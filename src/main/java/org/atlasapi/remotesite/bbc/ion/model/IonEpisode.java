@@ -74,6 +74,8 @@ public class IonEpisode {
     private Boolean isHdOnly;
     private URL myMediaselectorXmlUrl;
     private List<IonContributor> contributors;
+    private List<IonGenre> genres;
+    private List<IonFormat> formats;
 
     public List<IonContributor> getContributors() {
         return contributors;
@@ -346,6 +348,10 @@ public class IonEpisode {
     public static class IonTagScheme {
         //not used
     }
+    
+    public List<IonGenre> getGenres() {
+        return genres;
+    }
 
     public static class IonCategory {
         private String shortName;
@@ -406,5 +412,13 @@ public class IonEpisode {
 
     public boolean hasBrand() {
         return !Strings.isNullOrEmpty(getBrandId());
+    }
+
+    public void setFormat(List<IonFormat> formats) {
+        this.formats = formats;
+    }
+
+    public List<IonFormat> getFormats() {
+        return formats;
     }
 }

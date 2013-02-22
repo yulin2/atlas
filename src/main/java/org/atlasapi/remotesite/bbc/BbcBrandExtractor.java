@@ -26,7 +26,6 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesConta
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesRef;
 import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 

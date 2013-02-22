@@ -1,44 +1,52 @@
 package org.atlasapi.remotesite.bbc;
 
+import static org.atlasapi.media.entity.Publisher.DBPEDIA;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.TopicRef;
-import org.atlasapi.persistence.logging.NullAdapterLog;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.Topic.Type;
+import org.atlasapi.media.topic.TopicStore;
+import org.atlasapi.media.util.WriteResult;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesCategory;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesProgramme;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.google.common.collect.ImmutableList;
-import com.metabroadcast.common.base.Maybe;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.topic.Topic;
-import org.atlasapi.media.topic.Topic.Type;
+import com.metabroadcast.common.collect.ImmutableOptionalMap;
 
-@RunWith(JMock.class)
+@RunWith(MockitoJUnitRunner.class)
 public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
 
-    private final Mockery context = new Mockery();
     private static String URI = "http://www.bbc.co.uk/programmes/b0144pvg.json";
     
-    private final TopicStore topicStore = context.mock(TopicStore.class);
-    private @SuppressWarnings("unchecked") final RemoteSiteClient<SlashProgrammesContainer> containerFetcher = context.mock(RemoteSiteClient.class);
+    private final TopicStore topicStore = mock(TopicStore.class);
+    @SuppressWarnings("unchecked") 
+    private final RemoteSiteClient<SlashProgrammesContainer> containerFetcher = mock(RemoteSiteClient.class);
 
     
-    BbcSlashProgrammesJsonTopicsAdapter adapter = new BbcSlashProgrammesJsonTopicsAdapter(containerFetcher, topicStore, new NullAdapterLog());
+    BbcSlashProgrammesJsonTopicsAdapter adapter = new BbcSlashProgrammesJsonTopicsAdapter(containerFetcher, topicStore);
     
     @Test
     public void testWithValidTopic() throws Exception {
@@ -46,17 +54,27 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         final String value = "http://dbpedia.org/resource/Brighton";
         final String namespace = Publisher.DBPEDIA.name().toLowerCase();
         final String title = "Brighton";
-        final long id = 1234l;
+        final Id id = Id.valueOf(1234);
         
-        context.checking(new Expectations() {{
-                one(containerFetcher).get(URI); will(returnValue(containerWithTopic("place", title, value)));
-                one(topicStore).topicFor(namespace, value); will(returnValue(Maybe.just(topicWith(id, namespace, value))));
-                one(topicStore).write(with(topicMatching(id, Topic.Type.PLACE, title, namespace, value)));
-        }});
+        when((containerFetcher).get(URI))
+            .thenReturn(containerWithTopic("place", title, value));
+        when((topicStore).resolveAliases(ImmutableList.of(namespace+":"+value), DBPEDIA))
+            .thenReturn(ImmutableOptionalMap.<String, Topic>of());
+        when((topicStore).writeTopic(argThat(is(any(Topic.class)))))
+            .thenAnswer(new Answer<WriteResult<Topic>>() {
+                @Override
+                public WriteResult<Topic> answer(InvocationOnMock invocation) throws Throwable {
+                    Topic topic = (Topic) invocation.getArguments()[0];
+                    topic.setId(id);
+                    return WriteResult.written(topic).build();
+                }
+            });
         
         List<TopicRef> refs = adapter.fetch("http://www.bbc.co.uk/programmes/b0144pvg");
         
-        assertThat(refs.get(0).getTopic(),is(Id.valueOf(id)));
+        verify(topicStore).writeTopic(argThat(is(topicMatching(id, Topic.Type.PLACE, title, namespace, value))));
+        
+        assertThat(refs.get(0).getTopic(),is(id));
         assertThat(refs.get(0).getWeighting(), is(1.0f));
         assertThat(refs.get(0).isSupervised(), is(true));
         assertThat(refs.get(0).getRelationship(), is(TopicRef.Relationship.ABOUT));
@@ -67,12 +85,14 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         
         final String invalidType = "invalidtype";
         
-        context.checking(new Expectations() {{
-                one(containerFetcher).get(URI);will(returnValue(containerWithTopic(invalidType, "title", "sameAs")));
-                never(topicStore).topicFor(with(any(String.class)), with(any(String.class)));
-                never(topicStore).write(with(any(Topic.class)));
-        }});
-        
+        when((containerFetcher).get(URI))
+            .thenReturn(containerWithTopic(invalidType, "title", "sameAs"));
+        verify(topicStore, never()).resolveAliases(
+            argThat(hasItems(any(String.class))), 
+            argThat(is(any(Publisher.class)))
+        );
+        verify(topicStore, never()).writeTopic(argThat(is(any(Topic.class))));
+
         List<TopicRef> refs = adapter.fetch("http://www.bbc.co.uk/programmes/b0144pvg");
         assertTrue(refs.isEmpty());
         
@@ -83,17 +103,20 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         
         final String value = "http://anothertopicsource.org/resource/Brighton";
         
-        context.checking(new Expectations() {{
-                one(containerFetcher).get(URI);will(returnValue(containerWithTopic("place", "title", value)));
-                never(topicStore).topicFor(with(any(String.class)), with(any(String.class)));
-                never(topicStore).write(with(any(Topic.class)));
-        }});
+        when((containerFetcher).get(URI))
+            .thenReturn(containerWithTopic("place", "title", value));
+        verify(topicStore, never()).resolveAliases(
+            argThat(hasItems(any(String.class))), 
+            argThat(is(any(Publisher.class)))
+        );
+        verify(topicStore, never()).writeTopic(argThat(is(any(Topic.class))));
+
         
         List<TopicRef> refs = adapter.fetch("http://www.bbc.co.uk/programmes/b0144pvg");
         assertTrue(refs.isEmpty());
     }
     
-    private TypeSafeMatcher<Topic> topicMatching(final long id, final Type place, final String title, final String namespace, final String value) {
+    private TypeSafeMatcher<Topic> topicMatching(final Id id, final Type place, final String title, final String namespace, final String value) {
         return new TypeSafeMatcher<Topic>() {
 
             @Override
@@ -104,16 +127,11 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
             @Override
             public boolean matchesSafely(Topic topic) {
                 return topic.getId().equals(id)
+                    && topic.getAliases().contains(namespace+":"+value)
                     && topic.getType().equals(place)
-                    && topic.getTitle().equals(title)
-                    && topic.getNamespace().equals(namespace)
-                    && topic.getValue().equals(value);
+                    && topic.getTitle().equals(title);
             }
         };
-    }
-    
-    private Topic topicWith(long id, String namespace, String value) {
-        return new Topic(Id.valueOf(id), namespace, value);
     }
     
     private SlashProgrammesContainer containerWithTopic(String type, String title, String value) {

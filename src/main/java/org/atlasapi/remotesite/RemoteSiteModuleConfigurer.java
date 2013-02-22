@@ -25,7 +25,7 @@ import com.google.common.collect.Lists;
 import com.hp.hpl.jena.graph.query.StageElement.PutBindings;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
-import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
+import org.atlasapi.remotesite.bbc.products.BbcProductsModule;
 import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
 import org.atlasapi.remotesite.metabroadcast.MetaBroadcastModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
@@ -57,7 +57,7 @@ public class RemoteSiteModuleConfigurer {
         .put("redux", ReduxModule.class)
         .put("voila", VoilaModule.class)
         .put("lovefilm", LoveFilmModule.class)
-        .put("bbc-products", BBCProductsModule.class)
+        .put("bbc-products", BbcProductsModule.class)
         .put("thespace", TheSpaceModule.class)
         .put("musicbrainz", MusicBrainzModule.class)
         .put("emipub", EmiPubModule.class)

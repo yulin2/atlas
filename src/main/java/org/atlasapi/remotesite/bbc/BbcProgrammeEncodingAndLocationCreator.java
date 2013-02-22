@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bbc;
 
+import java.util.List;
+
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Location;
@@ -9,6 +11,7 @@ import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.joda.time.Interval;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.internal.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
 
@@ -32,44 +35,45 @@ public class BbcProgrammeEncodingAndLocationCreator {
         if(ionService.hasValue()) {
             Encoding encoding = new Encoding();
             encoding.setCanonicalUri(SLASH_PROGRAMMES_ROOT+ondemand.getId());
-            encoding.addAvailableAt(location(ondemand, episodeId));
             
             IonService requiredIonService = ionService.requireValue();
             requiredIonService.applyToEncoding(encoding);
+            for (Location location : encoding.getAvailableAt()) {
+                applyToLocation(location, ondemand, episodeId);
+            }
+
             return Maybe.just(encoding);
         }
         return Maybe.nothing();
     }
-    
-    public Maybe<Location> location(IonOndemandChange ondemand) {
-        Location location = location(ondemand, ondemand.getEpisodeId());
-        Maybe<IonService> possibleService = IonService.fromString(ondemand.getService());
-        if (possibleService.isNothing()) {
-        	return Maybe.nothing();
+
+    public List<Location> locations(IonOndemandChange change) {
+        Maybe<IonService> ionService = IonService.fromString(change.getService());
+        if (ionService.hasValue()) {
+            List<Location> locations = ionService.requireValue().locations();
+            for (Location location : locations) {
+                applyToLocation(location, change, change.getEpisodeId());
+            }
+            return locations;
         }
-        possibleService.requireValue().applyToLocation(location);
-        return Maybe.just(location);
+        return ImmutableList.of();
     }
 
-    private Location location(IonOndemandChange ondemand, String episodeId) {
-        Location location = new Location();
+    private void applyToLocation(Location location, IonOndemandChange ondemand, String episodeId) {
 
-        Policy policy = policyFrom(ondemand);
-        location.setPolicy(policy);
+        Policy policy = location.getPolicy();
+        applyToPolicy(policy, ondemand);
         
         location.setAvailable(availableNow(policy));
         location.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ondemand.getId());
         location.setTransportType(TransportType.LINK);
-        location.setUri("http://www.bbc.co.uk/iplayer/episode/"+episodeId);
-
-        return location;
+        location.setUri("http://www.bbc.co.uk/iplayer/episode/" + episodeId);
     }
     
-    private Policy policyFrom(IonOndemandChange ondemand) {
-        Policy policy = new Policy();
-        policy.setAvailabilityStart(ondemand.getActualStart() == null ? ondemand.getScheduledStart() : ondemand.getActualStart());
+    private void applyToPolicy(Policy policy, IonOndemandChange ondemand) {
+        policy.setActualAvailabilityStart(ondemand.getActualStart());
+        policy.setAvailabilityStart(ondemand.getScheduledStart());
         policy.setAvailabilityEnd(ondemand.getEnd() == null ? policy.getAvailabilityStart().plus(ondemand.getDuration()) : ondemand.getEnd());
-        return policy;
     }
 
     private boolean availableNow(Policy policy) {

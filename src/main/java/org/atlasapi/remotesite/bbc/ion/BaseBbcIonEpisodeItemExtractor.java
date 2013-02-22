@@ -3,7 +3,7 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
-import static org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient.CONTAINER_DETAIL_PATTERN;
+import static org.atlasapi.remotesite.bbc.ion.BbcIonContainerAdapter.CONTAINER_DETAIL_PATTERN;
 
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
@@ -17,10 +17,12 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcAliasCompiler;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.BbcProgrammesGenreMap;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonContributor;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
+import org.atlasapi.remotesite.bbc.ion.model.IonFormat;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
@@ -29,9 +31,12 @@ import com.metabroadcast.common.base.Maybe;
 
 public abstract class BaseBbcIonEpisodeItemExtractor {
 
+    private static final String FILM_FORMAT_ID = "PT007";
+
     protected static final String CURIE_BASE = "bbc:";
 
     private final BbcIonContributorPersonExtractor personExtractor = new BbcIonContributorPersonExtractor();
+    private final BbcIonGenreMap genreMap = new BbcIonGenreMap(new BbcProgrammesGenreMap());
     private final RemoteSiteClient<IonContainerFeed> containerClient;
     private final AdapterLog log;
     
@@ -46,7 +51,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
 
     protected Item extract(IonEpisode source) {
         Item item = null;
-        if (source.getIsFilm()) {
+        if (source.getIsFilm() || isFilmFormat(source)) {
             item = new Film(BbcFeeds.slashProgrammesUriForPid(source.getId()), CURIE_BASE+source.getId(), BBC);
             item.setMediaType(MediaType.VIDEO);
             item.setSpecialization(Specialization.FILM);
@@ -63,10 +68,20 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         return setItemDetails(item, source);
     }
 
+    private boolean isFilmFormat(IonEpisode source) {
+        if (source.getFormats() != null) {
+            for (IonFormat format : source.getFormats()) {
+                if (FILM_FORMAT_ID.equals(format.getId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     protected void setEpisodeDetails(Episode item, IonEpisode episodeDetail) {
         if(!Strings.isNullOrEmpty(episodeDetail.getSeriesId())) {
-            throw new RuntimeException("get series");
-//            item.setSeriesRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getSeriesId())));
+            //TODO: item.setSeriesRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getSeriesId())));
         }
         
         if(episodeDetail.getPosition() == null) {
@@ -98,7 +113,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         item.setAliases(BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri()));
         item.setIsLongForm(true);
         item.setLastUpdated(episode.getUpdated());
-        
+        item.setGenres(genreMap.fromIon(episode.getGenres()));
         if (!Strings.isNullOrEmpty(episode.getId())) {
             BbcImageUrlCreator.addImagesTo(episode.getMyImageBaseUrl().toString(), episode.getId(), item);
         }
@@ -112,6 +127,10 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
                     log.record(new AdapterLogEntry(WARN).withSource(getClass()).withDescription("Unknown person: " + contributor.getRoleName()));
                 }
             }
+        }
+        
+        if (!Strings.isNullOrEmpty(episode.getToplevelContainerId())) {
+            //TODO: item.setParentRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episode.getToplevelContainerId())));
         }
 
         return item;

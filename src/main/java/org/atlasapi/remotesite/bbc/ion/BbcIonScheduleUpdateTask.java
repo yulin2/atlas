@@ -14,9 +14,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
-import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
@@ -29,14 +27,12 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
     private final RemoteSiteClient<IonSchedule> scheduleClient;
     private final BbcIonBroadcastHandler handler;
     private final AdapterLog log;
-    private final BroadcastTrimmer trimmer;
     private final ChannelResolver channelResolver;
 
-    public BbcIonScheduleUpdateTask(String scheduleUrl, RemoteSiteClient<IonSchedule> scheduleClient, BbcIonBroadcastHandler handler, BroadcastTrimmer trimmer, ChannelResolver channelResolver, AdapterLog log) {
+    public BbcIonScheduleUpdateTask(String scheduleUrl, RemoteSiteClient<IonSchedule> scheduleClient, BbcIonBroadcastHandler handler, ChannelResolver channelResolver, AdapterLog log) {
         this.scheduleUrl = scheduleUrl;
         this.scheduleClient = scheduleClient;
         this.handler = handler;
-        this.trimmer = trimmer;
         this.channelResolver = channelResolver;
         this.log = log;
     }
@@ -90,7 +86,6 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
             }
             
             Channel channel = channelResolver.fromUri(broadcastOn).requireValue();
-            trimmer.trimBroadcasts(new Interval(scheduleStartTime, scheduleEndTime), channel, acceptableIds.build());
         }
     }
 }

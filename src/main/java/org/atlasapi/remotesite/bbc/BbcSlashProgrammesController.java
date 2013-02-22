@@ -9,7 +9,9 @@ import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +22,10 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 @Controller
 public class BbcSlashProgrammesController {
 
-    private BbcProgrammeAdapter fetcher;
+    private SiteSpecificAdapter<Content> fetcher;
     private ExecutorService executor;
 
-    public BbcSlashProgrammesController(BbcProgrammeAdapter programmeAdapter) {
+    public BbcSlashProgrammesController(SiteSpecificAdapter<Content> programmeAdapter) {
         this.fetcher = programmeAdapter;
         this.executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("BBC /programmes %s").build());
     }
@@ -31,9 +33,9 @@ public class BbcSlashProgrammesController {
     @RequestMapping(value = "/system/update/bbc/programmes/{pid}", method = RequestMethod.POST)
     public void updatePid(HttpServletResponse response, HttpServletRequest request, @PathVariable("pid") final String pid) throws IOException {
         
-        Future<Identified> result = executor.submit(new Callable<Identified>() {
+        Future<Content> result = executor.submit(new Callable<Content>() {
             @Override
-            public Identified call() {
+            public Content call() {
                 return fetcher.fetch(BbcFeeds.slashProgrammesUriForPid(pid));
             }
         });
@@ -41,8 +43,10 @@ public class BbcSlashProgrammesController {
         try {
             Identified ided = result.get();
             response.setStatus(200);
-            response.setContentLength(ided.getCanonicalUri().length()+1);
-            response.getWriter().println(ided.getCanonicalUri());
+            String msg = ided == null ? "No content for " + pid
+                                      : ided.getCanonicalUri();
+            response.setContentLength(msg.length()+1);
+            response.getWriter().println(msg);
         } catch (Exception e) {
             response.setStatus(500);
             e.printStackTrace(response.getWriter());

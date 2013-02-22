@@ -11,18 +11,16 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.s3.DefaultS3Client;
 import org.atlasapi.s3.S3Client;
 
-/**
- */
-class BBCProductsUpdater extends ScheduledTask {
+class BbcProductsUpdater extends ScheduledTask {
 
     static final String S3_BUCKET = "bbc-products";
-    //
+
     private final Timestamper timestamper = new SystemClock();
     private final ProductStore productStore;
     private final AdapterLog log;
     private S3Client client;
 
-    public BBCProductsUpdater(ProductStore productStore, AdapterLog log, String s3Access, String s3Secret) {
+    public BbcProductsUpdater(ProductStore productStore, AdapterLog log, String s3Access, String s3Secret) {
         this.productStore = productStore;
         this.log = log;
         this.client = new DefaultS3Client(s3Access, s3Secret, S3_BUCKET);
@@ -34,7 +32,7 @@ class BBCProductsUpdater extends ScheduledTask {
             Timestamp start = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("BBC Products update started!").withSource(getClass()));
 
-            new BBCProductsProcessor().process(client, productStore);
+            new BbcProductsProcessor().process(client, productStore);
 
             Timestamp end = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("BBC Products update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
