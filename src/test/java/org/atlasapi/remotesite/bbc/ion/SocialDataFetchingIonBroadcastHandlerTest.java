@@ -1,16 +1,15 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.atlasapi.persistence.content.ResolvedContent.builder;
-import static org.hamcrest.Matchers.hasItem;
+import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.hamcrest.Matchers.hasItems;
 
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
@@ -18,8 +17,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.TopicRef;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
@@ -35,7 +32,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.metabroadcast.common.collect.ImmutableOptionalMap;
 
 @RunWith(JMock.class)
 public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
@@ -53,12 +52,11 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
     @SuppressWarnings("unchecked")
     private final SiteSpecificAdapter<List<TopicRef>> topicsAdapter = context.mock(SiteSpecificAdapter.class, "topic adapter");
     
-    private final ContentResolver resolver = context.mock(ContentResolver.class);
-    private final ContentWriter writer = context.mock(ContentWriter.class);
+    private final ContentStore store = context.mock(ContentStore.class);
     
     private final BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(linkAdapter, tagAdapter, topicsAdapter);
     
-    private final SocialDataFetchingIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(extendedDataAdapter, resolver, writer, log);
+    private final SocialDataFetchingIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(extendedDataAdapter, store, log);
 
     @Test
     public void testSetsLinksAndTagsForTopLevelItem() {
@@ -87,8 +85,9 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
             one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.of(RelatedLink.unknownTypeLink("link url").build())));
             one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.of(new KeyPhrase("phrase", Publisher.BBC))));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
-            one(resolver).findByCanonicalUris(with(hasItems(uri))); will(returnValue(builder().build()));
-            never(writer).createOrUpdate(with(any(Item.class)));
+            one(store).resolveAliases(with(hasItems(uri)), with(BBC));
+                will(returnValue(ImmutableOptionalMap.fromMap(ImmutableMap.of())));
+            never(store).writeContent(with(any(Item.class)));
         }});
 
         handler.handle(broadcast);
@@ -124,25 +123,25 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
     public void checkingUpdateLinksAndTagsForContainer(Container content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
         checkFetchesLinksTagsAndContent(content, links, tags);
         context.checking(new Expectations(){{
-            one(writer).createOrUpdate((Container)with(contentWithLinksAndTags(links, tags)));
+            one(store).writeContent((Container)with(contentWithLinksAndTags(links, tags)));
         }});
     }
 
     public void checkingUpdateLinksAndTagsForItem(Item content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
         checkFetchesLinksTagsAndContent(content, links, tags);
         context.checking(new Expectations(){{
-            one(writer).createOrUpdate((Item)with(contentWithLinksAndTags(links, tags)));
+            one(store).writeContent((Item)with(contentWithLinksAndTags(links, tags)));
         }});
     }
 
     public <T extends Content> void checkFetchesLinksTagsAndContent(final T content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
-        final Id id = content.getId();
+        final String uri = content.getCanonicalUri();
         context.checking(new Expectations(){{
-            one(linkAdapter).fetch(id.toString());will(returnValue(links));
-            one(tagAdapter).fetch(id.toString());will(returnValue(tags));
-            one(topicsAdapter).fetch(id.toString());will(returnValue(ImmutableList.of()));
-            one(resolver).findByIds(with(hasItems(id))); 
-                will(returnValue(builder().put(id, content).build()));
+            one(linkAdapter).fetch(uri);will(returnValue(links));
+            one(tagAdapter).fetch(uri);will(returnValue(tags));
+            one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
+            one(store).resolveAliases(with(hasItems(uri)), with(BBC));
+                will(returnValue(ImmutableOptionalMap.fromMap(ImmutableMap.of(uri, content))));
         }});
     }
 
@@ -158,8 +157,8 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
             one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
-            never(resolver).findByCanonicalUris(with(any(Iterable.class)));
-            never(writer).createOrUpdate(with(any(Item.class)));
+            never(store).resolveAliases(with(any(Iterable.class)), with(any(Publisher.class)));
+            never(store).writeContent(with(any(Item.class)));
         }});
         
         handler.handle(broadcast);

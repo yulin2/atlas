@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.bbc;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
@@ -10,21 +11,25 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.Topic.Type;
-import org.atlasapi.persistence.logging.NullAdapterLog;
-import org.atlasapi.persistence.topic.TopicStore;
+import org.atlasapi.media.topic.TopicStore;
+import org.atlasapi.media.util.Resolved;
+import org.atlasapi.media.util.WriteResult;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesDescription;
 import org.junit.Test;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
-import org.atlasapi.content.criteria.ContentQuery;
+import com.metabroadcast.common.collect.ImmutableOptionalMap;
+import com.metabroadcast.common.collect.OptionalMap;
 
 public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
 
     private final String topicUri = "http://dbpedia.org/resource/Religion";
     private final DummyTopicStore topicStore = new DummyTopicStore(topicUri);
-    private final BbcSlashProgrammesRdfTopicExtractor extractor = new BbcSlashProgrammesRdfTopicExtractor(topicStore , new NullAdapterLog());
+    private final BbcSlashProgrammesRdfTopicExtractor extractor = new BbcSlashProgrammesRdfTopicExtractor(topicStore);
 
     @Test
     public void testExtractsTopicFromValidSlashProgrammesTopic() {
@@ -46,58 +51,44 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
         assertThat(extractedTopicRef.requireValue().isSupervised(), is(true));
         assertThat(extractedTopicRef.requireValue().getRelationship(), is(TopicRef.Relationship.ABOUT));
         
-        assertThat(storedTopic.getValue(), is(equalTo(topicUri)));
+        assertThat(storedTopic.getAliasUrls(), hasItem(Publisher.DBPEDIA.name().toLowerCase()+":"+topicUri));
         assertThat(storedTopic.getType(), is(equalTo(Type.PERSON)));
         assertThat(storedTopic.getPublisher(), is(equalTo(Publisher.DBPEDIA)));
-        assertThat(storedTopic.getNamespace(), is(equalTo(Publisher.DBPEDIA.name().toLowerCase())));
         assertThat(storedTopic.getTitle(), is(equalTo("Religion")));
         
     }
     
     private static class DummyTopicStore implements TopicStore {
-    	private Topic storedTopic;
-		private String topicUri;
 
-    	public DummyTopicStore(String topicUri) {
-    		this.topicUri = topicUri;
-    	}
-		@Override
-		public Maybe<Topic> topicFor(String namespace, String value) {
-			Preconditions.checkArgument(namespace.equals("dbpedia"), "Unexpected namespace");
-			Preconditions.checkArgument(value.equals(topicUri), "Unexpected URI");
-			
-			return Maybe.just(new Topic(100l));
-		}
-		
-		@Override
-		public Maybe<Topic> topicFor(Publisher publisher, String namespace, String value) {
-		    throw new UnsupportedOperationException();
-		}
+        private Topic storedTopic;
+        private String topicUri;
 
-		@Override
-		public void write(Topic topic) {
-			Preconditions.checkState(topicUri != null, "Already stored a topic");
-			this.storedTopic = topic;
-		}
-    	
-    	public Topic getStoredTopic() {
-    		return storedTopic;
-    	}
-
-        @Override
-        public Maybe<Topic> topicForId(Id id) {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public DummyTopicStore(String topicUri) {
+            this.topicUri = topicUri;
         }
 
         @Override
-        public Iterable<Topic> topicsForIds(Iterable<Id> ids) {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public WriteResult<Topic> writeTopic(Topic topic) {
+            Preconditions.checkState(topicUri != null, "Already stored a topic");
+            this.storedTopic = topic;
+            topic.setId(1234L);
+            return WriteResult.written(topic).build();
+        }
+
+        public Topic getStoredTopic() {
+            return storedTopic;
         }
 
         @Override
-        public Iterable<Topic> topicsFor(ContentQuery query) {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public Resolved<Topic> resolveIds(Iterable<Id> ids) {
+            return Resolved.valueOf(ImmutableList.<Topic>of());
+        }
+
+
+        @Override
+        public OptionalMap<String, Topic> resolveAliases(Iterable<String> aliases, Publisher source) {
+            return ImmutableOptionalMap.fromMap(ImmutableMap.<String,Topic>of());
         }
     }
-    
+
 }

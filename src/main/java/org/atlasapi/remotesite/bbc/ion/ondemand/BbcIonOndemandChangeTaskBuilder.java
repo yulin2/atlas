@@ -1,11 +1,12 @@
 package org.atlasapi.remotesite.bbc.ion.ondemand;
 
+import static org.atlasapi.media.entity.Publisher.BBC;
+
 import java.util.concurrent.Callable;
 
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -13,18 +14,17 @@ import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 
 import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.collect.OptionalMap;
 
 public class BbcIonOndemandChangeTaskBuilder {
 
-    private final ContentResolver resolver;
-    private final ContentWriter writer;
+    private final ContentStore store;
     private final AdapterLog log;
 
     private final BbcIonOndemandItemUpdater itemUpdater = new BbcIonOndemandItemUpdater();
 
-    public BbcIonOndemandChangeTaskBuilder(ContentResolver resolver, ContentWriter writer, AdapterLog log) {
-        this.resolver = resolver;
-        this.writer = writer;
+    public BbcIonOndemandChangeTaskBuilder(ContentStore store, AdapterLog log) {
+        this.store = store;
         this.log = log;
     }
 
@@ -44,11 +44,11 @@ public class BbcIonOndemandChangeTaskBuilder {
         public Void call() {
             String uri = BbcFeeds.slashProgrammesUriForPid(change.getEpisodeId());
             try {
-                ResolvedContent resolvedItem = resolver.findByCanonicalUris(ImmutableList.of(uri));
-                if (resolvedItem.resolved(uri)) {
-                    Item item = (Item) resolvedItem.get(uri).requireValue();
+                OptionalMap<String, Content> resolvedItem = store.resolveAliases(ImmutableList.of(uri), BBC);
+                if (resolvedItem.get(uri).isPresent()) {
+                    Item item = (Item) resolvedItem.get(uri).get();
                     itemUpdater.updateItemDetails(item, change);
-                    writer.createOrUpdate(item);
+                    store.writeContent(item);
                 }/* else {
                     log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("No item %s for on-demand change", uri));
                 }*/

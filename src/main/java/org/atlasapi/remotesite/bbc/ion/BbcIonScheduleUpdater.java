@@ -30,14 +30,12 @@ public class BbcIonScheduleUpdater extends ScheduledTask {
     private final RemoteSiteClient<IonSchedule> scheduleClient;
     private final BbcIonBroadcastHandler handler;
     private final AdapterLog log;
-    private final BroadcastTrimmer trimmer;
     private final ChannelResolver channelResolver;
 
-    public BbcIonScheduleUpdater(Supplier<Iterable<String>> urlSupplier, RemoteSiteClient<IonSchedule> client, BbcIonBroadcastHandler handler, BroadcastTrimmer trimmer, ChannelResolver channelResolver, AdapterLog log) {
+    public BbcIonScheduleUpdater(Supplier<Iterable<String>> urlSupplier, RemoteSiteClient<IonSchedule> client, BbcIonBroadcastHandler handler, ChannelResolver channelResolver, AdapterLog log) {
         this.urlSupplier = urlSupplier;
         this.scheduleClient = client;
         this.handler = handler;
-        this.trimmer = trimmer;
         this.channelResolver = channelResolver;
         this.log = log;
     }
@@ -53,7 +51,7 @@ public class BbcIonScheduleUpdater extends ScheduledTask {
         int submitted = 0;
 
         for (String url : urlSupplier.get()) {
-            completer.submit(new BbcIonScheduleUpdateTask(url, scheduleClient, handler, trimmer, channelResolver, log));
+            completer.submit(new BbcIonScheduleUpdateTask(url, scheduleClient, handler, channelResolver, log));
             submitted++;
         }
 

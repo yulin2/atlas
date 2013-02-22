@@ -1,30 +1,30 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static org.atlasapi.media.entity.Publisher.BBC;
+
 import java.util.List;
 
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.media.util.ItemAndBroadcast;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 
 public class SegmentUpdatingIonBroadcastHandler implements BbcIonBroadcastHandler {
 
-    private final ContentResolver contentResolver;
-    private final ContentWriter contentWriter;
+    private final ContentStore store;
     private final BbcIonSegmentAdapter segmentAdapter;
 
-    public SegmentUpdatingIonBroadcastHandler(ContentResolver contentResolver, ContentWriter contentWriter, BbcIonSegmentAdapter segmentAdapter) {
-        this.contentResolver = contentResolver;
-        this.contentWriter = contentWriter;
+    public SegmentUpdatingIonBroadcastHandler(ContentStore store, BbcIonSegmentAdapter segmentAdapter) {
+        this.store = store;
         this.segmentAdapter = segmentAdapter;
     }
 
@@ -32,17 +32,17 @@ public class SegmentUpdatingIonBroadcastHandler implements BbcIonBroadcastHandle
     public Maybe<ItemAndBroadcast> handle(IonBroadcast broadcast) {
         
         final String itemId = BbcFeeds.slashProgrammesUriForPid(broadcast.getEpisodeId());
-        Maybe<Identified> possibleContent = contentResolver.findByCanonicalUris(ImmutableSet.of(itemId)).get(itemId);
+        Optional<Content> possibleContent = store.resolveAliases(ImmutableSet.of(itemId), BBC).get(itemId);
         
-        if(possibleContent.hasValue()) {
+        if(possibleContent.isPresent()) {
             
-            Item item = (Item) possibleContent.requireValue();
+            Item item = (Item) possibleContent.get();
             
             Version version = versionFrom(BbcFeeds.slashProgrammesUriForPid(broadcast.getVersionId()), item);
             if (version != null) {
                 List<SegmentEvent> segEvents = segmentAdapter.fetch(broadcast.getVersionId());
                 version.addSegmentEvents(segEvents);
-                contentWriter.createOrUpdate(item);
+                store.writeContent(item);
             }
             
             return Maybe.just(new ItemAndBroadcast(item, Maybe.<Broadcast>nothing()));

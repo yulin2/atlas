@@ -11,16 +11,18 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.util.ItemAndBroadcast;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -31,28 +33,25 @@ import com.metabroadcast.common.intl.Countries;
 
 public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
 
-    private final ContentResolver resolver;
-    private final ContentWriter writer;
+    private final ContentStore store;
     private final AdapterLog log;
     private final ContentLock lock;
 
-    public OndemandBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log, ContentLock lock) {
-        this.resolver = resolver;
-        this.writer = writer;
+    public OndemandBbcIonBroadcastHandler(ContentStore store, AdapterLog log, ContentLock lock) {
+        this.store = store;
         this.log = log;
         this.lock = lock;
     }
 
     @Override
     public Maybe<ItemAndBroadcast> handle(IonBroadcast broadcast) {
-        Maybe<Item> item = null;
         try {
-            item = tryHandle(broadcast);
+            Maybe<Item> item = tryHandle(broadcast);
+            if(item.hasValue()) {
+                return Maybe.just(new ItemAndBroadcast(item.requireValue(), Maybe.<Broadcast>nothing()));
+            }
         } catch (Exception e) {
             log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Failed to process ondemand for %s", broadcast.getEpisodeId()));
-        }
-        if(item.hasValue()) {
-            return Maybe.just(new ItemAndBroadcast(item.requireValue(), Maybe.<Broadcast>nothing()));
         }
         return Maybe.nothing();
     }
@@ -106,7 +105,7 @@ public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
                 }
             }
     
-            writer.createOrUpdate(item);
+            store.writeContent(item);
         } catch (InterruptedException e) {
             Throwables.propagate(e);
         }
@@ -152,12 +151,12 @@ public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     }
 
     private Item resolve(String uri) {
-        Maybe<Identified> maybeItem = resolver.findByCanonicalUris(ImmutableList.of(uri)).get(uri);
-        if (maybeItem.isNothing()) {
+        Optional<Content> maybeItem = store.resolveAliases(ImmutableList.of(uri), Publisher.BBC).get(uri);
+        if (maybeItem.isPresent()) {
             log.record(warnEntry().withSource(getClass()).withDescription("Couldn't resolve item for %s", uri));
             return null;
         }
-        Identified resolved = maybeItem.requireValue();
+        Identified resolved = maybeItem.get();
         if (!(resolved instanceof Item)) {
             log.record(warnEntry().withSource(getClass()).withDescription("Resolved %s not item for %s", resolved.getClass().getSimpleName(), uri));
             return null;

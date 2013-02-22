@@ -2,34 +2,31 @@ package org.atlasapi.remotesite.bbc;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.atlasapi.media.entity.Publisher.DBPEDIA;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.List;
 
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.TopicRef;
-import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.Topic.Type;
+import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesCategory;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.metabroadcast.common.base.Maybe;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.topic.Topic;
-import org.atlasapi.media.topic.Topic.Type;
 
 public class BbcSlashProgrammesJsonTopicsAdapter implements SiteSpecificAdapter<List<TopicRef>> {
 
     private final RemoteSiteClient<SlashProgrammesContainer> slashProgrammesClient;
     private final TopicStore topicStore;
-    private final AdapterLog log;
 
-    public BbcSlashProgrammesJsonTopicsAdapter(RemoteSiteClient<SlashProgrammesContainer> slashProgrammesClient, TopicStore topicStore, AdapterLog log) {
+    public BbcSlashProgrammesJsonTopicsAdapter(RemoteSiteClient<SlashProgrammesContainer> slashProgrammesClient, TopicStore topicStore) {
         this.slashProgrammesClient = slashProgrammesClient;
         this.topicStore = topicStore;
-        this.log = log;
     }
 
     @Override
@@ -68,17 +65,15 @@ public class BbcSlashProgrammesJsonTopicsAdapter implements SiteSpecificAdapter<
 
     public Maybe<Topic> resolveTopic(SlashProgrammesCategory category, Type topicType) {
         String namespace = Publisher.DBPEDIA.name().toLowerCase();
-        Topic topic = topicStore.topicFor(namespace, category.getSameAs()).valueOrNull();
-        if (topic == null) {
-            throw new IllegalStateException("This should never happen, as topic is either found or created by the topic store, so failing fast.");
-        } else {
-            topic.setValue(category.getSameAs());
-            topic.setNamespace(namespace);
-            topic.setPublisher(DBPEDIA);
-            topic.setTitle(category.getTitle());
-            topic.setType(topicType);
-            topicStore.write(topic);
-        }
+        String uri = category.getSameAs();
+        String alias = namespace+":"+uri;
+        Optional<Topic> existingTopic = topicStore.resolveAliases(ImmutableList.of(alias), Publisher.DBPEDIA).get(alias);
+        Topic topic = existingTopic.or(new Topic());
+        topic.addAlias(alias);
+        topic.setPublisher(DBPEDIA);
+        topic.setTitle(category.getTitle());
+        topic.setType(topicType);
+        topicStore.writeTopic(topic);
         return Maybe.just(topic);
     }
 
