@@ -34,7 +34,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.hamcrest.Matcher;
 import org.joda.time.Duration;
 
@@ -60,19 +60,19 @@ public class YouTubeGraphExtractorTest extends TestCase {
 	static final String IMAGE_URI = "http://i.ytimg.com/vi/otA7tjinFX4/3thumb.jpg";
 	
 	YouTubeGraphExtractor extractor = new YouTubeGraphExtractor();
-	VideoEntry entry = new VideoEntry();
+	YouTubeVideoEntry entry = new YouTubeVideoEntry();
 	YouTubeSource source;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		entry.title = "Video Title";
+		entry.setTitle("Video Title");
 		source = new TestYouTubeSource(entry, ITEM_URI);
 	}
 	
 	class TestYouTubeSource extends YouTubeSource {
 
-		public TestYouTubeSource(VideoEntry entry, String episodeUri) {
+		public TestYouTubeSource(YouTubeVideoEntry entry, String episodeUri) {
 			super(entry, episodeUri);
 		}
 		
@@ -88,10 +88,11 @@ public class YouTubeGraphExtractorTest extends TestCase {
 			return Sets.newHashSet("http://ref.atlasapi.org/genres/youtube/News");
 		}
 		
-		@Override
-		Set<String> getTags() {
-			return Sets.newHashSet("http://ref.atlasapi.org/tags/funny");
-		}
+        //Tags were removed from the video's metadata
+//		@Override
+//		Set<String> getTags() {
+//			return Sets.newHashSet("http://ref.atlasapi.org/tags/funny");
+//		}
 		
 		@Override
 		String getDescription() {
@@ -116,7 +117,8 @@ public class YouTubeGraphExtractorTest extends TestCase {
 		assertThat(item.getTitle(), is("Video Title"));
 		assertThat(item.getDescription(), is("Description of video"));
 		assertThat(item.getGenres(), is((Set<String>) Sets.<String>newHashSet("http://ref.atlasapi.org/genres/youtube/News", "http://ref.atlasapi.org/genres/atlas/news")));
-		assertThat(item.getTags(), is((Set<String>) Sets.<String>newHashSet("http://ref.atlasapi.org/tags/funny")));
+		// tags were removed fromYouTube.
+		//assertThat(item.getTags(), is((Set<String>) Sets.<String>newHashSet("http://ref.atlasapi.org/tags/funny")));
 		assertThat(item.getPublisher(), is(Publisher.YOUTUBE));
 		assertThat(item.getThumbnail(),  is(THUMBNAIL_URI));
 		assertThat(item.getImage(), is(IMAGE_URI));
@@ -186,7 +188,7 @@ public class YouTubeGraphExtractorTest extends TestCase {
 	
 	class NoVideosYouTubeSource extends YouTubeSource {
 
-		public NoVideosYouTubeSource(VideoEntry entry, String episodeUri) {
+		public NoVideosYouTubeSource(YouTubeVideoEntry entry, String episodeUri) {
 			super(entry, episodeUri);
 		}
 		
@@ -199,11 +201,12 @@ public class YouTubeGraphExtractorTest extends TestCase {
 		Set<String> getCategories() {
 			return Sets.newHashSet();
 		}
-		
-		@Override
-		Set<String> getTags() {
-			return Sets.newHashSet();
-		}
+	
+	      //Tags were removed from the video's metadata
+//		@Override
+//		Set<String> getTags() {
+//			return Sets.newHashSet();
+//		}
 		
 		@Override
 		String getDescription() {

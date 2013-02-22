@@ -23,6 +23,7 @@ import org.atlasapi.genres.GenreMap;
  *  
  * @author Chris Jackson (chris@metabroadcast.com)
  * @author Robert Chatley (robert@metabroadcast.com)
+ * @deprecated
  */
 class YouTubeGenreMap extends GenreMap {
 

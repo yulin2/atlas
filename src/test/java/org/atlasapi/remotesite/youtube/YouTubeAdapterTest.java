@@ -26,7 +26,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
@@ -46,11 +46,11 @@ public class YouTubeAdapterTest extends TestCase {
     private final Mockery context = new Mockery();
 	static final String DOCUMENT = "doc";
 	
-	RemoteSiteClient<VideoEntry> gdataClient;
+	RemoteSiteClient<YouTubeVideoEntry> gdataClient;
 	ContentExtractor<YouTubeSource, Item> contentExtractor;
 	YouTubeAdapter adapter;
-	VideoEntry videoEntry = null;
-	YouTubeSource youtubeSource = new YouTubeSource(videoEntry, "http://uk.youtube.com/watch?v=-OBxL8PiFc8");
+	YouTubeVideoEntry videoEntry = null;
+	YouTubeSource youtubeSource = new YouTubeSource(videoEntry, "http://wwww.youtube.com/watch?v=-OBxL8PiFc8");
 
 	
 	@SuppressWarnings("unchecked")
@@ -66,22 +66,22 @@ public class YouTubeAdapterTest extends TestCase {
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
 		
 		context.checking(new Expectations() {{
-			one(gdataClient).get("http://uk.youtube.com/watch?v=-OBxL8PiFc8"); will(returnValue(videoEntry));
+			one(gdataClient).get("http://wwww.youtube.com/watch?v=-OBxL8PiFc8"); will(returnValue(videoEntry));
 			one(contentExtractor).extract(youtubeSource); will(returnValue(new Item()));
 		}});
 		
-		adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8");
+		adapter.fetch("http://wwww.youtube.com/watch?v=-OBxL8PiFc8");
 	}
 	
 	@Test
 	public void testWrapsExceptionIfGDataClientThrowsIOException() throws Exception {
 		
 		context.checking(new Expectations() {{
-			allowing(gdataClient).get("http://uk.youtube.com/watch?v=-OBxL8PiFc8"); will(throwException(new IOException()));
+			allowing(gdataClient).get("http://wwww.youtube.com/watch?v=-OBxL8PiFc8"); will(throwException(new IOException()));
 		}});
 		
 		try {
-			adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8");
+			adapter.fetch("http://wwww.youtube.com/watch?v=-OBxL8PiFc8");
 			fail("Should have thrown FetchException.");
 		} catch (Exception e) {
 			assertThat(e, instanceOf(FetchException.class));
@@ -91,11 +91,11 @@ public class YouTubeAdapterTest extends TestCase {
 	public void tesRetunsNullIfGDataClientThrowsResourceNotFoundException() throws Exception {
 		
 		context.checking(new Expectations() {{
-			allowing(gdataClient).get("http://uk.youtube.com/watch?v=-OBxL8PiFc8"); 
+			allowing(gdataClient).get("http://wwww.youtube.com/watch?v=-OBxL8PiFc8"); 
 				will(throwException(new HttpStatusCodeException(404, "Not Found")));
 		}});
 		
-		assertNull(adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8"));
+		assertNull(adapter.fetch("http://wwww.youtube.com/watch?v=-OBxL8PiFc8"));
 	}
 	
 	@Test

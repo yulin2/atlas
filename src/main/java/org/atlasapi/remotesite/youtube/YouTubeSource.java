@@ -22,10 +22,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.remotesite.BaseSource;
-import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.joda.time.Duration;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -38,24 +37,24 @@ public class YouTubeSource extends BaseSource {
 	
 	private static final String ATLAS_GENRES_SCHEME = "http://ref.atlasapi.org/genres/youtube/";
 	
-	private final VideoEntry videoEntry;
+	private final YouTubeVideoEntry videoEntry;
 	
-	public YouTubeSource(VideoEntry entry, String uri) {
+	public YouTubeSource(YouTubeVideoEntry entry, String uri) {
 		super(uri);
 		videoEntry = entry;
 	}
 		
 	String getVideoTitle() {
-		if (videoEntry.title != null) {
-			return videoEntry.title;
+		if (videoEntry.getTitle() != null) {
+			return videoEntry.getTitle();
 		} else {
 			return null;
 		}
 	}
 	
 	String getDescription() {
-		if (videoEntry.description != null) {
-			return videoEntry.description;
+		if (videoEntry.getDescription() != null) {
+			return videoEntry.getDescription();
 		} else {
 			return null;
 		}
@@ -63,20 +62,20 @@ public class YouTubeSource extends BaseSource {
 	
 	List<Video> getVideos() {
 		List<Video> result = Lists.newArrayList();
-		if (videoEntry != null && videoEntry.player != null && videoEntry.player.defaultUrl != null) {
-    		Video video = new Video("application/x-shockwave-flash", Duration.standardSeconds(videoEntry.duration), videoEntry.player.defaultUrl, topContent(), true);
+		if (videoEntry != null && videoEntry.getPlayer() != null && videoEntry.getPlayer().getDefaultUrl() != null) {
+    		Video video = new Video("application/x-shockwave-flash", Duration.standardSeconds(videoEntry.getDuration()), videoEntry.getPlayer().getDefaultUrl(), topContent(), true);
     		result.add(video);
 		}
 		return result;
 	}
 	
 	int topContent() {
-	    if (videoEntry.content != null) {
-	        if (videoEntry.content.six != null) {
+	    if (videoEntry.getContent() != null) {
+	        if (videoEntry.getContent().getSix() != null) {
 	            return 6;
-	        } else if (videoEntry.content.one != null) {
+	        } else if (videoEntry.getContent().getOne() != null) {
 	            return 1;
-	        } else if (videoEntry.content.five != null) {
+	        } else if (videoEntry.getContent().getFive() != null) {
 	            return 5;
 	        }
 	    }
@@ -127,9 +126,9 @@ public class YouTubeSource extends BaseSource {
 	
 	Set<String> getCategories() {
         Set<String> result = Sets.newHashSet();
-        if (videoEntry != null && videoEntry.category != null) {
+        if (videoEntry != null && videoEntry.getCategory() != null) {
             try {
-                result.add(ATLAS_GENRES_SCHEME + URLEncoder.encode(videoEntry.category, com.google.common.base.Charsets.UTF_8.name()));
+                result.add(ATLAS_GENRES_SCHEME + URLEncoder.encode(videoEntry.getCategory(), com.google.common.base.Charsets.UTF_8.name()));
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException("UTF-8 not found");
             }
@@ -137,24 +136,24 @@ public class YouTubeSource extends BaseSource {
         return result;
     }
 
-	Set<String> getTags() {
-		return ImmutableSet.copyOf(videoEntry.tags);
-	}
+//	Set<String> getTags() {
+//		return ImmutableSet.copyOf(videoEntry.tags);
+//	}
 
 	public String getThumbnailImageUri() {
-	    if (videoEntry.thumbnail != null) {
-	        if (videoEntry.thumbnail.defaultUrl != null) {
-	            return videoEntry.thumbnail.defaultUrl;
-	        } else if (videoEntry.thumbnail.sqDefault != null) {
-	            return videoEntry.thumbnail.sqDefault;
+	    if (videoEntry.getThumbnail() != null) {
+	        if (videoEntry.getThumbnail().getDefaultUrl() != null) {
+	            return videoEntry.getThumbnail().getDefaultUrl();
+	        } else if (videoEntry.getThumbnail().getSqDefault() != null) {
+	            return videoEntry.getThumbnail().getSqDefault();
 	        }
 	    }
 	    return null;
 	}
 	
 	public String getImageUri() {
-	    if (videoEntry.thumbnail != null && videoEntry.thumbnail.hqDefault != null) {
-            return videoEntry.thumbnail.hqDefault;
+	    if (videoEntry.getThumbnail() != null && videoEntry.getThumbnail().getHqDefault() != null) {
+            return videoEntry.getThumbnail().getHqDefault();
         }
 	    return null;
 	}

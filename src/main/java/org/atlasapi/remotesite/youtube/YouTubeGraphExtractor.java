@@ -95,7 +95,8 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 		item.setTitle(source.getVideoTitle());
 		item.setDescription(source.getDescription());
 		
-		item.setTags(source.getTags());
+        //Tags were removed from the video's metadata
+		//item.setTags(source.getTags());
 		
 		item.setThumbnail(source.getThumbnailImageUri());
 		item.setImage(source.getImageUri());
