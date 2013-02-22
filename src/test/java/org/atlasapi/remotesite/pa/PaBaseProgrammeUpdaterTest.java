@@ -33,22 +33,15 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.LookupResolvingContentResolver;
-import org.atlasapi.persistence.content.mongo.MongoContentResolver;
-import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.media.util.WriteResult;
 import org.atlasapi.persistence.content.people.DummyItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,12 +58,8 @@ import com.google.common.io.Resources;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.media.MimeType;
-import com.metabroadcast.common.persistence.MongoTestHelper;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.time.DateTimeZones;
-import com.metabroadcast.common.time.TimeMachine;
 import com.metabroadcast.common.collect.ImmutableOptionalMap;
+import com.metabroadcast.common.media.MimeType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaBaseProgrammeUpdaterTest {

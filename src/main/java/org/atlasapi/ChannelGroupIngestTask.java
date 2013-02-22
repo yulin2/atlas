@@ -7,15 +7,15 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import org.atlasapi.media.channel.ChannelGroup;
-import org.atlasapi.media.channel.ChannelGroupType;
 import org.atlasapi.media.channel.ChannelGroupWriter;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.MongoChannelGroupStore;
+import org.atlasapi.media.channel.MongoChannelStore;
 import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
-import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
-import org.atlasapi.persistence.media.channel.MongoChannelStore;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;

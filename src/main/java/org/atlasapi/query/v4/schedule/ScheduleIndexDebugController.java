@@ -7,9 +7,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.content.schedule.ScheduleRef;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.springframework.stereotype.Controller;

@@ -45,6 +45,7 @@ import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.content.criteria.attribute.Attribute;
 import org.atlasapi.content.criteria.attribute.Attributes;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.content.ContentIndex;
