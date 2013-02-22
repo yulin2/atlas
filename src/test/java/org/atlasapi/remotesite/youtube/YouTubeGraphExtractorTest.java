@@ -32,6 +32,8 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
 import org.atlasapi.remotesite.youtube.entity.YouTubeThumbnail;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
+import org.hamcrest.Matcher;
 import org.joda.time.Duration;
 
 import com.google.common.base.Optional;
@@ -83,7 +85,7 @@ public class YouTubeGraphExtractorTest extends TestCase {
 									  new Video("video/3gpp", Duration.standardMinutes(5), LOCATION_URI_2, 1, true, entry.getUploaded()),
 					                  new Video("video/3gpp", Duration.standardMinutes(5), LOCATION_URI_3, 6, true, entry.getUploaded()));
 		}
-
+		
 		@Override
 		public String getDescription() {
 			return "Description of video";
@@ -118,7 +120,7 @@ public class YouTubeGraphExtractorTest extends TestCase {
 		public Set<String> getCategories() {
 			return Sets.newHashSet();
 		}
-		
+
 		@Override
 		public String getDescription() {
 			return "Description of video";

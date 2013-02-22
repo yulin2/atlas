@@ -1,6 +1,5 @@
 package org.atlasapi.remotesite.youtube.entity;
 
-import org.atlasapi.remotesite.youtube.entity.Permission;
 
 /**
  * Access Controls will have one of 3 values - ALLOWED, DENIED or MODERATED.
