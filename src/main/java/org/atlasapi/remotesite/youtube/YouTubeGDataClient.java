@@ -21,13 +21,21 @@ import java.util.regex.Pattern;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.HttpClients;
-import org.atlasapi.remotesite.youtube.YouTubeModel.Content;
-import org.atlasapi.remotesite.youtube.YouTubeModel.Player;
-import org.atlasapi.remotesite.youtube.YouTubeModel.Thumbnail;
-import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
-import org.atlasapi.remotesite.youtube.YouTubeModel.VideoWrapper;
+import org.atlasapi.remotesite.deserializers.DateTimeDeserializer;
+import org.atlasapi.remotesite.deserializers.LocalDateDeserializer;
+import org.atlasapi.remotesite.youtube.deserializers.YouTubeAccessControlDeserializer;
+import org.atlasapi.remotesite.youtube.deserializers.YouTubeContentDeserializer;
+import org.atlasapi.remotesite.youtube.deserializers.YouTubePlayerDeserializer;
+import org.atlasapi.remotesite.youtube.deserializers.YouTubeThumbnailDeserializer;
+import org.atlasapi.remotesite.youtube.entity.YouTubeAccessControl;
+import org.atlasapi.remotesite.youtube.entity.YouTubeContent;
+import org.atlasapi.remotesite.youtube.entity.YouTubePlayer;
+import org.atlasapi.remotesite.youtube.entity.YouTubeThumbnail;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoWrapper;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
-import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.metabroadcast.common.http.HttpResponse;
@@ -39,13 +47,16 @@ import com.metabroadcast.common.http.SimpleHttpClient;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class YouTubeGDataClient implements RemoteSiteClient<VideoEntry> {
+public class YouTubeGDataClient implements RemoteSiteClient<YouTubeVideoEntry> {
     
     private final SimpleHttpClient client;
-    private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-            .registerTypeAdapter(Content.class, new YouTubeModel.ContentDeserializer())
-            .registerTypeAdapter(Thumbnail.class, new YouTubeModel.ThumbnailDeserializer())
-            .registerTypeAdapter(Player.class, new YouTubeModel.PlayerDeserializer())
+    private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssz")
+            .registerTypeAdapter(YouTubeContent.class, new YouTubeContentDeserializer())
+            .registerTypeAdapter(YouTubeThumbnail.class, new YouTubeThumbnailDeserializer())
+            .registerTypeAdapter(YouTubePlayer.class, new YouTubePlayerDeserializer())
+            .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
+            .registerTypeAdapter(LocalDate.class, new LocalDateDeserializer())
+            .registerTypeAdapter(YouTubeAccessControl.class, new YouTubeAccessControlDeserializer())
             .create();
     
     public YouTubeGDataClient() {
@@ -56,13 +67,13 @@ public class YouTubeGDataClient implements RemoteSiteClient<VideoEntry> {
         this.client = client;
     }
 
-    public VideoEntry get(String uri) throws Exception {
+    public YouTubeVideoEntry get(String uri) throws Exception {
         String url = "http://gdata.youtube.com/feeds/api/videos/" + videoIdFrom(uri) + "?v=2&alt=jsonc";
         HttpResponse httpResponse = client.get(url);
         if (httpResponse.statusCode() >= 300) {
             throw new HttpStatusCodeException(httpResponse.statusCode(), httpResponse.statusLine()); 
         }
-        VideoWrapper wrapper = gson.fromJson(httpResponse.body(), VideoWrapper.class);
+        YouTubeVideoWrapper wrapper = gson.fromJson(httpResponse.body(), YouTubeVideoWrapper.class);
         if (wrapper != null && wrapper.getData() != null) {
             return wrapper.getData();
         }

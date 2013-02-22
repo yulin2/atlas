@@ -18,34 +18,28 @@ package org.atlasapi.remotesite.youtube;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import junit.framework.TestCase;
 
-import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.atlasapi.remotesite.youtube.YouTubeSource.Video;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.joda.time.Duration;
-
-import com.google.common.collect.Lists;
 
 public class YouTubeSourceTest extends TestCase {
 
 	public void testReturnsNullForUninitalisedContent() throws Exception {
 		
-		YouTubeSource source = new YouTubeSource(new VideoEntry(), "uri");
+		YouTubeSource source = new YouTubeSource(new YouTubeVideoEntry(), "uri");
 		assertNull(source.getVideoTitle());
 		assertNull(source.getDescription());
 	}
 	
 	public void testGeneratesGenresAndTagsUrisForCategories() throws Exception {
 		
-	    VideoEntry entry = new VideoEntry();
-	    entry.category = "News";
-	    entry.tags = Lists.newArrayList("Funny");
+	    YouTubeVideoEntry entry = new YouTubeVideoEntry();
+	    entry.setCategory("News");
 				
 		YouTubeSource source = new YouTubeSource(entry, "uri");
 		assertThat(source.getCategories(), hasItem("http://ref.atlasapi.org/genres/youtube/News"));
-		assertThat(source.getTags(), hasItem("Funny"));
-		assertThat(source.getTags(), not(hasItem("News")));
 	}
 	
 	public void testStripsParametersFromLocationUris() throws Exception {
