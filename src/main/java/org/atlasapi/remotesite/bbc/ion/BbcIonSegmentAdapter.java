@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 
 import org.atlasapi.media.segment.Segment;
 import org.atlasapi.media.segment.SegmentEvent;
-import org.atlasapi.persistence.media.segment.SegmentWriter;
+import org.atlasapi.media.segment.SegmentWriter;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.SiteSpecificAdapter;

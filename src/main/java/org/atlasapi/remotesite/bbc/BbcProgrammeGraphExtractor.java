@@ -20,6 +20,8 @@ import static org.atlasapi.remotesite.HttpClients.webserviceClient;
 import static org.atlasapi.remotesite.bbc.BbcUriCanonicaliser.bbcProgrammeIdFrom;
 import static org.joda.time.Duration.standardSeconds;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +65,7 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -71,6 +74,7 @@ import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.time.Clock;
@@ -202,7 +206,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     private final HttpResponseTransformer<IonEpisodeDetailFeed> ION_TRANSLATOR = new HttpResponseTransformer<IonEpisodeDetailFeed>() {
 
         @Override
-        public IonEpisodeDetailFeed transform(HttpResponsePrologue response, InputStream in) throws HttpException {
+        public IonEpisodeDetailFeed transform(HttpResponsePrologue response, InputStream in) throws HttpException, Exception {
             return ionDeserialiser.deserialise(new InputStreamReader(in, response.getCharsetOrDefault(Charsets.UTF_8)));
         }
     };
@@ -337,14 +341,13 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         } else {
             item = new Episode(episodeUri, curie, Publisher.BBC);
 
-s//            SlashProgrammesSeriesContainer series = episode.series();
+//            SlashProgrammesSeriesContainer series = episode.series();
 //            if (series != null) {
 //                String seriesUri = series.uri();
 //                if (seriesUri != null) {
-//                    throw new RuntimeException("implement me");
-////                    ((Episode) item).setSeriesRef(new ParentRef(seriesUri));
+//                    ((Episode) item).setSeriesRef(new ParentRef(seriesUri));
 //                    // This will get over written below if there's a brand.
-////                    ((Episode) item).setContainer(new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(seriesUri), Publisher.BBC));
+//                    ((Episode) item).setContainer(new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(seriesUri), Publisher.BBC));
 //                }
 //            }
             

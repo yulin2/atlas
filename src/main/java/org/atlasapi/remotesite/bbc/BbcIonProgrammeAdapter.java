@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bbc;
 
+import static org.atlasapi.media.entity.Publisher.BBC;
+
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -11,14 +13,14 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.segment.SegmentEvent;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesBase;
@@ -29,6 +31,7 @@ import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonItemMerger;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
@@ -43,8 +46,7 @@ import com.metabroadcast.common.base.Maybe;
 
 public class BbcIonProgrammeAdapter extends AbstractBbcAdapter<Content> {
 
-    private final ContentResolver resolver;
-    private final ContentWriter writer;
+    private final ContentStore store;
     
     private final SiteSpecificAdapter<Item> episodeAdapter;
     private final SiteSpecificAdapter<List<SegmentEvent>> segmentAdapter;
@@ -57,9 +59,8 @@ public class BbcIonProgrammeAdapter extends AbstractBbcAdapter<Content> {
     private final SiteSpecificAdapter<Clip> clipAdapter;
     private final ListeningExecutorService executor;
 
-    public BbcIonProgrammeAdapter(ContentResolver resolver, ContentWriter writer, SiteSpecificAdapter<Item> episodeAdapter, BbcExtendedDataContentAdapter extendedDataAdapter, SiteSpecificAdapter<List<SegmentEvent>> segmentAdapter, RemoteSiteClient<SlashProgrammesRdf> slashProgrammesClient, SiteSpecificAdapter<Container> containerAdapter, SiteSpecificAdapter<Clip> clipAdapter, ExecutorService executor) {
-        this.resolver = resolver;
-        this.writer = writer;
+    public BbcIonProgrammeAdapter(ContentStore store, SiteSpecificAdapter<Item> episodeAdapter, BbcExtendedDataContentAdapter extendedDataAdapter, SiteSpecificAdapter<List<SegmentEvent>> segmentAdapter, RemoteSiteClient<SlashProgrammesRdf> slashProgrammesClient, SiteSpecificAdapter<Container> containerAdapter, SiteSpecificAdapter<Clip> clipAdapter, ExecutorService executor) {
+        this.store = store;
         this.episodeAdapter = episodeAdapter;
         this.extendedDataAdapter = extendedDataAdapter;
         this.segmentAdapter = segmentAdapter;
@@ -108,12 +109,12 @@ public class BbcIonProgrammeAdapter extends AbstractBbcAdapter<Content> {
     }
 
     private void mergeAndWrite(Container fetchedContainer) {
-        Maybe<Identified> possibleExistingContent = existingContent(fetchedContainer.getCanonicalUri());
-        if (possibleExistingContent.hasValue()) {
-            Container existingContainer = (Container)possibleExistingContent.requireValue();
+        Optional<Content> possibleExistingContent = existingContent(fetchedContainer.getCanonicalUri());
+        if (possibleExistingContent.isPresent()) {
+            Container existingContainer = (Container)possibleExistingContent.get();
             fetchedContainer = merger.mergeContainers(fetchedContainer, existingContainer);
         }
-        writer.createOrUpdate(fetchedContainer);
+        store.writeContent(fetchedContainer);
     }
 
     private void fetchSubSeries(SlashProgrammesSeriesContainer seriesContainer, Series series) {
@@ -204,7 +205,7 @@ public class BbcIonProgrammeAdapter extends AbstractBbcAdapter<Content> {
         if (fetchedItem instanceof Episode) {
             Episode episode = (Episode)fetchedItem;
             if (series == null && episode.getSeriesRef() != null) {
-                Container fetchedContainer = containerAdapter.fetch(episode.getSeriesRef().getUri());
+                Container fetchedContainer = null;//TODO:containerAdapter.fetch(episode.getSeriesRef().getUri());
                 if (fetchedContainer instanceof Series) {
                     series = (Series) fetchedContainer;
                 }
@@ -213,16 +214,16 @@ public class BbcIonProgrammeAdapter extends AbstractBbcAdapter<Content> {
                 episode.setSeriesNumber(series.getSeriesNumber());
             }
         }
-        Maybe<Identified> possibleExistingContent = existingContent(uri);
-        if (possibleExistingContent.hasValue()) {
-            fetchedItem = merger.merge(fetchedItem, (Item)possibleExistingContent.requireValue());
+        Optional<Content> possibleExistingContent = existingContent(uri);
+        if (possibleExistingContent.isPresent()) {
+            fetchedItem = merger.merge(fetchedItem, (Item)possibleExistingContent.get());
         }
-        writer.createOrUpdate(fetchedItem);
+        store.writeContent(fetchedItem);
         return fetchedItem;
     }
 
-    private Maybe<Identified> existingContent(String uri) {
-        return resolver.findByCanonicalUris(ImmutableSet.of(uri)).get(uri);
+    private Optional<Content> existingContent(String uri) {
+        return store.resolveAliases(ImmutableSet.of(uri), BBC).get(uri);
     }
 
     private void attachSegmentsToVersions(Item fetchedItem) {

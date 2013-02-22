@@ -1,12 +1,14 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.remotesite.bbc.BbcFeeds.slashProgrammesUriForPid;
 
 import java.util.List;
-import java.util.Map.Entry;
 
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
@@ -15,21 +17,16 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.segment.Segment;
 import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.media.util.ItemAndBroadcast;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
-import org.atlasapi.remotesite.bbc.ion.model.IonSegmentEvent;
 import org.joda.time.Duration;
 
 import com.google.common.base.Optional;
@@ -41,8 +38,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
 
     private static final String BBC_CURIE_BASE = "bbc:";
     
-    private final ContentResolver resolver;
-    private final ContentWriter writer;
+    private final ContentStore store;
     private final AdapterLog log;
 
     private final BbcIonEpisodeItemContentExtractor itemExtractor;
@@ -58,9 +54,8 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private final ContentLock lock;
 
     
-    public DefaultBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log, ContentLock lock) {
-        this.resolver = resolver;
-        this.writer = writer;
+    public DefaultBbcIonBroadcastHandler(ContentStore store, AdapterLog log, ContentLock lock) {
+        this.store = store;
         this.log = log;
         this.lock = lock;
         this.itemExtractor = new BbcIonEpisodeItemContentExtractor(log);
@@ -110,7 +105,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             if (brand != null) {
                 updateBrand(brand, ionBroadcast);
                 item.setContainer(brand);
-                writer.createOrUpdate(brand);
+                store.writeContent(brand);
             }
 
             if (series != null) {
@@ -122,11 +117,11 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
                     item.setContainer(series);
                     series.setParentRef(null);
                 }
-                writer.createOrUpdate(series);
+                store.writeContent(series);
                 ((Episode) item).setSeries(series);
             }
 
-            writer.createOrUpdate(item);
+            store.writeContent(item);
             createOrUpdatePeople((Item) item);
             
             return Maybe.just(new ItemAndBroadcast(item, broadcast));
@@ -155,9 +150,9 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         Item basicItem = itemExtractor.extract(broadcast.getEpisode()); 
 
         // look for existing item, merge into latest remote data, else fetch complete.
-        Maybe<Identified> possibleIdentified = resolver.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
-        if (possibleIdentified.hasValue()) {
-            Identified ided = possibleIdentified.requireValue();
+        Optional<Content> possibleIdentified = store.resolveAliases(ImmutableList.of(itemUri), BBC).get(itemUri);
+        if (possibleIdentified.isPresent()) {
+            Identified ided = possibleIdentified.get();
             if (!(ided instanceof Item)) {
                 log.record(new AdapterLogEntry(Severity.WARN).withDescription("Updating %s, expecting Item, got %s", itemUri, ided.getClass().getSimpleName()).withSource(getClass()));
                 return null;
@@ -210,9 +205,9 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
 
     private Series getOrCreateSeries(IonBroadcast broadcast, String itemUri) {
         String seriesUri = slashProgrammesUriForPid(broadcast.getSeriesId());
-        Maybe<Identified> maybeSeries = resolver.findByCanonicalUris(ImmutableList.of(seriesUri)).get(seriesUri);
+        Optional<Content> maybeSeries = store.resolveAliases(ImmutableList.of(seriesUri), BBC).get(seriesUri);
 
-        if (maybeSeries.isNothing()) {
+        if (!maybeSeries.isPresent()) {
             Maybe<Series> series = Maybe.nothing();
             if (containerClient != null) {
                 series = containerClient.createSeries(broadcast.getSeriesId());
@@ -220,7 +215,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             return series.hasValue() ? series.requireValue() : createSeries(broadcast);
         }
 
-        Identified ided = maybeSeries.requireValue();
+        Identified ided = maybeSeries.get();
         if (ided instanceof Series) {
             return (Series) ided;
         }
@@ -232,9 +227,9 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private Brand getOrCreateBrand(IonBroadcast broadcast, String itemUri) {
         String brandUri = slashProgrammesUriForPid(broadcast.getBrandId());
 
-        Maybe<Identified> maybeIdentified = resolver.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
+        Optional<Content> maybeIdentified = store.resolveAliases(ImmutableList.of(brandUri), BBC).get(brandUri);
 
-        if (maybeIdentified.isNothing()) {
+        if (!maybeIdentified.isPresent()) {
             Maybe<Brand> brand = Maybe.nothing();
             if (containerClient != null) {
                 brand = containerClient.createBrand(broadcast.getBrandId());
@@ -242,7 +237,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             return brand.hasValue() ? brand.requireValue() : createBrandFrom(broadcast);
         }
 
-        Identified ided = maybeIdentified.requireValue();
+        Identified ided = maybeIdentified.get();
         if (ided instanceof Brand) {
             Brand brand = (Brand) ided;
             if(brand.getGenres().isEmpty()) {

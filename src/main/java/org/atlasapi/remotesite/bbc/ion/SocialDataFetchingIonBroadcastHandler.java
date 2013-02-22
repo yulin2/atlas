@@ -5,20 +5,18 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.KeyPhrase;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.util.ItemAndBroadcast;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
@@ -26,14 +24,12 @@ import com.metabroadcast.common.base.Maybe;
 public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHandler {
 
     private final BbcExtendedDataContentAdapter extendedDataAdapter;
-    private final ContentResolver resolver;
-    private final ContentWriter writer;
+    private final ContentStore store;
     private final AdapterLog log;
 
-    public SocialDataFetchingIonBroadcastHandler(BbcExtendedDataContentAdapter extendedDataAdapter, ContentResolver resolver, ContentWriter writer, AdapterLog log) {
+    public SocialDataFetchingIonBroadcastHandler(BbcExtendedDataContentAdapter extendedDataAdapter, ContentStore store, AdapterLog log) {
         this.extendedDataAdapter = extendedDataAdapter;
-        this.resolver = resolver;
-        this.writer = writer;
+        this.store = store;
         this.log = log;
     }
 
@@ -68,17 +64,13 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
     }
 
     private void upadteContent(String pidUri, Set<RelatedLink> links, Set<KeyPhrase> phrases, List<TopicRef> topics) {
-        Maybe<Identified> possibleContent = resolver.findByCanonicalUris(ImmutableList.of(pidUri)).get(pidUri);
-        if (possibleContent.hasValue()) {
-            Content content = (Content) possibleContent.requireValue();
+        Optional<Content> possibleContent = store.resolveAliases(ImmutableList.of(pidUri), Publisher.BBC).get(pidUri);
+        if (possibleContent.isPresent()) {
+            Content content = (Content) possibleContent.get();
             content.setRelatedLinks(links);
             content.setKeyPhrases(phrases);
             content.setTopicRefs(topics);
-            if (content instanceof Container) {
-                writer.createOrUpdate((Container) content);
-            } else if (content instanceof Item) {
-                writer.createOrUpdate((Item) content);
-            }
+            store.writeContent(content);
         }
     }
 

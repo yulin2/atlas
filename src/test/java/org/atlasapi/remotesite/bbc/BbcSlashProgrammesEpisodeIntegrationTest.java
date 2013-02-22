@@ -1,11 +1,21 @@
 package org.atlasapi.remotesite.bbc;
 
+import static org.atlasapi.media.entity.Publisher.DBPEDIA;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Clip;
@@ -15,9 +25,9 @@ import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.Topic.Type;
 import org.atlasapi.media.entity.TopicRef;
-import org.atlasapi.persistence.logging.NullAdapterLog;
+import org.atlasapi.media.topic.TopicStore;
+import org.atlasapi.media.util.WriteResult;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
@@ -25,26 +35,25 @@ import org.atlasapi.remotesite.channel4.RecordingContentWriter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
-import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.collect.ImmutableOptionalMap;
 
-@RunWith(JMock.class)
+@RunWith(MockitoJUnitRunner.class)
 public class BbcSlashProgrammesEpisodeIntegrationTest {
     
-    Mockery context = new Mockery();
-    private final TopicStore topicStore = context.mock(TopicStore.class);
+    private final TopicStore topicStore = mock(TopicStore.class);
     
     FixedResponseHttpClient httpClient = FixedResponseHttpClient.respondTo("http://www.bbc.co.uk/programmes/b015d4pt.json", Resources.getResource("bbc-topics-b015d4pt.json"));
     
-    private final BbcSlashProgrammesJsonTopicsAdapter topicsAdapter = new BbcSlashProgrammesJsonTopicsAdapter(new BbcModule().jsonClient(httpClient), topicStore, new NullAdapterLog());
+    private final BbcSlashProgrammesJsonTopicsAdapter topicsAdapter = new BbcSlashProgrammesJsonTopicsAdapter(new BbcModule().jsonClient(httpClient), topicStore);
     private final BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(nullAdapter((List<RelatedLink>)ImmutableList.<RelatedLink>of()), nullAdapter((List<KeyPhrase>)ImmutableList.<KeyPhrase>of()), topicsAdapter);
 
     @Test
@@ -54,18 +63,20 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
         
         BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, extendedDataAdapter, new SystemOutAdapterLog());
         
-//        topics are disabled currently
-        context.checking(new Expectations(){{
-            oneOf(topicStore).topicFor(Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Religion"); will(returnValue(newTopic(1, Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Religion")));
-            oneOf(topicStore).write(with(topicMatcher(1,Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Religion", "Religion",Topic.Type.SUBJECT)));
-            oneOf(topicStore).topicFor(Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Rosh_Hashanah"); will(returnValue(newTopic(2, Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Rosh_Hashanah")));
-            oneOf(topicStore).write(with(topicMatcher(2,Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Rosh_Hashanah", "Rosh Hashanah",Topic.Type.SUBJECT)));
-            oneOf(topicStore).topicFor(Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Jonathan_Sacks"); will(returnValue(newTopic(3, Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Jonathan_Sacks")));
-            oneOf(topicStore).write(with(topicMatcher(3,Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Jonathan_Sacks", "Jonathan Sacks",Topic.Type.PERSON)));
-            oneOf(topicStore).topicFor(Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Debate"); will(returnValue(newTopic(4, Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Debate")));
-            oneOf(topicStore).write(with(topicMatcher(4,Publisher.DBPEDIA.name().toLowerCase(), "http://dbpedia.org/resource/Debate", "Debate",Topic.Type.SUBJECT)));
-        }});
-
+        when(topicStore.resolveAliases(argThat(hasItems(any(String.class))),argThat(isA(Publisher.class))))
+            .thenReturn(ImmutableOptionalMap.<String, Topic>of());
+        final AtomicInteger id = new AtomicInteger(1);
+        when((topicStore).writeTopic(argThat(is(any(Topic.class)))))
+            .thenAnswer(new Answer<WriteResult<Topic>>() {
+                @Override
+                public WriteResult<Topic> answer(InvocationOnMock invocation)
+                    throws Throwable {
+                    Topic topic = (Topic) invocation.getArguments()[0];
+                    topic.setId(id.getAndIncrement());
+                    return WriteResult.written(topic).build();
+                }
+            });
+        
         Content programme = (Content) adapter.fetch("http://www.bbc.co.uk/programmes/b015d4pt");
         assertNotNull(programme);
         
@@ -88,7 +99,16 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
         
         assertEquals(ImmutableSet.of(topic1, topic2, topic3, topic4), ImmutableSet.copyOf(programme.getTopicRefs()));
         
-        context.assertIsSatisfied();
+        String ns = DBPEDIA.name().toLowerCase();
+        String religion = "http://dbpedia.org/resource/Religion";
+        String roshHashanah = "http://dbpedia.org/resource/Rosh_Hashanah";
+        String jonathanSacks = "http://dbpedia.org/resource/Jonathan_Sacks";
+        String debate = "http://dbpedia.org/resource/Debate";
+        
+        verify(topicStore).writeTopic(argThat(is((topicMatcher(1, ns, religion, "Religion", Type.SUBJECT)))));
+        verify(topicStore).writeTopic(argThat(is((topicMatcher(1, ns, roshHashanah, "Rosh Hashanah", Type.SUBJECT)))));
+        verify(topicStore).writeTopic(argThat(is((topicMatcher(1, ns, jonathanSacks, "Jonathan Sacks", Type.PERSON)))));
+        verify(topicStore).writeTopic(argThat(is((topicMatcher(1, ns, debate, "Debate", Type.SUBJECT)))));
     }
     
     private <T> SiteSpecificAdapter<T> nullAdapter(final T returns) {
@@ -116,21 +136,12 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
 
             @Override
             public boolean matchesSafely(Topic topic) {
-                return topic.getId().equals(id) &&
-                topic.getNamespace().equals(ns) &&
-                topic.getValue().equals(value) &&
-                topic.getTitle().equals(title) &&
-                topic.getPublisher().equals(Publisher.DBPEDIA) &&
-                topic.getType().equals(type);
+                return topic.getId().equals(id)
+                    && topic.getAliases().contains(ns+":"+value)
+                    && topic.getTitle().equals(title)
+                    && topic.getPublisher().equals(Publisher.DBPEDIA)
+                    && topic.getType().equals(type);
             }
         };
-    }
-    
-    private Maybe<Topic> newTopic(long id, String ns, String value) {
-        Topic topic = new Topic(id);
-        topic.setNamespace(ns);
-        topic.setValue(value);
-        topic.setPublisher(Publisher.DBPEDIA);
-        return Maybe.just(topic);
     }
 }

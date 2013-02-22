@@ -1,8 +1,5 @@
 package org.atlasapi.remotesite.bbc.products;
 
-import com.google.common.base.Optional;
-import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.currency.Price;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -13,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductLocation;
@@ -20,9 +18,11 @@ import org.atlasapi.persistence.media.product.ProductStore;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.s3.S3Client;
 
-/**
- */
-public class BBCProductsProcessor {
+import com.google.common.base.Optional;
+import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.currency.Price;
+
+public class BbcProductsProcessor {
 
     static final String PRODUCTS = "products.txt";
     static final String LOCATIONS = "locations.txt";
@@ -137,7 +137,7 @@ public class BBCProductsProcessor {
     }
 
     private BufferedReader loadEpisodes(S3Client client) throws IOException {
-        File localEpisodesFile = File.createTempFile(BBCProductsUpdater.S3_BUCKET, EPISODES);
+        File localEpisodesFile = File.createTempFile(BbcProductsUpdater.S3_BUCKET, EPISODES);
         client.getAndSaveIfUpdated(EPISODES, localEpisodesFile, Maybe.<File>nothing());
 
         BufferedReader reader = new BufferedReader(new FileReader(localEpisodesFile));
@@ -149,7 +149,7 @@ public class BBCProductsProcessor {
     }
 
     private BufferedReader loadSeries(S3Client client) throws IOException {
-        File localSeriesFile = File.createTempFile(BBCProductsUpdater.S3_BUCKET, SERIES);
+        File localSeriesFile = File.createTempFile(BbcProductsUpdater.S3_BUCKET, SERIES);
         client.getAndSaveIfUpdated(SERIES, localSeriesFile, Maybe.<File>nothing());
 
         BufferedReader reader = new BufferedReader(new FileReader(localSeriesFile));
@@ -161,7 +161,7 @@ public class BBCProductsProcessor {
     }
 
     private BufferedReader loadBrands(S3Client client) throws IOException {
-        File localBrandsFile = File.createTempFile(BBCProductsUpdater.S3_BUCKET, BRANDS);
+        File localBrandsFile = File.createTempFile(BbcProductsUpdater.S3_BUCKET, BRANDS);
         client.getAndSaveIfUpdated(BRANDS, localBrandsFile, Maybe.<File>nothing());
 
         BufferedReader reader = new BufferedReader(new FileReader(localBrandsFile));
@@ -173,7 +173,7 @@ public class BBCProductsProcessor {
     }
 
     private BufferedReader loadLocations(S3Client client) throws IOException {
-        File localLocationsFile = File.createTempFile(BBCProductsUpdater.S3_BUCKET, LOCATIONS);
+        File localLocationsFile = File.createTempFile(BbcProductsUpdater.S3_BUCKET, LOCATIONS);
         client.getAndSaveIfUpdated(LOCATIONS, localLocationsFile, Maybe.<File>nothing());
 
         BufferedReader reader = new BufferedReader(new FileReader(localLocationsFile));
@@ -185,7 +185,7 @@ public class BBCProductsProcessor {
     }
 
     private BufferedReader loadProducts(S3Client client) throws IOException {
-        File localProductsFile = File.createTempFile(BBCProductsUpdater.S3_BUCKET, PRODUCTS);
+        File localProductsFile = File.createTempFile(BbcProductsUpdater.S3_BUCKET, PRODUCTS);
         client.getAndSaveIfUpdated(PRODUCTS, localProductsFile, Maybe.<File>nothing());
 
         BufferedReader reader = new BufferedReader(new FileReader(localProductsFile));

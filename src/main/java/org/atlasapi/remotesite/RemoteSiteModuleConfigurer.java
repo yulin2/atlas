@@ -34,6 +34,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
+import org.atlasapi.remotesite.bbc.products.BbcProductsModule;
+import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
+import org.atlasapi.remotesite.metabroadcast.MetaBroadcastModule;
+import org.atlasapi.remotesite.space.TheSpaceModule;
+import org.atlasapi.remotesite.music.emipub.EmiPubModule;
+import org.atlasapi.remotesite.music.musicbrainz.MusicBrainzModule;
 
 public class RemoteSiteModuleConfigurer {
 
@@ -62,7 +68,7 @@ public class RemoteSiteModuleConfigurer {
         .put("lovefilm", LoveFilmModule.class)
         .put("netflix", NetflixModule.class)
         .put("youview", YouViewModule.class)
-        .put("bbc-products", BBCProductsModule.class)
+        .put("bbc-products", BbcProductsModule.class)
         .put("thespace", TheSpaceModule.class)
         .put("musicbrainz", MusicBrainzModule.class)
         .put("emipub", EmiPubModule.class)

@@ -93,7 +93,7 @@ public class BbcIonContainerAdapter implements BbcContainerAdapter, SiteSpecific
         Series series = new Series(BbcFeeds.slashProgrammesUriForPid(pid), CURIE_BASE+pid, Publisher.BBC);
         
         if (!Strings.isNullOrEmpty(ionContainer.getParentId())) {
-            series.setParentRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(ionContainer.getParentId())));
+            //TODO: series.setParentRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(ionContainer.getParentId())));
         }
         
         setCommonFields(ionContainer, series);
