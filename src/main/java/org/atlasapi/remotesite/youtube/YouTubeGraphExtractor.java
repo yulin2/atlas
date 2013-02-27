@@ -72,8 +72,6 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 
             encodings.add(encoding);
         }
-        // encodings.add(encodingForWebPage(source));
-
         Version version = new Version();
 
         version.setManifestedAs(encodings);

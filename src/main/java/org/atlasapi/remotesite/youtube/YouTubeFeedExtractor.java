@@ -25,6 +25,10 @@ public class YouTubeFeedExtractor implements
         this.itemExtractor = itemExtractor;
     }
 
+    public YouTubeFeedExtractor(YouTubeGraphExtractor itemExtractor) {
+        this.itemExtractor = itemExtractor;
+    }
+
     @Override
     public ContentGroup extract(YouTubeFeedSource source) {
         YouTubeVideoFeed feed = source.getVideoFeed();
