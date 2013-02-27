@@ -106,7 +106,7 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
                 .withBroadcastWeighting(broadcastWeighting)
                 .withCatchupWeighting(catchupWeighting)
                 .withType(type)
-                .isTopLevel(!Strings.isNullOrEmpty(topLevel) ? Boolean.valueOf(topLevel) : null)
+                .isTopLevelOnly(!Strings.isNullOrEmpty(topLevel) ? Boolean.valueOf(topLevel) : null)
                 .build(), appConfig);
 
             modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)), appConfig);
