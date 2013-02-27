@@ -26,10 +26,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
-<<<<<<< HEAD
 import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
-=======
->>>>>>> a715d5a... IN PROGRESS - issue MBST-4533: YouTube adapter 
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
