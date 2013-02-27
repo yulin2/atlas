@@ -20,8 +20,10 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
-import org.atlasapi.remotesite.youtube.YouTubeSource.Video;
+import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
+import org.atlasapi.remotesite.youtube.entity.YouTubeSource.Video;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
+import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 public class YouTubeSourceTest extends TestCase {
@@ -39,12 +41,12 @@ public class YouTubeSourceTest extends TestCase {
 	    entry.setCategory("News");
 				
 		YouTubeSource source = new YouTubeSource(entry, "uri");
-		assertThat(source.getCategories(), hasItem("http://ref.atlasapi.org/genres/youtube/News"));
+		assertThat(source.getCategories(), hasItem("http://www.youtube.com/news"));
 	}
 	
 	public void testStripsParametersFromLocationUris() throws Exception {
 		
-		Video video = new YouTubeSource.Video("type", Duration.ZERO, "http://www.youtube.com/v/pliAz4L-sAQ&f=videos&c=ref.atlasapi.org&app=youtube_gdata", 0, true);
+		Video video = new YouTubeSource.Video("type", Duration.ZERO, "http://www.youtube.com/v/pliAz4L-sAQ&f=videos&c=ref.atlasapi.org&app=youtube_gdata", 0, true, new DateTime());
 		assertThat(video.getUrl(), is("http://www.youtube.com/v/pliAz4L-sAQ"));
 	}
 }
