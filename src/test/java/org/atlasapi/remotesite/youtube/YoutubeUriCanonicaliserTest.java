@@ -30,8 +30,8 @@ public class YoutubeUriCanonicaliserTest extends TestCase {
 	}
 
 	public void testThatTheAdapterCanExtractVideoIdFromYoutubeUri() throws Exception {
-		check("http://www.youtube.com/watch?v=uOH0o2DQDco&feature=channel", "uOH0o2DQDco");
-		check("http://www.youtube.com/watch?v=xyCNqsbVPYM&feature=autoshare_twitter", "xyCNqsbVPYM");
+		check("http://www.youtube.com/watch?v=uOH0o2DQDco", "uOH0o2DQDco");
+		check("http://www.youtube.com/watch?v=xyCNqsbVPYM", "xyCNqsbVPYM");
 	}
 
 	public void testCanGenerateCurieForUri() throws Exception {
@@ -40,7 +40,7 @@ public class YoutubeUriCanonicaliserTest extends TestCase {
 	}
 
 	private void check(String alternate, final String expected) {
-		final String canonicalUri = "http://www.youtube.com/watch?v=" + expected;
+		final String canonicalUri = "http://gdata.youtube.com/feeds/api/videos/" + expected;
 		assertEquals(canonicalUri, canonicaliser.canonicalise(alternate));
 	}
 }

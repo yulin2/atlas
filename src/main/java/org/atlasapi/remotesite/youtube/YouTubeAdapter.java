@@ -22,6 +22,7 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 
 import com.metabroadcast.common.http.HttpStatusCodeException;

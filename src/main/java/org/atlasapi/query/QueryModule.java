@@ -61,14 +61,15 @@ public class QueryModule {
     private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
 	
 	private @Value("${applications.enabled}") String applicationsEnabled;
-	private @Value("${atlas.search.host}") String searchHost;
+    private @Value("${atlas.search.host}") String searchHost;
+    private @Value("${cassandra.enabled}") boolean cassandraEnbaled;
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 	    
 	    KnownTypeContentResolver mongoContentResolver = new MongoContentResolver(mongo, new MongoLookupEntryStore(mongo));
         KnownTypeContentResolver cassandraContentResolver = new CassandraKnownTypeContentResolver(cassandra);
 		
-        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, new MongoLookupEntryStore(mongo));
+        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, new MongoLookupEntryStore(mongo), cassandraEnbaled);
 		
 		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor, equivUpdater, ImmutableSet.of(FACEBOOK));
 		

@@ -5,6 +5,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoFeed;
 
@@ -20,8 +21,11 @@ public class YouTubeFeedExtractor implements
         this(new YouTubeGraphExtractor());
     }
 
-    public YouTubeFeedExtractor(
-            ContentExtractor<YouTubeSource, Item> itemExtractor) {
+    public YouTubeFeedExtractor(ContentExtractor<YouTubeSource, Item> itemExtractor) {
+        this.itemExtractor = itemExtractor;
+    }
+
+    public YouTubeFeedExtractor(YouTubeGraphExtractor itemExtractor) {
         this.itemExtractor = itemExtractor;
     }
 

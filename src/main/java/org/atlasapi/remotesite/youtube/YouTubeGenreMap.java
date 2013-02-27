@@ -26,7 +26,7 @@ import org.atlasapi.genres.GenreMap;
  * @deprecated
  */
 class YouTubeGenreMap extends GenreMap {
-
+//TODO is this used at all, other than the tests?
     static {
         genres.put("http://ref.atlasapi.org/genres/youtube/autos",         AtlasGenre.LIFESTYLE);
         genres.put("http://ref.atlasapi.org/genres/youtube/comedy",        AtlasGenre.COMEDY);

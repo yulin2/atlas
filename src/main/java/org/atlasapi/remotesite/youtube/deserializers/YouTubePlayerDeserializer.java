@@ -19,6 +19,9 @@ public class YouTubePlayerDeserializer implements JsonDeserializer<YouTubePlayer
         if (jsonObject.has("default")) {
             player.setDefaultUrl(jsonObject.get("default").getAsString());
         }
+        if (jsonObject.has("mobile")) {
+            player.setMobileUrl(jsonObject.get("mobile").getAsString());
+        }
         return player;
     }
 }

@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
+import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.jmock.Expectations;
 import org.jmock.Mockery;

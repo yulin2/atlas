@@ -18,6 +18,8 @@ import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -30,6 +32,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.properties.Configurer;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
@@ -37,17 +40,19 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     private final KnownTypeContentResolver cassandraContentResolver;
     private final KnownTypeContentResolver mongoContentResolver;
     private final LookupEntryStore mongoLookupResolver;
+    private final boolean cassandraEnabled;
 
-    public LookupResolvingQueryExecutor(KnownTypeContentResolver cassandraContentResolver, KnownTypeContentResolver mongoContentResolver, LookupEntryStore mongoLookupResolver) {
+    public LookupResolvingQueryExecutor(KnownTypeContentResolver cassandraContentResolver, KnownTypeContentResolver mongoContentResolver, LookupEntryStore mongoLookupResolver, boolean cassandraEnable) {
         this.cassandraContentResolver = cassandraContentResolver;
         this.mongoContentResolver = mongoContentResolver;
         this.mongoLookupResolver = mongoLookupResolver;
+        cassandraEnabled = cassandraEnable;
     }
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
         Map<String, List<Identified>> results = resolveMongoEntries(query, mongoLookupResolver.entriesForIdentifiers(uris, true));
-        if (results.isEmpty()) {
+        if (cassandraEnabled && results.isEmpty()) {
             try {
                 results = resolveCassandraEntries(uris, query);
             }
@@ -159,6 +164,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     private Map<String, List<Identified>> resolveCassandraEntries(Iterable<String> uris, ContentQuery query) {
         final ApplicationConfiguration configuration = query.getConfiguration();
+        
         ResolvedContent result = cassandraContentResolver.findByLookupRefs(Iterables.transform(uris, new Function<String, LookupRef>() {
 
             @Override
