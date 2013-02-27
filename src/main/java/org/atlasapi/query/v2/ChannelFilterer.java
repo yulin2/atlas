@@ -2,6 +2,7 @@ package org.atlasapi.query.v2;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
@@ -11,15 +12,16 @@ import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 public class ChannelFilterer {
     
-    public Set<Channel> filter(Iterable<Channel> channels, ChannelFilter filter) {
+    public List<Channel> filter(Iterable<Channel> channels, ChannelFilter filter) {
         
-        return ImmutableSet.copyOf(Iterables.filter(channels, filterPredicate(filter)));
+        return ImmutableList.copyOf(Iterables.filter(channels, filterPredicate(filter)));
     }
     
     private Predicate<Channel> filterPredicate(final ChannelFilter filter) {
