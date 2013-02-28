@@ -20,6 +20,7 @@ import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,8 +38,15 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
     
     private final InMemoryLookupEntryStore lookupStore = new InMemoryLookupEntryStore();
     
-    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore);
+    private LookupResolvingQueryExecutor executor;
 
+    @Before
+    public void setup(){
+        executor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore, true);
+
+    }
+
+    @Test
     @Ignore("Doesn't currently work as equivalence isn't implemented yet in Cassandra.")
     public void setsSameAs() {
         final String query = "query";
@@ -174,6 +182,26 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
     }
     
     @Test
+    public void testCassandraIsNotCalledIfMongoReturnsNothing() {
+        executor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore, false);
+                final String query = "query";
+        final Item queryItem = new Item(query, "qcurie", Publisher.BBC);
+        
+        context.checking(new Expectations(){{
+            never(mongoContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
+        }});
+        context.checking(new Expectations(){{
+            never(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
+            will(returnValue(ResolvedContent.builder().put(queryItem.getCanonicalUri(), queryItem).build()));
+        }});
+        
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), MatchesNothing.asQuery());
+        
+        assertNull(result.get(query));
+        
+        context.assertIsSatisfied();
+    }
+    @Test
     public void testPublisherFilteringWithCassandra() {
         final String uri1 = "uri1";
         final Item item1 = new Item(uri1, "qcurie1", Publisher.BBC);
@@ -191,6 +219,7 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
         Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(uri1, uri2), MatchesNothing.asQuery().copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.disable(Publisher.BBC)));
         
         assertEquals(0, result.size());
+
         context.assertIsSatisfied();
     }
     

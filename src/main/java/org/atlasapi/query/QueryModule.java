@@ -69,13 +69,14 @@ public class QueryModule {
     //
     @Value("${applications.enabled}")
     private String applicationsEnabled;
+    private @Value("${cassandra.enabled}") boolean cassandraEnabled;
 
     @Bean
     public KnownTypeQueryExecutor queryExecutor() {
 
         KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(new SimpleKnownTypeContentResolver(cassandraResolver),
                 new FilterScheduleOnlyKnownTypeContentResolver(mongoResolver),
-                mongoStore);
+                mongoStore, cassandraEnabled);
 
         queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor, equivUpdater, ImmutableSet.of(FACEBOOK));
 
@@ -90,7 +91,7 @@ public class QueryModule {
     public TopicContentLister mergingTopicContentLister() {
         KnownTypeContentResolver contentResolver = new FilterScheduleOnlyKnownTypeContentResolver(mongoResolver);
         final KnownTypeQueryExecutor queryExecutor = new MergeOnOutputQueryExecutor(
-                new LookupResolvingQueryExecutor(new SimpleKnownTypeContentResolver(cassandraResolver), contentResolver, mongoStore));
+                new LookupResolvingQueryExecutor(new SimpleKnownTypeContentResolver(cassandraResolver), contentResolver, mongoStore, cassandraEnabled));
 
         return new TopicContentLister() {
 

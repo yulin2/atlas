@@ -30,21 +30,21 @@ import org.atlasapi.remotesite.hulu.HuluAdapterModule;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
+import org.atlasapi.remotesite.youtube.YouTubeAdapterModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({HuluAdapterModule.class, ArchiveOrgAdapterModule.class, FacebookAdapterModule.class})
+@Import({HuluAdapterModule.class, ArchiveOrgAdapterModule.class, FacebookAdapterModule.class, YouTubeAdapterModule.class})
 public class RemoteSiteModule {
 
     @Autowired
     private AdapterLog log;
     @Autowired
     private Collection<SiteSpecificAdapter<? extends Identified>> remoteAdapters;
-    //
-    //private @Autowired YouTubeAdapterModule youTubeAdapterModule;
+    private @Autowired YouTubeAdapterModule youTubeAdapterModule;
 
     @Bean
     public Fetcher<Identified> remoteFetcher() {
@@ -58,6 +58,7 @@ public class RemoteSiteModule {
         adapters.add(new TedTalkAdapter());
         adapters.add(new DailyMotionItemAdapter());
         adapters.add(new BlipTvAdapter());
+        adapters.add(youTubeAdapterModule.youTubeAdapter());
 
         adapters.add(new VimeoAdapter());
 
@@ -71,4 +72,5 @@ public class RemoteSiteModule {
         dispatcher.setAdapters(adapters);
         return dispatcher;
     }
+
 }
