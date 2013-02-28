@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License. */
 
-package org.atlasapi.remotesite.youtube;
+package org.atlasapi.remotesite.youtube.entity;
 
 
 import java.io.UnsupportedEncodingException;
@@ -23,7 +23,9 @@ import java.util.Set;
 
 import org.atlasapi.remotesite.BaseSource;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
+import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.joda.time.LocalDate;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -35,8 +37,9 @@ import com.google.common.collect.Sets;
  */
 public class YouTubeSource extends BaseSource {
 	
-	private static final String ATLAS_GENRES_SCHEME = "http://ref.atlasapi.org/genres/youtube/";
-	
+	// Genres = You tube categories.
+    private static final String YOUTUBE_GENRES_PREFIX = "http://www.youtube.com/";
+
 	private final YouTubeVideoEntry videoEntry;
 	
 	public YouTubeSource(YouTubeVideoEntry entry, String uri) {
@@ -44,7 +47,7 @@ public class YouTubeSource extends BaseSource {
 		videoEntry = entry;
 	}
 		
-	String getVideoTitle() {
+	public String getVideoTitle() {
 		if (videoEntry.getTitle() != null) {
 			return videoEntry.getTitle();
 		} else {
@@ -52,24 +55,52 @@ public class YouTubeSource extends BaseSource {
 		}
 	}
 	
-	String getDescription() {
+	public String getDescription() {
 		if (videoEntry.getDescription() != null) {
 			return videoEntry.getDescription();
 		} else {
 			return null;
 		}
 	}
+    
+    public String getDefaultPlayerUrl(){
+        if(videoEntry.getPlayer() != null)
+            return videoEntry.getPlayer().getDefaultUrl();
+        
+        return null;
+    }
+    
+    public String getMobilePlayerUrl(){
+        if(videoEntry.getPlayer() != null)
+            return videoEntry.getPlayer().getMobileUrl();
+        
+        return null;
+    }
 	
-	List<Video> getVideos() {
+	public String getURL(){
+	    if(videoEntry.getPlayer() != null)
+	        return videoEntry.getPlayer().getDefaultUrl();
+	    return null;
+	}
+
+    public DateTime getUploaded(){
+        return videoEntry.getUploaded();
+    }
+
+    public LocalDate getRecorded(){
+        return videoEntry.getRecorded();
+    }
+	
+	public List<Video> getVideos() {
 		List<Video> result = Lists.newArrayList();
 		if (videoEntry != null && videoEntry.getPlayer() != null && videoEntry.getPlayer().getDefaultUrl() != null) {
-    		Video video = new Video("application/x-shockwave-flash", Duration.standardSeconds(videoEntry.getDuration()), videoEntry.getPlayer().getDefaultUrl(), topContent(), true);
+    		Video video = new Video("application/x-shockwave-flash", Duration.standardSeconds(videoEntry.getDuration()), videoEntry.getPlayer().getDefaultUrl(), topContent(), true, videoEntry.getUploaded());
     		result.add(video);
 		}
 		return result;
 	}
 	
-	int topContent() {
+	public int topContent() {
 	    if (videoEntry.getContent() != null) {
 	        if (videoEntry.getContent().getSix() != null) {
 	            return 6;
@@ -81,16 +112,35 @@ public class YouTubeSource extends BaseSource {
 	    }
 	    return 0;
 	}
-	
-	static class Video {
+
+    public String getOne(){
+        if(videoEntry.getContent() != null)
+            return videoEntry.getContent().getOne();
+        return null;
+    }
+
+    public String getSix(){
+        if(videoEntry.getContent() != null)
+            return videoEntry.getContent().getSix();
+        return null;
+    }
+
+    public String getFive(){
+        if(videoEntry.getContent() != null)
+            return videoEntry.getContent().getFive();
+        return null;
+    }
+
+	public static class Video {
 
 		private final String url;
 		private final Duration duration;
 		private final String type;
 		private final int youtubeFormat;
-		private final boolean embeddable;
+        private final boolean embeddable;
+        private final DateTime uploaded;
 
-		public Video(String type, Duration duration, String locationUri, int youtubeFormat, boolean embeddable) {
+		public Video(String type, Duration duration, String locationUri, int youtubeFormat, boolean embeddable, DateTime uploaded) {
 			this.type = type;
 			this.duration = duration;
 			this.embeddable = embeddable;
@@ -100,8 +150,13 @@ public class YouTubeSource extends BaseSource {
 				url = locationUri;
 			}
 			this.youtubeFormat = youtubeFormat;
+			this.uploaded = uploaded;
 		}
 
+		public DateTime getUploaded(){
+		    return this.uploaded;
+		}
+		
 		public String getUrl() {
 			return url;
 		}
@@ -123,12 +178,15 @@ public class YouTubeSource extends BaseSource {
 		}
 		
 	}
-	
-	Set<String> getCategories() {
+
+	public Set<String> getCategories() {
         Set<String> result = Sets.newHashSet();
         if (videoEntry != null && videoEntry.getCategory() != null) {
             try {
-                result.add(ATLAS_GENRES_SCHEME + URLEncoder.encode(videoEntry.getCategory(), com.google.common.base.Charsets.UTF_8.name()));
+                String category = URLEncoder.encode(videoEntry.getCategory(), com.google.common.base.Charsets.UTF_8.name());
+                if(category != null){
+                    result.add(YOUTUBE_GENRES_PREFIX + category.toLowerCase());
+                }
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException("UTF-8 not found");
             }
@@ -136,9 +194,9 @@ public class YouTubeSource extends BaseSource {
         return result;
     }
 
-//	Set<String> getTags() {
-//		return ImmutableSet.copyOf(videoEntry.tags);
-//	}
+	public Set<String> getGenres() {
+        return getCategories();
+    }
 
 	public String getThumbnailImageUri() {
 	    if (videoEntry.getThumbnail() != null) {
@@ -158,3 +216,5 @@ public class YouTubeSource extends BaseSource {
 	    return null;
 	}
 }
+
+
