@@ -15,7 +15,6 @@ import org.atlasapi.remotesite.pa.channels.bindings.Name;
 import org.atlasapi.remotesite.pa.channels.bindings.ProviderChannelId;
 import org.atlasapi.remotesite.pa.channels.bindings.ServiceProvider;
 import org.atlasapi.remotesite.pa.channels.bindings.Station;
-import org.atlasapi.remotesite.pa.channels.bindings.Url;
 import org.atlasapi.remotesite.pa.channels.bindings.Variation;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;

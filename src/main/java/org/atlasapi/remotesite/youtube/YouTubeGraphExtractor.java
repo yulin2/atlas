@@ -142,7 +142,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         return item;
     }
 
-    private Encoding extractEncodingPropertyValuesFrom(Video video) {
+    public Encoding extractEncodingPropertyValuesFrom(Video video) {
         MimeType containerFormat = ContainerFormat.fromAltName(video.getType());
         if (containerFormat == null) {
             return null;
@@ -211,14 +211,6 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
             locationMobile.setTransportType(TransportType.LINK);
             locationMobile.setUri(source.getMobilePlayerUrl());
             locations.add(locationMobile);
-        }
-
-        //has to be the last one, as the locations above copy this object.
-        if (source.getOne() != null) {
-            location1.setTransportType(TransportType.STREAM);
-            location1.setTransportSubType(TransportSubType.RTSP);
-            location1.setUri(source.getOne());
-            locations.add(location1);
         }
 
         return locations;

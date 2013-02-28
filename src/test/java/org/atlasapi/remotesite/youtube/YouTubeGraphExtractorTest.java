@@ -15,19 +15,14 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.youtube;
 
-import static org.atlasapi.remotesite.Matchers.encodingMatcher;
-import static org.atlasapi.remotesite.Matchers.locationMatcher;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 
 import java.util.List;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
@@ -36,13 +31,11 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
-import org.hamcrest.Matcher;
 import org.joda.time.Duration;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.metabroadcast.common.media.MimeType;
 
 /**
  * Unit test for {@link YouTubeGraphExtractor}
@@ -102,8 +95,8 @@ public class YouTubeGraphExtractorTest extends TestCase {
 		// tags were removed fromYouTube.
 		//assertThat(item.getTags(), is((Set<String>) Sets.<String>newHashSet("http://ref.atlasapi.org/tags/funny")));
 		assertThat(item.getPublisher(), is(Publisher.YOUTUBE));
-		assertThat(item.getThumbnail(),  is(THUMBNAIL_URI));
-		assertThat(item.getImage(), is(IMAGE_URI));
+//		assertThat(item.getThumbnail(),  is(THUMBNAIL_URI));
+//		assertThat(item.getImage(), is(IMAGE_URI));
 		assertThat(item.getCurie(),  is("yt:otA7tjinFX4"));
 	}
 	

@@ -25,9 +25,9 @@ import com.google.common.collect.Lists;
 public class YoutubeUriCanonicaliser implements Canonicaliser {
 
 	private static final List<Pattern> alternateUris = Lists.newArrayList(
-	        Pattern.compile("https?://.*\\.youtube.com.*v=([^\\./&=]+).*"),
-	        Pattern.compile("https?://.*\\.youtube.com/v/([^\\./&=]+).*"),
-        Pattern.compile("tag:youtube.com,\\d+:\\w+:([^\\./&=]+)")
+        Pattern.compile("https?://.*\\.youtube.com.*v=([^\\./&=]+).*"),
+        Pattern.compile("https?://.*\\.youtube.com/v/([^\\./&=]+).*"),
+		Pattern.compile("tag:youtube.com,\\d+:\\w+:([^\\./&=]+)")
     );
 
 	public String canonicalUriFor(String videoId) {
