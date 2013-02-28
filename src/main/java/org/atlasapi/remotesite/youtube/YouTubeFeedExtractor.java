@@ -21,8 +21,11 @@ public class YouTubeFeedExtractor implements
         this(new YouTubeGraphExtractor());
     }
 
-    public YouTubeFeedExtractor(
-            ContentExtractor<YouTubeSource, Item> itemExtractor) {
+    public YouTubeFeedExtractor(ContentExtractor<YouTubeSource, Item> itemExtractor) {
+        this.itemExtractor = itemExtractor;
+    }
+
+    public YouTubeFeedExtractor(YouTubeGraphExtractor itemExtractor) {
         this.itemExtractor = itemExtractor;
     }
 

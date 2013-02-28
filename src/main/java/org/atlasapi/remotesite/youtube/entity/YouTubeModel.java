@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.youtube.entity;
 
-public class YouTubeModel {
 
+public class YouTubeModel {
+    
 }

@@ -63,7 +63,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         ArrayList<Alias> aliases = new ArrayList<Alias>();
         ArrayList<String> aliasesUrl = new ArrayList<String>();
 
-        for (YouTubeSource.Video video : source.getVideos()) {
+        for (Video video : source.getVideos()) {
             Encoding encoding = extractEncodingPropertyValuesFrom(video);
             if (encoding == null) {
                 continue;
@@ -211,6 +211,14 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
             locationMobile.setTransportType(TransportType.LINK);
             locationMobile.setUri(source.getMobilePlayerUrl());
             locations.add(locationMobile);
+        }
+
+        //has to be the last one, as the locations above copy this object.
+        if (source.getOne() != null) {
+            location1.setTransportType(TransportType.STREAM);
+            location1.setTransportSubType(TransportSubType.RTSP);
+            location1.setUri(source.getOne());
+            locations.add(location1);
         }
 
         return locations;

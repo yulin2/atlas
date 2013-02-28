@@ -162,6 +162,7 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
         Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(uri1, uri2), MatchesNothing.asQuery().copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.disable(Publisher.BBC)));
         
         assertEquals(0, result.size());
+
         context.assertIsSatisfied();
     }
     
