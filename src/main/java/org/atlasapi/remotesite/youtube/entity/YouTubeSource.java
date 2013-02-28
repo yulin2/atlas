@@ -132,8 +132,7 @@ public class YouTubeSource extends BaseSource {
         return Optional.<String>absent();
     }
 
-	public static class Video {
-
+    public static class Video {
 		private final String url;
 		private final Duration duration;
 		private final String type;
@@ -217,5 +216,3 @@ public class YouTubeSource extends BaseSource {
 	    return Optional.<String>absent();
 	}
 }
-
-

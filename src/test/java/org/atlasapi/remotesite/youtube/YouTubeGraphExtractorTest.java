@@ -98,11 +98,9 @@ public class YouTubeGraphExtractorTest extends TestCase {
 		assertThat(item.getDescription(), is("Description of video"));
 		assertThat(item.getGenres(), is((Set<String>) Sets.<String>newHashSet("http://www.youtube.com/news")));
 		assertThat(item.getPublisher(), is(Publisher.YOUTUBE));
-		assertThat(item.getThumbnail(),  is(THUMBNAIL_URI));
-		assertThat(item.getImage(), is(IMAGE_URI));
 		assertThat(item.getCurie(),  is("yt:otA7tjinFX4"));
 	}
-	
+
 	class NoVideosYouTubeSource extends YouTubeSource {
 
 		public NoVideosYouTubeSource(YouTubeVideoEntry entry, String episodeUri) {
@@ -118,6 +116,7 @@ public class YouTubeGraphExtractorTest extends TestCase {
 		public Set<String> getCategories() {
 			return Sets.newHashSet();
 		}
+
 		@Override
 		public String getDescription() {
 			return "Description of video";
