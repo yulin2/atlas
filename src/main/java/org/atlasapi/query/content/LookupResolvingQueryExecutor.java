@@ -18,8 +18,6 @@ import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -32,7 +30,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
-import com.metabroadcast.common.properties.Configurer;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
