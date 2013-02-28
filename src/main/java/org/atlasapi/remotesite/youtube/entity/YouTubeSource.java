@@ -133,7 +133,6 @@ public class YouTubeSource extends BaseSource {
     }
 
     public static class Video {
-
 		private final String url;
 		private final Duration duration;
 		private final String type;
