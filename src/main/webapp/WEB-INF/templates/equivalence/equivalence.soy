@@ -142,3 +142,72 @@
 </td></tr></table>
 </body>
 {/template}
+
+/**
+ * @param uri
+ */
+{template .graph}
+<!DOCTYPE HTML>
+<html id="equiv">
+<head>
+  <title>{$uri}</title>
+  <link rel="stylesheet" type="text/css" href="/static/css/equivalence.css" />
+  <style>{literal}
+    html, body {
+      margin: 0px; 
+      padding: 0px;
+      width: 100%; 
+      height: 100%;    
+    }
+
+    .fullscreen {
+      width: 100%; 
+      height: 100%;
+      display: block;
+    }
+    
+    .node {
+      color: black;
+      font-family: Menlo;
+      font-size: 10px;
+      text-anchor: start;
+    }
+    
+    .node rect {
+      fill: #fff;
+    }
+    
+    .direct {
+      stroke-opacity: .6;
+      stroke: #333;
+    }
+
+    .explicit {
+      stroke-opacity: .6;
+      stroke: #333;
+      stroke-dasharray: 5,5,2,5
+    }
+
+    .indirect {
+      stroke-opacity: 0;
+      stroke: #00f;
+    }
+    
+    .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 1.5px;
+    }
+    
+    {/literal}
+  </style>
+  <script src="http://d3js.org/d3.v3.js"></script>
+  <script type="text/javascript">
+    var uri = "{$uri}";
+  </script>
+</head>
+<body>
+  <script src="/static/js/equiv-graph.js"></script>
+</body>
+</html>
+{/template}
