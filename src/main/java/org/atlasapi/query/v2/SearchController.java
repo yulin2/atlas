@@ -42,6 +42,7 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
     private static final String CATCHUP_WEIGHTING_PARAM = "catchupWeighting";
     private static final String TYPE_PARAM = "type";
     private static final String TOP_LEVEL_PARAM = "topLevelOnly";
+    private static final String CURRENT_BROADCASTS_ONLY = "currentBroadcastsOnly";
     private static final String ANNOTATIONS_PARAM = "annotations";
 
     private static final float DEFAULT_TITLE_WEIGHTING = 1.0f;
@@ -78,6 +79,7 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
             @RequestParam(value = CATCHUP_WEIGHTING_PARAM, required = false) String catchupWeightingParam,
             @RequestParam(value = TYPE_PARAM, required = false) String type, 
             @RequestParam(value = TOP_LEVEL_PARAM, required = false, defaultValue = "true") String topLevel,
+            @RequestParam(value = CURRENT_BROADCASTS_ONLY, required = false, defaultValue = "false") String currentBroadcastsOnly,
             HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             paramChecker.checkParameters(request);
@@ -107,6 +109,7 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
                 .withCatchupWeighting(catchupWeighting)
                 .withType(type)
                 .isTopLevelOnly(!Strings.isNullOrEmpty(topLevel) ? Boolean.valueOf(topLevel) : null)
+                .withCurrentBroadcastsOnly(!Strings.isNullOrEmpty(currentBroadcastsOnly) ? Boolean.valueOf(currentBroadcastsOnly) : null)
                 .build(), appConfig);
 
             modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)), appConfig);
