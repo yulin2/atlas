@@ -63,7 +63,8 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
         JsonTranslator.CALLBACK,
         ANNOTATIONS_PARAM,
         TYPE_PARAM,
-        TOP_LEVEL_PARAM
+        TOP_LEVEL_PARAM,
+        CURRENT_BROADCASTS_ONLY
     ));
     public SearchController(SearchResolver searcher, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content,?extends Identified>> outputter) {
         super(configFetcher, log, outputter);
