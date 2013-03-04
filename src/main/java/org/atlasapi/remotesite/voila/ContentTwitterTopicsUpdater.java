@@ -1,11 +1,12 @@
 package org.atlasapi.remotesite.voila;
 
+import static org.atlasapi.feeds.UpdateProgress.FAILURE;
+import static org.atlasapi.feeds.UpdateProgress.SUCCESS;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
-import static org.atlasapi.remotesite.redux.UpdateProgress.FAILURE;
-import static org.atlasapi.remotesite.redux.UpdateProgress.SUCCESS;
 
 import java.util.List;
 
+import org.atlasapi.feeds.UpdateProgress;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
@@ -20,7 +21,6 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.atlasapi.remotesite.voila.ContentWords.ContentWordsList;
 import org.atlasapi.remotesite.voila.ContentWords.WordWeighting;
 

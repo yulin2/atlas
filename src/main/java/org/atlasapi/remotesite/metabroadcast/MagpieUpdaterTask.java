@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.atlasapi.remotesite.redux.UpdateProgress;
+import org.atlasapi.feeds.UpdateProgress;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
