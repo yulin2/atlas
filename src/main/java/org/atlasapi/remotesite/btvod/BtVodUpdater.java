@@ -3,7 +3,7 @@ package org.atlasapi.remotesite.btvod;
 import nu.xom.Document;
 import nu.xom.Element;
 
-import org.atlasapi.remotesite.redux.UpdateProgress;
+import org.atlasapi.feeds.UpdateProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
