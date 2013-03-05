@@ -9,8 +9,8 @@ import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
 
+import org.atlasapi.feeds.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;

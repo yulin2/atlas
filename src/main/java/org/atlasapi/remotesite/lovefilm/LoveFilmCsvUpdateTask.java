@@ -2,8 +2,8 @@ package org.atlasapi.remotesite.lovefilm;
 
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SKU;
 
+import org.atlasapi.feeds.UpdateProgress;
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
-import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

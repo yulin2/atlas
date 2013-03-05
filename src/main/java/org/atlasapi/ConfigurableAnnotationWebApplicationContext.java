@@ -7,6 +7,7 @@ import org.atlasapi.feeds.AtlasFeedsModule;
 import org.atlasapi.feeds.interlinking.delta.InterlinkingDeltaModule;
 import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
 import org.atlasapi.feeds.xmltv.XmlTvModule;
+import org.atlasapi.feeds.youview.YouViewUploadModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.messaging.WorkersModule;
@@ -65,6 +66,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 WorkersModule.class,
                 ManualScheduleRebuildModule.class,
                 InterlinkingDeltaModule.class,
+                YouViewUploadModule.class,
                 EquivTaskModule.class
             );
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());

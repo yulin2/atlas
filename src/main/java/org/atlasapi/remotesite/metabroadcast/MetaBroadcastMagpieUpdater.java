@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.metabroadcast;
 import java.util.List;
 import java.util.Set;
 
+import org.atlasapi.feeds.UpdateProgress;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic.Type;
@@ -13,7 +14,6 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
-import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
