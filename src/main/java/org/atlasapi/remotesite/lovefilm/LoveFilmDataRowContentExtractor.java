@@ -249,6 +249,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setPublisher(LOVEFILM);
         content.setCanonicalUri(uri(sku, resourceType));
         content.setCurie(curie(sku, curieType));
+        content.setLastUpdated(new DateTime());
         return content;
     }
     
