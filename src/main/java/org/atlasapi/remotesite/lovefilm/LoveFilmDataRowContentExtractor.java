@@ -5,6 +5,8 @@ import static org.atlasapi.media.entity.Policy.RevenueContract.PAY_TO_RENT;
 import static org.atlasapi.media.entity.Policy.RevenueContract.SUBSCRIPTION;
 import static org.atlasapi.media.entity.Publisher.LOVEFILM;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ACCESS_METHOD;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.AVAILABILITY_END_DATE;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.AVAILABILITY_START_DATE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.BBFC_RATING;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.CONTRIBUTOR;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.DRM_RIGHTS;
@@ -21,6 +23,7 @@ import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.RELEASE_WINDOW_
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SERIES_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SHOW_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SKU;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SYNOPSIS;
 
 import java.util.Currency;
 import java.util.List;
@@ -53,6 +56,7 @@ import org.atlasapi.remotesite.util.EnglishLanguageCodeMap;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -88,6 +92,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
 
     private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
     private final DateTimeFormatter dateMonthYearFormat = DateTimeFormat.forPattern("dd/MM/YYYY").withZoneUTC();
+    private final DateTimeFormatter yearMonthDayFormat = ISODateTimeFormat.date().withZoneUTC();
     
     private static final EnglishLanguageCodeMap languageCodeMap = new EnglishLanguageCodeMap();
     private static final OptionalMap<String, Certificate> certificateMap = ImmutableOptionalMap.fromMap(
@@ -249,6 +254,8 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setCertificates(certificatesFrom(BBFC_RATING.valueFrom(source)));
         content.setMediaType(MediaType.VIDEO);
         content.setSpecialization(Specialization.TV);
+        content.setDescription(SYNOPSIS.valueFrom(source));
+        
         return content;
     }
     
@@ -315,11 +322,11 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private Policy policyFrom(LoveFilmDataRow source) {
         Policy policy = new Policy();
         
-        String launchDate = PRODUCT_SITE_LAUNCH_DATE.valueFrom(source);
-        policy.setAvailabilityStart(dateTimeFrom(launchDate));
+        String availabilityStartDate = AVAILABILITY_START_DATE.valueFrom(source);
+        policy.setAvailabilityStart(dateTimeFromAvailability(availabilityStartDate));
         
-        String windowEndDate = RELEASE_WINDOW_END_DATE.valueFrom(source);
-        policy.setAvailabilityEnd(dateTimeFrom(windowEndDate));
+        String availabilityEndDate = AVAILABILITY_END_DATE.valueFrom(source);
+        policy.setAvailabilityEnd(dateTimeFromAvailability(availabilityEndDate));
         
         String drmRights = DRM_RIGHTS.valueFrom(source);
         RevenueContract revenueContract = revenueContractMap.get(drmRights);
@@ -331,6 +338,13 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
         
         return policy;
+    }
+
+    private DateTime dateTimeFromAvailability(String date) {
+        if (Strings.isNullOrEmpty(date)) {
+            return null;
+        }
+        return yearMonthDayFormat.parseDateTime(date);
     }
 
     private DateTime dateTimeFrom(String date) {

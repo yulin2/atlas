@@ -7,11 +7,15 @@ import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 public enum LoveFilmCsvColumn {
     
     ACCESS_METHOD("access_method"),
+    AVAILABILITY_START_DATE("availability_start_date"),
+    AVAILABILITY_END_DATE("availability_end_date"),
     BBFC_RATING("bbfc_rating"),
     CONTRIBUTOR("contributor"),
     CURRENCY("currency"),
     DEVELOPER("developer"),
+    DIGITAL_RELEASE_IDS("digital_release_ids"),
     DIGITAL_RELEASES_IDS("digital_releases_ids"),
+    DIGITAL_RELEASES_TO_ORDERS("digital_releases_to_orders"),
     DM_RATING("dm_rating"),
     DRM_RIGHTS("drm_rights"),
     ENTITY("entity"),
@@ -36,7 +40,6 @@ public enum LoveFilmCsvColumn {
     ORIGINAL_PUBLICATION_DATE("Original_publication_date"),
     PEGI_RATING("pegi_rating"),
     PLATFORM("platform"),
-    PRICE("price"),
     PRODUCT_SITE_LAUNCH_DATE("Product_site_launch_date"),
     RELEASE_WINDOW_END_DATE("release_window_end_date"),
     RUN_TIME_SEC("run_time_sec"),
@@ -44,8 +47,11 @@ public enum LoveFilmCsvColumn {
     SHOW_ID("show_id"),
     SKU("sku"),
     SM_RATING("sm_rating"),
+    SVOD_PRICE("svod_price"),
+    SYNOPSIS("synopsis"),
     STUDIO("studio"),
-    TITLE_MASTER_ID("title_master_id");
+    TITLE_MASTER_ID("title_master_id"),
+    TVOD_PRICE("tvod_price");
 
     private String name;
 
