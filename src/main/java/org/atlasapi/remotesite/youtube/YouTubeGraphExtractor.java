@@ -72,12 +72,6 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
             encoding.setAvailableAt(locations);
 
             encodings.add(encoding);
-
-            Alias alias = new Alias("zz:youtube:id",
-                    YoutubeUriCanonicaliser.videoIdFrom(video.getUrl()));
-            aliases.add(alias);
-            aliasesUrl.add("zz:youtube:id=" + alias.getValue());
-            
         }
         encodings.add(encodingForWebPage(source));
 
@@ -114,7 +108,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
     private Encoding encodingForWebPage(YouTubeSource source) {
         Location location = new Location();
         location.setTransportType(TransportType.LINK);
-        location.setUri(source.getUri());
+        location.setUri(YoutubeUriCanonicaliser.standardURL(YoutubeUriCanonicaliser.videoIdFrom(source.getURL())));
 
         Encoding encoding = new Encoding();
         encoding.addAvailableAt(location);
@@ -150,26 +144,6 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         Encoding encoding = new Encoding();
         encoding.setDataContainerFormat(containerFormat);
 
-        switch (video.getYoutubeFormat()) {
-        case 1:
-        case 6: {
-            encoding.setVideoHorizontalSize(176);
-            encoding.setVideoVerticalSize(144);
-            if (video.getYoutubeFormat() == 1) {
-                encoding.setAudioCoding(MimeType.AUDIO_AMR);
-            } else {
-                encoding.setAudioCoding(MimeType.AUDIO_MP4);
-            }
-            encoding.setAudioChannels(1);
-            encoding.setVideoCoding(MimeType.VIDEO_H263);
-            encoding.setHasDOG(false);
-            break;
-        }
-        case 5: {
-            encoding.setHasDOG(true);
-            break;
-        }
-        }
         return encoding;
     }
 
@@ -179,35 +153,17 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         Policy policy = new Policy();
         policy.setAvailabilityStart(source.getUploaded());
 
-        Location location1 = new Location();
-
-        location1.setPolicy(policy);
-
-        if (source.getFive() != null) {
-            Location location5 = location1.copy();
-            location5.setTransportType(TransportType.EMBED);
-            location5.setEmbedCode(embedCodeFor(source.getURL()));
-            location5.setUri(source.getFive());
-            location5.setEmbedCode(embedCodeFor(source.getFive()));
-            locations.add(location5);
-        }
-        if (source.getSix() != null) {
-            Location location6 = location1.copy();
-            location6.setTransportType(TransportType.STREAM);
-            location6.setTransportSubType(TransportSubType.RTSP);
-            location6.setUri(source.getSix());
-            locations.add(location6);
-        }
-
         if (source.getDefaultPlayerUrl() != null && !source.getDefaultPlayerUrl().equals("")) {
-            Location locationDefault = location1.copy();
+            Location locationDefault = new Location();
+            locationDefault.setPolicy(policy);
             locationDefault.setTransportType(TransportType.LINK);
             locationDefault.setUri(source.getDefaultPlayerUrl());
             locations.add(locationDefault);
         }
 
         if (source.getMobilePlayerUrl() != null && !source.getMobilePlayerUrl().equals("")) {
-            Location locationMobile = location1.copy();
+            Location locationMobile = new Location();
+            locationMobile.setPolicy(policy);
             locationMobile.setTransportType(TransportType.LINK);
             locationMobile.setUri(source.getMobilePlayerUrl());
             locations.add(locationMobile);
