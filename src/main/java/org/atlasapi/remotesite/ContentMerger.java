@@ -43,6 +43,7 @@ public class ContentMerger {
         current.setCertificates(extracted.getCertificates());
         current.setMediaType(extracted.getMediaType());
         current.setSpecialization(extracted.getSpecialization());
+        current.setLastUpdated(extracted.getLastUpdated());
         return current;
     }   
     
