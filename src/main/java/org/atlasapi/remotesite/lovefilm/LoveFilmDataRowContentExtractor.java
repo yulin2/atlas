@@ -18,8 +18,7 @@ import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ITEM_NAME;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ITEM_TYPE_KEYWORD;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.LANGUAGE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ORIGINAL_PUBLICATION_DATE;
-import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.PRODUCT_SITE_LAUNCH_DATE;
-import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.RELEASE_WINDOW_END_DATE;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.RUN_TIME_SEC;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SERIES_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SHOW_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SKU;
@@ -47,14 +46,15 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.atlasapi.remotesite.util.EnglishLanguageCodeMap;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -330,6 +330,10 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     
     private Set<Version> versionAndLocationFrom(LoveFilmDataRow source) {
         Version version = new Version();
+        String duration = RUN_TIME_SEC.valueFrom(source);
+        if (!duration.equals("")) {
+            version.setDuration(Duration.standardSeconds(Long.parseLong(duration)));
+        }
         Encoding encoding = new Encoding();
         
         Location location = new Location();
@@ -368,12 +372,5 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             return null;
         }
         return yearMonthDayFormat.parseDateTime(date);
-    }
-
-    private DateTime dateTimeFrom(String date) {
-        if (Strings.isNullOrEmpty(date)) {
-            return null;
-        }
-        return dateMonthYearFormat.parseDateTime(date);
     }
 }
