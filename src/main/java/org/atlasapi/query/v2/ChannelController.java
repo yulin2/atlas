@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -47,15 +48,18 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 public class ChannelController extends BaseController<Iterable<Channel>> {
     
     private static final ImmutableSet<Annotation> validAnnotations = ImmutableSet.<Annotation>builder()
-            .add(Annotation.CHANNEL_GROUPS)
-            .add(Annotation.HISTORY)
-            .add(Annotation.PARENT)
-            .add(Annotation.VARIATIONS)
-            .build();
+        .add(Annotation.CHANNEL_GROUPS)
+        .add(Annotation.HISTORY)
+        .add(Annotation.PARENT)
+        .add(Annotation.VARIATIONS)
+        .build();
 
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
         .withMessage("Channel not found")
         .withStatusCode(HttpStatusCode.NOT_FOUND);
+    
+    private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException())
+        .withStatusCode(HttpStatusCode.FORBIDDEN);
     
     private static final AtlasErrorSummary BAD_ANNOTATION = new AtlasErrorSummary(new NullPointerException())
         .withMessage("Invalid annotation specified. Valid annotations are: " + Joiner.on(',').join(Iterables.transform(validAnnotations, Annotation.TO_KEY)))
@@ -87,19 +91,25 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
             @RequestParam(value = "available_from", required = false) String availableFromKey,
             @RequestParam(value = "order_by", required = false) String orderBy) throws IOException {
         try {
-            ApplicationConfiguration appConfig = appConfig(request); 
+            final ApplicationConfiguration appConfig = appConfig(request); 
             
             Selection selection = SELECTION_BUILDER.build(request);
 
-            List<Channel> channels;
+            List<Channel> channels = filterer.filter(channelResolver.all(), constructFilter(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey));
+            
             Optional<Ordering<Channel>> ordering = ordering(orderBy);
             if (ordering.isPresent()) {
-                channels = ordering.get().immutableSortedCopy(channelResolver.all());
+                channels = ordering.get().immutableSortedCopy(channels);
             }
-            else {
-                channels = ImmutableList.copyOf(channelResolver.all());
-            }
-            channels = selection.applyTo(filterer.filter(channels, constructFilter(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey)));
+            
+            channels = selection.applyTo(Iterables.filter(
+                channels, 
+                new Predicate<Channel>() {
+                    @Override
+                    public boolean apply(Channel input) {
+                        return appConfig.isEnabled(input.source());
+                    }
+                }));
             
             Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
             if (annotations.isPresent() && !validAnnotations(annotations.get())) {
@@ -121,6 +131,9 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
                 errorViewFor(request, response, NOT_FOUND);
             } else {
                 ApplicationConfiguration appConfig = appConfig(request);
+                if (!appConfig.isEnabled(possibleChannel.requireValue().source())) {
+                    outputter.writeError(request, response, FORBIDDEN.withMessage("Channel " + id + " not available"));
+                }
 
                 Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
                 if (annotations.isPresent() && !validAnnotations(annotations.get())) {
