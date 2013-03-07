@@ -16,21 +16,19 @@ permissions and limitations under the License. */
 package org.atlasapi.remotesite.youtube.entity;
 
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.remotesite.BaseSource;
-import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
