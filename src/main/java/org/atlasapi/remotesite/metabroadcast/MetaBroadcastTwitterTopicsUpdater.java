@@ -3,7 +3,7 @@ package org.atlasapi.remotesite.metabroadcast;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.feeds.UpdateProgress;
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;

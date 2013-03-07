@@ -11,8 +11,8 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.atlasapi.feeds.Reducible;
-import org.atlasapi.feeds.UpdateProgress;
+import org.atlasapi.feeds.utils.Reducible;
+import org.atlasapi.feeds.utils.UpdateProgress;
 
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.ScheduledTask;

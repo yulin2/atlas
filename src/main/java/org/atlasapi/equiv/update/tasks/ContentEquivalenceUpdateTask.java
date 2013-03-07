@@ -1,7 +1,7 @@
 package org.atlasapi.equiv.update.tasks;
 
-import static org.atlasapi.feeds.UpdateProgress.FAILURE;
-import static org.atlasapi.feeds.UpdateProgress.SUCCESS;
+import static org.atlasapi.feeds.utils.UpdateProgress.FAILURE;
+import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
 import static org.atlasapi.persistence.content.ContentCategory.CONTAINER;
 import static org.atlasapi.persistence.content.ContentCategory.TOP_LEVEL_ITEM;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.equiv.update.RootEquivalenceUpdater;
-import org.atlasapi.feeds.UpdateProgress;
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;

@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.lovefilm;
 
+import static org.atlasapi.feeds.utils.lovefilm.LoveFilmGenreConverter.TO_ATLAS_GENRE;
 import static org.atlasapi.media.entity.Policy.RevenueContract.FREE_TO_VIEW;
 import static org.atlasapi.media.entity.Policy.RevenueContract.PAY_TO_RENT;
 import static org.atlasapi.media.entity.Policy.RevenueContract.SUBSCRIPTION;
@@ -33,6 +34,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import org.atlasapi.feeds.utils.lovefilm.LoveFilmGenreConverter;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Certificate;
@@ -79,7 +81,6 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private static final String LOVEFILM_PEOPLE_PREFIX = "http://lovefilm.com/people/";
     private static final String LOVEFILM_CURIE_PATTERN = "lf:%s-%s";
     private static final String LOVEFILM_URI_PATTERN = "http://lovefilm.com/%s/%s";
-    private static final String LOVEFILM_GENRES_PREFIX = "http://lovefilm.com/genres/";
 
     private static final String EPISODE_RESOURCE_TYPE = "episodes";
     private static final String SEASON_RESOURCE_TYPE = "seasons";
@@ -291,13 +292,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     
     private Iterable<String> genresFrom(String genreCsv) {
         Iterable<String> genres = COMMA_SPLITTER.split(genreCsv);
-        return Iterables.transform(genres, new Function<String, String>() {
-            @Override
-            public String apply(@Nullable String input) {
-                input = input.toLowerCase();
-                return LOVEFILM_GENRES_PREFIX + input.replace('/', '-').replace(" ", "");
-            }
-        });
+        return Iterables.transform(genres, TO_ATLAS_GENRE);
     }
 
 

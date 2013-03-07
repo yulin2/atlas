@@ -1,11 +1,11 @@
 package org.atlasapi.remotesite.metabroadcast;
 
-import static org.atlasapi.feeds.UpdateProgress.FAILURE;
-import static org.atlasapi.feeds.UpdateProgress.SUCCESS;
+import static org.atlasapi.feeds.utils.UpdateProgress.FAILURE;
+import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
 
 import java.util.List;
 
-import org.atlasapi.feeds.UpdateProgress;
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Container;
