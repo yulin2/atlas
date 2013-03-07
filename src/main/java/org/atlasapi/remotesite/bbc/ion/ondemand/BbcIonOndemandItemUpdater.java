@@ -45,7 +45,7 @@ public class BbcIonOndemandItemUpdater {
         Maybe<Encoding> encoding = encoding(version.getManifestedAs(), BbcFeeds.slashProgrammesUriForPid(change.getId()));
         if (encoding.hasValue()) {
             List<Location> locations = locations(encoding.requireValue().getAvailableAt(),
-                    BbcProgrammeGraphExtractor.iplayerPageFrom(BbcFeeds.slashProgrammesUriForPid(change.getEpisodeId())));
+                    "http://www.bbc.co.uk/iplayer/episode/" + change.getEpisodeId());
             if (!locations.isEmpty()) {
                 for (Location location : locations) {
                     if (!revoked) {

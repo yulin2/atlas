@@ -53,12 +53,11 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
 
     private final ContentLock lock;
 
-    
     public DefaultBbcIonBroadcastHandler(ContentStore store, AdapterLog log, ContentLock lock) {
         this.store = store;
         this.log = log;
         this.lock = lock;
-        this.itemExtractor = new BbcIonEpisodeItemContentExtractor(log);
+        this.itemExtractor = new BbcIonEpisodeItemContentExtractor(store);
         this.broadcastExtractor = new BbcIonBroadcastExtractor();
     }
 
