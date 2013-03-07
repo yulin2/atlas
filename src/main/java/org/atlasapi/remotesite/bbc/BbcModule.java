@@ -188,17 +188,22 @@ public class BbcModule {
     }
     
     BbcIonContainerAdapter ionContainerAdapter() {
-        return new BbcIonContainerAdapter(log, ionClient(HttpClients.webserviceClient(),IonContainerFeed.class));
+        return new BbcIonContainerAdapter(ionClient(HttpClients.webserviceClient(),IonContainerFeed.class), contentStore);
     }
     
     private BbcIonEpisodeItemAdapter<Item> bbcIonEpisodeDetailItemAdapter() {
         return new BbcIonEpisodeItemAdapter<Item>(
                 ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class), 
-                new BbcIonEpisodeDetailItemContentExtractor(log, ionClient(HttpClients.webserviceClient(), IonContainerFeed.class)));
+                new BbcIonEpisodeDetailItemContentExtractor(ionClient(HttpClients.webserviceClient(), IonContainerFeed.class), contentStore));
     }
 
     @Bean Runnable bbcAtoZUpdater() {
-		return new BbcSlashProgrammesAtoZUpdater(new BbcSlashProgrammesAtoZRdfClient(), Executors.newFixedThreadPool(5), bbcProgrammeAdapter(), new MongoProgressStore(mongo));
+		return new BbcSlashProgrammesAtoZUpdater(
+		        new BbcSlashProgrammesAtoZRdfClient(), 
+		        Executors.newFixedThreadPool(5), 
+		        bbcProgrammeAdapter(), 
+		        new MongoProgressStore(mongo)
+	        );
 	}
     
 	@Bean BbcSlashProgrammesController bbcFeedsController() {
@@ -206,22 +211,25 @@ public class BbcModule {
 	}
 	
 	SiteSpecificAdapter<Content> bbcProgrammeAdapter() {
-	    BbcIonEpisodeItemAdapter<Item> detailAdapter = new BbcIonEpisodeItemAdapter<Item>(
-            ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class), 
-            new BbcIonEpisodeDetailItemContentExtractor(log, 
-                ionClient(HttpClients.webserviceClient(), IonContainerFeed.class), 
-                ionClient(HttpClients.webserviceClient(), IonVersionListFeed.class)
-            )
+	    HttpBackedBbcIonClient<IonContainerFeed> ionContainerClient = ionClient(HttpClients.webserviceClient(), IonContainerFeed.class);
+        HttpBackedBbcIonClient<IonEpisodeDetailFeed> episodeDetailClient = ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class);
+        HttpBackedBbcIonClient<IonVersionListFeed> versionListClient = ionClient(HttpClients.webserviceClient(), IonVersionListFeed.class);
+        
+        BbcIonEpisodeItemAdapter<Item> detailAdapter = new BbcIonEpisodeItemAdapter<Item>(
+            episodeDetailClient, 
+            new BbcIonEpisodeDetailItemContentExtractor(ionContainerClient, versionListClient, contentStore)
         );
+        
 	    BbcExtendedDataContentAdapter extendedDataAdapter = extendedDataAdapter();
 	    BbcIonSegmentAdapter segmentAdapter = segmentAdapter();
 	    BbcIonContainerAdapter containerAdapter = ionContainerAdapter();
 	    BbcIonEpisodeItemAdapter<Clip> clipAdapter = new BbcIonEpisodeItemAdapter<Clip>(
-            ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class), 
-            new BbcIonClipExtractor(log));
+            episodeDetailClient, new BbcIonClipExtractor(contentStore));
+	    
 	    RemoteSiteClient<SlashProgrammesRdf> rdfClient = BbcSlashProgrammesRdfClient.slashProgrammesClient(
 	        new RequestLimitingSimpleHttpClient(HttpClients.webserviceClient(), 3), SlashProgrammesRdf.class
         );
+	    
         return new BbcIonProgrammeAdapter(contentStore, detailAdapter, extendedDataAdapter, segmentAdapter, 
 	        rdfClient, containerAdapter, clipAdapter, Executors.newFixedThreadPool(5));
 	}

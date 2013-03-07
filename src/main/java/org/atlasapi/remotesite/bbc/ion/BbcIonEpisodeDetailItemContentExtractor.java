@@ -5,18 +5,17 @@ import static org.atlasapi.media.entity.Publisher.BBC;
 import java.util.List;
 import java.util.Set;
 
+import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
-import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
@@ -30,6 +29,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.SystemClock;
 
@@ -42,14 +42,14 @@ public class BbcIonEpisodeDetailItemContentExtractor extends BaseBbcIonEpisodeIt
     private final BbcIonBroadcastExtractor broadcastExtractor;
     private RemoteSiteClient<IonVersionListFeed> versionListClient; 
     
-    public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient) {
-        this(log, containerClient, null);
+    public BbcIonEpisodeDetailItemContentExtractor(RemoteSiteClient<IonContainerFeed> containerClient, ContentResolver contentResolver) {
+        this(containerClient, null, contentResolver);
     }
     
-    public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient, RemoteSiteClient<IonVersionListFeed> versionListClient) {
-        super(log, containerClient);
+    public BbcIonEpisodeDetailItemContentExtractor(RemoteSiteClient<IonContainerFeed> containerClient, RemoteSiteClient<IonVersionListFeed> versionListClient, ContentResolver contentResolver) {
+        super(containerClient, contentResolver);
         this.versionListClient = versionListClient;
-        this.clipExtractor = new BbcIonClipExtractor(log);
+        this.clipExtractor = new BbcIonClipExtractor(contentResolver);
         this.broadcastExtractor = new BbcIonBroadcastExtractor();
     }
 
@@ -94,7 +94,11 @@ public class BbcIonEpisodeDetailItemContentExtractor extends BaseBbcIonEpisodeIt
     private Version versionFrom(IonVersion ionVersion, String pid) {
         Version version = new Version();
         version.setCanonicalUri(BbcFeeds.slashProgrammesUriForPid(ionVersion.getId()));
-        BbcProgrammeGraphExtractor.setDurations(version, ionVersion);
+        if (ionVersion.getDuration() != null) {
+            Duration duration = Duration.standardSeconds(ionVersion.getDuration());
+            version.setDuration(duration);
+            version.setPublishedDuration(Ints.saturatedCast(duration.getStandardSeconds()));
+        }
         version.setProvider(BBC);
         version.setRestriction(restricitonFrom(ionVersion));
         if (ionVersion.getDuration() != null) {

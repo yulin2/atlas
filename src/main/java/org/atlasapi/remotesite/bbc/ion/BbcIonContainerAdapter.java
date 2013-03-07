@@ -1,46 +1,52 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
+import static com.google.common.base.Preconditions.checkState;
 
 import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammesGenreMap;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 
 public class BbcIonContainerAdapter implements BbcContainerAdapter, SiteSpecificAdapter<Container> {
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final String CURIE_BASE = "bbc:";
     public static final String CONTAINER_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/container/container/%s/category_type/pips/format/json";
 
     private final BbcIonGenreMap genreMap = new BbcIonGenreMap(new BbcProgrammesGenreMap());
-    private final RemoteSiteClient<IonContainerFeed> containerFeedClient;
-    private final AdapterLog log;
     
-    public BbcIonContainerAdapter(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerFeedClient) {
-        this.log = log;
+    private final RemoteSiteClient<IonContainerFeed> containerFeedClient;
+    private final ContentResolver contentResolver;
+    
+    public BbcIonContainerAdapter(RemoteSiteClient<IonContainerFeed> containerFeedClient, ContentResolver contentResolver) {
         this.containerFeedClient = containerFeedClient;
+        this.contentResolver = contentResolver;
     }
     
     private Maybe<IonContainer> getIonContainer(String pid) {
         try {
             return Maybe.firstElementOrNothing(containerFeedClient.get(String.format(CONTAINER_DETAIL_PATTERN, pid)).getBlocklist());
         } catch (Exception e) {
-            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error fetching container info for " + pid));
+            log.error("Error fetching container info for {}", pid);
             return Maybe.nothing();
         }
     }
@@ -58,12 +64,14 @@ public class BbcIonContainerAdapter implements BbcContainerAdapter, SiteSpecific
 
     protected Maybe<Brand> extractBrand(String brandId, IonContainer ionContainer) {
         if(!ionContainer.getType().equals("brand")) {
-            log.record(errorEntry().withSource(getClass()).withDescription("Expecting brand for %s, got %s ", brandId, ionContainer.getType()));
+            log.error("Expecting brand for {}, got {}", brandId, ionContainer.getType());
             return Maybe.nothing();
         }
         
         String pid = ionContainer.getId();
-        Brand brand = new Brand(BbcFeeds.slashProgrammesUriForPid(pid), CURIE_BASE+pid, Publisher.BBC);
+        String programmesUri = BbcFeeds.slashProgrammesUriForPid(pid);
+        Brand brand = new Brand(programmesUri, CURIE_BASE+pid, Publisher.BBC);
+        brand.addAlias(programmesUri);
         brand.setGenres(genreMap.fromIon(ionContainer.getGenres()));
         setCommonFields(ionContainer, brand);
         BbcImageUrlCreator.addIplayerImagesTo(ionContainer.getId(), brand);
@@ -85,15 +93,19 @@ public class BbcIonContainerAdapter implements BbcContainerAdapter, SiteSpecific
 
     protected Maybe<Series> extractSeries(String seriesId, IonContainer ionContainer) {
         if(!ionContainer.getType().equals("series")) {
-            log.record(errorEntry().withSource(getClass()).withDescription("Expecting series for %s, got %s ", seriesId, ionContainer.getType()));
+            log.error("Expecting series for {}, got {}", seriesId, ionContainer.getType());
             return Maybe.nothing();
         }
         
         String pid = ionContainer.getId();
         Series series = new Series(BbcFeeds.slashProgrammesUriForPid(pid), CURIE_BASE+pid, Publisher.BBC);
+        series.addAlias(series.getCanonicalUri());
         
         if (!Strings.isNullOrEmpty(ionContainer.getParentId())) {
-            //TODO: series.setParentRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(ionContainer.getParentId())));
+            String containerUri = BbcFeeds.slashProgrammesUriForPid(ionContainer.getParentId());
+            Optional<Content> possibleContainer = contentResolver.resolveAliases(ImmutableList.of(containerUri), Publisher.BBC).get(containerUri);
+            checkState(possibleContainer.isPresent(), "No container %s for %s", ionContainer.getParentId(), pid);
+            series.setParent((Brand)possibleContainer.get());
         }
         
         setCommonFields(ionContainer, series);
@@ -121,14 +133,14 @@ public class BbcIonContainerAdapter implements BbcContainerAdapter, SiteSpecific
             if(maybeMediaType.hasValue()) {
                 dst.setMediaType(maybeMediaType.requireValue());
             } else {
-                log.record(warnEntry().withSource(getClass()).withDescription("No mediaType mapping for " + masterbrand));
+                log.warn("No mediaType mapping for {}", masterbrand);
             }
             
             Maybe<Specialization> maybeSpecialisation = BbcIonMediaTypeMapping.specialisationForService(masterbrand);
             if(maybeSpecialisation.hasValue()) {
                 dst.setSpecialization(maybeSpecialisation.requireValue());
             } else {
-                log.record(warnEntry().withSource(getClass()).withDescription("No specialisation mapping for " + masterbrand));
+                log.warn("No specialisation mapping for {}" ,masterbrand);
             }
         }
     }

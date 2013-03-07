@@ -3,12 +3,12 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.media.entity.Publisher.BBC;
 
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
@@ -19,8 +19,8 @@ import com.metabroadcast.common.intl.Countries;
 public class BbcIonClipExtractor extends BaseBbcIonEpisodeItemExtractor implements
         ContentExtractor<IonEpisode, Clip> {
 
-    public BbcIonClipExtractor(AdapterLog log) {
-        super(log);
+    public BbcIonClipExtractor(ContentResolver resolver) {
+        super(null, resolver);
     }
 
     @Override
