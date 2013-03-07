@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 
 import com.google.common.collect.Lists;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class YoutubeUriCanonicaliser implements Canonicaliser {
 
