@@ -67,7 +67,8 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
         TYPE_PARAM,
         TOP_LEVEL_PARAM,
         CURRENT_BROADCASTS_ONLY,
-        PRIORITY_CHANNEL_WEIGHTING
+        PRIORITY_CHANNEL_WEIGHTING,
+        CURRENT_BROADCASTS_ONLY
     ));
     public SearchController(SearchResolver searcher, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content,?extends Identified>> outputter) {
         super(configFetcher, log, outputter);

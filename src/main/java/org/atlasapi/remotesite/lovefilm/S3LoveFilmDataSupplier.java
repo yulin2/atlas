@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.lovefilm;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.atlasapi.remotesite.FetchException;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.ServiceException;
@@ -20,6 +21,7 @@ public class S3LoveFilmDataSupplier implements LoveFilmDataSupplier {
     private final Supplier<S3Service> serviceSupplier;
     private final String bucketName;
     private final String folder;
+    private static final String FILENAME = "metabroadcast2_catalogue_dump_gb.csv.bz2";
 
     public S3LoveFilmDataSupplier(Supplier<S3Service> serviceSupplier, String bucket, String folder) {
         this.serviceSupplier = serviceSupplier;
@@ -32,15 +34,25 @@ public class S3LoveFilmDataSupplier implements LoveFilmDataSupplier {
         try {
             S3Service service = serviceSupplier.get();
             S3Object[] objects = service.listObjects(bucketName, folder, NO_DELIMITER);
-            S3Object mostRecent = getMostRecent(objects);
-            if (mostRecent != null) {
-                InputSupplier<InputStream> in = inputStreamFor(service, mostRecent);
+            S3Object file = getFileforName(objects);
+            if (file != null) {
+                InputSupplier<InputStream> in = inputStreamFor(service, file);
                 return new LoveFilmData(CharStreams.newReaderSupplier(in, Charsets.UTF_8));
             }
             throw new FetchException(String.format("No data file in %s/%s", bucketName, folder));
         } catch (ServiceException e) {
             throw new FetchException(e.getMessage(), e);
         } 
+    }
+
+    private S3Object getFileforName(S3Object[] objects) {
+        for (S3Object obj : objects) {
+            String matchName = folder + '/' + FILENAME;
+            if (matchName.equals(obj.getName())) {
+                return obj;
+            }
+        }
+        return null;
     }
 
     private InputSupplier<InputStream> inputStreamFor(final S3Service service, S3Object object) {
@@ -50,22 +62,11 @@ public class S3LoveFilmDataSupplier implements LoveFilmDataSupplier {
             public InputStream getInput() throws IOException {
                 try {
                     S3Object fullObject = service.getObject(bucketName, key);
-                    return fullObject.getDataInputStream();
+                    return new BZip2CompressorInputStream(fullObject.getDataInputStream());
                 } catch (ServiceException e) {
                     throw new IOException(e.getMessage(), e);
                 }
             }
         };
     }
-
-    private S3Object getMostRecent(S3Object[] objects) {
-        S3Object result = null;
-        for (S3Object object : objects) {
-            if (result == null || object.getLastModifiedDate().after(result.getLastModifiedDate())) {
-                result = object;
-            }
-        }
-        return result;
-    }
-
 }

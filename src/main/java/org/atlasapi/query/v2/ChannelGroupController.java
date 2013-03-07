@@ -40,9 +40,9 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 public class ChannelGroupController extends BaseController<Iterable<ChannelGroup>> {
 
     private static final ImmutableSet<Annotation> validAnnotations = ImmutableSet.<Annotation>builder()
-            .add(Annotation.CHANNELS)
-            .add(Annotation.HISTORY)
-            .build();
+        .add(Annotation.CHANNELS)
+        .add(Annotation.HISTORY)
+        .build();
     
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
         .withErrorCode("Channel Group not found")
@@ -52,8 +52,8 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
         .withStatusCode(HttpStatusCode.FORBIDDEN);
     
     private static final AtlasErrorSummary BAD_ANNOTATION = new AtlasErrorSummary(new NullPointerException())
-    .withMessage("Invalid annotation specified. Valid annotations are: " + Joiner.on(',').join(Iterables.transform(validAnnotations, Annotation.TO_KEY)))
-    .withStatusCode(HttpStatusCode.BAD_REQUEST);
+        .withMessage("Invalid annotation specified. Valid annotations are: " + Joiner.on(',').join(Iterables.transform(validAnnotations, Annotation.TO_KEY)))
+        .withStatusCode(HttpStatusCode.BAD_REQUEST);
     
     private static final String TYPE_KEY = "type";
     private static final String PLATFORM_ID_KEY = "platform_id";
@@ -79,18 +79,18 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
             @RequestParam(value = PLATFORM_ID_KEY, required = false) String platformId) throws IOException {
         try {
             final ApplicationConfiguration appConfig = appConfig(request);
-        	
+            
             List<ChannelGroup> channelGroups = ImmutableList.copyOf(channelGroupResolver.channelGroups());
 
             Selection selection = SELECTION_BUILDER.build(request);        
             channelGroups = selection.applyTo(Iterables.filter(
                 filterer.filter(channelGroups, constructFilter(platformId, type)), 
-                new Predicate<ChannelGroup>() {
-                    @Override
-                    public boolean apply(ChannelGroup input) {
-                        return appConfig.isEnabled(input.getPublisher());
-                    }
-                }));
+                    new Predicate<ChannelGroup>() {
+                        @Override
+                        public boolean apply(ChannelGroup input) {
+                            return appConfig.isEnabled(input.getPublisher());
+                        }
+                    }));
 
             Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
             if (annotations.isPresent() && !validAnnotations(annotations.get())) {
@@ -107,16 +107,17 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
     public void listChannel(HttpServletRequest request, HttpServletResponse response, 
             @PathVariable("id") String id) throws IOException {
         try {
-            ApplicationConfiguration appConfig = appConfig(request);
-            
             Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver.channelGroupFor(idCodec.decode(id).longValue());
             
             if (!possibleChannelGroup.isPresent()) {
                 errorViewFor(request, response, NOT_FOUND);
             } else {
+                ApplicationConfiguration appConfig = appConfig(request);
+                
                 if (!appConfig.isEnabled(possibleChannelGroup.get().getPublisher())) {
                     outputter.writeError(request, response, FORBIDDEN.withMessage("ChannelGroup " + id + " not available"));
                 }
+                
                 Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
                 if (annotations.isPresent() && !validAnnotations(annotations.get())) {
                     errorViewFor(request, response, BAD_ANNOTATION);
