@@ -42,9 +42,12 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
     private static final String CATCHUP_WEIGHTING_PARAM = "catchupWeighting";
     private static final String TYPE_PARAM = "type";
     private static final String TOP_LEVEL_PARAM = "topLevelOnly";
+    private static final String CURRENT_BROADCASTS_ONLY = "currentBroadcastsOnly";
+    private static final String PRIORITY_CHANNEL_WEIGHTING = "priorityChannelWeighting";
     private static final String ANNOTATIONS_PARAM = "annotations";
 
     private static final float DEFAULT_TITLE_WEIGHTING = 1.0f;
+    private static final float DEFAULT_PRIORITY_CHANNEL_WEIGHTING = 1.0f;
     private static final float DEFAULT_BROADCAST_WEIGHTING = 0.2f;
     private static final float DEFAULT_CATCHUP_WEIGHTING = 0.15f;
 
@@ -62,7 +65,9 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
         JsonTranslator.CALLBACK,
         ANNOTATIONS_PARAM,
         TYPE_PARAM,
-        TOP_LEVEL_PARAM
+        TOP_LEVEL_PARAM,
+        CURRENT_BROADCASTS_ONLY,
+        PRIORITY_CHANNEL_WEIGHTING
     ));
     public SearchController(SearchResolver searcher, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content,?extends Identified>> outputter) {
         super(configFetcher, log, outputter);
@@ -78,6 +83,8 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
             @RequestParam(value = CATCHUP_WEIGHTING_PARAM, required = false) String catchupWeightingParam,
             @RequestParam(value = TYPE_PARAM, required = false) String type, 
             @RequestParam(value = TOP_LEVEL_PARAM, required = false, defaultValue = "true") String topLevel,
+            @RequestParam(value = CURRENT_BROADCASTS_ONLY, required = false, defaultValue = "false") String currentBroadcastsOnly,
+            @RequestParam(value = PRIORITY_CHANNEL_WEIGHTING, required = false) String priorityChannelWeightingParam,
             HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             paramChecker.checkParameters(request);
@@ -94,6 +101,7 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
             float titleWeighting = getFloatParam(titleWeightingParam, DEFAULT_TITLE_WEIGHTING);
             float broadcastWeighting = getFloatParam(broadcastWeightingParam, DEFAULT_BROADCAST_WEIGHTING);
             float catchupWeighting = getFloatParam(catchupWeightingParam, DEFAULT_CATCHUP_WEIGHTING);
+            float priorityChannelWeighting = getFloatParam(priorityChannelWeightingParam, DEFAULT_PRIORITY_CHANNEL_WEIGHTING);
 
             ApplicationConfiguration appConfig = appConfig(request);
             Set<Specialization> specializations = specializations(specialization);
@@ -105,8 +113,10 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
                 .withTitleWeighting(titleWeighting)
                 .withBroadcastWeighting(broadcastWeighting)
                 .withCatchupWeighting(catchupWeighting)
+                .withPriorityChannelWeighting(priorityChannelWeighting)
                 .withType(type)
                 .isTopLevelOnly(!Strings.isNullOrEmpty(topLevel) ? Boolean.valueOf(topLevel) : null)
+                .withCurrentBroadcastsOnly(!Strings.isNullOrEmpty(currentBroadcastsOnly) ? Boolean.valueOf(currentBroadcastsOnly) : null)
                 .build(), appConfig);
 
             modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)), appConfig);
