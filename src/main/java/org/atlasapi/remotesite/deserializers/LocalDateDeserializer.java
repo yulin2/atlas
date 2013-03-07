@@ -12,7 +12,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
 public class LocalDateDeserializer implements JsonDeserializer<LocalDate> {
-    DateTimeFormatter format = ISODateTimeFormat.date();
+    private final DateTimeFormatter format;
+    
+    public LocalDateDeserializer(DateTimeFormatter formatter){
+        this.format = formatter;
+    }
 
     public LocalDate deserialize(JsonElement json, Type typeOfT,
             JsonDeserializationContext context) throws JsonParseException {
