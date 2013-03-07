@@ -27,8 +27,10 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Object that wraps data fetched from YouTube
@@ -44,43 +46,37 @@ public class YouTubeSource extends BaseSource {
 	
 	public YouTubeSource(YouTubeVideoEntry entry, String uri) {
 		super(uri);
+		checkNotNull(entry);
 		videoEntry = entry;
 	}
 		
 	public String getVideoTitle() {
-		if (videoEntry.getTitle() != null) {
-			return videoEntry.getTitle();
-		} else {
-			return null;
-		}
+		return videoEntry.getTitle();
 	}
 	
 	public String getDescription() {
-		if (videoEntry.getDescription() != null) {
-			return videoEntry.getDescription();
-		} else {
-			return null;
-		}
+		return videoEntry.getDescription();
 	}
     
-    public String getDefaultPlayerUrl(){
+    public Optional<String> getDefaultPlayerUrl(){
         if(videoEntry.getPlayer() != null)
-            return videoEntry.getPlayer().getDefaultUrl();
+            return Optional.<String>of(videoEntry.getPlayer().getDefaultUrl());
         
-        return null;
+        return Optional.<String>absent();
     }
     
-    public String getMobilePlayerUrl(){
+    public Optional<String> getMobilePlayerUrl(){
         if(videoEntry.getPlayer() != null)
-            return videoEntry.getPlayer().getMobileUrl();
+            return Optional.<String>of(videoEntry.getPlayer().getMobileUrl());
         
-        return null;
+        return Optional.<String>absent();
     }
 	
-	public String getURL(){
+	public Optional<String> getURL(){
 	    if(videoEntry.getPlayer() != null)
-	        return videoEntry.getPlayer().getDefaultUrl();
-	    return null;
+	        return Optional.<String>of(videoEntry.getPlayer().getDefaultUrl());
+
+	    return Optional.<String>absent();
 	}
 
     public DateTime getUploaded(){
@@ -113,22 +109,25 @@ public class YouTubeSource extends BaseSource {
 	    return 0;
 	}
 
-    public String getOne(){
+    public Optional<String>  getOne(){
         if(videoEntry.getContent() != null)
-            return videoEntry.getContent().getOne();
-        return null;
+            return Optional.<String>of(videoEntry.getContent().getOne());
+        
+        return Optional.<String>absent();
     }
 
-    public String getSix(){
+    public Optional<String> getSix(){
         if(videoEntry.getContent() != null)
-            return videoEntry.getContent().getSix();
-        return null;
+            return Optional.<String>of(videoEntry.getContent().getSix());
+
+        return Optional.<String>absent();
     }
 
-    public String getFive(){
+    public Optional<String> getFive(){
         if(videoEntry.getContent() != null)
-            return videoEntry.getContent().getFive();
-        return null;
+            return Optional.<String>of(videoEntry.getContent().getFive());
+
+        return Optional.<String>absent();
     }
 
 	public static class Video {
@@ -209,11 +208,11 @@ public class YouTubeSource extends BaseSource {
 	    return null;
 	}
 	
-	public String getImageUri() {
-	    if (videoEntry.getThumbnail() != null && videoEntry.getThumbnail().getHqDefault() != null) {
-            return videoEntry.getThumbnail().getHqDefault();
-        }
-	    return null;
+	public Optional<String> getImageUri() {
+	    if (videoEntry.getThumbnail() != null && videoEntry.getThumbnail().getHqDefault() != null) 
+            return Optional.<String>of(videoEntry.getThumbnail().getHqDefault());
+
+	    return Optional.<String>absent();
 	}
 }
 
