@@ -1,79 +1,81 @@
 package org.atlasapi.remotesite.youtube.entity;
 
+import org.atlasapi.remotesite.youtube.deserializers.YouTubeAccessControlDeserializer.Permission;
+
 /**
  * Access Controls will have one of 3 values - ALLOWED, DENIED or MODERATED.
  */
 public class YouTubeAccessControl {
-    Integer comment;
-    Integer commentVote;
-    Integer videoRespond;
-    Integer rate;
-    Integer embed;
-    Integer list;
-    Integer autoPlay;
-    Integer syndicate;
+    Permission comment;
+    Permission commentVote;
+    Permission videoRespond;
+    Permission rate;
+    Permission embed;
+    Permission list;
+    Permission autoPlay;
+    Permission syndicate;
 
-    public Integer getComment() {
+    public Permission getComment() {
         return comment;
     }
 
-    public void setComment(Integer comment) {
+    public void setComment(Permission comment) {
         this.comment = comment;
     }
 
-    public Integer getCommentVote() {
+    public Permission getCommentVote() {
         return commentVote;
     }
 
-    public void setCommentVote(Integer commentVote) {
+    public void setCommentVote(Permission commentVote) {
         this.commentVote = commentVote;
     }
 
-    public Integer getVideoRespond() {
+    public Permission getVideoRespond() {
         return videoRespond;
     }
 
-    public void setVideoRespond(Integer videoRespond) {
+    public void setVideoRespond(Permission videoRespond) {
         this.videoRespond = videoRespond;
     }
 
-    public Integer getRate() {
+    public Permission getRate() {
         return rate;
     }
 
-    public void setRate(Integer rate) {
+    public void setRate(Permission rate) {
         this.rate = rate;
     }
 
-    public Integer getEmbed() {
+    public Permission getEmbed() {
         return embed;
     }
 
-    public void setEmbed(Integer embed) {
+    public void setEmbed(Permission embed) {
         this.embed = embed;
     }
 
-    public Integer getList() {
+    public Permission getList() {
         return list;
     }
 
-    public void setList(Integer list) {
+    public void setList(Permission list) {
         this.list = list;
     }
 
-    public Integer getAutoPlay() {
+    public Permission getAutoPlay() {
         return autoPlay;
     }
 
-    public void setAutoPlay(Integer autoPlay) {
+    public void setAutoPlay(Permission autoPlay) {
         this.autoPlay = autoPlay;
     }
 
-    public Integer getSyndicate() {
+    public Permission getSyndicate() {
         return syndicate;
     }
 
-    public void setSyndicate(Integer syndicate) {
+    public void setSyndicate(Permission syndicate) {
         this.syndicate = syndicate;
     }
 

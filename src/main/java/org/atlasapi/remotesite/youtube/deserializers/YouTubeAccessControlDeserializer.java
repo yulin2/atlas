@@ -52,15 +52,15 @@ public class YouTubeAccessControlDeserializer implements
         return accessControl;
     }
 
-    public int getPermission(String value) {
+    public Permission getPermission(String value) {
         if ("moderated".equalsIgnoreCase(value)) {
-            return Permission.MODERATED.getPermission();
+            return Permission.MODERATED;
         } else if ("denied".equalsIgnoreCase(value)) {
-            return Permission.DENIED.getPermission();
+            return Permission.DENIED;
         } else if ("allowed".equalsIgnoreCase(value)) {
-            return Permission.ALLOWED.getPermission();
+            return Permission.ALLOWED;
         }
-        return Permission.UNDEFINED.getPermission();
+        return Permission.UNDEFINED;
     }
 
     /**

@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 
 import com.google.common.collect.Lists;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class YoutubeUriCanonicaliser implements Canonicaliser {
 
@@ -39,9 +40,7 @@ public class YoutubeUriCanonicaliser implements Canonicaliser {
 	}
 
 	public static String videoIdFrom(String uri) {
-	    if(uri == null){
-	        return null;
-	    }
+	    checkNotNull(uri);
 		for (Pattern p : alternateUris) {
 			Matcher matcher = p.matcher(uri);
 			if (matcher.matches()) {
