@@ -9,15 +9,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.segment.SegmentEvent;
@@ -42,7 +40,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.metabroadcast.common.base.Maybe;
 
 public class BbcIonProgrammeAdapter extends AbstractBbcAdapter<Content> {
 
@@ -195,7 +192,7 @@ public class BbcIonProgrammeAdapter extends AbstractBbcAdapter<Content> {
         return resourceUri.substring(resourceUri.lastIndexOf('/')+1, resourceUri.indexOf('#'));
     }
 
-    protected Item fetchItem(String uri, Series series) {
+    private Item fetchItem(String uri, Series series) {
         Item fetchedItem = episodeAdapter.fetch(uri);
         if (fetchedItem == null) {
             return null;
@@ -204,12 +201,6 @@ public class BbcIonProgrammeAdapter extends AbstractBbcAdapter<Content> {
         attachSegmentsToVersions(fetchedItem);
         if (fetchedItem instanceof Episode) {
             Episode episode = (Episode)fetchedItem;
-            if (series == null && episode.getSeriesRef() != null) {
-                Container fetchedContainer = null;//TODO:containerAdapter.fetch(episode.getSeriesRef().getUri());
-                if (fetchedContainer instanceof Series) {
-                    series = (Series) fetchedContainer;
-                }
-            }
             if (series != null) {
                 episode.setSeriesNumber(series.getSeriesNumber());
             }

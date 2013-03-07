@@ -1,19 +1,21 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.atlasapi.media.entity.Publisher.BBC;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import static org.atlasapi.remotesite.bbc.ion.BbcIonContainerAdapter.CONTAINER_DETAIL_PATTERN;
 
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcAliasCompiler;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
@@ -23,30 +25,32 @@ import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonContributor;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
 import org.atlasapi.remotesite.bbc.ion.model.IonFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 
 public abstract class BaseBbcIonEpisodeItemExtractor {
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final String FILM_FORMAT_ID = "PT007";
-
     protected static final String CURIE_BASE = "bbc:";
 
     private final BbcIonContributorPersonExtractor personExtractor = new BbcIonContributorPersonExtractor();
     private final BbcIonGenreMap genreMap = new BbcIonGenreMap(new BbcProgrammesGenreMap());
+    
     private final RemoteSiteClient<IonContainerFeed> containerClient;
-    private final AdapterLog log;
+    private final ContentResolver contentResolver;
     
-    public BaseBbcIonEpisodeItemExtractor(AdapterLog log) {
-        this(log, null);
-    }
-    
-    public BaseBbcIonEpisodeItemExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient) {
-        this.log = log;
+    public BaseBbcIonEpisodeItemExtractor(RemoteSiteClient<IonContainerFeed> containerClient, ContentResolver contentResolver) {
         this.containerClient = containerClient;
+        this.contentResolver = checkNotNull(contentResolver);
     }
 
     protected Item extract(IonEpisode source) {
@@ -79,19 +83,22 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         return false;
     }
 
-    protected void setEpisodeDetails(Episode item, IonEpisode episodeDetail) {
-        if(!Strings.isNullOrEmpty(episodeDetail.getSeriesId())) {
-            //TODO: item.setSeriesRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getSeriesId())));
+    protected void setEpisodeDetails(Episode item, IonEpisode episode) {
+        String seriesPid = episode.getSeriesId();
+        if(!Strings.isNullOrEmpty(seriesPid)) {
+            Optional<Content> possibleContainer = resolvePid(seriesPid);
+            checkState(possibleContainer.isPresent(), "No container %s for %s", seriesPid, episode.getId());
+            item.setSeries((Series)possibleContainer.get());
         }
         
-        if(episodeDetail.getPosition() == null) {
+        if(episode.getPosition() == null) {
             return;
         }
         
-        String subseriesId = episodeDetail.getSubseriesId();
+        String subseriesId = episode.getSubseriesId();
 
         if (Strings.isNullOrEmpty(subseriesId)) {
-            item.setEpisodeNumber(Ints.saturatedCast(episodeDetail.getPosition()));
+            item.setEpisodeNumber(Ints.saturatedCast(episode.getPosition()));
             return;
         }
 
@@ -99,15 +106,15 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
             try {
                 IonContainer subseries = Iterables.getOnlyElement(containerClient.get(String.format(CONTAINER_DETAIL_PATTERN, subseriesId)).getBlocklist());
                 item.setEpisodeNumber(Ints.saturatedCast(subseries.getPosition()));
-                item.setPartNumber(Ints.saturatedCast(episodeDetail.getPosition()));
+                item.setPartNumber(Ints.saturatedCast(episode.getPosition()));
             } catch (Exception e) {
-                log.record(warnEntry().withSource(getClass()).withDescription("Updating item %s, couldn't fetch subseries %s", subseriesId));
+                log.warn("Updating item {}, couldn't fetch subseries {}", item, subseriesId);
             }
         }
     }
 
     protected Item setItemDetails(Item item, IonEpisode episode) {
-        
+        item.addAlias(item.getCanonicalUri());
         item.setTitle(getTitle(episode));
         item.setDescription(episode.getSynopsis());
         // TODO new alias
@@ -125,16 +132,25 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
                 if (possiblePerson.hasValue()) {
                     item.addPerson(possiblePerson.requireValue());
                 } else {
-                    log.record(new AdapterLogEntry(WARN).withSource(getClass()).withDescription("Unknown person: " + contributor.getRoleName()));
+                    log.warn("Unknown person: {}", contributor.getRoleName());
                 }
             }
         }
         
-        if (!Strings.isNullOrEmpty(episode.getToplevelContainerId())) {
-            //TODO: item.setParentRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episode.getToplevelContainerId())));
+        String containerPid = episode.getToplevelContainerId();
+        if (!Strings.isNullOrEmpty(containerPid)) {
+            Optional<Content> possibleContainer = resolvePid(containerPid);
+            checkState(possibleContainer.isPresent(), "No container %s for %s", containerPid, episode.getId());
+            item.setContainer((Container)possibleContainer.get());
         }
 
         return item;
+    }
+
+    private Optional<Content> resolvePid(String pid) {
+        String containerUri = BbcFeeds.slashProgrammesUriForPid(pid);
+        Optional<Content> possibleContainer = contentResolver.resolveAliases(ImmutableList.of(containerUri), Publisher.BBC).get(containerUri);
+        return possibleContainer;
     }
 
     protected void setMediaTypeAndSpecialisation(Item item, IonEpisode episode) {
