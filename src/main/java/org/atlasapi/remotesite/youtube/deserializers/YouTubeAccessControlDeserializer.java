@@ -16,39 +16,7 @@ public class YouTubeAccessControlDeserializer implements
     public YouTubeAccessControl deserialize(JsonElement json, Type typeOfT,
             JsonDeserializationContext context) throws JsonParseException {
         YouTubeAccessControl accessControl = new YouTubeAccessControl();
-        JsonObject jsonObject = json.getAsJsonObject();
-        if (jsonObject.has("autoPlay")) {
-            accessControl.setAutoPlay(getPermission(jsonObject.get("autoPlay")
-                    .getAsString()));
-        }
-        if (jsonObject.has("comment")) {
-            accessControl.setAutoPlay(getPermission(jsonObject.get("comment")
-                    .getAsString()));
-        }
-        if (jsonObject.has("commentVote")) {
-            accessControl.setAutoPlay(getPermission(jsonObject.get(
-                    "commentVote").getAsString()));
-        }
-        if (jsonObject.has("videoRespond")) {
-            accessControl.setAutoPlay(getPermission(jsonObject.get(
-                    "videoRespond").getAsString()));
-        }
-        if (jsonObject.has("rate")) {
-            accessControl.setAutoPlay(getPermission(jsonObject.get("rate")
-                    .getAsString()));
-        }
-        if (jsonObject.has("embed")) {
-            accessControl.setAutoPlay(getPermission(jsonObject.get("embed")
-                    .getAsString()));
-        }
-        if (jsonObject.has("list")) {
-            accessControl.setAutoPlay(getPermission(jsonObject.get("list")
-                    .getAsString()));
-        }
-        if (jsonObject.has("syndicate")) {
-            accessControl.setAutoPlay(getPermission(jsonObject.get("syndicate")
-                    .getAsString()));
-        }
+
         return accessControl;
     }
 
@@ -73,14 +41,14 @@ public class YouTubeAccessControlDeserializer implements
      * 
      */
     public enum Permission {
-        ALLOWED(1), DENIED(0), MODERATED(2), UNDEFINED(-1);
-        private int permission;
+        ALLOWED("allowed"), DENIED("denied"), MODERATED("moderated"), UNDEFINED("undefined");
+        private String permission;
 
-        private Permission(int permission) {
+        private Permission(String permission) {
             this.permission = permission;
         }
 
-        public int getPermission() {
+        public String getPermission() {
             return permission;
         }
     }

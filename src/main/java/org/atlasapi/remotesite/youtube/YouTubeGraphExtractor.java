@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.youtube;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +36,7 @@ import org.atlasapi.remotesite.youtube.entity.YouTubeSource.Video;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Duration;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.media.MimeType;
 
@@ -55,9 +56,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 
     @Override
     public Item extract(YouTubeSource source) {
-        if (source == null) {
-            return null;
-        }
+        checkNotNull(source);
 
         Set<Encoding> encodings = Sets.newHashSet();
         ArrayList<Alias> aliases = new ArrayList<Alias>();
@@ -86,10 +85,10 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         Item item = item(source);
         item.addVersion(version);
 
-        if (source.getDefaultPlayerUrl() != null) {
+        if (source.getDefaultPlayerUrl().orNull() != null) {
             String defaultPlayerNamespace = "";
             Alias defaultPlayer = new Alias(defaultPlayerNamespace,
-                    source.getDefaultPlayerUrl());
+                    source.getDefaultPlayerUrl().orNull());
             aliases.add(defaultPlayer);
             aliasesUrl.add(defaultPlayer.getValue());
         }
@@ -108,7 +107,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
     private Encoding encodingForWebPage(YouTubeSource source) {
         Location location = new Location();
         location.setTransportType(TransportType.LINK);
-        location.setUri(YoutubeUriCanonicaliser.standardURL(YoutubeUriCanonicaliser.videoIdFrom(source.getURL())));
+        location.setUri(YoutubeUriCanonicaliser.standardURL(YoutubeUriCanonicaliser.videoIdFrom(source.getURL().orNull())));
 
         Encoding encoding = new Encoding();
         encoding.addAvailableAt(location);
@@ -125,7 +124,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         item.setDescription(source.getDescription());
 
         item.setThumbnail(source.getThumbnailImageUri());
-        item.setImage(source.getImageUri());
+        item.setImage(source.getImageUri().orNull());
         if (source.getVideos().size() > 0) {
             item.setIsLongForm((source.getVideos().get(0).getDuration())
                     .isLongerThan(Duration.standardMinutes(15)));
@@ -153,19 +152,19 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         Policy policy = new Policy();
         policy.setAvailabilityStart(source.getUploaded());
 
-        if (source.getDefaultPlayerUrl() != null && !source.getDefaultPlayerUrl().equals("")) {
+        if (source.getDefaultPlayerUrl().orNull() != null && !source.getDefaultPlayerUrl().get().equals("")) {
             Location locationDefault = new Location();
             locationDefault.setPolicy(policy);
             locationDefault.setTransportType(TransportType.LINK);
-            locationDefault.setUri(source.getDefaultPlayerUrl());
+            locationDefault.setUri(source.getDefaultPlayerUrl().orNull());
             locations.add(locationDefault);
         }
 
-        if (source.getMobilePlayerUrl() != null && !source.getMobilePlayerUrl().equals("")) {
+        if (source.getMobilePlayerUrl().orNull() != null && !source.getMobilePlayerUrl().get().equals("")) {
             Location locationMobile = new Location();
             locationMobile.setPolicy(policy);
             locationMobile.setTransportType(TransportType.LINK);
-            locationMobile.setUri(source.getMobilePlayerUrl());
+            locationMobile.setUri(source.getMobilePlayerUrl().orNull());
             locations.add(locationMobile);
         }
 

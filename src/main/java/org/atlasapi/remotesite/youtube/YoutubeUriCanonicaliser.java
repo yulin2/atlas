@@ -40,13 +40,14 @@ public class YoutubeUriCanonicaliser implements Canonicaliser {
 	}
 
 	public static String videoIdFrom(String uri) {
-	    checkNotNull(uri);
-		for (Pattern p : alternateUris) {
-			Matcher matcher = p.matcher(uri);
-			if (matcher.matches()) {
-				return matcher.group(1);
-			}
-		}
+	    if(uri != null){
+    		for (Pattern p : alternateUris) {
+    			Matcher matcher = p.matcher(uri);
+    			if (matcher.matches()) {
+    				return matcher.group(1);
+    			}
+    		}
+    	}
 		return null;
 	}
 
