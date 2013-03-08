@@ -48,7 +48,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
     DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
 
     ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
-    MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo);
+    MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo.collection("lookup"));
     ContentResolver resolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo), lookupStore);
     ContentWriter writer = new MongoContentWriter(mongo, lookupStore, new SystemClock());
     ContentLister lister = new MongoContentLister(mongo);
