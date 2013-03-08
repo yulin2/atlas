@@ -21,12 +21,13 @@ public class S3LoveFilmDataSupplier implements LoveFilmDataSupplier {
     private final Supplier<S3Service> serviceSupplier;
     private final String bucketName;
     private final String folder;
-    private static final String FILENAME = "metabroadcast2_catalogue_dump_gb.csv.bz2";
+    private final String fileName;
 
-    public S3LoveFilmDataSupplier(Supplier<S3Service> serviceSupplier, String bucket, String folder) {
+    public S3LoveFilmDataSupplier(Supplier<S3Service> serviceSupplier, String bucket, String folder, String fileName) {
         this.serviceSupplier = serviceSupplier;
         this.bucketName = bucket;
         this.folder = folder;
+        this.fileName = fileName;
     }
     
     @Override
@@ -47,7 +48,7 @@ public class S3LoveFilmDataSupplier implements LoveFilmDataSupplier {
 
     private S3Object getFileforName(S3Object[] objects) {
         for (S3Object obj : objects) {
-            String matchName = folder + '/' + FILENAME;
+            String matchName = folder + '/' + fileName;
             if (matchName.equals(obj.getName())) {
                 return obj;
             }
