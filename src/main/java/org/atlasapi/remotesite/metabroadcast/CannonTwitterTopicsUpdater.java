@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.metabroadcast;
 
 import java.util.List;
 
-import org.atlasapi.feeds.UpdateProgress;
+import org.atlasapi.feeds.utils.UpdateProgress;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
