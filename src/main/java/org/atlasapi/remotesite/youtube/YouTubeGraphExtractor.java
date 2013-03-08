@@ -67,7 +67,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
             if (encoding == null) {
                 continue;
             }
-            Set<Location> locations = extractLocationPropertyValuesFrom(source);
+            Set<Location> locations = extractLocationPropertyValhuesFrom(source);
             encoding.setAvailableAt(locations);
 
             encodings.add(encoding);
