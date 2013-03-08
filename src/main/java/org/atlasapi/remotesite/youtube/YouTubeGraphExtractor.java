@@ -67,7 +67,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
             if (encoding == null) {
                 continue;
             }
-            Set<Location> locations = extractLocationPropertyValuesFrom(source);
+            Set<Location> locations = extractLocationPropertyValhuesFrom(source);
             encoding.setAvailableAt(locations);
 
             encodings.add(encoding);
@@ -85,7 +85,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         Item item = item(source);
         item.addVersion(version);
 
-        if (source.getDefaultPlayerUrl().orNull() != null) {
+        if (source.getDefaultPlayerUrl().isPresent()) {
             String defaultPlayerNamespace = "";
             Alias defaultPlayer = new Alias(defaultPlayerNamespace,
                     source.getDefaultPlayerUrl().orNull());
@@ -152,7 +152,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         Policy policy = new Policy();
         policy.setAvailabilityStart(source.getUploaded());
 
-        if (source.getDefaultPlayerUrl().orNull() != null && !source.getDefaultPlayerUrl().get().equals("")) {
+        if (source.getDefaultPlayerUrl().isPresent() && !source.getDefaultPlayerUrl().get().equals("")) {
             Location locationDefault = new Location();
             locationDefault.setPolicy(policy);
             locationDefault.setTransportType(TransportType.LINK);
@@ -160,7 +160,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
             locations.add(locationDefault);
         }
 
-        if (source.getMobilePlayerUrl().orNull() != null && !source.getMobilePlayerUrl().get().equals("")) {
+        if (source.getMobilePlayerUrl().isPresent() && !source.getMobilePlayerUrl().get().equals("")) {
             Location locationMobile = new Location();
             locationMobile.setPolicy(policy);
             locationMobile.setTransportType(TransportType.LINK);
