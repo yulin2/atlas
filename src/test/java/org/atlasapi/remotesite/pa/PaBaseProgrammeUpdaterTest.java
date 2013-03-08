@@ -77,7 +77,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
         DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
-        MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(db);
+        MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(db.collection("lookup"));
         resolver = new LookupResolvingContentResolver(new MongoContentResolver(db, lookupStore), lookupStore);
         
         channelResolver = new DummyChannelResolver();

@@ -18,12 +18,14 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
+import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.base.Optional;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
@@ -32,7 +34,7 @@ import com.metabroadcast.common.servlet.StubHttpServletResponse;
 
 public class PeopleControllerTest {
 
-    private PeopleResolver resolver = mock(PeopleResolver.class);
+    private PeopleQueryResolver resolver = mock(PeopleQueryResolver.class);
     private final ApplicationConfigurationFetcher configFetcher = mock(ApplicationConfigurationFetcher.class);
     private final AdapterLog log = new NullAdapterLog();
     @SuppressWarnings("unchecked")
@@ -43,11 +45,13 @@ public class PeopleControllerTest {
 
     private StubHttpServletRequest request;
     private StubHttpServletResponse response;
+    private ApplicationConfiguration appConfig;
     
     @Before
     public void setup() {
         request = new StubHttpServletRequest();
         response = new StubHttpServletResponse();
+        appConfig = ApplicationConfiguration.defaultConfiguration();
         when(configFetcher.configurationFor(request))
             .thenReturn(Maybe.<ApplicationConfiguration>nothing());
     }
@@ -71,7 +75,7 @@ public class PeopleControllerTest {
         
         Person person = new Person();
         person.setPublisher(Publisher.PA);
-        when(resolver.person(uri)).thenReturn(person);
+        when(resolver.person(uri, appConfig)).thenReturn(Optional.of(person));
         
         peopleController.content(request, response);
         
@@ -88,7 +92,8 @@ public class PeopleControllerTest {
         
         Person person = new Person();
         person.setPublisher(Publisher.BBC);
-        when(resolver.person(idCodec.decode(id).longValue())).thenReturn(person);
+        when(resolver.person(idCodec.decode(id).longValue(), appConfig))
+            .thenReturn(Optional.of(person));
         
         peopleController.content(request, response);
         
@@ -104,7 +109,7 @@ public class PeopleControllerTest {
         
         Person person = new Person();
         person.setPublisher(Publisher.BBC);
-        when(resolver.person(uri)).thenReturn(person);
+        when(resolver.person(uri, appConfig)).thenReturn(Optional.of(person));
         
         peopleController.content(request, response);
         
