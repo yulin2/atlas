@@ -28,6 +28,7 @@ public class YoutubeUriCanonicaliser implements Canonicaliser {
 	private static final List<Pattern> alternateUris = Lists.newArrayList(
         Pattern.compile("https?://.*\\.youtube.com.*v=([^\\./&=]+).*"),
         Pattern.compile("https?://.*\\.youtube.com/v/([^\\./&=]+).*"),
+        Pattern.compile("http://.*\\.youtube.com/watch?v/([^\\./&=]+).*"),
 		Pattern.compile("tag:youtube.com,\\d+:\\w+:([^\\./&=]+)")
     );
 
