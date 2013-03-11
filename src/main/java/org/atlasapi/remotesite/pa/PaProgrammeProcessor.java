@@ -16,9 +16,13 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Image;
+import org.atlasapi.media.entity.ImageAspectRatio;
+import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -45,6 +49,7 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
@@ -55,13 +60,18 @@ import com.google.common.collect.Lists;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.intl.Countries;
+import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.text.MoreStrings;
 import com.metabroadcast.common.time.Timestamp;
 
 public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
+    private static final String NEW_IMAGE_BASE_IMAGE_URL = "http://images.atlas.metabroadcast.com/pressassociation.com/";
     public static final String BROADCAST_ID_PREFIX = "pa:";
+    
+    private static final DateTimeFormatter PA_DATE_FORMAT = DateTimeFormat.forPattern("dd/MM/yyyy");
+    
     private static final String YES = "yes";
     private static final String CLOSED_BRAND = "http://pressassociation.com/brands/8267";
     private static final String CLOSED_EPISODE = "http://pressassociation.com/episodes/closed";
@@ -264,10 +274,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         if (progData.getPictures() != null) {
             for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
                 if (picture.getType().equals("season") && brand.getImage() == null){
-                    brand.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                    setImage(brand, picture);
                 }
                 if (picture.getType().equals("series")){
-                    brand.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                    setImage(brand, picture);
                     break;
                 }
             }
@@ -314,16 +324,46 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         if (progData.getPictures() != null) {
             for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
                 if (picture.getType().equals("series") && series.getImage() == null){
-                    series.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                    setImage(series, picture);
                 }
                 if (picture.getType().equals("season")){
-                    series.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                    setImage(series, picture);
                     break;
                 }
             }
         }
 
         return Maybe.just(series);
+    }
+    
+    private void setImage(Described described, PictureUsage pictureUsage) {
+        String imageUri = PA_BASE_IMAGE_URL + pictureUsage.getvalue();
+        described.setImage(imageUri);
+        
+        Image image = new Image(imageUri);
+        
+        image.setHeight(360);
+        image.setWidth(640);
+        image.setType(ImageType.PRIMARY);
+        image.setAspectRatio(ImageAspectRatio.SIXTEEN_BY_NINE);
+        image.setMimeType(MimeType.IMAGE_JPG);
+        image.setCanonicalUri(NEW_IMAGE_BASE_IMAGE_URL + pictureUsage.getvalue());
+        image.setAvailabilityStart(fromPaDate(pictureUsage.getStartDate()));
+        DateTime expiry = fromPaDate(pictureUsage.getExpiryDate());
+        if(expiry != null) {
+            image.setAvailabilityEnd(expiry.plusDays(1));
+        } else {
+            image.setAvailabilityEnd(null);
+        }
+        
+        described.setImages(ImmutableSet.of(image));
+    }
+    
+    private DateTime fromPaDate(String paDate) {
+        if(paDate == null) {
+            return null;
+        }
+        return PA_DATE_FORMAT.parseDateTime(paDate).withZone(DateTimeZone.UTC);
     }
     
     private Maybe<ItemAndBroadcast> getFilmOrEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode, Timestamp updatedAt) {
@@ -405,20 +445,20 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
 
         if (progData.getPictures() != null) {
-        	String bestImage = null;
+        	PictureUsage bestImage = null;
             for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
                 if (picture.getType().equals("series") && bestImage == null) {
-                    bestImage = PA_BASE_IMAGE_URL + picture.getvalue();
+                    bestImage = picture;
                 }
                 if (picture.getType().equals("season")) {
-                	bestImage = PA_BASE_IMAGE_URL + picture.getvalue();
+                	bestImage = picture;
                 }
                 if (picture.getType().equals("episode")){
-                	bestImage = PA_BASE_IMAGE_URL + picture.getvalue();
+                	bestImage = picture;
                     break;
                 }
             }
-            episode.setImage(bestImage);
+            setImage(episode, bestImage);
         }
         
         episode.setPeople(people(progData));
@@ -488,6 +528,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             }
         } catch (NumberFormatException e) {
             // sometimes we don't get valid numbers
+            //log.
         }
         
         return Maybe.just(new ItemAndBroadcast(item, Maybe.just(broadcast)));
@@ -505,6 +546,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         episode.setFirstSeen(item.getFirstSeen());
         episode.setGenres(item.getGenres());
         episode.setImage(item.getImage());
+        episode.setImages(item.getImages());
         episode.setIsLongForm(item.getIsLongForm());
         episode.setLastFetched(item.getLastFetched());
         episode.setLastUpdated(item.getLastUpdated());
