@@ -117,7 +117,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 
     private Item item(YouTubeSource source) {
         Item item = new Item(source.getUri(),
-                YoutubeUriCanonicaliser.curieFor(source.getUri()),
+                YoutubeUriCanonicaliser.curieFor(source.getURL().get()),
                 Publisher.YOUTUBE);
 
         item.setTitle(source.getVideoTitle());

@@ -36,7 +36,9 @@ public class YoutubeUriCanonicaliserTest extends TestCase {
 
 	public void testCanGenerateCurieForUri() throws Exception {
 		assertEquals("yt:uOH0o2DQDco", YoutubeUriCanonicaliser.curieFor("http://www.youtube.com/watch?v=uOH0o2DQDco&feature=channel"));
-		assertEquals("yt:uOH0o2DQDco", YoutubeUriCanonicaliser.curieFor("http://www.youtube.com/watch?v=uOH0o2DQDco"));
+        assertEquals("yt:uOH0o2DQDco", YoutubeUriCanonicaliser.curieFor("http://www.youtube.com/watch?v=uOH0o2DQDco"));
+        assertEquals("yt:xViM96yKlnE", YoutubeUriCanonicaliser.curieFor("http://www.youtube.com/watch?v=xViM96yKlnE"));
+        assertEquals("yt:SiFvV8Ix0OI", YoutubeUriCanonicaliser.curieFor("http://www.youtube.com/watch?v=SiFvV8Ix0OI"));
 	}
 
 	private void check(String alternate, final String expected) {
