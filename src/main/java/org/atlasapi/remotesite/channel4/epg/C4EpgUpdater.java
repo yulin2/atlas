@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import java.util.Map;
 
-import org.atlasapi.feeds.UpdateProgress;
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;

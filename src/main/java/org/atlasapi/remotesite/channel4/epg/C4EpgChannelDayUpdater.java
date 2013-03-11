@@ -7,7 +7,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.feeds.UpdateProgress;
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
