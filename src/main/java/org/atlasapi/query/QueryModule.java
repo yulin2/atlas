@@ -13,93 +13,73 @@
  permissions and limitations under the License. */
 package org.atlasapi.query;
 
-import com.google.common.base.Strings;
-import static org.atlasapi.media.entity.Publisher.FACEBOOK;
-
 import org.atlasapi.equiv.EquivModule;
-import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.Content;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.KnownTypeContentResolver;
-import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
-import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
-import org.atlasapi.query.content.CurieResolvingQueryExecutor;
-import org.atlasapi.query.content.LookupResolvingQueryExecutor;
-import org.atlasapi.query.content.UriFetchingQueryExecutor;
-import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
+import org.atlasapi.media.content.ContentIndex;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentSearcher;
+import org.atlasapi.media.content.schedule.ScheduleIndex;
+import org.atlasapi.media.topic.PopularTopicIndex;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicIndex;
+import org.atlasapi.media.topic.TopicResolver;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.persistence.media.product.ProductResolver;
+import org.atlasapi.persistence.media.segment.SegmentResolver;
+import org.atlasapi.query.common.ContextualQueryExecutor;
+import org.atlasapi.query.common.QueryExecutor;
+import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
+import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
+import org.atlasapi.query.v4.search.support.ContentResolvingSearcher;
+import org.atlasapi.query.v4.topic.IndexBackedTopicQueryExecutor;
+import org.atlasapi.query.v4.topic.TopicContentQueryExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import com.google.common.collect.ImmutableSet;
-import com.metabroadcast.common.properties.Configurer;
-import org.atlasapi.equiv.update.EquivalenceUpdater;
-import org.atlasapi.persistence.content.DefaultEquivalentContentResolver;
-import org.atlasapi.persistence.content.EquivalentContentResolver;
-import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
-import org.atlasapi.query.content.search.ContentResolvingSearcher;
-import org.atlasapi.query.content.search.DummySearcher;
-import org.atlasapi.search.ContentSearcher;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
 @Configuration
 @Import(EquivModule.class)
 public class QueryModule {
 
     @Autowired
-    @Qualifier("remoteSiteContentResolver")
-    private CanonicalisingFetcher localOrRemoteFetcher;
-    @Autowired
-    private LookupEntryStore lookupEntry;
-    @Autowired
     private ContentResolver contentResolver;
     @Autowired
-    private org.atlasapi.media.content.ContentSearcher contentSearcher;
-    @Autowired
-    @Qualifier("contentUpdater")
-    private EquivalenceUpdater<Content> equivUpdater;
-    //
-    private String applicationsEnabled = Configurer.get("applications.enabled").get();
-    private String searchHost = Configurer.get("atlas.search.host").get();
+    private ContentSearcher contentSearcher;
 
-    @Bean
-    public EquivalentContentResolver equivExecutor() {
-        return new DefaultEquivalentContentResolver(contentResolver, lookupEntry);
+    private @Autowired DatabasedMongo mongo;
+    private @Autowired ContentGroupResolver contentGroupResolver;
+    private @Autowired ContentResolver contentStore;
+    private @Autowired ContentIndex contentIndex;
+    private @Autowired ChannelResolver channelResolver;
+    private @Autowired SearchResolver v4SearchResolver;
+    private @Autowired TopicResolver topicResolver;
+    private @Autowired TopicIndex topicIndex;
+    private @Autowired PopularTopicIndex popularTopicIndex;
+    private @Autowired SegmentResolver segmentResolver;
+    private @Autowired ProductResolver productResolver;
+    private @Autowired ScheduleIndex scheduleIndex;
+
+    @Bean ScheduleQueryExecutor scheduleQueryExecutor() {
+        return new IndexBackedScheduleQueryExecutor(scheduleIndex, contentStore);
+    }
+    
+    @Bean QueryExecutor<Topic> topicQueryExecutor() {
+        return new IndexBackedTopicQueryExecutor(topicIndex, topicResolver);
     }
     
     @Bean
-    public KnownTypeQueryExecutor queryExecutor() {
-
-        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(contentResolver,
-                lookupEntry);
-
-        queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor, equivUpdater, ImmutableSet.of(FACEBOOK));
-
-        queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
-
-        queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
-
-        return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
+    public ContextualQueryExecutor<Topic, Content> topicContentQueryExecutor() {
+        return new TopicContentQueryExecutor(topicResolver, contentIndex, contentStore);
     }
 
     @Bean
-    @Qualifier("v2")
-    public SearchResolver v2SearchResolver() {
-        if (!Strings.isNullOrEmpty(searchHost)) {
-            ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
-            return new ContentResolvingSearcher(titleSearcher, queryExecutor());
-        }
-        return new DummySearcher();
-    }
-    
-    @Bean
-    @Qualifier("v4")
     public SearchResolver v4SearchResolver() {
         // FIXME externalize timeout
-        return new org.atlasapi.query.v4.search.support.ContentResolvingSearcher(contentSearcher, queryExecutor(), 60000);
+        return new ContentResolvingSearcher(contentSearcher, contentResolver, 60000);
     }
 }
