@@ -4,14 +4,18 @@ package org.atlasapi.output.annotation;
 import java.io.IOException;
 
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
 
 
 public class SegmentEventsAnnotation extends OutputAnnotation<Content> {
 
-    public SegmentEventsAnnotation() {
+    private final SegmentResolver segmentResolver;
+
+    public SegmentEventsAnnotation(SegmentResolver segmentResolver) {
         super(Content.class);
+        this.segmentResolver = segmentResolver;
     }
 
     @Override

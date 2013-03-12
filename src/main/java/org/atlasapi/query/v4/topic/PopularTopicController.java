@@ -13,9 +13,16 @@ import org.atlasapi.media.topic.PopularTopicIndex;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.TopicResolver;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.output.AtlasModelWriter;
+import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
+import org.atlasapi.output.QueryResultWriter;
+import org.atlasapi.output.ResponseWriter;
+import org.atlasapi.output.ResponseWriterFactory;
+import org.atlasapi.query.common.QueryContext;
+import org.atlasapi.query.common.QueryResult;
 import org.joda.time.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,16 +39,20 @@ import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 @Controller
 public class PopularTopicController {
 
+    private static Logger log = LoggerFactory.getLogger(TopicController.class);
+
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final TopicResolver resolver;
     private final PopularTopicIndex index;
-    private final AtlasModelWriter<Iterable<Topic>> responseWriter;
+    private final QueryResultWriter<Topic> resultWriter;
     private final ApplicationConfigurationFetcher configurationFetcher;
 
-    public PopularTopicController(TopicResolver resolver, PopularTopicIndex index, AtlasModelWriter<Iterable<Topic>> responseWriter, ApplicationConfigurationFetcher configurationFetcher) {
+    private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
+
+    public PopularTopicController(TopicResolver resolver, PopularTopicIndex index, QueryResultWriter<Topic> resultWriter, ApplicationConfigurationFetcher configurationFetcher) {
         this.resolver = resolver;
         this.index = index;
-        this.responseWriter = responseWriter;
+        this.resultWriter = resultWriter;
         this.configurationFetcher = configurationFetcher;
     }
 
@@ -51,13 +62,17 @@ public class PopularTopicController {
             throw new IllegalArgumentException("Request parameters 'from' and 'to' are required!");
         }
         Selection selection = Selection.builder().withDefaultLimit(Integer.MAX_VALUE).withMaxLimit(Integer.MAX_VALUE).build(request);
+        ResponseWriter writer = null;
         try {
+            writer = writerResolver.writerFor(request, response);
             ApplicationConfiguration configuration = configurationFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.DEFAULT_CONFIGURATION);
             Interval interval = new Interval(dateTimeInQueryParser.parse(from), dateTimeInQueryParser.parse(to));
             ListenableFuture<FluentIterable<Id>> topicIds = index.popularTopics(interval, selection);
-            responseWriter.writeTo(request, response, resolve(topicIds), ImmutableSet.<Annotation>of(), configuration);
-        } catch (Exception ex) {
-            responseWriter.writeError(request, response, ErrorSummary.forException(ex));
+            resultWriter.write(QueryResult.listResult(resolve(topicIds), new QueryContext(configuration, ImmutableSet.<Annotation>of())), writer);
+        } catch (Exception e) {
+            log.error("Request exception " + request.getRequestURI(), e);
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, writer, request, response);
         }
     }
 
