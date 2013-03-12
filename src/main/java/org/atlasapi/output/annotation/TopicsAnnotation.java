@@ -3,7 +3,6 @@ package org.atlasapi.output.annotation;
 import static org.atlasapi.output.writers.SourceWriter.sourceWriter;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -12,11 +11,11 @@ import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicResolver;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -72,11 +71,11 @@ public class TopicsAnnotation extends OutputAnnotation<Content> {
         }
     };
 
-    private final TopicQueryResolver topicResolver;
+    private final TopicResolver topicResolver;
     private final TopicWriter topicWriter;
     
     
-    public TopicsAnnotation(TopicQueryResolver topicResolver, String localHostName, SubstitutionTableNumberCodec idCodec) {
+    public TopicsAnnotation(TopicResolver topicResolver, String localHostName, SubstitutionTableNumberCodec idCodec) {
         super(Content.class);
         this.topicResolver = topicResolver;
         this.topicWriter = new TopicWriter(idCodec, localHostName);
@@ -86,7 +85,7 @@ public class TopicsAnnotation extends OutputAnnotation<Content> {
         if (topicIds.isEmpty()) { // don't even ask (the resolver)
             return ImmutableList.of();
         }
-        return topicResolver.topicsForIds(topicIds);
+        return topicResolver.resolveIds(topicIds).getResources();
     }
     
     @Override

@@ -27,7 +27,7 @@ public class TopicController {
     private final QueryExecutor<Topic> queryExecutor;
     private final QueryResultWriter<Topic> resultWriter;
 
-    private ResponseWriterFactory writerResolver = new ResponseWriterFactory();
+    private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
 
     public TopicController(QueryParser<Topic> queryParser,
         QueryExecutor<Topic> queryExecutor, QueryResultWriter<Topic> resultWriter) {

@@ -15,12 +15,7 @@
 package org.atlasapi;
 
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
-import org.atlasapi.query.v2.QueryController;
-import org.junit.Test;
-
-import com.metabroadcast.common.properties.Configurer;
-import org.atlasapi.media.EsSchema;
-import org.elasticsearch.node.Node;
+import org.atlasapi.query.v4.schedule.ScheduleController;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -49,7 +44,7 @@ public class SpringTest {
         ConfigurableAnnotationWebApplicationContext applicationContext = new ConfigurableAnnotationWebApplicationContext();
         applicationContext.setConfigLocation(null);
         applicationContext.refresh();
-        applicationContext.getBean(QueryController.class);
+        applicationContext.getBean(ScheduleController.class);
     }
 
     @Test

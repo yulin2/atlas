@@ -1,7 +1,6 @@
 package org.atlasapi;
 
 import org.atlasapi.application.ApplicationModule;
-import org.atlasapi.equiv.ChildRefUpdateModule;
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.EquivTaskModule;
 import org.atlasapi.feeds.AtlasFeedsModule;
@@ -51,7 +50,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             AtlasPersistenceModule.class,
             AtlasLoggingModule.class,
             AtlasWebModule.class,
-            SearchModule.class,
             QueryModule.class,
             AtlasFetchModule.class,
             RemoteSiteModule.class,
@@ -67,7 +65,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 ManualScheduleRebuildModule.class, 
                 InterlinkingDeltaModule.class,
                 EquivTaskModule.class,
-                ChildRefUpdateModule.class,
                 AtlasMessagingModule.class,
                 WorkersModule.class
             );
