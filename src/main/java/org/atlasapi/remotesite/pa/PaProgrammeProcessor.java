@@ -350,7 +350,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         image.setCanonicalUri(NEW_IMAGE_BASE_IMAGE_URL + pictureUsage.getvalue());
         image.setAvailabilityStart(fromPaDate(pictureUsage.getStartDate()));
         DateTime expiry = fromPaDate(pictureUsage.getExpiryDate());
-        if(expiry != null) {
+        if (expiry != null) {
             image.setAvailabilityEnd(expiry.plusDays(1));
         } else {
             image.setAvailabilityEnd(null);
@@ -360,7 +360,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private DateTime fromPaDate(String paDate) {
-        if(paDate == null) {
+        if (Strings.isNullOrEmpty(paDate)) {
             return null;
         }
         return PA_DATE_FORMAT.parseDateTime(paDate).withZone(DateTimeZone.UTC);
