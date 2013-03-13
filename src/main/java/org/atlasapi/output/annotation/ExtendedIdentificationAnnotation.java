@@ -3,8 +3,8 @@ package org.atlasapi.output.annotation;
 
 import java.io.IOException;
 
+import org.atlasapi.equiv.EquivalenceRef;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
@@ -14,13 +14,12 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public class ExtendedIdentificationAnnotation extends OutputAnnotation<Identified> {
 
-    private final EntityListWriter<LookupRef> equivalentWriter = new EntityListWriter<LookupRef>() {
+    private final EntityListWriter<EquivalenceRef> equivalentWriter = new EntityListWriter<EquivalenceRef>() {
 
         @Override
-        public void write(LookupRef entity, FieldWriter formatter, OutputContext ctxt) throws IOException {
-//            formatter.writeField("id", idCodec.encode(BigInteger.valueOf(entity.id())));
-            formatter.writeField("uri", entity.id());
-            formatter.writeField("source", entity.publisher().key());
+        public void write(EquivalenceRef entity, FieldWriter formatter, OutputContext ctxt) throws IOException {
+            formatter.writeField("id", idCodec.encode(entity.getId().toBigInteger()));
+            formatter.writeField("source", entity.getPublisher().key());
         }
 
         @Override
