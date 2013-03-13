@@ -49,11 +49,11 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 public class ChannelController extends BaseController<Iterable<Channel>> {
     
     private static final ImmutableSet<Annotation> validAnnotations = ImmutableSet.<Annotation>builder()
-            .add(Annotation.CHANNEL_GROUPS)
-            .add(Annotation.HISTORY)
-            .add(Annotation.PARENT)
-            .add(Annotation.VARIATIONS)
-            .build();
+        .add(Annotation.CHANNEL_GROUPS)
+        .add(Annotation.HISTORY)
+        .add(Annotation.PARENT)
+        .add(Annotation.VARIATIONS)
+        .build();
 
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
         .withMessage("Channel not found")
@@ -104,13 +104,13 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
             }
             
             channels = selection.applyTo(Iterables.filter(
-                    channels, 
-                    new Predicate<Channel>() {
-                        @Override
-                        public boolean apply(Channel input) {
-                            return appConfig.isEnabled(input.source());
-                        }
-                    }));
+                channels, 
+                new Predicate<Channel>() {
+                    @Override
+                    public boolean apply(Channel input) {
+                        return appConfig.isEnabled(input.source());
+                    }
+                }));
             
             Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
             if (annotations.isPresent() && !validAnnotations(annotations.get())) {
@@ -135,7 +135,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
                 if (!appConfig.isEnabled(possibleChannel.requireValue().source())) {
                     outputter.writeError(request, response, FORBIDDEN.withMessage("Channel " + id + " not available"));
                 }
-                
+
                 Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
                 if (annotations.isPresent() && !validAnnotations(annotations.get())) {
                     errorViewFor(request, response, BAD_ANNOTATION);

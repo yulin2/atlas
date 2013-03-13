@@ -55,7 +55,7 @@ public class ContentResolvingSearchTest extends TestCase {
     public void testShouldReturnSearchedForItem() {
         final String searchQuery = "test";
         final ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
-        final SearchQuery query = new SearchQuery(searchQuery, selection, publishers, 1.0f, 0.0f, 0.0f, Maybe.<Float>nothing(), Maybe.<Float>nothing());
+        final SearchQuery query = new SearchQuery(searchQuery, selection, publishers, 1.0f, 0.0f, 0.0f);
         
         context.checking(new Expectations() {{ 
             one(fuzzySearcher).search(query); will(returnValue(new SearchResults(ImmutableList.of(brand.getCanonicalUri()))));

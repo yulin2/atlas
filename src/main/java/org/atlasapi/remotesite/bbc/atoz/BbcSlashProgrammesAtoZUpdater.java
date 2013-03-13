@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.bbc.atoz;
 
-import static org.atlasapi.feeds.UpdateProgress.FAILURE;
-import static org.atlasapi.feeds.UpdateProgress.SUCCESS;
+import static org.atlasapi.feeds.utils.UpdateProgress.FAILURE;
+import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
 
 import java.util.Iterator;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.atlasapi.feeds.UpdateProgress;
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;

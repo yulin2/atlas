@@ -4,9 +4,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.atlasapi.feeds.UpdateProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.atlasapi.feeds.utils.UpdateProgress;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;

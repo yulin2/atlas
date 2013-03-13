@@ -1,10 +1,13 @@
 package org.atlasapi.remotesite.lovefilm;
 
+import static org.atlasapi.feeds.utils.lovefilm.LoveFilmGenreConverter.TO_ATLAS_GENRE;
 import static org.atlasapi.media.entity.Policy.RevenueContract.FREE_TO_VIEW;
 import static org.atlasapi.media.entity.Policy.RevenueContract.PAY_TO_RENT;
 import static org.atlasapi.media.entity.Policy.RevenueContract.SUBSCRIPTION;
 import static org.atlasapi.media.entity.Publisher.LOVEFILM;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ACCESS_METHOD;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.AVAILABILITY_END_DATE;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.AVAILABILITY_START_DATE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.BBFC_RATING;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.CONTRIBUTOR;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.DRM_RIGHTS;
@@ -16,11 +19,11 @@ import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ITEM_NAME;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ITEM_TYPE_KEYWORD;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.LANGUAGE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ORIGINAL_PUBLICATION_DATE;
-import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.PRODUCT_SITE_LAUNCH_DATE;
-import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.RELEASE_WINDOW_END_DATE;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.RUN_TIME_SEC;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SERIES_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SHOW_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SKU;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SYNOPSIS;
 
 import java.util.Currency;
 import java.util.List;
@@ -31,6 +34,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import org.atlasapi.feeds.utils.lovefilm.LoveFilmGenreConverter;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Certificate;
@@ -44,16 +48,18 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.atlasapi.remotesite.util.EnglishLanguageCodeMap;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -75,7 +81,6 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private static final String LOVEFILM_PEOPLE_PREFIX = "http://lovefilm.com/people/";
     private static final String LOVEFILM_CURIE_PATTERN = "lf:%s-%s";
     private static final String LOVEFILM_URI_PATTERN = "http://lovefilm.com/%s/%s";
-    private static final String LOVEFILM_GENRES_PREFIX = "http://lovefilm.com/genres/";
 
     private static final String EPISODE_RESOURCE_TYPE = "episodes";
     private static final String SEASON_RESOURCE_TYPE = "seasons";
@@ -91,6 +96,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
 
     private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
     private final DateTimeFormatter dateMonthYearFormat = DateTimeFormat.forPattern("dd/MM/YYYY").withZoneUTC();
+    private final DateTimeFormatter yearMonthDayFormat = ISODateTimeFormat.date().withZoneUTC();
     
     private static final EnglishLanguageCodeMap languageCodeMap = new EnglishLanguageCodeMap();
     private static final OptionalMap<String, Certificate> certificateMap = ImmutableOptionalMap.fromMap(
@@ -272,6 +278,8 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setLanguages(languagesFrom(LANGUAGE.valueFrom(source)));
         content.setCertificates(certificatesFrom(BBFC_RATING.valueFrom(source)));
         content.setMediaType(MediaType.VIDEO);
+        content.setDescription(SYNOPSIS.valueFrom(source));
+        
         return content;
     }
     
@@ -284,13 +292,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     
     private Iterable<String> genresFrom(String genreCsv) {
         Iterable<String> genres = COMMA_SPLITTER.split(genreCsv);
-        return Iterables.transform(genres, new Function<String, String>() {
-            @Override
-            public String apply(@Nullable String input) {
-                input = input.toLowerCase();
-                return LOVEFILM_GENRES_PREFIX + input.replace('/', '-').replace(" ", "");
-            }
-        });
+        return Iterables.transform(genres, TO_ATLAS_GENRE);
     }
 
 
@@ -323,6 +325,10 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     
     private Set<Version> versionAndLocationFrom(LoveFilmDataRow source) {
         Version version = new Version();
+        String duration = RUN_TIME_SEC.valueFrom(source);
+        if (!duration.equals("")) {
+            version.setDuration(Duration.standardSeconds(Long.parseLong(duration)));
+        }
         Encoding encoding = new Encoding();
         
         Location location = new Location();
@@ -338,11 +344,11 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private Policy policyFrom(LoveFilmDataRow source) {
         Policy policy = new Policy();
         
-        String launchDate = PRODUCT_SITE_LAUNCH_DATE.valueFrom(source);
-        policy.setAvailabilityStart(dateTimeFrom(launchDate));
+        String availabilityStartDate = AVAILABILITY_START_DATE.valueFrom(source);
+        policy.setAvailabilityStart(dateTimeFromAvailability(availabilityStartDate));
         
-        String windowEndDate = RELEASE_WINDOW_END_DATE.valueFrom(source);
-        policy.setAvailabilityEnd(dateTimeFrom(windowEndDate));
+        String availabilityEndDate = AVAILABILITY_END_DATE.valueFrom(source);
+        policy.setAvailabilityEnd(dateTimeFromAvailability(availabilityEndDate));
         
         String drmRights = DRM_RIGHTS.valueFrom(source);
         RevenueContract revenueContract = revenueContractMap.get(drmRights);
@@ -356,10 +362,10 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         return policy;
     }
 
-    private DateTime dateTimeFrom(String date) {
+    private DateTime dateTimeFromAvailability(String date) {
         if (Strings.isNullOrEmpty(date)) {
             return null;
         }
-        return dateMonthYearFormat.parseDateTime(date);
+        return yearMonthDayFormat.parseDateTime(date);
     }
 }
