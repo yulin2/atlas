@@ -15,11 +15,12 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.youtube;
 
-import java.util.ArrayList; 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Encoding;
@@ -36,7 +37,6 @@ import org.atlasapi.remotesite.youtube.entity.YouTubeSource.Video;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Duration;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.media.MimeType;
 
@@ -72,7 +72,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 
             encodings.add(encoding);
         }
-        encodings.add(encodingForWebPage(source));
+        // encodings.add(encodingForWebPage(source));
 
         Version version = new Version();
 
@@ -88,7 +88,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         if (source.getDefaultPlayerUrl().isPresent()) {
             String defaultPlayerNamespace = "";
             Alias defaultPlayer = new Alias(defaultPlayerNamespace,
-                    source.getDefaultPlayerUrl().orNull());
+                    YoutubeUriCanonicaliser.standardURL(YoutubeUriCanonicaliser.videoIdFrom(source.getURL().orNull())));
             aliases.add(defaultPlayer);
             aliasesUrl.add(defaultPlayer.getValue());
         }
@@ -104,6 +104,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         return item;
     }
 
+    @SuppressWarnings("unused")
     private Encoding encodingForWebPage(YouTubeSource source) {
         Location location = new Location();
         location.setTransportType(TransportType.LINK);
@@ -141,7 +142,6 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
             return null;
         }
         Encoding encoding = new Encoding();
-        encoding.setDataContainerFormat(containerFormat);
 
         return encoding;
     }
