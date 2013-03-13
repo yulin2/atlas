@@ -97,7 +97,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
         if (keyPhrase.isPresent()) {
             content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
         }
-        content.addEquivalentTo((Described) identified); //TODO check equivalent to
+        content.addEquivalentTo((Content) identified); //TODO check equivalent to
         write(content);
     }
 
@@ -144,7 +144,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
             auxDataBrand = Maybe.<Identified>just(brand);
         }
         Brand brand = (Brand) auxDataBrand.requireValue();
-        brand.addEquivalentTo((Described) content.get(originalUri).requireValue());
+        brand.addEquivalentTo((Content) content.get(originalUri).requireValue());
         contentWriter.createOrUpdate(brand);
         return brand;
 
