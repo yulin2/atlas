@@ -62,7 +62,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
         try {
             String mbUri = generateMetaBroadcastUri(contentWordSet.getUri());
             log.debug("Processing content {}", mbUri);
-            Maybe<Identified> possibleMetaBroadcastContent = resolvedMetaBroadcastContent.get(mbUri);
+            Maybe<Identified> possibleMetaBroadcastContent = resolvedMetaBroadcastContent.getFirstValue();
             if (possibleMetaBroadcastContent.hasValue()) { // Content exists, update it
                 updateExistingContent(contentWordSet, possibleMetaBroadcastContent, keyPhrases);
             } else { // Generate new content
@@ -77,7 +77,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 
     private void createThenUpdateContent(ResolvedContent resolvedContent, ContentWords contentWordSet, String mbUri, Optional<List<KeyPhrase>> keyPhrase) {
         String subjectUri = contentWordSet.getUri();
-        Maybe<Identified> possibleContent = resolvedContent.get(subjectUri);
+        Maybe<Identified> possibleContent = resolvedContent.getFirstValue();
         if (possibleContent.hasValue()) {
             Identified identified = possibleContent.requireValue();
             String newCuri = ""; // TODO define a curie at some point
@@ -86,7 +86,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
             if (keyPhrase.isPresent()) {
                 content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
             }
-            content.addEquivalentTo((Described) identified); // TODO check
+            content.addEquivalentTo((Content) identified); // TODO check
                                                              // equivalent to
             write(content);
         } else {
@@ -108,18 +108,15 @@ public abstract class AbstractMetaBroadcastContentUpdater {
             return new Brand(newUri, newCuri, publisher);
         } else if (originalContent instanceof Series) {
             Series originalSeries = (Series) originalContent;
-            Brand brand = getOrCreateContainer(originalSeries.getParent().getId().toString());
+            Brand brand = getOrCreateBrand(originalSeries.getParent().getId().toString());
             Series series = new Series(newUri, newCuri, publisher);
-            if (originalSeries.getParent() != null) {
-                Brand brand = (Brand) getOrCreateContainer(originalSeries.getParent().getId().toString());
-                series.setParent(brand);
-            }
+            series.setParent(brand);
             return series;
         } else if (originalContent instanceof Clip) {
             return new Clip(newUri, newCuri, publisher);
         } else if (originalContent instanceof Episode) {
             Episode originalEpisode = (Episode) originalContent;
-            Brand brand = getOrCreateContainer(originalEpisode.getContainer().getId().toString());
+            Brand brand = getOrCreateBrand(originalEpisode.getContainer().getId().toString());
             Episode episode = new Episode(newUri, newCuri, publisher);
             episode.setContainer(brand);
             return episode;
@@ -131,26 +128,19 @@ public abstract class AbstractMetaBroadcastContentUpdater {
         throw new IllegalArgumentException("Unrecognised type of content: " + originalContent.getClass().getName());
     }
 
-    private Container getOrCreateContainer(String originalUri) {
+    private Brand getOrCreateBrand(String originalUri) {
         String auxDataUri = generateMetaBroadcastUri(originalUri);
         ResolvedContent content = contentResolver.findByCanonicalUris(ImmutableList.of(auxDataUri, originalUri));
-        Container originalContent = (Container) content.get(originalUri).requireValue();
-        Maybe<Identified> possibleAuxDataContainer = content.get(auxDataUri);
-        Container container;
-        if (possibleAuxDataContainer.hasValue()) {
-            container = (Container) possibleAuxDataContainer.requireValue();
-        } else {
-            if (originalContent instanceof Brand) {
-                container = new Brand(auxDataUri, "", publisher);
-            } else if (originalContent instanceof Series) {
-                container = new Series(auxDataUri, "", publisher);
-            } else {
-                throw new IllegalStateException(originalUri + " has unexpected type " + originalContent.getClass().getSimpleName());
-            }
+        Maybe<Identified> auxDataBrand = Maybe.nothing();//content.get(auxDataUri);
+        if (auxDataBrand.isNothing()) {
+            Brand brand = new Brand(auxDataUri, "", publisher);
+            auxDataBrand = Maybe.<Identified>just(brand);
         }
-        container.addEquivalentTo(originalContent);
-        contentWriter.createOrUpdate(container);
-        return container;
+        Brand brand = (Brand) auxDataBrand.requireValue();
+        //TODO: brand.addEquivalentTo((Content) content.get(originalUri).requireValue());
+        contentWriter.createOrUpdate(brand);
+        return brand;
+
     }
 
     protected List<String> generateMetaBroadcastUris(Iterable<String> uris) {
