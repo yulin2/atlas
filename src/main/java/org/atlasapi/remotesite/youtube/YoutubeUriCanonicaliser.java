@@ -21,12 +21,14 @@ import java.util.regex.Pattern;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 
 import com.google.common.collect.Lists;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class YoutubeUriCanonicaliser implements Canonicaliser {
 
 	private static final List<Pattern> alternateUris = Lists.newArrayList(
         Pattern.compile("https?://.*\\.youtube.com.*v=([^\\./&=]+).*"),
         Pattern.compile("https?://.*\\.youtube.com/v/([^\\./&=]+).*"),
+        Pattern.compile("http://.*\\.youtube.com/watch?v/([^\\./&=]+).*"),
 		Pattern.compile("tag:youtube.com,\\d+:\\w+:([^\\./&=]+)")
     );
 
@@ -39,15 +41,14 @@ public class YoutubeUriCanonicaliser implements Canonicaliser {
 	}
 
 	public static String videoIdFrom(String uri) {
-	    if(uri == null){
-	        return null;
-	    }
-		for (Pattern p : alternateUris) {
-			Matcher matcher = p.matcher(uri);
-			if (matcher.matches()) {
-				return matcher.group(1);
-			}
-		}
+	    if(uri != null){
+    		for (Pattern p : alternateUris) {
+    			Matcher matcher = p.matcher(uri);
+    			if (matcher.matches()) {
+    				return matcher.group(1);
+    			}
+    		}
+    	}
 		return null;
 	}
 

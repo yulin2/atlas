@@ -30,9 +30,11 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
+import org.atlasapi.remotesite.youtube.entity.YouTubeThumbnail;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.joda.time.Duration;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -50,8 +52,8 @@ public class YouTubeGraphExtractorTest extends TestCase {
 	static final String LOCATION_URI_2 = "http://www.youtube.com/v/svnwenn331";
 	static final String LOCATION_URI_3 = "http://www.youtube.com/v/svnwvskld31";
 
-	static final String THUMBNAIL_URI = "http://i.ytimg.com/vi/otA7tjinFX4/3.jpg";
-	static final String IMAGE_URI = "http://i.ytimg.com/vi/otA7tjinFX4/3thumb.jpg";
+	static final String THUMBNAIL_URI = "http://i.ytimg.com/vi/XK7ZpW8Dq7E/default.jpg";
+	static final String IMAGE_URI = "http://i.ytimg.com/vi/XK7ZpW8Dq7E/hqdefault.jpg";
 	
 	YouTubeGraphExtractor extractor = new YouTubeGraphExtractor();
 	YouTubeVideoEntry entry = new YouTubeVideoEntry();
@@ -62,6 +64,10 @@ public class YouTubeGraphExtractorTest extends TestCase {
 		super.setUp();
 		entry.setTitle("Video Title");
 		entry.setCategory("news");
+		YouTubeThumbnail thumb = new YouTubeThumbnail();
+		thumb.setDefaultUrl(THUMBNAIL_URI);
+		thumb.setHqDefault(IMAGE_URI);
+		entry.setThumbnail(thumb);
 		source = new TestYouTubeSource(entry, ITEM_URI);
 	}
 	
@@ -86,81 +92,16 @@ public class YouTubeGraphExtractorTest extends TestCase {
 	}
 	
 	public void testCanExtractVideoTitleDescriptionCategories() throws Exception {
-		
 		Item item = extractor.extract(source);
 		assertThat(item.getCanonicalUri(), is(ITEM_URI));
 		assertThat(item.getTitle(), is("Video Title"));
 		assertThat(item.getDescription(), is("Description of video"));
 		assertThat(item.getGenres(), is((Set<String>) Sets.<String>newHashSet("http://www.youtube.com/news")));
-		// tags were removed fromYouTube.
-		//assertThat(item.getTags(), is((Set<String>) Sets.<String>newHashSet("http://ref.atlasapi.org/tags/funny")));
 		assertThat(item.getPublisher(), is(Publisher.YOUTUBE));
-//		assertThat(item.getThumbnail(),  is(THUMBNAIL_URI));
-//		assertThat(item.getImage(), is(IMAGE_URI));
+		assertThat(item.getThumbnail(),  is(THUMBNAIL_URI));
+		assertThat(item.getImage(), is(IMAGE_URI));
 		assertThat(item.getCurie(),  is("yt:otA7tjinFX4"));
 	}
-	
-//	Encodings are notpopulated or retrieved from YouTube...
-//	@SuppressWarnings("unchecked")
-//	public void testGeneratesVersionEncodingAndLocationData() throws Exception {
-//	
-//		Item item = extractor.extract(source);
-//		assertThat(item.getCanonicalUri(), is(ITEM_URI));
-//		assertThat(item.getIsLongForm(), is(false));
-//
-//		Version version = Iterables.getOnlyElement(item.getVersions());
-//		assertThat(version.getDuration(), is(300));
-//		
-//		Set<Encoding> encodings = version.getManifestedAs();
-//		assertThat(encodings.size(), is(4));
-//		
-//		Matcher<Encoding> encoding1 = 
-//			encodingMatcher()
-//				.withDataContainerFormat(is(MimeType.APPLICATION_XSHOCKWAVEFLASH))
-//				.withVideoCoding(is(not(MimeType.VIDEO_XVP6)))
-//				.withDOG(is(true))
-//				.withLocations(hasItems(
-//						locationMatcher()
-//							.withTransportType(is(TransportType.EMBED))));
-//		
-//		
-//		Matcher<Encoding> encoding2 = 
-//			encodingMatcher()
-//				.withDataContainerFormat(is(MimeType.VIDEO_3GPP))
-//				.withVideoCoding(is(MimeType.VIDEO_H263))
-//				.withAudioCoding(is(MimeType.AUDIO_AMR))
-//				.withVideoHorizonalSize(is(176))
-//				.withVideoVerticalSize(is(144))
-//				.withAudioChannels(is(1))
-//				.withDOG(is(false))
-//				.withLocations(hasItems(
-//						locationMatcher()
-//							.withTransportSubType(is(TransportSubType.RTSP))
-//							.withTransportType(is(TransportType.STREAM))));
-//		
-//		Matcher<Encoding> encoding3 = 
-//			encodingMatcher()
-//				.withDataContainerFormat(is(MimeType.VIDEO_3GPP))
-//				.withVideoCoding(is(MimeType.VIDEO_H263))
-//				.withAudioCoding(is(MimeType.AUDIO_MP4)) 
-//				.withVideoHorizonalSize(is(176)) 
-//				.withVideoVerticalSize(is(144)) 
-//				.withAudioChannels(is(1)) 
-//				.withDOG(is(false)) 
-//				.withLocations(hasItems(
-//						locationMatcher()
-//							.withTransportSubType(is(TransportSubType.RTSP))
-//							.withTransportType(is(TransportType.STREAM))));
-//		
-//		Matcher<Encoding> encoding4 = 
-//			encodingMatcher()
-//				.withLocations(hasItems(
-//						locationMatcher()
-//							.withUri(is(ITEM_URI))
-//							.withTransportType(is(TransportType.LINK))));
-//		
-//		assertThat(encodings, hasItems(encoding1, encoding2, encoding3, encoding4));
-//	}
 	
 	class NoVideosYouTubeSource extends YouTubeSource {
 
@@ -189,8 +130,8 @@ public class YouTubeGraphExtractorTest extends TestCase {
 		}
 		
 		@Override
-		public String getImageUri() {
-			return IMAGE_URI;
+		public Optional<String> getImageUri() {
+			return Optional.<String>of(IMAGE_URI);
 		}
 	}
 	

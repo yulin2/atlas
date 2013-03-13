@@ -17,6 +17,8 @@ package org.atlasapi.remotesite.youtube;
 
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -34,7 +36,9 @@ import com.metabroadcast.common.http.HttpStatusCodeException;
  */
 public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 
-	private static final Pattern YOUTUBE_CANONICAL_URI_PATTERN = Pattern.compile("http://www\\.youtube\\.com/watch\\?v=[^\\./&=]+");
+    static final Log log = LogFactory.getLog(YouTubeAdapter.class);
+
+    private static final Pattern YOUTUBE_CANONICAL_URI_PATTERN = Pattern.compile("http://www\\.youtube\\.com/watch\\?v=[^\\./&=]+");
 	
 	private final RemoteSiteClient<YouTubeVideoEntry> gdataClient;
 	private final ContentExtractor<YouTubeSource, Item> contentExtractor;
@@ -53,8 +57,10 @@ public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 		try {
 		    YouTubeVideoEntry videoEntry = gdataClient.get(uri);
 		    String itemUri = YoutubeUriCanonicaliser.canonicalUriFor(YoutubeUriCanonicaliser.videoIdFrom(uri));
+		    
 			return contentExtractor.extract(new YouTubeSource(videoEntry, itemUri));
 		} catch (HttpStatusCodeException e) {
+		    log.error("HTTP Error Status code:", e);
 		    return null;
 		} catch (Exception e) {
 			throw new FetchException("Failed to fetch: " + uri, e);

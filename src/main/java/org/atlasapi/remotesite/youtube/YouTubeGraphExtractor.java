@@ -15,6 +15,8 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.youtube;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -54,9 +56,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 
     @Override
     public Item extract(YouTubeSource source) {
-        if (source == null) {
-            return null;
-        }
+        checkNotNull(source);
 
         Set<Encoding> encodings = Sets.newHashSet();
         ArrayList<Alias> aliases = new ArrayList<Alias>();
@@ -72,7 +72,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 
             encodings.add(encoding);
         }
-        encodings.add(encodingForWebPage(source));
+        // encodings.add(encodingForWebPage(source));
 
         Version version = new Version();
 
@@ -85,10 +85,10 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         Item item = item(source);
         item.addVersion(version);
 
-        if (source.getDefaultPlayerUrl() != null) {
+        if (source.getDefaultPlayerUrl().isPresent()) {
             String defaultPlayerNamespace = "";
             Alias defaultPlayer = new Alias(defaultPlayerNamespace,
-                    source.getDefaultPlayerUrl());
+                    YoutubeUriCanonicaliser.standardURL(YoutubeUriCanonicaliser.videoIdFrom(source.getURL().orNull())));
             aliases.add(defaultPlayer);
             aliasesUrl.add(defaultPlayer.getValue());
         }
@@ -104,10 +104,11 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         return item;
     }
 
+    @SuppressWarnings("unused")
     private Encoding encodingForWebPage(YouTubeSource source) {
         Location location = new Location();
         location.setTransportType(TransportType.LINK);
-        location.setUri(YoutubeUriCanonicaliser.standardURL(YoutubeUriCanonicaliser.videoIdFrom(source.getURL())));
+        location.setUri(YoutubeUriCanonicaliser.standardURL(YoutubeUriCanonicaliser.videoIdFrom(source.getURL().orNull())));
 
         Encoding encoding = new Encoding();
         encoding.addAvailableAt(location);
@@ -117,14 +118,14 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 
     private Item item(YouTubeSource source) {
         Item item = new Item(source.getUri(),
-                YoutubeUriCanonicaliser.curieFor(source.getUri()),
+                YoutubeUriCanonicaliser.curieFor(source.getURL().get()),
                 Publisher.YOUTUBE);
 
         item.setTitle(source.getVideoTitle());
         item.setDescription(source.getDescription());
 
         item.setThumbnail(source.getThumbnailImageUri());
-        item.setImage(source.getImageUri());
+        item.setImage(source.getImageUri().orNull());
         if (source.getVideos().size() > 0) {
             item.setIsLongForm((source.getVideos().get(0).getDuration())
                     .isLongerThan(Duration.standardMinutes(15)));
@@ -141,7 +142,6 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
             return null;
         }
         Encoding encoding = new Encoding();
-        encoding.setDataContainerFormat(containerFormat);
 
         return encoding;
     }
@@ -152,19 +152,19 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         Policy policy = new Policy();
         policy.setAvailabilityStart(source.getUploaded());
 
-        if (source.getDefaultPlayerUrl() != null && !source.getDefaultPlayerUrl().equals("")) {
+        if (source.getDefaultPlayerUrl().isPresent() && !source.getDefaultPlayerUrl().get().equals("")) {
             Location locationDefault = new Location();
             locationDefault.setPolicy(policy);
             locationDefault.setTransportType(TransportType.LINK);
-            locationDefault.setUri(source.getDefaultPlayerUrl());
+            locationDefault.setUri(source.getDefaultPlayerUrl().orNull());
             locations.add(locationDefault);
         }
 
-        if (source.getMobilePlayerUrl() != null && !source.getMobilePlayerUrl().equals("")) {
+        if (source.getMobilePlayerUrl().isPresent() && !source.getMobilePlayerUrl().get().equals("")) {
             Location locationMobile = new Location();
             locationMobile.setPolicy(policy);
             locationMobile.setTransportType(TransportType.LINK);
-            locationMobile.setUri(source.getMobilePlayerUrl());
+            locationMobile.setUri(source.getMobilePlayerUrl().orNull());
             locations.add(locationMobile);
         }
 

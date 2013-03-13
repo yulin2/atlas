@@ -1,9 +1,9 @@
 package org.atlasapi.remotesite.youtube.entity;
 
 public class YouTubeContent {
-    String one;
-    String five;
-    String six;
+    private String one;
+    private String five;
+    private String six;
 
     public String getOne() {
         return one;
