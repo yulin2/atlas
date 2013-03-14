@@ -78,7 +78,7 @@ public class C4Module {
 	}
 	
 	@Bean protected C4AtoZAtomContentUpdateTask xboxC4AtozUpdater() {
-	    return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.of(Platform.XBOX)));
+	    return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, Optional.of(Platform.XBOX), c4BrandFetcher(Optional.of(Platform.XBOX)));
 	}
 	
     @Bean protected SimpleHttpClient httpsClient() {
