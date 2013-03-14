@@ -147,8 +147,8 @@ public class C4BrandExtractorTest extends TestCase {
 		// TODO new alias
         assertThat(firstItem.getAliasUrls().size(), is(2));
 		assertThat(firstItem.getAliasUrls(), is((Set<String>) ImmutableSet.of(
-	        "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2921983", 
-	        "tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1"
+	        "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045", 
+	        "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1/episode-1"
         )));
 		
 		assertThat(firstItem.getTitle(), is(("Series 1 Episode 1")));
