@@ -264,44 +264,41 @@ var updatePrecedence = function(callback) {
 var updateEnabled = function(callback){
 	var slug = app.slug;
 	var count = 0;
+	var sources = {'enabled':[], 'disabled':[]};
+	
 	for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
 		var enabled = app.configuration.publishers[i].enabled;
 		var publisher = app.configuration.publishers[i].key;
 		var available = app.configuration.publishers[i].state == "available";
 		if (!available) {
-			count++;
 			continue;
 		}
-		var type = 'delete';
-		var data = null;
-		if(enabled){
-			type = 'post';
-			data = {pubkey: publisher};
+		if (enabled) {
+			sources.enabled.push(publisher);
+		} else {
+			sources.disabled.push(publisher);
 		}
-		var url = "/admin/applications/"+slug+"/publishers/enabled";
-		if(!enabled){
-			url += "/"+publisher;
-		}
-		url += ".json";
-
-		$.ajax({
-			type: type,
-			url: url,
-			data: data,
-			success:function(responseData, textStatus, XMLHttpRequest) {
-
-			},
-			error:function(textStatus) {
-				console.log("fail:", textStatus);
-			},
-			complete: function(){
-				if(count === ii-1){
-					callback();
-				}
-				count++;
-			}
-		});
 	}
+	var url = "/admin/applications/"+slug+"/publishers.json";
+	
+	$.ajax({
+	    type: "POST",
+		url: url,
+		data: JSON.stringify(sources),
+		async: false,
+		success:function(responseData, textStatus, XMLHttpRequest) {
+		    $('#saveApplicationSources').val("Changes saved");
+		    setTimeout(function() {
+		       $('#saveApplicationSources').val("Save Changes");
+		    }, 2000);
+		},
+		error:function(textStatus) {
+		    console.log("fail:", textStatus);
+		},
+		complete: function(){
+		    callback();
+		}
+    });
 }
 
 var disablePrecedence = function(callback) {
