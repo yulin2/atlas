@@ -82,6 +82,9 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
             version.setManifestedAs(encodings);
             item.setVersions(ImmutableSet.of(version));
         }
+        if (inputItem.getBrandSummary() != null) {
+            item.setParentRef(new ParentRef(inputItem.getBrandSummary().getUri()));
+        }
         return item;
     }
 
