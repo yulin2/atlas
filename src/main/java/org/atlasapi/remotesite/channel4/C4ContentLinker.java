@@ -32,7 +32,7 @@ class C4ContentLinker {
             Episode odEpisode = odIndex.remove(episode.getCanonicalUri());
             if (odEpisode != null) {
                 episode.setVersions(odEpisode.getVersions());
-                episode.addAliases(odEpisode.getAliases());
+                episode.addAliasUrls(odEpisode.getAliasUrls());
             }
         }
         
