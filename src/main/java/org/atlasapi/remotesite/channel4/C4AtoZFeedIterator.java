@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.atlasapi.remotesite.support.atom.AtomClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.AbstractIterator;
@@ -20,18 +21,18 @@ import com.sun.syndication.feed.atom.Link;
 
 public class C4AtoZFeedIterator extends AbstractIterator<Optional<Feed>> {
     
-    private final Log log = LogFactory.getLog(getClass());
-
-    private static final Pattern PAGE_PATTERN = Pattern.compile("http://[^.]*\\.channel4\\.com/[^/]*/atoz/(.+/page-\\d+).atom.*");
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    
+    private static final Pattern PAGE_PATTERN = Pattern.compile("https?://[^.]*\\.channel4\\.com/[^/]*/atoz/(.+/page-\\d+).atom.*");
 
     private final AtomClient client;
     private final String uriBase;
-    private final Optional<String> platform;
+    private final Optional<Platform> platform;
     private final Iterator<String> letterIterator;
     
     private String nextPageUri = null;
 
-    public C4AtoZFeedIterator(SimpleHttpClient client, String uriBase, Optional<String> platform) {
+    public C4AtoZFeedIterator(SimpleHttpClient client, String uriBase, Optional<Platform> platform) {
         this.client = new AtomClient(client);
         this.uriBase = uriBase;
         this.platform = platform;
@@ -47,11 +48,15 @@ public class C4AtoZFeedIterator extends AbstractIterator<Optional<Feed>> {
         nextUri = optionallyAppendPlatform(nextUri);
         Feed feed = null;
         try {
+            log.debug("Fetching {}", nextUri);
             feed = client.get(nextUri);
             nextPageUri = extractNextPageUri(feed);
         } catch (HttpException e) {
             log.warn(e.getResponse().statusCode() + ": Failed to fetch " + nextUri);
+            nextPageUri = null;
         } catch (Exception e) {
+            log.error("Failed to fetch " + nextUri, e);
+            nextPageUri = null;
         }
         return Optional.fromNullable(feed);
     }
@@ -61,7 +66,7 @@ public class C4AtoZFeedIterator extends AbstractIterator<Optional<Feed>> {
     }
     
     private String appendPlatform(String url) {
-        return Urls.appendParameters(url, "platform", platform.get());
+        return Urls.appendParameters(url, "platform", platform.get().key());
     }
 
     private String nextUri() {
@@ -79,12 +84,14 @@ public class C4AtoZFeedIterator extends AbstractIterator<Optional<Feed>> {
 
     @SuppressWarnings("unchecked")
     private String extractNextPageUri(Feed feed) {
-        for (Link link : (List<Link>) feed.getOtherLinks()) {
-            if ("next".equals(link.getRel())) {
-                String next = link.getHref();
-                Matcher matcher = PAGE_PATTERN.matcher(next);
-                if (matcher.matches()) {
-                    return matcher.group(1);
+        if (feed != null) {
+            for (Link link : (List<Link>) feed.getOtherLinks()) {
+                if ("next".equals(link.getRel())) {
+                    String next = link.getHref();
+                    Matcher matcher = PAGE_PATTERN.matcher(next);
+                    if (matcher.matches()) {
+                        return matcher.group(1);
+                    }
                 }
             }
         }

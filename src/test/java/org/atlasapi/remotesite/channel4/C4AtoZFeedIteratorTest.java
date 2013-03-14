@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.atlasapi.media.entity.Policy.Platform;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
@@ -28,7 +29,7 @@ public class C4AtoZFeedIteratorTest {
     public void testIteratesOverAtoZFeeds() throws HttpException, Exception {
         
         String base = "base/";
-        Optional<String> platform = Optional.absent();
+        Optional<Platform> platform = Optional.absent();
         C4AtoZFeedIterator iterator = new C4AtoZFeedIterator(client, base, platform);
         
         String next = "http://asdf.channel4.com/zxcv/atoz/z/page-1.atom";
@@ -48,20 +49,20 @@ public class C4AtoZFeedIteratorTest {
     public void testIteratesOverAtoZFeedsWithPlatformPresent() throws HttpException, Exception {
         
         String base = "base/";
-        Optional<String> platform = Optional.of("ps3");
+        Optional<Platform> platform = Optional.of(Platform.IOS);
         C4AtoZFeedIterator iterator = new C4AtoZFeedIterator(client, base, platform);
         
-        String next = "http://ps3.channel4.com/zxcv/atoz/z/page-1.atom?platform=ps3";
-        when(client.get(requestFor("base/atoz/z.atom?platform=ps3"))).thenReturn(feedWithNextLink(next));
-        when(client.get(requestFor("base/atoz/z/page-1.atom?platform=ps3"))).thenReturn(new Feed());
+        String next = "http://ps3.channel4.com/zxcv/atoz/z/page-1.atom?platform=ios";
+        when(client.get(requestFor("base/atoz/z.atom?platform=ios"))).thenReturn(feedWithNextLink(next));
+        when(client.get(requestFor("base/atoz/z/page-1.atom?platform=ios"))).thenReturn(new Feed());
         
         iterator.next();
         iterator.next();
         iterator.next();
         
-        verify(client).get(requestFor("base/atoz/z.atom?platform=ps3"));
-        verify(client).get(requestFor("base/atoz/z/page-1.atom?platform=ps3"));
-        verify(client).get(requestFor("base/atoz/y.atom?platform=ps3"));
+        verify(client).get(requestFor("base/atoz/z.atom?platform=ios"));
+        verify(client).get(requestFor("base/atoz/z/page-1.atom?platform=ios"));
+        verify(client).get(requestFor("base/atoz/y.atom?platform=ios"));
     }
     
     private Feed feedWithNextLink(String uri) {

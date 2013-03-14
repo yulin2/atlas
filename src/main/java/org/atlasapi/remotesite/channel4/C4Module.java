@@ -79,21 +79,18 @@ public class C4Module {
         return new C4EpgUpdater(atomApi(), httpsClient(), lastUpdatedSettingContentWriter,
                 contentResolver, c4BrandFetcher(Optional.<Platform>absent()), trimmer, log, new DayRangeGenerator().withLookAhead(7).withLookBack(7));
     }
-
-    @Bean
-    protected C4AtoZAtomContentUpdateTask pcC4AtozUpdater() {
-        return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.<Platform>absent()));
-    }
-
-    @Bean
-    protected C4AtoZAtomContentUpdateTask xboxC4AtozUpdater() {
-        return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.of(Platform.XBOX)));
-    }
-
-    @Bean
-    protected SimpleHttpClient httpsClient() {
-        try {
-            URL jksFile = new File(keyStorePath).toURI().toURL();
+	
+	@Bean protected C4AtoZAtomContentUpdateTask pcC4AtozUpdater() {
+		return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.<Platform>absent()));
+	}
+	
+	@Bean protected C4AtoZAtomContentUpdateTask xboxC4AtozUpdater() {
+	    return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, Optional.of(Platform.XBOX), c4BrandFetcher(Optional.of(Platform.XBOX)));
+	}
+	
+    @Bean protected SimpleHttpClient httpsClient() {
+	    try {
+	        URL jksFile = new File(keyStorePath).toURI().toURL();
             return HttpClients.httpsClient(jksFile, keyStorePass);
         } catch (Exception e) {
             throw Throwables.propagate(e);

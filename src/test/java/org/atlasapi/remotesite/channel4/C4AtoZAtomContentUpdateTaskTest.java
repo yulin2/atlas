@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Policy.Platform;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
@@ -59,9 +60,9 @@ public class C4AtoZAtomContentUpdateTaskTest extends TestCase {
     @Test
     public void testRequestsFeedsAndPassesExtractedUrisToAdapterWithPlatform() throws Exception {
         
-        C4AtoZAtomContentUpdateTask adapter = new C4AtoZAtomContentUpdateTask(client, apiBase, Optional.of("ps3"), brandAdapter);
+        C4AtoZAtomContentUpdateTask adapter = new C4AtoZAtomContentUpdateTask(client, apiBase, Optional.of(Platform.XBOX), brandAdapter);
     
-        when(client.get(requestFor("http://pmlsc.channel4.com/pmlsd/atoz/a.atom?platform=ps3"))).thenReturn(ps3atoza.build());
+        when(client.get(requestFor("http://pmlsc.channel4.com/pmlsd/atoz/a.atom?platform=xbox"))).thenReturn(ps3atoza.build());
         when(brandAdapter.canFetch(anyString())).thenReturn(true);
 
         adapter.run();

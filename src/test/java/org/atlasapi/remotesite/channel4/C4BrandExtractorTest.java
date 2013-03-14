@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.channel4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -47,6 +46,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
@@ -140,11 +140,11 @@ public class C4BrandExtractorTest extends TestCase {
 		assertThat(firstItem.getCanonicalUri(), is("http://www.channel4.com/programmes/36423/001"));
 
 		// TODO new alias
-		assertThat(firstItem.getAliasUrls().size(), is(2));
-		assertThat(firstItem.getAliasUrls(), hasItems(
-            "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1/episode-1", 
-            "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045"
-        ));
+        assertThat(firstItem.getAliasUrls().size(), is(2));
+		assertThat(firstItem.getAliasUrls(), is((Set<String>) ImmutableSet.of(
+	        "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045", 
+	        "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1/episode-1"
+        )));
 		
 		assertThat(firstItem.getTitle(), is(("Series 1 Episode 1")));
 		
@@ -178,7 +178,7 @@ public class C4BrandExtractorTest extends TestCase {
 	            assertEquals(1, version.getBroadcasts().size());
 	            for (Broadcast broadcast: version.getBroadcasts()) {
 	                if (broadcast.getBroadcastDuration() == 60*55) {
-	                    assertTrue(broadcast.getAliases().contains("tag:www.channel4.com,2009:slot/E439861"));
+	                    assertTrue(broadcast.getAliasUrls().contains("tag:www.channel4.com,2009:slot/E439861"));
 	                    assertThat(broadcast.getSourceId(), is("e4:39861"));
 	                    found = true;
 	                }
@@ -219,10 +219,10 @@ public class C4BrandExtractorTest extends TestCase {
                 assertEquals(2, version.getBroadcasts().size());
                 for (Broadcast broadcast: version.getBroadcasts()) {
                     if (broadcast.getBroadcastDuration() == 60*55) {
-                        assertTrue(broadcast.getAliases().contains("tag:www.channel4.com,2009:slot/E439861"));
+                        assertTrue(broadcast.getAliasUrls().contains("tag:www.channel4.com,2009:slot/E439861"));
                         assertThat(broadcast.getSourceId(), is("e4:39861"));
                         found = true;
-                    } else if (broadcast.getAliases().contains("tag:www.channel4.com:someid")) {
+                    } else if (broadcast.getAliasUrls().contains("tag:www.channel4.com:someid")) {
                         foundOld = true;
                     }
                 }
