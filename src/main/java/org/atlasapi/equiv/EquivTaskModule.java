@@ -21,6 +21,7 @@ import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
 import org.atlasapi.equiv.results.probe.EquivalenceResultProbeController;
 import org.atlasapi.equiv.results.probe.MongoEquivalenceProbeStore;
+import org.atlasapi.equiv.results.www.EquivGraphController;
 import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
@@ -31,6 +32,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,7 @@ public class EquivTaskModule {
     private @Autowired SimpleScheduler taskScheduler;
     private @Autowired ContentResolver contentResolver;
     private @Autowired DatabasedMongo db;
+    private @Autowired LookupEntryStore lookupStore;
     
     private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
     private @Autowired RecentEquivalenceResultStore equivalenceResultStore;
@@ -102,6 +105,10 @@ public class EquivTaskModule {
     
     public @Bean RecentResultController recentEquivalenceResultController() {
         return new RecentResultController(equivalenceResultStore);
+    }
+    
+    public @Bean EquivGraphController debugGraphController() {
+        return new EquivGraphController(lookupStore);
     }
     
     //Probes...

@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ModelTransformer;
 import org.atlasapi.input.ReadException;
@@ -60,12 +59,9 @@ public class ContentWriteController {
     public Void writeContent(HttpServletRequest req, HttpServletResponse resp) {
         
         Maybe<ApplicationConfiguration> possibleConfig = Maybe.nothing();
-		try {
-			possibleConfig = appConfigFetcher.configurationFor(req);
-		} catch (InvalidAPIKeyException e) {
-			log.info("API Key not enabled", e);
-		}
-        
+		
+		possibleConfig = appConfigFetcher.configurationFor(req);
+		
         if (possibleConfig.isNothing()) {
             return error(resp, HttpStatus.UNAUTHORIZED.value());
         }

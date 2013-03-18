@@ -422,7 +422,13 @@ var updateEnabledDisabled = function() {
 	} else {
 		$('#appEnabled').attr('checked', !checkedStatus);
 	}
-}
+};
+
+$('#appEnabled').live('click', function() {
+	updateEnabledDisabled();
+});
+
+
 
 $('#showEnabledOnly').live('click', function() {
 	var url = "/admin/applications?showEnabledOnly=";
