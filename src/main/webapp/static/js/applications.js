@@ -405,3 +405,37 @@ $('#search').live('keypress',function(e) {
 		runSearch();	
 	}
 });
+
+var updateEnabledDisabled = function() {
+	var checkedStatus = $('#appEnabled').attr('checked');
+	var action = checkedStatus ? "enable" : "disable";
+	var check = confirm("Are you sure you want to " + action + " the API key for " + app.slug + "?");
+	if (check) {
+		var url = "/admin/applications/" + app.slug + "/" + action;
+		$('#saveApplicationSources').addClass('loading');
+		$.ajax({
+			type:'POST',
+			url: url,
+			success:function(responseData, textStatus, XMLHttpRequest) {
+				$('#saveApplicationSources').removeClass('loading');
+			},
+			error:function(textStatus) {
+				console.log("fail:", textStatus);
+			}
+		});	
+	} else {
+		$('#appEnabled').attr('checked', !checkedStatus);
+	}
+};
+
+$('#appEnabled').live('click', function() {
+	updateEnabledDisabled();
+});
+
+
+
+$('#showEnabledOnly').live('click', function() {
+	var url = "/admin/applications?showEnabledOnly=";
+	url += $(this).attr('checked') ? "yes" : "no";
+	window.location.href = url;
+});

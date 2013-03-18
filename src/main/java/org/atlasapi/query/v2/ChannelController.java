@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.MediaType;
@@ -124,7 +125,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
     
     @RequestMapping(value={"/3.0/channels/{id}.*", "/channels/{id}.*"})
     public void listChannel(HttpServletRequest request, HttpServletResponse response,
-            @PathVariable("id") String id) throws IOException {
+            @PathVariable("id") String id) throws IOException, InvalidAPIKeyException {
         try {
             Maybe<Channel> possibleChannel = channelResolver.fromId(codec.decode(id).longValue());
             if (possibleChannel.isNothing()) {

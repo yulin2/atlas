@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Item;
@@ -54,7 +55,7 @@ public class ScheduleControllerTest {
     
     @Test
     @SuppressWarnings("unchecked")
-    public void testScheduleRequestFailsWithNoPublishersOrApiKey() throws IOException {
+    public void testScheduleRequestFailsWithNoPublishersOrApiKey() throws IOException, InvalidAPIKeyException {
         String to = new DateTime(DateTimeZones.UTC).toString();
         String from = new DateTime(DateTimeZones.UTC).toString();
         HttpServletRequest request = new StubHttpServletRequest();
@@ -70,7 +71,7 @@ public class ScheduleControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testScheduleRequestPassWithJustPublishers() throws IOException {
+    public void testScheduleRequestPassWithJustPublishers() throws IOException, InvalidAPIKeyException {
         DateTime from = new DateTime(DateTimeZones.UTC);
         DateTime to = new DateTime(DateTimeZones.UTC);
         HttpServletRequest request = new StubHttpServletRequest();

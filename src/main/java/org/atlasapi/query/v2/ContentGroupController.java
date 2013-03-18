@@ -5,11 +5,11 @@ import com.google.common.base.Predicate;
 
 import java.io.IOException;
 
-import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.output.AtlasErrorSummary;
@@ -51,13 +51,13 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
     }
 
     @RequestMapping(value = {"3.0/content_groups.*", "content_groups.*"})
-    public void contentGroup(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void contentGroup(HttpServletRequest req, HttpServletResponse resp) throws IOException, InvalidAPIKeyException {
         ContentQuery query = builder.build(req);
         modelAndViewFor(req, resp, query.getSelection().apply(Iterables.filter(contentGroupResolver.findAll(), publisherFilter(query))), query.getConfiguration());
     }
 
     @RequestMapping(value = {"3.0/content_groups/{id}.*", "content_groups/{id}.*"})
-    public void contentGroup(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
+    public void contentGroup(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException, InvalidAPIKeyException {
         long contentGroupId;
         try {
             contentGroupId = idCodec.decode(id).longValue();
@@ -82,7 +82,7 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
     }
 
     @RequestMapping(value = {"3.0/content_groups/{id}/content.*", "content_groups/{id}/content.*"})
-    public void contentGroupContents(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
+    public void contentGroupContents(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException, InvalidAPIKeyException {
         long contentGroupId;
         try {
             contentGroupId = idCodec.decode(id).longValue();
