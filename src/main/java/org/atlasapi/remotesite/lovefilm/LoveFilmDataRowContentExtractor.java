@@ -14,6 +14,7 @@ import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.DRM_RIGHTS;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.EPISODE_SEQUENCE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.EXTERNAL_PRODUCT_DESCRIPTION_URL;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.GENRE;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.HD_AVAILABLE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.HEROSHOT_URL;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ITEM_NAME;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ITEM_TYPE_KEYWORD;
@@ -32,9 +33,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
-
-import org.atlasapi.feeds.utils.lovefilm.LoveFilmGenreConverter;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Certificate;
@@ -61,7 +59,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -329,7 +326,21 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         if (!duration.equals("")) {
             version.setDuration(Duration.standardSeconds(Long.parseLong(duration)));
         }
+        
         Encoding encoding = new Encoding();
+        if (HD_AVAILABLE.valueFrom(source).equals("1")) {
+            // HD
+            encoding.setVideoHorizontalSize(1280);
+            encoding.setVideoVerticalSize(720);
+            encoding.setVideoAspectRatio("16:9");
+            encoding.setBitRate(3308);
+        } else {
+            // SD
+            encoding.setVideoHorizontalSize(720);
+            encoding.setVideoVerticalSize(576);
+            encoding.setVideoAspectRatio("16:9");
+            encoding.setBitRate(1600);
+        }
         
         Location location = new Location();
         location.setUri(EXTERNAL_PRODUCT_DESCRIPTION_URL.valueFrom(source));
