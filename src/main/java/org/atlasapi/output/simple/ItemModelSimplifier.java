@@ -402,6 +402,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         simpleLocation.setUri(location.getUri());
         simpleLocation.setEmbedCode(location.getEmbedCode());
         simpleLocation.setEmbedId(location.getEmbedId());
+        simpleLocation.setAvailable(location.getAvailable());
 
     }
 }
