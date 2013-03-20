@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -25,6 +26,7 @@ public class LoveFilmModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
+    private @Autowired ContentLister contentLister;
     private @Autowired AdapterLog log;
     
     @PostConstruct
@@ -39,10 +41,11 @@ public class LoveFilmModule {
         String s3bucket = Configurer.get("lovefilm.s3.bucket").get();
         String s3folder = Configurer.get("lovefilm.s3.folder").get();
         String s3fileName = Configurer.get("lovefilm.s3.fileName").get();
+        int missingThreshold = Configurer.get("lovefilm.missingThreshold").toInt();
         AWSCredentials credentials = new AWSCredentials(s3access, s3secret);
         RestS3ServiceSupplier serviceSupplier = new RestS3ServiceSupplier(credentials);
         LoveFilmDataSupplier dataSupplier = new S3LoveFilmDataSupplier(serviceSupplier, s3bucket, s3folder, s3fileName);
-        LoveFilmDataRowHandler dataHandler = new DefaultLoveFilmDataRowHandler(contentResolver, contentWriter);
+        LoveFilmDataRowHandler dataHandler = new DefaultLoveFilmDataRowHandler(contentResolver, contentWriter, contentLister, missingThreshold);
         return new LoveFilmCsvUpdateTask(dataSupplier, dataHandler);
     }
 }
