@@ -16,6 +16,7 @@ import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.listing.ContentLister;
 
 @Configuration
 public class LoveFilmModule {
@@ -25,6 +26,7 @@ public class LoveFilmModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
+    private @Autowired ContentLister contentLister;
     private @Autowired AdapterLog log;
     
     @PostConstruct
@@ -39,10 +41,11 @@ public class LoveFilmModule {
         String s3secret = Configurer.get("s3.secret").get();
         String s3bucket = Configurer.get("lovefilm.s3.bucket").get();
         String s3folder = Configurer.get("lovefilm.s3.folder").get();
+        int missingThreshold = Configurer.get("lovefilm.missingThreshold").toInt();
         AWSCredentials credentials = new AWSCredentials(s3access, s3secret);
         RestS3ServiceSupplier serviceSupplier = new RestS3ServiceSupplier(credentials);
         LoveFilmDataSupplier dataSupplier = new S3LoveFilmDataSupplier(serviceSupplier, s3bucket, s3folder);
-        LoveFilmDataRowHandler dataHandler = new DefaultLoveFilmDataRowHandler(contentResolver, contentWriter);
+        LoveFilmDataRowHandler dataHandler = new DefaultLoveFilmDataRowHandler(contentResolver, contentWriter, contentLister, missingThreshold);
         return new LoveFilmCsvUpdateTask(dataSupplier, dataHandler);
     }
 

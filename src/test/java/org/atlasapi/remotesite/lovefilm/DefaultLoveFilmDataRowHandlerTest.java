@@ -9,6 +9,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.atlasapi.media.entity.Brand;
@@ -18,6 +19,8 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.content.listing.ContentLister;
+import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.junit.Test;
@@ -28,6 +31,7 @@ import org.mockito.stubbing.OngoingStubbing;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
 
 public class DefaultLoveFilmDataRowHandlerTest {
 
@@ -36,10 +40,11 @@ public class DefaultLoveFilmDataRowHandlerTest {
     
     private final ContentResolver resolver = mock(ContentResolver.class);
     private final ContentWriter writer = mock(ContentWriter.class);
+    private final ContentLister lister = new DummyContentLister();
     @SuppressWarnings("unchecked")
     private final ContentExtractor<LoveFilmDataRow, Optional<Content>> extractor = mock(ContentExtractor.class);
     
-    private final DefaultLoveFilmDataRowHandler handler = new DefaultLoveFilmDataRowHandler(resolver, writer, extractor);
+    private final DefaultLoveFilmDataRowHandler handler = new DefaultLoveFilmDataRowHandler(resolver, writer, lister, extractor, 10);
     
     @Test
     public void testHandlesWritingContentInAnyOrder() {
@@ -81,4 +86,21 @@ public class DefaultLoveFilmDataRowHandlerTest {
         }
     }
 
+    private static class DummyContentLister implements ContentLister {
+        
+        private List<Content> content;
+        
+        public DummyContentLister() {
+            this.content = ImmutableList.of();
+        }
+        
+        @Override
+        public Iterator<Content> listContent(ContentListingCriteria criteria) {
+            
+            ImmutableList.Builder<Iterator<Content>> iterators = ImmutableList.builder();
+            iterators.add(content.iterator());
+            
+            return Iterators.concat(iterators.build().iterator());
+        }
+    }
 }

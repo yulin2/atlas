@@ -1,8 +1,10 @@
 package org.atlasapi.remotesite.lovefilm;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
@@ -11,9 +13,12 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.listing.ContentLister;
+import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.ContentMerger;
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
@@ -25,6 +30,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 
 /**
@@ -45,20 +51,25 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     private final ContentResolver resolver;
     private final ContentWriter writer;
+    private final ContentLister lister;
     private final ContentExtractor<LoveFilmDataRow, Optional<Content>> extractor;
 
     private final Map<String, Container> seen = Maps.newHashMap();
     private final SetMultimap<String, Content> cached = HashMultimap.create();
+    private final Set<Content> seenContent = Sets.newHashSet();
+    private final int missingContentPercentage;
 
-    public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer) {
-        this(resolver, writer, new LoveFilmDataRowContentExtractor());
+    public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer, ContentLister lister, int missingContentPercentage) {
+        this(resolver, writer, lister, new LoveFilmDataRowContentExtractor(), missingContentPercentage);
     }
 
-    public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer, 
-            ContentExtractor<LoveFilmDataRow, Optional<Content>> extractor) {
+    public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer, ContentLister lister, 
+            ContentExtractor<LoveFilmDataRow, Optional<Content>> extractor, int missingContentPercentage) {
         this.resolver = resolver;
         this.writer = writer;
+        this.lister = lister;
         this.extractor = extractor;
+        this.missingContentPercentage = missingContentPercentage;
     }
 
     @Override
@@ -72,6 +83,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
             return;
         }
         Content content = possibleContent.get();
+        seenContent.add(content);
         Maybe<Identified> existing = resolve(content.getCanonicalUri());
         if (existing.isNothing()) {
             write(content);
@@ -96,6 +108,41 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         }
         seen.clear();
         cached.clear();
+        
+        checkForDeletedContent();
+        
+        seenContent.clear();
+    }
+
+    private void checkForDeletedContent() {
+        Set<Content> allLoveFilmContent = ImmutableSet.copyOf(resolveAllLoveFilmContent());
+        Set<Content> notSeen = Sets.difference(allLoveFilmContent, seenContent);
+        
+        float missingPercentage = ((float) notSeen.size() / (float) allLoveFilmContent.size()) * 100;
+        if (missingPercentage > (float) missingContentPercentage) {
+            log.error("File failed to update " + missingPercentage + "% of all LoveFilm content. File may be truncated.");
+        } else {
+            for (Content notSeenContent : notSeen) {
+                notSeenContent.setActivelyPublished(false);
+                // write
+                if (notSeenContent instanceof Item) {
+                    writer.createOrUpdate((Item) notSeenContent);
+                } else if (notSeenContent instanceof Container) {
+                    writer.createOrUpdate((Container) notSeenContent);
+                } else {
+                    throw new RuntimeException("LoveFilm content with uri " + notSeenContent.getCanonicalUri() + " not an Item or a Container");
+                }
+            }
+        }
+    }
+
+    private Iterator<Content> resolveAllLoveFilmContent() {
+        ContentListingCriteria criteria = ContentListingCriteria
+            .defaultCriteria()
+            .forPublisher(Publisher.LOVEFILM)
+            .build();
+        
+        return lister.listContent(criteria);
     }
 
     private Optional<Content> extract(LoveFilmDataRow row) {
