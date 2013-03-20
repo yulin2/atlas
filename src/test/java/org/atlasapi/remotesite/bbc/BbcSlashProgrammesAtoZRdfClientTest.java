@@ -17,11 +17,17 @@ package org.atlasapi.remotesite.bbc;
 
 import java.io.IOException;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+
 import junit.framework.TestCase;
 
 import org.apache.commons.io.IOUtils;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZRdfClient;
 import org.atlasapi.remotesite.bbc.atoz.SlashProgrammesAtoZRdf;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
@@ -29,7 +35,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
+import com.google.common.io.Resources;
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpRequest;
 
 /**
  * Unit test for {@link BbcSlashProgrammesAtoZRdfClient}.
@@ -48,7 +56,7 @@ public class BbcSlashProgrammesAtoZRdfClientTest extends TestCase {
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
 		context.checking(new Expectations() {{ 
-			one(httpClient).getContentsOf(URI); will(returnValue(xmlDocument()));
+			one(httpClient).get(with(request(URI))); will(returnValue(xmlDocument()));
 		}});
 		
 		SlashProgrammesAtoZRdf atoz = new BbcSlashProgrammesAtoZRdfClient(httpClient).get(URI);
@@ -60,7 +68,24 @@ public class BbcSlashProgrammesAtoZRdfClientTest extends TestCase {
 		}
 	}
 
-	protected String xmlDocument() throws IOException {
-		return IOUtils.toString(new ClassPathResource("all.rdf.xml").getInputStream());
+	protected SlashProgrammesAtoZRdf xmlDocument() throws Exception {
+        return (SlashProgrammesAtoZRdf) JAXBContext.newInstance(SlashProgrammesAtoZRdf.class)
+                .createUnmarshaller()
+                .unmarshal(Resources.getResource("all.rdf.xml"));
+	}
+	
+	private Matcher<SimpleHttpRequest<?>> request(final String uri) {
+	    return new TypeSafeMatcher<SimpleHttpRequest<?>>() {
+
+            @Override
+            public void describeTo(Description desc) {
+                desc.appendText("request with uri " + uri);
+            }
+
+            @Override
+            public boolean matchesSafely(SimpleHttpRequest<?> req) {
+                return req.getUrl().equals(uri);
+            }
+        };
 	}
 }
