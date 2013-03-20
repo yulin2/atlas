@@ -101,7 +101,11 @@ public class PaCompletePeopleUpdater extends ScheduledTask {
 
             File latestFile = BY_DATE_ORDER.max(files);
             Matcher matcher = FULL_FILE.matcher(latestFile.toURI().toString());
-            if (matcher.matches()) {
+            
+            if (!matcher.matches()) {
+                throw new RuntimeException("No full profiles dump file found");
+            } else {
+                
                 log.info("Processing file " + latestFile.toString());
                 final File fileToProcess = store.copyForProcessing(latestFile);
 
@@ -122,8 +126,6 @@ public class PaCompletePeopleUpdater extends ScheduledTask {
                     }
                 }
                 
-            } else {
-                throw new RuntimeException("No full profiles dump file found");
             }
 
             reportStatus(String.format("found %s files, processed most recent file %s", Iterables.size(files), latestFile.getName()));

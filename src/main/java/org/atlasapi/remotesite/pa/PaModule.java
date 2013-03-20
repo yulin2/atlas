@@ -71,6 +71,7 @@ public class PaModule {
     private @Autowired ChannelResolver channelResolver;
     private @Autowired FileUploadResultStore fileUploadResultStore;
     private @Autowired DatabasedMongo mongo;
+    // to ensure the complete and daily people ingest jobs are not run simultaneously 
     private final Lock peopleLock = new ReentrantLock();
     
     private @Value("${pa.ftp.username}") String ftpUsername;
@@ -81,11 +82,14 @@ public class PaModule {
     private @Value("${s3.access}") String s3access;
     private @Value("${s3.secret}") String s3secret;
     private @Value("${pa.s3.bucket}") String s3bucket;
+    private @Value("${updaters.pa.people.enabled}") boolean peopleEnabled;
     
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(paCompletePeopleUpdater().withName("PA Complete People Updater"), PEOPLE_COMPLETE_INGEST);
-        scheduler.schedule(paDailyPeopleUpdater().withName("PA People Updater"), PEOPLE_INGEST);
+        if (peopleEnabled) {
+            scheduler.schedule(paCompletePeopleUpdater().withName("PA Complete People Updater"), PEOPLE_COMPLETE_INGEST);
+            scheduler.schedule(paDailyPeopleUpdater().withName("PA People Updater"), PEOPLE_INGEST);
+        }
         scheduler.schedule(paFeaturesUpdater().withName("PA Features Updater"), FEATURES_INGEST);
         scheduler.schedule(paFileUpdater().withName("PA File Updater"), RECENT_FILE_DOWNLOAD);
         scheduler.schedule(paCompleteUpdater().withName("PA Complete Updater"), COMPLETE_INGEST);
