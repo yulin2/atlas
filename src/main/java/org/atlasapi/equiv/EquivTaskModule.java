@@ -10,6 +10,7 @@ import static org.atlasapi.media.entity.Publisher.LOVEFILM;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
 import static org.atlasapi.media.entity.Publisher.NETFLIX;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 
 import java.util.Set;
 
@@ -19,9 +20,10 @@ import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
 import org.atlasapi.equiv.results.probe.EquivalenceResultProbeController;
 import org.atlasapi.equiv.results.probe.MongoEquivalenceProbeStore;
+import org.atlasapi.equiv.results.www.EquivGraphController;
 import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.equiv.update.tasks.ContentEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.tasks.MongoScheduleTaskProgressStore;
 import org.atlasapi.equiv.update.www.ContentEquivalenceUpdateController;
@@ -29,7 +31,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
-import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,11 +60,10 @@ public class EquivTaskModule {
     private @Autowired SimpleScheduler taskScheduler;
     private @Autowired ContentResolver contentResolver;
     private @Autowired DatabasedMongo db;
-    private @Autowired AdapterLog log;
+    private @Autowired LookupEntryStore lookupStore;
     
-    private @Autowired @Qualifier("contentUpdater") ContentEquivalenceUpdater<Content> contentUpdater;
+    private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
     private @Autowired RecentEquivalenceResultStore equivalenceResultStore;
-    
     
     @PostConstruct
     public void scheduleUpdater() {
@@ -78,11 +79,9 @@ public class EquivTaskModule {
             taskScheduler.schedule(publisherUpdateTask(RADIO_TIMES).withName("RT Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(LOVEFILM).withName("Lovefilm Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(NETFLIX).withName("Netflix Equivalence Updater"), RepetitionRules.NEVER);
+            taskScheduler.schedule(publisherUpdateTask(YOUVIEW).withName("YouView Equivalence Updater"), RepetitionRules.NEVER);
             
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_MUSIC).withName("Music Equivalence Updater"), RepetitionRules.every(Duration.standardHours(6)));
-            //taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.BBC).withName("BBC Child Ref Update"), RepetitionRules.NEVER);
-            //taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.PA).withName("PA Child Ref Update"), RepetitionRules.NEVER);
-            //taskScheduler.schedule(childRefUpdateTask().forPublishers(publishersApartFrom(Publisher.BBC, Publisher.PA)).withName("Other Publishers Child Ref Update"), RepetitionRules.NEVER);
         }
     }
     
@@ -91,17 +90,12 @@ public class EquivTaskModule {
     }
     
     private ContentEquivalenceUpdateTask publisherUpdateTask(final Publisher... publishers) {
-        return new ContentEquivalenceUpdateTask(contentLister, contentUpdater, log, progressStore(), ignored).forPublishers(publishers);
+        return new ContentEquivalenceUpdateTask(contentLister, contentResolver, progressStore(), equivUpdater, ignored).forPublishers(publishers);
     }
-    
-    /*private Publisher[] publishersApartFrom(Publisher...publishers) {
-        SetView<Publisher> remainingPublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.copyOf(publishers));
-        return remainingPublishers.toArray(new Publisher[remainingPublishers.size()]);
-    }*/
 
     //Controllers...
     public @Bean ContentEquivalenceUpdateController contentEquivalenceUpdateController() {
-        return new ContentEquivalenceUpdateController(contentUpdater, contentResolver, log);
+        return new ContentEquivalenceUpdateController(equivUpdater, contentResolver);
     }
     
     public @Bean EquivalenceResultController resultEquivalenceResultController() {
@@ -112,6 +106,10 @@ public class EquivTaskModule {
         return new RecentResultController(equivalenceResultStore);
     }
     
+    public @Bean EquivGraphController debugGraphController() {
+        return new EquivGraphController(lookupStore);
+    }
+    
     //Probes...
     public @Bean EquivalenceProbeStore equivProbeStore() { 
         return new MongoEquivalenceProbeStore(db);
@@ -120,10 +118,5 @@ public class EquivTaskModule {
     public @Bean EquivalenceResultProbeController equivProbeController() {
         return new EquivalenceResultProbeController(equivalenceResultStore, equivProbeStore());
     }
-
-//    @Bean ManualScheduleUpdateController scheduleUpdateController() {
-//        return new ManualScheduleUpdateController(scheduleResolver, contentResolver, channelResolver);
-//    }
-    
     
 }

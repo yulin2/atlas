@@ -21,7 +21,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
@@ -58,10 +58,10 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
     
 	private final Fetcher<Identified> fetcher;
 	private final KnownTypeQueryExecutor delegate;
-    private final ContentEquivalenceUpdater<Content> equivUpdater;
+    private final EquivalenceUpdater<Content> equivUpdater;
     private final Set<Publisher> equivalablePublishers;
 	
-	public UriFetchingQueryExecutor(Fetcher<Identified> fetcher, KnownTypeQueryExecutor delegate, ContentEquivalenceUpdater<Content> equivUpdater, Set<Publisher> equivalablePublishers) {
+	public UriFetchingQueryExecutor(Fetcher<Identified> fetcher, KnownTypeQueryExecutor delegate, EquivalenceUpdater<Content> equivUpdater, Set<Publisher> equivalablePublishers) {
 		this.fetcher = fetcher;
 		this.delegate = delegate;
         this.equivUpdater = equivUpdater;
@@ -77,6 +77,12 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 	public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
 	    return delegate.executeIdQuery(ids, query);
 	}
+
+    @Override
+    public Map<String, List<Identified>> executeAliasQuery(Optional<String> namespace, Iterable<String> values,
+            ContentQuery query) {
+        return delegate.executeAliasQuery(namespace, values, query);
+    }
 	
 	public Map<String, List<Identified>> executeContentQuery(Iterable<String> uris, ContentQuery query) {
 
@@ -120,7 +126,7 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 		    if (fetchedEntity instanceof Content) {
 		        Content fetchedContent = (Content) fetchedEntity;
                 if (equivalablePublishers.contains(fetchedContent.getPublisher())) {
-                    equivUpdater.updateEquivalences(fetchedContent, Optional.<List<Content>>absent());
+                    equivUpdater.updateEquivalences(fetchedContent);
                 }
             }
         }

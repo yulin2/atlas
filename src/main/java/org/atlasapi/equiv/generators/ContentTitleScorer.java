@@ -1,19 +1,37 @@
 package org.atlasapi.equiv.generators;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.base.Function;
 
-public class ContentTitleScorer {
+public final class ContentTitleScorer<T extends Content> {
     
-    private Function<String, String> titleTransform;
+    private final Function<String, String> titleTransform;
+    private final String name;
 
-    public ContentTitleScorer(Function<String, String> titleTransform) {
+    public ContentTitleScorer(String name, Function<String, String> titleTransform) {
+        this.name = name;
         this.titleTransform = titleTransform;
     }
 
+    public ScoredCandidates<T> scoreCandidates(T content, Iterable<? extends T> candidates, ResultDescription desc) {
+        Builder<T> equivalents = DefaultScoredCandidates.fromSource(name);
+        desc.appendText("Scoring %s candidates", Iterables.size(candidates));
+        
+        for (T found : ImmutableSet.copyOf(candidates)) {
+            equivalents.addEquivalent(found, score(content, found, desc));
+        }
+
+        return equivalents.build();
+    }
+    
     /**
      * Calculates a score representing the similarity of the candidate's title compared to the subject's title.
      * @param subject - subject content
@@ -21,6 +39,9 @@ public class ContentTitleScorer {
      * @return score representing how closely candidate's title matches subject's title.
      */
     public Score score(Content subject, Content candidate, ResultDescription desc) {
+        if (subject.getTitle() == null || candidate.getTitle() == null) {
+            return Score.NULL_SCORE;
+        }
         String subjectTitle = sanitize(subject.getTitle());
         String contentTitle = sanitize(candidate.getTitle());
         double score = score(subjectTitle, contentTitle);

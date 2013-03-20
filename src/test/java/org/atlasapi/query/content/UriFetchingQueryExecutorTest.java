@@ -24,7 +24,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -56,7 +56,7 @@ public class UriFetchingQueryExecutorTest extends TestCase {
     private final Mockery context = new Mockery();
 	private final Fetcher<Identified> fetcher = context.mock(Fetcher.class);
 	private final KnownTypeQueryExecutor delegate = context.mock(KnownTypeQueryExecutor.class);
-	private final ContentEquivalenceUpdater<Content> equivUpdater = context.mock(ContentEquivalenceUpdater.class);
+	private final EquivalenceUpdater<Content> equivUpdater = context.mock(EquivalenceUpdater.class);
 	private final Set<Publisher> publishers = ImmutableSet.of();
 	
 	private UriFetchingQueryExecutor executor = new UriFetchingQueryExecutor(fetcher, delegate,equivUpdater, publishers);

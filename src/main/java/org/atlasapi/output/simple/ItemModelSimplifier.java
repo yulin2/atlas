@@ -233,8 +233,8 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         simpleModel.setLive(broadcast.getLive());
         simpleModel.setPremiere(broadcast.getPremiere());
         simpleModel.setNewSeries(broadcast.getNewSeries());
+        simpleModel.setAliases(broadcast.getAliasUrls());
         simpleModel.setChannel(simplify(channelResolver.fromUri(broadcast.getBroadcastOn()).requireValue(), annotations));
-        
 
         return simpleModel;
     }
@@ -402,6 +402,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         simpleLocation.setUri(location.getUri());
         simpleLocation.setEmbedCode(location.getEmbedCode());
         simpleLocation.setEmbedId(location.getEmbedId());
+        simpleLocation.setAvailable(location.getAvailable());
 
     }
 }

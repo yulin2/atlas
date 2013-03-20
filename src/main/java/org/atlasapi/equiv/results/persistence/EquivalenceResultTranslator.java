@@ -12,8 +12,8 @@ import java.util.Set;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
@@ -64,15 +64,15 @@ public class EquivalenceResultTranslator {
             }
         });
         
-        T target = result.target();
+        T target = result.subject();
         TranslatorUtils.from(dbo, ID, target.getCanonicalUri());
         TranslatorUtils.from(dbo, TITLE, target.getTitle());
         
-        TranslatorUtils.fromSet(dbo, copyOf(transform(transform(result.strongEquivalences().values(), ScoredEquivalent.<T>toEquivalent()), TO_URI)), STRONG);
+        TranslatorUtils.fromSet(dbo, copyOf(transform(transform(result.strongEquivalences().values(), ScoredCandidate.<T>toCandidate()), TO_URI)), STRONG);
         
         BasicDBList equivList = new BasicDBList();
         
-        for (Entry<T, Score> combinedEquiv : equivalenceResultOrdering.sortedCopy(result.combinedEquivalences().equivalents().entrySet())) {
+        for (Entry<T, Score> combinedEquiv : equivalenceResultOrdering.sortedCopy(result.combinedEquivalences().candidates().entrySet())) {
             DBObject equivDbo = new BasicDBObject();
 
             T content = combinedEquiv.getKey();
@@ -83,8 +83,8 @@ public class EquivalenceResultTranslator {
             TranslatorUtils.from(equivDbo, COMBINED, combinedEquiv.getValue().isRealScore() ? combinedEquiv.getValue().asDouble() : null);
                 
             BasicDBList scoreList = new BasicDBList();
-            for (ScoredEquivalents<T> source : result.rawScores()) {
-                Score sourceScore = source.equivalents().get(content);
+            for (ScoredCandidates<T> source : result.rawScores()) {
+                Score sourceScore = source.candidates().get(content);
                 
                 BasicDBObject scoreDbo = new BasicDBObject();
                 scoreDbo.put(SOURCE, source.source());
@@ -109,8 +109,6 @@ public class EquivalenceResultTranslator {
         if(dbo == null) {
             return null;
         }
-        
-        
         
         String targetId = TranslatorUtils.toString(dbo, ID);
         String targetTitle = TranslatorUtils.toString(dbo, TITLE);

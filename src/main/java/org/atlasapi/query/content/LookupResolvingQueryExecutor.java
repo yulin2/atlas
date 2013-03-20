@@ -16,8 +16,11 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
@@ -30,6 +33,7 @@ import com.google.common.collect.Sets;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
+    private final Logger log = LoggerFactory.getLogger(LookupResolvingQueryExecutor.class);
     private final KnownTypeContentResolver cassandraContentResolver;
     private final KnownTypeContentResolver mongoContentResolver;
     private final LookupEntryStore mongoLookupResolver;
@@ -42,9 +46,14 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-        Map<String, List<Identified>> results = resolveMongoEntries(query, mongoLookupResolver.entriesForIdentifiers(uris));
+        Map<String, List<Identified>> results = resolveMongoEntries(query, mongoLookupResolver.entriesForIdentifiers(uris, true));
         if (results.isEmpty()) {
-            results = resolveCassandraEntries(uris, query);
+            try {
+                results = resolveCassandraEntries(uris, query);
+            }
+            catch(Exception e) {
+                log.error(String.format("Cassandra resolution failed for URIS %s", uris), e);
+            }
         }
         return results;
     }
@@ -52,6 +61,13 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     @Override
     public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
         Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForIds(ids));
+        return mongoResults;
+    }
+
+    @Override
+    public Map<String, List<Identified>> executeAliasQuery(Optional<String> namespace, Iterable<String> values,
+            ContentQuery query) {
+        Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForAliases(namespace, values));
         return mongoResults;
     }
 

@@ -11,6 +11,8 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Image;
+import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -18,6 +20,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.EquivalentContentResolver;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentWriter;
@@ -34,6 +37,7 @@ import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.junit.Before;
@@ -45,7 +49,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.inject.internal.Iterables;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -77,7 +83,8 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         channelResolver = new DummyChannelResolver();
         contentWriter = new MongoContentWriter(db, lookupStore, clock);
         programmeProcessor = new PaProgrammeProcessor(contentWriter, resolver, channelResolver, new DummyItemsPeopleWriter(), log);
-        scheduleWriter = new MongoScheduleStore(db, resolver, channelResolver);
+        EquivalentContentResolver equivContentResolver = context.mock(EquivalentContentResolver.class);
+        scheduleWriter = new MongoScheduleStore(db, resolver, channelResolver, equivContentResolver);
     }
 
     @Test
@@ -109,6 +116,15 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         Brand brand = (Brand) content;
         assertFalse(brand.getChildRefs().isEmpty());
         assertNotNull(brand.getImage());
+        Image brandImage = Iterables.getOnlyElement(brand.getImages());
+        assertEquals("http://images.atlas.metabroadcast.com/pressassociation.com/webcomeflywithme1.jpg", brandImage.getCanonicalUri());
+        assertEquals(new DateTime(2010, DateTimeConstants.DECEMBER, 18, 0, 0, 0, 0).withZone(DateTimeZone.UTC), brandImage.getAvailabilityStart());
+        assertEquals(new DateTime(2011, DateTimeConstants.FEBRUARY, 6, 0, 0, 0, 0).withZone(DateTimeZone.UTC), brandImage.getAvailabilityEnd());
+        assertEquals(MimeType.IMAGE_JPG, brandImage.getMimeType());
+        assertEquals(ImageType.PRIMARY, brandImage.getType());
+        assertEquals((Integer)640, brandImage.getWidth());
+        assertEquals((Integer)360, brandImage.getHeight());
+        
 
         Item item = loadItemAtPosition(brand, 0);
         assertTrue(item.getCanonicalUri().contains("episodes"));
@@ -240,6 +256,11 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
         @Override
         public Iterable<Channel> forIds(Iterable<Long> ids) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Maybe<Channel> forAlias(String alias) {
             throw new UnsupportedOperationException();
         }
     	

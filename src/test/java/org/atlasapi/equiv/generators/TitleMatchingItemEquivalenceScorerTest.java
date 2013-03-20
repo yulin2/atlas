@@ -5,9 +5,9 @@ import junit.framework.TestCase;
 
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
-import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer.TitleType;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.equiv.scorers.TitleMatchingItemScorer;
+import org.atlasapi.equiv.scorers.TitleMatchingItemScorer.TitleType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
@@ -16,7 +16,7 @@ import com.google.common.collect.Iterables;
 
 public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
 
-    private final TitleMatchingItemEquivalenceScorer scorer = new TitleMatchingItemEquivalenceScorer();
+    private final TitleMatchingItemScorer scorer = new TitleMatchingItemScorer();
 
     @Test
     public void testTitleTyping() {
@@ -90,8 +90,8 @@ public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
         
     }
     
-    private void score(double expected, ScoredEquivalents<Item> scores) {
-        Score value = Iterables.getOnlyElement(scores.equivalents().entrySet()).getValue();
+    private void score(double expected, ScoredCandidates<Item> scores) {
+        Score value = Iterables.getOnlyElement(scores.candidates().entrySet()).getValue();
         assertTrue(String.format("expected %s got %s", expected, value), value.equals(expected > 0 ? Score.valueOf(expected) : Score.NULL_SCORE));
     }
 
