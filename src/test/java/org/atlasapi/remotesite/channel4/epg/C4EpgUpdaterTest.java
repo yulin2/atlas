@@ -18,6 +18,7 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -27,6 +28,7 @@ import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.persistence.testing.StubContentResolver;
 import org.atlasapi.remotesite.channel4.C4BrandUpdater;
+import org.hamcrest.Matchers;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
@@ -113,7 +115,7 @@ public class C4EpgUpdaterTest extends TestCase {
             one(trimmer).trimBroadcasts(
                     with(new Interval(day, day.plusDays(1))), 
                     with(CHANNEL_FOUR),
-                    (Map<String,String>)with(allOf(
+                    with(Matchers.<Map<String,String>>allOf(
                             hasKey("c4:25939874"),hasValue("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-51"),
                             hasKey("c4:25955760"),hasValue("http://www.channel4.com/programmes/synthesized/25955760")
                     ))
