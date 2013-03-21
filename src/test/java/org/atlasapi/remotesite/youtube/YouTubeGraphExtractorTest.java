@@ -36,6 +36,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.joda.time.Duration;
 
 import com.google.common.collect.Iterables;
@@ -141,7 +142,7 @@ public class YouTubeGraphExtractorTest extends TestCase {
 				.withDataContainerFormat(is(MimeType.APPLICATION_XSHOCKWAVEFLASH))
 				.withVideoCoding(is(not(MimeType.VIDEO_XVP6)))
 				.withDOG(is(true))
-				.withLocations(hasItems(
+				.withLocations(Matchers.<Location>hasItems(
 						locationMatcher()
 							.withTransportType(is(TransportType.EMBED))));
 		
@@ -155,7 +156,7 @@ public class YouTubeGraphExtractorTest extends TestCase {
 				.withVideoVerticalSize(is(144))
 				.withAudioChannels(is(1))
 				.withDOG(is(false))
-				.withLocations(hasItems(
+				.withLocations(Matchers.<Location>hasItems(
 						locationMatcher()
 							.withTransportSubType(is(TransportSubType.RTSP))
 							.withTransportType(is(TransportType.STREAM))));
@@ -169,19 +170,19 @@ public class YouTubeGraphExtractorTest extends TestCase {
 				.withVideoVerticalSize(is(144)) 
 				.withAudioChannels(is(1)) 
 				.withDOG(is(false)) 
-				.withLocations(hasItems(
+				.withLocations(Matchers.<Location>hasItems(
 						locationMatcher()
 							.withTransportSubType(is(TransportSubType.RTSP))
 							.withTransportType(is(TransportType.STREAM))));
 		
 		Matcher<Encoding> encoding4 = 
 			encodingMatcher()
-				.withLocations(hasItems(
+				.withLocations(Matchers.<Location>hasItems(
 						locationMatcher()
 							.withUri(is(ITEM_URI))
 							.withTransportType(is(TransportType.LINK))));
 		
-		assertThat(encodings, hasItems(encoding1, encoding2, encoding3, encoding4));
+		assertThat(encodings, Matchers.<Encoding>hasItems(encoding1, encoding2, encoding3, encoding4));
 	}
 	
 	class NoVideosYouTubeSource extends YouTubeSource {

@@ -23,12 +23,15 @@ import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.Matchers.EncodingMatcher;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlDescriptionSource;
+import org.hamcrest.Matchers;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -76,7 +79,7 @@ public class BlipTvGraphExtractorTest extends TestCase {
 		
 		EncodingMatcher encoding1 = encodingMatcher()
 			.withDataContainerFormat(is(MimeType.VIDEO_XFLV))
-			.withLocations(hasItems(
+			.withLocations(Matchers.<Location>hasItems(
 					locationMatcher()
 						.withUri(is("http://blip.tv/1.flv"))
 						.withTransportType(is(TransportType.DOWNLOAD)),
@@ -88,12 +91,12 @@ public class BlipTvGraphExtractorTest extends TestCase {
 		
 		EncodingMatcher encoding2 = encodingMatcher()
 			.withDataContainerFormat(is(MimeType.VIDEO_QUICKTIME))
-			.withLocations(hasItems(
+			.withLocations(Matchers.<Location>hasItems(
 					locationMatcher()
 						.withTransportType(is(TransportType.DOWNLOAD))
 						.withUri(is("http://blip.tv/2.mov"))));
 		
-		assertThat(version.getManifestedAs(), hasItems(encoding1, encoding2));
+		assertThat(version.getManifestedAs(), Matchers.<Encoding>hasItems(encoding1, encoding2));
 	}
 
 }
