@@ -37,6 +37,7 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private static final String PROGRAMME_ID_KEY = "programmeId";
     private static final String IDENTIFIER_KEY = "identifier";
     private static final String PROGRAMME_CRID_KEY = "programmeCRID";
+    private static final String SERIES_CRID_KEY = "seriesCRID";
     private static final String SERVICE_ID_KEY = "serviceId";
     private static final String EVENT_LOCATOR_KEY = "eventLocator";
     private static final String MEDIA_CONTENT_KEY = "content";
@@ -74,11 +75,7 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
             item.addAliasUrl(YOUVIEW_URI_PREFIX + programmeId.get());
             item.addAlias(new Alias("youview:programme", programmeId.get()));
         }
-        Optional<String> programmeCrid = getProgrammeCrid(source);
-        if (programmeCrid.isPresent()) {
-            item.addAliasUrl(programmeCrid.get());
-            item.addAlias(new Alias("dvb:pcrid", programmeCrid.get()));
-        }
+        
         item.addVersion(getVersion(source));
         return item;
     }
@@ -119,6 +116,16 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         broadcast.withId(id);
         broadcast.addAliasUrl(eventLocator);
         broadcast.addAlias(new Alias("dvb:event-locator", eventLocator));
+        Optional<String> programmeCrid = getProgrammeCrid(source);
+        if (programmeCrid.isPresent()) {
+            broadcast.addAliasUrl(programmeCrid.get());
+            broadcast.addAlias(new Alias("dvb:pcrid", programmeCrid.get()));
+        }
+        Optional<String> seriesCRID = getSeriesCrid(source);
+        if (seriesCRID.isPresent()) {
+            broadcast.addAliasUrl(seriesCRID.get());
+            broadcast.addAlias(new Alias("dvb:scrid", seriesCRID.get()));
+        }
         
         return broadcast;
     }
@@ -188,6 +195,14 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
             return Optional.absent();
         }
         return Optional.fromNullable(programmeCrid.getValue());
+    }
+
+    private Optional<String> getSeriesCrid(Element source) {
+        Element seriesCrid = getElementOfType(source, IDENTIFIER_KEY, YV_PREFIX, SERIES_CRID_KEY);
+        if (seriesCrid == null) {
+            return Optional.absent();
+        }
+        return Optional.fromNullable(seriesCrid.getValue());
     }
 
     private Element getElementOfType(Element source, String elementName, String prefixName, String elementType) {
