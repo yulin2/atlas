@@ -42,8 +42,8 @@ public class WorkersModule {
 
     @Autowired
     private ConnectionFactory connectionFactory;
-    @Autowired
-    private MessageStore messageStore;
+//    @Autowired
+//    private MessageStore messageStore;
     @Autowired
     private ContentIndexer contentIndexer;
     @Autowired
@@ -68,17 +68,17 @@ public class WorkersModule {
         return makeContainer(esIndexer(), indexerReplayDestination, 1, 1);
     }
 
-    @Bean
-    @Lazy(true)
-    public Worker messageLogger() {
-        return new MessageLogger(messageStore);
-    }
-
-    @Bean
-    @Lazy(true)
-    public DefaultMessageListenerContainer messageLoggerMessageListener() {
-        return makeContainer(messageLogger(), loggerDestination, loggerConsumers, loggerConsumers);
-    }
+//    @Bean
+//    @Lazy(true)
+//    public Worker messageLogger() {
+//        return new MessageLogger(messageStore);
+//    }
+//
+//    @Bean
+//    @Lazy(true)
+//    public DefaultMessageListenerContainer messageLoggerMessageListener() {
+//        return makeContainer(messageLogger(), loggerDestination, loggerConsumers, loggerConsumers);
+//    }
 
     @PostConstruct
     public void start() {
