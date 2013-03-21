@@ -2,16 +2,15 @@ package org.atlasapi.remotesite.health;
 
 import java.util.Map.Entry;
 
-import org.atlasapi.media.common.Id;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.entity.Described;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentResolver;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.health.HealthProbe;
 import com.metabroadcast.common.health.ProbeResult;
 import com.metabroadcast.common.time.Clock;
@@ -36,10 +35,10 @@ public class BroadcasterProbe implements HealthProbe {
 	@Override
 	public ProbeResult probe() {
 		ProbeResult result = new ProbeResult(title());
-		for (Entry<Id, Maybe<Identified>> uriContent : contentStore.findByCanonicalUris(uris).asMap().entrySet()) {
-		    Maybe<Identified> content = uriContent.getValue();
-			if (content.hasValue() && content.requireValue() instanceof Described) {
-			    Described playlist = (Described) content.requireValue();
+		for (Entry<String, Optional<Content>> uriContent : contentStore.resolveAliases(uris, publisher).entrySet()) {
+		    Optional<Content> content = uriContent.getValue();
+			if (content.isPresent() && content.get() instanceof Described) {
+			    Described playlist = (Described) content.get();
 				result.add(Strings.isNullOrEmpty(playlist.getTitle())?playlist.getCanonicalUri():playlist.getTitle(), playlist.getLastFetched().toString(DateTimeFormat.mediumDateTime()), playlist.getLastFetched().isAfter(clock.now().minus(maxStaleness)));
 			} else {
 				result.addFailure(uriContent.getKey().toString(), "not found");

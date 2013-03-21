@@ -4,21 +4,17 @@ import static com.metabroadcast.common.health.ProbeResult.ProbeResultType.FAILUR
 import static com.metabroadcast.common.health.ProbeResult.ProbeResultType.INFO;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.schedule.ScheduleIndex;
+import org.atlasapi.media.content.schedule.ScheduleRef;
+import org.atlasapi.media.content.schedule.ScheduleRef.ScheduleRefEntry;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.ScheduleEntry;
-import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.joda.time.Interval;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.metabroadcast.common.health.HealthProbe;
 import com.metabroadcast.common.health.ProbeResult;
 import com.metabroadcast.common.health.ProbeResult.ProbeResultEntry;
@@ -31,13 +27,13 @@ public class ScheduleProbe implements HealthProbe {
     
     private final Publisher publisher;
     private final Channel channel;
-    private final ScheduleResolver scheduleResolver;
+    private final ScheduleIndex scheduleIndex;
     private final Clock clock;
 
-    public ScheduleProbe(Publisher publisher, Channel channel, ScheduleResolver scheduleResolver, Clock clock) {
+    public ScheduleProbe(Publisher publisher, Channel channel, ScheduleIndex scheduleIndex, Clock clock) {
         this.publisher = publisher;
         this.channel = channel;
-        this.scheduleResolver = scheduleResolver;
+        this.scheduleIndex = scheduleIndex;
         this.clock = clock;
     }
 
@@ -51,8 +47,8 @@ public class ScheduleProbe implements HealthProbe {
         
         DateTime date = clock.now().withTime(0, 0, 0, 0);
 
-        Schedule schedule = scheduleResolver.schedule(date.minusMillis(1), date.plusDays(1), ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<ApplicationConfiguration>absent());
-        List<Item> items = Iterables.getOnlyElement(schedule.channelSchedules()).items();
+        ScheduleRef schedule = scheduleIndex.resolveSchedule(publisher, channel, new Interval(date.minusMillis(1), date.plusDays(1))).get(1, TimeUnit.MINUTES);
+        List<ScheduleRefEntry> items = schedule.getScheduleEntries();
         result.addEntry(scheduleSize(items.size()));
 
         if(items.isEmpty()) {
@@ -60,7 +56,7 @@ public class ScheduleProbe implements HealthProbe {
         }
 
         addContiguityEntries(items, result);
-        addLastFetchedCheckEntry(items, result);
+//        addLastFetchedCheckEntry(items, result);
 
         return result;
     }
@@ -69,13 +65,12 @@ public class ScheduleProbe implements HealthProbe {
         return new ProbeResultEntry(scheduleEntries > 0 ? INFO : FAILURE, "Schedule Entries", String.valueOf(scheduleEntries));
     }
 
-    private void addContiguityEntries(List<Item> items, ProbeResult result) {
+    private void addContiguityEntries(List<ScheduleRefEntry> items, ProbeResult result) {
         int breaks = 0, overlaps = 0;
-        DateTime lastEnd = ScheduleEntry.BROADCAST.apply(items.get(0)).getTransmissionTime();
+        DateTime lastEnd = items.get(0).getBroadcastTime();
 
-        for (Item item: items) {
-            Broadcast broadcast = ScheduleEntry.BROADCAST.apply(item);
-            DateTime transmissionStart = broadcast.getTransmissionTime();
+        for (ScheduleRefEntry item: items) {
+            DateTime transmissionStart = item.getBroadcastTime();
             
             if(transmissionStart.isAfter(lastEnd.plus(MAX_GAP))) {
                 breaks++;
@@ -83,24 +78,24 @@ public class ScheduleProbe implements HealthProbe {
                 overlaps++;
             }
             
-            lastEnd = broadcast.getTransmissionEndTime();
+            lastEnd = item.getBroadcastEndTime();
         }
 
         result.add("Schedule Breaks", String.valueOf(breaks), !(breaks > 0));
         result.add("Schedule Overlaps", String.valueOf(overlaps), !(overlaps > 0));
     }
 
-    private void addLastFetchedCheckEntry(List<Item> items, ProbeResult result) {
-        DateTime oldestFetch = clock.now();
-        
-        for (Item item : items) {
-            if(item.getLastFetched().isBefore(oldestFetch)) {
-                oldestFetch = item.getLastFetched();
-            }
-        }
-        
-        result.add("Oldest Fetch", oldestFetch.toString("HH:mm:ss dd/MM/yyyy"), oldestFetch.isAfter(clock.now().minus(MAX_STALENESS)));
-    }
+//    private void addLastFetchedCheckEntry(List<ScheduleRefEntry> items, ProbeResult result) {
+//        DateTime oldestFetch = clock.now();
+//        
+//        for (ScheduleRefEntry item : items) {
+//            if(item.getLastFetched().isBefore(oldestFetch)) {
+//                oldestFetch = item.getLastFetched();
+//            }
+//        }
+//        
+//        result.add("Oldest Fetch", oldestFetch.toString("HH:mm:ss dd/MM/yyyy"), oldestFetch.isAfter(clock.now().minus(MAX_STALENESS)));
+//    }
 
     @Override
     public String title() {

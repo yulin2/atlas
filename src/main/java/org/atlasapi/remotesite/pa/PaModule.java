@@ -78,7 +78,6 @@ public class PaModule {
     private @Autowired ContentStore contentStore;
     private @Autowired AdapterLog log;
     private @Autowired ItemsPeopleWriter peopleWriter;
-    private @Autowired ScheduleWriter scheduleWriter;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired ChannelWriter channelWriter;
     private @Autowired FileUploadResultStore fileUploadResultStore;

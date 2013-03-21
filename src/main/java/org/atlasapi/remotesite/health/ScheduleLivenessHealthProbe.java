@@ -1,26 +1,27 @@
 package org.atlasapi.remotesite.health;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.content.schedule.ScheduleIndex;
+import org.atlasapi.media.content.schedule.ScheduleRef;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.metabroadcast.common.health.HealthProbe;
 import com.metabroadcast.common.health.ProbeResult;
 
 public class ScheduleLivenessHealthProbe implements HealthProbe {
 
-	private ScheduleResolver scheduleResolver;
+	private ScheduleIndex scheduleIndex;
 	private Set<Channel> channels;
 	
 	private static final int TWELVE_POINT_FIVE_DAYS_IN_HOURS = 300;
@@ -29,8 +30,8 @@ public class ScheduleLivenessHealthProbe implements HealthProbe {
 	private final Log log = LogFactory.getLog(getClass());
 	private Publisher publisher;
 	
-	public ScheduleLivenessHealthProbe(ScheduleResolver scheduleResolver, Iterable<Channel> channels, Publisher publisher) {
-		this.scheduleResolver = scheduleResolver;
+	public ScheduleLivenessHealthProbe(ScheduleIndex scheduleIndex, Iterable<Channel> channels, Publisher publisher) {
+		this.scheduleIndex = scheduleIndex;
 		this.channels = ImmutableSet.copyOf(channels);
 		this.publisher = publisher;
 	}
@@ -50,8 +51,9 @@ public class ScheduleLivenessHealthProbe implements HealthProbe {
 			
 			for(Channel channel : channels) {
 				try {
-					Schedule schedule = scheduleResolver.schedule(startTime, endTime, ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<ApplicationConfiguration>absent());
-					int itemCount = Iterables.getOnlyElement(schedule.channelSchedules()).items().size();
+					ScheduleRef schedule = scheduleIndex.resolveSchedule(publisher, channel, new Interval(startTime, endTime)).get(1, TimeUnit.MINUTES);
+					
+					int itemCount = schedule == null ? 0 : schedule.getScheduleEntries().size();
 							
 					result.add(channel.title(), String.format("%d items in schedule from %s to %s", itemCount, startTime.toString("dd/MM/yy HH:mm"), endTime.toString("dd/MM/yy HH:mm")), itemCount > 0);
 				}

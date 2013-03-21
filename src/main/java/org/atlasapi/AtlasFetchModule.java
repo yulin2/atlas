@@ -55,25 +55,25 @@ public class AtlasFetchModule {
 
     @Autowired
     private AtlasPersistenceModule atlasPersistenceModule;
-    @Autowired
-    private RemoteSiteModule remoteSiteModule;
-
-    @PostConstruct
-    public void passWriterToReader() {
-        final ContentStore contentStore = atlasPersistenceModule.contentStore();
-        savingFetcher().setStore(new org.atlasapi.persistence.content.ContentWriter() {
-
-            @Override
-            public void createOrUpdate(Item item) {
-                contentStore.writeContent(item);
-            }
-
-            @Override
-            public void createOrUpdate(Container container) {
-                contentStore.writeContent(container);
-            }
-        });
-    }
+//    @Autowired
+//    private RemoteSiteModule remoteSiteModule;
+//
+//    @PostConstruct
+//    public void passWriterToReader() {
+//        final ContentStore contentStore = atlasPersistenceModule.contentStore();
+//        savingFetcher().setStore(new org.atlasapi.persistence.content.ContentWriter() {
+//
+//            @Override
+//            public void createOrUpdate(Item item) {
+//                contentStore.writeContent(item);
+//            }
+//
+//            @Override
+//            public void createOrUpdate(Container container) {
+//                contentStore.writeContent(container);
+//            }
+//        });
+//    }
 
     @Bean
     public SimpleScheduler scheduler() {
@@ -85,19 +85,19 @@ public class AtlasFetchModule {
         return new ManualTaskTrigger(scheduler());
     }
 
-    @Bean
-    @Qualifier("remoteSiteContentResolver")
-    public CanonicalisingFetcher remoteSiteContentResolver() {
-        Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(atlasPersistenceModule.contentResolver(), savingFetcher());
-        return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
-    }
-
-    @Bean
-    @Qualifier("contentResolverThatDoesntSave")
-    public CanonicalisingFetcher contentResolverThatDoesntSave() {
-        Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(atlasPersistenceModule.contentResolver(), remoteSiteModule.remoteFetcher());
-        return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
-    }
+//    @Bean
+//    @Qualifier("remoteSiteContentResolver")
+//    public CanonicalisingFetcher remoteSiteContentResolver() {
+//        Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(atlasPersistenceModule.contentResolver(), savingFetcher());
+//        return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
+//    }
+//
+//    @Bean
+//    @Qualifier("contentResolverThatDoesntSave")
+//    public CanonicalisingFetcher contentResolverThatDoesntSave() {
+//        Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(atlasPersistenceModule.contentResolver(), remoteSiteModule.remoteFetcher());
+//        return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
+//    }
 
     @Bean
     public List<Canonicaliser> canonicalisers() {
@@ -111,12 +111,12 @@ public class AtlasFetchModule {
         canonicalisers.add(new BlipTvAdapter.BlipTvCanonicaliser());
         canonicalisers.add(new HuluItemAdapter.HuluItemCanonicaliser());
         canonicalisers.add(new WritingHuluBrandAdapter.HuluBrandCanonicaliser());
-        canonicalisers.add(new SavingShortUrlCanonicaliser(new ShortenedUrlCanonicaliser(), atlasPersistenceModule.shortUrlSaver()));
+        //canonicalisers.add(new SavingShortUrlCanonicaliser(new ShortenedUrlCanonicaliser(), atlasPersistenceModule.shortUrlSaver()));
         return canonicalisers;
     }
 
-    @Bean
-    public SavingFetcher savingFetcher() {
-        return new SavingFetcher(remoteSiteModule.remoteFetcher(), null);
-    }
+//    @Bean
+//    public SavingFetcher savingFetcher() {
+//        return new SavingFetcher(remoteSiteModule.remoteFetcher(), null);
+//    }
 }

@@ -22,8 +22,8 @@ public class AtlasMessagingModule {
     private String contentChangesDestination;
     @Value("${messaging.destination.changes.topics}")
     private String topicChangesDestination;
-    @Autowired
-    private MessageStore messageStore;
+//    @Autowired
+//    private MessageStore messageStore;
 
     @Bean
     @Lazy(true)
@@ -51,9 +51,9 @@ public class AtlasMessagingModule {
         return jmsTemplate;
     }
     
-    @Bean 
-    @Lazy(true)
-    public MessageReplayer messageReplayer() {
-        return new MessageReplayer(messageStore, new JmsTemplate(activemqConnectionFactory()));
-    }
+//    @Bean 
+//    @Lazy(true)
+//    public MessageReplayer messageReplayer() {
+//        return new MessageReplayer(messageStore, new JmsTemplate(activemqConnectionFactory()));
+//    }
 }

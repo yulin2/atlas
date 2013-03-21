@@ -96,6 +96,7 @@ import org.atlasapi.query.v4.schedule.ScheduleController;
 import org.atlasapi.query.v4.schedule.ScheduleIndexDebugController;
 import org.atlasapi.query.v4.schedule.ScheduleQueryResultWriter;
 import org.atlasapi.query.v4.search.ContentQueryResultWriter;
+import org.atlasapi.query.v4.search.SearchController;
 import org.atlasapi.query.v4.topic.PopularTopicController;
 import org.atlasapi.query.v4.topic.TopicContentController;
 import org.atlasapi.query.v4.topic.TopicContentResultWriter;
@@ -189,13 +190,13 @@ public class QueryWebModule {
     }
     
     @Bean
-    PopularTopicController v4PopularTopicController() {
+    PopularTopicController popularTopicController() {
         return new PopularTopicController(topicResolver, popularTopicIndex, new TopicQueryResultWriter(annotations()), configFetcher);
     }
 
     @Bean
-    org.atlasapi.query.v4.search.SearchController v4SearchController() {
-        return new org.atlasapi.query.v4.search.SearchController(v4SearchResolver, configFetcher, new ContentQueryResultWriter(annotations()));
+    SearchController searchController() {
+        return new SearchController(v4SearchResolver, configFetcher, new ContentQueryResultWriter(annotations()));
     }
 
     @Bean

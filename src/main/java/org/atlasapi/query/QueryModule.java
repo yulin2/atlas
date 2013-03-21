@@ -55,7 +55,6 @@ public class QueryModule {
     private ContentSearcher contentSearcher;
 
     private @Autowired DatabasedMongo mongo;
-    private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired ContentResolver contentStore;
     private @Autowired ContentIndex contentIndex;
     private @Autowired ChannelResolver channelResolver;
@@ -63,8 +62,6 @@ public class QueryModule {
     private @Autowired TopicResolver topicResolver;
     private @Autowired TopicIndex topicIndex;
     private @Autowired PopularTopicIndex popularTopicIndex;
-    private @Autowired SegmentResolver segmentResolver;
-    private @Autowired ProductResolver productResolver;
     private @Autowired ScheduleIndex scheduleIndex;
 
     @Bean ScheduleQueryExecutor scheduleQueryExecutor() {

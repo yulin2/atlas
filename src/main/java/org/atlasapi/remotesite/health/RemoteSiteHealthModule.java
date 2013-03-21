@@ -2,9 +2,9 @@ package org.atlasapi.remotesite.health;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +26,7 @@ public class RemoteSiteHealthModule {
 
     private @Autowired ChannelResolver channelResolver;
     
-    private @Autowired ScheduleResolver scheduleResolver;
+    private @Autowired ScheduleIndex scheduleIndex;
     
     private @Autowired HealthController health;
     
@@ -53,16 +53,16 @@ public class RemoteSiteHealthModule {
     
     public @Bean HealthProbe c4ScheduleProbe() {
         Maybe<Channel> possibleChannel4 = channelResolver.fromUri("http://www.channel4.com");
-        return new ScheduleProbe(Publisher.C4, possibleChannel4.valueOrNull(), scheduleResolver, clock);
+        return new ScheduleProbe(Publisher.C4, possibleChannel4.valueOrNull(), scheduleIndex, clock);
     }
     
     public @Bean HealthProbe bbcScheduleProbe() {
         Maybe<Channel> possibleBbcOneLondon = channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/london");
-        return new ScheduleProbe(Publisher.BBC, possibleBbcOneLondon.valueOrNull(), scheduleResolver, clock);
+        return new ScheduleProbe(Publisher.BBC, possibleBbcOneLondon.valueOrNull(), scheduleIndex, clock);
     }
     
     public @Bean HealthProbe scheduleLivenessHealthProbe() {
-    	ImmutableList<Maybe<Channel>> channels = ImmutableList.of(
+        	ImmutableList<Maybe<Channel>> channels = ImmutableList.of(
     			channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/london"),
     			channelResolver.fromUri("http://www.bbc.co.uk/services/bbctwo/england"),
     			channelResolver.fromUri("http://www.itv.com/channels/itv1/london"),
@@ -70,8 +70,8 @@ public class RemoteSiteHealthModule {
     			channelResolver.fromUri("http://www.five.tv"),
     			channelResolver.fromUri("http://ref.atlasapi.org/channels/sky1"),
     			channelResolver.fromUri("http://ref.atlasapi.org/channels/skyatlantic")
-    	);
-        return new ScheduleLivenessHealthProbe(scheduleResolver, Iterables.transform(Iterables.filter(channels,Maybe.HAS_VALUE),Maybe.<Channel>requireValueFunction()), Publisher.PA);
+        	);
+        return new ScheduleLivenessHealthProbe(scheduleIndex, Iterables.transform(Iterables.filter(channels,Maybe.HAS_VALUE),Maybe.<Channel>requireValueFunction()), Publisher.PA);
     }
     
     @Bean

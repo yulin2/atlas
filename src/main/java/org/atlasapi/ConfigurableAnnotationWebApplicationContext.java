@@ -52,20 +52,20 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             AtlasWebModule.class,
             QueryModule.class,
             AtlasFetchModule.class,
-            RemoteSiteModule.class,
+//            RemoteSiteModule.class,
             SystemModule.class,
-            RadioPlayerModule.class,
-            XmlTvModule.class, 
-            RemoteSiteHealthModule.class,
-            EquivModule.class
+//            RadioPlayerModule.class,
+//            XmlTvModule.class, 
+            RemoteSiteHealthModule.class/*,
+            EquivModule.class*/
         );
         
         if(runProcessingOnly()) {
             builder.add(
-                ManualScheduleRebuildModule.class, 
-                InterlinkingDeltaModule.class,
-                EquivTaskModule.class,
-                AtlasMessagingModule.class,
+//                ManualScheduleRebuildModule.class, 
+//                InterlinkingDeltaModule.class,
+//                EquivTaskModule.class,
+//                AtlasMessagingModule.class,
                 WorkersModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
@@ -74,7 +74,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
             builder.add(
-                AtlasFeedsModule.class,
+//                AtlasFeedsModule.class,
                 QueryWebModule.class,
                 ApplicationModule.class
             );
