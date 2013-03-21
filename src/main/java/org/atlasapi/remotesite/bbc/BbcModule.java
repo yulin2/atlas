@@ -91,7 +91,6 @@ public class BbcModule {
 	private @Autowired DatabasedMongo mongo;
 	private @Autowired SegmentWriter segmentWriter;
 	private @Autowired ChannelResolver channelResolver;
-	private @Autowired ScheduleResolver scheduleResolver;
 	
     @PostConstruct
     public void scheduleTasks() {
