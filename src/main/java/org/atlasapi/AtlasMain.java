@@ -16,7 +16,7 @@ public class AtlasMain {
     private static final String LOCAL_WAR_DIR = "./src/main/webapp";
 
 	public static void main(String[] args) throws Exception {
-		
+	    
 		WebAppContext ctx = new WebAppContext(warBase(), "/");
 		
 		if(IS_PROCESSING) {

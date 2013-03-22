@@ -1,11 +1,9 @@
 package org.atlasapi.messaging.workers;
 
-import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.messaging.EntityUpdatedMessage;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 
 import com.google.common.collect.ImmutableList;
@@ -26,11 +24,7 @@ public class ContentReadWriter extends AbstractWorker {
         ResolvedContent resolved = contentResolver.findByCanonicalUris(ImmutableList.of(message.getEntityId()));
         for (Content content : Iterables.filter(resolved.getAllResolvedResults(), Content.class)) {
             content.setReadHash(null);//force write
-            if (content instanceof Container) {
-                contentWriter.createOrUpdate((Container)content);
-            } else if (content instanceof Item) {
-                contentWriter.createOrUpdate((Item)content);
-            }
+            contentWriter.writeContent(content);
         }
     }
     
