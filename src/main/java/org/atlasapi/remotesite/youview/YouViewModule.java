@@ -2,9 +2,14 @@ package org.atlasapi.remotesite.youview;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
+import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
+import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +29,8 @@ public class YouViewModule {
     private @Autowired ChannelResolver channelResolver;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
+    private @Autowired ScheduleWriter scheduleWriter;
+    private @Autowired ScheduleResolver scheduleResolver;
     
     @PostConstruct
     public void startBackgroundTasks() {
@@ -31,27 +38,40 @@ public class YouViewModule {
         scheduler.schedule(youViewFortnightUpdater().withName("YouView Updater ±7 Days"), EVERY_HOUR);
     }
 
-    private YouViewFortnightUpdater youViewFortnightUpdater() {
-        return new YouViewFortnightUpdater(youViewChannelResolver(), youViewFetcher(), youViewXmlElementHandler());
+    @Bean
+    public YouViewFortnightUpdater youViewFortnightUpdater() {
+        return new YouViewFortnightUpdater(channelResolver(), youViewFetcher(), youViewChannelProcessor());
     }
-
-    private YouViewTodayUpdater youViewTodayUpdater() {
-        return new YouViewTodayUpdater(youViewChannelResolver(), youViewFetcher(), youViewXmlElementHandler());
+        
+    @Bean
+    public YouViewTodayUpdater youViewTodayUpdater() {
+        return new YouViewTodayUpdater(channelResolver(), youViewFetcher(), youViewChannelProcessor());
     }
     
-    private YouViewScheduleFetcher youViewFetcher() {
+    @Bean
+    public YouViewChannelProcessor youViewChannelProcessor() {
+        return new DefaultYouViewChannelProcessor(scheduleWriter, youViewElementProcessor(), broadcastTrimmer());
+    }
+
+    @Bean
+    public YouViewElementProcessor youViewElementProcessor() {
+        YouViewContentExtractor extractor = new YouViewContentExtractor(channelResolver());
+        return new DefaultYouViewElementProcessor(extractor, contentResolver, contentWriter);
+    }
+
+    @Bean
+    public YouViewScheduleFetcher youViewFetcher() {
         String url = Configurer.get("youview.url").get();
         int timeout = Configurer.get("youview.timeout").toInt();
         return new YouViewScheduleFetcher(url, timeout);
     }
-    
-    private YouViewXmlElementHandler youViewXmlElementHandler() {
-        YouViewContentExtractor extractor = new YouViewContentExtractor(youViewChannelResolver());
-        return new DefaultYouViewXmlElementHandler(extractor, contentResolver, contentWriter);
+
+    @Bean
+    public YouViewChannelResolver channelResolver() {
+        return new DefaultYouViewChannelResolver(channelResolver);
     }
     
-    @Bean
-    YouViewChannelResolver youViewChannelResolver() {  
-        return new DefaultYouViewChannelResolver(channelResolver);
+    private BroadcastTrimmer broadcastTrimmer() {
+        return new ScheduleResolverBroadcastTrimmer(Publisher.YOUVIEW, scheduleResolver, contentResolver, contentWriter);
     }
 }

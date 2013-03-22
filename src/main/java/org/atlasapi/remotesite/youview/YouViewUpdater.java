@@ -26,20 +26,21 @@ public class YouViewUpdater extends ScheduledTask {
     private static final String ATOM_PREFIX = "atom";
     private static final String ENTRY_KEY = "entry";
     private final YouViewScheduleFetcher fetcher;
-    private final YouViewXmlElementHandler elementHandler;
     private final Duration plus;
     private final Duration minus;
     private final Logger log = LoggerFactory.getLogger(YouViewUpdater.class);
     private final YouViewChannelResolver channelResolver;
+    private final YouViewChannelProcessor processor;
     
-    public YouViewUpdater(YouViewChannelResolver channelResolver, YouViewScheduleFetcher fetcher, YouViewXmlElementHandler elementHandler, Duration minus, Duration plus) {
+    public YouViewUpdater(YouViewChannelResolver channelResolver, YouViewScheduleFetcher fetcher, YouViewChannelProcessor processor, Duration minus, Duration plus) {
         this.channelResolver = channelResolver;
         this.fetcher = fetcher;
-        this.elementHandler = elementHandler;
+        this.processor = processor;
         this.minus = minus;
         this.plus = plus;
     }
     
+    // TODO report status effectively
     @Override
     protected void runTask() {
         try {
@@ -47,24 +48,22 @@ public class YouViewUpdater extends ScheduledTask {
             DateTime startTime = midnightToday.minus(minus);
             DateTime endTime = midnightToday.plus(plus);
             
-            YouViewDataProcessor<UpdateProgress> processor = processor();
-            
             List<Channel> youViewChannels = channelResolver.getAllChannels();
+            
+            UpdateProgress progress = UpdateProgress.START;
             
             while (startTime.isBefore(endTime)) {
                 for (Channel channel : youViewChannels) {
+                    
                     Document xml = fetcher.getSchedule(startTime, startTime.plusDays(1), getYouViewId(channel));
                     Element root = xml.getRootElement();
                     Elements entries = root.getChildElements(ENTRY_KEY, root.getNamespaceURI(ATOM_PREFIX));
 
-                    for (int i = 0; i < entries.size(); i++) {
-                        processor.process(entries.get(i));
-                    }
+                    progress = progress.reduce(processor.process(channel, entries, startTime));
+                    reportStatus(progress.toString());
                 }
                 startTime = startTime.plusDays(1);
             }
-
-            reportStatus(processor.getResult().toString());
         } catch (Exception e) {
             log.error("Exception when processing YouView schedule", e);
             Throwables.propagate(e);
@@ -82,30 +81,4 @@ public class YouViewUpdater extends ScheduledTask {
         }
         throw new RuntimeException("Channel " + channel.getCanonicalUri() + " does not have a YouView alias");
     }
-
-    private YouViewDataProcessor<UpdateProgress> processor() {
-        return new YouViewDataProcessor<UpdateProgress>() {
-            
-            UpdateProgress progress = UpdateProgress.START;
-            
-            @Override
-            public boolean process(Element element) {
-                try {
-                    elementHandler.handle(element);
-                    progress = progress.reduce(UpdateProgress.SUCCESS);
-                } catch (Exception e) {
-                    log.warn(element.getLocalName() , e);
-                    progress = progress.reduce(UpdateProgress.FAILURE);
-                }
-                reportStatus(progress.toString());
-                return shouldContinue();
-            }
-
-            @Override
-            public UpdateProgress getResult() {
-                return progress;
-            }
-        };
-    }
-
 }
