@@ -124,13 +124,13 @@ public class QueryWebModule {
     
     private @Autowired DatabasedMongo mongo;
     private @Autowired QueryModule queryModule;
-    private @Autowired ContentGroupResolver contentGroupResolver;
+//    private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired SearchResolver v4SearchResolver;
     private @Autowired TopicResolver topicResolver;
     private @Autowired PopularTopicIndex popularTopicIndex;
-    private @Autowired SegmentResolver segmentResolver;
-    private @Autowired ProductResolver productResolver;
+//    private @Autowired SegmentResolver segmentResolver;
+//    private @Autowired ProductResolver productResolver;
     private @Autowired ScheduleIndex scheduleIndex;
 
     private @Autowired ApplicationConfigurationFetcher configFetcher;
@@ -220,8 +220,8 @@ public class QueryWebModule {
         .register(CLIPS, new ClipsAnnotation(), commonImplied)
         .register(PEOPLE, new PeopleAnnotation(), commonImplied)
         .register(TOPICS, new TopicsAnnotation(topicResolver, localHostName, idCodec), commonImplied)
-        .register(CONTENT_GROUPS, new ContentGroupsAnnotation(contentGroupResolver), commonImplied)
-        .register(SEGMENT_EVENTS, new SegmentEventsAnnotation(segmentResolver), commonImplied)
+        //.register(CONTENT_GROUPS, new ContentGroupsAnnotation(contentGroupResolver), commonImplied)
+        //.register(SEGMENT_EVENTS, new SegmentEventsAnnotation(segmentResolver), commonImplied)
         .register(RELATED_LINKS, new RelatedLinksAnnotation(), commonImplied)
         .register(KEY_PHRASES, new KeyPhrasesAnnotation(), commonImplied)
         .register(LOCATIONS, new LocationsAnnotation(), commonImplied)
@@ -231,7 +231,7 @@ public class QueryWebModule {
         .register(AVAILABLE_LOCATIONS, new AvailableLocationsAnnotation(), commonImplied)
         .register(UPCOMING, new UpcomingAnnotation(upcomingChildrenResolver), commonImplied)
         .register(FILTERING_RESOURCE, new FilteringResourceAnnotation(), commonImplied)
-        .register(PRODUCTS, new ProductsAnnotation(productResolver), commonImplied)
+        //.register(PRODUCTS, new ProductsAnnotation(productResolver), commonImplied)
         .register(RECENTLY_BROADCAST, new RecentlyBroadcastAnnotation(recentlyBroadcastResolver), commonImplied)
         .register(CHANNELS, new ChannelsAnnotation(), commonImplied)
         .register(PUBLISHER, new PublisherAnnotation(), commonImplied)
