@@ -58,7 +58,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.security.UsernameAndPassword;
 
 @Configuration
-@Import(RtFilmModule.class)
+//@Import(RtFilmModule.class)
 public class PaModule {
     private final static RepetitionRule PEOPLE_COMPLETE_INGEST = RepetitionRules.NEVER;
     private final static RepetitionRule PEOPLE_INGEST = RepetitionRules.daily(LocalTime.MIDNIGHT);

@@ -46,7 +46,7 @@ import org.springframework.context.annotation.Lazy;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
 @Configuration
-@Import(EquivModule.class)
+//@Import(EquivModule.class)
 public class QueryModule {
 
     @Autowired

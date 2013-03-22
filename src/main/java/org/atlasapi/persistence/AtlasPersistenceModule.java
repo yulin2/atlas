@@ -4,7 +4,6 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PreDestroy;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
@@ -12,6 +11,10 @@ import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.equiv.CassandraEquivalenceSummaryStore;
 import org.atlasapi.media.CassandraPersistenceModule;
 import org.atlasapi.media.ElasticSearchContentIndexModule;
+import org.atlasapi.media.channel.ChannelGroupResolver;
+import org.atlasapi.media.channel.ChannelGroupStore;
+import org.atlasapi.media.channel.MongoChannelGroupStore;
+import org.atlasapi.media.channel.MongoChannelStore;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.content.EsContentIndex;
@@ -23,6 +26,8 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.segment.Segment;
 import org.atlasapi.media.segment.SegmentRef;
+import org.atlasapi.media.segment.SegmentResolver;
+import org.atlasapi.media.segment.SegmentWriter;
 import org.atlasapi.media.topic.EsPopularTopicIndex;
 import org.atlasapi.media.topic.EsTopicIndex;
 import org.atlasapi.media.topic.TopicStore;
@@ -33,12 +38,6 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.persistence.media.TranslatorContentHasher;
-import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
-import org.atlasapi.persistence.media.segment.SegmentResolver;
-import org.atlasapi.persistence.media.segment.SegmentWriter;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -110,26 +109,7 @@ public class AtlasPersistenceModule {
         return new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
     }
 
-    @Bean
-    public CassandraContentPersistenceModule cassandraContentPersistenceModule() {
-        CassandraContentPersistenceModule cassandraContentPersistenceModule
-            = new CassandraContentPersistenceModule(persistenceModule().getContext(), 
-                    Integer.parseInt(cassandraRequestTimeout), 
-                    idGeneratorBuilder());
-        return cassandraContentPersistenceModule;
-    }
-
-    @Bean
-    public ContentBootstrapperModule contentBootstrapperModule() {
-        return new ContentBootstrapperModule(cassandraContentPersistenceModule().cassandraContentStore());
-    }
-    
-    @Bean
-    public ContentBootstrapperModule contentBootstrapperModule() {
-        return new ContentBootstrapperModule(contentLister(), cassandraContentPersistenceModule().cassandraContentStore());
-    }
-
-    @Bean
+    @Bean @Primary
     public DatabasedMongo databasedMongo() {
         return new DatabasedMongo(mongo(), mongoDbName);
     }
@@ -192,16 +172,14 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    @Qualifier(value = "cassandra")
-    public CassandraChannelStore cassandraChannelStore() {
-        return cassandraContentPersistenceModule().cassandraChannelStore();
+    public MongoChannelStore cassandraChannelStore() {
+        return new MongoChannelStore(databasedMongo(), channelGroupStore(), channelGroupStore());
     }
-
+    
     @Bean
     @Primary
-    @Qualifier(value = "cassandra")
-    public CassandraEquivalenceSummaryStore cassandraEquivalenceSummaryStore() {
-        return cassandraContentPersistenceModule().cassandraEquivalenceSummaryStore();
+    private ChannelGroupStore channelGroupStore() {
+        return new MongoChannelGroupStore(databasedMongo());
     }
 
     private List<ServerAddress> mongoHosts() {

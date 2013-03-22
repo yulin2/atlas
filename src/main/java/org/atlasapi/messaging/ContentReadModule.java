@@ -7,7 +7,7 @@ import javax.jms.ConnectionFactory;
 import org.atlasapi.messaging.worker.Worker;
 import org.atlasapi.messaging.workers.ContentReadWriter;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.NullContentResolver;
