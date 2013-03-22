@@ -2,12 +2,12 @@ package org.atlasapi.remotesite.youview;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.joda.time.Duration;
