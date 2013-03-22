@@ -31,6 +31,7 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.persistence.media.TranslatorContentHasher;
+import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
 import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.persistence.media.segment.SegmentWriter;
@@ -110,15 +111,6 @@ public class AtlasPersistenceModule {
         return module;
     }
 
-    @Bean
-    public CassandraContentPersistenceModule cassandraContentPersistenceModule() {
-        CassandraContentPersistenceModule cassandraContentPersistenceModule
-            = new CassandraContentPersistenceModule(persistenceModule().getContext(), 
-                    Integer.parseInt(cassandraRequestTimeout), 
-                    idGeneratorBuilder());
-        return cassandraContentPersistenceModule;
-    }
-
     @Bean @Primary
     public DatabasedMongo databasedMongo() {
         return new DatabasedMongo(mongo(), mongoDbName);
@@ -182,16 +174,8 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    @Qualifier(value = "cassandra")
-    public CassandraChannelStore cassandraChannelStore() {
-        return cassandraContentPersistenceModule().cassandraChannelStore();
-    }
-
-    @Bean
-    @Primary
-    @Qualifier(value = "cassandra")
-    public CassandraEquivalenceSummaryStore cassandraEquivalenceSummaryStore() {
-        return cassandraContentPersistenceModule().cassandraEquivalenceSummaryStore();
+    public MongoChannelStore cassandraChannelStore() {
+        return new MongoChannelStore(databasedMongo());
     }
 
     private List<ServerAddress> mongoHosts() {
