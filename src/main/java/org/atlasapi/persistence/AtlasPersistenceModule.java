@@ -217,41 +217,4 @@ public class AtlasPersistenceModule {
             }
         };
     }
-    
-    @Bean
-    public ContentGroupResolver nullContentGroupResolver() {
-        return new ContentGroupResolver() {
-            
-            @Override
-            public Iterable<ContentGroup> findAll() {
-                return ImmutableList.of();
-            }
-            
-            @Override
-            public ResolvedContent findByIds(Iterable<Id> ids) {
-                return ResolvedContent.builder().build();
-            }
-            
-            @Override
-            public ResolvedContent findByCanonicalUris(Iterable<String> canonicalUris) {
-                return ResolvedContent.builder().build();
-            }
-        };
-    }
-    
-    @Bean
-    public SegmentResolver segmentResolver() {
-        return new SegmentResolver() {
-            
-            @Override
-            public Maybe<Segment> resolveForSource(Publisher source, String sourceId) {
-                return Maybe.nothing();
-            }
-            
-            @Override
-            public Map<SegmentRef, Maybe<Segment>> resolveById(Iterable<SegmentRef> identifier) {
-                return ImmutableMap.of();
-            }
-        };
-    }
 }
