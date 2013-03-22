@@ -39,25 +39,23 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
         Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
         
         UpdateProgress progress = UpdateProgress.START;
-        try {
-            for (int i = 0; i < elements.size(); i++) {
-                ItemRefAndBroadcast itemAndBroadcast = processor.process(elements.get(i));
-                if (itemAndBroadcast != null) {
-                    broadcasts.add(itemAndBroadcast);
-                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
-                    progress = progress.reduce(UpdateProgress.SUCCESS);
-                } else {
-                    progress = progress.reduce(UpdateProgress.FAILURE);
-                }
+        for (int i = 0; i < elements.size(); i++) {
+            ItemRefAndBroadcast itemAndBroadcast = processor.process(elements.get(i));
+            if (itemAndBroadcast != null) {
+                broadcasts.add(itemAndBroadcast);
+                acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
+                progress = progress.reduce(UpdateProgress.SUCCESS);
+            } else {
+                progress = progress.reduce(UpdateProgress.FAILURE);
             }
-            if (trimmer != null) {
-                trimmer.trimBroadcasts(new Interval(startTime, startTime.plusDays(1)), channel, acceptableBroadcastIds.build());
-            }
+        }
+        if (trimmer != null) {
+            trimmer.trimBroadcasts(new Interval(startTime, startTime.plusDays(1)), channel, acceptableBroadcastIds.build());
+        }
+        if (broadcasts.isEmpty()) {
+            log.info(String.format("No broadcasts for channel %s (%s) on %s", channel.title(), getYouViewId(channel), startTime.toString()));
+        } else {
             scheduleWriter.replaceScheduleBlock(Publisher.YOUVIEW, channel, broadcasts);
-        } catch (Exception e) {
-            //TODO: should we just throw e?
-            log.error(String.format("Error processing channel %s with youview alias %s", channel.key(), getYouViewId(channel)));
-            return UpdateProgress.FAILURE;
         }
         
         return progress;
