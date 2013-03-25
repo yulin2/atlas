@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.lovefilm;
 
+import static org.atlasapi.feeds.youview.YouViewDeleter.REVERSE_HIERARCHICAL_ORDER;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -7,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.atlasapi.feeds.youview.YouViewUploader;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -124,7 +125,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         if (missingPercentage > (float) missingContentPercentage) {
             log.error("File failed to update " + missingPercentage + "% of all LoveFilm content. File may be truncated.");
         } else {
-            List<Content> orderedContent = YouViewUploader.REVERSE_HIERARCHICAL_ORDER.sortedCopy(notSeen);
+            List<Content> orderedContent = REVERSE_HIERARCHICAL_ORDER.sortedCopy(notSeen);
             for (Content notSeenContent : orderedContent) {
                 notSeenContent.setActivelyPublished(false);
                 // write
