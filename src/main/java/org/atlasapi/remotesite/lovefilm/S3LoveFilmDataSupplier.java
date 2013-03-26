@@ -36,11 +36,11 @@ public class S3LoveFilmDataSupplier implements LoveFilmDataSupplier {
             S3Service service = serviceSupplier.get();
             S3Object[] objects = service.listObjects(bucketName, folder, NO_DELIMITER);
             S3Object file = getFileforName(objects);
-            if (file != null) {
-                InputSupplier<InputStream> in = inputStreamFor(service, file);
-                return new LoveFilmData(CharStreams.newReaderSupplier(in, Charsets.UTF_8));
+            if (file == null) {
+                throw new FetchException(String.format("No data file in %s/%s", bucketName, folder));
             }
-            throw new FetchException(String.format("No data file in %s/%s", bucketName, folder));
+            InputSupplier<InputStream> in = inputStreamFor(service, file);
+            return new LoveFilmData(CharStreams.newReaderSupplier(in, Charsets.UTF_8));
         } catch (ServiceException e) {
             throw new FetchException(e.getMessage(), e);
         } 
