@@ -66,9 +66,11 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 WorkersModule.class,
                 ManualScheduleRebuildModule.class,
                 InterlinkingDeltaModule.class,
-                YouViewUploadModule.class,
                 EquivTaskModule.class
             );
+            if (Configurer.get("youview.upload.enabled").toBoolean()) {
+                builder.add(YouViewUploadModule.class);
+            }
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
             builder.add(
