@@ -75,6 +75,7 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         result.setPeople(transformPeople(inputContent.getPeople(), publisher));
         result.setEquivalentTo(resolveEquivalences(inputContent.getSameAs()));
         result.setTopicRefs(topicRefs(inputContent.getTopics()));
+        result.setGenres(inputContent.getGenres());
         return result;
     }
 
