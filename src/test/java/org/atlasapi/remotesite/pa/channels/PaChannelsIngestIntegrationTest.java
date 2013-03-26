@@ -192,4 +192,9 @@ class DummyPaProgrammeDataStore implements PaProgrammeDataStore {
     public File copyForProcessing(File file) {
         return file;
     }
+
+    @Override
+    public List<File> localProfilesFiles(Predicate<File> filter) {
+        throw new NotImplementedException();
+    }
 }

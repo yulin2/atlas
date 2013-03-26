@@ -1,5 +1,9 @@
 package org.atlasapi.remotesite.pa;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.feeds.upload.persistence.FileUploadResultStore;
@@ -12,8 +16,10 @@ import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
+import org.atlasapi.persistence.content.people.PersonWriter;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -27,6 +33,8 @@ import org.atlasapi.remotesite.pa.channels.PaChannelsUpdater;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.features.PaFeaturesUpdater;
+import org.atlasapi.remotesite.pa.people.PaCompletePeopleUpdater;
+import org.atlasapi.remotesite.pa.people.PaDailyPeopleUpdater;
 import org.atlasapi.remotesite.pa.persistence.MongoPaScheduleVersionStore;
 import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
 import org.atlasapi.remotesite.rt.RtFilmModule;
@@ -49,6 +57,8 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 @Configuration
 @Import(RtFilmModule.class)
 public class PaModule {
+    private final static RepetitionRule PEOPLE_COMPLETE_INGEST = RepetitionRules.NEVER;
+    private final static RepetitionRule PEOPLE_INGEST = RepetitionRules.daily(LocalTime.MIDNIGHT);
     private final static RepetitionRule CHANNELS_INGEST = RepetitionRules.every(Duration.standardHours(12));
     private final static RepetitionRule FEATURES_INGEST = RepetitionRules.daily(LocalTime.MIDNIGHT);
     private final static RepetitionRule RECENT_FILE_INGEST = RepetitionRules.every(Duration.standardMinutes(10)).withOffset(Duration.standardMinutes(15));
@@ -60,6 +70,8 @@ public class PaModule {
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
+    private @Autowired PeopleResolver personResolver;
+    private @Autowired PersonWriter personWriter;
     private @Autowired ChannelGroupWriter channelGroupWriter;
     private @Autowired ChannelGroupResolver channelGroupResolver;
     private @Autowired AdapterLog log;
@@ -70,6 +82,8 @@ public class PaModule {
     private @Autowired ChannelWriter channelWriter;
     private @Autowired FileUploadResultStore fileUploadResultStore;
     private @Autowired DatabasedMongo mongo;
+    // to ensure the complete and daily people ingest jobs are not run simultaneously 
+    private final Lock peopleLock = new ReentrantLock();
     
     private @Value("${pa.ftp.username}") String ftpUsername;
     private @Value("${pa.ftp.password}") String ftpPassword;
@@ -79,15 +93,28 @@ public class PaModule {
     private @Value("${s3.access}") String s3access;
     private @Value("${s3.secret}") String s3secret;
     private @Value("${pa.s3.bucket}") String s3bucket;
+    private @Value("${pa.people.enabled}") boolean peopleEnabled;
     
     @PostConstruct
     public void startBackgroundTasks() {
+        if (peopleEnabled) {
+            scheduler.schedule(paCompletePeopleUpdater().withName("PA Complete People Updater"), PEOPLE_COMPLETE_INGEST);
+            scheduler.schedule(paDailyPeopleUpdater().withName("PA People Updater"), PEOPLE_INGEST);
+        }
         scheduler.schedule(paChannelsUpdater().withName("PA Channels Updater"), CHANNELS_INGEST);
         scheduler.schedule(paFeaturesUpdater().withName("PA Features Updater"), FEATURES_INGEST);
         scheduler.schedule(paFileUpdater().withName("PA File Updater"), RECENT_FILE_DOWNLOAD);
         scheduler.schedule(paCompleteUpdater().withName("PA Complete Updater"), COMPLETE_INGEST);
         scheduler.schedule(paRecentUpdater().withName("PA Recent Updater"), RECENT_FILE_INGEST);
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("PA update scheduled task installed").withSource(PaCompleteUpdater.class));
+    }
+    
+    private PaCompletePeopleUpdater paCompletePeopleUpdater() {
+        return new PaCompletePeopleUpdater(paProgrammeDataStore(), personResolver, personWriter, peopleLock);
+    }
+
+    private PaDailyPeopleUpdater paDailyPeopleUpdater() {
+        return new PaDailyPeopleUpdater(paProgrammeDataStore(), personResolver, personWriter, fileUploadResultStore, peopleLock);
     }
     
     @Bean PaChannelsUpdater paChannelsUpdater() {
