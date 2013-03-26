@@ -67,6 +67,6 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
                 return alias;
             }
         }
-        return "";
+        throw new RuntimeException("Channel " + channel.title() + " does not have a YouView alias (" + channel.toString() + ")");
     }
 }
