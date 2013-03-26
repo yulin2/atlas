@@ -57,8 +57,8 @@ public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 		try {
 		    YouTubeVideoEntry videoEntry = gdataClient.get(uri);
 		    String itemUri = YoutubeUriCanonicaliser.canonicalUriFor(YoutubeUriCanonicaliser.videoIdFrom(uri));
-		    
-			return contentExtractor.extract(new YouTubeSource(videoEntry, itemUri));
+
+		    return contentExtractor.extract(new YouTubeSource(videoEntry, itemUri));
 		} catch (HttpStatusCodeException e) {
 		    log.error("HTTP Error Status code:", e);
 		    return null;
