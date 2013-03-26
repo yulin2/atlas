@@ -36,18 +36,6 @@ public class YouTubeFeedUpdater implements Runnable {
 		log.record(new AdapterLogEntry(Severity.DEBUG).withDescription("Starting YouTube feeds update"));
 		for (String uri : feedUris) {
 			try {
-		        // look for existing item, merge into latest remote data, else fetch complete.
-//                ContentGroup group = client.fetch(uri);
-//                for (ChildRef content : group.getContents()) {
-//    		        Maybe<Identified> possibleIdentified = resolver.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
-//    		        if (possibleIdentified.hasValue()) {
-//    		            Identified ided = possibleIdentified.requireValue();
-//                        writer.createOrUpdate(ided);
-//    		        } else {
-//    		            item = fetchFullItem(itemUri).or(basicItem);
-//    		        }
-//				}
-//				writer.createOrUpdateSkeleton(group);
 			} catch (Exception e) {
 				log.record(new AdapterLogEntry(Severity.ERROR).withCause(e));
 			}

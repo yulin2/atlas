@@ -102,18 +102,6 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         return item;
     }
 
-    @SuppressWarnings("unused")
-    private Encoding encodingForWebPage(YouTubeSource source) {
-        Location location = new Location();
-        location.setTransportType(TransportType.LINK);
-        location.setUri(YoutubeUriCanonicaliser.standardURL(YoutubeUriCanonicaliser.videoIdFrom(source.getURL().orNull())));
-
-        Encoding encoding = new Encoding();
-        encoding.addAvailableAt(location);
-
-        return encoding;
-    }
-
     private Item item(YouTubeSource source) {
         Item item = new Item(source.getUri(),
                 YoutubeUriCanonicaliser.curieFor(source.getURL().get()),
