@@ -20,6 +20,7 @@ import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
 import org.atlasapi.system.SystemModule;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import com.metabroadcast.common.properties.Configurer;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
