@@ -36,7 +36,7 @@ import com.metabroadcast.common.http.HttpStatusCodeException;
  */
 public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 
-    static final Log log = LogFactory.getLog(YouTubeAdapter.class);
+    private static final Log log = LogFactory.getLog(YouTubeAdapter.class);
 
     private static final Pattern YOUTUBE_CANONICAL_URI_PATTERN = Pattern.compile("http://www\\.youtube\\.com/watch\\?v=[^\\./&=]+");
 	
