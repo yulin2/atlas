@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.voila;
 
 import java.util.List;
 
-import org.atlasapi.remotesite.redux.UpdateProgress;
+import org.atlasapi.feeds.utils.UpdateProgress;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;

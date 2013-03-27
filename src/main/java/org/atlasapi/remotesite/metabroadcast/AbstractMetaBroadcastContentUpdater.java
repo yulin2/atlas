@@ -1,10 +1,11 @@
 package org.atlasapi.remotesite.metabroadcast;
 
-import static org.atlasapi.remotesite.redux.UpdateProgress.FAILURE;
-import static org.atlasapi.remotesite.redux.UpdateProgress.SUCCESS;
+import static org.atlasapi.feeds.utils.UpdateProgress.FAILURE;
+import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
 
 import java.util.List;
 
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Container;
@@ -25,7 +26,6 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
-import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
