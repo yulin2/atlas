@@ -5,6 +5,7 @@ import static org.atlasapi.output.writers.SourceWriter.sourceWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
@@ -21,6 +22,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Futures;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 public class TopicsAnnotation extends OutputAnnotation<Content> {
@@ -81,11 +83,13 @@ public class TopicsAnnotation extends OutputAnnotation<Content> {
         this.topicWriter = new TopicWriter(idCodec, localHostName);
     }
 
-    private Iterable<Topic> resolve(List<Id> topicIds) {
+    private Iterable<Topic> resolve(List<Id> topicIds) throws IOException {
         if (topicIds.isEmpty()) { // don't even ask (the resolver)
             return ImmutableList.of();
         }
-        return topicResolver.resolveIds(topicIds).getResources();
+        //TODO: more specific exception, probably, please?
+        return Futures.get(topicResolver.resolveIds(topicIds),
+                1, TimeUnit.MINUTES, IOException.class).getResources();
     }
     
     @Override

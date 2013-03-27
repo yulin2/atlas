@@ -17,14 +17,14 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
-public class EsIndexer extends AbstractWorker {
+public class ContentIndexerWorker extends AbstractWorker {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final ContentStore contentStore;
     private final ContentIndexer contentIndexer;
 
-    public EsIndexer(ContentStore contentResolver, ContentIndexer contentIndexer) {
+    public ContentIndexerWorker(ContentStore contentResolver, ContentIndexer contentIndexer) {
         this.contentStore = contentResolver;
         this.contentIndexer = contentIndexer;
     }
