@@ -1,5 +1,6 @@
 package org.atlasapi.query.v4.schedule;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.Collection;
@@ -31,53 +32,70 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.metabroadcast.common.collect.OptionalMap;
 
 public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor {
 
-    private static final long QUERY_TIMEOUT = 60000;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private ContentResolver contentResolver;
-    private ScheduleIndex index;
+    private static final long QUERY_TIMEOUT = 60000;
+
+    private static Function<ScheduleRefEntry, Id> toId = new Function<ScheduleRefEntry, Id>() {
+
+        @Override
+        public Id apply(ScheduleRefEntry input) {
+            return input.getItemId();
+        }
+        
+    };
+
+    private final ContentResolver contentResolver;
+    private final ScheduleIndex index;
 
     public IndexBackedScheduleQueryExecutor(ScheduleIndex index, ContentResolver contentResolver) {
-        this.index = index;
-        this.contentResolver = contentResolver;
+        this.index = checkNotNull(index);
+        this.contentResolver = checkNotNull(contentResolver);
     }
 
     @Override
-    public QueryResult<ChannelSchedule> execute(ScheduleQuery query) throws ScheduleQueryExecutionException {
-        long id = Thread.currentThread().getId();
-        long startIndexTime = System.currentTimeMillis();
+    public QueryResult<ChannelSchedule> execute(final ScheduleQuery query) throws ScheduleQueryExecutionException {
 
-        ListenableFuture<ScheduleRef> futureRef = queryIndex(query);
-        ScheduleRef scheduleRef = Futures.get(futureRef, QUERY_TIMEOUT, MILLISECONDS, ScheduleQueryExecutionException.class);
-        long indexTime = System.currentTimeMillis() - startIndexTime;
+        ChannelSchedule schedule = Futures.get(resolveToSchedule(queryIndex(query), query),
+            QUERY_TIMEOUT, MILLISECONDS, ScheduleQueryExecutionException.class);
 
-        long startRetrieveTime = System.currentTimeMillis();
-        ChannelSchedule schedule = transformToChannelSchedule(query, scheduleRef);
-        long retrieveTime = System.currentTimeMillis() - startRetrieveTime;
-
-        log.info("{}: schedule times: {}\t{}", new Object[]{id, indexTime, retrieveTime});
         return QueryResult.singleResult(schedule, query.getContext());
+    }
+
+    private ListenableFuture<ChannelSchedule> resolveToSchedule(ListenableFuture<ScheduleRef> queryIndex,
+            final ScheduleQuery query) {
+        return Futures.transform(queryIndex, new AsyncFunction<ScheduleRef, ChannelSchedule>() {
+            @Override
+            public ListenableFuture<ChannelSchedule> apply(ScheduleRef input) throws Exception {
+                return transformToChannelSchedule(query, input);
+            }
+        });
     }
 
     private ListenableFuture<ScheduleRef> queryIndex(ScheduleQuery query) {
         return index.resolveSchedule(query.getSource(), query.getChannel(), query.getInterval());
     }
 
-    private ChannelSchedule transformToChannelSchedule(ScheduleQuery query, ScheduleRef scheduleRef) {
+    private ListenableFuture<ChannelSchedule> transformToChannelSchedule(final ScheduleQuery query, final ScheduleRef scheduleRef) {
         if (scheduleRef.isEmpty()) {
-            return new ChannelSchedule(query.getChannel(), query.getInterval(), ImmutableList.<Item>of());
+            return Futures.immediateFuture(new ChannelSchedule(query.getChannel(), query.getInterval(), ImmutableList.<Item>of()));
         }
         
-        Resolved<Content> scheduleContent = contentResolver.resolveIds(
-            Iterables.transform(scheduleRef.getScheduleEntries(), new ScheduleRefEntryToId())
-        );
-        
-        return new ChannelSchedule(query.getChannel(), query.getInterval(), contentList(query, scheduleRef, scheduleContent.toMap()));
+        return Futures.transform(contentResolver.resolveIds(
+            Iterables.transform(scheduleRef.getScheduleEntries(), toId)
+        ), new Function<Resolved<Content>, ChannelSchedule>() {
+            @Override
+            public ChannelSchedule apply(Resolved<Content> input) {
+                return new ChannelSchedule(query.getChannel(), query.getInterval(),
+                        contentList(query, scheduleRef, input.toMap()));
+            }
+        });
     }
 
     private Iterable<Item> contentList(ScheduleQuery query, ScheduleRef scheduleRef, OptionalMap<Id, Content> resolvedContent) {
@@ -172,13 +190,5 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor {
         }
         return appConfig.copyWithPrecedence(publishers);
     }
-    
-    private static class ScheduleRefEntryToId implements Function<ScheduleRefEntry, Id> {
 
-        @Override
-        public Id apply(ScheduleRefEntry input) {
-            return input.getItemId();
-        }
-        
-    }
 }
