@@ -2,7 +2,6 @@ package org.atlasapi.persistence;
 
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -11,30 +10,22 @@ import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.equiv.CassandraEquivalenceSummaryStore;
 import org.atlasapi.media.CassandraPersistenceModule;
 import org.atlasapi.media.ElasticSearchContentIndexModule;
-import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.MongoChannelGroupStore;
 import org.atlasapi.media.channel.MongoChannelStore;
-import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.content.EsContentIndex;
 import org.atlasapi.media.content.EsContentIndexer;
 import org.atlasapi.media.content.EsContentSearcher;
 import org.atlasapi.media.content.schedule.EsScheduleIndex;
-import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.segment.Segment;
-import org.atlasapi.media.segment.SegmentRef;
-import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.media.segment.SegmentWriter;
 import org.atlasapi.media.topic.EsPopularTopicIndex;
 import org.atlasapi.media.topic.EsTopicIndex;
 import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.messaging.MessageQueueingContentStore;
 import org.atlasapi.messaging.MessageQueueingTopicStore;
-import org.atlasapi.persistence.content.ContentGroupResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.persistence.media.TranslatorContentHasher;
@@ -47,9 +38,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.IdGenerator;
 import com.metabroadcast.common.ids.IdGeneratorBuilder;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
@@ -172,7 +161,7 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public MongoChannelStore cassandraChannelStore() {
+    public MongoChannelStore channelStore() {
         return new MongoChannelStore(databasedMongo(), channelGroupStore(), channelGroupStore());
     }
     
