@@ -12,7 +12,7 @@ public class BbcIonBroadcastExtractor implements ContentExtractor<IonBroadcast, 
     
     @Override
     public Maybe<Broadcast> extract(IonBroadcast source) {
-        String serviceUri = BbcIonServices.get(source.getService());
+        String serviceUri = BbcIonServices.get(source.getBroadcastService());
         if (serviceUri == null) {
             return Maybe.nothing();
         } else {
