@@ -4,7 +4,6 @@ import static org.atlasapi.media.entity.MediaType.VIDEO;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.METABROADCAST;
 import static org.hamcrest.Matchers.any;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -39,6 +38,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.metabroadcast.common.time.DateTimeZones;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -149,8 +149,8 @@ public class IndexBackedScheduleQueryExecutorTest {
         version.addBroadcast(broadcast);
     }
 
-    private Resolved<Content> queryResult(List<Content> content) {
-        return Resolved.valueOf(content);
+    private ListenableFuture<Resolved<Content>> queryResult(List<Content> content) {
+        return Futures.immediateFuture(Resolved.valueOf(content));
     }
 
     private Item itemWithBroadcast(String itemUri, String channelUri, DateTime start, DateTime end, String bid) {
