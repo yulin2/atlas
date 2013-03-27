@@ -62,7 +62,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
         
         if(runProcessingOnly()) {
             builder.add(
-//                ManualScheduleRebuildModule.class, 
 //                InterlinkingDeltaModule.class,
 //                EquivTaskModule.class,
 //                AtlasMessagingModule.class,

@@ -12,6 +12,7 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.media.topic.PopularTopicIndex;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.TopicResolver;
+import org.atlasapi.media.util.Resolved;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
@@ -27,10 +28,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.metabroadcast.common.query.Selection;
@@ -78,11 +79,11 @@ public class PopularTopicController {
 
     private Iterable<Topic> resolve(ListenableFuture<FluentIterable<Id>> topicIds) throws Exception {
         return Futures.get(Futures.transform(topicIds,
-            new Function<FluentIterable<Id>, Iterable<Topic>>() {
+            new AsyncFunction<FluentIterable<Id>, Resolved<Topic>>() {
                 @Override
-                public FluentIterable<Topic> apply(FluentIterable<Id> input) {
-                    return resolver.resolveIds(input).getResources();
+                public ListenableFuture<Resolved<Topic>> apply(FluentIterable<Id> input) {
+                    return resolver.resolveIds(input);
                 }
-            }), 60, TimeUnit.SECONDS, Exception.class);
+            }), 60, TimeUnit.SECONDS, Exception.class).getResources();
     }
 }

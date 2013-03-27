@@ -18,9 +18,9 @@ public class AtlasMessagingModule {
     
     @Value("${messaging.broker.url}")
     private String brokerUrl;
-    @Value("${messaging.destination.changes.content}")
+    @Value("${messaging.destination.content.changes}")
     private String contentChangesDestination;
-    @Value("${messaging.destination.changes.topics}")
+    @Value("${messaging.destination.topics.changes}")
     private String topicChangesDestination;
 //    @Autowired
 //    private MessageStore messageStore;

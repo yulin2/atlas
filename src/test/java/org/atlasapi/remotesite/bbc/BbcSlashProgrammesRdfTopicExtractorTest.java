@@ -21,6 +21,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.collect.ImmutableOptionalMap;
 import com.metabroadcast.common.collect.OptionalMap;
@@ -80,8 +82,8 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
         }
 
         @Override
-        public Resolved<Topic> resolveIds(Iterable<Id> ids) {
-            return Resolved.valueOf(ImmutableList.<Topic>of());
+        public ListenableFuture<Resolved<Topic>> resolveIds(Iterable<Id> ids) {
+            return Futures.immediateFuture(Resolved.valueOf(ImmutableList.<Topic>of()));
         }
 
 
