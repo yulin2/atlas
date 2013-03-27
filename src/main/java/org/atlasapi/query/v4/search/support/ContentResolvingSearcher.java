@@ -6,15 +6,20 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.common.Id;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.content.ContentSearcher;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.util.Resolved;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 import org.atlasapi.search.model.SearchResults;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.AsyncFunction;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class ContentResolvingSearcher implements SearchResolver {
 
@@ -31,15 +36,23 @@ public class ContentResolvingSearcher implements SearchResolver {
     @Override
     public List<Identified> search(SearchQuery query, ApplicationConfiguration appConfig) {
         try {
-            SearchResults searchResults = searcher.search(query).get(timeout, TimeUnit.MILLISECONDS);
-
-            List<Id> ids = searchResults.getIds();
-            if (ids.isEmpty()) {
-                return ImmutableList.of();
-            }
-
-            return ImmutableList.<Identified>copyOf(contentResolver.resolveIds(ids).getResources());
             
+            return Futures.transform(Futures.transform(searcher.search(query), 
+                new AsyncFunction<SearchResults, Resolved<Content>>() {
+                    @Override
+                    public ListenableFuture<Resolved<Content>> apply(SearchResults input) throws Exception {
+                        if (input.getIds().isEmpty()) {
+                            return Futures.immediateFuture(Resolved.<Content>empty());
+                        }
+                        return contentResolver.resolveIds(input.getIds());
+                    }
+            }), new Function<Resolved<Content>, List<Identified>>() {
+                    @Override
+                    public List<Identified> apply(Resolved<Content> input) {
+                        return ImmutableList.<Identified>copyOf(input.getResources());
+                    }
+            }).get(timeout, TimeUnit.MILLISECONDS);
+
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage(), ex);
         }

@@ -105,4 +105,5 @@ public class FixedResponseHttpClient implements SimpleHttpClient {
     public HttpResponse delete(String string) throws HttpException {
         throw new UnsupportedOperationException();
     }
+    
 }

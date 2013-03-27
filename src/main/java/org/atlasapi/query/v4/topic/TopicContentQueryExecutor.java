@@ -1,6 +1,7 @@
 package org.atlasapi.query.v4.topic;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,9 +23,12 @@ import org.atlasapi.query.common.QueryResult;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.metabroadcast.common.query.Selection;
 
 public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic, Content> {
+
+    private static final long QUERY_TIMEOUT = 60000;
 
     private final TopicResolver topicResolver;
     private final ContentIndex index;
@@ -56,8 +60,12 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
             throw new QueryExecutionException();
         }
         
-        Resolved<Content> content = contentResolver.resolveIds(queryIndex(query.getResourceQuery()));
+        ListenableFuture<Resolved<Content>> futureContent = 
+            contentResolver.resolveIds(queryIndex(query.getResourceQuery()));
 
+        Resolved<Content> content = 
+            Futures.get(futureContent, QUERY_TIMEOUT, MILLISECONDS, QueryExecutionException.class);
+        
         return ContextualQueryResult.valueOf(
             QueryResult.singleResult(topic, context), 
             QueryResult.listResult(content.getResources(), context), 
