@@ -20,8 +20,10 @@ import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.QueryResult;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.metabroadcast.common.query.Selection;
@@ -42,35 +44,61 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
     }
 
     @Override
-    public ContextualQueryResult<Topic, Content> execute(ContextualQuery<Topic, Content> query)
+    public ContextualQueryResult<Topic, Content> execute(final ContextualQuery<Topic, Content> query)
         throws QueryExecutionException {
-        QueryContext context = query.getContext();
+        return Futures.get(Futures.transform(
+                resolveTopic(query.getContextQuery().getOnlyId()), resolveContentToContextualQuery(query)
+            ), QUERY_TIMEOUT, MILLISECONDS, QueryExecutionException.class);
+    }
 
-        Resolved<Topic> resolved = topicResolver.resolveIds(ImmutableList.of(query.getContextQuery()
-            .getOnlyId()));
-        Optional<Topic> possibleTopic = resolved.getResources().first();
+    private AsyncFunction<Resolved<Topic>, ContextualQueryResult<Topic, Content>> resolveContentToContextualQuery(
+            final ContextualQuery<Topic, Content> query) {
+        return new AsyncFunction<Resolved<Topic>, ContextualQueryResult<Topic, Content>>(){
 
-        if (!possibleTopic.isPresent()) {
-            throw new QueryExecutionException();
-        }
-
-        Topic topic = possibleTopic.get();
-
-        if (!context.getApplicationConfiguration().isEnabled(topic.getPublisher())) {
-            throw new QueryExecutionException();
-        }
+            @Override
+            public ListenableFuture<ContextualQueryResult<Topic, Content>> apply(
+                    Resolved<Topic> resolved) throws Exception {
         
-        ListenableFuture<Resolved<Content>> futureContent = 
-            contentResolver.resolveIds(queryIndex(query.getResourceQuery()));
-
-        Resolved<Content> content = 
-            Futures.get(futureContent, QUERY_TIMEOUT, MILLISECONDS, QueryExecutionException.class);
+                    Optional<Topic> possibleTopic = resolved.getResources().first();
+            
+                    if (!possibleTopic.isPresent()) {
+                        throw new QueryExecutionException();
+                    }
+            
+                    final Topic topic = possibleTopic.get();
+            
+                    final QueryContext context = query.getContext();
+                    if (!context.getApplicationConfiguration().isEnabled(topic.getPublisher())) {
+                        throw new QueryExecutionException();
+                    }
         
-        return ContextualQueryResult.valueOf(
-            QueryResult.singleResult(topic, context), 
-            QueryResult.listResult(content.getResources(), context), 
-            context
-        );
+                    return Futures.transform(resolveContent(queryIndex(query.getResourceQuery())), 
+                            toContextualQuery(topic, context));
+                }
+
+            };
+    }
+    
+    private Function<Resolved<Content>, ContextualQueryResult<Topic, Content>> toContextualQuery(
+            final Topic topic, final QueryContext context) {
+        return new Function<Resolved<Content>, ContextualQueryResult<Topic, Content>>() {
+            @Override
+            public ContextualQueryResult<Topic, Content> apply(Resolved<Content> content) {
+                return ContextualQueryResult.valueOf(
+                        QueryResult.singleResult(topic, context),
+                        QueryResult.listResult(content.getResources(), context),
+                        context);
+            }
+
+        };
+    }
+
+    private ListenableFuture<Resolved<Content>> resolveContent(Iterable<Id> contentIds) {
+        return contentResolver.resolveIds(contentIds);
+    }
+    
+    private ListenableFuture<Resolved<Topic>> resolveTopic(Id contextId) {
+        return topicResolver.resolveIds(ImmutableList.of(contextId));
     }
     
     private Iterable<Id> queryIndex(Query<Content> query) throws QueryExecutionException {
