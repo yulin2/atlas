@@ -23,7 +23,8 @@ import org.atlasapi.messaging.MessageQueueingTopicStore;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.persistence.media.TranslatorContentHasher;
-import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
+import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
+import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.segment.SegmentWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -162,10 +163,14 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public CassandraChannelStore cassandraChannelStore() {
-        return new CassandraContentPersistenceModule(persistenceModule().getContext(), 
-                Integer.valueOf(cassandraRequestTimeout), idGeneratorBuilder())
-            .cassandraChannelStore();
+    public MongoChannelStore channelStore() {
+        return new MongoChannelStore(databasedMongo());
+    }
+    
+    @Bean
+    @Primary
+    public MongoChannelGroupStore channelGroupStore() {
+        return new MongoChannelGroupStore(databasedMongo());
     }
 
     private List<ServerAddress> mongoHosts() {
