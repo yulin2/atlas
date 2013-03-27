@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.bbc.atoz;
 
-import static org.atlasapi.remotesite.redux.UpdateProgress.FAILURE;
-import static org.atlasapi.remotesite.redux.UpdateProgress.SUCCESS;
+import static org.atlasapi.feeds.utils.UpdateProgress.FAILURE;
+import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
 
 import java.util.Iterator;
 import java.util.List;
@@ -16,7 +16,7 @@ import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcSlashProgrammesPidSource;
 import org.atlasapi.remotesite.bbc.ChannelAndPid;
 import org.atlasapi.remotesite.bbc.ProgressStore;
-import org.atlasapi.remotesite.redux.UpdateProgress;
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
