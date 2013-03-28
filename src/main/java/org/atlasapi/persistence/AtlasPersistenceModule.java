@@ -6,9 +6,12 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.atlasapi.equiv.EquivalenceRecordStore;
 import org.atlasapi.media.CassandraPersistenceModule;
 import org.atlasapi.media.ElasticSearchContentIndexModule;
+import org.atlasapi.media.content.CassandraContentStore;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.content.EquivalenceWritingContentStore;
 import org.atlasapi.media.content.EsContentIndex;
 import org.atlasapi.media.content.EsContentIndexer;
 import org.atlasapi.media.content.EsContentSearcher;
@@ -83,13 +86,18 @@ public class AtlasPersistenceModule {
     
     @Bean
     public ContentStore contentStore() {
-        return new MessageQueueingContentStore(contentChanges, 
-            persistenceModule().contentStore());
+        ContentStore store = persistenceModule().contentStore();
+        store = new EquivalenceWritingContentStore(store, recordStore());
+        return new MessageQueueingContentStore(contentChanges, store);
     }
     
     @Bean TopicStore topicStore() {
         return new MessageQueueingTopicStore(topicChanges,
             persistenceModule().topicStore());
+    }
+    
+    @Bean EquivalenceRecordStore recordStore() {
+        return persistenceModule().getEquivalenceRecordStore();
     }
 
     @Bean
