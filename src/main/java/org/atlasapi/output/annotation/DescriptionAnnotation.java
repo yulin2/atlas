@@ -2,7 +2,7 @@ package org.atlasapi.output.annotation;
 
 import java.io.IOException;
 
-import org.atlasapi.media.entity.Described;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
@@ -16,17 +16,17 @@ import org.atlasapi.output.writers.ItemDisplayTitleWriter;
 import org.atlasapi.output.writers.SourceWriter;
 import org.joda.time.Duration;
 
-public class DescriptionAnnotation extends OutputAnnotation<Described> {
+public class DescriptionAnnotation extends OutputAnnotation<Content> {
 
     private final EntityWriter<Publisher> publisherWriter = SourceWriter.sourceWriter("source");
     private final ItemDisplayTitleWriter displayTitleWriter = new ItemDisplayTitleWriter();
 
     public DescriptionAnnotation() {
-        super(Described.class);
+        super(Content.class);
     }
 
     @Override
-    public void write(Described content, FieldWriter writer, OutputContext ctxt) throws IOException {
+    public void write(Content content, FieldWriter writer, OutputContext ctxt) throws IOException {
         writer.writeObject(publisherWriter, content.getPublisher(), ctxt);
         
         if (content instanceof Episode) {
