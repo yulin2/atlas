@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.content.ContentIndexer;
+import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.persistence.bootstrap.ChangeListener;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.bootstrap.cassandra.CassandraChangeListener;
@@ -50,14 +52,14 @@ public class BootstrapController {
     //
     private final ExecutorService scheduler = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 10);
     //
-    private CassandraContentStore cassandraContentStore;
+    private ContentStore cassandraContentStore;
     private CassandraChannelGroupStore cassandraChannelGroupStore;
     private CassandraChannelStore cassandraChannelStore;
     private CassandraContentGroupStore cassandraContentGroupStore;
     private CassandraPersonStore cassandraPersonStore;
     private CassandraProductStore cassandraProductStore;
     private CassandraSegmentStore cassandraSegmentStore;
-    private CassandraTopicStore cassandraTopicStore;
+    private TopicStore cassandraTopicStore;
     private CassandraLookupEntryStore cassandraLookupEntryStore;
     private ContentIndexer esContentIndexer;
     //
@@ -82,7 +84,7 @@ public class BootstrapController {
         this.cassandraContentGroupStore = cassandraContentGroupStore;
     }
 
-    public void setCassandraContentStore(CassandraContentStore cassandraContentStore) {
+    public void setCassandraContentStore(ContentStore cassandraContentStore) {
         this.cassandraContentStore = cassandraContentStore;
     }
 
@@ -98,7 +100,7 @@ public class BootstrapController {
         this.cassandraSegmentStore = cassandraSegmentStore;
     }
 
-    public void setCassandraTopicStore(CassandraTopicStore cassandraTopicStore) {
+    public void setCassandraTopicStore(TopicStore cassandraTopicStore) {
         this.cassandraTopicStore = cassandraTopicStore;
     }
 
@@ -146,7 +148,7 @@ public class BootstrapController {
     public void bootstrapCassandraContent(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
         CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
         cassandraChangeListener.setCassandraContentStore(cassandraContentStore);
-        cassandraChangeListener.setCassandraLookupEntryStore(cassandraLookupEntryStore);
+//        cassandraChangeListener.setCassandraLookupEntryStore(cassandraLookupEntryStore);
         doBootstrap(cassandraContentBootstrapper, cassandraChangeListener, response);
     }
 
