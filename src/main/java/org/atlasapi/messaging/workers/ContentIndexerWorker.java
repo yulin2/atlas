@@ -4,8 +4,6 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentIndexer;
 import org.atlasapi.media.content.ContentStore;
-import org.atlasapi.media.content.IndexException;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.util.Resolved;
 import org.atlasapi.messaging.EntityUpdatedMessage;
 import org.slf4j.Logger;
@@ -31,35 +29,28 @@ public class ContentIndexerWorker extends AbstractWorker {
 
     @Override
     public void process(final EntityUpdatedMessage message) {
-        Futures.addCallback(resolveContent(message),
-                new FutureCallback<Resolved<Content>>() {
-
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        log.error("Indexing error:", throwable);
-                    }
-
-                    @Override
-                    public void onSuccess(Resolved<Content> results) {
-                        Optional<Content> content = results.getResources().first();
-                        if (content.isPresent()) {
-                            Content source = content.get();
-                            log.info("Indexing {}", source);
-                            try {
-                                contentIndexer.index((Item) source);
-                            } catch (IndexException ie) {
-                                onFailure(ie);
-                            }
-                        } else {
-                            log.warn("{}: failed to resolved {} {}",
-                                    new Object[] {
-                                        message.getMessageId(),
-                                        message.getEntityType(),
-                                        message.getEntityId() });
+        Futures.addCallback(resolveContent(message), 
+            new FutureCallback<Resolved<Content>>() {
+    
+                @Override
+                public void onFailure(Throwable throwable) {
+                    log.error("Indexing error:", throwable);
+                }
+    
+                @Override
+                public void onSuccess(Resolved<Content> results) {
+                    Optional<Content> content = results.getResources().first();
+                    if (content.isPresent()) {
+                        Content source = content.get();
+                        log.info("Indexing {}", source);
+                        try {
+                            contentIndexer.index(source);
+                        } catch (Throwable ie) {
+                            onFailure(ie);
                         }
                     }
                 }
-                );
+        });
     }
 
     private ListenableFuture<Resolved<Content>> resolveContent(final EntityUpdatedMessage message) {
