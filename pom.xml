@@ -481,6 +481,8 @@
         <atlas.version>${project.version}</atlas.version>
         <common.version>1.0-SNAPSHOT</common.version>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <scm>
