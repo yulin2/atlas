@@ -46,8 +46,8 @@ public class ContentIndexerWorker extends AbstractWorker {
                         Content source = content.get();
                         log.info("Indexing {}", source);
                         try {
-                            contentIndexer.index((Item) source);
-                        } catch (IndexException ie) {
+                            contentIndexer.index(source);
+                        } catch (Throwable ie) {
                             onFailure(ie);
                         }
                     } else {
