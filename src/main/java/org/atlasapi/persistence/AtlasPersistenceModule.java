@@ -85,16 +85,18 @@ public class AtlasPersistenceModule {
     @Bean
     public ContentStore contentStore() {
         ContentStore store = persistenceModule().contentStore();
-        store = new EquivalenceWritingContentStore(store, recordStore());
+        store = new EquivalenceWritingContentStore(store, equivalenceRecordStore());
         return new MessageQueueingContentStore(contentChanges, store);
     }
     
-    @Bean TopicStore topicStore() {
+    @Bean
+    public TopicStore topicStore() {
         return new MessageQueueingTopicStore(topicChanges,
             persistenceModule().topicStore());
     }
     
-    @Bean EquivalenceRecordStore recordStore() {
+    @Bean
+    public EquivalenceRecordStore equivalenceRecordStore() {
         return persistenceModule().getEquivalenceRecordStore();
     }
 

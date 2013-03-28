@@ -17,6 +17,7 @@ import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
+import org.atlasapi.system.BootstrapModule;
 import org.atlasapi.system.SystemModule;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
@@ -65,7 +66,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 //                InterlinkingDeltaModule.class,
 //                EquivTaskModule.class,
 //                AtlasMessagingModule.class,
-                WorkersModule.class
+                WorkersModule.class,
+                BootstrapModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(YouViewUploadModule.class);
