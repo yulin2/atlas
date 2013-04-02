@@ -55,9 +55,7 @@ public class PaPeopleProcessor {
         if (paPerson.getBorn() != null) {
             person.setBirthDate(dateTimeFormatter.parseDateTime(paPerson.getBorn()));
         }
-        if (paPerson.getBornIn() != null) {
-            person.setBirthPlace(paPerson.getBornIn());
-        }
+        person.setBirthPlace(paPerson.getBornIn());
         person.setDescription(paPerson.getEarlyLife() + "\n\n" + paPerson.getCareer());
         person.addQuote(paPerson.getQuote());
         person.setPublisher(Publisher.PA_PEOPLE);

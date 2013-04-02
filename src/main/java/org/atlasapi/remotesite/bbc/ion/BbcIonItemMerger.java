@@ -145,6 +145,7 @@ public class BbcIonItemMerger {
     private <T extends Content> void mergeContents(T fetchedItem, T existingItem) {
         //Identified attrs. Assume uri, curie are corrrect, equivs ignored.
         existingItem.addAliases(fetchedItem.getAliases());
+        existingItem.addAliasUrls(fetchedItem.getAliasUrls());
         existingItem.setLastUpdated(ifNotNull(fetchedItem.getLastUpdated(), existingItem.getLastUpdated()));
         
         //Described attrs.

@@ -37,7 +37,7 @@ public class PersonModelSimplifier extends DescribedModelSimplifier<Person, org.
     private List<ContentIdentifier> simpleContentListFrom(Iterable<ChildRef> contents) {
         List<ContentIdentifier> contentList = Lists.newArrayList();
         for (ChildRef ref : contents) {
-            contentList.add(ContentIdentifier.identifierFor(ref));
+            contentList.add(ContentIdentifier.identifierFor(ref, idCodec));
         }
         return contentList;
     }
