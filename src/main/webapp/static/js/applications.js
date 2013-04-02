@@ -279,7 +279,7 @@ var updateEnabled = function(callback){
 			sources.disabled.push(publisher);
 		}
 	}
-	var url = "/admin/applications/"+slug+"/publishers.json";
+	var url = "/admin/applications/"+slug+"/configuration/publishers.json";
 	
 	$.ajax({
 	    type: "POST",
