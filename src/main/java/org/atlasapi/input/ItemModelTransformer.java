@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
@@ -21,9 +22,9 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+import com.google.inject.internal.Sets;
 import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.media.MimeType;
@@ -32,8 +33,11 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.media.entity.simple.Item, Item> {
 
+    private final BroadcastModelTransformer broadcastTransformer;
+    
     public ItemModelTransformer(ContentResolver resolver, TopicStore topicStore, Clock clock) {
         super(resolver, topicStore, clock);
+        this.broadcastTransformer = new BroadcastModelTransformer();
     }
 
     @Override
@@ -70,6 +74,14 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         episode.setEpisodeNumber(inputItem.getEpisodeNumber());
         if (inputItem.getSeriesSummary() != null) {
             episode.setSeriesRef(new ParentRef(inputItem.getSeriesSummary().getUri()));
+        }
+        if (!inputItem.getBroadcasts().isEmpty()) {
+            Set<Broadcast> broadcasts = Sets.newHashSet();
+            for (org.atlasapi.media.entity.simple.Broadcast broadcast : inputItem.getBroadcasts()) {
+                broadcasts.add(broadcastTransformer.transform(broadcast));
+            }
+            
+            episode.addVersion(new Version().copyWithBroadcasts(broadcasts));
         }
         return episode;
     }
