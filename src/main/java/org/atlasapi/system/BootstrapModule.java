@@ -5,8 +5,12 @@ import java.util.List;
 
 import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentLister;
+import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoTopicStore;
+import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,29 +48,32 @@ public class BootstrapModule {
         
         return bootstrapController;
     }
+    
+    @Bean
+    IndividualBootstrapController contentBootstrapController() {
+        ContentResolver resolver = new LookupResolvingContentResolver(
+                new MongoContentResolver(bootstrapMongo()), 
+                new MongoLookupEntryStore(bootstrapMongo()));
+        return new IndividualBootstrapController(resolver, persistenceModule.contentStore());
+    }
 
     private ContentBootstrapper cassandraTopicBootstrapper() {
         ContentBootstrapper contentBootstrapper = new ContentBootstrapper();
-        contentBootstrapper.withTopicListers(new MongoTopicStore(databasedMongo()));
+        contentBootstrapper.withTopicListers(new MongoTopicStore(bootstrapMongo()));
         return contentBootstrapper;
     }
 
     private ContentBootstrapper cassandraContentBootstrapper() {
         ContentBootstrapper contentBootstrapper = new ContentBootstrapper();
-        contentBootstrapper.withContentListers(new MongoContentLister(databasedMongo()));
+        contentBootstrapper.withContentListers(new MongoContentLister(bootstrapMongo()));
         return contentBootstrapper;
     }
     
     @Bean
-    public DatabasedMongo databasedMongo() {
-        return new DatabasedMongo(mongo(), contentReadMongoName);
-    }
-
-    @Bean
-    public Mongo mongo() {
+    public DatabasedMongo bootstrapMongo() {
         Mongo mongo = new Mongo(mongoHosts());
         mongo.setReadPreference(ReadPreference.secondaryPreferred());
-        return mongo;
+        return new DatabasedMongo(mongo, contentReadMongoName);
     }
     
     private List<ServerAddress> mongoHosts() {
