@@ -63,6 +63,7 @@ public class AtlasPersistenceModule {
     private final String cassandraClientThreads = Configurer.get("cassandra.clientThreads").get();
  
     private final String esSeeds = Configurer.get("elasticsearch.seeds").get();
+    private final String esCluster = Configurer.get("elasticsearch.cluster").get();
     private final String esRequestTimeout = Configurer.get("elasticsearch.requestTimeout").get();
     private final Parameter processingConfig = Configurer.get("processing.config");
     private final String generateIds = Configurer.get("ids.generate").get();
@@ -104,7 +105,7 @@ public class AtlasPersistenceModule {
     @Bean
     public ElasticSearchContentIndexModule esContentIndexModule() {
         ElasticSearchContentIndexModule module = 
-                new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
+                new ElasticSearchContentIndexModule(esSeeds, esCluster, Long.parseLong(esRequestTimeout));
         module.init();
         return module;
     }
