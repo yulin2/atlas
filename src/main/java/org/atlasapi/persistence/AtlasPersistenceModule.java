@@ -36,6 +36,8 @@ import org.atlasapi.persistence.messaging.mongo.MongoMessageStore;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
 import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,6 +62,8 @@ import com.mongodb.WriteConcern;
 @Configuration
 public class AtlasPersistenceModule {
 
+    private final Logger log = LoggerFactory.getLogger(getClass()); 
+    
     private final String mongoHost = Configurer.get("mongo.host").get();
     private final String mongoDbName = Configurer.get("mongo.dbName").get();
     private final String cassandraEnv = Configurer.get("cassandra.env").get();
@@ -150,6 +154,7 @@ public class AtlasPersistenceModule {
         ContentWriter contentWriter = mongoContentPersistenceModule().contentWriter();
         contentWriter = new EquivalenceWritingContentWriter(contentWriter, lookupStore());
         if (Boolean.valueOf(generateIds)) {
+            log.info("ID generation enabled");
             contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
         }
         contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter);
