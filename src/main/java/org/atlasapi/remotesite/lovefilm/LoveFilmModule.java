@@ -41,7 +41,7 @@ public class LoveFilmModule {
         String s3bucket = Configurer.get("lovefilm.s3.bucket").get();
         String s3folder = Configurer.get("lovefilm.s3.folder").get();
         String s3fileName = Configurer.get("lovefilm.s3.fileName").get();
-        int missingThreshold = Configurer.get("lovefilm.missingThreshold").toInt();
+        int missingThreshold = Configurer.get("lovefilm.missingThresholdPercentage").toInt();
         AWSCredentials credentials = new AWSCredentials(s3access, s3secret);
         RestS3ServiceSupplier serviceSupplier = new RestS3ServiceSupplier(credentials);
         LoveFilmDataSupplier dataSupplier = new S3LoveFilmDataSupplier(serviceSupplier, s3bucket, s3folder, s3fileName);

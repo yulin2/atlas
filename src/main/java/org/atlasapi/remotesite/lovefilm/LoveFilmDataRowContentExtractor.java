@@ -267,6 +267,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     }
 
     private Content setCommonFields(Content content, LoveFilmDataRow source) {
+        content.setActivelyPublished(true);
         content.setTitle(ITEM_NAME.valueFrom(source));
         content.setImage(HEROSHOT_URL.valueFrom(source));
         content.setYear(yearFrom(ORIGINAL_PUBLICATION_DATE.valueFrom(source)));
