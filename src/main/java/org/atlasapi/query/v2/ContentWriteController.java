@@ -143,6 +143,7 @@ public class ContentWriteController {
 
     private void mergeVersions(Version existing, Version posted) {
         existing.setManifestedAs(posted.getManifestedAs());
+        existing.setBroadcasts(posted.getBroadcasts());
     }
 
     private Song mergeSongs(Song existing, Song posted) {
