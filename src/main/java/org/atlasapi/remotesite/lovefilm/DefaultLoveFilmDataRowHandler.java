@@ -123,7 +123,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         
         float missingPercentage = ((float) notSeen.size() / (float) allLoveFilmContent.size()) * 100;
         if (missingPercentage > (float) missingContentPercentage) {
-            log.error("File failed to update " + missingPercentage + "% of all LoveFilm content. File may be truncated.");
+            throw new RuntimeException("File failed to update " + missingPercentage + "% of all LoveFilm content. File may be truncated.");
         } else {
             List<Content> orderedContent = REVERSE_HIERARCHICAL_ORDER.sortedCopy(notSeen);
             for (Content notSeenContent : orderedContent) {
