@@ -49,7 +49,7 @@ public class YouViewItemParseTest {
     
     @Test
     public void testItemParsing() throws ValidityException, ParsingException, IOException {
-        DateTimeZone.setDefault(DateTimeZones.LONDON);
+        DateTimeZone.setDefault(DateTimeZones.UTC);
 
         Item item = contentExtractor.extract(getContentElementFromFile("youview-item.xml"));
         
