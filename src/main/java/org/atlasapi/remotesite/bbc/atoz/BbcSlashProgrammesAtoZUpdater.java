@@ -17,6 +17,7 @@ import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcSlashProgrammesPidSource;
 import org.atlasapi.remotesite.bbc.ChannelAndPid;
 import org.atlasapi.remotesite.bbc.ProgressStore;
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
