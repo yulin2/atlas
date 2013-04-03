@@ -18,6 +18,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
@@ -35,7 +36,7 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
     }
 
     @Override
-    public Schedule schedule(DateTime from, DateTime to, Iterable<Channel> channels, Iterable<Publisher> publishers, ApplicationConfiguration mergeConfig) {
+    public Schedule schedule(DateTime from, DateTime to, Iterable<Channel> channels, Iterable<Publisher> publishers, Optional<ApplicationConfiguration> mergeConfig) {
         Schedule schedule = scheduleResovler.schedule(from, to, channels, publishers, mergeConfig);
 
         ImmutableList.Builder<ScheduleChannel> scheduleChannels = ImmutableList.builder();

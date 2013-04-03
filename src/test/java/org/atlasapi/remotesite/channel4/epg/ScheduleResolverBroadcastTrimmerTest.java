@@ -29,6 +29,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Test;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -54,7 +55,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
         ContentResolver resolver = new StubContentResolver().respondTo(item);
         
         context.checking(new Expectations(){{
-            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(nullValue(ApplicationConfiguration.class))); will(returnValue(schedule));
+            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<ApplicationConfiguration>absent())); will(returnValue(schedule));
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});
         
@@ -88,7 +89,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
         ContentResolver resolver = new StubContentResolver().respondTo(item1).respondTo(item2);
 
         context.checking(new Expectations() {{
-            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(nullValue(ApplicationConfiguration.class)));
+            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<ApplicationConfiguration>absent()));
             will(returnValue(schedule));
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});
