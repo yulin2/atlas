@@ -10,7 +10,6 @@ import static org.joda.time.Duration.standardMinutes;
 import java.lang.reflect.Field;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
