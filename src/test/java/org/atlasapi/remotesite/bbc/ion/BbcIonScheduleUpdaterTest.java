@@ -56,7 +56,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     private final BbcIonBroadcastHandler handler = new DefaultBbcIonBroadcastHandler(resolver, writer, log, new ContentLock());
     
     protected void setUp() {
-        DateTimeZone.setDefault(DateTimeZones.LONDON);
+        DateTimeZone.setDefault(DateTimeZones.UTC);
     }
 
     @SuppressWarnings("unchecked")
