@@ -9,7 +9,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.jets3t.service.security.AWSCredentials;
-import org.joda.time.LocalTime;
+import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,7 +21,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class LoveFilmModule {
     
-    private final static RepetitionRule DAILY = RepetitionRules.daily(new LocalTime(23, 0, 0));
+    private final static RepetitionRule DAILY = RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(8));
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentResolver contentResolver;
