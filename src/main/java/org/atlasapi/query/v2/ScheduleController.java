@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
@@ -97,7 +98,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
             }
             
             ApplicationConfiguration mergeConfig = apiKeySupplied && !publishersSupplied ? appConfig : null;
-            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers, mergeConfig).scheduleChannels(), appConfig);
+            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers, Optional.fromNullable(mergeConfig)).scheduleChannels(), appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
