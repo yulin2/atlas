@@ -20,6 +20,8 @@ import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.media.util.WriteResult;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 
+@Controller
 public class IndividualBootstrapController {
 
     private final ContentResolver read;
@@ -47,7 +50,7 @@ public class IndividualBootstrapController {
             return;
         }
         Content content = (Content) identified.requireValue();
-        content.accept(new ContentVisitorAdapter<String>() {
+        String result = content.accept(new ContentVisitorAdapter<String>() {
             
             @Override
             public String visit(Brand brand) {
@@ -85,6 +88,10 @@ public class IndividualBootstrapController {
             }
             
         });
+        resp.setStatus(HttpStatus.OK.value());
+        resp.setContentLength(result.length());
+        resp.getWriter().write(result);
+        resp.getWriter().flush();
     }
     
 }
