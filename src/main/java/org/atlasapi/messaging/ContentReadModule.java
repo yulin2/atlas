@@ -32,6 +32,7 @@ public class ContentReadModule {
     
     private String contentReadDestination = Configurer.get("messaging.destination.content").get();
     private String contentReadMongoHost = Configurer.get("mongo.readOnly.host").get();
+    private Integer contentReadMongoPort = Configurer.get("mongo.readOnly.port").toInt();
     private String contentReadMongoName = Configurer.get("mongo.readOnly.dbName").get();
 
     @Autowired private ConnectionFactory connectionFactory;
@@ -61,7 +62,7 @@ public class ContentReadModule {
 
     private Mongo mongo() {
         try {
-            return new Mongo(contentReadMongoHost);
+            return new Mongo(contentReadMongoHost, contentReadMongoPort);
         } catch (UnknownHostException e) {
             throw Throwables.propagate(e);
         }

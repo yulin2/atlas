@@ -32,6 +32,7 @@ import com.mongodb.ServerAddress;
 public class BootstrapModule {
 
     private String contentReadMongoHost = Configurer.get("mongo.readOnly.host").get();
+    private Integer contentReadMongoPort = Configurer.get("mongo.readOnly.port").toInt();
     private String contentReadMongoName = Configurer.get("mongo.readOnly.dbName").get();
     
     @Autowired AtlasPersistenceModule persistenceModule;
@@ -72,7 +73,7 @@ public class BootstrapModule {
     @Bean
     public DatabasedMongo bootstrapMongo() {
         Mongo mongo = new Mongo(mongoHosts());
-        mongo.setReadPreference(ReadPreference.secondaryPreferred());
+        mongo.setReadPreference(ReadPreference.secondary());
         return new DatabasedMongo(mongo, contentReadMongoName);
     }
     
@@ -82,7 +83,7 @@ public class BootstrapModule {
             @Override
             public ServerAddress apply(String input) {
                 try {
-                    return new ServerAddress(input, 27017);
+                    return new ServerAddress(input, contentReadMongoPort);
                 } catch (UnknownHostException e) {
                     return null;
                 }
