@@ -93,6 +93,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private static final String SHOW = "show";
 
     private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
+    private static final Splitter TITLE_SPLIT = Splitter.on(" - ").trimResults();
     private final DateTimeFormatter dateMonthYearFormat = DateTimeFormat.forPattern("dd/MM/YYYY").withZoneUTC();
     private final DateTimeFormatter yearMonthDayFormat = ISODateTimeFormat.date().withZoneUTC();
     
@@ -155,8 +156,11 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             series.setParentRef(new ParentRef(uri(SHOW_ID.valueFrom(source),SHOW_RESOURCE_TYPE)));
             content = series;
         }
+        setCommonFields(content, source);
         content.setSpecialization(Specialization.TV);
-        return Optional.of(setCommonFields(content, source));
+        content.setTitle(getSeriesTitle(source));
+        
+        return Optional.of(content);
     }
 
     private Optional<Content> extractFilm(LoveFilmDataRow source) {
@@ -380,5 +384,10 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             return null;
         }
         return yearMonthDayFormat.parseDateTime(date);
+    }
+
+    private String getSeriesTitle(LoveFilmDataRow source) {
+        Iterable<String> parts = TITLE_SPLIT.split(ITEM_NAME.valueFrom(source));
+        return Iterables.get(parts, 1);
     }
 }
