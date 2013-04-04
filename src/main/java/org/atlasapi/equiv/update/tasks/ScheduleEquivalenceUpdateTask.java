@@ -111,6 +111,7 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
     private UpdateProgress process(Item item) {
         try {
             updater.updateEquivalences(item);
+            log.info("successfully updated equivalences on " + item.getCanonicalUri());
             return SUCCESS;
         } catch (Exception e) {
             log.error("Error updating equivalences on " + item.getCanonicalUri(), e);
