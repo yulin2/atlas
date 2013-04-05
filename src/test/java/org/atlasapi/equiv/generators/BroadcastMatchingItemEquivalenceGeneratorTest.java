@@ -11,6 +11,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -33,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -72,7 +74,7 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
         final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(BBC_ONE.uri(), utcTime(100000), utcTime(200000)));
         
         context.checking(new Expectations(){{
-            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC), null);
+            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC), Optional.<ApplicationConfiguration>absent());
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});
         
