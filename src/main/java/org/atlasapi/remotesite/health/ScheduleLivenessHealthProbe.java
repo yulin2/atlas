@@ -4,12 +4,14 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -48,7 +50,7 @@ public class ScheduleLivenessHealthProbe implements HealthProbe {
 			
 			for(Channel channel : channels) {
 				try {
-					Schedule schedule = scheduleResolver.schedule(startTime, endTime, ImmutableSet.of(channel), ImmutableSet.of(publisher), null);
+					Schedule schedule = scheduleResolver.schedule(startTime, endTime, ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<ApplicationConfiguration>absent());
 					int itemCount = Iterables.getOnlyElement(schedule.scheduleChannels()).items().size();
 							
 					result.add(channel.title(), String.format("%d items in schedule from %s to %s", itemCount, startTime.toString("dd/MM/yy HH:mm"), endTime.toString("dd/MM/yy HH:mm")), itemCount > 0);
