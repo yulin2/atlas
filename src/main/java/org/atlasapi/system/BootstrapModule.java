@@ -73,7 +73,7 @@ public class BootstrapModule {
     @Bean
     public DatabasedMongo bootstrapMongo() {
         Mongo mongo = new Mongo(mongoHosts());
-        mongo.setReadPreference(ReadPreference.secondary());
+        //mongo.setReadPreference(ReadPreference.secondary());
         return new DatabasedMongo(mongo, contentReadMongoName);
     }
     
