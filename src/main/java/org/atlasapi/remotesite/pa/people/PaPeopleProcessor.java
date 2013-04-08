@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.pa.people;
 
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.PeopleResolver;
+import org.atlasapi.persistence.content.people.PeopleResolver;
 import org.atlasapi.persistence.content.people.PersonWriter;
 import org.atlasapi.remotesite.pa.profiles.bindings.Name;
 import org.joda.time.format.DateTimeFormatter;

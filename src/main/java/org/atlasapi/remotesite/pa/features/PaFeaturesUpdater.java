@@ -14,7 +14,7 @@ import org.apache.cassandra.cli.CliParser.newColumnFamily_return;
 import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
-import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.features.bindings.Feature;
 import org.joda.time.DateMidnight;

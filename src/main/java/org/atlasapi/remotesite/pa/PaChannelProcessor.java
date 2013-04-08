@@ -4,21 +4,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.common.Id;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
-import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
-import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.pa.PaBaseProgrammeUpdater.PaChannelData;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 
 public class PaChannelProcessor {
 
