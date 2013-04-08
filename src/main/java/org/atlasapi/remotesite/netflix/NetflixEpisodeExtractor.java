@@ -51,11 +51,11 @@ public class NetflixEpisodeExtractor implements NetflixContentExtractor<Episode>
     }
 
     private ParentRef getParentRef(Element episodeElement) {
-        return new ParentRef(NetflixBrandExtractor.BRAND_URL_PREFIX + getShowId(episodeElement));
+        return null; //TODO: new ParentRef(NetflixBrandExtractor.BRAND_URL_PREFIX + getShowId(episodeElement));
     }
 
     private ParentRef getSeriesRef(Element episodeElement) {
-        return new ParentRef(NetflixSeriesExtractor.SERIES_URL_PREFIX + getShowId(episodeElement) + "-" + getSeriesNumber(episodeElement));
+        return null; //TODO: new ParentRef(NetflixSeriesExtractor.SERIES_URL_PREFIX + getShowId(episodeElement) + "-" + getSeriesNumber(episodeElement));
     }
 
     String getTitle(Element episodeElement) {
