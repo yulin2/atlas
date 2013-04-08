@@ -151,7 +151,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             if (!Strings.isNullOrEmpty(episodeSequence)) {
                 series.withSeriesNumber(Integer.valueOf(episodeSequence));
             }
-            series.setParentRef(new ParentRef(uri(SHOW_ID.valueFrom(source),SHOW_RESOURCE_TYPE)));
+            //TODO: series.setParentRef(new ParentRef(uri(SHOW_ID.valueFrom(source),SHOW_RESOURCE_TYPE)));
             content = series;
         }
         content.setSpecialization(Specialization.TV);
@@ -179,7 +179,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
                 episode.setEpisodeNumber(Integer.valueOf(episodeSequence));
             }
             if (!SERIES_ID.valueIs(source, parentId)) {
-                episode.setSeriesRef(new ParentRef(uri(SERIES_ID.valueFrom(source), SEASON_RESOURCE_TYPE)));
+                //TODO: episode.setSeriesRef(new ParentRef(uri(SERIES_ID.valueFrom(source), SEASON_RESOURCE_TYPE)));
             }
             item = episode;
         } else {
@@ -187,7 +187,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         }
 
         if (!Strings.isNullOrEmpty(parentId)) {
-            item.setParentRef(new ParentRef(uri(parentId, SHOW_RESOURCE_TYPE)));
+            //TODO: item.setParentRef(new ParentRef(uri(parentId, SHOW_RESOURCE_TYPE)));
         }
         
         item.setVersions(versionAndLocationFrom(source));
