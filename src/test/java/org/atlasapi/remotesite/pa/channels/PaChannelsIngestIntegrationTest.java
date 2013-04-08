@@ -18,6 +18,7 @@ import org.atlasapi.media.channel.MongoChannelGroupStore;
 import org.atlasapi.media.channel.MongoChannelStore;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +63,7 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         Channel channel = maybeChannel.requireValue();
         assertEquals("BBC One Northern Ireland", channel.title());
         // test parent is correct
-        Long parent = channel.parent();
+        Id parent = channel.parent();
         assertNotNull(parent);
         Maybe<Channel> maybeParent = channelStore.fromId(parent);
         assertTrue(maybeParent.hasValue());

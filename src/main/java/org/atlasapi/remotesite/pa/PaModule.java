@@ -16,7 +16,7 @@ import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.PeopleResolver;
+import org.atlasapi.persistence.content.people.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.feeds.upload.persistence.MongoFileUploadResultStore;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -126,7 +126,7 @@ public class PaModule {
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {
-        return new PaFeaturesUpdater(paProgrammeDataStore(), contentResolver, contentGroupResolver, contentGroupWriter);
+        return new PaFeaturesUpdater(paProgrammeDataStore(), contentStore, contentGroupResolver, contentGroupWriter);
     }
 
     @Bean PaFtpFileUpdater ftpFileUpdater() {

@@ -13,7 +13,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.feeds.upload.FileUploadResult.FileUploadResultType;
 import org.atlasapi.feeds.upload.persistence.FileUploadResultStore;
-import org.atlasapi.persistence.content.PeopleResolver;
+import org.atlasapi.persistence.content.people.PeopleResolver;
 import org.atlasapi.persistence.content.people.PersonWriter;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.profiles.bindings.Person;

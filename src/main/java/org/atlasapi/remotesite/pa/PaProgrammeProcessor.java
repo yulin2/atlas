@@ -45,7 +45,6 @@ import org.atlasapi.remotesite.pa.listings.bindings.Category;
 import org.atlasapi.remotesite.pa.listings.bindings.PictureUsage;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.atlasapi.remotesite.pa.listings.bindings.StaffMember;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
