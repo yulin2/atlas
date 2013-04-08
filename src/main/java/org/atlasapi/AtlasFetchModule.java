@@ -23,8 +23,6 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.persistence.system.Fetcher;
-import org.atlasapi.query.uri.LocalOrRemoteFetcher;
-import org.atlasapi.query.uri.SavingFetcher;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
 import org.atlasapi.remotesite.RemoteSiteModule;
