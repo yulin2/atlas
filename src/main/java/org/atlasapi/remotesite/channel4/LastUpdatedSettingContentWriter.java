@@ -45,7 +45,7 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
     
     @Override
     public void createOrUpdate(Item item) {
-        Maybe<Identified> previously = resolver.findByCanonicalUris(ImmutableList.of(item.getCanonicalUri())).get(item.getCanonicalUri());
+        Maybe<Identified> previously = resolver.findByCanonicalUris(ImmutableList.of(item.getCanonicalUri())).getFirstValue();
         
         DateTime now = clock.now();
         if(previously.hasValue() && previously.requireValue() instanceof Item) {
@@ -154,7 +154,7 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
     @Override
     public void createOrUpdate(Container container) {
         
-        Maybe<Identified> previously = resolver.findByCanonicalUris(ImmutableList.of(container.getCanonicalUri())).get(container.getCanonicalUri());
+        Maybe<Identified> previously = resolver.findByCanonicalUris(ImmutableList.of(container.getCanonicalUri())).getFirstValue();
         
         if(previously.hasValue() && previously.requireValue() instanceof Container) {
             Container prevContainer = (Container) previously.requireValue();

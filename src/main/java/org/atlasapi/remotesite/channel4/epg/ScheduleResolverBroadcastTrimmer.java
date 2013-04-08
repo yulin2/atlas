@@ -48,7 +48,7 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
             for (Item itemEmbeddedInSchedule : Iterables.getOnlyElement(schedule.channelSchedules()).items()) {
             	// load the item from the main db to avoid reading stale data
             	String itemEmbeddedInScheduleUri = itemEmbeddedInSchedule.getCanonicalUri();
-                Maybe<Identified> maybeItem = resolver.findByCanonicalUris(ImmutableList.of(itemEmbeddedInScheduleUri)).get(itemEmbeddedInScheduleUri);
+                Maybe<Identified> maybeItem = resolver.findByCanonicalUris(ImmutableList.of(itemEmbeddedInScheduleUri)).getFirstValue();
                 if(maybeItem.hasValue()) {
                     Item item = (Item) maybeItem.requireValue();
                     boolean changed = false;

@@ -95,7 +95,7 @@ public class C4EpgEntryProcessor {
             String itemUri = uriFrom(entry);
 
             Episode episode = null;
-            Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
+            Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableList.of(itemUri)).getFirstValue();
             if (resolved.isNothing()) {
                 episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri), Publisher.C4);
                 // TODO new alias
@@ -134,7 +134,7 @@ public class C4EpgEntryProcessor {
 
     private Brand updateBrand(String brandName, Episode episode, C4EpgEntry entry, DateTime now) {
         String brandUri = C4_PROGRAMMES_BASE + brandName;
-        Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableSet.of(brandUri)).get(brandUri);
+        Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableSet.of(brandUri)).getFirstValue();
         
         if(resolved.isNothing()) {
             try {
@@ -155,7 +155,7 @@ public class C4EpgEntryProcessor {
     }
 
     private void updateSeries(String seriesUri, String brandName, Episode episode, Brand brand, DateTime now) {
-        Maybe<Identified> maybeSeries = contentStore.findByCanonicalUris(ImmutableSet.of(seriesUri)).get(seriesUri);
+        Maybe<Identified> maybeSeries = contentStore.findByCanonicalUris(ImmutableSet.of(seriesUri)).getFirstValue();
         Series series = null;
         if (maybeSeries.hasValue()) {
             series = (Series) maybeSeries.requireValue();
