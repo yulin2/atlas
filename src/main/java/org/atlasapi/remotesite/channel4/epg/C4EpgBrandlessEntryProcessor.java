@@ -64,7 +64,7 @@ public class C4EpgBrandlessEntryProcessor {
             
             //try to get container for the item.
             String brandUri = REAL_PROGRAMME_BASE + brandName;
-            Maybe<Identified> maybeBrand = contentStore.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
+            Maybe<Identified> maybeBrand = contentStore.findByCanonicalUris(ImmutableList.of(brandUri)).getFirstValue();
             
             DateTime now = clock.now();
             
@@ -96,7 +96,7 @@ public class C4EpgBrandlessEntryProcessor {
     private ItemRefAndBroadcast episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel, Brand brand, DateTime now) {
         
         String slotId = entry.slotId();
-        Maybe<Identified> possibleEpisode = contentStore.findByCanonicalUris(ImmutableList.of(synthesizedEpisodeUriFrom(entry))).get(synthesizedEpisodeUriFrom(entry));
+        Maybe<Identified> possibleEpisode = contentStore.findByCanonicalUris(ImmutableList.of(synthesizedEpisodeUriFrom(entry))).getFirstValue();
         
         Episode episode = null;
         if(possibleEpisode.hasValue()) {

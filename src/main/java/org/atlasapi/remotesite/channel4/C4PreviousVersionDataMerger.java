@@ -28,7 +28,7 @@ class C4PreviousVersionDataMerger {
 	void merge(Item item) {
 		
 		String itemUri = item.getCanonicalUri();
-        Maybe<Identified> maybeOldItem = contentResolver.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
+        Maybe<Identified> maybeOldItem = contentResolver.findByCanonicalUris(ImmutableList.of(itemUri)).getFirstValue();
 		
         if (!maybeOldItem.hasValue()) {
             // can't merge if this is the first time we've seen the item

@@ -39,7 +39,7 @@ public class C4SynthesizedItemUpdater {
     }
 
     private boolean findAndMergeSynthItem(Episode canonicalEpisode, String synthItemUri) {
-        Maybe<Identified> maybeSynthEpisode = contentResolver.findByCanonicalUris(ImmutableList.of(synthItemUri)).get(synthItemUri);
+        Maybe<Identified> maybeSynthEpisode = contentResolver.findByCanonicalUris(ImmutableList.of(synthItemUri)).getFirstValue();
 
         if(maybeSynthEpisode.hasValue()) {
             Episode synthEpisode = (Episode) maybeSynthEpisode.requireValue();
