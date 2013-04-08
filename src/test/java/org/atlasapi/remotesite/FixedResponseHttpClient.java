@@ -101,7 +101,6 @@ public class FixedResponseHttpClient implements SimpleHttpClient {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public HttpResponse delete(String string) throws HttpException {
         throw new UnsupportedOperationException();
     }
