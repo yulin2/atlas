@@ -121,6 +121,7 @@ public class ContentWriteController {
         existing.setSpecialization(posted.getSpecialization());
         existing.setTopicRefs(merge(existing.getTopicRefs(), posted.getTopicRefs()));
         existing.setPeople(merge(existing.people(), posted.people()));
+        existing.setKeyPhrases(posted.getKeyPhrases());
         if (existing instanceof Item && posted instanceof Item) {
             return mergeItems((Item)existing, (Item) posted);
         }
