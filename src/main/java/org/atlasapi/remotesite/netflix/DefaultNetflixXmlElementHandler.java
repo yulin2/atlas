@@ -8,6 +8,7 @@ import java.util.Set;
 import nu.xom.Element;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Episode;
@@ -30,9 +31,9 @@ import com.metabroadcast.common.base.Maybe;
 
 public class DefaultNetflixXmlElementHandler implements NetflixXmlElementHandler {
 
-    private final Map<String, Container> seen = Maps.newHashMap();
+    private final Map<Id, Container> seen = Maps.newHashMap();
     private final ContentExtractor<Element, Set<? extends Content>> extractor;
-    private final SetMultimap<String, Content> cached = HashMultimap.create();
+    private final SetMultimap<Id, Content> cached = HashMultimap.create();
     private final ContentWriter writer;
     private final ContentResolver resolver;
     private final Logger log = LoggerFactory.getLogger(DefaultNetflixXmlElementHandler.class);
@@ -68,7 +69,7 @@ public class DefaultNetflixXmlElementHandler implements NetflixXmlElementHandler
     public void finish() {
         if (cached.values().size() > 0) {
             log.warn("{} extracted but unwritten", cached.values().size());
-            for (Entry<String, Collection<Content>> mapping : cached.asMap().entrySet()) {
+            for (Entry<Id, Collection<Content>> mapping : cached.asMap().entrySet()) {
                 log.warn(mapping.toString());
             }
 
@@ -79,7 +80,7 @@ public class DefaultNetflixXmlElementHandler implements NetflixXmlElementHandler
 
     private Maybe<Identified> resolve(String uri) {
         ImmutableSet<String> uris = ImmutableSet.of(uri);
-        return resolver.findByCanonicalUris(uris).get(uri);
+        return resolver.findByCanonicalUris(uris).getFirstValue();
     }
 
     private void write(Content content) {
@@ -102,22 +103,22 @@ public class DefaultNetflixXmlElementHandler implements NetflixXmlElementHandler
 
     private void writeBrandAndCachedSubContents(Brand brand) {
         writer.createOrUpdate(brand);
-        String brandUri = brand.getCanonicalUri();
-        seen.put(brandUri, brand);
-        for (Content subContent : cached.removeAll(brandUri)) {
+        Id brandId = brand.getId();
+        seen.put(brandId, brand);
+        for (Content subContent : cached.removeAll(brandId)) {
             write(subContent);
         }
     }
 
     private void cacheOrWriteSeriesAndSubContents(Series series) {
         ParentRef parent = series.getParent();
-        if (parent != null && !seen.containsKey(parent.getUri())) {
-            cached.put(parent.getUri(), series);
+        if (parent != null && !seen.containsKey(parent.getId())) {
+            cached.put(parent.getId(), series);
         } else {
-            String seriesUri = series.getCanonicalUri();
+            Id seriesId = series.getId();
             writer.createOrUpdate(series);
-            seen.put(seriesUri, series);
-            for (Content episode : cached.removeAll(seriesUri)) {
+            seen.put(seriesId, series);
+            for (Content episode : cached.removeAll(seriesId)) {
                 write(episode);
             }
         }
@@ -126,28 +127,28 @@ public class DefaultNetflixXmlElementHandler implements NetflixXmlElementHandler
     private void cacheOrWriteItem(Content content) {
         Item item = (Item) content;
         ParentRef parent = item.getContainer();
-        if (parent != null && !seen.containsKey(parent.getUri())) {
-            cached.put(parent.getUri(), item);
+        if (parent != null && !seen.containsKey(parent.getId())) {
+            cached.put(parent.getId(), item);
         } else {
             writer.createOrUpdate((Item) content);
         }
     }
 
     private void cacheOrWriteEpisode(Episode episode) {
-        String brandUri = episode.getContainer().getUri();
+        Id brandId = episode.getContainer().getId();
         
-        if (!seen.containsKey(brandUri)) {
-            cached.put(brandUri, episode);
+        if (!seen.containsKey(brandId)) {
+            cached.put(brandId, episode);
             return;
         } 
         
-        String seriesUri = episode.getSeriesRef() != null ? episode.getSeriesRef().getUri() : null;
-        if (seriesUri != null) {
-            if (!seen.containsKey(seriesUri)) {
-                cached.put(seriesUri, episode);
+        Id seriesId = episode.getSeriesRef() != null ? episode.getSeriesRef().getId() : null;
+        if (seriesId != null) {
+            if (!seen.containsKey(seriesId)) {
+                cached.put(seriesId, episode);
                 return;
             }
-            Series series = (Series)seen.get(seriesUri);
+            Series series = (Series)seen.get(seriesId);
             episode.setSeriesNumber(series.getSeriesNumber());
         }
         
