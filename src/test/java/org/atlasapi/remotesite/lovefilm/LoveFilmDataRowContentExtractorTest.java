@@ -2,7 +2,9 @@ package org.atlasapi.remotesite.lovefilm;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -45,11 +47,11 @@ public class LoveFilmDataRowContentExtractorTest {
         assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Episode.class));
+        assertThat(content, is(instanceOf(Episode.class)));
         Episode episode = (Episode) content;
         
-        assertThat(episode.getContainer().getUri(), endsWith("shows/179260"));
-        assertThat(episode.getSeriesRef().getUri(), endsWith("seasons/182909"));
+        assertThat(episode.getContainer().getId().toString(), endsWith("shows/179260"));
+        assertThat(episode.getSeriesRef().getId().toString(), endsWith("seasons/182909"));
         assertThat(episode.getEpisodeNumber(), is(2));
         assertThat(episode.getTitle(), is("Stoke Me a Clipper"));
         assertThat(episode.getDescription(), is("Rimmer's alter ego, Ace, arrives on Starbug badly wounded."));
@@ -79,11 +81,11 @@ public class LoveFilmDataRowContentExtractorTest {
         assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Episode.class));
+        assertThat(content, is(instanceOf(Episode.class)));
         Episode episode = (Episode) content;
         
-        assertThat(episode.getContainer().getUri(), endsWith("shows/180765"));
-        assertThat(episode.getSeriesRef().getUri(), endsWith("seasons/180775"));
+        assertThat(episode.getContainer().getId().toString(), endsWith("shows/180765"));
+        assertThat(episode.getSeriesRef().getId().toString(), endsWith("seasons/180775"));
         assertThat(episode.getEpisodeNumber(), is(1));
         assertThat(episode.getTitle(), is("Episode 1"));
         assertEquals(Specialization.TV, episode.getSpecialization());
@@ -98,12 +100,12 @@ public class LoveFilmDataRowContentExtractorTest {
         
         assertTrue(extracted.isPresent());
         Content content = extracted.get();
-        
-        assertThat(content, is(Episode.class));
+
+        assertThat(content, is(instanceOf(Episode.class)));
         Episode episode = (Episode) content;
         
-        assertThat(episode.getContainer().getUri(), endsWith("shows/188387"));
-        assertThat(episode.getSeriesRef().getUri(), endsWith("seasons/188388"));
+        assertThat(episode.getContainer().getId().toString(), endsWith("shows/188387"));
+        assertThat(episode.getSeriesRef().getId().toString(), endsWith("seasons/188388"));
         assertThat(episode.getEpisodeNumber(), is(16));
         assertThat(episode.getTitle(), is("Resolutions"));
         assertEquals(Specialization.TV, episode.getSpecialization());
@@ -138,11 +140,11 @@ public class LoveFilmDataRowContentExtractorTest {
         
         assertTrue(extracted.isPresent());
         Content content = extracted.get();
-        
-        assertThat(content, is(Episode.class));
+
+        assertThat(content, is(instanceOf(Episode.class)));
         Episode episode = (Episode) content;
         
-        assertThat(episode.getContainer().getUri(), endsWith("192242"));
+        assertThat(episode.getContainer().getId().toString(), endsWith("181684"));
         assertThat(episode.getSeriesRef(), is(nullValue()));
         assertThat(episode.getEpisodeNumber(), is(8));
         assertThat(episode.getGenres(), hasItem("http://lovefilm.com/genres/specialinterest"));
@@ -159,11 +161,11 @@ public class LoveFilmDataRowContentExtractorTest {
         
         assertTrue(extracted.isPresent());
         Content content = extracted.get();
-        
-        assertThat(content, is(Item.class));
+
+        assertThat(content, is(instanceOf(Item.class)));
         Item episode = (Item) content;
         
-        assertThat(episode.getContainer().getUri(), endsWith("177351"));
+        assertThat(episode.getContainer().getId().toString(), endsWith("177351"));
         assertThat(episode.getTitle(), is("Blackadder's Christmas Carol"));
         assertEquals(Specialization.TV, episode.getSpecialization());
     }
@@ -182,7 +184,7 @@ public class LoveFilmDataRowContentExtractorTest {
         assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Brand.class));
+        assertThat(content, is(instanceOf(Brand.class)));
         Brand episode = (Brand) content;
         
         assertThat(episode.getTitle(), is("Blackadder - Special"));
@@ -199,7 +201,7 @@ public class LoveFilmDataRowContentExtractorTest {
         assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Film.class));
+        assertThat(content, is(instanceOf(Film.class)));
         Film film = (Film) content;
         
         assertThat(film.getTitle(), is("Battle Royale"));

@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Episode;
@@ -227,25 +228,25 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     private Maybe<Identified> resolve(String uri) {
         ImmutableSet<String> uris = ImmutableSet.of(uri);
-        return resolver.findByCanonicalUris(uris).get(uri);
+        return resolver.findByCanonicalUris(uris).getFirstValue();
     }
 
     private void write(Content content) {
-        if (content instanceof Container) {
-            if (content instanceof Series) {
-                cacheOrWriteSeriesAndSubContents((Series) content);
-            } else if (content instanceof Brand) {
-                cacheOrWriteBrandAndCachedSubContents((Brand) content);
-            } else {
-                writer.createOrUpdate((Container) content);
-            }
-        } else if (content instanceof Item) {
-            if (content instanceof Episode) {
-                cacheOrWriteEpisode((Episode) content);
-            } else {
-                cacheOrWriteItem(content);
-            }
-        }
+//        if (content instanceof Container) {
+//            if (content instanceof Series) {
+//                cacheOrWriteSeriesAndSubContents((Series) content);
+//            } else if (content instanceof Brand) {
+//                cacheOrWriteBrandAndCachedSubContents((Brand) content);
+//            } else {
+//                writer.createOrUpdate((Container) content);
+//            }
+//        } else if (content instanceof Item) {
+//            if (content instanceof Episode) {
+//                cacheOrWriteEpisode((Episode) content);
+//            } else {
+//                cacheOrWriteItem(content);
+//            }
+//        }
     }
 
     private void cacheOrWriteBrandAndCachedSubContents(Brand brand) {
@@ -260,71 +261,71 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     
     private void writeBrand(Brand brand) {
         writer.createOrUpdate(brand);
-        String brandUri = brand.getCanonicalUri();
-        seen.put(brandUri, brand);
-        for (Content subContent : cached.removeAll(brandUri)) {
+        String brandId = brand.getCanonicalUri();
+        seen.put(brandId, brand);
+        for (Content subContent : cached.removeAll(brandId)) {
             write(subContent);
         }
     }
 
-    private void cacheOrWriteSeriesAndSubContents(Series series) {
-        ParentRef parent = series.getParent();
-        if (parent != null && !seen.containsKey(parent.getUri())) {
-            // series has parent, parent not written
-            if (unwrittenBrands.containsKey(parent.getUri())) {
-                Brand brand = unwrittenBrands.get(parent.getUri());
-                Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(parent.getUri()), IS_SERIES);
-                if (!mightBeTopLevelSeries(brand, Iterables.concat(cachedSeriesForBrand, ImmutableList.of(series)))) {
-                    // have brand, is now definitely not a top level series, so can write brand, etc
-                    unwrittenBrands.remove(parent.getUri());
-                    writeBrand(brand);
-                    writeSeries(series);
-                    return;
-                } 
-            }
-            cached.put(parent.getUri(), series);
-        } else {
-            writeSeries(series);
-        }
-    }
-
-    public void writeSeries(Series series) {
-        String seriesUri = series.getCanonicalUri();
-        writer.createOrUpdate(series);
-        seen.put(seriesUri, series);
-        for (Content episode : cached.removeAll(seriesUri)) {
-            write(episode);
-        }
-    }
-
-    private void cacheOrWriteItem(Content content) {
-        Item item = (Item) content;
-        ParentRef parent = item.getContainer();
-        if (parent != null && !seen.containsKey(parent.getUri())) {
-            cached.put(parent.getUri(), item);
-        } else {
-            writer.createOrUpdate((Item) content);
-        }
-    }
-
-    private void cacheOrWriteEpisode(Episode episode) {
-        String brandUri = episode.getContainer().getUri();
-        
-        if (!seen.containsKey(brandUri)) {
-            cached.put(brandUri, episode);
-            return;
-        } 
-        
-        String seriesUri = episode.getSeriesRef() != null ? episode.getSeriesRef().getUri() : null;
-        if (seriesUri != null) {
-            if (!seen.containsKey(seriesUri)) {
-                cached.put(seriesUri, episode);
-                return;
-            }
-            Series series = (Series)seen.get(seriesUri);
-            episode.setSeriesNumber(series.getSeriesNumber());
-        }
-        
-        writer.createOrUpdate(episode);
-    }
+//    private void cacheOrWriteSeriesAndSubContents(Series series) {
+//        ParentRef parent = series.getParent();
+//        if (parent != null && !seen.containsKey(parent.getUri())) {
+//            // series has parent, parent not written
+//            if (unwrittenBrands.containsKey(parent.getUri())) {
+//                Brand brand = unwrittenBrands.get(parent.getUri());
+//                Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(parent.getUri()), IS_SERIES);
+//                if (!mightBeTopLevelSeries(brand, Iterables.concat(cachedSeriesForBrand, ImmutableList.of(series)))) {
+//                    // have brand, is now definitely not a top level series, so can write brand, etc
+//                    unwrittenBrands.remove(parent.getUri());
+//                    writeBrand(brand);
+//                    writeSeries(series);
+//                    return;
+//                } 
+//            }
+//            cached.put(parent.getUri(), series);
+//        } else {
+//            writeSeries(series);
+//        }
+//    }
+//
+//    public void writeSeries(Series series) {
+//        String seriesUri = series.getCanonicalUri();
+//        writer.createOrUpdate(series);
+//        seen.put(seriesUri, series);
+//        for (Content episode : cached.removeAll(seriesUri)) {
+//            write(episode);
+//        }
+//    }
+//
+//    private void cacheOrWriteItem(Content content) {
+//        Item item = (Item) content;
+//        ParentRef parent = item.getContainer();
+//        if (parent != null && !seen.containsKey(parent.getId())) {
+//            cached.put(parent.getId(), item);
+//        } else {
+//            writer.createOrUpdate((Item) content);
+//        }
+//    }
+//
+//    private void cacheOrWriteEpisode(Episode episode) {
+//        Id brandId = episode.getContainer().getId();
+//        
+//        if (!seen.containsKey(brandId)) {
+//            cached.put(brandId, episode);
+//            return;
+//        } 
+//        
+//        Id seriesId = episode.getSeriesRef() != null ? episode.getSeriesRef().getId() : null;
+//        if (seriesId != null) {
+//            if (!seen.containsKey(seriesId)) {
+//                cached.put(seriesId, episode);
+//                return;
+//            }
+//            Series series = (Series)seen.get(seriesId);
+//            episode.setSeriesNumber(series.getSeriesNumber());
+//        }
+//        
+//        writer.createOrUpdate(episode);
+//    }
 }
