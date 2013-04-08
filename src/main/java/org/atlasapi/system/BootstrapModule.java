@@ -4,13 +4,13 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import org.atlasapi.persistence.AtlasPersistenceModule;
-import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentLister;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoTopicStore;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+import org.atlasapi.system.bootstrap.ContentBootstrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,6 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.properties.Configurer;
 import com.mongodb.Mongo;
-import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
 
 @Configuration
