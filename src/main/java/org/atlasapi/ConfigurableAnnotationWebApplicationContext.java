@@ -17,6 +17,7 @@ import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
 import org.atlasapi.system.BootstrapModule;
+import org.atlasapi.system.DebugModule;
 import org.atlasapi.system.SystemModule;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
@@ -64,7 +65,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 //                InterlinkingDeltaModule.class,
 //                EquivTaskModule.class,
                 WorkersModule.class,
-                BootstrapModule.class
+                BootstrapModule.class,
+                DebugModule.class
             );
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
