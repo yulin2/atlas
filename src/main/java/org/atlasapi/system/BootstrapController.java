@@ -3,12 +3,6 @@ package org.atlasapi.system;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,21 +14,10 @@ import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.content.ContentIndexer;
 import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.topic.TopicStore;
-import org.atlasapi.persistence.bootstrap.ChangeListener;
-import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
-import org.atlasapi.persistence.bootstrap.elasticsearch.ESChangeListener;
-import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
-import org.atlasapi.persistence.bootstrap.cassandra.CassandraChangeListener;
-import org.atlasapi.persistence.bootstrap.elasticsearch.IndexingChangeListener;
-import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
-import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
-import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
-import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
-import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
-import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
-import org.atlasapi.persistence.media.segment.cassandra.CassandraSegmentStore;
-import org.atlasapi.persistence.topic.cassandra.CassandraTopicStore;
+import org.atlasapi.system.bootstrap.ChangeListener;
+import org.atlasapi.system.bootstrap.ContentBootstrapper;
+import org.atlasapi.system.bootstrap.cassandra.CassandraChangeListener;
+import org.atlasapi.system.bootstrap.elasticsearch.IndexingChangeListener;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -58,87 +41,26 @@ public class BootstrapController {
     private ContentBootstrapper esContentBootstrapper;
     //
     private ContentStore cassandraContentStore;
-    private CassandraChannelGroupStore cassandraChannelGroupStore;
-    private CassandraChannelStore cassandraChannelStore;
-    private CassandraContentGroupStore cassandraContentGroupStore;
-    private CassandraPersonStore cassandraPersonStore;
-    private CassandraProductStore cassandraProductStore;
-    private CassandraSegmentStore cassandraSegmentStore;
     private TopicStore cassandraTopicStore;
-    private CassandraLookupEntryStore cassandraLookupEntryStore;
     private ContentIndexer esContentIndexer;
     //
-    private ContentBootstrapper cassandraContentBootstrapper;
-    private ContentBootstrapper cassandraChannelBootstrapper;
-    private ContentBootstrapper cassandraContentGroupBootstrapper;
-    private ContentBootstrapper cassandraPeopleBootstrapper;
-    private ContentBootstrapper cassandraProductBootstrapper;
-    private ContentBootstrapper cassandraSegmentBootstrapper;
     private ContentBootstrapper cassandraTopicBootstrapper;
-    private ContentBootstrapper esContentBootstrapper;
     
-    public void setCassandraChannelGroupStore(CassandraChannelGroupStore cassandraChannelGroupStore) {
-        this.cassandraChannelGroupStore = cassandraChannelGroupStore;
-    }
-
-    public void setCassandraChannelStore(CassandraChannelStore cassandraChannelStore) {
-        this.cassandraChannelStore = cassandraChannelStore;
-    }
-
-    public void setCassandraContentGroupStore(CassandraContentGroupStore cassandraContentGroupStore) {
-        this.cassandraContentGroupStore = cassandraContentGroupStore;
-    }
 
     public void setCassandraContentStore(ContentStore cassandraContentStore) {
         this.cassandraContentStore = cassandraContentStore;
-    }
-
-    public void setCassandraPersonStore(CassandraPersonStore cassandraPersonStore) {
-        this.cassandraPersonStore = cassandraPersonStore;
-    }
-
-    public void setCassandraProductStore(CassandraProductStore cassandraProductStore) {
-        this.cassandraProductStore = cassandraProductStore;
-    }
-
-    public void setCassandraSegmentStore(CassandraSegmentStore cassandraSegmentStore) {
-        this.cassandraSegmentStore = cassandraSegmentStore;
     }
 
     public void setCassandraTopicStore(TopicStore cassandraTopicStore) {
         this.cassandraTopicStore = cassandraTopicStore;
     }
 
-    public void setCassandraLookupEntryStore(CassandraLookupEntryStore cassandraLookupEntryStore) {
-        this.cassandraLookupEntryStore = cassandraLookupEntryStore;
-    }
-
     public void setEsContentIndexer(ContentIndexer esContentIndexer) {
         this.esContentIndexer = esContentIndexer;
     }
 
-    public void setCassandraChannelBootstrapper(ContentBootstrapper cassandraChannelBootstrapper) {
-        this.cassandraChannelBootstrapper = cassandraChannelBootstrapper;
-    }
-
     public void setCassandraContentBootstrapper(ContentBootstrapper cassandraContentBootstrapper) {
         this.cassandraContentBootstrapper = cassandraContentBootstrapper;
-    }
-
-    public void setCassandraContentGroupBootstrapper(ContentBootstrapper cassandraContentGroupBootstrapper) {
-        this.cassandraContentGroupBootstrapper = cassandraContentGroupBootstrapper;
-    }
-
-    public void setCassandraPeopleBootstrapper(ContentBootstrapper cassandraPeopleBootstrapper) {
-        this.cassandraPeopleBootstrapper = cassandraPeopleBootstrapper;
-    }
-
-    public void setCassandraProductBootstrapper(ContentBootstrapper cassandraProductBootstrapper) {
-        this.cassandraProductBootstrapper = cassandraProductBootstrapper;
-    }
-
-    public void setCassandraSegmentBootstrapper(ContentBootstrapper cassandraSegmentBootstrapper) {
-        this.cassandraSegmentBootstrapper = cassandraSegmentBootstrapper;
     }
 
     public void setCassandraTopicBootstrapper(ContentBootstrapper cassandraTopicBootstrapper) {
@@ -155,42 +77,6 @@ public class BootstrapController {
         cassandraChangeListener.setCassandraContentStore(cassandraContentStore);
 //        cassandraChangeListener.setCassandraLookupEntryStore(cassandraLookupEntryStore);
         doBootstrap(cassandraContentBootstrapper, cassandraChangeListener, response);
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/contentGroup")
-    public void bootstrapCassandraContentGroup(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
-        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
-        cassandraChangeListener.setCassandraContentGroupStore(cassandraContentGroupStore);
-        doBootstrap(cassandraContentGroupBootstrapper, cassandraChangeListener, response);
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/channel")
-    public void bootstrapCassandraChannel(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
-        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
-        cassandraChangeListener.setCassandraChannelGroupStore(cassandraChannelGroupStore);
-        cassandraChangeListener.setCassandraChannelStore(cassandraChannelStore);
-        doBootstrap(cassandraChannelBootstrapper, cassandraChangeListener, response);
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/people")
-    public void bootstrapCassandraPeople(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
-        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
-        cassandraChangeListener.setCassandraPersonStore(cassandraPersonStore);
-        doBootstrap(cassandraPeopleBootstrapper, cassandraChangeListener, response);
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/product")
-    public void bootstrapCassandra(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
-        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
-        cassandraChangeListener.setCassandraProductStore(cassandraProductStore);
-        doBootstrap(cassandraProductBootstrapper, cassandraChangeListener, response);
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/segment")
-    public void bootstrapCassandraSegment(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
-        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
-        cassandraChangeListener.setCassandraSegmentStore(cassandraSegmentStore);
-        doBootstrap(cassandraSegmentBootstrapper, cassandraChangeListener, response);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/topic")
@@ -210,31 +96,6 @@ public class BootstrapController {
     @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/content/status")
     public void cassandraContentBootstrapStatus(HttpServletResponse response) throws IOException {
         writeBootstrapStatus(cassandraContentBootstrapper, response);
-    }
-    
-    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/channel/status")
-    public void cassandraChannelBootstrapStatus(HttpServletResponse response) throws IOException {
-        writeBootstrapStatus(cassandraChannelBootstrapper, response);
-    }
-    
-    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/contentGroup/status")
-    public void cassandraContentGroupBootstrapStatus(HttpServletResponse response) throws IOException {
-        writeBootstrapStatus(cassandraContentGroupBootstrapper, response);
-    }
-    
-    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/people/status")
-    public void cassandraPeopleBootstrapStatus(HttpServletResponse response) throws IOException {
-        writeBootstrapStatus(cassandraPeopleBootstrapper, response);
-    }
-    
-    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/product/status")
-    public void cassandraProductBootstrapStatus(HttpServletResponse response) throws IOException {
-        writeBootstrapStatus(cassandraProductBootstrapper, response);
-    }
-    
-    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/segment/status")
-    public void cassandraSegmentBootstrapStatus(HttpServletResponse response) throws IOException {
-        writeBootstrapStatus(cassandraSegmentBootstrapper, response);
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/topic/status")
