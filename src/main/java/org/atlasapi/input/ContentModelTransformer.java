@@ -12,6 +12,7 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -29,6 +30,7 @@ import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -75,8 +77,27 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         result.setPeople(transformPeople(inputContent.getPeople(), publisher));
         result.setEquivalentTo(resolveEquivalences(inputContent.getSameAs()));
         result.setTopicRefs(topicRefs(inputContent.getTopics()));
+        result.setKeyPhrases(keyPhrases(inputContent.getKeyPhrases()));
         result.setGenres(inputContent.getGenres());
         return result;
+    }
+    
+    private Iterable<KeyPhrase> keyPhrases(Iterable<org.atlasapi.media.entity.simple.KeyPhrase> keyPhrases) {
+        return ImmutableList.copyOf(Iterables.transform(keyPhrases, new Function<org.atlasapi.media.entity.simple.KeyPhrase, KeyPhrase>() {
+
+            @Override
+            public KeyPhrase apply(org.atlasapi.media.entity.simple.KeyPhrase input) {
+                Maybe<Publisher> publisher = Publisher.fromKey(input.getPublisher().getKey());
+                if (publisher.hasValue()) {
+                    return new KeyPhrase(input.getPhrase(), publisher.requireValue(), input.getWeighting());
+                } else {
+                    throw new IllegalStateException(
+                            String.format("No publisher for %s", input.getPublisher().getKey())
+                    );
+                }
+            }
+            
+        }));
     }
 
     private Iterable<TopicRef> topicRefs(Set<org.atlasapi.media.entity.simple.TopicRef> topics) {
