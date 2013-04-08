@@ -8,6 +8,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentVisitorAdapter;
 import org.atlasapi.media.content.ContentWriter;
@@ -44,17 +45,17 @@ public class IndividualBootstrapController {
     @RequestMapping(value="/system/bootstrap/content", method=RequestMethod.POST)
     public void bootstrapContent(@RequestParam("uri") String uri, HttpServletResponse resp) throws IOException {
         ResolvedContent resolved = read.findByCanonicalUris(ImmutableList.of(uri));
-        Maybe<Identified> identified = resolved.get(uri);
-        if (identified.isNothing() || !(identified.requireValue() instanceof Content)) {
-            resp.sendError(500, "No content for URI");
+        Identified identified = Iterables.getOnlyElement(resolved.getAllResolvedResults());
+        if (!(identified instanceof Content)) {
+            resp.sendError(500, "Resolved not content");
             return;
         }
-        Content content = (Content) identified.requireValue();
+        Content content = (Content) identified;
         String result = content.accept(new ContentVisitorAdapter<String>() {
             
             @Override
             public String visit(Brand brand) {
-                WriteResult<Brand> brandWrite = write(brand);
+                WriteResult<Container> brandWrite = write(brand.copy());
                 int series = resolveAndWrite(Iterables.transform(brand.getSeriesRefs(), Identifiables.toId()));
                 int childs = resolveAndWrite(Iterables.transform(brand.getChildRefs(), Identifiables.toId()));
                 return String.format("%s s:%s c:%s", brandWrite, series, childs);
@@ -90,7 +91,7 @@ public class IndividualBootstrapController {
         });
         resp.setStatus(HttpStatus.OK.value());
         resp.setContentLength(result.length());
-        resp.getWriter().write(result);
+        resp.getWriter().write(result + "\n");
         resp.getWriter().flush();
     }
     
