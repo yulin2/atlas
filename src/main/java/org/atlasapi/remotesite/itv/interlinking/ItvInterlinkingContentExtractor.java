@@ -116,7 +116,7 @@ public class ItvInterlinkingContentExtractor {
         
         String id = requireElemValue(episodeElem, "id", ATOM_NS);
         
-        Maybe<Identified> existingContent = contentResolver.findByCanonicalUris(ImmutableList.of(id)).get(id);
+        Maybe<Identified> existingContent = contentResolver.findByCanonicalUris(ImmutableList.of(id)).getFirstValue();
         
         String title = requireElemValue(episodeElem, "title", ATOM_NS);
         
