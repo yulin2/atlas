@@ -40,7 +40,7 @@ public final class JsonResponseWriter implements ResponseWriter {
     private static final char END_OBJECT = '}';
 
     private static final String GZIP_HEADER_VALUE = "gzip";
-    private static final String CALLBACK = "callback";
+    public static final String CALLBACK = "callback";
 
     private final HttpServletResponse response;
     private final HttpServletRequest request;

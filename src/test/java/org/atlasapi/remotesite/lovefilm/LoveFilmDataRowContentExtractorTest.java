@@ -27,6 +27,8 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.io.Resources;
 
+
+@Ignore("LoveFilm Module needs Refactor for IDs")
 public class LoveFilmDataRowContentExtractorTest {
 
     private final LoveFilmDataRowContentExtractor extractor = new LoveFilmDataRowContentExtractor();

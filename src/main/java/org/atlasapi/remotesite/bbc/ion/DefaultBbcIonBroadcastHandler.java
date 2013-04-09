@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
@@ -149,7 +150,8 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         Item basicItem = itemExtractor.extract(broadcast.getEpisode()); 
 
         // look for existing item, merge into latest remote data, else fetch complete.
-        Optional<Content> possibleIdentified = store.resolveAliases(ImmutableList.of(itemUri), BBC).get(itemUri);
+        Alias itemProgrammesUrl = new Alias("bbc:programmes:url", itemUri);
+        Optional<Content> possibleIdentified = store.resolveAliases(ImmutableList.of(itemProgrammesUrl), BBC).get(itemProgrammesUrl);
         if (possibleIdentified.isPresent()) {
             Identified ided = possibleIdentified.get();
             if (!(ided instanceof Item)) {
@@ -204,7 +206,8 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
 
     private Series getOrCreateSeries(IonBroadcast broadcast, String itemUri) {
         String seriesUri = slashProgrammesUriForPid(broadcast.getSeriesId());
-        Optional<Content> maybeSeries = store.resolveAliases(ImmutableList.of(seriesUri), BBC).get(seriesUri);
+        Alias seriesProgrammesUrl = new Alias("bbc:programmes:url", seriesUri);
+        Optional<Content> maybeSeries = store.resolveAliases(ImmutableList.of(seriesProgrammesUrl), BBC).get(seriesProgrammesUrl);
 
         if (!maybeSeries.isPresent()) {
             Maybe<Series> series = Maybe.nothing();
@@ -225,8 +228,8 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
 
     private Brand getOrCreateBrand(IonBroadcast broadcast, String itemUri) {
         String brandUri = slashProgrammesUriForPid(broadcast.getBrandId());
-
-        Optional<Content> maybeIdentified = store.resolveAliases(ImmutableList.of(brandUri), BBC).get(brandUri);
+        Alias brandProgrammeUrl = new Alias("bbc:programmes:url", brandUri);
+        Optional<Content> maybeIdentified = store.resolveAliases(ImmutableList.of(brandProgrammeUrl), BBC).get(brandProgrammeUrl);
 
         if (!maybeIdentified.isPresent()) {
             Maybe<Brand> brand = Maybe.nothing();

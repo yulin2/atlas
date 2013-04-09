@@ -6,7 +6,7 @@ import static com.metabroadcast.common.persistence.mongo.MongoConstants.LESS_THA
 import java.io.IOException;
 
 import org.atlasapi.messaging.Message;
-import org.atlasapi.persistence.messaging.MessageStore;
+import org.atlasapi.messaging.MessageStore;
 import org.atlasapi.serialization.json.JsonFactory;
 import org.joda.time.DateTime;
 

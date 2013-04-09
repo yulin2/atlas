@@ -69,7 +69,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         episode.setSeriesNumber(inputItem.getSeriesNumber());
         episode.setEpisodeNumber(inputItem.getEpisodeNumber());
         if (inputItem.getSeriesSummary() != null) {
-            episode.setSeriesRef(new ParentRef(inputItem.getSeriesSummary().getUri()));
+//            episode.setSeriesRef(new ParentRef(inputItem.getSeriesSummary().getId()));
         }
         return episode;
     }
@@ -83,7 +83,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
             item.setVersions(ImmutableSet.of(version));
         }
         if (inputItem.getBrandSummary() != null) {
-            item.setParentRef(new ParentRef(inputItem.getBrandSummary().getUri()));
+//            item.setParentRef(new ParentRef(inputItem.getBrandSummary().getUri()));
         }
         return item;
     }

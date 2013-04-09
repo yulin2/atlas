@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.topic.Topic;
@@ -53,7 +54,7 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
         assertThat(extractedTopicRef.requireValue().isSupervised(), is(true));
         assertThat(extractedTopicRef.requireValue().getRelationship(), is(TopicRef.Relationship.ABOUT));
         
-        assertThat(storedTopic.getAliasUrls(), hasItem(Publisher.DBPEDIA.name().toLowerCase()+":"+topicUri));
+        assertThat(storedTopic.getAliases(), hasItem(new Alias(Publisher.DBPEDIA.name().toLowerCase(), topicUri)));
         assertThat(storedTopic.getType(), is(equalTo(Type.PERSON)));
         assertThat(storedTopic.getPublisher(), is(equalTo(Publisher.DBPEDIA)));
         assertThat(storedTopic.getTitle(), is(equalTo("Religion")));
@@ -88,8 +89,8 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
 
 
         @Override
-        public OptionalMap<String, Topic> resolveAliases(Iterable<String> aliases, Publisher source) {
-            return ImmutableOptionalMap.fromMap(ImmutableMap.<String,Topic>of());
+        public OptionalMap<Alias, Topic> resolveAliases(Iterable<Alias> aliases, Publisher source) {
+            return ImmutableOptionalMap.fromMap(ImmutableMap.<Alias,Topic>of());
         }
     }
 

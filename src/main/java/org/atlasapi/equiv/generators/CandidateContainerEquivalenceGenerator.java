@@ -2,6 +2,8 @@ package org.atlasapi.equiv.generators;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.equiv.EquivalenceSummary;
 import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.equiv.results.description.ResultDescription;

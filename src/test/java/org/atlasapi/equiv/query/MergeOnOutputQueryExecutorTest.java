@@ -41,6 +41,16 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 	
 	@Override
 	protected void setUp() throws Exception {
+	    brand1.setId(1l);
+	    brand2.setId(2l);
+	    brand3.setId(3l);
+	    item1.setId(4l);
+	    item2.setId(5l);
+	    clip1.setId(6l);
+	    
+	    film1.setId(7l);
+	    film2.setId(8l);
+
 	    item1.setContainer(brand1);
 	    item2.setContainer(brand3);
 	    
@@ -48,15 +58,6 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		item1.addEquivalentTo(item2);
 		item2.addClip(clip1);
 		
-		brand1.setId(1l);
-		brand2.setId(2l);
-		brand3.setId(3l);
-		item1.setId(4l);
-		item2.setId(5l);
-		clip1.setId(6l);
-		
-		film1.setId(7l);
-		film2.setId(8l);
 		film2.addPerson(actor);
 		film1.addEquivalentTo(film2);
 		film2.addEquivalentTo(film1);

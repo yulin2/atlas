@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.atlasapi.feeds.lakeview.LakeviewModule;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
-import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
+import org.atlasapi.remotesite.bbc.products.BbcProductsModule;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.five.FiveModule;
 import org.atlasapi.remotesite.hulu.HuluModule;
@@ -34,12 +34,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
-import org.atlasapi.remotesite.bbc.products.BbcProductsModule;
-import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
-import org.atlasapi.remotesite.metabroadcast.MetaBroadcastModule;
-import org.atlasapi.remotesite.space.TheSpaceModule;
-import org.atlasapi.remotesite.music.emipub.EmiPubModule;
-import org.atlasapi.remotesite.music.musicbrainz.MusicBrainzModule;
 
 public class RemoteSiteModuleConfigurer {
 

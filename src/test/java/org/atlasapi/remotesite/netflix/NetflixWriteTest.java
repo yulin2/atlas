@@ -49,10 +49,13 @@ public class NetflixWriteTest {
     public void testHandlesWritingContentInAnyOrder() {
         
         Brand brand = new Brand("brand", "b", NETFLIX);
+        brand.setId(1);
         Series series = new Series("series", "s", NETFLIX);
+        series.setId(2);
         series.setParent(brand);
         series.withSeriesNumber(4);
         Episode episode = new Episode("episode", "e", NETFLIX);
+        episode.setId(3);
         episode.setContainer(brand);
         episode.setSeries(series);
         

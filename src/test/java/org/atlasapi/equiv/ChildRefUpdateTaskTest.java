@@ -53,20 +53,24 @@ public class ChildRefUpdateTaskTest extends TestCase {
         
         final String containerUri = "brandUri";
         
-        final Id ep1Uri = Id.valueOf(1);
-        final Episode ep1 = new Episode(ep1Uri.toString(), "c"+ep1Uri, BBC);
+        final Id ep1Id = Id.valueOf(1);
+        final Episode ep1 = new Episode(ep1Id.toString(), "c"+ep1Id, BBC);
+        ep1.setId(ep1Id);
+        ep1.setThisOrChildLastUpdated(new DateTime(DateTimeZones.UTC));
         ep1.setSeriesNumber(5);
         ep1.setEpisodeNumber(5);
         
-        final Id ep2Uri = Id.valueOf(2);
-        final Episode ep2 = new Episode(ep2Uri.toString(), "c"+ep2Uri, BBC);
+        final Id ep2Id = Id.valueOf(2);
+        final Episode ep2 = new Episode(ep2Id.toString(), "c"+ep2Id, BBC);
+        ep2.setId(ep2Id);
+        ep2.setThisOrChildLastUpdated(new DateTime(DateTimeZones.UTC));
         ep2.setSeriesNumber(5);
         ep2.setEpisodeNumber(6);
         
         context.checking(new Expectations(){{
             ignoring(progressStore);
             one(lister).listContent(with(any(ContentListingCriteria.class))); will(returnValue(Iterators.forArray(aContainer(containerUri, ep1.childRef(), ep2.childRef()))));
-            one(resolver).findByIds(with(hasItems(ep1Uri, ep2Uri))); will(returnValue(ResolvedContent.builder().put(ep1Uri, ep1).put(ep2Uri, ep2).build()));
+            one(resolver).findByIds(with(hasItems(ep1Id, ep2Id))); will(returnValue(ResolvedContent.builder().put(ep1Id, ep1).put(ep2Id, ep2).build()));
         }});
 
         task.run();
@@ -83,6 +87,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
 
     private Brand aContainer(String id, ChildRef... children) {
         Brand brand = new Brand(id, "c"+id, BBC);
+        brand.setId(3);
         brand.setTitle("a title");
         brand.setChildRefs(ImmutableList.copyOf(children));
         return brand;

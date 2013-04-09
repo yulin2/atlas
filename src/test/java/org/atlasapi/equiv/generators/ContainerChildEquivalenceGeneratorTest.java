@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.collect.ImmutableOptionalMap;
@@ -62,15 +63,17 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
         Container equiv2 = new Brand("equivalent2","e2",Publisher.ITV);
         equiv2.setId(5);
         
-        when(equivSummaryStore.summariesForChildren(subject.getId())).thenReturn(
-            ImmutableSet.of(
-                new EquivalenceSummary(3L,1L,NO_CANDIDATES,ImmutableMap.of(
+        when(equivSummaryStore.summariesForIds(ImmutableList.of(child1.getId(), child2.getId()))).thenReturn(
+            ImmutableOptionalMap.fromMap(ImmutableMap.of(
+                child1.getId(),
+                new EquivalenceSummary(2L,1L,NO_CANDIDATES,ImmutableMap.of(
                     Publisher.BBC, new ContentRef(6L, Publisher.BBC,null),
                     Publisher.PA, new ContentRef(5L, Publisher.PA, equiv1.getId()))),
-                new EquivalenceSummary(4L,1L,NO_CANDIDATES,ImmutableMap.of(
+                child2.getId(),
+                new EquivalenceSummary(3L,1L,NO_CANDIDATES,ImmutableMap.of(
                     Publisher.BBC, new ContentRef(7L, Publisher.BBC,equiv2.getId()),
                     Publisher.PA, new ContentRef(5L, Publisher.PA, equiv1.getId()))
-            ))
+            )))
         );
         
         ResolvedContent content = ResolvedContent.builder()
@@ -78,7 +81,7 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
                 .put(equiv2.getId(), equiv2)
                 .build();
         
-        when(resolver.findByCanonicalUris(argThat(hasItems("equivalent1","equivalent2")))).thenReturn(
+        when(resolver.findByIds(argThat(hasItems(equiv1.getId(), equiv2.getId())))).thenReturn(
             content
         );
         

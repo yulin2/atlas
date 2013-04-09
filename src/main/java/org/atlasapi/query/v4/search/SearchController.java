@@ -17,6 +17,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
+import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
@@ -52,7 +53,14 @@ public class SearchController {
     private static final String TITLE_WEIGHTING_PARAM = "titleWeighting";
     private static final String BROADCAST_WEIGHTING_PARAM = "broadcastWeighting";
     private static final String CATCHUP_WEIGHTING_PARAM = "catchupWeighting";
+    private static final String TYPE_PARAM = "type";
+    private static final String TOP_LEVEL_PARAM = "topLevelOnly";
+    private static final String CURRENT_BROADCASTS_ONLY = "currentBroadcastsOnly";
+    private static final String PRIORITY_CHANNEL_WEIGHTING = "priorityChannelWeighting";
+    private static final String ANNOTATIONS_PARAM = "annotations";
+    
     private static final float DEFAULT_TITLE_WEIGHTING = 1.0f;
+    private static final float DEFAULT_PRIORITY_CHANNEL_WEIGHTING = 1.0f;
     private static final float DEFAULT_BROADCAST_WEIGHTING = 0.2f;
     private static final float DEFAULT_CATCHUP_WEIGHTING = 0.15f;
     
@@ -62,8 +70,22 @@ public class SearchController {
 
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
     
-    private final ParameterChecker paramChecker = new ParameterChecker(ImmutableSet.of(IpCheckingApiKeyConfigurationFetcher.API_KEY_QUERY_PARAMETER, Selection.LIMIT_REQUEST_PARAM,
-            Selection.START_INDEX_REQUEST_PARAM, QUERY_PARAM, SPECIALIZATION_PARAM, PUBLISHER_PARAM, TITLE_WEIGHTING_PARAM, BROADCAST_WEIGHTING_PARAM, CATCHUP_WEIGHTING_PARAM));
+    private final ParameterChecker paramChecker = new ParameterChecker(ImmutableSet.of(      IpCheckingApiKeyConfigurationFetcher.API_KEY_QUERY_PARAMETER,
+            Selection.LIMIT_REQUEST_PARAM,
+            Selection.START_INDEX_REQUEST_PARAM,
+            QUERY_PARAM,
+            SPECIALIZATION_PARAM,
+            PUBLISHER_PARAM,
+            TITLE_WEIGHTING_PARAM,
+            BROADCAST_WEIGHTING_PARAM,
+            CATCHUP_WEIGHTING_PARAM,
+            JsonResponseWriter.CALLBACK,
+            ANNOTATIONS_PARAM,
+            TYPE_PARAM,
+            TOP_LEVEL_PARAM,
+            CURRENT_BROADCASTS_ONLY,
+            PRIORITY_CHANNEL_WEIGHTING
+    ));
 
     public SearchController(SearchResolver searcher, ApplicationConfigurationFetcher configFetcher, QueryResultWriter<Content> resultWriter) {
         this.searcher = searcher;
@@ -77,7 +99,12 @@ public class SearchController {
             @RequestParam(value = PUBLISHER_PARAM, required = false) String publisher,
             @RequestParam(value = TITLE_WEIGHTING_PARAM, required = false) String titleWeightingParam,
             @RequestParam(value = BROADCAST_WEIGHTING_PARAM, required = false) String broadcastWeightingParam,
-            @RequestParam(value = CATCHUP_WEIGHTING_PARAM, required = false) String catchupWeightingParam, HttpServletRequest request, HttpServletResponse response) throws IOException {
+            @RequestParam(value = CATCHUP_WEIGHTING_PARAM, required = false) String catchupWeightingParam, 
+            @RequestParam(value = TYPE_PARAM, required = false) String type,
+            @RequestParam(value = TOP_LEVEL_PARAM, required = false, defaultValue = "true") String topLevel,
+            @RequestParam(value = CURRENT_BROADCASTS_ONLY, required = false, defaultValue = "false") String currentBroadcastsOnly,
+            @RequestParam(value = PRIORITY_CHANNEL_WEIGHTING, required = false) String priorityChannelWeightingParam,
+            HttpServletRequest request, HttpServletResponse response) throws IOException {
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
@@ -95,11 +122,23 @@ public class SearchController {
             float titleWeighting = getFloatParam(titleWeightingParam, DEFAULT_TITLE_WEIGHTING);
             float broadcastWeighting = getFloatParam(broadcastWeightingParam, DEFAULT_BROADCAST_WEIGHTING);
             float catchupWeighting = getFloatParam(catchupWeightingParam, DEFAULT_CATCHUP_WEIGHTING);
+            float priorityChannelWeighting = getFloatParam(priorityChannelWeightingParam, DEFAULT_PRIORITY_CHANNEL_WEIGHTING);
 
             ApplicationConfiguration appConfig = configFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.DEFAULT_CONFIGURATION);
             Set<Specialization> specializations = specializations(specialization);
             Set<Publisher> publishers = publishers(publisher, appConfig);
-            List<Identified> content = searcher.search(new SearchQuery(q, selection, specializations, publishers, titleWeighting, broadcastWeighting, catchupWeighting), appConfig);
+            List<Identified> content = searcher.search(SearchQuery.builder(q)
+                    .withSelection(selection)
+                    .withSpecializations(specializations)
+                    .withPublishers(publishers)
+                    .withTitleWeighting(titleWeighting)
+                    .withBroadcastWeighting(broadcastWeighting)
+                    .withCatchupWeighting(catchupWeighting)
+                    .withPriorityChannelWeighting(priorityChannelWeighting)
+                    .withType(type)
+                    .isTopLevelOnly(!Strings.isNullOrEmpty(topLevel) ? Boolean.valueOf(topLevel) : null)
+                    .withCurrentBroadcastsOnly(!Strings.isNullOrEmpty(currentBroadcastsOnly) ? Boolean.valueOf(currentBroadcastsOnly) : null)
+                    .build(), appConfig);
             resultWriter.write(QueryResult.listResult(Iterables.filter(content, Content.class), new QueryContext(appConfig, Annotation.defaultAnnotations(), selection)), writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);

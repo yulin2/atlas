@@ -51,7 +51,8 @@ public class IndexBackedScheduleQueryExecutorTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testDoesntResolveContentOnEmptyScheduleRef() throws Exception {
-        Channel channel = new Channel(BBC, "One", "one", VIDEO, "one");
+        Channel channel = Channel.builder().build();
+        channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
         ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.defaultContext());
 
@@ -68,7 +69,8 @@ public class IndexBackedScheduleQueryExecutorTest {
 
     @Test
     public void testHandlesSimpleScheduleQuery() throws Exception {
-        Channel channel = new Channel(BBC, "One", "one", VIDEO, "one");
+        Channel channel = Channel.builder().build();
+        channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
         ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.defaultContext());
         
@@ -100,7 +102,8 @@ public class IndexBackedScheduleQueryExecutorTest {
     
     @Test
     public void testRepeatedScheduleItemAppearsTwice() throws Exception {
-        Channel channel = new Channel(BBC, "One", "one", VIDEO, "one");
+        Channel channel = Channel.builder().build();
+        channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
         ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.defaultContext());
         

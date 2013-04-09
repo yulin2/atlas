@@ -5,6 +5,7 @@ import static org.atlasapi.media.entity.Publisher.DBPEDIA;
 
 import java.util.List;
 
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.topic.Topic;
@@ -66,7 +67,7 @@ public class BbcSlashProgrammesJsonTopicsAdapter implements SiteSpecificAdapter<
     public Maybe<Topic> resolveTopic(SlashProgrammesCategory category, Type topicType) {
         String namespace = Publisher.DBPEDIA.name().toLowerCase();
         String uri = category.getSameAs();
-        String alias = namespace+":"+uri;
+        Alias alias = new Alias(namespace, uri);
         Optional<Topic> existingTopic = topicStore.resolveAliases(ImmutableList.of(alias), Publisher.DBPEDIA).get(alias);
         Topic topic = existingTopic.or(new Topic());
         topic.addAlias(alias);

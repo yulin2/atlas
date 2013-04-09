@@ -34,7 +34,7 @@ public class DefaultWsSeriesHandler implements WsSeriesHandler {
     public void handle(WsSeries series) {
         String seriesUri = null;//uriFor(series);
         
-        Maybe<Identified> possibleSeries = resolver.findByCanonicalUris(ImmutableSet.of(seriesUri)).get(seriesUri);
+        Maybe<Identified> possibleSeries = resolver.findByCanonicalUris(ImmutableSet.of(seriesUri)).getFirstValue();
         
         Brand wsBrand = null;
         

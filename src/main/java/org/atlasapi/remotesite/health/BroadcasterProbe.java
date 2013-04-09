@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Publisher;
 import org.joda.time.Duration;
@@ -23,10 +24,10 @@ public class BroadcasterProbe implements HealthProbe {
 	
 	private final Publisher publisher;
 	private final ContentResolver contentStore;
-	private final Iterable<String> uris;
+	private final Iterable<Alias> uris;
 	
 	
-	public BroadcasterProbe(Publisher publisher, Iterable<String> uris, ContentResolver contentStore) {
+	public BroadcasterProbe(Publisher publisher, Iterable<Alias> uris, ContentResolver contentStore) {
 		this.publisher = publisher;
 		this.uris = uris;
 		this.contentStore = contentStore;
@@ -35,7 +36,7 @@ public class BroadcasterProbe implements HealthProbe {
 	@Override
 	public ProbeResult probe() {
 		ProbeResult result = new ProbeResult(title());
-		for (Entry<String, Optional<Content>> uriContent : contentStore.resolveAliases(uris, publisher).entrySet()) {
+		for (Entry<Alias, Optional<Content>> uriContent : contentStore.resolveAliases(uris, publisher).entrySet()) {
 		    Optional<Content> content = uriContent.getValue();
 			if (content.isPresent() && content.get() instanceof Described) {
 			    Described playlist = (Described) content.get();

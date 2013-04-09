@@ -86,7 +86,7 @@ public class TVBlobDayPopulator {
                             broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
 
                             String episodeUri = episode.getCanonicalUri();
-                            Maybe<Identified> currentContent = contentResolver.findByCanonicalUris(ImmutableList.of(episodeUri)).get(episodeUri);
+                            Maybe<Identified> currentContent = contentResolver.findByCanonicalUris(ImmutableList.of(episodeUri)).getFirstValue();
                             if (currentContent.hasValue() && currentContent.requireValue() instanceof Episode) {
                                 episode.setVersions(((Episode) currentContent.requireValue()).getVersions());
                             }

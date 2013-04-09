@@ -1,22 +1,25 @@
 package org.atlasapi.messaging.producers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
-import com.metabroadcast.common.time.Clock;
-import com.metabroadcast.common.time.SystemClock;
 import java.io.IOException;
 import java.util.UUID;
+
 import javax.jms.JMSException;
 import javax.jms.Session;
+
 import org.atlasapi.messaging.BeginReplayMessage;
 import org.atlasapi.messaging.EndReplayMessage;
-import org.atlasapi.persistence.messaging.MessageStore;
 import org.atlasapi.messaging.Message;
+import org.atlasapi.messaging.MessageStore;
 import org.atlasapi.messaging.ReplayMessage;
 import org.atlasapi.serialization.json.JsonFactory;
 import org.joda.time.DateTime;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Optional;
+import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.SystemClock;
 
 public class MessageReplayer {
 

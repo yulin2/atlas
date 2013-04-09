@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -42,18 +43,18 @@ public class BbcIonOndemandChangeTaskBuilder {
 
         @Override
         public Void call() {
-            String uri = BbcFeeds.slashProgrammesUriForPid(change.getEpisodeId());
+            Alias episodeUrl = new Alias("bbc:programmes:url", BbcFeeds.slashProgrammesUriForPid(change.getEpisodeId()));
             try {
-                OptionalMap<String, Content> resolvedItem = store.resolveAliases(ImmutableList.of(uri), BBC);
-                if (resolvedItem.get(uri).isPresent()) {
-                    Item item = (Item) resolvedItem.get(uri).get();
+                OptionalMap<Alias, Content> resolvedItem = store.resolveAliases(ImmutableList.of(episodeUrl), BBC);
+                if (resolvedItem.get(episodeUrl).isPresent()) {
+                    Item item = (Item) resolvedItem.get(episodeUrl).get();
                     itemUpdater.updateItemDetails(item, change);
                     store.writeContent(item);
                 }/* else {
                     log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("No item %s for on-demand change", uri));
                 }*/
             } catch (Exception e) {
-                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Unable to process ondemand changes for item " + uri));
+                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Unable to process ondemand changes for item " + episodeUrl));
             }
             return null;
         }

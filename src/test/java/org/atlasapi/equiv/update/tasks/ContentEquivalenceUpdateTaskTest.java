@@ -88,7 +88,7 @@ public class ContentEquivalenceUpdateTaskTest extends TestCase {
         when(progressStore.progressForTask(taskName))
             .thenReturn(ContentListingProgress.START);
         
-        when(contentResolver.findByCanonicalUris(argThat(hasItems("episode"))))
+        when(contentResolver.findByIds(argThat(hasItems(paEp.getId()))))
             .thenReturn(ResolvedContent.builder().put(paEp.getId(), paEp).build());
         
         new ContentEquivalenceUpdateTask(contentLister, contentResolver, progressStore, updater, ImmutableSet.<String>of()).forPublishers(PA, BBC, C4).run();

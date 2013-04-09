@@ -2,6 +2,9 @@ package org.atlasapi.remotesite.pa.features;
 
 import java.util.Map;
 
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
@@ -11,9 +14,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
-import org.atlasapi.media.content.Content;
-import org.atlasapi.media.content.ContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Interval;
 
@@ -53,7 +53,9 @@ public class PaFeaturesProcessor {
     }
     
     public void process(String programmeId) {
-        Map<String, Optional<Content>> resolvedContent = contentResolver.resolveAliases(ImmutableSet.of(PaHelper.getFilmUri(programmeId), PaHelper.getEpisodeUri(programmeId)), Publisher.PA);
+        Map<Alias, Optional<Content>> resolvedContent = contentResolver.resolveAliases(ImmutableSet.of(
+                new Alias("pa:film", PaHelper.getFilmUri(programmeId)), 
+                new Alias("pa:episode", PaHelper.getEpisodeUri(programmeId))), Publisher.PA);
         Item item = (Item) Iterables.getOnlyElement(resolvedContent.values()).get();
         Broadcast broadcast = BY_BROADCAST_DATE.min(Iterables.concat(Iterables.transform(item.getVersions(), Version.TO_BROADCASTS)));
         if (featureDate.contains(broadcast.getTransmissionTime())) {

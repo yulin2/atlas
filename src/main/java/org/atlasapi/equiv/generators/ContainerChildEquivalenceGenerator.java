@@ -20,6 +20,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.collect.OptionalMap;
@@ -45,7 +46,7 @@ public class ContainerChildEquivalenceGenerator implements EquivalenceGenerator<
     
     @Override
     public ScoredCandidates<Container> generate(Container content, ResultDescription desc) {
-        OptionalMap<Id, EquivalenceSummary> childSummaries = summaryStore.summariesForIds(Iterables.transform(content.getChildRefs(), Identifiables.toId()));
+        OptionalMap<Id, EquivalenceSummary> childSummaries = summaryStore.summariesForIds(Lists.transform(content.getChildRefs(), Identifiables.toId()));
         Multiset<Id> parents = HashMultiset.create();
         for (EquivalenceSummary summary : Optional.presentInstances(childSummaries.values())) {
             Iterables.addAll(parents, Iterables.filter(Iterables.transform(summary.getEquivalents().values(), TO_PARENT), Predicates.notNull()));

@@ -2,6 +2,7 @@ package org.atlasapi.messaging.workers;
 
 import java.util.Arrays;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -30,7 +31,7 @@ public class CassandraReplicator extends AbstractWorker {
     @Override
     public void process(EntityUpdatedMessage message) {
         // TODO_SB : ResolvedContent should be eliminated or made way simpler:
-        ResolvedContent results = mongoContentResolver.findByCanonicalUris(Arrays.asList(message.getEntityId()));
+        ResolvedContent results = mongoContentResolver.findByIds(Arrays.asList(Id.valueOf(message.getEntityId())));
         //
         if (results.getAllResolvedResults().size() > 1) {
             throw new IllegalStateException("More than one content found for id: " + message.getEntityId());

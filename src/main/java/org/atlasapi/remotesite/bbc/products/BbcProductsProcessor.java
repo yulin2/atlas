@@ -14,7 +14,7 @@ import java.util.Set;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductLocation;
-import org.atlasapi.persistence.media.product.ProductStore;
+import org.atlasapi.media.product.ProductStore;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.s3.S3Client;
 

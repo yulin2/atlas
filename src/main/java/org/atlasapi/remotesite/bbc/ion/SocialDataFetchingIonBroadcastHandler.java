@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
@@ -64,7 +65,8 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
     }
 
     private void upadteContent(String pidUri, Set<RelatedLink> links, Set<KeyPhrase> phrases, List<TopicRef> topics) {
-        Optional<Content> possibleContent = store.resolveAliases(ImmutableList.of(pidUri), Publisher.BBC).get(pidUri);
+        Alias programmesUrl = new Alias("bbc:programmes:url", pidUri);
+        Optional<Content> possibleContent = store.resolveAliases(ImmutableList.of(programmesUrl), Publisher.BBC).get(programmesUrl);
         if (possibleContent.isPresent()) {
             Content content = (Content) possibleContent.get();
             content.setRelatedLinks(links);

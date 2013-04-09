@@ -5,6 +5,7 @@ import static org.atlasapi.media.topic.Topic.Type.SUBJECT;
 
 import java.util.Set;
 
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.topic.Topic;
@@ -32,7 +33,7 @@ public class BbcSlashProgrammesRdfTopicExtractor implements ContentExtractor<Sla
     public Maybe<TopicRef> extract(SlashProgrammesRdf source) {
         String namespace = Publisher.DBPEDIA.name().toLowerCase();
         String uri = extractTopicUri(source);
-        String alias = namespace+":"+uri;
+        Alias alias = new Alias(namespace, uri);
         Optional<Topic> existingTopic = topicStore.resolveAliases(ImmutableList.of(alias), Publisher.DBPEDIA).get(alias);
         Topic topic = existingTopic.or(new Topic());
         topic.addAlias(alias);
