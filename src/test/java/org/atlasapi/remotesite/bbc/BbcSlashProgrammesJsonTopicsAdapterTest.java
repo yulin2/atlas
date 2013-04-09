@@ -2,7 +2,9 @@ package org.atlasapi.remotesite.bbc;
 
 import static org.atlasapi.media.entity.Publisher.DBPEDIA;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.mockito.Matchers.any;
@@ -28,6 +30,7 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesCategory;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesProgramme;
 import org.hamcrest.Description;
+import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,7 +93,7 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         when((containerFetcher).get(URI))
             .thenReturn(containerWithTopic(invalidType, "title", "sameAs"));
         verify(topicStore, never()).resolveAliases(
-            argThat(hasItems(isA(Alias.class))), 
+            argThat(Matchers.<Alias>hasItems(instanceOf(Alias.class))), 
             argThat(isA(Publisher.class))
         );
         verify(topicStore, never()).writeTopic(argThat(isA(Topic.class)));
@@ -108,7 +111,7 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         when((containerFetcher).get(URI))
             .thenReturn(containerWithTopic("place", "title", value));
         verify(topicStore, never()).resolveAliases(
-            argThat(is(hasItems(isA(Alias.class)))), 
+            argThat(Matchers.<Alias>hasItems(instanceOf(Alias.class))), 
             argThat(isA(Publisher.class))
         );
         verify(topicStore, never()).writeTopic(argThat(is(isA(Topic.class))));

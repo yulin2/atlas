@@ -160,7 +160,7 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         ResolvedContent resolvedContent = resolver.findByCanonicalUris(sameAs);
         List<Identified> identified = resolvedContent.getAllResolvedResults();
         Iterable<Content> described = Iterables.filter(identified,Content.class);
-        return ImmutableSet.copyOf(Iterables.transform(described,EquivalenceRef.toEquivalenceRef()));
+        return ImmutableSet.copyOf(Iterables.transform(described,EquivalenceRef.<Content>toEquivalenceRef()));
     }
 
     private List<CrewMember> transformPeople(List<Person> people, Publisher publisher) {
