@@ -44,6 +44,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     
     private Item target(String name, String title, Publisher publisher) {
         Item target = new Item(name+"Uri", name+"Curie", publisher);
+        target.setId(name.hashCode());
         target.setTitle("Test " + title);
         return target;
     }
@@ -84,11 +85,11 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         Set<Cell<Id, String, Double>> cells = restoredResult.sourceResults().cellSet();
         assertEquals(1, cells.size());
         assertEquals(5.0, Iterables.getOnlyElement(cells).getValue());
-        assertEquals(equivalent1.getCanonicalUri(), Iterables.getOnlyElement(cells).getRowKey());
+        assertEquals(equivalent1.getId(), Iterables.getOnlyElement(cells).getRowKey());
         assertEquals("source1", Iterables.getOnlyElement(cells).getColumnKey());
         
         assertEquals(1, restoredResult.combinedResults().size());
-        assertEquals(equivalent1.getCanonicalUri(), Iterables.getOnlyElement(restoredResult.combinedResults()).id());
+        assertEquals(equivalent1.getId(), Iterables.getOnlyElement(restoredResult.combinedResults()).id());
         assertEquals(5.0, Iterables.getOnlyElement(restoredResult.combinedResults()).score());
         assertTrue(Iterables.getOnlyElement(restoredResult.combinedResults()).strong());
         

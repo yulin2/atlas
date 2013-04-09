@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Episode;
@@ -214,7 +215,8 @@ public class BbcIonProgrammeAdapter extends AbstractBbcAdapter<Content> {
     }
 
     private Optional<Content> existingContent(String uri) {
-        return store.resolveAliases(ImmutableSet.of(uri), BBC).get(uri);
+        Alias programmesUrl = new Alias("bbc:programmes:url", uri);
+        return store.resolveAliases(ImmutableSet.of(programmesUrl), BBC).get(programmesUrl);
     }
 
     private void attachSegmentsToVersions(Item fetchedItem) {

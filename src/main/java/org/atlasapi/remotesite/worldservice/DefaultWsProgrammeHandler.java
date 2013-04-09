@@ -65,7 +65,7 @@ public class DefaultWsProgrammeHandler implements WsProgrammeHandler {
 
         String episodeUri = uriFor(programme);
 
-        Maybe<Identified> possibleEpisode = resolver.findByCanonicalUris(ImmutableSet.of(episodeUri)).get(episodeUri);
+        Maybe<Identified> possibleEpisode = resolver.findByCanonicalUris(ImmutableSet.of(episodeUri)).getFirstValue();
 
         Episode episode = null;
 

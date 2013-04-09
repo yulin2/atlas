@@ -4,20 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.content.ContentIndexer;
-import org.atlasapi.messaging.producers.MessageReplayer;
-import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
-import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
-import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
-import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
-import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
-import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
-import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
-import org.atlasapi.persistence.media.segment.cassandra.CassandraSegmentStore;
-import org.atlasapi.persistence.topic.cassandra.CassandraTopicStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

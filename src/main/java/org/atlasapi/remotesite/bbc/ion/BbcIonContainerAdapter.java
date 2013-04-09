@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkState;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -71,7 +72,7 @@ public class BbcIonContainerAdapter implements BbcContainerAdapter, SiteSpecific
         String pid = ionContainer.getId();
         String programmesUri = BbcFeeds.slashProgrammesUriForPid(pid);
         Brand brand = new Brand(programmesUri, CURIE_BASE+pid, Publisher.BBC);
-        brand.addAlias(programmesUri);
+        brand.addAlias(new Alias("bbc:programmes:url", programmesUri));
         brand.setGenres(genreMap.fromIon(ionContainer.getGenres()));
         setCommonFields(ionContainer, brand);
         BbcImageUrlCreator.addIplayerImagesTo(ionContainer.getId(), brand);
@@ -99,10 +100,10 @@ public class BbcIonContainerAdapter implements BbcContainerAdapter, SiteSpecific
         
         String pid = ionContainer.getId();
         Series series = new Series(BbcFeeds.slashProgrammesUriForPid(pid), CURIE_BASE+pid, Publisher.BBC);
-        series.addAlias(series.getCanonicalUri());
+        series.addAlias(new Alias("bbc:programmes:url", series.getCanonicalUri()));
         
         if (!Strings.isNullOrEmpty(ionContainer.getParentId())) {
-            String containerUri = BbcFeeds.slashProgrammesUriForPid(ionContainer.getParentId());
+            Alias containerUri = new Alias("bbc:programmes:url", BbcFeeds.slashProgrammesUriForPid(ionContainer.getParentId()));
             Optional<Content> possibleContainer = contentResolver.resolveAliases(ImmutableList.of(containerUri), Publisher.BBC).get(containerUri);
             checkState(possibleContainer.isPresent(), "No container %s for %s", ionContainer.getParentId(), pid);
             series.setParent((Brand)possibleContainer.get());

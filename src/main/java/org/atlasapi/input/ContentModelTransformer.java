@@ -6,6 +6,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import java.util.List;
 import java.util.Set;
 
+import org.atlasapi.equiv.EquivalenceRef;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.CrewMember;
@@ -17,8 +18,8 @@ import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.Topic.Type;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.Topic.Type;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.TopicRef.Relationship;
 import org.atlasapi.media.entity.simple.Description;
@@ -64,7 +65,7 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
     private T setContentFields(T result, Description inputContent) {
         result.setCanonicalUri(inputContent.getUri());
         result.setCurie(inputContent.getCurie());
-        Publisher publisher = getPublisher(inputContent.getPublisher());
+        Publisher publisher = getPublisher(inputContent.getSource());
         result.setPublisher(publisher);
         result.setTitle(inputContent.getTitle());
         result.setDescription(inputContent.getDescription());
@@ -155,11 +156,11 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         }));
     }
 
-    private Set<LookupRef> resolveEquivalences(Set<String> sameAs) {
+    private Set<EquivalenceRef> resolveEquivalences(Set<String> sameAs) {
         ResolvedContent resolvedContent = resolver.findByCanonicalUris(sameAs);
         List<Identified> identified = resolvedContent.getAllResolvedResults();
-        Iterable<Described> described = Iterables.filter(identified,Described.class);
-        return ImmutableSet.copyOf(Iterables.transform(described,LookupRef.FROM_DESCRIBED));
+        Iterable<Content> described = Iterables.filter(identified,Content.class);
+        return ImmutableSet.copyOf(Iterables.transform(described,EquivalenceRef.toEquivalenceRef()));
     }
 
     private List<CrewMember> transformPeople(List<Person> people, Publisher publisher) {

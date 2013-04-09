@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
@@ -32,7 +33,8 @@ public class SegmentUpdatingIonBroadcastHandler implements BbcIonBroadcastHandle
     public Maybe<ItemAndBroadcast> handle(IonBroadcast broadcast) {
         
         final String itemId = BbcFeeds.slashProgrammesUriForPid(broadcast.getEpisodeId());
-        Optional<Content> possibleContent = store.resolveAliases(ImmutableSet.of(itemId), BBC).get(itemId);
+        Alias itemProgrammesUrl = new Alias("bbc:programmes:url", itemId);
+        Optional<Content> possibleContent = store.resolveAliases(ImmutableSet.of(itemProgrammesUrl), BBC).get(itemProgrammesUrl);
         
         if(possibleContent.isPresent()) {
             

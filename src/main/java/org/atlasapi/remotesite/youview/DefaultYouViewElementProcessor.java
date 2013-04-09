@@ -49,7 +49,7 @@ public class DefaultYouViewElementProcessor implements YouViewElementProcessor {
 
     private Maybe<Identified> resolve(String uri) {
         ImmutableSet<String> uris = ImmutableSet.of(uri);
-        return resolver.findByCanonicalUris(uris).get(uri);
+        return resolver.findByCanonicalUris(uris).getFirstValue();
     }
 
     private void write(Content content) {

@@ -23,6 +23,7 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Identified;
@@ -91,8 +92,8 @@ public class PaBaseProgrammeUpdaterTest {
                     return WriteResult.written(written).build();
                 }
             });
-        when(contentStore.resolveAliases(anyCollectionOf(String.class), argThat(is(Publisher.PA))))
-            .thenReturn(ImmutableOptionalMap.fromMap(ImmutableMap.<String, Content>of()));
+        when(contentStore.resolveAliases(anyCollectionOf(Alias.class), argThat(is(Publisher.PA))))
+            .thenReturn(ImmutableOptionalMap.fromMap(ImmutableMap.<Alias, Content>of()));
         
         TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(
             programmeProcessor, channelResolver, scheduleVersionStore, log,

@@ -36,7 +36,7 @@ public class BbcIonContentUpdateController {
     public void updateItem(HttpServletResponse response, @PathVariable("pid") String pid) {
         String uri = BbcFeeds.slashProgrammesUriForPid(pid);
         Item fetchedItem = itemAdapter.fetch(uri);
-        Maybe<Identified> existingItem = resolver.findByCanonicalUris(ImmutableList.of(uri)).get(uri);
+        Maybe<Identified> existingItem = resolver.findByCanonicalUris(ImmutableList.of(uri)).getFirstValue();
 
         if (existingItem.isNothing()) {
             writer.createOrUpdate(fetchedItem);

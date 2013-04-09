@@ -133,6 +133,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
     public void testDoesntFilterItemFromStrongBrand() {
         
         Container strongContainer = new Brand("bbcbrand", "bbcbrandCurie", Publisher.BBC);
+        strongContainer.setId(1);
 
         EquivalenceSummary equivSummary = summary(subjectContainer.getId(), strongContainer);
         

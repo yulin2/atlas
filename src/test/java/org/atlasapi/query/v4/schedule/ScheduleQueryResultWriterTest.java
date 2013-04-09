@@ -44,7 +44,7 @@ public class ScheduleQueryResultWriterTest {
     
     @Test
     public void testWrite() throws IOException {
-        Channel channel = new Channel(Publisher.BBC, "aTitle", "aKey", MediaType.VIDEO, "aUri");
+        Channel channel = Channel.builder().build();
         channel.setId(1234l);
         
         DateTime from = new DateTime(0, DateTimeZones.UTC);

@@ -1,7 +1,7 @@
 package org.atlasapi.messaging.workers;
 
-import org.atlasapi.persistence.messaging.MessageStore;
 import org.atlasapi.messaging.EntityUpdatedMessage;
+import org.atlasapi.messaging.MessageStore;
 
 public class MessageLogger extends AbstractWorker {
 

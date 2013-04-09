@@ -50,7 +50,7 @@ public final class ReduxLatestUpdateTasks {
             protected boolean finished(PaginatedBaseProgrammes lastBatch) {
                 BaseReduxProgramme first = lastBatch.getResults().get(0);
                 String firstUri = FullProgrammeItemExtractor.REDUX_URI_BASE + first.getCanonical();
-                Maybe<Identified> possibleContent = resolver.findByCanonicalUris(ImmutableList.of(firstUri)).get(firstUri);
+                Maybe<Identified> possibleContent = resolver.findByCanonicalUris(ImmutableList.of(firstUri)).getFirstValue();
                 return possibleContent.hasValue();
             }
         });

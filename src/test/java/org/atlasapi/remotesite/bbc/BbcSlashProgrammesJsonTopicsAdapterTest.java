@@ -4,6 +4,7 @@ import static org.atlasapi.media.entity.Publisher.DBPEDIA;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -16,6 +17,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.topic.Topic;
@@ -58,9 +60,9 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         
         when((containerFetcher).get(URI))
             .thenReturn(containerWithTopic("place", title, value));
-        when((topicStore).resolveAliases(ImmutableList.of(namespace+":"+value), DBPEDIA))
-            .thenReturn(ImmutableOptionalMap.<String, Topic>of());
-        when((topicStore).writeTopic(argThat(is(any(Topic.class)))))
+        when((topicStore).resolveAliases(ImmutableList.of(new Alias(namespace, value)), DBPEDIA))
+            .thenReturn(ImmutableOptionalMap.<Alias, Topic>of());
+        when((topicStore).writeTopic(argThat(isA(Topic.class))))
             .thenAnswer(new Answer<WriteResult<Topic>>() {
                 @Override
                 public WriteResult<Topic> answer(InvocationOnMock invocation) throws Throwable {
@@ -88,10 +90,10 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         when((containerFetcher).get(URI))
             .thenReturn(containerWithTopic(invalidType, "title", "sameAs"));
         verify(topicStore, never()).resolveAliases(
-            argThat(hasItems(any(String.class))), 
-            argThat(is(any(Publisher.class)))
+            argThat(hasItems(isA(Alias.class))), 
+            argThat(isA(Publisher.class))
         );
-        verify(topicStore, never()).writeTopic(argThat(is(any(Topic.class))));
+        verify(topicStore, never()).writeTopic(argThat(isA(Topic.class)));
 
         List<TopicRef> refs = adapter.fetch("http://www.bbc.co.uk/programmes/b0144pvg");
         assertTrue(refs.isEmpty());
@@ -106,10 +108,10 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         when((containerFetcher).get(URI))
             .thenReturn(containerWithTopic("place", "title", value));
         verify(topicStore, never()).resolveAliases(
-            argThat(hasItems(any(String.class))), 
-            argThat(is(any(Publisher.class)))
+            argThat(is(hasItems(isA(Alias.class)))), 
+            argThat(isA(Publisher.class))
         );
-        verify(topicStore, never()).writeTopic(argThat(is(any(Topic.class))));
+        verify(topicStore, never()).writeTopic(argThat(is(isA(Topic.class))));
 
         
         List<TopicRef> refs = adapter.fetch("http://www.bbc.co.uk/programmes/b0144pvg");
@@ -127,7 +129,7 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
             @Override
             public boolean matchesSafely(Topic topic) {
                 return topic.getId().equals(id)
-                    && topic.getAliases().contains(namespace+":"+value)
+                    && topic.getAliases().contains(new Alias(namespace, value))
                     && topic.getType().equals(place)
                     && topic.getTitle().equals(title);
             }

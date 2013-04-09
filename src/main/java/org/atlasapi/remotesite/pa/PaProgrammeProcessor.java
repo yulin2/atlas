@@ -236,7 +236,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private Maybe<ItemAndBroadcast> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         String uri = CLOSED_EPISODE+getClosedPostfix(channel);
-        Optional<Content> resolvedContent = resolveAlias(uri);
+        Optional<Content> resolvedContent = resolveAlias(new Alias("pa:episode", uri));
 
         Episode episode;
         if (resolvedContent.isPresent() && resolvedContent.get() instanceof Episode) {
@@ -271,7 +271,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         String brandUri = PaHelper.getBrandUri(brandId);
         Alias brandAlias = PaHelper.getBrandAlias(brandId);
         
-        Optional<Content> possiblePrevious = resolveAlias(brandUri);
+        Optional<Content> possiblePrevious = resolveAlias(new Alias("pa:brand", brandUri));
         
         Brand brand = possiblePrevious.isPresent() ? (Brand) possiblePrevious.get() : new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
         brand.addAlias(brandAlias);
@@ -371,7 +371,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Alias seriesAlias = PaHelper.getSeriesAlias(progData.getSeriesId(), progData.getSeriesNumber());
         
         
-        Optional<Content> possiblePrevious = resolveAlias(seriesUri);
+        Optional<Content> possiblePrevious = resolveAlias(new Alias("pa:series", seriesUri));
         
         
         Series series = possiblePrevious.isPresent() ? (Series) possiblePrevious.get() : new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
@@ -415,7 +415,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private Maybe<ItemAndBroadcast> getFilm(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         String filmUri = PaHelper.getFilmUri(programmeId(progData));
-        Optional<Content> possiblePreviousData = resolveAlias(filmUri);
+        Optional<Content> possiblePreviousData = resolveAlias(new Alias("pa:film", filmUri));
         
         Film film;
         if (possiblePreviousData.isPresent()) {
@@ -526,7 +526,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private Maybe<ItemAndBroadcast> getEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode, Timestamp updatedAt) {
         
         String episodeUri = PaHelper.getEpisodeUri(programmeId(progData));
-        Optional<Content> possiblePrevious = resolveAlias(episodeUri);
+        Optional<Content> possiblePrevious = resolveAlias(new Alias("pa:episode", episodeUri));
 
         Item item;
         if (possiblePrevious.isPresent()) {
@@ -562,7 +562,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return Maybe.just(new ItemAndBroadcast(item, Maybe.just(broadcast)));
     }
 
-    private Optional<Content> resolveAlias(String alias) {
+    private Optional<Content> resolveAlias(Alias alias) {
         return contentStore.resolveAliases(ImmutableList.of(alias), PA).get(alias);
     }
 

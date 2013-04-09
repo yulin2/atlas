@@ -52,7 +52,7 @@ public class ScheduleRequestParserTest {
     );
 
     private final NumberToShortStringCodec codec = SubstitutionTableNumberCodec.lowerCaseOnly();
-    private final Channel channel = new Channel(BBC, "Channel", "cbbc", VIDEO, "uri");
+    private final Channel channel = Channel.builder().build();
     
     @Before
     public void setup() {

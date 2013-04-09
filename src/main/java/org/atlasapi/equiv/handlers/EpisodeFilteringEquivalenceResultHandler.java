@@ -92,49 +92,46 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
     }
 
     private Map<Publisher, ScoredCandidate<Item>> filter(
-        Map<Publisher, ScoredCandidate<Item>> strongItems, 
-        final Map<Publisher,ContentRef> containerEquivalents, 
-        final ResultDescription desc) {
-        
-        return ImmutableMap.copyOf(Maps.filterValues(strongItems, new Predicate<ScoredCandidate<Item>>() {
-            @Override
-            public boolean apply(ScoredCandidate<Item> scoredCandidate) {
-                Item candidate = scoredCandidate.candidate();
-                ParentRef candidateContainer = candidate.getContainer();
-                if (candidateContainer == null) {
-                    return true;
+            Map<Publisher, ScoredCandidate<Item>> strongItems, 
+            final Map<Publisher,ContentRef> containerEquivalents, 
+            final ResultDescription desc) {
+            
+            ImmutableMap.Builder<Publisher, ScoredCandidate<Item>> filtered = 
+                ImmutableMap.builder();
+            
+            for (Entry<Publisher, ScoredCandidate<Item>> scoredCandidate : strongItems.entrySet()) {
+                Item candidate = scoredCandidate.getValue().candidate();
+                
+                if (filter(containerEquivalents, candidate)) {
+                    filtered.put(scoredCandidate);
+                } else {
+                    desc.appendText("%s removed. Unacceptable container: %s", 
+                        scoredCandidate, containerUri(candidate));
                 }
-
-                Id candidateContainerUri = candidateContainer.getId();
-                ContentRef validContainer = containerEquivalents.get(candidate.getPublisher());
-                if (validContainer == null || validContainer.getId().equals(candidateContainerUri)) {
-                    return true;
-                }
-                desc.appendText("%s removed. Unacceptable container: %s", scoredCandidate, candidateContainerUri);
-                return false;
             }
-        }));
-    }
 
-    private boolean filter(final Map<Publisher, ContentRef> containerEquivalents,
-                              Item candidate) {
-        Id candidateContainerId = containerUri(candidate);
-        if (candidateContainerId == null) {
-            return true;
-        } 
-        ContentRef validContainer = containerEquivalents.get(candidate.getPublisher());
-        if (validContainer == null) {
-            return !strict;
-        } else if (validContainer.getId().equals(candidateContainerId)) {
-            return true;
+            return filtered.build();
         }
-        return false;
-    }
 
-    private Id containerUri(Item candidate) {
-        ParentRef container = candidate.getContainer();
-        return container == null ? null 
-                                 : candidate.getContainer().getId();
-    }
+        private boolean filter(final Map<Publisher, ContentRef> containerEquivalents,
+                                  Item candidate) {
+            Id candidateContainer = containerUri(candidate);
+            if (candidateContainer == null) {
+                return true;
+            } 
+            ContentRef validContainer = containerEquivalents.get(candidate.getPublisher());
+            if (validContainer == null) {
+                return !strict;
+            } else if (validContainer.getId().equals(candidateContainer)) {
+                return true;
+            }
+            return false;
+        }
+
+        private Id containerUri(Item candidate) {
+            ParentRef container = candidate.getContainer();
+            return container == null ? null 
+                                     : candidate.getContainer().getId();
+        }
 
 }

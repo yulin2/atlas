@@ -31,6 +31,7 @@ import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
@@ -135,4 +136,5 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 	private static Set<String> missingUris(Iterable<String> content, Iterable<String> uris) {
 		return Sets.difference(ImmutableSet.copyOf(uris), ImmutableSet.copyOf(content));
 	}
+
 }

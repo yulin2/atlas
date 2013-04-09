@@ -5,6 +5,7 @@ import static com.google.common.collect.Iterables.transform;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static org.atlasapi.media.entity.Identified.TO_URI;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -17,8 +18,12 @@ import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.util.Identifiables;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
@@ -69,7 +74,10 @@ public class EquivalenceResultTranslator {
         TranslatorUtils.from(dbo, ID, target.getCanonicalUri());
         TranslatorUtils.from(dbo, TITLE, target.getTitle());
         
-        TranslatorUtils.fromSet(dbo, copyOf(transform(transform(result.strongEquivalences().values(), ScoredCandidate.<T>toCandidate()), TO_URI)), STRONG);
+        Function<ScoredCandidate<T>, Long> toLongId = Functions.compose(Id.toLongValue(), 
+                Functions.compose(Identifiables.toId(), ScoredCandidate.<T>toCandidate()));
+        
+        TranslatorUtils.fromLongSet(dbo, STRONG, copyOf(transform(result.strongEquivalences().values(),toLongId)));
         
         BasicDBList equivList = new BasicDBList();
         
@@ -78,7 +86,7 @@ public class EquivalenceResultTranslator {
 
             T content = combinedEquiv.getKey();
             
-            TranslatorUtils.from(equivDbo, ID, content.getCanonicalUri());
+            TranslatorUtils.from(equivDbo, ID, content.getId().longValue());
             TranslatorUtils.from(equivDbo, TITLE, content.getTitle());
             TranslatorUtils.from(equivDbo, PUBLISHER, content.getPublisher().key());
             TranslatorUtils.from(equivDbo, COMBINED, combinedEquiv.getValue().isRealScore() ? combinedEquiv.getValue().asDouble() : null);
@@ -114,7 +122,7 @@ public class EquivalenceResultTranslator {
         String targetId = TranslatorUtils.toString(dbo, ID);
         String targetTitle = TranslatorUtils.toString(dbo, TITLE);
         
-        Set<String> strongs = TranslatorUtils.toSet(dbo, STRONG);
+        Collection<Id> strongs = Collections2.transform(TranslatorUtils.toLongSet(dbo, STRONG), Id.fromLongValue());
         
         ImmutableList.Builder<CombinedEquivalenceScore> totals = ImmutableList.builder();
         Table<Id, String, Double> results = HashBasedTable.create();

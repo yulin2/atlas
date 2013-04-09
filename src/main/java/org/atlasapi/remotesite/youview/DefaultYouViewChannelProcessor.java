@@ -43,7 +43,7 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
             ItemRefAndBroadcast itemAndBroadcast = processor.process(elements.get(i));
             if (itemAndBroadcast != null) {
                 broadcasts.add(itemAndBroadcast);
-                acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
+                acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemId().toString());
                 progress = progress.reduce(UpdateProgress.SUCCESS);
             } else {
                 progress = progress.reduce(UpdateProgress.FAILURE);

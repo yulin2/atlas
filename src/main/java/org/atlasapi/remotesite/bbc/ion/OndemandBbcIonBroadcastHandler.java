@@ -5,6 +5,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import java.util.Set;
 
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Identified;
@@ -151,7 +152,8 @@ public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     }
 
     private Item resolve(String uri) {
-        Optional<Content> maybeItem = store.resolveAliases(ImmutableList.of(uri), Publisher.BBC).get(uri);
+        Alias itemProgrammesUrl = new Alias("bbc:programmes:url", uri);
+        Optional<Content> maybeItem = store.resolveAliases(ImmutableList.of(itemProgrammesUrl), Publisher.BBC).get(itemProgrammesUrl);
         if (maybeItem.isPresent()) {
             log.record(warnEntry().withSource(getClass()).withDescription("Couldn't resolve item for %s", uri));
             return null;

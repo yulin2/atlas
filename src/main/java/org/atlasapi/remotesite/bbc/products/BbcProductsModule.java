@@ -2,10 +2,10 @@ package org.atlasapi.remotesite.bbc.products;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.product.ProductStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.persistence.media.product.ProductStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

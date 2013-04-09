@@ -23,6 +23,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.lookup.LookupWriter;
 import org.joda.time.Duration;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -33,7 +34,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LookupWritingEquivalenceHandlerTest extends TestCase {
+public class LookupWritingEquivalenceHandlerTest {
     
     private final LookupWriter lookupWriter = mock(LookupWriter.class);
     private final Set<Publisher> publishers = ImmutableSet.of(Publisher.BBC,Publisher.PA, Publisher.ITV);
@@ -42,11 +43,22 @@ public class LookupWritingEquivalenceHandlerTest extends TestCase {
     private final Item content = new Item("item","c:item", Publisher.BBC);
     private final Item equiv1 = new Item("equiv1","c:equiv1",Publisher.PA);
     private final Item equiv2 = new Item("equiv2","c:equiv2",Publisher.ITV);
-    
-    private final ContentRef contentRef = ContentRef.valueOf(content);
-    private final ContentRef equiv1Ref = ContentRef.valueOf(equiv1);
-    private final ContentRef equiv2Ref = ContentRef.valueOf(equiv2);
-    
+
+    private ContentRef contentRef;
+    private ContentRef equiv1Ref;
+    private ContentRef equiv2Ref;
+
+    @Before
+    public void setUp() {
+        content.setId(1);
+        equiv1.setId(2);
+        equiv2.setId(3);
+        
+        contentRef = ContentRef.valueOf(content);
+        equiv1Ref = ContentRef.valueOf(equiv1);
+        equiv2Ref = ContentRef.valueOf(equiv2);
+    }
+
     @Test
     public void testWritesLookups() {
         

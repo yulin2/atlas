@@ -25,7 +25,7 @@ public class ChannelAnnotation extends OutputAnnotation<Channel> {
     @Override
     public void write(Channel entity, FieldWriter format, OutputContext ctxt) throws IOException {
         format.writeList(AVAILABLE_FROM_WRITER, entity.availableFrom(), ctxt);
-        format.writeObject(AVAILABLE_FROM_WRITER, entity.publisher(), ctxt);
+        format.writeObject(AVAILABLE_FROM_WRITER, entity.source(), ctxt);
         format.writeField("media_type", entity.mediaType());
         format.writeObject(BROADCASTER_WRITER, entity.broadcaster(), ctxt);
     }

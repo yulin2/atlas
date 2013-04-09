@@ -50,12 +50,13 @@ public class DefaultLoveFilmDataRowHandlerTest {
     public void testHandlesWritingContentInAnyOrder() {
         
         Brand brand = new Brand("brand", "b", LOVEFILM);
-        brand.setTitle("brand");
+        brand.setId(1);
         Series series = new Series("series", "s", LOVEFILM);
-        series.setTitle("series");
+        series.setId(2);
         series.setParent(brand);
         series.withSeriesNumber(4);
         Episode episode = new Episode("episode", "e", LOVEFILM);
+        episode.setId(3);
         episode.setContainer(brand);
         episode.setSeries(series);
         

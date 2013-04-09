@@ -6,6 +6,8 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
@@ -27,7 +29,9 @@ import org.atlasapi.remotesite.voila.ContentWords.WordWeighting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
@@ -60,22 +64,23 @@ public class ContentTwitterTopicsUpdater {
         }
 
         ContentWordsList contentWords = possibleContentWords.get();
+        
+        ImmutableMap<String, ContentWords> contentWordIndex = Maps.uniqueIndex(contentWords.getResults(), new Function<ContentWords, String>(){
+
+            @Override
+            public String apply(ContentWords input) {
+                return input.getUri();
+            }});
 
         ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(urisForWords(contentWords));
 
         UpdateProgress result = UpdateProgress.START;
-        for (ContentWords contentWordSet : contentWords) {
+        for (Content content: Iterables.filter(resolvedContent.getAllResolvedResults(), Content.class)) {
+            ContentWords contentWordSet = contentWordIndex.get(content.getCanonicalUri());
             try {
-                Maybe<Identified> possibleContent = resolvedContent.get(contentWordSet.getUri());
-                if (possibleContent.hasValue()) {
-                    Content content = (Content) possibleContent.requireValue();
-                    content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
-                    write(content);
-                    result = result.reduce(SUCCESS);
-                } else {
-                    log.record(warnEntry().withSource(getClass()).withDescription("Couldn't resolve content for %s", contentWordSet.getUri()));
-                    result = result.reduce(FAILURE);
-                }
+                content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
+                write(content);
+                result = result.reduce(SUCCESS);
             } catch (Exception e) {
                 log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to update topics for %s", contentWordSet.getUri()));
                 result = result.reduce(FAILURE);

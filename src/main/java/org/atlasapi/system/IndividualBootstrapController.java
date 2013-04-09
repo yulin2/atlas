@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.metabroadcast.common.base.Maybe;
 
 @Controller
 public class IndividualBootstrapController {

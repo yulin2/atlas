@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
@@ -85,7 +86,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
             one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.of(RelatedLink.unknownTypeLink("link url").build())));
             one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.of(new KeyPhrase("phrase", Publisher.BBC))));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
-            one(store).resolveAliases(with(hasItems(uri)), with(BBC));
+            one(store).resolveAliases(with(hasItems(new Alias("bbc:programmes:url", uri))), with(BBC));
                 will(returnValue(ImmutableOptionalMap.fromMap(ImmutableMap.of())));
             never(store).writeContent(with(any(Item.class)));
         }});
@@ -123,25 +124,26 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
     public void checkingUpdateLinksAndTagsForContainer(Container content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
         checkFetchesLinksTagsAndContent(content, links, tags);
         context.checking(new Expectations(){{
-            one(store).writeContent((Container)with(contentWithLinksAndTags(links, tags)));
+            one(store).writeContent(with(contentWithLinksAndTags(links, tags)));
         }});
     }
 
     public void checkingUpdateLinksAndTagsForItem(Item content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
         checkFetchesLinksTagsAndContent(content, links, tags);
         context.checking(new Expectations(){{
-            one(store).writeContent((Item)with(contentWithLinksAndTags(links, tags)));
+            one(store).writeContent(with(contentWithLinksAndTags(links, tags)));
         }});
     }
 
     public <T extends Content> void checkFetchesLinksTagsAndContent(final T content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
         final String uri = content.getCanonicalUri();
+        final Alias alias = new Alias("bbc:programmes:url", uri);
         context.checking(new Expectations(){{
             one(linkAdapter).fetch(uri);will(returnValue(links));
             one(tagAdapter).fetch(uri);will(returnValue(tags));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
-            one(store).resolveAliases(with(hasItems(uri)), with(BBC));
-                will(returnValue(ImmutableOptionalMap.fromMap(ImmutableMap.of(uri, content))));
+            one(store).resolveAliases(with(hasItems(alias)), with(BBC));
+                will(returnValue(ImmutableOptionalMap.fromMap(ImmutableMap.of(alias, content))));
         }});
     }
 

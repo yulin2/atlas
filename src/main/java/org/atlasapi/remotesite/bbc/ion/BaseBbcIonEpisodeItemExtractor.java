@@ -8,6 +8,7 @@ import static org.atlasapi.remotesite.bbc.ion.BbcIonContainerAdapter.CONTAINER_D
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
@@ -34,6 +35,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.collect.OptionalMap;
 
 public abstract class BaseBbcIonEpisodeItemExtractor {
     
@@ -114,10 +116,10 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
     }
 
     protected Item setItemDetails(Item item, IonEpisode episode) {
-        item.addAlias(item.getCanonicalUri());
         item.setTitle(getTitle(episode));
         item.setDescription(episode.getSynopsis());
-        // TODO new alias
+        // TODO more alias
+        item.addAlias(new Alias("bbc:programmes:url", item.getCanonicalUri()));
         item.setAliasUrls(BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri()));
         item.setIsLongForm(true);
         item.setLastUpdated(episode.getUpdated());
@@ -148,9 +150,9 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
     }
 
     private Optional<Content> resolvePid(String pid) {
-        String containerUri = BbcFeeds.slashProgrammesUriForPid(pid);
-        Optional<Content> possibleContainer = contentResolver.resolveAliases(ImmutableList.of(containerUri), Publisher.BBC).get(containerUri);
-        return possibleContainer;
+        Alias containerUrl = new Alias("bbc:programmes:url", BbcFeeds.slashProgrammesUriForPid(pid));
+        OptionalMap<Alias,Content> possibleContainer = contentResolver.resolveAliases(ImmutableList.of(containerUrl), Publisher.BBC);
+        return possibleContainer.get(containerUrl);
     }
 
     protected void setMediaTypeAndSpecialisation(Item item, IonEpisode episode) {

@@ -9,7 +9,9 @@ import javax.annotation.Resource;
 import org.atlasapi.equiv.EquivalenceRecordStore;
 import org.atlasapi.media.CassandraPersistenceModule;
 import org.atlasapi.media.ElasticSearchContentIndexModule;
+import org.atlasapi.media.channel.CachingChannelStore;
 import org.atlasapi.media.channel.ChannelGroupStore;
+import org.atlasapi.media.channel.ChannelStore;
 import org.atlasapi.media.channel.MongoChannelGroupStore;
 import org.atlasapi.media.channel.MongoChannelStore;
 import org.atlasapi.media.content.ContentStore;
@@ -172,8 +174,9 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public MongoChannelStore channelStore() {
-        return new MongoChannelStore(databasedMongo(), channelGroupStore(), channelGroupStore());
+    public ChannelStore channelStore() {
+        MongoChannelStore rawStore = new MongoChannelStore(databasedMongo(), channelGroupStore(), channelGroupStore());
+        return new CachingChannelStore(rawStore);
     }
     
     @Bean
