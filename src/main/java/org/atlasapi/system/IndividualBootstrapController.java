@@ -90,7 +90,7 @@ public class IndividualBootstrapController {
         });
         resp.setStatus(HttpStatus.OK.value());
         resp.setContentLength(result.length());
-        resp.getWriter().write(result + "\n");
+        resp.getWriter().println(result);
         resp.getWriter().flush();
     }
     

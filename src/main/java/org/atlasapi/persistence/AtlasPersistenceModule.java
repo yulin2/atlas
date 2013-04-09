@@ -14,13 +14,16 @@ import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelStore;
 import org.atlasapi.media.channel.MongoChannelGroupStore;
 import org.atlasapi.media.channel.MongoChannelStore;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.content.EquivalenceWritingContentStore;
 import org.atlasapi.media.content.EsContentIndex;
 import org.atlasapi.media.content.EsContentIndexer;
 import org.atlasapi.media.content.EsContentSearcher;
 import org.atlasapi.media.content.schedule.EsScheduleIndex;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.segment.Segment;
 import org.atlasapi.media.segment.SegmentWriter;
 import org.atlasapi.media.topic.EsPopularTopicIndex;
@@ -28,7 +31,12 @@ import org.atlasapi.media.topic.EsTopicIndex;
 import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.messaging.MessageQueueingContentStore;
 import org.atlasapi.messaging.MessageQueueingTopicStore;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.ContentGroupWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
+import org.atlasapi.persistence.content.people.PeopleResolver;
+import org.atlasapi.persistence.content.people.PersonWriter;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.persistence.media.TranslatorContentHasher;
 import org.springframework.context.annotation.Bean;
@@ -181,7 +189,7 @@ public class AtlasPersistenceModule {
     
     @Bean
     @Primary
-    private ChannelGroupStore channelGroupStore() {
+    public ChannelGroupStore channelGroupStore() {
         return new MongoChannelGroupStore(databasedMongo());
     }
 
@@ -217,6 +225,66 @@ public class AtlasPersistenceModule {
             @Override
             public Segment write(Segment segment) {
                 return segment;
+            }
+        };
+    }
+    
+    @Bean
+    public ContentGroupWriter nullContentGroupWriter() {
+        return new ContentGroupWriter() {
+            
+            @Override
+            public void createOrUpdate(ContentGroup group) {
+                //no-op
+            }
+        };
+    }
+    
+    @Bean
+    public ContentGroupResolver nullContentGroupResolver() {
+        return new ContentGroupResolver() {
+            
+            @Override
+            public Iterable<ContentGroup> findAll() {
+                return ImmutableList.of();
+            }
+            
+            @Override
+            public ResolvedContent findByIds(Iterable<Id> ids) {
+                return ResolvedContent.builder().build();
+            }
+            
+            @Override
+            public ResolvedContent findByCanonicalUris(Iterable<String> canonicalUris) {
+                return ResolvedContent.builder().build();
+            }
+        };
+    }
+    
+    @Bean
+    public PeopleResolver nullPeopleResolver() {
+        return new PeopleResolver() {
+            
+            @Override
+            public Person person(String uri) {
+                return null;
+            }
+        };
+    }
+    
+    @Bean
+    public PersonWriter nullPersonWriter() {
+        return new PersonWriter() {
+            
+            @Override
+            public void updatePersonItems(Person person) {
+                //no-op
+            }
+            
+            @Override
+            public void createOrUpdatePerson(Person person) {
+                // TODO Auto-generated method stub
+                
             }
         };
     }

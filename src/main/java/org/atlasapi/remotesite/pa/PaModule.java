@@ -80,7 +80,6 @@ public class PaModule {
     private @Autowired ItemsPeopleWriter peopleWriter;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired ChannelWriter channelWriter;
-    private @Autowired FileUploadResultStore fileUploadResultStore;
     private @Autowired DatabasedMongo mongo;
     // to ensure the complete and daily people ingest jobs are not run simultaneously 
     private final Lock peopleLock = new ReentrantLock();
@@ -114,7 +113,7 @@ public class PaModule {
     }
 
     private PaDailyPeopleUpdater paDailyPeopleUpdater() {
-        return new PaDailyPeopleUpdater(paProgrammeDataStore(), personResolver, personWriter, fileUploadResultStore, peopleLock);
+        return new PaDailyPeopleUpdater(paProgrammeDataStore(), personResolver, personWriter, new MongoFileUploadResultStore(mongo), peopleLock);
     }
     
     @Bean PaChannelsUpdater paChannelsUpdater() {
