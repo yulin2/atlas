@@ -131,12 +131,11 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
                 errorViewFor(request, response, NOT_FOUND);
             } else {
                 ApplicationConfiguration appConfig = appConfig(request);
+                Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
+                
                 if (!appConfig.isEnabled(possibleChannel.requireValue().source())) {
                     outputter.writeError(request, response, FORBIDDEN.withMessage("Channel " + id + " not available"));
-                }
-
-                Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
-                if (annotations.isPresent() && !validAnnotations(annotations.get())) {
+                } else if (annotations.isPresent() && !validAnnotations(annotations.get())) {
                     errorViewFor(request, response, BAD_ANNOTATION);
                 } else {
                     modelAndViewFor(request, response, ImmutableList.of(possibleChannel.requireValue()), appConfig);
