@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.redux.model;
 
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+
 public class FullReduxProgramme extends BaseReduxProgramme {
 
     public static Builder builder() {
@@ -118,4 +120,7 @@ public class FullReduxProgramme extends BaseReduxProgramme {
         return media;
     }
 
+    public void addMedia(Map<String, ReduxMedia> media) {
+    	this.media = ImmutableMap.copyOf(media);
+    }
 }
