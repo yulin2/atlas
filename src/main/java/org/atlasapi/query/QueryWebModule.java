@@ -134,11 +134,11 @@ public class QueryWebModule {
     private @Autowired ScheduleIndex scheduleIndex;
 
     private @Autowired ApplicationConfigurationFetcher configFetcher;
-    
+
     @Bean NumberToShortStringCodec idCodec() {
         return SubstitutionTableNumberCodec.lowerCaseOnly();
     }
-    
+
     @Bean SelectionBuilder  selectionBuilder() {
         return Selection.builder().withDefaultLimit(50).withMaxLimit(100);
     }
@@ -174,7 +174,9 @@ public class QueryWebModule {
             QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())),
             QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
             QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer()),
-            QueryAtomParser.valueOf(Attributes.TOPIC_RELATIONSHIP, AttributeCoercers.stringCoercer())
+            QueryAtomParser.valueOf(Attributes.TOPIC_RELATIONSHIP, AttributeCoercers.stringCoercer()),
+            QueryAtomParser.valueOf(Attributes.TOPIC_SUPERVISED, AttributeCoercers.booleanCoercer()),
+            QueryAtomParser.valueOf(Attributes.TOPIC_WEIGHTING, AttributeCoercers.floatCoercer())
         ));
     }
 
@@ -189,7 +191,7 @@ public class QueryWebModule {
             new QueryParameterAnnotationsExtractor("topic"), selectionBuilder())
         );
     }
-    
+
     @Bean
     PopularTopicController popularTopicController() {
         return new PopularTopicController(topicResolver, popularTopicIndex, new TopicQueryResultWriter(annotations()), configFetcher);
