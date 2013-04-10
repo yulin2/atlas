@@ -12,6 +12,7 @@ import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.TopicResolver;
 import org.atlasapi.media.util.Resolved;
+import org.atlasapi.output.NotFoundException;
 import org.atlasapi.query.common.ContextualQuery;
 import org.atlasapi.query.common.ContextualQueryExecutor;
 import org.atlasapi.query.common.ContextualQueryResult;
@@ -63,7 +64,7 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
                     Optional<Topic> possibleTopic = resolved.getResources().first();
             
                     if (!possibleTopic.isPresent()) {
-                        throw new QueryExecutionException();
+                        throw new NotFoundException(query.getResourceQuery().getOnlyId());
                     }
             
                     final Topic topic = possibleTopic.get();

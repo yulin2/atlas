@@ -16,7 +16,7 @@ public class ResponseWriterFactory {
     
     private final Map<String, MimeType> extensionMap = ImmutableMap.of(".json", MimeType.APPLICATION_JSON);
 
-    public ResponseWriter writerFor(HttpServletRequest request, HttpServletResponse response) throws IOException, NotFoundException, NotAcceptableException {
+    public ResponseWriter writerFor(HttpServletRequest request, HttpServletResponse response) throws IOException, UnsupportedFormatException, NotAcceptableException {
         ResponseWriter writerFromExtension = writerFromExtension(request, response);
         if (writerFromExtension != null) {
             return writerFromExtension;
@@ -36,13 +36,13 @@ public class ResponseWriterFactory {
         throw new NotAcceptableException("Cannot generate content for type " + acceptHeader);
     }
 
-    private ResponseWriter writerFromExtension(HttpServletRequest request, HttpServletResponse response) throws NotFoundException {
+    private ResponseWriter writerFromExtension(HttpServletRequest request, HttpServletResponse response) throws UnsupportedFormatException {
         String requestUri = request.getRequestURI();
         String extension = extensionFromUri(requestUri);
         if (extension != null) {
             MimeType mimeType = extensionMap.get(extension);
             if (mimeType == null) {
-                throw new NotFoundException("Resource not found: " + requestUri);
+                throw new UnsupportedFormatException(extension);
             }
             return new JsonResponseWriter(request, response);
         }

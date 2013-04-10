@@ -47,7 +47,7 @@ public class IndexBackedTopicQueryExecutor implements QueryExecutor<Topic> {
     private QueryResult<Topic> singleResult(Resolved<Topic> resolved, Query<Topic> query) throws NotFoundException {
         Topic topic = Iterables.getOnlyElement(resolved.getResources(), null);
         if (topic == null) {
-            throw new NotFoundException();
+            throw new NotFoundException(query.getOnlyId());
         }
         return QueryResult.singleResult(topic, query.getContext());
     }

@@ -18,11 +18,11 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.query.common.AnnotationsExtractor;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
+import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.RequestParameterValidator;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
@@ -71,7 +71,7 @@ class ScheduleRequestParser {
         this.annotationExtractor = new QueryParameterAnnotationsExtractor();
     }
 
-    public ScheduleQuery queryFrom(HttpServletRequest request) throws NotFoundException {
+    public ScheduleQuery queryFrom(HttpServletRequest request) throws QueryParseException, NotFoundException {
         // Attempt to extract channel first so we can 404 if missing before
         // 400ing from bad params.
         Channel channel = extractChannel(request);
@@ -109,24 +109,22 @@ class ScheduleRequestParser {
         return openInterval.contains(interval);
     }
 
-    private Channel extractChannel(HttpServletRequest request) throws NotFoundException {
+    private Channel extractChannel(HttpServletRequest request) throws QueryParseException, NotFoundException {
         String channelId = getChannelId(request.getRequestURI());
-        Maybe<Channel> channel = resolveChannel(channelId);
         
-        if (channel.hasValue()) {
-            return channel.requireValue();
-        }
-        throw new NotFoundException(String.format("Unknown channel '%s'", channelId));
-    }
-
-    private Maybe<Channel> resolveChannel(String channelId) {
         Id cid;
         try {
             cid = Id.valueOf(idCodec.decode(channelId));
         } catch (IllegalArgumentException e) {
-            return Maybe.nothing();
+            throw new QueryParseException("Invalid id " + channelId);
         }
-        return channelResolver.fromId(cid);
+        Maybe<Channel> channel = channelResolver.fromId(cid);
+
+        
+        if (channel.hasValue()) {
+            return channel.requireValue();
+        }
+        throw new NotFoundException(cid);
     }
 
     private String getChannelId(String requestUri) {
