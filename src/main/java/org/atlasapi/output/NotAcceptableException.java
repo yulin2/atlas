@@ -1,7 +1,9 @@
 package org.atlasapi.output;
 
+import org.atlasapi.query.common.QueryExecutionException;
 
-public class NotAcceptableException extends Exception {
+
+public class NotAcceptableException extends QueryExecutionException {
 
     public NotAcceptableException() {
         super();
