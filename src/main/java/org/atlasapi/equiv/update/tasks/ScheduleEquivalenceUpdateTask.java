@@ -21,12 +21,15 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.time.DayRange;
+import com.metabroadcast.common.time.DayRangeGenerator;
 
 public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
 
@@ -34,8 +37,8 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
     private final ScheduleResolver scheduleResolver;
     private final List<Publisher> publishers;
     private final List<Channel> channels;
-    private final Duration back;
-    private final Duration forward;
+    private final int back;
+    private final int forward;
 
     private final Logger log = LoggerFactory.getLogger(ScheduleEquivalenceUpdateTask.class);
 
@@ -45,7 +48,7 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
 
     private ScheduleEquivalenceUpdateTask(EquivalenceUpdater<Content> updater,
             ScheduleResolver scheduleResolver, List<Publisher> publishers, List<Channel> channels,
-            Duration back, Duration forward) {
+            int back, int forward) {
         this.updater = updater;
         this.scheduleResolver = scheduleResolver;
         this.publishers = publishers;
@@ -58,39 +61,55 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
     protected void runTask() {
         UpdateProgress progress = UpdateProgress.START;
 
-        DateTime start = new DateTime().withZone(DateTimeZone.UTC).minus(back);
-        DateTime end = new DateTime().withZone(DateTimeZone.UTC).plus(forward);
+        DayRange range = new DayRangeGenerator()
+            .withLookBack(back)
+            .withLookAhead(forward)
+            .generate(new LocalDate());
         
-        while (end.isAfter(start.plusDays(1))) {
-            progress = progress.reduce(equivalateSchedule(start, start.plusDays(1)));
-            start = start.plusDays(1);
-        } 
+        Iterator<LocalDate> dayIterator = range.iterator();
+        LocalDate start, end;
         
-        progress = progress.reduce(equivalateSchedule(start, end));
-
+        while(dayIterator.hasNext()) {
+            start = dayIterator.next();
+            end = start.plusDays(1);
+            progress = progress.reduce(equivalateSchedule(start, end));
+        }
+        
         reportStatus(String.format("Finished. %d Items processed, %d failed", progress.getProcessed(), progress.getFailures()));
     }
 
-    public UpdateProgress equivalateSchedule(DateTime start, DateTime end) {
+    public UpdateProgress equivalateSchedule(LocalDate start, LocalDate end) {
         UpdateProgress progress = UpdateProgress.START;
         for (Publisher publisher : publishers) {
             for (Channel channel : channels) {
+                if (!shouldContinue()) {
+                    return progress;
+                }
+                
                 Schedule schedule = scheduleResolver.schedule(
-                        start,
-                        end,
+                        start.toDateTimeAtStartOfDay(),
+                        end.toDateTimeAtStartOfDay(),
                         ImmutableList.of(channel),
                         ImmutableList.of(publisher),
                         Optional.<ApplicationConfiguration>absent());
                 
                 Iterator<ScheduleChannel> channelItr = schedule.scheduleChannels().iterator();
-                while (channelItr.hasNext() && shouldContinue()) {
-                    ScheduleChannel scheduleChannel = channelItr.next();
-                    Iterator<Item> channelItems = scheduleChannel.items().iterator();
-                    while (channelItems.hasNext() && shouldContinue()) {
-                        Item scheduleItem = channelItems.next();
-                        progress = progress.reduce(process(scheduleItem));
-                        reportStatus(generateStatus(progress, publisher, scheduleItem, channel));
-                    }
+                if (!channelItr.hasNext()) {
+                    throw new RuntimeException(String.format(
+                        "No schedule channel in schedule for %s, channel %s, from %s to %s", 
+                        publisher.name(), 
+                        channel.title(), 
+                        start.toString(), 
+                        end.toString()
+                    ));
+                }
+                ScheduleChannel scheduleChannel = channelItr.next();
+                
+                Iterator<Item> channelItems = scheduleChannel.items().iterator();
+                while (channelItems.hasNext() && shouldContinue()) {
+                    Item scheduleItem = channelItems.next();
+                    progress = progress.reduce(process(scheduleItem));
+                    reportStatus(generateStatus(progress, publisher, scheduleItem, channel));
                 }
             }   
         }
@@ -125,8 +144,8 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
         private ScheduleResolver scheduleResolver;
         private List<Publisher> publishers;
         private List<Channel> channels;
-        private Duration back;
-        private Duration forward;
+        private int back;
+        private int forward;
 
         public ScheduleEquivalenceUpdateTask build() {
             return new ScheduleEquivalenceUpdateTask(
@@ -161,12 +180,12 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
             return this;
         }
 
-        public Builder withBack(Duration back) {
+        public Builder withBack(int back) {
             this.back = back;
             return this;
         }
 
-        public Builder withForward(Duration forward) {
+        public Builder withForward(int forward) {
             this.forward = forward;
             return this;
         }
