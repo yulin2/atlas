@@ -18,6 +18,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
+import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
@@ -53,13 +54,15 @@ public class ScheduleEquivalenceUpdateTaskTest {
         DateTime now = new DateTime().withZone(DateTimeZone.UTC);
         
         ScheduleChannel schChannel1 = new ScheduleChannel(bbcOne, ImmutableList.of(yvItemOne, yvItemTwo));
-        Schedule schedule1 = new Schedule(ImmutableList.of(schChannel1), new Interval(now, now.plusDays(1)));
+        LocalDate today = new LocalDate();
+        LocalDate tomorrow = today.plusDays(1);
+        Schedule schedule1 = new Schedule(ImmutableList.of(schChannel1), new Interval(today.toDateTimeAtStartOfDay(), tomorrow.toDateTimeAtStartOfDay()));
         
         ScheduleResolver resolver = scheduleResolver(schedule1);
         
         ScheduleEquivalenceUpdateTask.builder()
-            .withBack(Duration.standardDays(0))
-            .withForward(Duration.standardDays(1))
+            .withBack(0)
+            .withForward(0)
             .withPublishers(ImmutableList.of(Publisher.YOUVIEW))
             .withChannels(ImmutableList.of(bbcOne))
             .withScheduleResolver(resolver)

@@ -97,7 +97,7 @@ public class EquivTaskModule {
                     Lists.newArrayList(YOUVIEW), 
                     youViewChannelResolver().getAllChannels(),
                     0,
-                    8
+                    7
                 ).withName("YouView Schedule Equivalence (8 day) Updater"), RepetitionRules.NEVER);
         }
     }
