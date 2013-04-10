@@ -34,6 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
@@ -79,7 +80,7 @@ public class ScheduleControllerTest {
         
         when(configFetcher.configurationFor(request)).thenReturn(Maybe.<ApplicationConfiguration>nothing());
         when(channelResolver.fromId(any(Long.class))).thenReturn(Maybe.just(channel));
-        when(scheduleResolver.schedule(from, to, ImmutableSet.of(channel), ImmutableSet.of(Publisher.BBC), null))
+        when(scheduleResolver.schedule(from, to, ImmutableSet.of(channel), ImmutableSet.of(Publisher.BBC), Optional.<ApplicationConfiguration>absent()))
             .thenReturn(Schedule.fromChannelMap(ImmutableMap.<Channel,List<Item>>of(), new Interval(from, to)));
         
         controller.schedule(from.toString(), to.toString(), null, null, "cbbh", "bbc.co.uk", request, response);

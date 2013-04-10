@@ -2,6 +2,7 @@ package org.atlasapi.equiv.generators;
 
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
@@ -20,6 +21,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
@@ -158,7 +160,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
         DateTime end = broadcast.getTransmissionEndTime().plus(flexibility);
         Maybe<Channel> channel = channelResolver.fromUri(broadcast.getBroadcastOn());
         if (channel.hasValue()) {
-            return resolver.schedule(start, end, ImmutableSet.of(channel.requireValue()), publishers, null);
+            return resolver.schedule(start, end, ImmutableSet.of(channel.requireValue()), publishers, Optional.<ApplicationConfiguration>absent());
         }
         return null;
     }

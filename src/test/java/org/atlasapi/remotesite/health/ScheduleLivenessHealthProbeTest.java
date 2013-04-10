@@ -20,6 +20,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Minutes;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -115,7 +116,7 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 
 		@Override
 		public Schedule schedule(DateTime from, DateTime to,
-				Iterable<Channel> channels, Iterable<Publisher> publisher, ApplicationConfiguration mergeConfig) {
+				Iterable<Channel> channels, Iterable<Publisher> publisher, Optional<ApplicationConfiguration> mergeConfig) {
 			
 			this.requestedStartTime = from;
 			this.requestedEndTime = to;
