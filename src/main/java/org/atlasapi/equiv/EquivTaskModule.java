@@ -93,7 +93,12 @@ public class EquivTaskModule {
             
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_MUSIC).withName("Music Equivalence Updater"), RepetitionRules.every(Duration.standardHours(6)));
             
-            taskScheduler.schedule(scheduleEquivTask(Lists.newArrayList(YOUVIEW), youViewChannelResolver().getAllChannels(), Duration.standardDays(8)).withName("YouView Schedule Equivalence (8 day) Updater"), RepetitionRules.NEVER);
+            taskScheduler.schedule(scheduleEquivTask(
+                    Lists.newArrayList(YOUVIEW), 
+                    youViewChannelResolver().getAllChannels(),
+                    0,
+                    8
+                ).withName("YouView Schedule Equivalence (8 day) Updater"), RepetitionRules.NEVER);
         }
     }
     
@@ -105,14 +110,14 @@ public class EquivTaskModule {
         return new ContentEquivalenceUpdateTask(contentLister, contentResolver, progressStore(), equivUpdater, ignored).forPublishers(publishers);
     }
     
-    private ScheduleEquivalenceUpdateTask scheduleEquivTask(Iterable<Publisher> publishers, Iterable<Channel> channels, Duration forward) {
+    private ScheduleEquivalenceUpdateTask scheduleEquivTask(Iterable<Publisher> publishers, Iterable<Channel> channels, int daysBack, int daysForward) {
         return ScheduleEquivalenceUpdateTask.builder()
             .withUpdater(equivUpdater)
             .withScheduleResolver(scheduleResolver)
             .withPublishers(publishers)
             .withChannels(channels)
-            .withBack(Duration.ZERO)
-            .withForward(forward)
+            .withBack(daysBack)
+            .withForward(daysForward)
             .build();
     }
 
