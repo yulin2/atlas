@@ -32,7 +32,7 @@ public class ContentMerger {
     }
 
     private static <C extends Content> C mergeContents(C current, C extracted) {
-        current.setActivelyPublished(true);
+        current.setActivelyPublished(extracted.isActivelyPublished());
         current.setAliasUrls(extracted.getAliasUrls());
         current.setTitle(extracted.getTitle());
         current.setDescription(extracted.getDescription());
