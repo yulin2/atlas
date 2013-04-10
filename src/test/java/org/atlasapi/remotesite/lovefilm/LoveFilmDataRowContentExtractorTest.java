@@ -16,6 +16,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.junit.Ignore;
@@ -88,6 +89,21 @@ public class LoveFilmDataRowContentExtractorTest {
         assertThat(episode.getEpisodeNumber(), is(16));
         assertThat(episode.getTitle(), is("Resolutions"));
         assertEquals(Specialization.TV, episode.getSpecialization());
+    }
+    
+    @Test
+    public void testExtractsSeriesTitleAndRemovesBrand() throws IOException {
+        
+        LoveFilmDataRow row = rowFromFile("peep-show-s4.csv");
+        
+        Optional<Content> extracted = extractor.extract(row);
+        
+        assertTrue(extracted.isPresent());
+        Content content = extracted.get();
+        
+        Series series = (Series) content;
+        
+        assertThat(series.getTitle(), is("Series 4"));
     }
     
     /* TODO
