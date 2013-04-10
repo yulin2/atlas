@@ -19,7 +19,6 @@ public class StandardQueryParser<T> implements QueryParser<T> {
     private final QueryContextParser queryContextParser;
 
     private final Pattern singleResourcePattern;
-    
 
     public StandardQueryParser(String resourceName, QueryAttributeParser attributeParser,
                             NumberToShortStringCodec idCodec,
@@ -31,7 +30,7 @@ public class StandardQueryParser<T> implements QueryParser<T> {
     }
 
     @Override
-    public Query<T> parse(HttpServletRequest request) {
+    public Query<T> parse(HttpServletRequest request) throws QueryParseException {
         Id singleId = tryExtractSingleId(request);
         return singleId != null ? singleQuery(request, singleId) 
                                 : listQuery(request);
@@ -47,7 +46,7 @@ public class StandardQueryParser<T> implements QueryParser<T> {
         return Query.singleQuery(singleId, queryContextParser.parseContext(request));
     }
 
-    private Query<T> listQuery(HttpServletRequest request) {
+    private Query<T> listQuery(HttpServletRequest request) throws QueryParseException {
         AttributeQuerySet querySet = attributeParser.parse(request);
         return Query.listQuery(querySet,
             queryContextParser.parseContext(request));

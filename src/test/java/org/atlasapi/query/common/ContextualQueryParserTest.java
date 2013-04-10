@@ -1,6 +1,5 @@
 package org.atlasapi.query.common;
 
-import static org.atlasapi.application.ApplicationConfiguration.DEFAULT_CONFIGURATION;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -11,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.content.criteria.attribute.Attributes;
@@ -38,7 +38,7 @@ public class ContextualQueryParserTest {
         new ContextualQueryParser<Topic, Content>("topics", Attributes.TOPIC_ID, "content", idCodec,attributeParser,queryContextParser);
     
     @Test
-    public void testParseRequest() {
+    public void testParseRequest() throws Exception {
         
         HttpServletRequest req = new StubHttpServletRequest().withRequestUri(
             "/4.0/topics/cbbh/content.json"
@@ -47,7 +47,7 @@ public class ContextualQueryParserTest {
         when(attributeParser.parse(req))
             .thenReturn(new AttributeQuerySet(ImmutableSet.<AttributeQuery<?>>of()));
         when(queryContextParser.parseContext(req))
-            .thenReturn(new QueryContext(DEFAULT_CONFIGURATION, Annotation.defaultAnnotations()));
+            .thenReturn(new QueryContext(ApplicationConfiguration.defaultConfiguration(), Annotation.defaultAnnotations()));
         
         ContextualQuery<Topic,Content> query = parser.parse(req);
         

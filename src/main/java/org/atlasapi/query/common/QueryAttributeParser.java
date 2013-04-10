@@ -47,11 +47,12 @@ public class QueryAttributeParser {
         return lookup;
     }
 
-    public AttributeQuerySet parse(HttpServletRequest request) {
+    public AttributeQuerySet parse(HttpServletRequest request) throws QueryParseException {
         return new AttributeQuerySet(parseListQuery(request));
     }
 
-    private Iterable<? extends AttributeQuery<?>> parseListQuery(HttpServletRequest request) {
+    private Iterable<? extends AttributeQuery<?>> parseListQuery(HttpServletRequest request)
+            throws QueryParseException {
         ImmutableSet.Builder<AttributeQuery<?>> operands = ImmutableSet.builder();
         LinkedList<String> invalidParams = Lists.newLinkedList();
         for(Entry<String, String[]> param : getParameterMap(request).entrySet()) {
@@ -66,7 +67,7 @@ public class QueryAttributeParser {
         if (invalidParams.isEmpty()) {
             return operands.build();
         }
-        throw new IllegalArgumentException(replacementSuggestion.forInvalid(invalidParams));
+        throw new InvalidParameterException(replacementSuggestion.forInvalid(invalidParams));
     }
 
     private Iterable<String> splitVals(String[] value) {
@@ -83,5 +84,5 @@ public class QueryAttributeParser {
     private Map<String, String[]> getParameterMap(HttpServletRequest request) {
         return (Map<String, String[]>) request.getParameterMap();
     }
-    
+
 }

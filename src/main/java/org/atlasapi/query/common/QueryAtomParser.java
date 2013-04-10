@@ -26,11 +26,12 @@ public final class QueryAtomParser<I, O> {
         return attribute;
     }
     
-    public AttributeQuery<O> parse(String key, Iterable<I> rawValues) {
+    public AttributeQuery<O> parse(String key, Iterable<I> rawValues)
+            throws QueryParseException {
         return attribute.createQuery(operator(key), parse(rawValues));
     }
 
-    private Operator operator(String key) {
+    private Operator operator(String key) throws InvalidOperatorException {
         if (key.equals(attribute.externalName())) {
             return Operators.EQUALS;
         }
@@ -40,10 +41,12 @@ public final class QueryAtomParser<I, O> {
         if (operator != null) {
             return operator;
         }
-        throw new IllegalArgumentException(String.format("unknown operator '%s'", operatorName));
+        throw new InvalidOperatorException(
+                String.format("unknown operator '%s'", operatorName));
     }
 
-    private Iterable<O> parse(Iterable<I> rawValues) {
+    private Iterable<O> parse(Iterable<I> rawValues)
+            throws InvalidAttributeValueException {
         return coercer.apply(rawValues);
     }
     

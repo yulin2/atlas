@@ -39,9 +39,9 @@ public class StandardQueryParserTest {
     private final StandardQueryParser<Topic> queryParser = new StandardQueryParser<Topic>("topics", atrributes, idCodec, queryContextParser);
     
     @Test
-    public void testParsesSingleIdIntoNonListTopicQuery() {
+    public void testParsesSingleIdIntoNonListTopicQuery() throws Exception {
         when(queryContextParser.parseContext(isA(HttpServletRequest.class)))
-            .thenReturn(new QueryContext(ApplicationConfiguration.DEFAULT_CONFIGURATION, Annotation.defaultAnnotations()));
+            .thenReturn(new QueryContext(ApplicationConfiguration.defaultConfiguration(), Annotation.defaultAnnotations()));
         
         Query<Topic> q = queryParser.parse(requestWithPath("4.0/topics/cbbh.json"));
         
@@ -52,9 +52,9 @@ public class StandardQueryParserTest {
     }
 
     @Test
-    public void testParsesIdsOnlyIntoListQuery() {
+    public void testParsesIdsOnlyIntoListQuery() throws Exception {
         when(queryContextParser.parseContext(isA(HttpServletRequest.class)))
-        .thenReturn(new QueryContext(ApplicationConfiguration.DEFAULT_CONFIGURATION, Annotation.defaultAnnotations()));
+        .thenReturn(new QueryContext(ApplicationConfiguration.defaultConfiguration(), Annotation.defaultAnnotations()));
     
         Query<Topic> q = queryParser.parse(requestWithPath("4.0/topics.json")
             .withParam("id", "cbbh"));

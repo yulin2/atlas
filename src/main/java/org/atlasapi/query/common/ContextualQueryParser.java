@@ -43,14 +43,16 @@ public class ContextualQueryParser<C, R> {
         return Pattern.compile(contextResourceName + "/([^/]+)/" + resourceName + "(\\..*)?$");
     }
     
-    public ContextualQuery<C, R> parse(HttpServletRequest request) {
+    public ContextualQuery<C, R> parse(HttpServletRequest request)
+            throws QueryParseException {
         QueryContext context = queryContextParser.parseContext(request);
         SingleQuery<C> contextQuery = contextQuery(request, context);
         return new ContextualQuery<C, R>(
             contextQuery, resourceQuery(request, contextQuery.getOnlyId(), context), context);
     }
 
-    private ListQuery<R> resourceQuery(HttpServletRequest request, Id contextId, QueryContext context) {
+    private ListQuery<R> resourceQuery(HttpServletRequest request, Id contextId, QueryContext context)
+            throws QueryParseException {
         AttributeQuerySet querySet = attributeParser.parse(request);
         querySet = querySet.copyWith(contextAttributeQuery(contextId));
         return Query.listQuery(querySet, context);

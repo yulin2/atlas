@@ -33,7 +33,7 @@ public class QueryAttributeParserTest {
     ));
     
     @Test
-    public void testParseQueryWithIdAttribute() {
+    public void testParseQueryWithIdAttribute() throws Exception {
         final Id id1 = Id.valueOf(1234);
         final Id id2 = Id.valueOf(1235);
         
@@ -59,7 +59,7 @@ public class QueryAttributeParserTest {
     }
     
     @Test
-    public void testParseQueryWithMultipleParams() {
+    public void testParseQueryWithMultipleParams() throws Exception {
 
         AttributeQuerySet queries = parser.parse(request()
             .withParam("aliases.namespace","theNamespace")
@@ -91,7 +91,7 @@ public class QueryAttributeParserTest {
     }
     
     @Test
-    public void testParseQueryWithOperator() {
+    public void testParseQueryWithOperator() throws Exception {
         
         AttributeQuerySet queries = parser.parse(request()
             .withParam("aliases.namespace.beginning","theNamespace")
@@ -124,8 +124,8 @@ public class QueryAttributeParserTest {
         
     }
     
-    @Test(expected=IllegalArgumentException.class)
-    public void testThrowsExceptionForUnknownParameter() {
+    @Test(expected=InvalidParameterException.class)
+    public void testThrowsExceptionForUnknownParameter() throws Exception {
         
         parser.parse(request()
             .withParam("aliases.namesppace","theNamespace")
@@ -133,8 +133,8 @@ public class QueryAttributeParserTest {
         
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testThrowsExceptionForUnknownOperator() {
+    @Test(expected=InvalidOperatorException.class)
+    public void testThrowsExceptionForUnknownOperator() throws Exception {
         
         parser.parse(request()
             .withParam("aliases.namespace.begginning","theNamespace")
