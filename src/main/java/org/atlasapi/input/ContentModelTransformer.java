@@ -77,26 +77,33 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         result.setPeople(transformPeople(inputContent.getPeople(), publisher));
         result.setEquivalentTo(resolveEquivalences(inputContent.getSameAs()));
         result.setTopicRefs(topicRefs(inputContent.getTopics()));
-        result.setKeyPhrases(keyPhrases(inputContent.getKeyPhrases()));
+        result.setKeyPhrases(keyPhrases(inputContent.getKeyPhrases(), publisher));
         result.setGenres(inputContent.getGenres());
         return result;
     }
     
-    private Iterable<KeyPhrase> keyPhrases(Iterable<org.atlasapi.media.entity.simple.KeyPhrase> keyPhrases) {
+    private Iterable<KeyPhrase> keyPhrases(Iterable<org.atlasapi.media.entity.simple.KeyPhrase> keyPhrases, final Publisher contentPublisher) {
         return ImmutableList.copyOf(Iterables.transform(keyPhrases, new Function<org.atlasapi.media.entity.simple.KeyPhrase, KeyPhrase>() {
 
             @Override
             public KeyPhrase apply(org.atlasapi.media.entity.simple.KeyPhrase input) {
-                Maybe<Publisher> publisher = Publisher.fromKey(input.getPublisher().getKey());
-                if (publisher.hasValue()) {
-                    return new KeyPhrase(input.getPhrase(), publisher.requireValue(), input.getWeighting());
+                if (input.getPublisher() == null) {
+                    return new KeyPhrase(input.getPhrase(), contentPublisher, input.getWeighting()); 
                 } else {
-                    throw new IllegalStateException(
-                            String.format("No publisher for %s", input.getPublisher().getKey())
-                    );
+                    Maybe<Publisher> publisher = Publisher.fromKey(input.getPublisher().getKey());
+                    if (publisher.hasValue()) {
+                        if (publisher.equals(contentPublisher)) {
+                            return new KeyPhrase(input.getPhrase(), publisher.requireValue(), input.getWeighting());
+                        } else {
+                            throw new IllegalStateException("Publisher in key phrase does not match publisher for content");
+                        }                    
+                    } else {
+                        throw new IllegalStateException(
+                             String.format("No publisher for %s", input.getPublisher().getKey())
+                        );
+                    }
                 }
             }
-            
         }));
     }
 
