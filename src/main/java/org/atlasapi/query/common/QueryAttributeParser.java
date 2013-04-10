@@ -27,8 +27,13 @@ public class QueryAttributeParser {
     private final AttributeLookupTree attributesLookup;
     private final Map<Attribute<?>, ? extends QueryAtomParser<String, ?>> parsers;
     private final ReplacementSuggestion replacementSuggestion;
-
+    private final ImmutableSet<String> ignoredParameters;
+    
     public QueryAttributeParser(Iterable<? extends QueryAtomParser<String, ?>> attributeParsers) {
+        this(attributeParsers, ImmutableSet.<String>of());
+    }
+
+    public QueryAttributeParser(Iterable<? extends QueryAtomParser<String, ?>> attributeParsers, Iterable<String> ignoredParameters) {
         this.parsers = Maps.uniqueIndex(attributeParsers, new Function<QueryAtomParser<String, ?>, Attribute<?>>(){
             @Override
             public Attribute<?> apply(QueryAtomParser<String, ?> input) {
@@ -37,6 +42,11 @@ public class QueryAttributeParser {
         this.attributesLookup = initLookup(parsers.keySet());
         this.replacementSuggestion = new ReplacementSuggestion(
             attributesLookup.allKeys(), "Invalid parameters: ", " (did you mean %s?)");
+        this.ignoredParameters = ImmutableSet.copyOf(ignoredParameters);
+    }
+    
+    public QueryAttributeParser copyWithIgnoredParameters(Iterable<String> ignored) {
+        return new QueryAttributeParser(this.parsers.values(), ignored);
     }
 
     private AttributeLookupTree initLookup(Set<Attribute<?>> attributes) {
@@ -56,6 +66,9 @@ public class QueryAttributeParser {
         ImmutableSet.Builder<AttributeQuery<?>> operands = ImmutableSet.builder();
         LinkedList<String> invalidParams = Lists.newLinkedList();
         for(Entry<String, String[]> param : getParameterMap(request).entrySet()) {
+            if (ignoredParameters.contains(param.getKey())) {
+                continue;
+            }
             Optional<Attribute<?>> attribute = attributesLookup.attributeFor(param.getKey());
             if (attribute.isPresent()) {
                 QueryAtomParser<String, ?> parser = parsers.get(attribute.get());

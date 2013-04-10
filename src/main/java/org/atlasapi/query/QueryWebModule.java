@@ -157,14 +157,17 @@ public class QueryWebModule {
         return new TopicController(topicQueryParser(), 
             queryModule.topicQueryExecutor(), new TopicQueryResultWriter(annotations()));
     }
-    
+
     @Bean
     TopicContentController topicContentController() {
+        QueryContextParser contextParser = new QueryContextParser(configFetcher,
+            new QueryParameterAnnotationsExtractor(), selectionBuilder());
+        
         ContextualQueryParser<Topic, Content> parser = new ContextualQueryParser<Topic, Content>(
             "topics", Attributes.TOPIC_ID, "content", idCodec(),
-            contentQueryAttributeParser(),
-            new QueryContextParser(configFetcher,
-                new QueryParameterAnnotationsExtractor(), selectionBuilder()));
+            contentQueryAttributeParser().copyWithIgnoredParameters(contextParser.getParameterNames()),
+            contextParser);
+        
         return new TopicContentController(parser, queryModule.topicContentQueryExecutor(),
                 new TopicContentResultWriter(annotations()));
     }

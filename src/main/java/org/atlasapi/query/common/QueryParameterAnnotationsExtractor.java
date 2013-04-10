@@ -76,6 +76,10 @@ public class QueryParameterAnnotationsExtractor implements AnnotationsExtractor 
         this("annotations", null);
     }
     
+    public ImmutableSet<String> getParameterNames() {
+        return ImmutableSet.of(this.parameterName);
+    }
+    
     @Override
     public Optional<Set<Annotation>> extractFromRequest(HttpServletRequest request) {
         

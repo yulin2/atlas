@@ -8,6 +8,8 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.output.Annotation;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
@@ -29,6 +31,13 @@ public class QueryContextParser {
             annotationExtractor.extractFromRequest(request).or(Annotation.defaultAnnotations()),
             selectionBuilder.build(request)
         );
+    }
+
+    public ImmutableSet<String> getParameterNames() {
+        return ImmutableSet.copyOf(Iterables.concat(
+            configFetcher.getParameterNames(), 
+            annotationExtractor.getParameterNames(), 
+            selectionBuilder.getParameterNames()));
     }
     
 }
