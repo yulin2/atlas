@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.channel4;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.atlasapi.media.entity.Broadcast;
@@ -25,7 +26,7 @@ import com.sun.syndication.feed.atom.Feed;
 
 public class C4EpisodeBroadcastExtractor implements ContentExtractor<Feed, List<Episode>> {
     
-    private final DateTimeFormatter fmt = DateTimeFormat.forPattern("EEEE dd MMMM yyyy hh:mm aa").withZone(DateTimeZones.LONDON);
+    private final DateTimeFormatter fmt = DateTimeFormat.forPattern("EEEE dd MMMM yyyy hh:mm aa").withZone(DateTimeZones.LONDON).withLocale(Locale.UK);
 	private final AdapterLog log;
 
     public C4EpisodeBroadcastExtractor(AdapterLog log) {
