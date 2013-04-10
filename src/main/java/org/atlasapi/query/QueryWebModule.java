@@ -173,7 +173,8 @@ public class QueryWebModule {
         return new QueryAttributeParser(ImmutableList.of(
             QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())),
             QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
-            QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer())
+            QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer()),
+            QueryAtomParser.valueOf(Attributes.TOPIC_RELATIONSHIP, AttributeCoercers.stringCoercer())
         ));
     }
 

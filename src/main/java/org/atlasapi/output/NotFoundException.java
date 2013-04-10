@@ -1,7 +1,8 @@
 package org.atlasapi.output;
 
+import org.atlasapi.query.common.QueryExecutionException;
 
-public class NotFoundException extends Exception {
+public class NotFoundException extends QueryExecutionException {
 
     public NotFoundException() {
         super();

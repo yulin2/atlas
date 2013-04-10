@@ -18,10 +18,13 @@ import org.atlasapi.query.common.ContextualQuery;
 import org.atlasapi.query.common.ContextualQueryExecutor;
 import org.atlasapi.query.common.ContextualQueryParser;
 import org.atlasapi.query.common.ContextualQueryResult;
+import org.atlasapi.query.common.QueryExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.google.common.base.Objects;
 
 @Controller
 public class TopicContentController {
@@ -51,11 +54,19 @@ public class TopicContentController {
             ContextualQuery<Topic, Content> query = parser.parse(request);
             ContextualQueryResult<Topic, Content> result = queryExecutor.execute(query);
             resultWriter.write(result, writer);
+        } catch (QueryExecutionException qee) {
+            log.error("Query execution exception " + request.getRequestURI(), qee.getCause());
+            handleException(request, response, writer, qee);
         } catch (Exception e) {
-            log.error("Request exception " + request.getRequestURI(), e);
-            ErrorSummary summary = ErrorSummary.forException(e);
-            new ErrorResultWriter().write(summary, writer, request, response);
+            log.error("Request exception " + request.getRequestURI(), Objects.firstNonNull(e.getCause(), e));
+            handleException(request, response, writer, e);
         }
+    }
+
+    private void handleException(HttpServletRequest request, HttpServletResponse response,
+            ResponseWriter writer, Exception e) throws IOException {
+        ErrorSummary summary = ErrorSummary.forException(e);
+        new ErrorResultWriter().write(summary, writer, request, response);
     }
     
 }

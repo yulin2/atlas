@@ -22,6 +22,7 @@ import org.atlasapi.query.common.QueryResult;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
@@ -93,20 +94,28 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
         };
     }
 
-    private ListenableFuture<Resolved<Content>> resolveContent(Iterable<Id> contentIds) {
-        return contentResolver.resolveIds(contentIds);
+    private ListenableFuture<Resolved<Content>> resolveContent(
+            ListenableFuture<FluentIterable<Id>> queryHits) {
+        return Futures.transform(queryHits,
+                new AsyncFunction<FluentIterable<Id>, Resolved<Content>>() {
+                    @Override
+                    public ListenableFuture<Resolved<Content>> apply(FluentIterable<Id> ids)
+                            throws Exception {
+                        return contentResolver.resolveIds(ids);
+                    }
+                });
     }
     
     private ListenableFuture<Resolved<Topic>> resolveTopic(Id contextId) {
         return topicResolver.resolveIds(ImmutableList.of(contextId));
     }
     
-    private Iterable<Id> queryIndex(Query<Content> query) throws QueryExecutionException {
-        return Futures.get(index.query(
+    private ListenableFuture<FluentIterable<Id>> queryIndex(Query<Content> query) throws QueryExecutionException {
+        return index.query(
             query.getOperands(), 
             query.getContext().getApplicationConfiguration().getEnabledSources(), 
             query.getContext().getSelection().or(Selection.ALL)
-        ), 1, TimeUnit.MINUTES, QueryExecutionException.class);
+        );
     }
 
 }

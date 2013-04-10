@@ -9,6 +9,7 @@ import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.TopicIndex;
 import org.atlasapi.media.topic.TopicResolver;
 import org.atlasapi.media.util.Resolved;
+import org.atlasapi.output.NotFoundException;
 import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.QueryExecutor;
@@ -38,13 +39,17 @@ public class IndexBackedTopicQueryExecutor implements QueryExecutor<Topic> {
             1, TimeUnit.MINUTES, QueryExecutionException.class), query);
     }
 
-    private QueryResult<Topic> resultFor(Resolved<Topic> resolved, Query<Topic> query) {
+    private QueryResult<Topic> resultFor(Resolved<Topic> resolved, Query<Topic> query) throws NotFoundException {
         return query.isListQuery() ? listResult(resolved, query)
                                    : singleResult(resolved, query);
     }
 
-    private QueryResult<Topic> singleResult(Resolved<Topic> resolved, Query<Topic> query) {
-        return QueryResult.singleResult(Iterables.getOnlyElement(resolved.getResources()), query.getContext());
+    private QueryResult<Topic> singleResult(Resolved<Topic> resolved, Query<Topic> query) throws NotFoundException {
+        Topic topic = Iterables.getOnlyElement(resolved.getResources(), null);
+        if (topic == null) {
+            throw new NotFoundException();
+        }
+        return QueryResult.singleResult(topic, query.getContext());
     }
 
     private QueryResult<Topic> listResult(Resolved<Topic> resolved, Query<Topic> query) {
