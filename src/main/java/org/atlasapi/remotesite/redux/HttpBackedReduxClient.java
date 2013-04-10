@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.redux;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -84,7 +83,8 @@ public class HttpBackedReduxClient implements ReduxClient {
     }
     
     @SuppressWarnings("unchecked")
-	Map<String, ReduxMedia> cacheMediaFormats() throws HttpException, Exception {
+	Map<String, ReduxMedia> cachedMediaFormats() throws HttpException, Exception {
+        if (mediaMap!=null) return mediaMap;
     	Type type = new TypeToken<Map<String, ReduxMedia>>() {}.getType();
     	
     	mediaMap = (Map<String, ReduxMedia>) getAsType(String.format("%sformats/tv.json", requestBase), TypeToken.get( type ));
@@ -95,11 +95,8 @@ public class HttpBackedReduxClient implements ReduxClient {
     
     @Override
     public FullReduxProgramme programmeFor(final String diskRef) throws HttpException, Exception {
-    	if (mediaMap==null) {
-    		cacheMediaFormats();
-    	}
         FullReduxProgramme result = getAsType(String.format("%sprogramme/%s/cached.json", requestBase, diskRef), TypeToken.get(FullReduxProgramme.class));
-        result.addMedia(mediaMap);
+        result.copyMedia(cachedMediaFormats());
         return result;
     }
 

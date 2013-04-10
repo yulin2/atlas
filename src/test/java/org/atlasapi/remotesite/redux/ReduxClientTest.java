@@ -3,12 +3,14 @@ package org.atlasapi.remotesite.redux;
 import static org.junit.Assert.*;
 
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.remotesite.redux.model.BaseReduxProgramme;
 import org.atlasapi.remotesite.redux.model.FullReduxProgramme;
 import org.atlasapi.remotesite.redux.model.PaginatedBaseProgrammes;
 import org.atlasapi.remotesite.redux.model.ReduxMedia;
+import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 import static org.hamcrest.Matchers.lessThan;
@@ -40,7 +42,6 @@ public class ReduxClientTest {
 		BaseReduxProgramme programme = pbp.getResults().get(0);
 		assertNotNull(programme.getDiskref());
 		assertNotNull(programme.getTitle());
-		System.out.println("Got programme "+programme.getTitle()+" : "+programme.getDiskref());
 	}
 
 	@Test
@@ -54,11 +55,21 @@ public class ReduxClientTest {
 	
 	@Test
 	public void testCachesMediaTypes() throws HttpException, Exception {
-		Map<String, ReduxMedia>mediaMap = reduxClient.cacheMediaFormats();
+		Map<String, ReduxMedia>mediaMap = reduxClient.cachedMediaFormats();
 		assertNotNull("Media map should not be null", mediaMap);
 		assertThat(mediaMap.size(), greaterThan(0));
-		for(String key : mediaMap.keySet()) {
-			System.out.println("Key "+key+" gets "+mediaMap.get(key));
-		}
+		
+		ReduxMedia media = mediaMap.get("mp3");
+		assertNotNull(media);
+		assertThat(media.getKind(), is("audio"));
+		assertThat(media.getTitle(), is("MP3 audio"));
+	}
+	
+	@Test
+	public void testGetsProgrammesForDay() throws HttpException, Exception {
+	    List<BaseReduxProgramme> programmes = reduxClient.programmesForDay(new LocalDate());
+	    
+	    assertNotNull(programmes);
+	    assertThat(programmes.size(), greaterThan(0));
 	}
 }

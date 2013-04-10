@@ -120,7 +120,7 @@ public class FullReduxProgramme extends BaseReduxProgramme {
         return media;
     }
 
-    public void addMedia(Map<String, ReduxMedia> media) {
+    public void copyMedia(Map<String, ReduxMedia> media) {
     	this.media = ImmutableMap.copyOf(media);
     }
 }
