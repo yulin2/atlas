@@ -28,6 +28,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 
 import com.google.common.base.Function;
@@ -36,6 +37,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class BbcIonScheduleUpdaterTest extends TestCase {
 
@@ -53,6 +55,10 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     private final Channel channel = Channel.builder().build();
     private final BbcIonBroadcastHandler handler = new DefaultBbcIonBroadcastHandler(resolver, writer, log, new ContentLock());
     
+    protected void setUp() {
+        DateTimeZone.setDefault(DateTimeZones.UTC);
+    }
+
     @SuppressWarnings("unchecked")
     public void testProcessNewItemWithNoBrandOrSeries() throws Exception {
 
