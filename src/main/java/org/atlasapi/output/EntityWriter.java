@@ -2,11 +2,13 @@ package org.atlasapi.output;
 
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
+
 
 public interface EntityWriter<T> {
 
-    void write(T entity, FieldWriter writer, OutputContext ctxt) throws IOException;
+    void write(@Nonnull T entity, @Nonnull FieldWriter writer, @Nonnull OutputContext ctxt) throws IOException;
     
-    String fieldName();
+    @Nonnull String fieldName();
     
 }
