@@ -89,7 +89,7 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
 
             @Override
             public KeyPhrase apply(org.atlasapi.media.entity.simple.KeyPhrase input) {
-                Preconditions.checkState(input.getPublisher() == null || input.getPublisher() == contentPublisher, 
+                Preconditions.checkState(input.getPublisher() == null || input.getPublisher().getKey().equals(contentPublisher.getKey()), 
                         "Publisher in key phrase must match publisher for content");
                 PublisherDetails publisherDetails = Objects.firstNonNull(input.getPublisher(), contentPublisher);
                 Maybe<Publisher> publisher = Publisher.fromKey(publisherDetails.getKey());
