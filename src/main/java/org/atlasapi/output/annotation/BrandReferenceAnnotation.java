@@ -1,33 +1,25 @@
 package org.atlasapi.output.annotation;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
 
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+
 public class BrandReferenceAnnotation extends OutputAnnotation<Content> {
 
-    public static final class BrandRefWriter implements EntityWriter<Item> {
-        
-        @Override
-        public void write(Item entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-            writer.writeField("uri", entity.getContainer().getId());
-        }
+    private static final String CONTAINER_FIELD = "container";
 
-        @Override
-        public String fieldName() {
-            return "container";
-        }
-    }
+    private final ParentRefWriter brandRefWriter;
 
-    private final BrandRefWriter brandRefWriter;
-
-    public BrandReferenceAnnotation() {
+    public BrandReferenceAnnotation(NumberToShortStringCodec idCodec) {
         super(Content.class);
-        brandRefWriter = new BrandRefWriter();
+        brandRefWriter = new ParentRefWriter(CONTAINER_FIELD, checkNotNull(idCodec));
     }
 
     @Override
@@ -35,9 +27,9 @@ public class BrandReferenceAnnotation extends OutputAnnotation<Content> {
         if (content instanceof Item) {
             Item item = (Item) content;
             if (item.getContainer() == null) {
-                writer.writeField("container", null);
+                writer.writeField(CONTAINER_FIELD, null);
             } else {
-                writer.writeObject(brandRefWriter, item, ctxt);
+                writer.writeObject(brandRefWriter, item.getContainer(), ctxt);
             }
         }
     }

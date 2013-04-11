@@ -39,7 +39,7 @@ public class AnnotationRegistryTest {
     private final ExtendedIdentificationAnnotation extIdent = new ExtendedIdentificationAnnotation(idCodec);
     private final DescriptionAnnotation desc = new DescriptionAnnotation();
     private final ExtendedDescriptionAnnotation extDesc = new ExtendedDescriptionAnnotation();
-    private final SeriesReferenceAnnotation seriesRef = new SeriesReferenceAnnotation();
+    private final SeriesReferenceAnnotation seriesRef = new SeriesReferenceAnnotation(idCodec);
     private final SeriesSummaryAnnotation seriesSum = new SeriesSummaryAnnotation(mock(ContainerSummaryResolver.class));
     
     private final AnnotationRegistry registry = AnnotationRegistry.builder()

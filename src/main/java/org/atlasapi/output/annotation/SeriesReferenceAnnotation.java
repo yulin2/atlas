@@ -1,35 +1,25 @@
 package org.atlasapi.output.annotation;
 
 
+
 import java.io.IOException;
 
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
 
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public class SeriesReferenceAnnotation extends OutputAnnotation<Content> {
 
-    public static final class SeriesRefWriter implements EntityWriter<Episode> {
-        
-        @Override
-        public void write(Episode entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-            writer.writeField("uri", entity.getSeriesRef().getId());
-        }
+    private static final String SERIES_FIELD = "series";
+    
+    private final ParentRefWriter seriesRefWriter;
 
-        @Override
-        public String fieldName() {
-            return "series";
-        }
-    }
-
-    private final SeriesRefWriter seriesRefWriter;
-
-    public SeriesReferenceAnnotation() {
+    public SeriesReferenceAnnotation(NumberToShortStringCodec idCodec) {
         super(Content.class);
-        seriesRefWriter = new SeriesRefWriter();
+        seriesRefWriter = new ParentRefWriter(SERIES_FIELD, idCodec);
     }
 
     @Override
@@ -37,9 +27,9 @@ public class SeriesReferenceAnnotation extends OutputAnnotation<Content> {
         if (content instanceof Episode) {
             Episode episode = (Episode) content;
             if (episode.getSeriesRef() == null) {
-                writer.writeField("series", null);
+                writer.writeField(SERIES_FIELD, null);
             } else {
-                writer.writeObject(seriesRefWriter, episode, ctxt);
+                writer.writeObject(seriesRefWriter, episode.getSeriesRef(), ctxt);
             }
         }
     }
