@@ -55,7 +55,7 @@ public class ReduxClientTest {
 	
 	@Test
 	public void testCachesMediaTypes() throws HttpException, Exception {
-		Map<String, ReduxMedia>mediaMap = reduxClient.cachedMediaFormats();
+		Map<String, ReduxMedia>mediaMap = reduxClient.getCachedMedia("radio");
 		assertNotNull("Media map should not be null", mediaMap);
 		assertThat(mediaMap.size(), greaterThan(0));
 		

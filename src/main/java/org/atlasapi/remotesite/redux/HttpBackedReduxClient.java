@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.redux.model.BaseReduxProgramme;
@@ -14,6 +16,9 @@ import org.atlasapi.remotesite.redux.model.ReduxMedia;
 import org.joda.time.LocalDate;
 import org.joda.time.format.ISODateTimeFormat;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HostSpecifier;
 import com.google.gson.FieldNamingPolicy;
@@ -32,6 +37,9 @@ import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.security.UsernameAndPassword;
 
 public class HttpBackedReduxClient implements ReduxClient {
+
+    private static final String MEDIA_TYPE_TV = "tv";
+    private static final int MEDIA_MAP_CACHE_TIMEOUT_HOURS = 13;
 
     public static final Builder reduxClientForHost(HostSpecifier host) {
         return new Builder(host);
@@ -74,29 +82,38 @@ public class HttpBackedReduxClient implements ReduxClient {
     
     private final Gson gson;
     
-    private Map<String, ReduxMedia> mediaMap;
+    private LoadingCache<String, Map<String,ReduxMedia>> mediaMapCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(MEDIA_MAP_CACHE_TIMEOUT_HOURS, TimeUnit.HOURS)
+            .build(
+                new CacheLoader<String, Map<String,ReduxMedia>>() {
     
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    public Map<String, ReduxMedia> load(String key) throws Exception {
+                        Type type = new TypeToken<Map<String, ReduxMedia>>() {}.getType();
+                        if (MEDIA_TYPE_TV.equals(key)) {
+                            return (Map<String, ReduxMedia>) getAsType(String.format("%sformats/tv.json", requestBase), TypeToken.get( type ));
+                        }
+                        else {
+                            return (Map<String, ReduxMedia>) getAsType(String.format("%sformats/radio.json", requestBase), TypeToken.get( type ));
+                        }
+                    }
+                    });
+            
     public HttpBackedReduxClient(SimpleHttpClient httpClient, String requestBase) {
         this.httpClient = httpClient;
         this.requestBase = requestBase;
         this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
     }
     
-    @SuppressWarnings("unchecked")
-	Map<String, ReduxMedia> cachedMediaFormats() throws HttpException, Exception {
-        if (mediaMap!=null) return mediaMap;
-    	Type type = new TypeToken<Map<String, ReduxMedia>>() {}.getType();
-    	
-    	mediaMap = (Map<String, ReduxMedia>) getAsType(String.format("%sformats/tv.json", requestBase), TypeToken.get( type ));
-    	mediaMap.putAll( (Map<String, ReduxMedia>) getAsType(String.format("%sformats/radio.json", requestBase), TypeToken.get( type )) );
-    	
-    	return mediaMap;
+    Map<String, ReduxMedia> getCachedMedia(String forType) throws ExecutionException {
+        return mediaMapCache.get(forType);
     }
     
     @Override
     public FullReduxProgramme programmeFor(final String diskRef) throws HttpException, Exception {
         FullReduxProgramme result = getAsType(String.format("%sprogramme/%s/cached.json", requestBase, diskRef), TypeToken.get(FullReduxProgramme.class));
-        result.copyMedia(cachedMediaFormats());
+        result.copyMedia(mediaMapCache.get(result.getType()));
         return result;
     }
 
