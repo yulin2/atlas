@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.net.HostSpecifier;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
-import com.metabroadcast.common.security.UsernameAndPassword;
 
 @Configuration
 public class ReduxModule {
@@ -34,13 +33,11 @@ public class ReduxModule {
     private @Autowired SimpleScheduler taskScheduler;
 
     private @Value("${redux.host}") String reduxHost;
-    private @Value("${redux.username}") String reduxUsername;
-    private @Value("${redux.password}") String reduxPassword;
     
     
     protected @Bean ReduxClient reduxClient() {
         try {
-            return reduxClientForHost(HostSpecifier.from(reduxHost)).withCredentials(new UsernameAndPassword(reduxUsername, reduxPassword)).build();
+            return reduxClientForHost(HostSpecifier.from(reduxHost)).build();
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

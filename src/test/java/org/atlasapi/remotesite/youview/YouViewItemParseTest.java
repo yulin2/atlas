@@ -24,6 +24,7 @@ import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
@@ -31,6 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.intl.Countries;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class YouViewItemParseTest {
 
@@ -48,6 +50,8 @@ public class YouViewItemParseTest {
     
     @Test
     public void testItemParsing() throws ValidityException, ParsingException, IOException {
+        DateTimeZone.setDefault(DateTimeZones.UTC);
+
         Item item = contentExtractor.extract(getContentElementFromFile("youview-item.xml"));
         
         assertEquals("http://youview.com/scheduleevent/7780297", item.getCanonicalUri());

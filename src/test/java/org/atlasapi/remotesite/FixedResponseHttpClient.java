@@ -112,8 +112,7 @@ public class FixedResponseHttpClient implements SimpleHttpClient {
     public HttpResponse put(String arg0, Payload arg1) throws HttpException {
         throw new UnsupportedOperationException();
     }
-
-    @Override
+    
     public HttpResponse delete(String string) throws HttpException {
         throw new UnsupportedOperationException();
     }
