@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
+import org.atlasapi.output.writers.AliasWriter;
 
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
@@ -34,15 +35,17 @@ public class ExtendedIdentificationAnnotation extends OutputAnnotation<Identifie
     };
     
     private final NumberToShortStringCodec idCodec;
+    private final AliasWriter aliasWriter;
 
     public ExtendedIdentificationAnnotation(NumberToShortStringCodec idCodec) {
         super(Identified.class);
         this.idCodec = idCodec;
+        this.aliasWriter = new AliasWriter();
     }
 
     @Override
     public void write(Identified entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-        writer.writeList("aliases", "alias", entity.getAliases(), ctxt);
+        writer.writeList(aliasWriter, entity.getAliases(), ctxt);
         writer.writeList(equivalentWriter, entity.getEquivalentTo(), ctxt);
     }
     
