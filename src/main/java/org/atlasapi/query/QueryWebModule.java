@@ -9,7 +9,6 @@ import static org.atlasapi.output.Annotation.CHANNELS;
 import static org.atlasapi.output.Annotation.CHANNEL_SUMMARY;
 import static org.atlasapi.output.Annotation.CLIPS;
 import static org.atlasapi.output.Annotation.CONTENT_DETAIL;
-import static org.atlasapi.output.Annotation.CONTENT_GROUPS;
 import static org.atlasapi.output.Annotation.CONTENT_SUMMARY;
 import static org.atlasapi.output.Annotation.DESCRIPTION;
 import static org.atlasapi.output.Annotation.EXTENDED_DESCRIPTION;
@@ -23,11 +22,9 @@ import static org.atlasapi.output.Annotation.LICENSE;
 import static org.atlasapi.output.Annotation.LOCATIONS;
 import static org.atlasapi.output.Annotation.NEXT_BROADCASTS;
 import static org.atlasapi.output.Annotation.PEOPLE;
-import static org.atlasapi.output.Annotation.PRODUCTS;
 import static org.atlasapi.output.Annotation.PUBLISHER;
 import static org.atlasapi.output.Annotation.RECENTLY_BROADCAST;
 import static org.atlasapi.output.Annotation.RELATED_LINKS;
-import static org.atlasapi.output.Annotation.SEGMENT_EVENTS;
 import static org.atlasapi.output.Annotation.SERIES_REFERENCE;
 import static org.atlasapi.output.Annotation.SERIES_SUMMARY;
 import static org.atlasapi.output.Annotation.SUB_ITEMS;
@@ -39,8 +36,7 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
-import org.atlasapi.media.product.ProductResolver;
-import org.atlasapi.media.segment.SegmentResolver;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.topic.PopularTopicIndex;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.TopicResolver;
@@ -54,7 +50,6 @@ import org.atlasapi.output.annotation.ChannelAnnotation;
 import org.atlasapi.output.annotation.ChannelSummaryWriter;
 import org.atlasapi.output.annotation.ChannelsAnnotation;
 import org.atlasapi.output.annotation.ClipsAnnotation;
-import org.atlasapi.output.annotation.ContentGroupsAnnotation;
 import org.atlasapi.output.annotation.DescriptionAnnotation;
 import org.atlasapi.output.annotation.ExtendedDescriptionAnnotation;
 import org.atlasapi.output.annotation.ExtendedIdentificationAnnotation;
@@ -68,17 +63,14 @@ import org.atlasapi.output.annotation.LocationsAnnotation;
 import org.atlasapi.output.annotation.NextBroadcastAnnotation;
 import org.atlasapi.output.annotation.NullWriter;
 import org.atlasapi.output.annotation.PeopleAnnotation;
-import org.atlasapi.output.annotation.ProductsAnnotation;
 import org.atlasapi.output.annotation.PublisherAnnotation;
 import org.atlasapi.output.annotation.RecentlyBroadcastAnnotation;
 import org.atlasapi.output.annotation.RelatedLinksAnnotation;
-import org.atlasapi.output.annotation.SegmentEventsAnnotation;
 import org.atlasapi.output.annotation.SeriesReferenceAnnotation;
 import org.atlasapi.output.annotation.SeriesSummaryAnnotation;
 import org.atlasapi.output.annotation.SubItemAnnotation;
 import org.atlasapi.output.annotation.TopicsAnnotation;
 import org.atlasapi.output.annotation.UpcomingAnnotation;
-import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoRecentlyBroadcastChildrenResolver;
@@ -175,6 +167,7 @@ public class QueryWebModule {
     private QueryAttributeParser contentQueryAttributeParser() {
         return new QueryAttributeParser(ImmutableList.of(
             QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())),
+            QueryAtomParser.valueOf(Attributes.SOURCE, AttributeCoercers.enumCoercer(Publisher.fromKey())),
             QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
             QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer()),
             QueryAtomParser.valueOf(Attributes.TOPIC_RELATIONSHIP, AttributeCoercers.stringCoercer()),
@@ -184,14 +177,17 @@ public class QueryWebModule {
     }
 
     private StandardQueryParser<Topic> topicQueryParser() {
+        QueryContextParser contextParser = new QueryContextParser(configFetcher, 
+        new QueryParameterAnnotationsExtractor("topic"), selectionBuilder());
+        
         return new StandardQueryParser<Topic>("topics", 
             new QueryAttributeParser(ImmutableList.of(
                 QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())),
+                QueryAtomParser.valueOf(Attributes.SOURCE, AttributeCoercers.enumCoercer(Publisher.fromKey())),
                 QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
                 QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer())
-            )),
-            idCodec(), new QueryContextParser(configFetcher, 
-            new QueryParameterAnnotationsExtractor("topic"), selectionBuilder())
+            )).copyWithIgnoredParameters(contextParser.getParameterNames()),
+            idCodec(), contextParser
         );
     }
 
