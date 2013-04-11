@@ -54,6 +54,7 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.atlasapi.remotesite.util.EnglishLanguageCodeMap;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -252,7 +253,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setPublisher(LOVEFILM);
         content.setCanonicalUri(uri(sku, resourceType));
         content.setCurie(curie(sku, curieType));
-        content.setLastUpdated(new DateTime());
+        content.setLastUpdated(new DateTime().withZone(DateTimeZone.UTC));
         return content;
     }
     
