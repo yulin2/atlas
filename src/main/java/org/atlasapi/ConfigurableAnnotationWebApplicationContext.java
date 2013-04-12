@@ -24,6 +24,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.properties.Configurer;
+
 import org.atlasapi.persistence.CassandraPersistenceModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
@@ -65,9 +67,11 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             builder.add(
                 ManualScheduleRebuildModule.class, 
                 InterlinkingDeltaModule.class,
-                YouViewUploadModule.class,
                 EquivTaskModule.class
             );
+            if (Configurer.get("youview.upload.enabled").toBoolean()) {
+                builder.add(YouViewUploadModule.class);
+            }
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
             builder.add(
