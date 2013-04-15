@@ -10,9 +10,9 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.BrandSummary;
@@ -35,11 +35,15 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class ScheduleQueryResultWriterTest {
 
     private final ContainerSummaryResolver containerSummaryResolver = mock(ContainerSummaryResolver.class);
-    private final ScheduleQueryResultWriter writer = new ScheduleQueryResultWriter(AnnotationRegistry.builder().build());
+    private final AnnotationRegistry<Content> contentAnnotations = AnnotationRegistry.<Content>builder().build();
+    private final AnnotationRegistry<Channel> channelAnnotations = AnnotationRegistry.<Channel>builder().build();
+    private final ScheduleQueryResultWriter writer = new ScheduleQueryResultWriter(
+            new ChannelListWriter(channelAnnotations), new ContentListWriter(contentAnnotations));
     
     @Before
     public void setup() {
-        when(containerSummaryResolver.summarizeTopLevelContainer(argThat(any(ParentRef.class)))).thenReturn(Optional.<BrandSummary>absent());
+        when(containerSummaryResolver.summarizeTopLevelContainer(argThat(any(ParentRef.class))))
+            .thenReturn(Optional.<BrandSummary>absent());
     }
     
     @Test
@@ -61,7 +65,8 @@ public class ScheduleQueryResultWriterTest {
         HttpServletRequest request = new StubHttpServletRequest();
         StubHttpServletResponse response = new StubHttpServletResponse();
         JsonResponseWriter responseWriter = new JsonResponseWriter(request, response);
-        QueryResult<ChannelSchedule> result = QueryResult.singleResult(cs, QueryContext.defaultContext());
+        QueryContext context = QueryContext.standard();
+        QueryResult<ChannelSchedule> result = QueryResult.singleResult(cs, context);
         
         writer.write(result, responseWriter);
         

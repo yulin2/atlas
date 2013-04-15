@@ -24,7 +24,7 @@ public class FirstBroadcastAnnotation extends OutputAnnotation<Content> {
     private final BroadcastWriter broadcastWriter;
 
     public FirstBroadcastAnnotation() {
-        super(Content.class);
+        super();
         broadcastWriter = new BroadcastWriter("first_broadcasts");
     }
 

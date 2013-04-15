@@ -2,9 +2,7 @@ package org.atlasapi.query.v4.schedule;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.metabroadcast.common.webapp.query.DateTimeInQueryParser.queryDateTimeParser;
-import static org.atlasapi.output.Annotation.defaultAnnotations;
 
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,11 +15,10 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.output.Annotation;
 import org.atlasapi.output.NotFoundException;
+import org.atlasapi.query.common.ActiveAnnotations;
 import org.atlasapi.query.common.AnnotationsExtractor;
 import org.atlasapi.query.common.QueryContext;
-import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
 import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.RequestParameterValidator;
 import org.joda.time.DateMidnight;
@@ -29,6 +26,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -56,7 +54,7 @@ class ScheduleRequestParser {
     private final Duration maxQueryDuration;
     private final Clock clock;
 
-    public ScheduleRequestParser(ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration, Clock clock) {
+    public ScheduleRequestParser(ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration, Clock clock, AnnotationsExtractor annotationsExtractor) {
         this.channelResolver = channelResolver;
         this.applicationStore = appFetcher;
         this.maxQueryDuration = maxQueryDuration;
@@ -68,7 +66,7 @@ class ScheduleRequestParser {
                 .parsesOffsets()
                 .build();
         this.clock = clock;
-        this.annotationExtractor = new QueryParameterAnnotationsExtractor();
+        this.annotationExtractor = annotationsExtractor;
     }
 
     public ScheduleQuery queryFrom(HttpServletRequest request) throws QueryParseException, NotFoundException {
@@ -85,7 +83,7 @@ class ScheduleRequestParser {
         appConfig = appConfigForValidPublisher(publisher, appConfig, queryInterval);
         checkArgument(appConfig != null, "Source %s not enabled", publisher);
         
-        Set<Annotation> annotations = annotationExtractor.extractFromRequest(request).or(defaultAnnotations());
+        ActiveAnnotations annotations = annotationExtractor.extractFromRequest(request);
 
         return new ScheduleQuery(publisher, channel, queryInterval, new QueryContext(appConfig, annotations));
     }
@@ -146,9 +144,9 @@ class ScheduleRequestParser {
 
     private Publisher extractPublisher(HttpServletRequest request) {
         String pubKey = getParameter(request, "source");
-        Maybe<Publisher> publisher = Publisher.fromKey(pubKey);
-        checkArgument(publisher.hasValue(), "Unknown source %s", pubKey);
-        return publisher.requireValue();
+        Optional<Publisher> publisher = Publisher.fromPossibleKey(pubKey);
+        checkArgument(publisher.isPresent(), "Unknown source %s", pubKey);
+        return publisher.get();
     }
 
     private ApplicationConfiguration getConfiguration(HttpServletRequest request) {
@@ -159,7 +157,7 @@ class ScheduleRequestParser {
         String apiKeyParam = request.getParameter("apiKey");
         // request doesn't specify apiKey so use default configuration.
         if (apiKeyParam == null) {
-            return ApplicationConfiguration.DEFAULT_CONFIGURATION;
+            return ApplicationConfiguration.defaultConfiguration();
         }
         // the request has an apiKey param but no config is found.
         throw new IllegalArgumentException("Unknown API key " + apiKeyParam);

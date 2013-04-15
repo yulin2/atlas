@@ -31,7 +31,7 @@ public final class LanguageWriter implements EntityListWriter<String> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(String entity) {
         return "language";
     }
 }

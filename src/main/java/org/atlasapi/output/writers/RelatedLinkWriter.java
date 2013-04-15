@@ -27,7 +27,7 @@ public final class RelatedLinkWriter implements EntityListWriter<RelatedLink> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(RelatedLink entity) {
         return "related_link";
     }
 }

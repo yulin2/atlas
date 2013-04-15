@@ -12,7 +12,7 @@ import org.atlasapi.output.writers.RelatedLinkWriter;
 public class RelatedLinksAnnotation extends OutputAnnotation<Content> {
 
     public RelatedLinksAnnotation() {
-        super(Content.class);
+        super();
     }
 
     @Override

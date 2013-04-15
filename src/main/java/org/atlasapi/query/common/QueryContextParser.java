@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.output.Annotation;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -16,19 +15,19 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 public class QueryContextParser {
     
     private final ApplicationConfigurationFetcher configFetcher;
-    private final QueryParameterAnnotationsExtractor annotationExtractor;
+    private final AnnotationsExtractor annotationExtractor;
     private final SelectionBuilder selectionBuilder;
 
-    public QueryContextParser(ApplicationConfigurationFetcher configFetcher, QueryParameterAnnotationsExtractor annotationsParser, Selection.SelectionBuilder selectionBuilder) {
+    public QueryContextParser(ApplicationConfigurationFetcher configFetcher, AnnotationsExtractor annotationsParser, Selection.SelectionBuilder selectionBuilder) {
         this.configFetcher = checkNotNull(configFetcher);
         this.annotationExtractor = checkNotNull(annotationsParser);
         this.selectionBuilder = checkNotNull(selectionBuilder);
     }
 
-    public QueryContext parseContext(HttpServletRequest request) {
+    public QueryContext parseContext(HttpServletRequest request) throws QueryParseException {
         return new QueryContext(
-            configFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.DEFAULT_CONFIGURATION),
-            annotationExtractor.extractFromRequest(request).or(Annotation.defaultAnnotations()),
+            configFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.defaultConfiguration()),
+            annotationExtractor.extractFromRequest(request),
             selectionBuilder.build(request)
         );
     }

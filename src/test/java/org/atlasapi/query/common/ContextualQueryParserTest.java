@@ -17,7 +17,6 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.topic.Topic;
-import org.atlasapi.output.Annotation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -47,7 +46,7 @@ public class ContextualQueryParserTest {
         when(attributeParser.parse(req))
             .thenReturn(new AttributeQuerySet(ImmutableSet.<AttributeQuery<?>>of()));
         when(queryContextParser.parseContext(req))
-            .thenReturn(new QueryContext(ApplicationConfiguration.defaultConfiguration(), Annotation.defaultAnnotations()));
+            .thenReturn(new QueryContext(ApplicationConfiguration.defaultConfiguration(), ActiveAnnotations.standard()));
         
         ContextualQuery<Topic,Content> query = parser.parse(req);
         

@@ -3,34 +3,34 @@ package org.atlasapi.query.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.output.Annotation;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.query.Selection;
 
 public class QueryContext {
+
+    private static final QueryContext STANDARD = new QueryContext(
+            ApplicationConfiguration.defaultConfiguration(), 
+            ActiveAnnotations.standard()    
+    );
     
-    private static final QueryContext DEFLT_INSTANCE = new QueryContext(
-        ApplicationConfiguration.DEFAULT_CONFIGURATION, Annotation.defaultAnnotations());
-
-    public static final QueryContext defaultContext() {
-        return DEFLT_INSTANCE;
+    public static final QueryContext standard() {
+        return STANDARD;
     }
-
+    
     private final ApplicationConfiguration appConfig;
-    private final ImmutableSet<Annotation> annotations;
+    private final ActiveAnnotations annotations;
     private final Optional<Selection> selection;
 
-    public QueryContext(ApplicationConfiguration appConfig, Iterable<Annotation> annotations) {
+    public QueryContext(ApplicationConfiguration appConfig, ActiveAnnotations annotations) {
         this(appConfig, annotations, null);
     }
     
-    public QueryContext(ApplicationConfiguration appConfig, Iterable<Annotation> annotations,
+    public QueryContext(ApplicationConfiguration appConfig, ActiveAnnotations annotations,
         Selection selection) {
         this.appConfig = checkNotNull(appConfig);
-        this.annotations = ImmutableSet.copyOf(annotations);
+        this.annotations = checkNotNull(annotations);
         this.selection = Optional.fromNullable(selection);
     }
 
@@ -38,7 +38,7 @@ public class QueryContext {
         return this.appConfig;
     }
 
-    public ImmutableSet<Annotation> getAnnotations() {
+    public ActiveAnnotations getAnnotations() {
         return this.annotations;
     }
     

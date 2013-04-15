@@ -42,7 +42,7 @@ public final class BroadcastWriter implements EntityListWriter<Broadcast> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(Broadcast entity) {
         return ELEMENT_NAME;
     }
 }

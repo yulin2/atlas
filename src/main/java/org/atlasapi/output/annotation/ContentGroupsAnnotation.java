@@ -35,7 +35,7 @@ public class ContentGroupsAnnotation extends OutputAnnotation<Content> {
         }
 
         @Override
-        public String fieldName() {
+        public String fieldName(ContentGroup entity) {
             return "content_group";
         }
     }
@@ -43,7 +43,7 @@ public class ContentGroupsAnnotation extends OutputAnnotation<Content> {
     private final ContentGroupResolver contentGroupResolver;
 
     public ContentGroupsAnnotation(ContentGroupResolver resolver) {
-        super(Content.class);
+        super();
         this.contentGroupResolver = resolver;
         contentGroupWriter = new ContentGroupWriter();
     }

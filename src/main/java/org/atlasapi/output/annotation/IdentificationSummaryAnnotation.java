@@ -13,7 +13,7 @@ public class IdentificationSummaryAnnotation extends OutputAnnotation<Identified
     private final NumberToShortStringCodec codec;
 
     public IdentificationSummaryAnnotation(NumberToShortStringCodec codec) {
-        super(Identified.class);
+        super();
         this.codec = codec;
     }
 

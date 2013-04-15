@@ -24,7 +24,7 @@ public class AvailableLocationsAnnotation extends OutputAnnotation<Content> {
     private final EncodedLocationWriter encodedLocationWriter;
 
     public AvailableLocationsAnnotation() {
-        super(Content.class);
+        super();
         this.encodedLocationWriter = new EncodedLocationWriter("available_locations");        
     }
 

@@ -21,7 +21,7 @@ public final class CertificateWriter implements EntityListWriter<Certificate> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(Certificate entity) {
         return "certificate";
     }
 }

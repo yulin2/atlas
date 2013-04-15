@@ -1,7 +1,5 @@
 package org.atlasapi.query.v4.schedule;
 
-import static org.atlasapi.media.entity.MediaType.VIDEO;
-import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.METABROADCAST;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasItems;
@@ -48,13 +46,14 @@ public class IndexBackedScheduleQueryExecutorTest {
     private final ContentResolver contentResolver = mock(ContentResolver.class);
     private final IndexBackedScheduleQueryExecutor queryExecutor = new IndexBackedScheduleQueryExecutor(index, contentResolver);
     
+    
     @Test
     @SuppressWarnings("unchecked")
     public void testDoesntResolveContentOnEmptyScheduleRef() throws Exception {
         Channel channel = Channel.builder().build();
         channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
-        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.defaultContext());
+        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.standard());
 
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(ScheduleRef.forChannel(channel.getCanonicalUri()).build()));
@@ -72,7 +71,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         Channel channel = Channel.builder().build();
         channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
-        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.defaultContext());
+        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.standard());
         
         Item item = itemWithBroadcast("item", channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid");
         addBroadcast(item, channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2");
@@ -105,7 +104,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         Channel channel = Channel.builder().build();
         channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
-        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.defaultContext());
+        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.standard());
         
         Item item = itemWithBroadcast("item", channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid");
         addBroadcast(item, channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2");

@@ -31,7 +31,7 @@ public final class ParentRefWriter implements EntityWriter<ParentRef> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(ParentRef entity) {
         return fieldName;
     }
 }

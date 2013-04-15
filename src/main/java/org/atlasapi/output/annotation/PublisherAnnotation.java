@@ -11,7 +11,7 @@ import org.atlasapi.output.OutputContext;
 public class PublisherAnnotation extends OutputAnnotation<Content> {
 
     public PublisherAnnotation() {
-        super(Content.class);
+        super();
     }
 
     @Override

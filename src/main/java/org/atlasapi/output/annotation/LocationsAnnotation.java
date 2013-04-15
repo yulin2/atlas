@@ -83,7 +83,7 @@ public class LocationsAnnotation extends OutputAnnotation<Content> {
         }
 
         @Override
-        public String fieldName() {
+        public String fieldName(EncodedLocation entity) {
             return "location";
         }
 
@@ -94,7 +94,7 @@ public class LocationsAnnotation extends OutputAnnotation<Content> {
     }
 
     public LocationsAnnotation() {
-        super(Content.class);
+        super();
         this.encodedLocationWriter = new EncodedLocationWriter("locations");
     }
 

@@ -41,7 +41,7 @@ public final class SourceWriter implements EntityListWriter<Publisher> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(Publisher entity) {
         return fieldName;
     }
 }

@@ -10,7 +10,7 @@ import org.atlasapi.output.OutputContext;
 public class IdentificationAnnotation extends OutputAnnotation<Identified> {
     
     public IdentificationAnnotation() {
-        super(Identified.class);
+        super();
     }
 
     @Override

@@ -24,7 +24,7 @@ public class UpcomingAnnotation extends OutputAnnotation<Content> {
     private final UpcomingChildrenResolver upcomingChildrenResolver;
 
     public UpcomingAnnotation(UpcomingChildrenResolver childrenResolver) {
-        super(Content.class);
+        super();
         this.upcomingChildrenResolver = childrenResolver;
     }
 

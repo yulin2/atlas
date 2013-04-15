@@ -10,7 +10,7 @@ import org.atlasapi.output.OutputContext;
 public class ChannelSummaryWriter extends OutputAnnotation<Channel> {
 
     public ChannelSummaryWriter() {
-        super(Channel.class);
+        super();
     }
 
     @Override

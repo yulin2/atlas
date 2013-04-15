@@ -35,7 +35,7 @@ public final class ItemDisplayTitleWriter implements EntityWriter<Item> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(Item entity) {
         return "display_title";
     }
 }

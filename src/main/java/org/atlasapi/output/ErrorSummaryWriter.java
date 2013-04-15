@@ -13,7 +13,7 @@ final class ErrorSummaryWriter implements EntityWriter<ErrorSummary> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(ErrorSummary entity) {
         return "error";
     }
 }

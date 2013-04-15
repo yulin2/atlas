@@ -11,11 +11,9 @@ import static org.mockito.Mockito.when;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.topic.Topic;
-import org.atlasapi.output.Annotation;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +39,7 @@ public class StandardQueryParserTest {
     @Test
     public void testParsesSingleIdIntoNonListTopicQuery() throws Exception {
         when(queryContextParser.parseContext(isA(HttpServletRequest.class)))
-            .thenReturn(new QueryContext(ApplicationConfiguration.defaultConfiguration(), Annotation.defaultAnnotations()));
+            .thenReturn(QueryContext.standard());
         
         Query<Topic> q = queryParser.parse(requestWithPath("4.0/topics/cbbh.json"));
         
@@ -54,7 +52,7 @@ public class StandardQueryParserTest {
     @Test
     public void testParsesIdsOnlyIntoListQuery() throws Exception {
         when(queryContextParser.parseContext(isA(HttpServletRequest.class)))
-        .thenReturn(new QueryContext(ApplicationConfiguration.defaultConfiguration(), Annotation.defaultAnnotations()));
+            .thenReturn(QueryContext.standard());
     
         Query<Topic> q = queryParser.parse(requestWithPath("4.0/topics.json")
             .withParam("id", "cbbh"));

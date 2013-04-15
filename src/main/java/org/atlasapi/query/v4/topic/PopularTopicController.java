@@ -13,12 +13,12 @@ import org.atlasapi.media.topic.PopularTopicIndex;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.TopicResolver;
 import org.atlasapi.media.util.Resolved;
-import org.atlasapi.output.Annotation;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
+import org.atlasapi.query.common.ActiveAnnotations;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryResult;
 import org.joda.time.Interval;
@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -66,10 +65,10 @@ public class PopularTopicController {
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
-            ApplicationConfiguration configuration = configurationFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.DEFAULT_CONFIGURATION);
+            ApplicationConfiguration configuration = configurationFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.defaultConfiguration());
             Interval interval = new Interval(dateTimeInQueryParser.parse(from), dateTimeInQueryParser.parse(to));
             ListenableFuture<FluentIterable<Id>> topicIds = index.popularTopics(interval, selection);
-            resultWriter.write(QueryResult.listResult(resolve(topicIds), new QueryContext(configuration, ImmutableSet.<Annotation>of())), writer);
+            resultWriter.write(QueryResult.listResult(resolve(topicIds), new QueryContext(configuration, ActiveAnnotations.standard())), writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
             ErrorSummary summary = ErrorSummary.forException(e);

@@ -25,7 +25,7 @@ public class ExtendedDescriptionAnnotation extends OutputAnnotation<Content> {
     private final ReleaseDateWriter releaseDateWriter;
 
     public ExtendedDescriptionAnnotation() {
-        super(Content.class);
+        super();
         this.languageWriter = new LanguageWriter(initLocalMap());
         this.certificateWriter = new CertificateWriter();
         this.subtitleWriter = new SubtitleWriter(languageWriter);

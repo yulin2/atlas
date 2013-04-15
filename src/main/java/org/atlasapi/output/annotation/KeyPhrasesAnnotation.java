@@ -11,13 +11,11 @@ import org.atlasapi.output.writers.KeyPhraseWriter;
 
 public class KeyPhrasesAnnotation extends OutputAnnotation<Content> {
 
-    public KeyPhrasesAnnotation() {
-        super(Content.class);
-    }
+    private static KeyPhraseWriter keyPhraseWriter = new KeyPhraseWriter();
 
     @Override
     public void write(Content entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-        writer.writeList(new KeyPhraseWriter(), entity.getKeyPhrases(), ctxt);
+        writer.writeList(keyPhraseWriter, entity.getKeyPhrases(), ctxt);
     }
 
 }

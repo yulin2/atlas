@@ -9,6 +9,6 @@ public interface EntityWriter<T> {
 
     void write(@Nonnull T entity, @Nonnull FieldWriter writer, @Nonnull OutputContext ctxt) throws IOException;
     
-    @Nonnull String fieldName();
+    @Nonnull String fieldName(T entity);
     
 }

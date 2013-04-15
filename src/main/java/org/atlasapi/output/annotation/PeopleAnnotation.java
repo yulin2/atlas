@@ -14,7 +14,7 @@ import org.atlasapi.output.OutputContext;
 public class PeopleAnnotation extends OutputAnnotation<Content> {
 
     public PeopleAnnotation() {
-        super(Content.class);
+        super();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class PeopleAnnotation extends OutputAnnotation<Content> {
             }
 
             @Override
-            public String fieldName() {
+            public String fieldName(CrewMember entity) {
                 return "person";
             }
         }, entity.people(), ctxt);

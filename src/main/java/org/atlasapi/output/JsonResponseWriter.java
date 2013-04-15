@@ -85,6 +85,7 @@ public final class JsonResponseWriter implements ResponseWriter {
     
     @Override
     public void startResponse() throws IOException {
+        printMemberSeparator = false;
         response.setContentType(MimeType.APPLICATION_JSON.toString());
         writer = writer();
         callback = callback(request);
@@ -124,7 +125,7 @@ public final class JsonResponseWriter implements ResponseWriter {
 
     @Override
     public <T> void writeObject(EntityWriter<? super T> objWriter, T obj, OutputContext ctxt) throws IOException {
-        startField(objWriter.fieldName());
+        startField(objWriter.fieldName(obj));
         if (obj != null) {
             writeObj(objWriter, obj, ctxt);
         } else {

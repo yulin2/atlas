@@ -6,15 +6,14 @@ import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
 
 
-public class LicenseWriter extends OutputAnnotation<Void> {
+public class LicenseWriter extends OutputAnnotation<Object> {
 
     public LicenseWriter() {
-        super(Void.class);
+        super();
     }
 
     @Override
-    public void write(Void entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-        // TODO Auto-generated method stub
+    public void write(Object entity, FieldWriter writer, OutputContext ctxt) throws IOException {
     }
 
 }

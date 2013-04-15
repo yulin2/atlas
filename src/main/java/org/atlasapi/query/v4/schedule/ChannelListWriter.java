@@ -5,7 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.IOException;
 import java.util.List;
 
-import org.atlasapi.media.content.Content;
+import javax.annotation.Nonnull;
+
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.FieldWriter;
@@ -13,18 +15,19 @@ import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.annotation.OutputAnnotation;
 import org.atlasapi.query.common.Resource;
 
-public final class ContentListWriter implements EntityListWriter<Content> {
+public final class ChannelListWriter implements EntityListWriter<Channel> {
 
-    private AnnotationRegistry<Content> annotationRegistry;
+    private AnnotationRegistry<Channel> annotationRegistry;
 
-    public ContentListWriter(AnnotationRegistry<Content> annotationRegistry) {
+    public ChannelListWriter(AnnotationRegistry<Channel> annotationRegistry) {
         this.annotationRegistry = checkNotNull(annotationRegistry);
     }
     
     @Override
-    public void write(Content entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-        ctxt.startResource(Resource.CONTENT);
-        List<OutputAnnotation<? super Content>> annotations = ctxt
+    public void write(Channel entity, FieldWriter writer, OutputContext ctxt)
+            throws IOException {
+        ctxt.startResource(Resource.CHANNEL);
+        List<OutputAnnotation<? super Channel>> annotations = ctxt
                 .getAnnotations(annotationRegistry);
         for (int i = 0; i < annotations.size(); i++) {
             annotations.get(i).write(entity, writer, ctxt);
@@ -32,12 +35,14 @@ public final class ContentListWriter implements EntityListWriter<Content> {
     }
 
     @Override
-    public String listName() {
-        return "content";
+    public String fieldName(Channel entity) {
+        return "channel";
     }
-
+    
     @Override
-    public String fieldName(Content entity) {
-        return "item";//TODO: get name from content for xml 
+    @Nonnull
+    public String listName() {
+        return "channels";
     }
+    
 }

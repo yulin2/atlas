@@ -1,7 +1,6 @@
 package org.atlasapi.query.v4.schedule;
 
-import static org.atlasapi.application.ApplicationConfiguration.DEFAULT_CONFIGURATION;
-import static org.atlasapi.media.entity.MediaType.VIDEO;
+import static org.atlasapi.application.ApplicationConfiguration.defaultConfiguration;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.hamcrest.Matchers.is;
@@ -19,6 +18,9 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
+import org.atlasapi.query.common.ActiveAnnotations;
+import org.atlasapi.query.common.AnnotationsExtractor;
+import org.atlasapi.query.common.Resource;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
@@ -28,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -42,21 +45,26 @@ public class ScheduleRequestParserTest {
     private final ApplicationConfigurationFetcher applicationFetcher = mock(ApplicationConfigurationFetcher.class);
     private final ChannelResolver channelResolver = mock(ChannelResolver.class);
     private final DateTime time = new DateTime(2012, 12, 14, 10,00,00,000, DateTimeZones.UTC);
+    private final AnnotationsExtractor annotationsExtractor = mock(AnnotationsExtractor.class);
     private final ScheduleRequestParser builder = new ScheduleRequestParser(
         channelResolver,
         applicationFetcher,
         Duration.standardDays(1),
-        new TimeMachine(time)
+        new TimeMachine(time), annotationsExtractor 
     );
 
     private final NumberToShortStringCodec codec = SubstitutionTableNumberCodec.lowerCaseOnly();
     private final Channel channel = Channel.builder().build();
     
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         channel.setId(1234L);
-        when(channelResolver.fromId(channel.getId())).thenReturn(Maybe.just(channel));
-        when(applicationFetcher.configurationFor(any(HttpServletRequest.class))).thenReturn(Maybe.just(DEFAULT_CONFIGURATION));
+        when(channelResolver.fromId(channel.getId()))
+            .thenReturn(Maybe.just(channel));
+        when(annotationsExtractor.extractFromRequest(any(HttpServletRequest.class)))
+            .thenReturn(ActiveAnnotations.standard());
+        when(applicationFetcher.configurationFor(any(HttpServletRequest.class)))
+            .thenReturn(Maybe.just(defaultConfiguration()));
     }
     
     @Test
@@ -68,7 +76,7 @@ public class ScheduleRequestParserTest {
             intvl.getStart(), intvl.getEnd(), 
             BBC, 
             "apikey", 
-            Annotation.defaultAnnotations(), 
+            Annotation.standard(), 
             ".json"
         );
         
@@ -77,8 +85,8 @@ public class ScheduleRequestParserTest {
         assertThat(query.getChannel(), is(channel));
         assertThat(query.getInterval(), is(intvl));
         assertThat(query.getSource(), is(BBC));
-        assertThat(query.getContext().getAnnotations(), is(Annotation.defaultAnnotations()));
-        assertThat(query.getContext().getApplicationConfiguration(), is(DEFAULT_CONFIGURATION));
+        assertThat(query.getContext().getAnnotations().forPath(ImmutableList.of(Resource.CONTENT)), is(Annotation.standard()));
+        assertThat(query.getContext().getApplicationConfiguration(), is(defaultConfiguration()));
     }
     
     @Test
@@ -90,7 +98,7 @@ public class ScheduleRequestParserTest {
             intvl.getStart(), intvl.getEnd(), 
             BBC, 
             "apikey", 
-            Annotation.defaultAnnotations(), 
+            Annotation.standard(), 
             ""
         );
         
@@ -99,8 +107,8 @@ public class ScheduleRequestParserTest {
         assertThat(query.getChannel(), is(channel));
         assertThat(query.getInterval(), is(intvl));
         assertThat(query.getSource(), is(BBC));
-        assertThat(query.getContext().getAnnotations(), is(Annotation.defaultAnnotations()));
-        assertThat(query.getContext().getApplicationConfiguration(), is(DEFAULT_CONFIGURATION));
+        assertThat(query.getContext().getAnnotations().forPath(ImmutableList.of(Resource.CONTENT)), is(Annotation.standard()));
+        assertThat(query.getContext().getApplicationConfiguration(), is(defaultConfiguration()));
     }
     
     @Test(expected=IllegalArgumentException.class)
@@ -110,7 +118,7 @@ public class ScheduleRequestParserTest {
         DateTime to = from.plusHours(25);
 
         StubHttpServletRequest request = scheduleRequest(channel, from, to,
-            BBC, "apikey", Annotation.defaultAnnotations(), ".json");
+            BBC, "apikey", Annotation.standard(), ".json");
         
         builder.queryFrom(request);
 
@@ -123,7 +131,7 @@ public class ScheduleRequestParserTest {
         DateTime to = from.plusDays(1);
         
         StubHttpServletRequest request = scheduleRequest(channel, from, to,
-            PA, "apikey", Annotation.defaultAnnotations(), ".json");
+            PA, "apikey", Annotation.standard(), ".json");
         
         builder.queryFrom(request);
         
@@ -136,7 +144,7 @@ public class ScheduleRequestParserTest {
         DateTime to = from.plusHours(2);
         
         StubHttpServletRequest request = scheduleRequest(channel, from, to,
-            PA, "apikey", Annotation.defaultAnnotations(), ".json");
+            PA, "apikey", Annotation.standard(), ".json");
         
         builder.queryFrom(request);
         
@@ -149,7 +157,7 @@ public class ScheduleRequestParserTest {
         DateTime to = from.plusHours(24);
         
         StubHttpServletRequest request = scheduleRequest(channel, from, to,
-            PA, "apikey", Annotation.defaultAnnotations(), ".json");
+            PA, "apikey", Annotation.standard(), ".json");
         
         builder.queryFrom(request);
         
@@ -162,7 +170,7 @@ public class ScheduleRequestParserTest {
         DateTime to = from.plusHours(24);
         
         StubHttpServletRequest request = scheduleRequest(channel, from, to,
-            PA, "apikey", Annotation.defaultAnnotations(), ".json");
+            PA, "apikey", Annotation.standard(), ".json");
         
         builder.queryFrom(request);
     }
@@ -177,7 +185,7 @@ public class ScheduleRequestParserTest {
                 .withParam("from", from.toString())
                 .withParam("to", to.toString())
                 .withParam("source", publisher.key())
-                .withParam("annotations", Joiner.on(',').join(Iterables.transform(annotations, Annotation.toRequestName())))
+                .withParam("annotations", Joiner.on(',').join(Iterables.transform(annotations, Annotation.toKeyFunction())))
                 .withParam("apiKey", appKey);
     }
 

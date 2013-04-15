@@ -18,7 +18,7 @@ public class BrandReferenceAnnotation extends OutputAnnotation<Content> {
     private final ParentRefWriter brandRefWriter;
 
     public BrandReferenceAnnotation(NumberToShortStringCodec idCodec) {
-        super(Content.class);
+        super();
         brandRefWriter = new ParentRefWriter(CONTAINER_FIELD, checkNotNull(idCodec));
     }
 

@@ -14,7 +14,7 @@ public class SegmentEventsAnnotation extends OutputAnnotation<Content> {
     private final SegmentResolver segmentResolver;
 
     public SegmentEventsAnnotation(SegmentResolver segmentResolver) {
-        super(Content.class);
+        super();
         this.segmentResolver = segmentResolver;
     }
 

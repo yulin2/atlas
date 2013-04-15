@@ -17,11 +17,11 @@ public final class KeyPhraseWriter implements EntityListWriter<KeyPhrase> {
 
     @Override
     public String listName() {
-        return "related_links";
+        return "keyphrases";
     }
 
     @Override
-    public String fieldName() {
-        return "related_link";
+    public String fieldName(KeyPhrase entity) {
+        return "keyphrase";
     }
 }

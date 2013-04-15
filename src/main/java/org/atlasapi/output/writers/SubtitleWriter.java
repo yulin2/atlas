@@ -26,7 +26,7 @@ public final class SubtitleWriter implements EntityListWriter<Subtitles> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(Subtitles entity) {
         return "subtitles";
     }
 }

@@ -14,7 +14,6 @@ import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.output.Annotation;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.JsonResponseWriter;
@@ -124,7 +123,7 @@ public class SearchController {
             float catchupWeighting = getFloatParam(catchupWeightingParam, DEFAULT_CATCHUP_WEIGHTING);
             float priorityChannelWeighting = getFloatParam(priorityChannelWeightingParam, DEFAULT_PRIORITY_CHANNEL_WEIGHTING);
 
-            ApplicationConfiguration appConfig = configFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.DEFAULT_CONFIGURATION);
+            ApplicationConfiguration appConfig = configFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.defaultConfiguration());
             Set<Specialization> specializations = specializations(specialization);
             Set<Publisher> publishers = publishers(publisher, appConfig);
             List<Identified> content = searcher.search(SearchQuery.builder(q)
@@ -139,7 +138,7 @@ public class SearchController {
                     .isTopLevelOnly(!Strings.isNullOrEmpty(topLevel) ? Boolean.valueOf(topLevel) : null)
                     .withCurrentBroadcastsOnly(!Strings.isNullOrEmpty(currentBroadcastsOnly) ? Boolean.valueOf(currentBroadcastsOnly) : null)
                     .build(), appConfig);
-            resultWriter.write(QueryResult.listResult(Iterables.filter(content, Content.class), new QueryContext(appConfig, Annotation.defaultAnnotations(), selection)), writer);
+            resultWriter.write(QueryResult.listResult(Iterables.filter(content, Content.class), QueryContext.standard()), writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
             ErrorSummary summary = ErrorSummary.forException(e);

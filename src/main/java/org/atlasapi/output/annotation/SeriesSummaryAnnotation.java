@@ -42,13 +42,13 @@ public class SeriesSummaryAnnotation extends OutputAnnotation<Content> {
         }
 
         @Override
-        public String fieldName() {
+        public String fieldName(Episode entity) {
             return "series";
         }
     }
 
     public SeriesSummaryAnnotation(ContainerSummaryResolver containerSummaryResolver) {
-        super(Content.class);
+        super();
         summaryWriter = new SeriesSummaryWriter(containerSummaryResolver);
     }
 

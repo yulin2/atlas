@@ -6,20 +6,22 @@ import java.io.IOException;
 
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.topic.Topic;
-import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.ContextualResultWriter;
+import org.atlasapi.output.EntityListWriter;
+import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.query.common.ContextualQueryResult;
 import org.atlasapi.query.common.QueryContext;
-import org.atlasapi.query.v4.schedule.ContentListWriter;
 
 public class TopicContentResultWriter implements ContextualResultWriter<Topic, Content> {
 
-    private final AnnotationRegistry registry;
+    private final EntityWriter<Topic> topicWriter;
+    private final EntityListWriter<Content> contentWriter;
 
-    public TopicContentResultWriter(AnnotationRegistry annotations) {
-        this.registry = checkNotNull(annotations);
+    public TopicContentResultWriter(EntityWriter<Topic> topicWriter, EntityListWriter<Content> contentWriter) {
+        this.topicWriter = checkNotNull(topicWriter);
+        this.contentWriter = checkNotNull(contentWriter);
     }
 
     @Override
@@ -35,14 +37,14 @@ public class TopicContentResultWriter implements ContextualResultWriter<Topic, C
 
         OutputContext ctxt = outputContext(result.getContext());
 
-        writer.writeObject(new TopicListWriter(), result.getContextResult().getOnlyResource(), ctxt);
-        writer.writeList(new ContentListWriter(), result.getResourceResult().getResources(), ctxt);
+        writer.writeObject(topicWriter, result.getContextResult().getOnlyResource(), ctxt);
+        writer.writeList(contentWriter, result.getResourceResult().getResources(), ctxt);
         
     }
 
     private OutputContext outputContext(QueryContext queryContext) {
         return new OutputContext(
-            registry.activeAnnotations(queryContext.getAnnotations()),
+            queryContext.getAnnotations(),
             queryContext.getApplicationConfiguration());
     }
 

@@ -18,7 +18,7 @@ public class AliasWriter implements EntityListWriter<Alias> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(Alias entity) {
         return "alias";
     }
 

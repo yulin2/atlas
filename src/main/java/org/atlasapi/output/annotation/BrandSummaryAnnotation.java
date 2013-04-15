@@ -48,7 +48,7 @@ public class BrandSummaryAnnotation extends OutputAnnotation<Content> {
         }
 
         @Override
-        public String fieldName() {
+        public String fieldName(Item entity) {
             return "container";
         }
     }
@@ -56,7 +56,7 @@ public class BrandSummaryAnnotation extends OutputAnnotation<Content> {
     private final ContainerSummaryWriter summaryWriter;
 
     public BrandSummaryAnnotation(ContainerSummaryResolver containerSummaryResolver) {
-        super(Content.class);
+        super();
         summaryWriter = new ContainerSummaryWriter(containerSummaryResolver);
     }
 

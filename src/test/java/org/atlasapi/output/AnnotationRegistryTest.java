@@ -12,9 +12,8 @@ import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.output.AnnotationRegistry.AnnotationSet;
-import org.atlasapi.output.annotation.DescriptionAnnotation;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.output.annotation.ContentDescriptionAnnotation;
 import org.atlasapi.output.annotation.ExtendedDescriptionAnnotation;
 import org.atlasapi.output.annotation.ExtendedIdentificationAnnotation;
 import org.atlasapi.output.annotation.IdentificationAnnotation;
@@ -37,12 +36,12 @@ public class AnnotationRegistryTest {
         idCodec);
     private final IdentificationAnnotation ident = new IdentificationAnnotation();
     private final ExtendedIdentificationAnnotation extIdent = new ExtendedIdentificationAnnotation(idCodec);
-    private final DescriptionAnnotation desc = new DescriptionAnnotation();
+    private final ContentDescriptionAnnotation desc = new ContentDescriptionAnnotation();
     private final ExtendedDescriptionAnnotation extDesc = new ExtendedDescriptionAnnotation();
     private final SeriesReferenceAnnotation seriesRef = new SeriesReferenceAnnotation(idCodec);
     private final SeriesSummaryAnnotation seriesSum = new SeriesSummaryAnnotation(mock(ContainerSummaryResolver.class));
     
-    private final AnnotationRegistry registry = AnnotationRegistry.builder()
+    private final AnnotationRegistry<Content> registry = AnnotationRegistry.<Content>builder()
         .register(ID_SUMMARY, idSum)
         .register(ID, ident, ImmutableSet.of(ID_SUMMARY))
         .register(EXTENDED_ID, extIdent, ImmutableSet.of(ID))
@@ -54,69 +53,67 @@ public class AnnotationRegistryTest {
 
     @Test
     public void testMapsToOnlyTopLevelOutputAnnotation() {
+        List<OutputAnnotation<? super Content>> annotations
+            = registry.activeAnnotations(ImmutableSet.of(ID_SUMMARY));
 
-        AnnotationSet set = registry.activeAnnotations(ImmutableSet.of(ID_SUMMARY));
-        List<OutputAnnotation<? super Item>> mapped = set.map(Item.class, ID_SUMMARY);
-
-        assertTrue("mapped annotation should be id summary", idSum.equals(mapped.get(0)));
-
+        assertTrue("mapped annotation should be id summary", 
+                idSum.equals(annotations.get(0)));
     }
 
     @Test
     public void testMapsImpliedAnnotations() {
 
-        AnnotationSet set = registry.activeAnnotations(ImmutableSet.of(ID));
-        List<OutputAnnotation<? super Item>> mapped = set.map(Item.class, ID);
+        List<OutputAnnotation<? super Content>> annotations
+            = registry.activeAnnotations(ImmutableSet.of(ID));
 
-        assertTrue("1st mapped annotation should be id summary", idSum.equals(mapped.get(0)));
-        assertTrue("2nd mapped annotation should be identification", ident.equals(mapped.get(1)));
+        assertTrue("1st mapped annotation should be id summary", 
+                idSum.equals(annotations.get(0)));
+        assertTrue("2nd mapped annotation should be identification", 
+                ident.equals(annotations.get(1)));
 
     }
 
     @Test
     public void testTransitivelyImpliedAnnotations() {
 
-        AnnotationSet set = registry.activeAnnotations(ImmutableSet.of(EXTENDED_DESCRIPTION));
-        List<OutputAnnotation<? super Item>> mapped = set.map(Item.class, ID);
+        List<OutputAnnotation<? super Content>> annotations = registry.activeAnnotations(ImmutableSet.of(EXTENDED_DESCRIPTION));
 
-        assertTrue("1st mapped annotation should be id summary", idSum.equals(mapped.get(0)));
-        assertTrue("2nd mapped annotation should be identification", ident.equals(mapped.get(1)));
-        assertTrue("3rd mapped annotation should be ext ident", extIdent.equals(mapped.get(2)));
-        assertTrue("4th mapped annotation should be desc", desc.equals(mapped.get(3)));
-        assertTrue("5th mapped annotation should be ext desc", extDesc.equals(mapped.get(4)));
-        assertTrue("6th mapped annotation should be series ref", seriesRef.equals(mapped.get(5)));
+        assertTrue("1st mapped annotation should be id summary", idSum.equals(annotations.get(0)));
+        assertTrue("2nd mapped annotation should be identification", ident.equals(annotations.get(1)));
+        assertTrue("3rd mapped annotation should be ext ident", extIdent.equals(annotations.get(2)));
+        assertTrue("4th mapped annotation should be desc", desc.equals(annotations.get(3)));
+        assertTrue("5th mapped annotation should be ext desc", extDesc.equals(annotations.get(4)));
+        assertTrue("6th mapped annotation should be series ref", seriesRef.equals(annotations.get(5)));
 
     }
 
     @Test
     public void testOverridesAnnotations() {
         
-        AnnotationSet set = registry.activeAnnotations(ImmutableSet.of(EXTENDED_DESCRIPTION,SERIES_SUMMARY));
-        List<OutputAnnotation<? super Item>> mapped = set.map(Item.class, ID);
+        List<OutputAnnotation<? super Content>> annotations = registry.activeAnnotations(ImmutableSet.of(EXTENDED_DESCRIPTION,SERIES_SUMMARY));
         
-        assertTrue("1st mapped annotation should be id summary", idSum.equals(mapped.get(0)));
-        assertTrue("2nd mapped annotation should be identification", ident.equals(mapped.get(1)));
-        assertTrue("3rd mapped annotation should be ext ident", extIdent.equals(mapped.get(2)));
-        assertTrue("4th mapped annotation should be desc", desc.equals(mapped.get(3)));
-        assertTrue("5th mapped annotation should be ext desc", extDesc.equals(mapped.get(4)));
-        assertTrue("6th mapped annotation should be series summary", seriesSum.equals(mapped.get(5)));
+        assertTrue("1st mapped annotation should be id summary", idSum.equals(annotations.get(0)));
+        assertTrue("2nd mapped annotation should be identification", ident.equals(annotations.get(1)));
+        assertTrue("3rd mapped annotation should be ext ident", extIdent.equals(annotations.get(2)));
+        assertTrue("4th mapped annotation should be desc", desc.equals(annotations.get(3)));
+        assertTrue("5th mapped annotation should be ext desc", extDesc.equals(annotations.get(4)));
+        assertTrue("6th mapped annotation should be series summary", seriesSum.equals(annotations.get(5)));
         
     }
 
     @Test
     public void testOverridesWithMultipleImplyingAnnotations() {
         
-        ImmutableSet<Annotation> annotations = ImmutableSet.of(EXTENDED_DESCRIPTION,SERIES_SUMMARY, DESCRIPTION);
-        for (List<Annotation> annotationList : Collections2.permutations(annotations)) {
-            AnnotationSet set = registry.activeAnnotations(annotationList);
-            List<OutputAnnotation<? super Item>> mapped = set.map(Item.class, ID);
+        ImmutableSet<Annotation> annotationSet = ImmutableSet.of(EXTENDED_DESCRIPTION,SERIES_SUMMARY, DESCRIPTION);
+        for (List<Annotation> annotationList : Collections2.permutations(annotationSet)) {
+            List<OutputAnnotation<? super Content>> annotations = registry.activeAnnotations(annotationList);
             
-            assertTrue("1st mapped annotation should be id summary", idSum.equals(mapped.get(0)));
-            assertTrue("2nd mapped annotation should be identification", ident.equals(mapped.get(1)));
-            assertTrue("3rd mapped annotation should be ext ident", extIdent.equals(mapped.get(2)));
-            assertTrue("4th mapped annotation should be desc", desc.equals(mapped.get(3)));
-            assertTrue("5th mapped annotation should be ext desc", extDesc.equals(mapped.get(4)));
-            assertTrue("6th mapped annotation should be series summary not "+mapped.get(5), seriesSum.equals(mapped.get(5)));
+            assertTrue("1st mapped annotation should be id summary", idSum.equals(annotations.get(0)));
+            assertTrue("2nd mapped annotation should be identification", ident.equals(annotations.get(1)));
+            assertTrue("3rd mapped annotation should be ext ident", extIdent.equals(annotations.get(2)));
+            assertTrue("4th mapped annotation should be desc", desc.equals(annotations.get(3)));
+            assertTrue("5th mapped annotation should be ext desc", extDesc.equals(annotations.get(4)));
+            assertTrue("6th mapped annotation should be series summary not "+annotations.get(5), seriesSum.equals(annotations.get(5)));
         }
         
     }

@@ -13,7 +13,7 @@ public class NullWriter<T> extends OutputAnnotation<T> {
     }
     
     public NullWriter(Class<T> cls) {
-        super(cls);
+        super();
     }
 
     @Override

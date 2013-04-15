@@ -15,7 +15,7 @@ public class SubItemAnnotation extends OutputAnnotation<Content> {
     private final ChildRefWriter childRefWriter;
 
     public SubItemAnnotation() {
-        super(Content.class);
+        super();
         childRefWriter = new ChildRefWriter("content");
     }
 

@@ -19,7 +19,7 @@ public class ChannelAnnotation extends OutputAnnotation<Channel> {
     private static final EntityWriter<Publisher> BROADCASTER_WRITER = sourceWriter("broadcaster");
 
     public ChannelAnnotation() {
-        super(Channel.class);
+        super();
     }
 
     @Override

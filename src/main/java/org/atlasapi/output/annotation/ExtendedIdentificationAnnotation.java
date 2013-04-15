@@ -29,7 +29,7 @@ public class ExtendedIdentificationAnnotation extends OutputAnnotation<Identifie
         }
 
         @Override
-        public String fieldName() {
+        public String fieldName(EquivalenceRef entity) {
             return "equivalent";
         }
     };
@@ -38,7 +38,7 @@ public class ExtendedIdentificationAnnotation extends OutputAnnotation<Identifie
     private final AliasWriter aliasWriter;
 
     public ExtendedIdentificationAnnotation(NumberToShortStringCodec idCodec) {
-        super(Identified.class);
+        super();
         this.idCodec = idCodec;
         this.aliasWriter = new AliasWriter();
     }

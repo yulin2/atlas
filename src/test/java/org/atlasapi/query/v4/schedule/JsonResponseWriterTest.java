@@ -9,14 +9,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.output.Annotation;
-import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.output.OutputContext;
+import org.atlasapi.query.common.QueryContext;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +22,6 @@ import org.junit.Test;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
 
@@ -36,8 +33,8 @@ public class JsonResponseWriterTest {
     private final StubHttpServletResponse response = new StubHttpServletResponse();
     
     private final JsonResponseWriter formatter = new JsonResponseWriter(request, response);
-    private final OutputContext ctxt = new OutputContext(AnnotationRegistry.builder().build().activeAnnotations(ImmutableSet.<Annotation>of()), ApplicationConfiguration.DEFAULT_CONFIGURATION);
-    
+    private final OutputContext ctxt = OutputContext.valueOf(QueryContext.standard()); 
+            
     @Before
     public void setup() throws IOException {
         formatter.startResponse();
@@ -93,7 +90,7 @@ public class JsonResponseWriterTest {
             }
 
             @Override
-            public String fieldName() {
+            public String fieldName(String entity) {
                 return "nested";
             }
         }, "value", ctxt);
@@ -149,7 +146,7 @@ public class JsonResponseWriterTest {
             }
 
             @Override
-            public String fieldName() {
+            public String fieldName(String entity) {
                 return "elem";
             }
             
@@ -198,7 +195,7 @@ public class JsonResponseWriterTest {
                 }
 
                 @Override
-                public String fieldName() {
+                public String fieldName(Integer entity) {
                     return "field";
                 }
             }, 0, ctxt);

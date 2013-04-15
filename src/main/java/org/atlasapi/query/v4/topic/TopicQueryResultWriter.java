@@ -1,11 +1,9 @@
 package org.atlasapi.query.v4.topic;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.IOException;
 
 import org.atlasapi.media.topic.Topic;
-import org.atlasapi.output.AnnotationRegistry;
+import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
@@ -16,10 +14,10 @@ import com.google.common.collect.FluentIterable;
 
 public class TopicQueryResultWriter implements QueryResultWriter<Topic> {
 
-    private final AnnotationRegistry registry;
+    private final EntityListWriter<Topic> topicListWriter;
     
-    public TopicQueryResultWriter(AnnotationRegistry annotations) {
-        this.registry = checkNotNull(annotations);
+    public TopicQueryResultWriter(EntityListWriter<Topic> topicListWriter) {
+        this.topicListWriter = topicListWriter;
     }
 
     @Override
@@ -36,17 +34,14 @@ public class TopicQueryResultWriter implements QueryResultWriter<Topic> {
 
         if (result.isListResult()) {
             FluentIterable<Topic> topics = result.getResources();
-            writer.writeList(new TopicListWriter(), topics, ctxt);
+            writer.writeList(topicListWriter, topics, ctxt);
         } else {
-            writer.writeObject(new TopicListWriter(), result.getOnlyResource(), ctxt);
+            writer.writeObject(topicListWriter, result.getOnlyResource(), ctxt);
         }
     }
     
     private OutputContext outputContext(QueryContext queryContext) {
-        return new OutputContext(
-            registry.activeAnnotations(queryContext.getAnnotations()),
-            queryContext.getApplicationConfiguration()
-        );
+        return OutputContext.valueOf(queryContext);
     }
     
 }

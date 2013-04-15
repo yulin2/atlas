@@ -13,6 +13,7 @@ import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
+import org.atlasapi.query.common.AnnotationsExtractor;
 import org.atlasapi.query.common.QueryResult;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
@@ -38,12 +39,13 @@ public class ScheduleController {
     public ScheduleController(ScheduleQueryExecutor queryExecutor,
         ChannelResolver channelResolver,
         ApplicationConfigurationFetcher appFetcher,
-        QueryResultWriter<ChannelSchedule> resultWriter) {
+        QueryResultWriter<ChannelSchedule> resultWriter,
+        AnnotationsExtractor annotationsExtractor) {
         this.requestParser = new ScheduleRequestParser(
             channelResolver,
             appFetcher,
             MAX_REQUEST_DURATION,
-            new SystemClock()
+            new SystemClock(), annotationsExtractor
         );
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;

@@ -1,45 +1,27 @@
 package org.atlasapi.query.v4.schedule;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.ChannelSchedule;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.output.Annotation;
-import org.atlasapi.output.AnnotationRegistry;
+import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.EntityWriter;
-import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
-import org.atlasapi.output.annotation.OutputAnnotation;
+import org.atlasapi.query.common.ActiveAnnotations;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryResult;
 
 public class ScheduleQueryResultWriter implements QueryResultWriter<ChannelSchedule> {
 
-    private final class ScheduleChannelWriter implements EntityWriter<Channel> {
+    private final EntityListWriter<Content> contentWriter;
+    private final EntityWriter<Channel> channelWriter;
 
-        @Override
-        public void write(Channel entity, FieldWriter writer, OutputContext ctxt)
-            throws IOException {
-            List<OutputAnnotation<? super Channel>> annotations = ctxt.getAnnotations(Channel.class, Annotation.ID_SUMMARY);
-            for (int i = 0; i < annotations.size(); i++) {
-                annotations.get(i).write(entity, writer, ctxt);
-            }
-        }
-
-        @Override
-        public String fieldName() {
-            return "channel";
-        }
-    }
-
-    private final AnnotationRegistry registry;
-
-    public ScheduleQueryResultWriter(AnnotationRegistry registry) {
-        this.registry = registry;
+    public ScheduleQueryResultWriter(EntityWriter<Channel> channelWriter, EntityListWriter<Content> contentListWriter) {
+        this.channelWriter = channelWriter;
+        this.contentWriter = contentListWriter;
     }
 
     @Override
@@ -57,7 +39,7 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ChannelSched
         ChannelSchedule channelSchedule = result.getOnlyResource();
 
         //TODO: train-wreck
-        if (result.getContext().getAnnotations().contains(Annotation.LICENSE)) {
+        if (result.getContext().getAnnotations() == ActiveAnnotations.standard()) {
             writer.writeField("license",
                 "In accessing this feed, you agree that you will only " +
                 "access its contents for your own personal and non-commercial " +
@@ -67,13 +49,13 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ChannelSched
                 "available to the general public.");
         }
         
-        writer.writeObject(new ScheduleChannelWriter(), channelSchedule.channel(), ctxt);
-        writer.writeList(new ContentListWriter(), channelSchedule.items(), ctxt);
+        writer.writeObject(channelWriter, channelSchedule.channel(), ctxt);
+        writer.writeList(contentWriter, channelSchedule.items(), ctxt);
     }
 
     private OutputContext outputContext(QueryContext queryContext) {
         return new OutputContext(
-            registry.activeAnnotations(queryContext.getAnnotations()),
+            queryContext.getAnnotations(),
             queryContext.getApplicationConfiguration()
         );
     }

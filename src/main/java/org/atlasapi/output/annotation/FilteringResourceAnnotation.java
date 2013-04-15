@@ -11,7 +11,7 @@ import org.atlasapi.output.OutputContext;
 public class FilteringResourceAnnotation extends OutputAnnotation<Content> {
 
     public FilteringResourceAnnotation() {
-        super(Content.class);
+        super();
     }
 
     @Override

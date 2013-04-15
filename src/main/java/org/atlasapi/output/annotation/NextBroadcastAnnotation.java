@@ -26,7 +26,7 @@ public class NextBroadcastAnnotation extends OutputAnnotation<Content> {
     private final Clock clock;
 
     public NextBroadcastAnnotation(Clock clock) {
-        super(Content.class);
+        super();
         this.clock = clock;
         this.broadcastWriter = new BroadcastWriter("next_broadcasts");
     }

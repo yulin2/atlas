@@ -18,7 +18,7 @@ public class SeriesReferenceAnnotation extends OutputAnnotation<Content> {
     private final ParentRefWriter seriesRefWriter;
 
     public SeriesReferenceAnnotation(NumberToShortStringCodec idCodec) {
-        super(Content.class);
+        super();
         seriesRefWriter = new ParentRefWriter(SERIES_FIELD, idCodec);
     }
 

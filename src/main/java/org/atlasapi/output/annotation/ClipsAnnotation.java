@@ -11,7 +11,7 @@ import org.atlasapi.output.OutputContext;
 public class ClipsAnnotation extends OutputAnnotation<Content> {
 
     public ClipsAnnotation() {
-        super(Content.class);
+        super();
     }
 
     @Override

@@ -19,7 +19,7 @@ public class ProductsAnnotation extends OutputAnnotation<Content> {
     private final ProductResolver productResolver;
 
     public ProductsAnnotation(ProductResolver productResolver) {
-        super(Content.class);
+        super();
         this.productResolver = productResolver;
     }
 
@@ -38,7 +38,7 @@ public class ProductsAnnotation extends OutputAnnotation<Content> {
             }
 
             @Override
-            public String fieldName() {
+            public String fieldName(Product entity) {
                 return "product";
             }
             

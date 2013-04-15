@@ -27,7 +27,7 @@ public final class ChildRefWriter implements EntityListWriter<ChildRef> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(ChildRef entity) {
         return "content";
     }
 }

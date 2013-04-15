@@ -22,7 +22,7 @@ public final class ReleaseDateWriter implements EntityListWriter<ReleaseDate> {
     }
 
     @Override
-    public String fieldName() {
+    public String fieldName(ReleaseDate entity) {
         return "release_date";
     }
 }

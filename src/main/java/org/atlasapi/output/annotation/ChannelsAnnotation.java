@@ -11,7 +11,7 @@ import org.atlasapi.output.OutputContext;
 public class ChannelsAnnotation extends OutputAnnotation<Content> {
 
     public ChannelsAnnotation() {
-        super(Content.class);
+        super();
     }
 
     @Override

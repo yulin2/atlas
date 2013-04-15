@@ -42,7 +42,7 @@ public class StandardQueryParser<T> implements QueryParser<T> {
                               : null;
     }
     
-    private Query<T> singleQuery(HttpServletRequest request, Id singleId) {
+    private Query<T> singleQuery(HttpServletRequest request, Id singleId) throws QueryParseException {
         return Query.singleQuery(singleId, queryContextParser.parseContext(request));
     }
 

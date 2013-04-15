@@ -24,7 +24,7 @@ public class RecentlyBroadcastAnnotation extends OutputAnnotation<Content> {
     private final RecentlyBroadcastChildrenResolver recentlyBroadcastResolver;
 
     public RecentlyBroadcastAnnotation(RecentlyBroadcastChildrenResolver recentlyBroadcastResolver) {
-        super(Content.class);
+        super();
         this.recentlyBroadcastResolver = recentlyBroadcastResolver;
     }
 

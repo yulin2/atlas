@@ -10,11 +10,15 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.content.schedule.ScheduleRef;
+import org.atlasapi.query.common.ActiveAnnotations;
+import org.atlasapi.query.common.AnnotationsExtractor;
+import org.atlasapi.query.common.InvalidAnnotationException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -44,7 +48,20 @@ public class ScheduleIndexDebugController {
             channelResolver,
             appFetcher,
             MAX_REQUEST_DURATION,
-            new SystemClock()
+            new SystemClock(), new AnnotationsExtractor() {
+
+                @Override
+                public ActiveAnnotations extractFromRequest(HttpServletRequest request)
+                        throws InvalidAnnotationException {
+                    return ActiveAnnotations.standard();
+                }
+                
+                @Override
+                public ImmutableSet<String> getParameterNames() {
+                    return ImmutableSet.of("annotations");
+                }
+                
+            }
         );
     }
 
