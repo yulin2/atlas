@@ -130,6 +130,7 @@ public final class JsonResponseWriter implements ResponseWriter {
         } else {
             writeNullValue();
         }
+        printMemberSeparator = true;
     }
     
     @Override
