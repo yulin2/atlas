@@ -3,6 +3,8 @@ package org.atlasapi.output;
 import java.util.Map;
 import java.util.UUID;
 
+import org.atlasapi.query.common.InvalidAnnotationException;
+
 
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.http.HttpStatusCode;
@@ -50,7 +52,8 @@ public class ErrorSummary {
 			IllegalArgumentException.class, new DefaultErrorSummaryFactory("BAD_QUERY_ATTRIBUTE", HttpStatusCode.BAD_REQUEST),
 			MalformedDateTimeException.class, new DefaultErrorSummaryFactory("BAD_DATE_TIME_VALUE", HttpStatusCode.BAD_REQUEST),
 			NotFoundException.class, new DefaultErrorSummaryFactory("RESOURCE_NOT_FOUND", HttpStatusCode.NOT_FOUND),
-			NotAcceptableException.class, new DefaultErrorSummaryFactory("NOT_ACCEPTABLE", HttpStatusCode.NOT_ACCEPTABLE)
+			NotAcceptableException.class, new DefaultErrorSummaryFactory("NOT_ACCEPTABLE", HttpStatusCode.NOT_ACCEPTABLE),
+			InvalidAnnotationException.class, new DefaultErrorSummaryFactory("BAD_ANNOTATION_VALUE", HttpStatusCode.BAD_REQUEST)
 	    );
 	}
 
