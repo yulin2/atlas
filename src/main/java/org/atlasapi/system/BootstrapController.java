@@ -11,9 +11,11 @@ import java.util.concurrent.RejectedExecutionException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atlasapi.equiv.EquivalenceRecordStore;
 import org.atlasapi.media.content.ContentIndexer;
 import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.topic.TopicStore;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.system.bootstrap.ChangeListener;
 import org.atlasapi.system.bootstrap.ContentBootstrapper;
 import org.atlasapi.system.bootstrap.ContentIndexingChangeListener;
@@ -40,9 +42,12 @@ public class BootstrapController {
     private final ObjectMapper jsonMapper = new ObjectMapper();
     //
     private ContentBootstrapper cassandraContentBootstrapper;
+    private ContentBootstrapper cassandraLookupEntryBootstrapper;
     private ContentBootstrapper esContentBootstrapper;
     //
     private ContentStore cassandraContentStore;
+    private EquivalenceRecordStore equivRecordStore;
+    private LookupEntryStore lookupStore;
     private TopicStore cassandraTopicStore;
     private ContentIndexer esContentIndexer;
     //
@@ -51,6 +56,15 @@ public class BootstrapController {
 
     public void setCassandraContentStore(ContentStore cassandraContentStore) {
         this.cassandraContentStore = cassandraContentStore;
+    }
+    
+    public void setCassandraLookupEntryStore(EquivalenceRecordStore equivRecordStore) {
+        this.equivRecordStore = equivRecordStore;
+    }
+    
+    public void setLookupEntryStore(LookupEntryStore lookupStore) {
+        this.lookupStore = lookupStore;
+        
     }
 
     public void setCassandraTopicStore(TopicStore cassandraTopicStore) {
@@ -63,6 +77,10 @@ public class BootstrapController {
 
     public void setCassandraContentBootstrapper(ContentBootstrapper cassandraContentBootstrapper) {
         this.cassandraContentBootstrapper = cassandraContentBootstrapper;
+    }
+
+    public void setCassandraLookupEntryBootstrapper(ContentBootstrapper cassandraLookupEntryBootstrapper) {
+        this.cassandraLookupEntryBootstrapper = cassandraLookupEntryBootstrapper;
     }
 
     public void setCassandraTopicBootstrapper(ContentBootstrapper cassandraTopicBootstrapper) {
@@ -89,6 +107,12 @@ public class BootstrapController {
     public void bootstrapESContent(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
         ContentIndexingChangeListener esChangeListener = new ContentIndexingChangeListener(getConcurrencyLevel(concurrency, response), esContentIndexer);
         doBootstrap(esContentBootstrapper, esChangeListener, response);
+    }
+    
+    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/lookup")
+    public void bootstrapCassandraLookupEntries(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
+        LookupEntryChangeListener changeListener = new LookupEntryChangeListener(getConcurrencyLevel(concurrency, response), lookupStore, equivRecordStore);
+        doBootstrap(cassandraLookupEntryBootstrapper, changeListener, response);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/content/status")
