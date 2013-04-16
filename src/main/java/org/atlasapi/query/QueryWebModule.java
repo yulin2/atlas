@@ -275,7 +275,7 @@ public class QueryWebModule {
             .registerDefault(ID_SUMMARY, new IdentificationSummaryAnnotation(idCodec()))
             .register(ID, new IdentificationAnnotation(), ID_SUMMARY)
             .register(EXTENDED_ID, new ExtendedIdentificationAnnotation(idCodec()), ImmutableSet.of(ID))
-            .register(DESCRIPTION, new DescriptionAnnotation<Topic>())
+            .register(DESCRIPTION, new DescriptionAnnotation<Topic>(), ImmutableSet.of(ID))
             .build();
     }
     
