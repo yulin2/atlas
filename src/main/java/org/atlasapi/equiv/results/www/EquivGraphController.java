@@ -45,7 +45,7 @@ public class EquivGraphController {
         );
         
         if (subj != null) {
-            Iterable<LookupEntry> equivs = lookupStore.entriesForIds(
+            Iterable<LookupEntry> equivs = lookupStore.entriesForCanonicalUris(
                 Iterables.transform(subj.equivalents(), LookupRef.TO_ID));
             
             List<SimpleModel> nodes = Lists.newLinkedList(); 
