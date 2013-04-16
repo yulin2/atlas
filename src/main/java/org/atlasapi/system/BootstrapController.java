@@ -16,8 +16,10 @@ import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.system.bootstrap.ChangeListener;
 import org.atlasapi.system.bootstrap.ContentBootstrapper;
-import org.atlasapi.system.bootstrap.cassandra.CassandraChangeListener;
-import org.atlasapi.system.bootstrap.elasticsearch.IndexingChangeListener;
+import org.atlasapi.system.bootstrap.ContentIndexingChangeListener;
+import org.atlasapi.system.bootstrap.ContentWritingChangeListener;
+import org.atlasapi.system.bootstrap.LookupEntryChangeListener;
+import org.atlasapi.system.bootstrap.TopicWritingChangeListener;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -73,23 +75,19 @@ public class BootstrapController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/content")
     public void bootstrapCassandraContent(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
-        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
-        cassandraChangeListener.setCassandraContentStore(cassandraContentStore);
-//        cassandraChangeListener.setCassandraLookupEntryStore(cassandraLookupEntryStore);
-        doBootstrap(cassandraContentBootstrapper, cassandraChangeListener, response);
+        ContentWritingChangeListener changeListener = new ContentWritingChangeListener(getConcurrencyLevel(concurrency, response), cassandraContentStore);
+        doBootstrap(cassandraContentBootstrapper, changeListener, response);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/topic")
     public void bootstrapCassandraTopic(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
-        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
-        cassandraChangeListener.setCassandraTopicStore(cassandraTopicStore);
-        doBootstrap(cassandraTopicBootstrapper, cassandraChangeListener, response);
+        TopicWritingChangeListener changeListener = new TopicWritingChangeListener(getConcurrencyLevel(concurrency, response), cassandraTopicStore);
+        doBootstrap(cassandraTopicBootstrapper, changeListener, response);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/es/content")
     public void bootstrapESContent(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
-        IndexingChangeListener esChangeListener = new IndexingChangeListener(getConcurrencyLevel(concurrency, response));
-        esChangeListener.setESContentIndexer(esContentIndexer);
+        ContentIndexingChangeListener esChangeListener = new ContentIndexingChangeListener(getConcurrencyLevel(concurrency, response), esContentIndexer);
         doBootstrap(esContentBootstrapper, esChangeListener, response);
     }
 
@@ -108,7 +106,7 @@ public class BootstrapController {
         writeBootstrapStatus(esContentBootstrapper, response);
     }
 
-    private void doBootstrap(final ContentBootstrapper contentBootstrapper, final ChangeListener changeListener, HttpServletResponse response) throws IOException {
+    private void doBootstrap(final ContentBootstrapper contentBootstrapper, final ChangeListener<?> changeListener, HttpServletResponse response) throws IOException {
         try {
             scheduler.submit(new Runnable() {
 

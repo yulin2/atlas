@@ -1,28 +1,27 @@
 package org.atlasapi.system.bootstrap;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.atlasapi.media.entity.Item;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
-public abstract class AbstractMultiThreadedChangeListener implements ChangeListener {
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+public abstract class AbstractMultiThreadedChangeListener<T> implements ChangeListener<T> {
+
+    private static final int NO_KEEP_ALIVE = 0;
     private final Logger log = LoggerFactory.getLogger(AbstractMultiThreadedChangeListener.class);
-    //
+
     private final ThreadPoolExecutor executor;
 
     public AbstractMultiThreadedChangeListener(int concurrencyLevel) {
-        this(new ThreadPoolExecutor(concurrencyLevel,
-                concurrencyLevel,
-                0,
-                TimeUnit.MICROSECONDS,
+        this(new ThreadPoolExecutor(concurrencyLevel, concurrencyLevel,
+                NO_KEEP_ALIVE, TimeUnit.MICROSECONDS,
                 new ArrayBlockingQueue<Runnable>(100 * Runtime.getRuntime().availableProcessors()),
-                new ThreadFactoryBuilder().setNameFormat(AbstractMultiThreadedChangeListener.class + " Thread %d").build(), new ThreadPoolExecutor.CallerRunsPolicy()));
+                new ThreadFactoryBuilder().setNameFormat(AbstractMultiThreadedChangeListener.class + " Thread %d").build(),
+                new ThreadPoolExecutor.CallerRunsPolicy()));
     }
 
     public AbstractMultiThreadedChangeListener(ThreadPoolExecutor executor) {
@@ -40,8 +39,8 @@ public abstract class AbstractMultiThreadedChangeListener implements ChangeListe
     }
 
     @Override
-    public void onChange(Iterable changed) {
-        for (final Object change : changed) {
+    public void onChange(Iterable<T> changed) {
+        for (final T change : changed) {
             executor.submit(new Runnable() {
 
                 @Override
@@ -57,5 +56,5 @@ public abstract class AbstractMultiThreadedChangeListener implements ChangeListe
         }
     }
 
-    protected abstract void onChange(Object change);
+    protected abstract void onChange(T change);
 }

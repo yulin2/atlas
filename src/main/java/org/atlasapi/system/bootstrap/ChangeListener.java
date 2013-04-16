@@ -1,10 +1,10 @@
 package org.atlasapi.system.bootstrap;
 
-public interface ChangeListener {
+public interface ChangeListener<T> {
 
     void beforeChange();
     
-    void onChange(Iterable changed);
+    void onChange(Iterable<T> changed);
         
     void afterChange();
 }
