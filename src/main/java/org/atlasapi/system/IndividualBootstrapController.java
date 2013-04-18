@@ -62,9 +62,9 @@ public class IndividualBootstrapController {
             
             @Override
             public String visit(Series series) {
-                write(series);
-                resolveAndWrite(Iterables.transform(series.getChildRefs(), Identifiables.toId()));
-                return null;
+                WriteResult<Container> seriesWrite = write(series.copy());
+                int childs = resolveAndWrite(Iterables.transform(series.getChildRefs(), Identifiables.toId()));
+                return String.format("%s c:%s", seriesWrite, childs);
             }
 
             private int resolveAndWrite(Iterable<Id> ids) {
