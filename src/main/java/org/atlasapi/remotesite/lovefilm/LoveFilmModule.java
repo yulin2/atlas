@@ -9,7 +9,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.jets3t.service.security.AWSCredentials;
-import org.joda.time.LocalTime;
+import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,7 +21,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class LoveFilmModule {
     
-    private final static RepetitionRule DAILY = RepetitionRules.daily(new LocalTime(23, 0, 0));
+    private final static RepetitionRule DAILY = RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(8));
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentResolver contentResolver;
@@ -41,7 +41,7 @@ public class LoveFilmModule {
         String s3bucket = Configurer.get("lovefilm.s3.bucket").get();
         String s3folder = Configurer.get("lovefilm.s3.folder").get();
         String s3fileName = Configurer.get("lovefilm.s3.fileName").get();
-        int missingThreshold = Configurer.get("lovefilm.missingThreshold").toInt();
+        int missingThreshold = Configurer.get("lovefilm.missingThresholdPercentage").toInt();
         AWSCredentials credentials = new AWSCredentials(s3access, s3secret);
         RestS3ServiceSupplier serviceSupplier = new RestS3ServiceSupplier(credentials);
         LoveFilmDataSupplier dataSupplier = new S3LoveFilmDataSupplier(serviceSupplier, s3bucket, s3folder, s3fileName);

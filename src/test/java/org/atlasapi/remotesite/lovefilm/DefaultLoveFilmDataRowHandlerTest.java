@@ -50,7 +50,9 @@ public class DefaultLoveFilmDataRowHandlerTest {
     public void testHandlesWritingContentInAnyOrder() {
         
         Brand brand = new Brand("brand", "b", LOVEFILM);
+        brand.setTitle("brand");
         Series series = new Series("series", "s", LOVEFILM);
+        series.setTitle("series");
         series.setParent(brand);
         series.withSeriesNumber(4);
         Episode episode = new Episode("episode", "e", LOVEFILM);
@@ -83,6 +85,48 @@ public class DefaultLoveFilmDataRowHandlerTest {
             
             assertThat(episode.getSeriesNumber(), is(4));
             episode.setSeriesNumber(null);
+        }
+    }
+
+    @Test
+    public void testWritingTopLevelSeries() {
+        
+        // write top level series
+        Brand brand = new Brand("brand", "b", LOVEFILM);
+        brand.setTitle("matching title");
+        Series series = new Series("series", "s", LOVEFILM);
+        series.setTitle("matching title");
+        series.setParent(brand);
+        series.withSeriesNumber(1);
+        Episode episode = new Episode("episode", "e", LOVEFILM);
+        episode.setContainer(brand);
+        episode.setSeries(series);
+        
+        for(List<Content> contentOrdering : Collections2.permutations(ImmutableList.of(brand, series, episode))) {
+            
+            
+            OngoingStubbing<Optional<Content>> stubbing = when(extractor.extract(EMPTY_ROW));
+            for (Content content : contentOrdering) {
+                stubbing = stubbing.thenReturn(Optional.of(content));
+            }
+            when(resolver.findByCanonicalUris(Matchers.<Iterable<String>>any())).thenReturn(NOTHING_RESOLVED);
+            
+            handler.prepare();
+
+            for (int i = 0; i < contentOrdering.size(); i++) {
+                handler.handle(EMPTY_ROW);
+            }
+            
+            handler.finish();
+            
+            InOrder inOrder = inOrder(writer);
+            inOrder.verify(writer, times(1)).createOrUpdate(series);
+            inOrder.verify(writer, times(1)).createOrUpdate(episode);
+            inOrder.verifyNoMoreInteractions();
+            reset(writer);
+            
+            series.setParent(brand);
+            episode.setContainer(brand);
         }
     }
 
