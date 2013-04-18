@@ -50,6 +50,7 @@ import org.atlasapi.remotesite.pa.listings.bindings.CastMember;
 import org.atlasapi.remotesite.pa.listings.bindings.Category;
 import org.atlasapi.remotesite.pa.listings.bindings.Person;
 import org.atlasapi.remotesite.pa.listings.bindings.PictureUsage;
+import org.atlasapi.remotesite.pa.listings.bindings.Pictures;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.atlasapi.remotesite.pa.listings.bindings.StaffMember;
 
@@ -75,8 +76,12 @@ import com.metabroadcast.common.time.Timestamp;
 
 public class PaProgrammeProcessor implements PaProgDataProcessor {
     
+    static final String PA_PICTURE_TYPE_EPISODE = "episode";
+    static final String PA_PICTURE_TYPE_BRAND   = "series";  // Counter-intuitively PA use 'series' where we use 'brand'
+    static final String PA_PICTURE_TYPE_SERIES  = "season";  // .. and 'season' where we use 'series'
+    
     private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
-    private static final String NEW_IMAGE_BASE_IMAGE_URL = "http://images.atlas.metabroadcast.com/pressassociation.com/";
+    static final String NEW_IMAGE_BASE_IMAGE_URL = "http://images.atlas.metabroadcast.com/pressassociation.com/";
     public static final String BROADCAST_ID_PREFIX = "pa:";
     
     private static final DateTimeFormatter PA_DATE_FORMAT = DateTimeFormat.forPattern("dd/MM/yyyy");
@@ -340,20 +345,84 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         setCertificate(progData, brand);
         setGenres(progData, brand);
 
-        if (progData.getPictures() != null) {
-            for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
-                if (picture.getType().equals("season") && brand.getImage() == null){
-                    setImage(brand, picture);
-                }
-                if (picture.getType().equals("series")){
-                    setImage(brand, picture);
-                    break;
-                }
-            }
-        }
+        selectImages(progData.getPictures(), brand, PA_PICTURE_TYPE_BRAND, PA_PICTURE_TYPE_SERIES, Maybe.<String>nothing());
 
         return Maybe.just(brand);
     }
+
+    /**
+     * If pictures is not null, add a list of images of the given primary type to the described object.
+     * If no images of the primary type are found, fall back to the first, or optional second type. Only
+     * one (the first) fallback image will be used. Ordering is preserved for images. If pictures is null,
+     * this method does nothing.
+     * @param pictures The picture collection to use
+     * @param described The object that will have images added
+     * @param primaryImageType The primary image type to add
+     * @param firstFallbackType The preferred fallback image type to add
+     * @param secondFallbackType The optional fallback image type to add
+     */
+    void selectImages(Pictures pictures, Described described, String primaryImageType, String firstFallbackType, Maybe<String> secondFallbackType) {
+        if (pictures != null) {
+            Set<Image> images = Sets.newLinkedHashSet();
+            Image fallbackImage = null;
+            boolean hasFirstFallbackType = false;
+            
+            for (PictureUsage picture : pictures.getPictureUsage()) {
+                Image image = createImage(picture);
+                
+                if (secondFallbackType.hasValue() && 
+                    picture.getType().equals(secondFallbackType.requireValue()) && 
+                    images.isEmpty() && 
+                    fallbackImage == null) {
+                    setPrimaryImage(described, image);
+                    fallbackImage = image;
+                }
+                if (picture.getType().equals(firstFallbackType) && images.isEmpty() && !hasFirstFallbackType) {
+                    setPrimaryImage(described, image);
+                    fallbackImage = image;
+                    hasFirstFallbackType = true;
+                }
+                if (picture.getType().equals(primaryImageType)) {
+                    if (images.size() == 0) {
+                        setPrimaryImage(described, image);
+                    }
+                    images.add(image);
+                }
+            }
+            
+            if (!images.isEmpty()) {
+                described.setImages(images);
+            } else if (fallbackImage != null) {
+                described.setImages(ImmutableSet.of(fallbackImage));
+            }
+        }
+    }
+    
+    private void setPrimaryImage(Described described, Image image) {
+        image.setType(ImageType.PRIMARY);
+        described.setImage(image.getCanonicalUri());
+    }
+    
+    private Image createImage(PictureUsage pictureUsage) {
+        String imageUri = PA_BASE_IMAGE_URL + pictureUsage.getvalue();
+        Image image = new Image(imageUri);
+        
+        image.setHeight(360);
+        image.setWidth(640);
+        //image.setType(ImageType.PRIMARY);  //TODO: Should be SECONDARY, or not set here
+        image.setAspectRatio(ImageAspectRatio.SIXTEEN_BY_NINE);
+        image.setMimeType(MimeType.IMAGE_JPG);
+        image.setCanonicalUri(NEW_IMAGE_BASE_IMAGE_URL + pictureUsage.getvalue());
+        image.setAvailabilityStart(fromPaDate(pictureUsage.getStartDate()));
+        DateTime expiry = fromPaDate(pictureUsage.getExpiryDate());
+        if (expiry != null) {
+            image.setAvailabilityEnd(expiry.plusDays(1));
+        } else {
+            image.setAvailabilityEnd(null);
+        }
+        return image;
+    }
+    
 
     private Maybe<Series> getSeries(ProgData progData, Channel channel, boolean hasBrand) {
         if (Strings.isNullOrEmpty(progData.getSeriesNumber()) || Strings.isNullOrEmpty(progData.getSeriesId())) {
@@ -390,42 +459,9 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         setCertificate(progData, series);
         setGenres(progData, series);
         
-        if (progData.getPictures() != null) {
-            for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
-                if (picture.getType().equals("series") && series.getImage() == null){
-                    setImage(series, picture);
-                }
-                if (picture.getType().equals("season")){
-                    setImage(series, picture);
-                    break;
-                }
-            }
-        }
-
+        selectImages(progData.getPictures(), series, PA_PICTURE_TYPE_SERIES, PA_PICTURE_TYPE_BRAND, Maybe.<String>nothing());
+        
         return Maybe.just(series);
-    }
-    
-    private void setImage(Described described, PictureUsage pictureUsage) {
-        String imageUri = PA_BASE_IMAGE_URL + pictureUsage.getvalue();
-        described.setImage(imageUri);
-        
-        Image image = new Image(imageUri);
-        
-        image.setHeight(360);
-        image.setWidth(640);
-        image.setType(ImageType.PRIMARY);
-        image.setAspectRatio(ImageAspectRatio.SIXTEEN_BY_NINE);
-        image.setMimeType(MimeType.IMAGE_JPG);
-        image.setCanonicalUri(NEW_IMAGE_BASE_IMAGE_URL + pictureUsage.getvalue());
-        image.setAvailabilityStart(fromPaDate(pictureUsage.getStartDate()));
-        DateTime expiry = fromPaDate(pictureUsage.getExpiryDate());
-        if (expiry != null) {
-            image.setAvailabilityEnd(expiry.plusDays(1));
-        } else {
-            image.setAvailabilityEnd(null);
-        }
-        
-        described.setImages(ImmutableSet.of(image));
     }
     
     private DateTime fromPaDate(String paDate) {
@@ -533,22 +569,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             episode.setBlackAndWhite(getBooleanValue(progData.getAttr().getBw()));
         }
 
-        if (progData.getPictures() != null) {
-        	PictureUsage bestImage = null;
-            for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
-                if (picture.getType().equals("series") && bestImage == null) {
-                    bestImage = picture;
-                }
-                if (picture.getType().equals("season")) {
-                	bestImage = picture;
-                }
-                if (picture.getType().equals("episode")){
-                	bestImage = picture;
-                    break;
-                }
-            }
-            setImage(episode, bestImage);
-        }
+        selectImages(progData.getPictures(), episode, PA_PICTURE_TYPE_EPISODE, PA_PICTURE_TYPE_SERIES, Maybe.just(PA_PICTURE_TYPE_BRAND));
         
         episode.setPeople(people(progData, episode.getPeople()));
 
