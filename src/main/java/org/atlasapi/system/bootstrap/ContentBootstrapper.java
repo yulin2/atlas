@@ -40,6 +40,8 @@ import org.atlasapi.persistence.content.listing.ContentListingProgress;
 import org.atlasapi.persistence.content.people.PeopleLister;
 import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.atlasapi.persistence.topic.TopicLister;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -51,7 +53,7 @@ public class ContentBootstrapper {
     private static final String SUCCESS = "SUCCESS";
     private static final String FAIL = "FAIL";
     //
-    private static final Log log = LogFactory.getLog(ContentBootstrapper.class);
+    private static final Logger log = LoggerFactory.getLogger(ContentBootstrapper.class);
     //
     private final ReentrantLock bootstrapLock = new ReentrantLock();
     private final AtomicReference<String> lastStatus = new AtomicReference<String>(NONE);
@@ -250,6 +252,9 @@ public class ContentBootstrapper {
         for (Iterable<LookupEntry> lookupEntries : Iterables.partition(lookupEntryLister.list(), 100)) {
             listener.onChange(lookupEntries);
             processed += Iterables.size(lookupEntries);
+            if (processed % 500 == 0) {
+                log.info("Lookup entries processed: {}", processed);
+            }
         }
         return processed;
     }
