@@ -46,9 +46,14 @@ public class BootstrapModule {
         bootstrapController.setCassandraTopicStore(persistenceModule.topicStore());
         bootstrapController.setCassandraTopicBootstrapper(cassandraTopicBootstrapper());
         
+        bootstrapController.setCassandraEquivalenceRecordStore(persistenceModule.equivalenceRecordStore());
+        bootstrapController.setLookupEntryStore(new MongoLookupEntryStore(bootstrapMongo()));
+        bootstrapController.setCassandraLookupEntryBootstrapper(cassandraEquivalenceRecordBootstrapper());
+        
         return bootstrapController;
     }
-    
+  
+
     @Bean
     IndividualBootstrapController contentBootstrapController() {
         ContentResolver resolver = new LookupResolvingContentResolver(
@@ -66,6 +71,12 @@ public class BootstrapModule {
     private ContentBootstrapper cassandraContentBootstrapper() {
         ContentBootstrapper contentBootstrapper = new ContentBootstrapper();
         contentBootstrapper.withContentListers(new MongoContentLister(bootstrapMongo()));
+        return contentBootstrapper;
+    }  
+    
+    private ContentBootstrapper cassandraEquivalenceRecordBootstrapper() {
+        ContentBootstrapper contentBootstrapper = new ContentBootstrapper();
+        contentBootstrapper.withLookupEntryListers(new MongoLookupEntryStore(bootstrapMongo()));
         return contentBootstrapper;
     }
     

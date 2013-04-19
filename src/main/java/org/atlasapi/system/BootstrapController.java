@@ -58,7 +58,7 @@ public class BootstrapController {
         this.cassandraContentStore = cassandraContentStore;
     }
     
-    public void setCassandraLookupEntryStore(EquivalenceRecordStore equivRecordStore) {
+    public void setCassandraEquivalenceRecordStore(EquivalenceRecordStore equivRecordStore) {
         this.equivRecordStore = equivRecordStore;
     }
     
@@ -120,6 +120,11 @@ public class BootstrapController {
         writeBootstrapStatus(cassandraContentBootstrapper, response);
     }
     
+    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/lookup/status")
+    public void cassandraLookupBootstrapStatus(HttpServletResponse response) throws IOException {
+        writeBootstrapStatus(cassandraLookupEntryBootstrapper, response);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/topic/status")
     public void cassandraTopicBootstrapStatus(HttpServletResponse response) throws IOException {
         writeBootstrapStatus(cassandraTopicBootstrapper, response);

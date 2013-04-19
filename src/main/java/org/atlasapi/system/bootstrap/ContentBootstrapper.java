@@ -43,6 +43,7 @@ import org.atlasapi.persistence.topic.TopicLister;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
@@ -249,7 +250,7 @@ public class ContentBootstrapper {
 
     private int bootstrapLookupEntries(final ChangeListener<LookupEntry> listener) throws RuntimeException {
         int processed = 0;
-        for (Iterable<LookupEntry> lookupEntries : Iterables.partition(lookupEntryLister.list(), 100)) {
+        for (Iterable<LookupEntry> lookupEntries : Iterables.partition(Iterables.filter(lookupEntryLister.list(), Predicates.notNull()), 100)) {
             listener.onChange(lookupEntries);
             processed += Iterables.size(lookupEntries);
             if (processed % 500 == 0) {
