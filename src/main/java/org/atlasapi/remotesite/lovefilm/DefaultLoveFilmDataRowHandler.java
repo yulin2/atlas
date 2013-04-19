@@ -138,7 +138,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     private void processTopLevelSeries() {
         for (Entry<String, Brand> entry : unwrittenBrands.entrySet()) {
             Iterable<Content> seriesForBrand = Iterables.filter(cached.get(entry.getKey()), IS_SERIES);
-            if (!isNotTopLevelSeries(entry.getValue(), seriesForBrand)) {
+            if (isTopLevelSeries(entry.getValue(), seriesForBrand)) {
                 
                 seen.put(entry.getKey(), entry.getValue());
                 
@@ -153,12 +153,22 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
                     write(episode);
                 }
                 for (Content child : cached.removeAll(entry.getKey())) {
-                    Episode episode = (Episode) child;
-                    episode.setParentRef(ParentRef.parentRefFrom(series));
-                    write(episode);
+                    Item item = (Item) child;
+                    item.setParentRef(ParentRef.parentRefFrom(series));
+                    write(item);
                 }
+            } else {
+                writeBrand(entry.getValue());
             }
         }
+    }
+    
+    private boolean isTopLevelSeries(Brand brand, Iterable<Content> seriesForBrand) {
+        if (Iterables.size(seriesForBrand) == 1) {
+            Content series = Iterables.getOnlyElement(seriesForBrand);
+            return series.getTitle().equals(brand.getTitle());
+        }
+        return false;
     }
     
     private boolean isNotTopLevelSeries(Brand brand, Iterable<Content> seriesForBrand) {
