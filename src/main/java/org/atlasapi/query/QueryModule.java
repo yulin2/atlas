@@ -14,21 +14,10 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
-import org.atlasapi.equiv.EquivModule;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.Content;
-import org.atlasapi.media.content.ContentIndex;
-import org.atlasapi.media.content.ContentResolver;
-import org.atlasapi.media.content.ContentSearcher;
-import org.atlasapi.media.content.schedule.ScheduleIndex;
-import org.atlasapi.media.topic.PopularTopicIndex;
 import org.atlasapi.media.topic.Topic;
-import org.atlasapi.media.topic.TopicIndex;
-import org.atlasapi.media.topic.TopicResolver;
-import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.media.product.ProductResolver;
-import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.query.common.ContextualQueryExecutor;
 import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
@@ -37,7 +26,6 @@ import org.atlasapi.query.v4.search.support.ContentResolvingSearcher;
 import org.atlasapi.query.v4.topic.IndexBackedTopicQueryExecutor;
 import org.atlasapi.query.v4.topic.TopicContentQueryExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -49,38 +37,25 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 //@Import(EquivModule.class)
 public class QueryModule {
 
-    @Autowired
-    private ContentResolver contentResolver;
-    @Autowired
-    private ContentSearcher contentSearcher;
-
-    private @Autowired DatabasedMongo mongo;
-    private @Autowired ContentResolver contentStore;
-    private @Autowired ContentIndex contentIndex;
-    private @Autowired ChannelResolver channelResolver;
-    private @Autowired SearchResolver v4SearchResolver;
-    private @Autowired TopicResolver topicResolver;
-    private @Autowired TopicIndex topicIndex;
-    private @Autowired PopularTopicIndex popularTopicIndex;
-    private @Autowired ScheduleIndex scheduleIndex;
+    private @Autowired AtlasPersistenceModule persistenceModule;
 
     @Bean ScheduleQueryExecutor scheduleQueryExecutor() {
-        return new IndexBackedScheduleQueryExecutor(scheduleIndex, contentStore);
+        return new IndexBackedScheduleQueryExecutor(persistenceModule.scheduleIndex(), persistenceModule.contentStore());
     }
     
     @Bean QueryExecutor<Topic> topicQueryExecutor() {
-        return new IndexBackedTopicQueryExecutor(topicIndex, topicResolver);
+        return new IndexBackedTopicQueryExecutor(persistenceModule.topicIndex(), persistenceModule.topicStore());
     }
     
     @Bean
     public ContextualQueryExecutor<Topic, Content> topicContentQueryExecutor() {
-        return new TopicContentQueryExecutor(topicResolver, contentIndex, contentStore);
+        return new TopicContentQueryExecutor(persistenceModule.topicStore(), persistenceModule.contentIndex(), persistenceModule.contentStore());
     }
 
     @Bean
     public SearchResolver v4SearchResolver() {
         // FIXME externalize timeout
-        return new ContentResolvingSearcher(contentSearcher, contentResolver, 60000);
+        return new ContentResolvingSearcher(persistenceModule.contentSearcher(), persistenceModule.contentStore(), 60000);
     }
 
     @Bean
