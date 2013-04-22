@@ -14,12 +14,16 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
+import org.atlasapi.equiv.DefaultMergingEquivalentsResolver;
+import org.atlasapi.equiv.OutputContentMerger;
+import org.atlasapi.equiv.StrategyBackedEquivalentsMerger;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.query.common.ContextualQueryExecutor;
 import org.atlasapi.query.common.QueryExecutor;
+import org.atlasapi.query.v4.content.IndexBackedEquivalentContentQueryExecutor;
 import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
 import org.atlasapi.query.v4.search.support.ContentResolvingSearcher;
@@ -51,6 +55,17 @@ public class QueryModule {
     public ContextualQueryExecutor<Topic, Content> topicContentQueryExecutor() {
         return new TopicContentQueryExecutor(persistenceModule.topicStore(), persistenceModule.contentIndex(), persistenceModule.contentStore());
     }
+    
+    @Bean
+    public QueryExecutor<Content> contentQueryExecutor() {
+        DefaultMergingEquivalentsResolver<Content> mergingContentResolver
+            = new DefaultMergingEquivalentsResolver<Content>(
+                persistenceModule.equivalentContentResolver(), 
+                new StrategyBackedEquivalentsMerger<Content>(new OutputContentMerger())
+            );
+        return new IndexBackedEquivalentContentQueryExecutor(persistenceModule.contentIndex(), 
+            mergingContentResolver);
+    }
 
     @Bean
     public SearchResolver v4SearchResolver() {
@@ -58,21 +73,4 @@ public class QueryModule {
         return new ContentResolvingSearcher(persistenceModule.contentSearcher(), persistenceModule.contentStore(), 60000);
     }
 
-    @Bean
-    @Qualifier("v2")
-    public SearchResolver v2SearchResolver() {
-        if (!Strings.isNullOrEmpty(searchHost)) {
-            ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
-            return new ContentResolvingSearcher(titleSearcher, queryExecutor());
-        }
-
-        return new DummySearcher();
-    }
-    
-    @Bean
-    @Qualifier("v4")
-    public SearchResolver v4SearchResolver() {
-        // FIXME externalize timeout
-        return new org.atlasapi.query.v4.search.support.ContentResolvingSearcher(contentSearcher, queryExecutor(), 60000);
-    }
 }

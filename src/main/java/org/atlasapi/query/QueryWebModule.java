@@ -83,6 +83,7 @@ import org.atlasapi.query.common.QueryAttributeParser;
 import org.atlasapi.query.common.QueryContextParser;
 import org.atlasapi.query.common.Resource;
 import org.atlasapi.query.common.StandardQueryParser;
+import org.atlasapi.query.v4.content.ContentController;
 import org.atlasapi.query.v4.schedule.ChannelListWriter;
 import org.atlasapi.query.v4.schedule.ContentListWriter;
 import org.atlasapi.query.v4.schedule.ScheduleController;
@@ -157,6 +158,12 @@ public class QueryWebModule {
         return new TopicController(topicQueryParser(), 
             queryModule.topicQueryExecutor(), new TopicQueryResultWriter(topicListWriter()));
     }
+    
+    @Bean
+    ContentController contentController() {
+        return new ContentController(contentQueryParser(),
+            queryModule.contentQueryExecutor(), new ContentQueryResultWriter(contentListWriter()));
+    }
 
     @Bean
     TopicContentController topicContentController() {
@@ -190,6 +197,18 @@ public class QueryWebModule {
             QueryAtomParser.valueOf(Attributes.TOPIC_SUPERVISED, AttributeCoercers.booleanCoercer()),
             QueryAtomParser.valueOf(Attributes.TOPIC_WEIGHTING, AttributeCoercers.floatCoercer())
         ));
+    }
+    
+    private StandardQueryParser<Content> contentQueryParser() {
+        QueryContextParser contextParser = new QueryContextParser(configFetcher, 
+        new LookupAnnotationsExtractor(AnnotationLookup.builder()
+                            .withImplicitListContext(Resource.CONTENT, Annotation.all())
+                            .build()), selectionBuilder());
+        
+        return new StandardQueryParser<Content>("content", 
+                contentQueryAttributeParser()
+                    .copyWithIgnoredParameters(contextParser.getParameterNames()),
+                idCodec(), contextParser);
     }
 
     private StandardQueryParser<Topic> topicQueryParser() {

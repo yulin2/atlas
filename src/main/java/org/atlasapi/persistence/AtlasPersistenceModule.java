@@ -8,7 +8,7 @@ import javax.annotation.Resource;
 
 import org.atlasapi.equiv.CassandraEquivalenceRecordStore;
 import org.atlasapi.equiv.EquivalenceRecordStore;
-import org.atlasapi.equiv.EquivalentResolver;
+import org.atlasapi.equiv.EquivalentsResolver;
 import org.atlasapi.equiv.IdResolverBackedEquivalentResolver;
 import org.atlasapi.media.CassandraPersistenceModule;
 import org.atlasapi.media.ElasticSearchContentIndexModule;
@@ -116,7 +116,7 @@ public class AtlasPersistenceModule {
     }
     
     @Bean
-    public EquivalentResolver<Content> equivalentContentResolver() {
+    public EquivalentsResolver<Content> equivalentContentResolver() {
         return new IdResolverBackedEquivalentResolver<Content>(equivalenceRecordStore(), contentStore());
     }
 
