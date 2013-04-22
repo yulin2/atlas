@@ -6,7 +6,10 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.atlasapi.equiv.CassandraEquivalenceRecordStore;
 import org.atlasapi.equiv.EquivalenceRecordStore;
+import org.atlasapi.equiv.EquivalentResolver;
+import org.atlasapi.equiv.IdResolverBackedEquivalentResolver;
 import org.atlasapi.media.CassandraPersistenceModule;
 import org.atlasapi.media.ElasticSearchContentIndexModule;
 import org.atlasapi.media.channel.CachingChannelStore;
@@ -15,6 +18,7 @@ import org.atlasapi.media.channel.ChannelStore;
 import org.atlasapi.media.channel.MongoChannelGroupStore;
 import org.atlasapi.media.channel.MongoChannelStore;
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.content.EquivalenceWritingContentStore;
 import org.atlasapi.media.content.EsContentIndex;
@@ -109,6 +113,11 @@ public class AtlasPersistenceModule {
     @Bean
     public EquivalenceRecordStore equivalenceRecordStore() {
         return persistenceModule().getEquivalenceRecordStore();
+    }
+    
+    @Bean
+    public EquivalentResolver<Content> equivalentContentResolver() {
+        return new IdResolverBackedEquivalentResolver<Content>(equivalenceRecordStore(), contentStore());
     }
 
     @Bean
