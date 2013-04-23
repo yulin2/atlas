@@ -29,6 +29,7 @@ public final class ContentListWriter implements EntityListWriter<Content> {
         for (int i = 0; i < annotations.size(); i++) {
             annotations.get(i).write(entity, writer, ctxt);
         }
+        ctxt.endResource();
     }
 
     @Override
