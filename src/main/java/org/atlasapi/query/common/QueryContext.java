@@ -3,6 +3,7 @@ package org.atlasapi.query.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.query.annotation.ActiveAnnotations;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;

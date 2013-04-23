@@ -4,25 +4,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.output.AnnotationLookup;
+import org.atlasapi.query.annotation.ActiveAnnotations;
+import org.atlasapi.query.annotation.ContextualAnnotationIndex;
+import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
+
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 
-public class LookupAnnotationsExtractor implements AnnotationsExtractor {
+public class IndexContextualAnnotationsExtractor implements ContextualAnnotationsExtractor {
 
     private static final String DEFAULT_PARAMETER_NAME = "annotations";
 
-    private final AnnotationLookup lookup;
+    private final ContextualAnnotationIndex lookup;
     private final String parameterName;
 
     private final Splitter csvSplitter = Splitter.on(",").omitEmptyStrings().trimResults();
 
-    public LookupAnnotationsExtractor(AnnotationLookup lookup) {
+    public IndexContextualAnnotationsExtractor(ContextualAnnotationIndex lookup) {
         this(DEFAULT_PARAMETER_NAME, lookup);
     }
 
-    public LookupAnnotationsExtractor(String parameterName, AnnotationLookup lookup) {
+    public IndexContextualAnnotationsExtractor(String parameterName, ContextualAnnotationIndex lookup) {
         this.parameterName = checkNotNull(parameterName);
         this.lookup = checkNotNull(lookup);
     }
@@ -37,7 +40,7 @@ public class LookupAnnotationsExtractor implements AnnotationsExtractor {
             return ActiveAnnotations.standard();
         }
 
-        return lookup.lookup(csvSplitter.split(serialisedAnnotations));
+        return lookup.resolve(csvSplitter.split(serialisedAnnotations));
     }
 
     @Override

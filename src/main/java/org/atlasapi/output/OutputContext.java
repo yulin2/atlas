@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.output.annotation.OutputAnnotation;
-import org.atlasapi.query.common.ActiveAnnotations;
+import org.atlasapi.query.annotation.ActiveAnnotations;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.Resource;
 

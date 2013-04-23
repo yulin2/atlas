@@ -43,13 +43,13 @@ public class StandardQueryParser<T> implements QueryParser<T> {
     }
     
     private Query<T> singleQuery(HttpServletRequest request, Id singleId) throws QueryParseException {
-        return Query.singleQuery(singleId, queryContextParser.parseContext(request));
+        return Query.singleQuery(singleId, queryContextParser.parseSingleContext(request));
     }
 
     private Query<T> listQuery(HttpServletRequest request) throws QueryParseException {
         AttributeQuerySet querySet = attributeParser.parse(request);
         return Query.listQuery(querySet,
-            queryContextParser.parseContext(request));
+            queryContextParser.parseListContext(request));
     }
     
 }

@@ -1,4 +1,4 @@
-package org.atlasapi.query.common;
+package org.atlasapi.query.annotation;
 
 import java.util.List;
 import java.util.Map.Entry;
@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 
 import org.atlasapi.output.Annotation;
+import org.atlasapi.query.common.Resource;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;

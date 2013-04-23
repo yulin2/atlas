@@ -22,7 +22,7 @@ public class ContextualQueryParser<C, R> {
 
     private final NumberToShortStringCodec idCodec;
     private final Attribute<Id> contextResouceAttribute;
-    private final QueryContextParser queryContextParser;
+    private final ContextualQueryContextParser queryContextParser;
     private final QueryAttributeParser attributeParser;
 
     private final Pattern contextResourcePattern;
@@ -31,7 +31,7 @@ public class ContextualQueryParser<C, R> {
         Attribute<Id> contextResouceAttribute,
         String resourceName,
         NumberToShortStringCodec idCodec,
-        QueryAttributeParser attributeParser, QueryContextParser queryContextParser) {
+        QueryAttributeParser attributeParser, ContextualQueryContextParser queryContextParser) {
         this.attributeParser = checkNotNull(attributeParser);
         this.queryContextParser = checkNotNull(queryContextParser);
         this.idCodec = checkNotNull(idCodec);

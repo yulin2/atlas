@@ -13,7 +13,7 @@ import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
-import org.atlasapi.query.common.AnnotationsExtractor;
+import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
 import org.atlasapi.query.common.QueryResult;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class ScheduleController {
         ChannelResolver channelResolver,
         ApplicationConfigurationFetcher appFetcher,
         QueryResultWriter<ChannelSchedule> resultWriter,
-        AnnotationsExtractor annotationsExtractor) {
+        ContextualAnnotationsExtractor annotationsExtractor) {
         this.requestParser = new ScheduleRequestParser(
             channelResolver,
             appFetcher,

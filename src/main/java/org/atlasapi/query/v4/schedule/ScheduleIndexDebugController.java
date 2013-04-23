@@ -10,8 +10,8 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.content.schedule.ScheduleRef;
-import org.atlasapi.query.common.ActiveAnnotations;
-import org.atlasapi.query.common.AnnotationsExtractor;
+import org.atlasapi.query.annotation.ActiveAnnotations;
+import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
 import org.atlasapi.query.common.InvalidAnnotationException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -48,7 +48,7 @@ public class ScheduleIndexDebugController {
             channelResolver,
             appFetcher,
             MAX_REQUEST_DURATION,
-            new SystemClock(), new AnnotationsExtractor() {
+            new SystemClock(), new ContextualAnnotationsExtractor() {
 
                 @Override
                 public ActiveAnnotations extractFromRequest(HttpServletRequest request)

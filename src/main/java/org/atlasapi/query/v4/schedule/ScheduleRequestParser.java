@@ -16,8 +16,8 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
-import org.atlasapi.query.common.ActiveAnnotations;
-import org.atlasapi.query.common.AnnotationsExtractor;
+import org.atlasapi.query.annotation.ActiveAnnotations;
+import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.RequestParameterValidator;
@@ -50,11 +50,11 @@ class ScheduleRequestParser {
     
     private final NumberToShortStringCodec idCodec;
     private final DateTimeInQueryParser dateTimeParser;
-    private final AnnotationsExtractor annotationExtractor;
+    private final ContextualAnnotationsExtractor annotationExtractor;
     private final Duration maxQueryDuration;
     private final Clock clock;
 
-    public ScheduleRequestParser(ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration, Clock clock, AnnotationsExtractor annotationsExtractor) {
+    public ScheduleRequestParser(ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration, Clock clock, ContextualAnnotationsExtractor annotationsExtractor) {
         this.channelResolver = channelResolver;
         this.applicationStore = appFetcher;
         this.maxQueryDuration = maxQueryDuration;

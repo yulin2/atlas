@@ -38,7 +38,7 @@ public class StandardQueryParserTest {
     
     @Test
     public void testParsesSingleIdIntoNonListTopicQuery() throws Exception {
-        when(queryContextParser.parseContext(isA(HttpServletRequest.class)))
+        when(queryContextParser.parseSingleContext(isA(HttpServletRequest.class)))
             .thenReturn(QueryContext.standard());
         
         Query<Topic> q = queryParser.parse(requestWithPath("4.0/topics/cbbh.json"));
@@ -46,12 +46,12 @@ public class StandardQueryParserTest {
         assertFalse(q.isListQuery());
         assertThat(q.getOnlyId(), is(Id.valueOf(idCodec.decode("cbbh"))));
         
-        verify(queryContextParser).parseContext(isA(HttpServletRequest.class));
+        verify(queryContextParser).parseSingleContext(isA(HttpServletRequest.class));
     }
 
     @Test
     public void testParsesIdsOnlyIntoListQuery() throws Exception {
-        when(queryContextParser.parseContext(isA(HttpServletRequest.class)))
+        when(queryContextParser.parseListContext(isA(HttpServletRequest.class)))
             .thenReturn(QueryContext.standard());
     
         Query<Topic> q = queryParser.parse(requestWithPath("4.0/topics.json")
@@ -62,7 +62,7 @@ public class StandardQueryParserTest {
         assertThat(Iterables.getOnlyElement(Iterables.getOnlyElement(q.getOperands()).getValue()),
             Matchers.<Object>is(Id.valueOf(idCodec.decode("cbbh"))));
         
-        verify(queryContextParser).parseContext(isA(HttpServletRequest.class));
+        verify(queryContextParser).parseListContext(isA(HttpServletRequest.class));
     }
 
     private StubHttpServletRequest requestWithPath(String uri) {

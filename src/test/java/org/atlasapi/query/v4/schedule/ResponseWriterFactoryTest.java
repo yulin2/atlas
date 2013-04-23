@@ -6,6 +6,7 @@ import org.atlasapi.output.NotAcceptableException;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
+import org.atlasapi.output.UnsupportedFormatException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -69,7 +70,7 @@ public class ResponseWriterFactoryTest {
         
     }
 
-    @Test(expected=NotFoundException.class)
+    @Test(expected=UnsupportedFormatException.class)
     public void testWritesNotFoundForUnknownExtension() throws Exception {
         
         request.withRequestUri("/extension/is.unknown");

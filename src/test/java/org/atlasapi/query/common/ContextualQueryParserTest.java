@@ -17,6 +17,7 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.topic.Topic;
+import org.atlasapi.query.annotation.ActiveAnnotations;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -32,7 +33,7 @@ public class ContextualQueryParserTest {
 
     private final NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
     private final QueryAttributeParser attributeParser = mock(QueryAttributeParser.class);
-    private final QueryContextParser queryContextParser = mock(QueryContextParser.class);
+    private final ContextualQueryContextParser queryContextParser = mock(ContextualQueryContextParser.class);
     private final ContextualQueryParser<Topic, Content> parser = 
         new ContextualQueryParser<Topic, Content>("topics", Attributes.TOPIC_ID, "content", idCodec,attributeParser,queryContextParser);
     

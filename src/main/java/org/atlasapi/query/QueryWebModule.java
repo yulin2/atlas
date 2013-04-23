@@ -39,7 +39,6 @@ import org.atlasapi.media.topic.PopularTopicIndex;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.TopicResolver;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.output.AnnotationLookup;
 import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.annotation.AvailableLocationsAnnotation;
@@ -75,9 +74,12 @@ import org.atlasapi.persistence.output.MongoRecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.output.MongoUpcomingChildrenResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
+import org.atlasapi.query.annotation.ResourceAnnotationIndex;
 import org.atlasapi.query.common.AttributeCoercers;
+import org.atlasapi.query.common.ContextualQueryContextParser;
 import org.atlasapi.query.common.ContextualQueryParser;
-import org.atlasapi.query.common.LookupAnnotationsExtractor;
+import org.atlasapi.query.common.IndexAnnotationsExtractor;
+import org.atlasapi.query.common.IndexContextualAnnotationsExtractor;
 import org.atlasapi.query.common.QueryAtomParser;
 import org.atlasapi.query.common.QueryAttributeParser;
 import org.atlasapi.query.common.QueryContextParser;
@@ -140,17 +142,12 @@ public class QueryWebModule {
 
     @Bean
     ScheduleController v4ScheduleController() {
-        return new ScheduleController(
-                queryModule.scheduleQueryExecutor(),
-                channelResolver, configFetcher,
-                new ScheduleQueryResultWriter(channelListWriter(), contentListWriter()),
-                new LookupAnnotationsExtractor(AnnotationLookup.builder()
-                    .withExplicitSingleContext(Resource.CHANNEL, Annotation.all())
-                    .withExplicitListContext(Resource.CONTENT, Annotation.all())
-                    .attachLookup(Resource.CONTENT, Annotation.TOPICS, AnnotationLookup.builder()
-                        .withImplicitListContext(Resource.TOPIC, Annotation.all())
-                        .build())
-                    .build()));
+        return new ScheduleController(queryModule.scheduleQueryExecutor(),
+            channelResolver, configFetcher, new ScheduleQueryResultWriter(channelListWriter(), contentListWriter()),
+            new IndexContextualAnnotationsExtractor(ResourceAnnotationIndex.combination()
+                .addExplicitSingleContext(channelAnnotationIndex())
+                .addExplicitListContext(contentAnnotationIndex())
+                .combine()));
     }
 
     @Bean
@@ -167,15 +164,11 @@ public class QueryWebModule {
 
     @Bean
     TopicContentController topicContentController() {
-        QueryContextParser contextParser = new QueryContextParser(configFetcher,
-            new LookupAnnotationsExtractor(AnnotationLookup.builder()
-                .withImplicitListContext(Resource.CONTENT, Annotation.all())
-                .withExplicitSingleContext(Resource.TOPIC, Annotation.all())
-                .attachLookup(Resource.CONTENT, Annotation.TOPICS, 
-                        AnnotationLookup.builder()
-                            .withImplicitListContext(Resource.TOPIC, Annotation.all())
-                            .build())
-                .build()
+        ContextualQueryContextParser contextParser = new ContextualQueryContextParser(configFetcher,
+            new IndexContextualAnnotationsExtractor(ResourceAnnotationIndex.combination()
+                .addImplicitListContext(contentAnnotationIndex())
+                .addExplicitSingleContext(topicAnnotationIndex())
+                .combine()
             ), selectionBuilder());
         
         ContextualQueryParser<Topic, Content> parser = new ContextualQueryParser<Topic, Content>(
@@ -201,9 +194,7 @@ public class QueryWebModule {
     
     private StandardQueryParser<Content> contentQueryParser() {
         QueryContextParser contextParser = new QueryContextParser(configFetcher, 
-        new LookupAnnotationsExtractor(AnnotationLookup.builder()
-                            .withImplicitListContext(Resource.CONTENT, Annotation.all())
-                            .build()), selectionBuilder());
+        new IndexAnnotationsExtractor(contentAnnotationIndex()), selectionBuilder());
         
         return new StandardQueryParser<Content>("content", 
                 contentQueryAttributeParser()
@@ -213,9 +204,7 @@ public class QueryWebModule {
 
     private StandardQueryParser<Topic> topicQueryParser() {
         QueryContextParser contextParser = new QueryContextParser(configFetcher, 
-        new LookupAnnotationsExtractor(AnnotationLookup.builder()
-                            .withImplicitListContext(Resource.TOPIC, Annotation.all())
-                            .build()), selectionBuilder());
+        new IndexAnnotationsExtractor(topicAnnotationIndex()), selectionBuilder());
         
         return new StandardQueryParser<Topic>("topics", 
             new QueryAttributeParser(ImmutableList.of(
@@ -239,17 +228,29 @@ public class QueryWebModule {
     }
     
     @Bean
-    EntityListWriter<Content> contentListWriter() {
-        return new ContentListWriter(contentAnnotations());
+    ResourceAnnotationIndex contentAnnotationIndex() {
+        return ResourceAnnotationIndex.builder(Resource.CONTENT, Annotation.all())
+            .attach(Annotation.TOPICS, topicAnnotationIndex(), Annotation.ID)
+            .build();
+    }
+    
+    @Bean
+    ResourceAnnotationIndex topicAnnotationIndex() {
+        return ResourceAnnotationIndex.builder(Resource.TOPIC, Annotation.all()).build();
     }
 
     @Bean
-    protected AnnotationRegistry<Content> contentAnnotations() {
+    ResourceAnnotationIndex channelAnnotationIndex() {
+        return ResourceAnnotationIndex.builder(Resource.CHANNEL, Annotation.all()).build();
+    }
+    
+    @Bean
+    EntityListWriter<Content> contentListWriter() {
         ImmutableSet<Annotation> commonImplied = ImmutableSet.of(ID_SUMMARY);
         RecentlyBroadcastChildrenResolver recentlyBroadcastResolver = new MongoRecentlyBroadcastChildrenResolver(mongo);
         UpcomingChildrenResolver upcomingChildrenResolver = new MongoUpcomingChildrenResolver(mongo);
         MongoContainerSummaryResolver containerSummaryResolver = new MongoContainerSummaryResolver(mongo, idCodec());
-        return AnnotationRegistry.<Content>builder()
+        return new ContentListWriter(AnnotationRegistry.<Content>builder()
             .registerDefault(ID_SUMMARY, new IdentificationSummaryAnnotation(idCodec()))
             .register(ID, new IdentificationAnnotation(), commonImplied)
             .register(EXTENDED_ID, new ExtendedIdentificationAnnotation(idCodec()), ImmutableSet.of(ID))
@@ -280,38 +281,28 @@ public class QueryWebModule {
                 SERIES_SUMMARY, BROADCASTS, LOCATIONS))
             .register(CONTENT_DETAIL, NullWriter.create(Content.class), ImmutableSet.of(EXTENDED_DESCRIPTION, SUB_ITEMS, CLIPS, 
                 PEOPLE, BRAND_SUMMARY, SERIES_SUMMARY, BROADCASTS, LOCATIONS, KEY_PHRASES, RELATED_LINKS))
-        .build();
+        .build());
     }
-    
+
     @Bean
     protected EntityListWriter<Topic> topicListWriter() {
-        return new TopicListWriter(topicAnnotations());
-    }
-    
-    @Bean
-    protected AnnotationRegistry<Topic> topicAnnotations() {
-        return AnnotationRegistry.<Topic>builder()
+        return new TopicListWriter(AnnotationRegistry.<Topic>builder()
             .registerDefault(ID_SUMMARY, new IdentificationSummaryAnnotation(idCodec()))
             .register(ID, new IdentificationAnnotation(), ID_SUMMARY)
             .register(EXTENDED_ID, new ExtendedIdentificationAnnotation(idCodec()), ImmutableSet.of(ID))
             .register(DESCRIPTION, new DescriptionAnnotation<Topic>(), ImmutableSet.of(ID))
-            .build();
+            .build());
     }
     
     @Bean
     protected EntityListWriter<Channel> channelListWriter() {
-        return new ChannelListWriter(channelAnnotations());
-    }
-    
-    @Bean
-    protected AnnotationRegistry<Channel> channelAnnotations() {
-        return AnnotationRegistry.<Channel>builder()
+        return new ChannelListWriter(AnnotationRegistry.<Channel>builder()
             .registerDefault(ID_SUMMARY, new IdentificationSummaryAnnotation(idCodec()))
             .register(ID, new IdentificationAnnotation(), ID_SUMMARY)
             .register(EXTENDED_ID, new ExtendedIdentificationAnnotation(idCodec()), ImmutableSet.of(ID))
             .register(CHANNEL_SUMMARY, new ChannelSummaryWriter(), ImmutableSet.of(ID))
             .register(CHANNEL, new ChannelAnnotation(), ImmutableSet.of(CHANNEL_SUMMARY))
-            .build();
+            .build());
     }
     
     @Bean

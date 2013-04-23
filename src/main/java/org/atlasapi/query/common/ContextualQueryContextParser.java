@@ -6,37 +6,29 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.query.annotation.AnnotationsExtractor;
+import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
-public class QueryContextParser {
+public class ContextualQueryContextParser {
     
     private final ApplicationConfigurationFetcher configFetcher;
-    private final AnnotationsExtractor annotationExtractor;
+    private final ContextualAnnotationsExtractor annotationExtractor;
     private final SelectionBuilder selectionBuilder;
 
-    public QueryContextParser(ApplicationConfigurationFetcher configFetcher, AnnotationsExtractor annotationsParser, Selection.SelectionBuilder selectionBuilder) {
+    public ContextualQueryContextParser(ApplicationConfigurationFetcher configFetcher, ContextualAnnotationsExtractor annotationsParser, Selection.SelectionBuilder selectionBuilder) {
         this.configFetcher = checkNotNull(configFetcher);
         this.annotationExtractor = checkNotNull(annotationsParser);
         this.selectionBuilder = checkNotNull(selectionBuilder);
     }
-    
-    public QueryContext parseSingleContext(HttpServletRequest request) throws QueryParseException {
-        return new QueryContext(
-                configFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.defaultConfiguration()),
-                annotationExtractor.extractFromSingleRequest(request),
-                selectionBuilder.build(request)
-                );
-    }
 
-    public QueryContext parseListContext(HttpServletRequest request) throws QueryParseException {
+    public QueryContext parseContext(HttpServletRequest request) throws QueryParseException {
         return new QueryContext(
             configFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.defaultConfiguration()),
-            annotationExtractor.extractFromListRequest(request),
+            annotationExtractor.extractFromRequest(request),
             selectionBuilder.build(request)
         );
     }

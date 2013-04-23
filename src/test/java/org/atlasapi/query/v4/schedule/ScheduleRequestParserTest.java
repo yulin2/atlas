@@ -18,8 +18,8 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.query.common.ActiveAnnotations;
-import org.atlasapi.query.common.AnnotationsExtractor;
+import org.atlasapi.query.annotation.ActiveAnnotations;
+import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
 import org.atlasapi.query.common.Resource;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -45,7 +45,7 @@ public class ScheduleRequestParserTest {
     private final ApplicationConfigurationFetcher applicationFetcher = mock(ApplicationConfigurationFetcher.class);
     private final ChannelResolver channelResolver = mock(ChannelResolver.class);
     private final DateTime time = new DateTime(2012, 12, 14, 10,00,00,000, DateTimeZones.UTC);
-    private final AnnotationsExtractor annotationsExtractor = mock(AnnotationsExtractor.class);
+    private final ContextualAnnotationsExtractor annotationsExtractor = mock(ContextualAnnotationsExtractor.class);
     private final ScheduleRequestParser builder = new ScheduleRequestParser(
         channelResolver,
         applicationFetcher,
