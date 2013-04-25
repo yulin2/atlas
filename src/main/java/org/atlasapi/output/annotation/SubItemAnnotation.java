@@ -9,14 +9,15 @@ import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.writers.ChildRefWriter;
 
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+
 
 public class SubItemAnnotation extends OutputAnnotation<Content> {
 
     private final ChildRefWriter childRefWriter;
 
-    public SubItemAnnotation() {
-        super();
-        childRefWriter = new ChildRefWriter("content");
+    public SubItemAnnotation(NumberToShortStringCodec idCodec) {
+        childRefWriter = new ChildRefWriter(idCodec, "content");
     }
 
     @Override

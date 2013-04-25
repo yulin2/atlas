@@ -1,5 +1,6 @@
 package org.atlasapi.output.annotation;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.metabroadcast.common.base.MorePredicates.transformingPredicate;
 
 import java.io.IOException;
@@ -18,21 +19,23 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public class RecentlyBroadcastAnnotation extends OutputAnnotation<Content> {
 
     private final RecentlyBroadcastChildrenResolver recentlyBroadcastResolver;
+    private final ChildRefWriter childRefWriter;
 
-    public RecentlyBroadcastAnnotation(RecentlyBroadcastChildrenResolver recentlyBroadcastResolver) {
-        super();
-        this.recentlyBroadcastResolver = recentlyBroadcastResolver;
+    public RecentlyBroadcastAnnotation(NumberToShortStringCodec idCodec, RecentlyBroadcastChildrenResolver recentlyBroadcastResolver) {
+        this.recentlyBroadcastResolver = checkNotNull(recentlyBroadcastResolver);
+        this.childRefWriter = new ChildRefWriter(checkNotNull(idCodec), "recent_content");
     }
 
     @Override
     public void write(Content content, FieldWriter writer, OutputContext ctxt) throws IOException {
         if (content instanceof Container) {
             Container container = (Container) content;
-            writer.writeList(new ChildRefWriter("recent_content"), Iterables.filter(container.getChildRefs(), recentlyBroadcastFilter(container)), ctxt);
+            writer.writeList(childRefWriter, Iterables.filter(container.getChildRefs(), recentlyBroadcastFilter(container)), ctxt);
         }
     }
 

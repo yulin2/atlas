@@ -19,14 +19,21 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public class ContentGroupsAnnotation extends OutputAnnotation<Content> {
 
     public static final class ContentGroupWriter implements EntityListWriter<ContentGroup> {
 
+        private final ChildRefWriter childRefWriter;
+
+        public ContentGroupWriter(NumberToShortStringCodec idCodec) {
+            childRefWriter = new ChildRefWriter(idCodec, "content");
+        }
+
         @Override
         public void write(ContentGroup entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-            writer.writeList(new ChildRefWriter("content"), entity.getContents(), ctxt);
+            writer.writeList(childRefWriter, entity.getContents(), ctxt);
         }
 
         @Override
@@ -42,10 +49,9 @@ public class ContentGroupsAnnotation extends OutputAnnotation<Content> {
 
     private final ContentGroupResolver contentGroupResolver;
 
-    public ContentGroupsAnnotation(ContentGroupResolver resolver) {
-        super();
+    public ContentGroupsAnnotation(NumberToShortStringCodec idCodec, ContentGroupResolver resolver) {
         this.contentGroupResolver = resolver;
-        contentGroupWriter = new ContentGroupWriter();
+        contentGroupWriter = new ContentGroupWriter(idCodec);
     }
 
     @Override
