@@ -1,5 +1,7 @@
 package org.atlasapi.output.annotation;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 
 import org.atlasapi.media.content.Content;
@@ -13,6 +15,7 @@ import org.atlasapi.output.OutputContext;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 
 import com.google.common.base.Optional;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 
 public class BrandSummaryAnnotation extends OutputAnnotation<Content> {
@@ -20,16 +23,18 @@ public class BrandSummaryAnnotation extends OutputAnnotation<Content> {
     private static final class ContainerSummaryWriter implements EntityWriter<Item> {
 
         private final ContainerSummaryResolver containerSummaryResolver;
+        private final NumberToShortStringCodec idCodec;
 
-        public ContainerSummaryWriter(ContainerSummaryResolver containerSummaryResolver) {
-            this.containerSummaryResolver = containerSummaryResolver;
+        public ContainerSummaryWriter(NumberToShortStringCodec idCodec, ContainerSummaryResolver containerSummaryResolver) {
+            this.idCodec = checkNotNull(idCodec);
+            this.containerSummaryResolver = checkNotNull(containerSummaryResolver);
         }
 
         @Override
         public void write(Item entity, FieldWriter writer, OutputContext ctxt) throws IOException {
             ParentRef container = entity.getContainer();
             ContainerSummary summary = entity.getContainerSummary();
-            writer.writeField("uri", container.getId());
+            writer.writeField("id", idCodec.encode(container.getId().toBigInteger()));
             if (summary != null) {
                 writer.writeField("type", summary.getType());
                 writer.writeField("title", summary.getTitle());
@@ -55,9 +60,8 @@ public class BrandSummaryAnnotation extends OutputAnnotation<Content> {
 
     private final ContainerSummaryWriter summaryWriter;
 
-    public BrandSummaryAnnotation(ContainerSummaryResolver containerSummaryResolver) {
-        super();
-        summaryWriter = new ContainerSummaryWriter(containerSummaryResolver);
+    public BrandSummaryAnnotation(NumberToShortStringCodec idCodec, ContainerSummaryResolver containerSummaryResolver) {
+        summaryWriter = new ContainerSummaryWriter(idCodec, containerSummaryResolver);
     }
 
     @Override

@@ -14,6 +14,7 @@ import org.atlasapi.output.OutputContext;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 
 import com.google.common.base.Optional;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public class SeriesSummaryAnnotation extends OutputAnnotation<Content> {
 
@@ -22,15 +23,17 @@ public class SeriesSummaryAnnotation extends OutputAnnotation<Content> {
     private final class SeriesSummaryWriter implements EntityWriter<Episode> {
 
         private final ContainerSummaryResolver containerSummaryResolver;
+        private final NumberToShortStringCodec idCodec;
         
         
-        public SeriesSummaryWriter(ContainerSummaryResolver containerSummaryResolver) {
+        public SeriesSummaryWriter(NumberToShortStringCodec idCodec, ContainerSummaryResolver containerSummaryResolver) {
+            this.idCodec = checkNotNull(idCodec);
             this.containerSummaryResolver = checkNotNull(containerSummaryResolver);
         }
 
         @Override
         public void write(Episode entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-            writer.writeField("uri", entity.getSeriesRef().getId());
+            writer.writeField("id", idCodec.encode(entity.getSeriesRef().getId().toBigInteger()));
             Optional<SeriesSummary> possibleSummary = containerSummaryResolver.summarizeSeries(entity.getSeriesRef());
             if (possibleSummary.isPresent()) {
                 SeriesSummary summary = possibleSummary.get();
@@ -47,9 +50,8 @@ public class SeriesSummaryAnnotation extends OutputAnnotation<Content> {
         }
     }
 
-    public SeriesSummaryAnnotation(ContainerSummaryResolver containerSummaryResolver) {
-        super();
-        summaryWriter = new SeriesSummaryWriter(containerSummaryResolver);
+    public SeriesSummaryAnnotation(NumberToShortStringCodec idCodec, ContainerSummaryResolver containerSummaryResolver) {
+        summaryWriter = new SeriesSummaryWriter(idCodec, containerSummaryResolver);
     }
 
     @Override
