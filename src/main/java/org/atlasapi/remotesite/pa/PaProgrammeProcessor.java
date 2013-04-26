@@ -80,7 +80,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private final ContentWriter contentWriter;
     private final ContentResolver contentResolver;
-    private final ChannelResolver channelResolver;
     private final AdapterLog log;
     private final PaCountryMap countryMap = new PaCountryMap();
     
@@ -94,7 +93,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         this.contentResolver = contentResolver;
         this.log = log;
         this.personWriter = itemsPeopleWriter;
-        this.channelResolver = channelResolver;
         this.terrestrialChannels = ImmutableList.<Channel>builder()
         		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/east").requireValue())
         		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/london").requireValue())
@@ -234,6 +232,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             episode = (Episode) getBasicEpisode(progData, true);
         }
         episode.setCanonicalUri(uri);
+        episode.addAlias(new Alias("uri", uri));
         episode.setCurie(CLOSED_CURIE+getClosedPostfix(channel));
         episode.setTitle(progData.getTitle());
         episode.setScheduleOnly(true);
@@ -658,7 +657,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private Film getBasicFilm(ProgData progData) {
-        Film film = new Film(PaHelper.getFilmUri(programmeId(progData)), PaHelper.getFilmCurie(programmeId(progData)), Publisher.PA);
+        String programmeId = programmeId(progData);
+        Film film = new Film(PaHelper.getFilmUri(programmeId), PaHelper.getFilmCurie(programmeId), Publisher.PA);
+        
+        film.addAlias(new Alias(Alias.URI_NAMESPACE, PaHelper.getFilmUri(programmeId)));
+        film.addAlias(PaHelper.getFilmAlias(programmeId));
         
         setBasicDetails(progData, film);
         
@@ -667,7 +670,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
     private Item getBasicEpisode(ProgData progData, boolean isEpisode) {
         Item item = isEpisode ? new Episode() : new Item();
-        item.setCanonicalUri(PaHelper.getEpisodeUri(programmeId(progData)));
+        String programmeId = programmeId(progData);
+        item.setCanonicalUri(PaHelper.getEpisodeUri(programmeId));
+        item.addAlias(new Alias(Alias.URI_NAMESPACE, PaHelper.getEpisodeUri(programmeId)));
+        item.addAlias(PaHelper.getEpisodeAlias(programmeId));
         item.setCurie("pa:e-" + programmeId(progData));
         item.setPublisher(Publisher.PA);
         setBasicDetails(progData, item);

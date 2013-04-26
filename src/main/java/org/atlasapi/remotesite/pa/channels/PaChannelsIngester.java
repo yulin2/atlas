@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.PaChannelMap;
@@ -30,6 +31,9 @@ import com.google.common.collect.Iterables;
 
 public class PaChannelsIngester {
 
+    private static final String YOUVIEW_CHANNEL_ALIAS_NAMESPACE = "gb:youview:service-id";
+    private static final String CHANNEL_ALIAS_NAMESPACE = "gb:pa:channel";
+    private static final String STATION_ALIAS_NAMESPACE = "gb:pa:station";
     private static final String REGIONAL_VARIATION = "regional";
     static final String IMAGE_PREFIX = "http://images.atlas.metabroadcast.com/pressassociation.com/channels/";
     private static final String CHANNEL_URI_PREFIX = "http://ref.atlasapi.org/channels/pressassociation.com/";
@@ -91,8 +95,10 @@ public class PaChannelsIngester {
 
     private Channel processParentChannel(Station station, org.atlasapi.remotesite.pa.channels.bindings.Channel firstChild) {
         
+        String stationUri = STATION_URI_PREFIX + station.getId();
+        
         Channel parentChannel = Channel.builder()
-            .withUri(STATION_URI_PREFIX + station.getId())
+            .withUri(stationUri)
             .withKey(generateStationKey(station.getId()))
             .withSource(Publisher.METABROADCAST)
             .build();
@@ -111,7 +117,11 @@ public class PaChannelsIngester {
         parentChannel.setHighDefinition(getHighDefinition(firstChild.getFormat()));
         parentChannel.setRegional(false);
             
-        parentChannel.addAliasUrl(createStationUriFromId(station.getId()));
+        String stationAliasUrl = createStationUriFromId(station.getId());
+        parentChannel.addAliasUrl(stationAliasUrl);
+        parentChannel.addAlias(new Alias(Alias.URI_NAMESPACE, stationUri));
+        parentChannel.addAlias(new Alias(Alias.URI_NAMESPACE, stationAliasUrl));
+        parentChannel.addAlias(new Alias(STATION_ALIAS_NAMESPACE, station.getId()));
         
         return parentChannel;
     }
@@ -123,8 +133,10 @@ public class PaChannelsIngester {
     private Channel processStandaloneChannel(org.atlasapi.remotesite.pa.channels.bindings.Channel paChannel, List<ServiceProvider> serviceProviders) {
         LocalDate startDate = formatter.parseLocalDate(paChannel.getStartDate());
         
+        String channelUri = CHANNEL_URI_PREFIX + paChannel.getId();
+        
         Channel channel = Channel.builder()
-                .withUri(CHANNEL_URI_PREFIX + paChannel.getId())
+                .withUri(channelUri)
                 .withKey(generateChannelKey(paChannel.getId()))
                 .withSource(Publisher.METABROADCAST)
                 .withStartDate(startDate)
@@ -133,7 +145,7 @@ public class PaChannelsIngester {
         
         if (paChannel.getProviderChannelIds() != null) {
             for (ProviderChannelId providerChannelId : paChannel.getProviderChannelIds().getProviderChannelId()) {
-                channel.addAliasUrl(lookupAlias(providerChannelId, serviceProviders));                
+                lookupAndAddServiceProviderAliases(providerChannelId, serviceProviders, channel);
             }
         }
         
@@ -155,7 +167,12 @@ public class PaChannelsIngester {
         }
         setChannelTitleAndImage(channel, paChannel.getNames().getName(), logos);
         
-        channel.addAliasUrl(PaChannelMap.createUriFromId(paChannel.getId()));
+        channel.addAlias(new Alias(Alias.URI_NAMESPACE, channelUri));
+        channel.addAlias(new Alias(CHANNEL_ALIAS_NAMESPACE, paChannel.getId()));
+        
+        String channelAliasUri = PaChannelMap.createUriFromId(paChannel.getId());
+        channel.addAlias(new Alias(Alias.URI_NAMESPACE, channelAliasUri));
+        channel.addAliasUrl(channelAliasUri);
         
         return channel;
     }
@@ -176,7 +193,7 @@ public class PaChannelsIngester {
         return false;
     }
 
-    private String lookupAlias(ProviderChannelId providerChannelId, List<ServiceProvider> serviceProviders) {
+    private void lookupAndAddServiceProviderAliases(ProviderChannelId providerChannelId, List<ServiceProvider> serviceProviders, Channel channel) {
         ServiceProvider serviceProvider = getServiceProvider(providerChannelId.getServiceProviderId(), serviceProviders);
         if (serviceProvider == null) {
             throw new RuntimeException("ServiceProvider with id " + providerChannelId.getServiceProviderId() + " not found in the channel data file");
@@ -187,7 +204,10 @@ public class PaChannelsIngester {
         String serviceProviderName = Iterables.getOnlyElement(serviceProvider.getNames().getName()).getvalue();
         
         if (serviceProviderName.equals(YOUVIEW_SERVICE_PROVIDER_NAME)) {
-            return youViewAlias(providerChannelId.getvalue());
+            String providerId = providerChannelId.getvalue();
+            channel.addAlias(new Alias(YOUVIEW_CHANNEL_ALIAS_NAMESPACE, providerId));
+            channel.addAlias(new Alias(Alias.URI_NAMESPACE, youViewAlias(providerId)));
+            channel.addAliasUrl(youViewAlias(providerId));
         }
         
         throw new RuntimeException("service provider name " + serviceProviderName + " not recognised. Unable to process providerChannelId " + providerChannelId);

@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.TemporalString;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.channels.bindings.Channels;
@@ -144,6 +145,7 @@ public class ChannelHierarchyTest {
             .withRegional(false)
             .build();
         westMids.addAliasUrl("http://pressassociation.com/channels/11");
+        westMids.addAlias(new Alias("gb:pa:channel", "11"));
         
         Channel channelIsl = Channel.builder()
             .withSource(Publisher.METABROADCAST)
@@ -156,6 +158,7 @@ public class ChannelHierarchyTest {
             .withRegional(false)
             .build();
         channelIsl.addAliasUrl("http://pressassociation.com/channels/1663");
+        channelIsl.addAlias(new Alias("gb:pa:channel", "1663"));
         
         ExtendedChannelEquivalence equiv = new ExtendedChannelEquivalence();
         assertTrue(equiv.pairwise().equivalent(ImmutableList.of(westMids, channelIsl), ImmutableList.copyOf(children)));

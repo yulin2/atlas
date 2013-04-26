@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.pa.features;
 
 import java.util.Map;
 
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
@@ -22,6 +23,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 
 public class PaFeaturesProcessor {
+    private static final String FEATURES_ALIAS_VALUE = "tvpicks";
+    private static final String FEATURES_ALIAS_NAMESPACE = "gb:pa:feed";
     private static final String CONTENT_GROUP_URI = "http://pressassocation.com/features/tvpicks";
     private static final Ordering<Broadcast> BY_BROADCAST_DATE = new Ordering<Broadcast>() {
         @Override
@@ -46,6 +49,8 @@ public class PaFeaturesProcessor {
             contentGroup.setContents(ImmutableList.<ChildRef>of());
         } else {
             contentGroup = new ContentGroup(CONTENT_GROUP_URI, Publisher.PA_FEATURES);
+            contentGroup.addAlias(new Alias(Alias.URI_NAMESPACE, CONTENT_GROUP_URI));
+            contentGroup.addAlias(new Alias(FEATURES_ALIAS_NAMESPACE, FEATURES_ALIAS_VALUE));
         }
     }
     

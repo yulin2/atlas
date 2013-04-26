@@ -108,6 +108,7 @@ public class PaChannelDataHandler {
             existingChannel.setStartDate(newChannel.startDate());
             existingChannel.setEndDate(newChannel.endDate());
             existingChannel.addAliasUrls(newChannel.getAliasUrls());
+            existingChannel.addAliases(newChannel.getAliases());
             existingChannel.setParent(newChannel.parent());
             existingChannel.setMediaType(newChannel.mediaType());
             existingChannel.setHighDefinition(newChannel.highDefinition());
@@ -137,6 +138,7 @@ public class PaChannelDataHandler {
             ChannelGroup existing = resolved.get();
 
             existing.addAliasUrls(channelGroup.getAliasUrls());
+            existing.addAliases(channelGroup.getAliases());
             existing.setTitles(channelGroup.getAllTitles());
             
             if (channelGroup instanceof Region) {

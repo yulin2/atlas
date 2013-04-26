@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.pa.people;
 
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.PeopleResolver;
@@ -41,16 +42,24 @@ public class PaPeopleProcessor {
         existing.setBirthPlace(newPerson.getBirthPlace());
         existing.setDescription(newPerson.getDescription());
         existing.setQuotes(newPerson.getQuotes());
+        existing.setAliases(newPerson.getAliases());
         existing.setPublisher(Publisher.PA_PEOPLE);
     }
 
     Person ingestPerson(org.atlasapi.remotesite.pa.profiles.bindings.Person paPerson) {
+
+        String personUri = PERSON_URI_PREFIX + paPerson.getId();
+        
         Person person = new Person();
-        person.setCanonicalUri(PERSON_URI_PREFIX + paPerson.getId());
+        
+        person.setCanonicalUri(personUri);
+        person.addAlias(new Alias(Alias.URI_NAMESPACE, personUri));
+        
         Name name = paPerson.getName();
         person.withName(name.getFirstname() + " " + name.getLastname());
         person.setGivenName(name.getFirstname());
         person.setFamilyName(name.getLastname());
+        
         person.setGender(paPerson.getGender());
         if (paPerson.getBorn() != null) {
             person.setBirthDate(dateTimeFormatter.parseDateTime(paPerson.getBorn()));
@@ -59,6 +68,7 @@ public class PaPeopleProcessor {
         person.setDescription(paPerson.getEarlyLife() + "\n\n" + paPerson.getCareer());
         person.addQuote(paPerson.getQuote());
         person.setPublisher(Publisher.PA_PEOPLE);
+        
         return person;
     }
 }

@@ -6,7 +6,7 @@ import org.atlasapi.media.entity.Alias;
 public class PaHelper {
     
     private static final String PA_BASE_URL = "http://pressassociation.com";
-    private static final String PA_BASE_ALIAS = "pa:";
+    private static final String PA_BASE_ALIAS = "gb:pa:";
     
     public static String getFilmUri(String id) {
         return PA_BASE_URL + "/films/" + id;

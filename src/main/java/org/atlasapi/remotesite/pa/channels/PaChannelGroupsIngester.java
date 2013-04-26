@@ -7,6 +7,7 @@ import java.util.Set;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.PaChannelMap;
 import org.atlasapi.remotesite.pa.channels.bindings.EpgContent;
@@ -27,6 +28,8 @@ import com.metabroadcast.common.intl.Country;
 
 public class PaChannelGroupsIngester {
 
+    private static final String PLATFORM_ALIAS_NAMESPACE = "gb:pa:platform";
+    private static final String REGION_ALIAS_NAMESPACE = "gb:pa:region";
     private static final String PLATFORM_ALIAS_PREFIX = "http://pressassociation.com/platforms/";
     private static final String REGION_ALIAS_PREFIX = "http://pressassociation.com/regions/";
     private static final String PLATFORM_PREFIX = "http://ref.atlasapi.org/platforms/pressassociation.com/";
@@ -106,8 +109,14 @@ public class PaChannelGroupsIngester {
                 }
             }
             
-            region.setCanonicalUri(REGION_PREFIX + paPlatform.getId() + "-" + regionalisation.getRegionId());
-            region.addAliasUrl(REGION_ALIAS_PREFIX + paPlatform.getId() + "-" + regionalisation.getRegionId());
+            String regionUri = REGION_PREFIX + paPlatform.getId() + "-" + regionalisation.getRegionId();
+            region.setCanonicalUri(regionUri);
+            region.addAlias(new Alias(Alias.URI_NAMESPACE, regionUri));
+            region.addAlias(new Alias(REGION_ALIAS_NAMESPACE, regionalisation.getRegionId()));
+            
+            String aliasUrl = REGION_ALIAS_PREFIX + paPlatform.getId() + "-" + regionalisation.getRegionId();
+            region.addAlias(new Alias(Alias.URI_NAMESPACE, aliasUrl));
+            region.addAliasUrl(aliasUrl);
             region.setPublisher(Publisher.METABROADCAST);
             region.setAvailableCountries(countries);            
             regions.put(regionalisation.getRegionId(), region);
@@ -117,9 +126,17 @@ public class PaChannelGroupsIngester {
 
     private Platform processBasicPlatform(org.atlasapi.remotesite.pa.channels.bindings.Platform paPlatform) {
 
+        String platformUri = PLATFORM_PREFIX + paPlatform.getId();
+
         Platform platform = new Platform();
-        platform.setCanonicalUri(PLATFORM_PREFIX + paPlatform.getId());
-        platform.addAliasUrl(PLATFORM_ALIAS_PREFIX + paPlatform.getId());
+        platform.setCanonicalUri(platformUri);
+        
+        String aliasUrl = PLATFORM_ALIAS_PREFIX + paPlatform.getId();
+        
+        platform.addAlias(new Alias(PLATFORM_ALIAS_NAMESPACE, paPlatform.getId()));
+        platform.addAlias(new Alias(Alias.URI_NAMESPACE, platformUri));
+        platform.addAlias(new Alias(Alias.URI_NAMESPACE, aliasUrl));
+        platform.addAliasUrl(aliasUrl);
         platform.setPublisher(Publisher.METABROADCAST);
         
         if (paPlatform.getCountries() != null) {
