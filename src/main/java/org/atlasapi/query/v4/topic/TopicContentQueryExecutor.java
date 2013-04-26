@@ -3,8 +3,6 @@ package org.atlasapi.query.v4.topic;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.util.concurrent.TimeUnit;
-
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentIndex;
@@ -64,7 +62,7 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
                     Optional<Topic> possibleTopic = resolved.getResources().first();
             
                     if (!possibleTopic.isPresent()) {
-                        throw new NotFoundException(query.getResourceQuery().getOnlyId());
+                        throw new NotFoundException(query.getContextQuery().getOnlyId());
                     }
             
                     final Topic topic = possibleTopic.get();
