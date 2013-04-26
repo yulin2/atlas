@@ -39,6 +39,6 @@ public final class ContentListWriter implements EntityListWriter<Content> {
 
     @Override
     public String fieldName(Content entity) {
-        return "item";//TODO: get name from content for xml 
+        return entity.getClass().getSimpleName().toLowerCase();
     }
 }
