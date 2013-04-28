@@ -35,7 +35,7 @@ public class ContextualQueryParserTest {
     private final QueryAttributeParser attributeParser = mock(QueryAttributeParser.class);
     private final ContextualQueryContextParser queryContextParser = mock(ContextualQueryContextParser.class);
     private final ContextualQueryParser<Topic, Content> parser = 
-        new ContextualQueryParser<Topic, Content>("topics", Attributes.TOPIC_ID, "content", idCodec,attributeParser,queryContextParser);
+        new ContextualQueryParser<Topic, Content>(Resource.TOPIC, Attributes.TOPIC_ID, Resource.CONTENT, idCodec,attributeParser,queryContextParser);
     
     @Test
     public void testParseRequest() throws Exception {

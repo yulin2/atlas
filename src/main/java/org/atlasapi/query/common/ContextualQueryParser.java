@@ -27,20 +27,20 @@ public class ContextualQueryParser<C, R> {
 
     private final Pattern contextResourcePattern;
 
-    public ContextualQueryParser(String contextResourceName,
+    public ContextualQueryParser(Resource context,
         Attribute<Id> contextResouceAttribute,
-        String resourceName,
+        Resource query,
         NumberToShortStringCodec idCodec,
         QueryAttributeParser attributeParser, ContextualQueryContextParser queryContextParser) {
         this.attributeParser = checkNotNull(attributeParser);
         this.queryContextParser = checkNotNull(queryContextParser);
         this.idCodec = checkNotNull(idCodec);
-        this.contextResourcePattern = contextResourcePattern(resourceName, contextResourceName);
+        this.contextResourcePattern = contextResourcePattern(query, context);
         this.contextResouceAttribute = contextResouceAttribute;
     }
 
-    private Pattern contextResourcePattern(String resourceName, String contextResourceName) {
-        return Pattern.compile(contextResourceName + "/([^/]+)/" + resourceName + "(\\..*)?$");
+    private Pattern contextResourcePattern(Resource query, Resource context) {
+        return Pattern.compile(context.getPlural() + "/([^/]+)/" + query.getPlural() + "(\\..*)?$");
     }
     
     public ContextualQuery<C, R> parse(HttpServletRequest request)

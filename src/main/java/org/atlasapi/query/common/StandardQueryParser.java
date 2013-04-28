@@ -20,13 +20,13 @@ public class StandardQueryParser<T> implements QueryParser<T> {
 
     private final Pattern singleResourcePattern;
 
-    public StandardQueryParser(String resourceName, QueryAttributeParser attributeParser,
+    public StandardQueryParser(Resource resource, QueryAttributeParser attributeParser,
                             NumberToShortStringCodec idCodec,
                             QueryContextParser queryContextParser) {
         this.attributeParser = checkNotNull(attributeParser);
         this.queryContextParser = checkNotNull(queryContextParser);
         this.idCodec = checkNotNull(idCodec);
-        this.singleResourcePattern = Pattern.compile(checkNotNull(resourceName) + "/([^.]+)(\\..*)?$");
+        this.singleResourcePattern = Pattern.compile(resource.getPlural() + "/([^.]+)(\\..*)?$");
     }
 
     @Override

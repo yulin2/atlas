@@ -34,7 +34,7 @@ public class StandardQueryParserTest {
     );
     
     private final QueryContextParser queryContextParser = mock(QueryContextParser.class);
-    private final StandardQueryParser<Topic> queryParser = new StandardQueryParser<Topic>("topics", atrributes, idCodec, queryContextParser);
+    private final StandardQueryParser<Topic> queryParser = new StandardQueryParser<Topic>(Resource.TOPIC, atrributes, idCodec, queryContextParser);
     
     @Test
     public void testParsesSingleIdIntoNonListTopicQuery() throws Exception {

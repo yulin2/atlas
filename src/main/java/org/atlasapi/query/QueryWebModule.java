@@ -172,7 +172,7 @@ public class QueryWebModule {
             ), selectionBuilder());
         
         ContextualQueryParser<Topic, Content> parser = new ContextualQueryParser<Topic, Content>(
-            "topics", Attributes.TOPIC_ID, "content", idCodec(),
+            Resource.TOPIC, Attributes.TOPIC_ID, Resource.CONTENT, idCodec(),
             contentQueryAttributeParser().copyWithIgnoredParameters(contextParser.getParameterNames()),
             contextParser);
         
@@ -196,7 +196,7 @@ public class QueryWebModule {
         QueryContextParser contextParser = new QueryContextParser(configFetcher, 
         new IndexAnnotationsExtractor(contentAnnotationIndex()), selectionBuilder());
         
-        return new StandardQueryParser<Content>("content", 
+        return new StandardQueryParser<Content>(Resource.CONTENT, 
                 contentQueryAttributeParser()
                     .copyWithIgnoredParameters(contextParser.getParameterNames()),
                 idCodec(), contextParser);
@@ -206,7 +206,7 @@ public class QueryWebModule {
         QueryContextParser contextParser = new QueryContextParser(configFetcher, 
         new IndexAnnotationsExtractor(topicAnnotationIndex()), selectionBuilder());
         
-        return new StandardQueryParser<Topic>("topics", 
+        return new StandardQueryParser<Topic>(Resource.TOPIC, 
             new QueryAttributeParser(ImmutableList.of(
                 QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())),
                 QueryAtomParser.valueOf(Attributes.SOURCE, AttributeCoercers.enumCoercer(Publisher.fromKey())),
