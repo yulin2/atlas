@@ -173,7 +173,7 @@ public class QueryWebModule {
         
         ContextualQueryParser<Topic, Content> parser = new ContextualQueryParser<Topic, Content>(
             Resource.TOPIC, Attributes.TOPIC_ID, Resource.CONTENT, idCodec(),
-            contentQueryAttributeParser().copyWithIgnoredParameters(contextParser.getParameterNames()),
+            contentQueryAttributeParser(),
             contextParser);
         
         return new TopicContentController(parser, queryModule.topicContentQueryExecutor(),
@@ -197,8 +197,7 @@ public class QueryWebModule {
         new IndexAnnotationsExtractor(contentAnnotationIndex()), selectionBuilder());
         
         return new StandardQueryParser<Content>(Resource.CONTENT, 
-                contentQueryAttributeParser()
-                    .copyWithIgnoredParameters(contextParser.getParameterNames()),
+                contentQueryAttributeParser(),
                 idCodec(), contextParser);
     }
 
@@ -212,7 +211,7 @@ public class QueryWebModule {
                 QueryAtomParser.valueOf(Attributes.SOURCE, AttributeCoercers.enumCoercer(Publisher.fromKey())),
                 QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
                 QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer())
-            )).copyWithIgnoredParameters(contextParser.getParameterNames()),
+            )),
             idCodec(), contextParser
         );
     }

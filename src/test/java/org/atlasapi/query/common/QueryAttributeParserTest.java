@@ -123,15 +123,6 @@ public class QueryAttributeParserTest {
         assertTrue(Iterables.all(accept, Predicates.equalTo(true)));
         
     }
-    
-    @Test(expected=InvalidParameterException.class)
-    public void testThrowsExceptionForUnknownParameter() throws Exception {
-        
-        parser.parse(request()
-            .withParam("aliases.namesppace","theNamespace")
-        );
-        
-    }
 
     @Test(expected=InvalidOperatorException.class)
     public void testThrowsExceptionForUnknownOperator() throws Exception {

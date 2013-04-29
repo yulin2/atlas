@@ -2,6 +2,7 @@ package org.atlasapi.query.v4.schedule;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.atlasapi.query.common.InvalidParameterException;
 import org.atlasapi.query.common.RequestParameterValidator;
 import org.junit.Test;
 
@@ -15,18 +16,18 @@ public class RequestParameterValidatorTest {
         .build();
     
     @Test
-    public void testValidatesParameters() {
+    public void testValidatesParameters() throws Exception {
         validator.validateParameters(requestWithParams("from","to","publisher"));
         validator.validateParameters(requestWithParams("from","to","publisher","apiKey","annotations"));
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testThrowsExceptionMissingParameters() {
+    @Test(expected=InvalidParameterException.class)
+    public void testThrowsExceptionMissingParameters() throws Exception {
         validator.validateParameters(requestWithParams("from","to"));
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testThrowsExceptionInvalidParameters() {
+    @Test(expected=InvalidParameterException.class)
+    public void testThrowsExceptionInvalidParameters() throws Exception {
         validator.validateParameters(requestWithParams("form","to","wibble"));
     }
 

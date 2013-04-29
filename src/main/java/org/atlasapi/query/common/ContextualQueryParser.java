@@ -25,18 +25,20 @@ public class ContextualQueryParser<C, R> {
     private final ContextualQueryContextParser queryContextParser;
     private final QueryAttributeParser attributeParser;
 
+    private final RequestParameterValidator parameterValidator;
     private final Pattern contextResourcePattern;
 
     public ContextualQueryParser(Resource context,
         Attribute<Id> contextResouceAttribute,
         Resource query,
         NumberToShortStringCodec idCodec,
-        QueryAttributeParser attributeParser, ContextualQueryContextParser queryContextParser) {
+        QueryAttributeParser attributeParser, ContextualQueryContextParser contextParser) {
         this.attributeParser = checkNotNull(attributeParser);
-        this.queryContextParser = checkNotNull(queryContextParser);
+        this.queryContextParser = checkNotNull(contextParser);
+        this.contextResouceAttribute = checkNotNull(contextResouceAttribute);
         this.idCodec = checkNotNull(idCodec);
+        this.parameterValidator = new RequestParameterValidator(attributeParser, contextParser);
         this.contextResourcePattern = contextResourcePattern(query, context);
-        this.contextResouceAttribute = contextResouceAttribute;
     }
 
     private Pattern contextResourcePattern(Resource query, Resource context) {
@@ -45,6 +47,7 @@ public class ContextualQueryParser<C, R> {
     
     public ContextualQuery<C, R> parse(HttpServletRequest request)
             throws QueryParseException {
+        parameterValidator.validateParameters(request);
         QueryContext context = queryContextParser.parseContext(request);
         SingleQuery<C> contextQuery = contextQuery(request, context);
         return new ContextualQuery<C, R>(

@@ -16,21 +16,24 @@ public class StandardQueryParser<T> implements QueryParser<T> {
 
     private final NumberToShortStringCodec idCodec;
     private final QueryAttributeParser attributeParser;
-    private final QueryContextParser queryContextParser;
+    private final QueryContextParser contextParser;
 
     private final Pattern singleResourcePattern;
+    private final RequestParameterValidator parameterValidator;
 
     public StandardQueryParser(Resource resource, QueryAttributeParser attributeParser,
                             NumberToShortStringCodec idCodec,
-                            QueryContextParser queryContextParser) {
+                            QueryContextParser contextParser) {
+        this.parameterValidator = new RequestParameterValidator(attributeParser, contextParser);
         this.attributeParser = checkNotNull(attributeParser);
-        this.queryContextParser = checkNotNull(queryContextParser);
+        this.contextParser = checkNotNull(contextParser);
         this.idCodec = checkNotNull(idCodec);
         this.singleResourcePattern = Pattern.compile(resource.getPlural() + "/([^.]+)(\\..*)?$");
     }
 
     @Override
     public Query<T> parse(HttpServletRequest request) throws QueryParseException {
+        parameterValidator.validateParameters(request);
         Id singleId = tryExtractSingleId(request);
         return singleId != null ? singleQuery(request, singleId) 
                                 : listQuery(request);
@@ -43,13 +46,13 @@ public class StandardQueryParser<T> implements QueryParser<T> {
     }
     
     private Query<T> singleQuery(HttpServletRequest request, Id singleId) throws QueryParseException {
-        return Query.singleQuery(singleId, queryContextParser.parseSingleContext(request));
+        return Query.singleQuery(singleId, contextParser.parseSingleContext(request));
     }
 
     private Query<T> listQuery(HttpServletRequest request) throws QueryParseException {
         AttributeQuerySet querySet = attributeParser.parse(request);
         return Query.listQuery(querySet,
-            queryContextParser.parseListContext(request));
+            contextParser.parseListContext(request));
     }
     
 }

@@ -18,6 +18,7 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.query.annotation.ActiveAnnotations;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -34,8 +35,15 @@ public class ContextualQueryParserTest {
     private final NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
     private final QueryAttributeParser attributeParser = mock(QueryAttributeParser.class);
     private final ContextualQueryContextParser queryContextParser = mock(ContextualQueryContextParser.class);
-    private final ContextualQueryParser<Topic, Content> parser = 
-        new ContextualQueryParser<Topic, Content>(Resource.TOPIC, Attributes.TOPIC_ID, Resource.CONTENT, idCodec,attributeParser,queryContextParser);
+    private ContextualQueryParser<Topic, Content> parser;
+    
+    @Before
+    public void setUp() {
+        when(attributeParser.getParameterNames()).thenReturn(ImmutableSet.of("alias.namespace"));
+        when(queryContextParser.getParameterNames()).thenReturn(ImmutableSet.<String>of());
+        this.parser = new ContextualQueryParser<Topic, Content>(Resource.TOPIC, Attributes.TOPIC_ID,
+                Resource.CONTENT, idCodec, attributeParser, queryContextParser);
+    }
     
     @Test
     public void testParseRequest() throws Exception {

@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
 
 import com.google.common.collect.ImmutableSet;
@@ -13,7 +14,7 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
-public class ContextualQueryContextParser {
+public class ContextualQueryContextParser implements ParameterNameProvider {
     
     private final ApplicationConfigurationFetcher configFetcher;
     private final ContextualAnnotationsExtractor annotationExtractor;
@@ -37,7 +38,8 @@ public class ContextualQueryContextParser {
         return ImmutableSet.copyOf(Iterables.concat(
             configFetcher.getParameterNames(), 
             annotationExtractor.getParameterNames(), 
-            selectionBuilder.getParameterNames()));
+            selectionBuilder.getParameterNames(),
+            ImmutableSet.of(JsonResponseWriter.CALLBACK)));
     }
     
 }
