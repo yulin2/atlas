@@ -58,8 +58,10 @@ public class LocationsAnnotation extends OutputAnnotation<Content> {
             writer.writeList("available_countries", "country", policy.getAvailableCountries(), ctxt);
             writer.writeField("platform", policy.getPlatform());
             writer.writeField("drm_playable_from", policy.getDrmPlayableFrom());
-            writer.writeField("currency", policy.getPrice().getCurrency());
-            writer.writeField("price", policy.getPrice().getAmount());
+            if (policy.getPrice() != null) {
+                writer.writeField("currency", policy.getPrice().getCurrency());
+                writer.writeField("price", policy.getPrice().getAmount());
+            }
             writer.writeField("revenue_contract", policy.getRevenueContract());
 
             writer.writeField("data_container_format", encoding.getDataContainerFormat());
