@@ -23,38 +23,6 @@ import com.google.common.util.concurrent.Futures;
 
 public class TopicsAnnotation extends OutputAnnotation<Content> {
 
-//    private static final class TopicWriter implements EntityWriter<Topic> {
-//
-//        private final SubstitutionTableNumberCodec idCodec;
-//        private final String topicUriBase;
-//        private static final EntityWriter<Publisher> SOURCE_WRITER = sourceWriter("source");
-//
-//        public TopicWriter(SubstitutionTableNumberCodec idCodec, String localHostName) {
-//            this.idCodec = idCodec;
-//            this.topicUriBase = String.format("http://%s/topics/", localHostName);
-//        }
-//
-//        @Override
-//        public void write(Topic topic, FieldWriter writer, OutputContext ctxt) throws IOException {
-//            String id = idCodec.encode(topic.getId().toBigInteger());
-//            writer.writeField("id", id);
-//            writer.writeField("uri", topicUriBase + topic.getId());
-//            writer.writeField("namespace", topic.getNamespace());
-//            writer.writeField("value", topic.getValue());
-//            writer.writeField("type", topic.getType());
-//            writer.writeObject(SOURCE_WRITER, topic.getPublisher(), ctxt);
-//            writer.writeField("title", topic.getTitle());
-//            writer.writeField("description", topic.getDescription());
-//            writer.writeField("image", topic.getImage());
-//            writer.writeField("thumbnail", topic.getThumbnail());
-//        }
-//
-//        @Override
-//        public String fieldName() {
-//            return "topic";
-//        }
-//    }
-
     private static final Function<TopicRef, Id> REF_TO_ID = new Function<TopicRef, Id>() {
         @Override
         public Id apply(TopicRef input) {
@@ -101,6 +69,7 @@ public class TopicsAnnotation extends OutputAnnotation<Content> {
                 writer.writeField("supervised", entity.isSupervised());
                 writer.writeField("weighting", entity.getWeighting());
                 writer.writeField("relationship", entity.getRelationship());
+                writer.writeField("offset", entity.getOffset());
             }
 
             @Override
