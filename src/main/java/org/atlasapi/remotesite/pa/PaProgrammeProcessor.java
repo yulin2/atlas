@@ -340,7 +340,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         image.setHeight(360);
         image.setWidth(640);
-        //image.setType(ImageType.PRIMARY);  //TODO: Should be SECONDARY, or not set here
+        image.setType(ImageType.ALTERNATE); 
         image.setAspectRatio(ImageAspectRatio.SIXTEEN_BY_NINE);
         image.setMimeType(MimeType.IMAGE_JPG);
         image.setCanonicalUri(NEW_IMAGE_BASE_IMAGE_URL + pictureUsage.getvalue());
