@@ -8,6 +8,8 @@ import nu.xom.Document;
 
 import org.atlasapi.remotesite.HttpClients;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponsePrologue;
@@ -24,6 +26,7 @@ public class YouViewScheduleFetcher {
     private final String youviewUrl;
     private final SimpleHttpClient client;
     private final XmlHttpResponseTransformer xmlTransformer = new XmlHttpResponseTransformer();
+    private final Logger log = LoggerFactory.getLogger(YouViewScheduleFetcher.class);
     
     public YouViewScheduleFetcher(String youviewUrl, int timeout) {
         this.youviewUrl = youviewUrl;
@@ -39,7 +42,9 @@ public class YouViewScheduleFetcher {
         qsp.add("service", "" + service);
         qsp.add("starttime", start.toString(DATE_TIME_FORMAT));
         qsp.add("endtime", finish.toString(DATE_TIME_FORMAT));
-        client.get(new SimpleHttpRequest<Void>(youviewUrl + "?" + qsp.toQueryString(), xmlTransformer));
+        String url = youviewUrl + "?" + qsp.toQueryString();
+        log.trace("Querying: " + url);
+        client.get(new SimpleHttpRequest<Void>(url, xmlTransformer));
         return xmlTransformer.getXml();
     }
     
