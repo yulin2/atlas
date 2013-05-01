@@ -51,7 +51,9 @@ public enum LoveFilmCsvColumn {
     SYNOPSIS("synopsis"),
     STUDIO("studio"),
     TITLE_MASTER_ID("title_master_id"),
-    TVOD_PRICE("tvod_price");
+    TVOD_PRICE("tvod_price"),
+    ASIN("asin"),
+    IMDB_ID("imdb_id");
 
     private String name;
 
