@@ -15,6 +15,7 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
@@ -65,7 +66,13 @@ public class YouViewItemParseTest {
         assertEquals(new DateTime(2012, 11, 18, 23, 30, 00), broadcast.getTransmissionTime());
         assertEquals(new DateTime(2012, 11, 19, 00, 30, 00), broadcast.getTransmissionEndTime());
         assertThat(broadcast.getBroadcastDuration(), is(3600));
-        assertEquals(ImmutableSet.of("dvb://233a..2134;8696", "crid://www.five.tv/V65K2", "crid://www.five.tv/RBJW"), broadcast.getAliasUrls());
+        assertEquals(ImmutableSet.of("dvb://233a..2134;8696", "pcrid:crid://www.five.tv/V65K2", "scrid:crid://www.five.tv/RBJW"), broadcast.getAliasUrls());
+        assertEquals(ImmutableSet.of(
+                    new Alias("dvb:event-locator", "dvb://233a..2134;8696"), 
+                    new Alias("dvb:pcrid", "crid://www.five.tv/V65K2"), 
+                    new Alias("dvb:scrid", "crid://www.five.tv/RBJW")
+                ), 
+                broadcast.getAliases());
         assertEquals("youview:7780297", broadcast.getSourceId());
         
         Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
