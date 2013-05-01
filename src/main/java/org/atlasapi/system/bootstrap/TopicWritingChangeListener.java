@@ -22,7 +22,15 @@ public class TopicWritingChangeListener extends AbstractMultiThreadedChangeListe
 
     @Override
     protected void onChange(Topic topic) {
-        topic.addAlias(new Alias(topic.getNamespace(), topic.getValue()));
+        topic.addAlias(new Alias(namespace(topic), topic.getValue()));
         topicStore.writeTopic(topic);
+    }
+
+    private String namespace(Topic topic) {
+        String ns = topic.getNamespace();
+        if (ns.equals("dbpedia") || ns.equals("magpie")) {
+            return "uri";
+        }
+        return ns;
     }
 }
