@@ -38,6 +38,8 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private static final String IDENTIFIER_KEY = "identifier";
     private static final String PROGRAMME_CRID_KEY = "programmeCRID";
     private static final String SERIES_CRID_KEY = "seriesCRID";
+    private static final String PCRID_PREFIX = "pcrid:";
+    private static final String SCRID_PREFIX = "scrid:";
     private static final String SERVICE_ID_KEY = "serviceId";
     private static final String EVENT_LOCATOR_KEY = "eventLocator";
     private static final String MEDIA_CONTENT_KEY = "content";
@@ -116,12 +118,12 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         broadcast.addAlias(new Alias("dvb:event-locator", eventLocator));
         Optional<String> programmeCrid = getProgrammeCrid(source);
         if (programmeCrid.isPresent()) {
-            broadcast.addAliasUrl(programmeCrid.get());
+            broadcast.addAliasUrl(PCRID_PREFIX + programmeCrid.get());
             broadcast.addAlias(new Alias("dvb:pcrid", programmeCrid.get()));
         }
         Optional<String> seriesCRID = getSeriesCrid(source);
         if (seriesCRID.isPresent()) {
-            broadcast.addAliasUrl(seriesCRID.get());
+            broadcast.addAliasUrl(SCRID_PREFIX + seriesCRID.get());
             broadcast.addAlias(new Alias("dvb:scrid", seriesCRID.get()));
         }
         
