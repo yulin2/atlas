@@ -403,7 +403,11 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     }
 
     private String getSeriesTitle(LoveFilmDataRow source) {
-        Iterable<String> parts = TITLE_SPLIT.split(ITEM_NAME.valueFrom(source));
-        return Iterables.get(parts, 1);
+        String seriesTitle = ITEM_NAME.valueFrom(source);
+        Iterable<String> parts = TITLE_SPLIT.split(seriesTitle);
+        if (Iterables.size(parts) > 1) {
+            return Iterables.get(parts, 1);
+        }
+        return seriesTitle;
     }
 }
