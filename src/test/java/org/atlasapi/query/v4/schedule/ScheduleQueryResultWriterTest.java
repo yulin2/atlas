@@ -15,7 +15,6 @@ import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
@@ -39,12 +38,7 @@ public class ScheduleQueryResultWriterTest {
     private final AnnotationRegistry<Channel> channelAnnotations = AnnotationRegistry.<Channel>builder().build();
     private final ScheduleQueryResultWriter writer = new ScheduleQueryResultWriter(
             new ChannelListWriter(channelAnnotations), new ContentListWriter(contentAnnotations));
-    
-    @Before
-    public void setup() {
-        when(containerSummaryResolver.summarizeTopLevelContainer(argThat(any(ParentRef.class))))
-            .thenReturn(Optional.<BrandSummary>absent());
-    }
+      
     
     @Test
     public void testWrite() throws IOException {

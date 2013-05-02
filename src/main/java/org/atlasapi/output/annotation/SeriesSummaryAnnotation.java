@@ -7,7 +7,6 @@ import java.io.IOException;
 
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.simple.SeriesSummary;
 import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
@@ -34,14 +33,7 @@ public class SeriesSummaryAnnotation extends OutputAnnotation<Content> {
         @Override
         public void write(Episode entity, FieldWriter writer, OutputContext ctxt) throws IOException {
             writer.writeField("id", idCodec.encode(entity.getSeriesRef().getId().toBigInteger()));
-            Optional<SeriesSummary> possibleSummary = containerSummaryResolver.summarizeSeries(entity.getSeriesRef());
-            if (possibleSummary.isPresent()) {
-                SeriesSummary summary = possibleSummary.get();
-                writer.writeField("type", summary.getType());
-                writer.writeField("title", summary.getTitle());
-                writer.writeField("description", summary.getDescription());
-                writer.writeField("series_number", summary.getSeriesNumber());
-            }
+           
         }
 
         @Override

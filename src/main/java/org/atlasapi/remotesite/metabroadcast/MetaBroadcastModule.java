@@ -57,7 +57,7 @@ public class MetaBroadcastModule {
     public void scheduleTasks() {
         scheduler.schedule(twitterUpdaterTask().withName("Voila Twitter topics ingest"), RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(7)));
         scheduler.schedule(twitterPeopleTalkUpdaterTask().withName("Voila Twitter audience topics ingest"), RepetitionRules.every(Duration.standardHours(3)));
-        scheduler.schedule(magpieUpdaterTask().withName("Magpie ingest"), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
+        //scheduler.schedule(magpieUpdaterTask().withName("Magpie ingest"), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
     }
 
     @Bean
@@ -66,15 +66,15 @@ public class MetaBroadcastModule {
                 new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver, topicStore, topicResolver, contentWriter, MetaBroadcastTwitterTopicsUpdater.TWITTER_NS_FOR_AUDIENCE, log));
     }
     
-    @Bean
-    MagpieUpdaterTask magpieUpdaterTask() {
-        return new MagpieUpdaterTask(magpieResultsSource(), magpieUpdater(), new MongoSchedulingStore(mongo));
-    }
+//    @Bean
+//    MagpieUpdaterTask magpieUpdaterTask() {
+//        return new MagpieUpdaterTask(magpieResultsSource(), magpieUpdater(), new MongoSchedulingStore(mongo));
+//    }
     
-    @Bean
-    RemoteMagpieResultsSource magpieResultsSource() {
-        return new S3MagpieResultsSource(awsService(), s3Bucket, s3folder);
-    }
+//    @Bean
+//    RemoteMagpieResultsSource magpieResultsSource() {
+//        return new S3MagpieResultsSource(awsService(), s3Bucket, s3folder);
+//    }
 
     @Bean
     CannonTwitterTopicsUpdater twitterPeopleTalkUpdaterTask() {
@@ -83,11 +83,11 @@ public class MetaBroadcastModule {
     }
     
     
-@Bean
-    MetaBroadcastMagpieUpdater magpieUpdater() {
-        return new MetaBroadcastMagpieUpdater(contentResolver, topicStore, 
-                topicResolver, contentWriter);
-    }
+//@Bean
+//    MetaBroadcastMagpieUpdater magpieUpdater() {
+//        return new MetaBroadcastMagpieUpdater(contentResolver, topicStore, 
+//                topicResolver, contentWriter);
+//    }
 
     @Bean 
     CannonTwitterTopicsClient cannonTopicsClient() {

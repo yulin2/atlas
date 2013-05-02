@@ -8,7 +8,6 @@ import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Item.ContainerSummary;
 import org.atlasapi.media.entity.ParentRef;
-import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
@@ -42,14 +41,7 @@ public class BrandSummaryAnnotation extends OutputAnnotation<Content> {
                 if (summary.getSeriesNumber() != null) {
                     writer.writeField("series_number", summary.getSeriesNumber());
                 }
-            } else {
-                Optional<BrandSummary> simpleSummary = containerSummaryResolver.summarizeTopLevelContainer(container);
-                if(simpleSummary.isPresent()) {
-                    writer.writeField("type", simpleSummary.get().getType());
-                    writer.writeField("title", simpleSummary.get().getTitle());
-                    writer.writeField("description", simpleSummary.get().getDescription());
-                }
-            }
+            } 
         }
 
         @Override
