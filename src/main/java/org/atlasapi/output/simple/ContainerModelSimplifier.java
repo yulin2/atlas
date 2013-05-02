@@ -5,6 +5,7 @@ import static com.metabroadcast.common.base.MorePredicates.transformingPredicate
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.EntityType;
@@ -12,6 +13,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.Playlist;
+import org.atlasapi.media.entity.simple.ContentIdentifier.SeriesIdentifier;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
@@ -68,6 +70,14 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
 
         if (annotations.contains(Annotation.SUB_ITEMS)) {
             simplePlaylist.setContent(Lists.transform(fullPlayList.getChildRefs(), toContentIdentifier));
+        }
+        
+        if (annotations.contains(Annotation.SERIES)) {
+            if (fullPlayList instanceof Brand) {
+                Brand brand = (Brand) fullPlayList;
+                simplePlaylist.setSeriesList(Iterables.filter(Lists.transform(brand.getSeriesRefs(), 
+                        toContentIdentifier), SeriesIdentifier.class));
+            }
         }
 
         if (annotations.contains(Annotation.AVAILABLE_LOCATIONS)) {
