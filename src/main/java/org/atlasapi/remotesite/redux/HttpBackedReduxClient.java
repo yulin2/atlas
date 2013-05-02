@@ -2,12 +2,12 @@ package org.atlasapi.remotesite.redux;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.redux.model.BaseReduxProgramme;
 import org.atlasapi.remotesite.redux.model.FullReduxProgramme;
@@ -39,6 +39,7 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 public class HttpBackedReduxClient implements ReduxClient {
 
     private static final String MEDIA_TYPE_TV = "tv";
+    private static final String MEDIA_TYPE_RADIO = "radio";
     private static final int MEDIA_MAP_CACHE_TIMEOUT_HOURS = 13;
 
     public static final Builder reduxClientForHost(HostSpecifier host) {
@@ -50,7 +51,7 @@ public class HttpBackedReduxClient implements ReduxClient {
         private HostSpecifier host;
         private UsernameAndPassword credentials;
         private String basePath = "/";
-
+        
         public Builder(HostSpecifier host) {
             this.host = host;
         }
@@ -87,15 +88,16 @@ public class HttpBackedReduxClient implements ReduxClient {
             .build(
                 new CacheLoader<String, Map<String,ReduxMedia>>() {
     
-                    @SuppressWarnings("unchecked")
                     @Override
                     public Map<String, ReduxMedia> load(String key) throws Exception {
-                        Type type = new TypeToken<Map<String, ReduxMedia>>() {}.getType();
+                        TypeToken<Map<String, ReduxMedia>> type = new TypeToken<Map<String, ReduxMedia>>() {};
+
                         if (MEDIA_TYPE_TV.equals(key)) {
-                            return (Map<String, ReduxMedia>) getAsType(String.format("%sformats/tv.json", requestBase), TypeToken.get( type ));
-                        }
-                        else {
-                            return (Map<String, ReduxMedia>) getAsType(String.format("%sformats/radio.json", requestBase), TypeToken.get( type ));
+                            return getAsType(String.format("%sformats/tv.json", requestBase), type);
+                        } else if (MEDIA_TYPE_RADIO.equals(key)) {
+                            return getAsType(String.format("%sformats/radio.json", requestBase), type);
+                        } else {
+                            throw new FetchException("Could not retrieve media map for redux type '"+key+"'");
                         }
                     }
                     });

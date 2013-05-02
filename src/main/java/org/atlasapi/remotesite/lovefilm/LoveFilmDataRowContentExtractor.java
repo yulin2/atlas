@@ -6,6 +6,7 @@ import static org.atlasapi.media.entity.Policy.RevenueContract.PAY_TO_RENT;
 import static org.atlasapi.media.entity.Policy.RevenueContract.SUBSCRIPTION;
 import static org.atlasapi.media.entity.Publisher.LOVEFILM;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ACCESS_METHOD;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ASIN;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.AVAILABILITY_END_DATE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.AVAILABILITY_START_DATE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.BBFC_RATING;
@@ -16,6 +17,7 @@ import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.EXTERNAL_PRODUC
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.GENRE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.HD_AVAILABLE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.HEROSHOT_URL;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.IMDB_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ITEM_NAME;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ITEM_TYPE_KEYWORD;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.LANGUAGE;
@@ -34,6 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Content;
@@ -75,6 +78,8 @@ import com.metabroadcast.common.intl.Countries;
 
 public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFilmDataRow, Optional<Content>> {
 
+    private static final String IMDB_NAMESPACE = "zz:imdb:id";
+    private static final String ASIN_NAMESPACE = "gb:amazon:asin";
     private static final String UNKNOWN_LANGUAGE = "unknown";
     private static final String LOVEFILM_PEOPLE_PREFIX = "http://lovefilm.com/people/";
     private static final String LOVEFILM_CURIE_PATTERN = "lf:%s-%s";
@@ -282,6 +287,17 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setCertificates(certificatesFrom(BBFC_RATING.valueFrom(source)));
         content.setMediaType(MediaType.VIDEO);
         content.setDescription(SYNOPSIS.valueFrom(source));
+        
+        String asin = ASIN.valueFrom(source);
+        if (asin.length() > 0) {
+            content.addAliasUrl(asin);
+            content.addAlias(new Alias(ASIN_NAMESPACE, asin));
+        }
+        String imdbId = IMDB_ID.valueFrom(source);
+        if (imdbId.length() > 0) {
+            content.addAliasUrl(imdbId);
+            content.addAlias(new Alias(IMDB_NAMESPACE, imdbId));
+        }
         
         return content;
     }
