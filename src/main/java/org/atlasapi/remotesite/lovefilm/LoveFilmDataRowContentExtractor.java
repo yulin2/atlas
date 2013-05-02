@@ -54,6 +54,7 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.atlasapi.remotesite.util.EnglishLanguageCodeMap;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -92,6 +93,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private static final String SHOW = "show";
 
     private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
+    private static final Splitter TITLE_SPLIT = Splitter.on(" - ").trimResults();
     private final DateTimeFormatter dateMonthYearFormat = DateTimeFormat.forPattern("dd/MM/YYYY").withZoneUTC();
     private final DateTimeFormatter yearMonthDayFormat = ISODateTimeFormat.date().withZoneUTC();
     
@@ -154,8 +156,11 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             series.setParentRef(new ParentRef(uri(SHOW_ID.valueFrom(source),SHOW_RESOURCE_TYPE)));
             content = series;
         }
+        setCommonFields(content, source);
         content.setSpecialization(Specialization.TV);
-        return Optional.of(setCommonFields(content, source));
+        content.setTitle(getSeriesTitle(source));
+        
+        return Optional.of(content);
     }
 
     private Optional<Content> extractFilm(LoveFilmDataRow source) {
@@ -252,7 +257,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setPublisher(LOVEFILM);
         content.setCanonicalUri(uri(sku, resourceType));
         content.setCurie(curie(sku, curieType));
-        content.setLastUpdated(new DateTime());
+        content.setLastUpdated(new DateTime().withZone(DateTimeZone.UTC));
         return content;
     }
     
@@ -267,6 +272,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     }
 
     private Content setCommonFields(Content content, LoveFilmDataRow source) {
+        content.setActivelyPublished(true);
         content.setTitle(ITEM_NAME.valueFrom(source));
         content.setImage(HEROSHOT_URL.valueFrom(source));
         content.setYear(yearFrom(ORIGINAL_PUBLICATION_DATE.valueFrom(source)));
@@ -378,5 +384,10 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             return null;
         }
         return yearMonthDayFormat.parseDateTime(date);
+    }
+
+    private String getSeriesTitle(LoveFilmDataRow source) {
+        Iterable<String> parts = TITLE_SPLIT.split(ITEM_NAME.valueFrom(source));
+        return Iterables.get(parts, 1);
     }
 }

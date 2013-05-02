@@ -26,12 +26,18 @@ import org.atlasapi.equiv.results.www.RecentResultController;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.equiv.update.tasks.ContentEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.tasks.MongoScheduleTaskProgressStore;
+import org.atlasapi.equiv.update.tasks.ScheduleEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.www.ContentEquivalenceUpdateController;
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
+import org.atlasapi.remotesite.youview.DefaultYouViewChannelResolver;
+import org.atlasapi.remotesite.youview.YouViewChannelResolver;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +48,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.internal.Lists;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
@@ -62,6 +69,8 @@ public class EquivTaskModule {
     private @Autowired ContentResolver contentResolver;
     private @Autowired DatabasedMongo db;
     private @Autowired LookupEntryStore lookupStore;
+    private @Autowired ScheduleResolver scheduleResolver;
+    private @Autowired ChannelResolver channelResolver;
     
     private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
     private @Autowired RecentEquivalenceResultStore equivalenceResultStore;
@@ -83,6 +92,13 @@ public class EquivTaskModule {
             taskScheduler.schedule(publisherUpdateTask(YOUVIEW).withName("YouView Equivalence Updater"), YOUVIEW_EQUIVALENCE_REPETITION);
             
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_MUSIC).withName("Music Equivalence Updater"), RepetitionRules.every(Duration.standardHours(6)));
+            
+            taskScheduler.schedule(scheduleEquivTask(
+                    Lists.newArrayList(YOUVIEW), 
+                    youViewChannelResolver().getAllChannels(),
+                    0,
+                    7
+                ).withName("YouView Schedule Equivalence (8 day) Updater"), RepetitionRules.NEVER);
         }
     }
     
@@ -92,6 +108,17 @@ public class EquivTaskModule {
     
     private ContentEquivalenceUpdateTask publisherUpdateTask(final Publisher... publishers) {
         return new ContentEquivalenceUpdateTask(contentLister, contentResolver, progressStore(), equivUpdater, ignored).forPublishers(publishers);
+    }
+    
+    private ScheduleEquivalenceUpdateTask scheduleEquivTask(Iterable<Publisher> publishers, Iterable<Channel> channels, int daysBack, int daysForward) {
+        return ScheduleEquivalenceUpdateTask.builder()
+            .withUpdater(equivUpdater)
+            .withScheduleResolver(scheduleResolver)
+            .withPublishers(publishers)
+            .withChannels(channels)
+            .withBack(daysBack)
+            .withForward(daysForward)
+            .build();
     }
 
     //Controllers...
@@ -118,6 +145,10 @@ public class EquivTaskModule {
     
     public @Bean EquivalenceResultProbeController equivProbeController() {
         return new EquivalenceResultProbeController(equivalenceResultStore, equivProbeStore());
+    }
+    
+    private YouViewChannelResolver youViewChannelResolver() {
+        return new DefaultYouViewChannelResolver(channelResolver);
     }
     
 }

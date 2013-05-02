@@ -12,6 +12,7 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -29,6 +30,9 @@ import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -75,8 +79,28 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         result.setPeople(transformPeople(inputContent.getPeople(), publisher));
         result.setEquivalentTo(resolveEquivalences(inputContent.getSameAs()));
         result.setTopicRefs(topicRefs(inputContent.getTopics()));
+        result.setKeyPhrases(keyPhrases(inputContent.getKeyPhrases(), inputContent.getPublisher()));
         result.setGenres(inputContent.getGenres());
         return result;
+    }
+    
+    private Iterable<KeyPhrase> keyPhrases(Iterable<org.atlasapi.media.entity.simple.KeyPhrase> keyPhrases, final PublisherDetails contentPublisher) {
+        return ImmutableList.copyOf(Iterables.transform(keyPhrases, new Function<org.atlasapi.media.entity.simple.KeyPhrase, KeyPhrase>() {
+
+            @Override
+            public KeyPhrase apply(org.atlasapi.media.entity.simple.KeyPhrase input) {
+                Preconditions.checkState(input.getPublisher() == null || input.getPublisher().getKey().equals(contentPublisher.getKey()), 
+                        "Publisher in key phrase must match publisher for content");
+                PublisherDetails publisherDetails = Objects.firstNonNull(input.getPublisher(), contentPublisher);
+                Maybe<Publisher> publisher = Publisher.fromKey(publisherDetails.getKey());
+
+                if(!publisher.hasValue()) {
+                    throw new IllegalArgumentException(String.format("No publisher for %s", publisherDetails.getKey()));
+                }
+
+                return new KeyPhrase(input.getPhrase(), publisher.requireValue(), input.getWeighting());
+            }
+        }));
     }
 
     private Iterable<TopicRef> topicRefs(Set<org.atlasapi.media.entity.simple.TopicRef> topics) {

@@ -4,6 +4,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
@@ -22,6 +23,7 @@ import org.joda.time.Interval;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -58,10 +60,10 @@ public class ScheduleOverlapResolverTest extends TestCase {
     @Test
     public void testBroadcastsShouldNotOverlap() {
         context.checking(new Expectations() {{ 
-            one(scheduleResolver).schedule(from, to, channels, publishers, null); will(returnValue(schedule));
+            one(scheduleResolver).schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent()); will(returnValue(schedule));
         }});
         
-        Schedule result = resolver.schedule(from, to, channels, publishers, null);
+        Schedule result = resolver.schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent());
         assertSchedules(schedule, result);
     }
     
@@ -75,11 +77,11 @@ public class ScheduleOverlapResolverTest extends TestCase {
         final Schedule overlappingSchedule = schedule(channel, item(b1), item(b2), item(b3), overlappingItem, item(b4));
         
         context.checking(new Expectations() {{ 
-            one(scheduleResolver).schedule(from, to, channels, publishers, null); will(returnValue(overlappingSchedule));
+            one(scheduleResolver).schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent()); will(returnValue(overlappingSchedule));
             one(listener).itemRemovedFromSchedule(overlappingItem, overlap);
         }});
         
-        Schedule result = resolver.schedule(from, to, channels, publishers, null);
+        Schedule result = resolver.schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent());
         assertSchedules(schedule, result);
     }
     
@@ -93,11 +95,11 @@ public class ScheduleOverlapResolverTest extends TestCase {
         final Schedule overlappingSchedule = schedule(channel, item(b1), item(b2), item(b3), item(b4), overlappingItem);
         
         context.checking(new Expectations() {{ 
-            one(scheduleResolver).schedule(from, to, channels, publishers, null); will(returnValue(overlappingSchedule));
+            one(scheduleResolver).schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent()); will(returnValue(overlappingSchedule));
             one(listener).itemRemovedFromSchedule(overlappingItem, overlap);
         }});
         
-        Schedule result = resolver.schedule(from, to, channels, publishers, null);
+        Schedule result = resolver.schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent());
         assertSchedules(schedule, result);
     }
     
@@ -109,11 +111,11 @@ public class ScheduleOverlapResolverTest extends TestCase {
         final Schedule overlappingSchedule = schedule(channel, item(b1), item(b2), item(b3), overlappingItem, item(b4));
         
         context.checking(new Expectations() {{ 
-            one(scheduleResolver).schedule(from, to, channels, publishers, null); will(returnValue(overlappingSchedule));
+            one(scheduleResolver).schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent()); will(returnValue(overlappingSchedule));
             one(listener).itemRemovedFromSchedule(overlappingItem, overlap);
         }});
         
-        Schedule result = resolver.schedule(from, to, channels, publishers, null);
+        Schedule result = resolver.schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent());
         assertSchedules(schedule, result);
     }
     
@@ -125,11 +127,11 @@ public class ScheduleOverlapResolverTest extends TestCase {
         final Schedule overlappingSchedule = schedule(channel, item(b1), overlappingItem, item(b2), item(b3), item(b4));
         
         context.checking(new Expectations() {{ 
-            one(scheduleResolver).schedule(from, to, channels, publishers, null); will(returnValue(overlappingSchedule));
+            one(scheduleResolver).schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent()); will(returnValue(overlappingSchedule));
             one(listener).itemRemovedFromSchedule(overlappingItem, overlap);
         }});
         
-        Schedule result = resolver.schedule(from, to, channels, publishers, null);
+        Schedule result = resolver.schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent());
         assertSchedules(schedule, result);
     }
     
@@ -143,12 +145,12 @@ public class ScheduleOverlapResolverTest extends TestCase {
         final Schedule overlappingSchedule = schedule(channel, item(b1), overlappingItem, item(b2), item(b3), overlappingItem2, item(b4));
         
         context.checking(new Expectations() {{ 
-            one(scheduleResolver).schedule(from, to, channels, publishers, null); will(returnValue(overlappingSchedule));
+            one(scheduleResolver).schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent()); will(returnValue(overlappingSchedule));
             one(listener).itemRemovedFromSchedule(overlappingItem, overlap);
             one(listener).itemRemovedFromSchedule(overlappingItem2, overlap2);
         }});
         
-        Schedule result = resolver.schedule(from, to, channels, publishers, null);
+        Schedule result = resolver.schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent());
         assertSchedules(schedule, result);
     }
     
@@ -162,11 +164,11 @@ public class ScheduleOverlapResolverTest extends TestCase {
         final Schedule overlappingSchedule = schedule(channel, item(b1), item(b2), item(b3), overlappingItem, item(b4));
         
         context.checking(new Expectations() {{ 
-            one(scheduleResolver).schedule(from, to, channels, publishers, null); will(returnValue(overlappingSchedule));
+            one(scheduleResolver).schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent()); will(returnValue(overlappingSchedule));
             one(listener).itemRemovedFromSchedule(overlappingItem, overlap);
         }});
         
-        Schedule result = resolver.schedule(from, to, channels, publishers, null);
+        Schedule result = resolver.schedule(from, to, channels, publishers, Optional.<ApplicationConfiguration>absent());
         assertSchedules(schedule, result);
     }
     
