@@ -19,12 +19,12 @@ public class StandardQueryParser<T> implements QueryParser<T> {
     private final QueryContextParser contextParser;
 
     private final Pattern singleResourcePattern;
-    private final RequestParameterValidator parameterValidator;
+    private final AbstractRequestParameterValidator parameterValidator;
 
     public StandardQueryParser(Resource resource, QueryAttributeParser attributeParser,
                             NumberToShortStringCodec idCodec,
                             QueryContextParser contextParser) {
-        this.parameterValidator = new RequestParameterValidator(attributeParser, contextParser);
+        this.parameterValidator = new QueryRequestParameterValidator(attributeParser, contextParser);
         this.attributeParser = checkNotNull(attributeParser);
         this.contextParser = checkNotNull(contextParser);
         this.idCodec = checkNotNull(idCodec);

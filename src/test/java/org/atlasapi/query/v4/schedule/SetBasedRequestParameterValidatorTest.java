@@ -3,14 +3,14 @@ package org.atlasapi.query.v4.schedule;
 import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.query.common.InvalidParameterException;
-import org.atlasapi.query.common.RequestParameterValidator;
+import org.atlasapi.query.common.SetBasedRequestParameterValidator;
 import org.junit.Test;
 
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 
-public class RequestParameterValidatorTest {
+public class SetBasedRequestParameterValidatorTest {
 
-    RequestParameterValidator validator = RequestParameterValidator.builder()
+    SetBasedRequestParameterValidator validator = SetBasedRequestParameterValidator.builder()
         .withRequiredParameters("from","to","publisher")
         .withOptionalParameters("apiKey","annotations")
         .build();

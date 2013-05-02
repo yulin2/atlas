@@ -20,7 +20,7 @@ import org.atlasapi.query.annotation.ActiveAnnotations;
 import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryParseException;
-import org.atlasapi.query.common.RequestParameterValidator;
+import org.atlasapi.query.common.SetBasedRequestParameterValidator;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -43,7 +43,7 @@ class ScheduleRequestParser {
     private final ChannelResolver channelResolver;
     private final ApplicationConfigurationFetcher applicationStore;
 
-    private final RequestParameterValidator validator = RequestParameterValidator.builder()
+    private final SetBasedRequestParameterValidator validator = SetBasedRequestParameterValidator.builder()
         .withRequiredParameters("from","to","source")
         .withOptionalParameters("annotations","apiKey", "callback")
         .build();
