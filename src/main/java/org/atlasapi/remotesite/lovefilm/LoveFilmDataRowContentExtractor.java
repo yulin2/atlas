@@ -79,6 +79,8 @@ import com.metabroadcast.common.intl.Countries;
 
 public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFilmDataRow, Optional<Content>> {
 
+    private static final String IMDB_ALIAS_URL_PREFIX = "http://www.imdb.com/title/";
+    private static final String AMAZON_ALIAS_URL_PREFIX = "http://gb.amazon.com/asin/";
     private static final String IMDB_NAMESPACE = "zz:imdb:id";
     private static final String ASIN_NAMESPACE = "gb:amazon:asin";
     private static final String UNKNOWN_LANGUAGE = "unknown";
@@ -291,12 +293,12 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         
         String asin = ASIN.valueFrom(source);
         if (asin.length() > 0) {
-            content.addAliasUrl(asin);
+            content.addAliasUrl(AMAZON_ALIAS_URL_PREFIX + asin);
             content.addAlias(new Alias(ASIN_NAMESPACE, asin));
         }
         String imdbId = IMDB_ID.valueFrom(source);
         if (imdbId.length() > 0) {
-            content.addAliasUrl(imdbId);
+            content.addAliasUrl(IMDB_ALIAS_URL_PREFIX + imdbId);
             content.addAlias(new Alias(IMDB_NAMESPACE, imdbId));
         }
         

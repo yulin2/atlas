@@ -193,7 +193,7 @@ public class LoveFilmDataRowContentExtractorTest {
         assertEquals(Specialization.FILM, film.getSpecialization());
         
         assertEquals(ImmutableSet.of(new Alias("gb:amazon:asin", "B00995Y076"), new Alias("zz:imdb:id", "tt0266308")), film.getAliases());
-        assertEquals(ImmutableSet.of("B00995Y076", "tt0266308"), film.getAliasUrls());
+        assertEquals(ImmutableSet.of("http://gb.amazon.com/asin/B00995Y076", "http://www.imdb.com/title/tt0266308"), film.getAliasUrls());
     }
     
     private LoveFilmDataRow rowFromFile(String filename) throws IOException {
