@@ -13,7 +13,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
@@ -150,12 +149,21 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
                 for (Content child : cached.removeAll(seriesUri)) {
                     Episode episode = (Episode) child;
                     episode.setParentRef(ParentRef.parentRefFrom(series));
+                    episode.setSeriesRef(null);
+                    episode.setSeriesNumber(null);
                     write(episode);
                 }
                 for (Content child : cached.removeAll(entry.getKey())) {
-                    Item item = (Item) child;
-                    item.setParentRef(ParentRef.parentRefFrom(series));
-                    write(item);
+                    if (child instanceof Item) {
+                        Item item = (Item) child;
+                        if (item instanceof Episode) {
+                            Episode episode = (Episode) child;
+                            episode.setSeriesRef(null);
+                            episode.setSeriesNumber(null);
+                        } 
+                        item.setParentRef(ParentRef.parentRefFrom(series));
+                        write(item);
+                    }
                 }
             } else {
                 writeBrand(entry.getValue());
