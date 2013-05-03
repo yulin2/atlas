@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Certificate;
@@ -281,7 +282,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setLanguages(languagesFrom(LANGUAGE.valueFrom(source)));
         content.setCertificates(certificatesFrom(BBFC_RATING.valueFrom(source)));
         content.setMediaType(MediaType.VIDEO);
-        content.setDescription(SYNOPSIS.valueFrom(source));
+        content.setDescription(StringEscapeUtils.unescapeXml(SYNOPSIS.valueFrom(source)));
         
         return content;
     }
