@@ -71,7 +71,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     static final String PA_PICTURE_TYPE_BRAND   = "series";  // Counter-intuitively PA use 'series' where we use 'brand'
     static final String PA_PICTURE_TYPE_SERIES  = "season";  // .. and 'season' where we use 'series'
     
-    private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
+    static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
     static final String NEW_IMAGE_BASE_IMAGE_URL = "http://images.atlas.metabroadcast.com/pressassociation.com/";
     public static final String BROADCAST_ID_PREFIX = "pa:";
     
@@ -305,17 +305,17 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                     picture.getType().equals(secondFallbackType.requireValue()) && 
                     images.isEmpty() && 
                     fallbackImage == null) {
-                    setPrimaryImage(described, image);
+                    setPrimaryImage(described, image, picture);
                     fallbackImage = image;
                 }
                 if (picture.getType().equals(firstFallbackType) && images.isEmpty() && !hasFirstFallbackType) {
-                    setPrimaryImage(described, image);
+                    setPrimaryImage(described, image, picture);
                     fallbackImage = image;
                     hasFirstFallbackType = true;
                 }
                 if (picture.getType().equals(primaryImageType)) {
                     if (images.size() == 0) {
-                        setPrimaryImage(described, image);
+                        setPrimaryImage(described, image, picture);
                     }
                     images.add(image);
                 }
@@ -329,9 +329,12 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
     }
     
-    private void setPrimaryImage(Described described, Image image) {
+    private void setPrimaryImage(Described described, Image image, PictureUsage picture) {
         image.setType(ImageType.PRIMARY);
-        described.setImage(image.getCanonicalUri());
+        // The image URL is set to the "legacy" URL of http://images.../pa/image.jpg since there
+        // are external dependencies on it. The new image block moves to the new URL scheme of
+        // http://images.../pressassociation.com/image.jpg
+        described.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
     }
     
     private Image createImage(PictureUsage pictureUsage) {

@@ -85,7 +85,7 @@ public class PaProgrammeProcessorTest {
         
         progProcessor.selectImages(pictures, described, PaProgrammeProcessor.PA_PICTURE_TYPE_SERIES, PaProgrammeProcessor.PA_PICTURE_TYPE_BRAND, Maybe.<String>nothing());
         verify(described).setImages(imageListCaptor.capture());
-        verify(described).setImage(PaProgrammeProcessor.NEW_IMAGE_BASE_IMAGE_URL+"series1");
+        verify(described).setImage(PaProgrammeProcessor.PA_BASE_IMAGE_URL+"series1");
         verifyNoMoreInteractions(described);
         
         Iterator<Image> iter = imageListCaptor.getValue().iterator();
@@ -110,7 +110,7 @@ public class PaProgrammeProcessorTest {
         verify(described, atLeastOnce()).setImage(stringCaptor.capture());
         verifyNoMoreInteractions(described);
         
-        assertEquals(PaProgrammeProcessor.NEW_IMAGE_BASE_IMAGE_URL+"brand1", stringCaptor.getValue()); // The latest version should be...
+        assertEquals(PaProgrammeProcessor.PA_BASE_IMAGE_URL+"brand1", stringCaptor.getValue()); // The latest version should be...
         
         Iterator<Image> iter = imageListCaptor.getValue().iterator();
         assertEquals(PaProgrammeProcessor.NEW_IMAGE_BASE_IMAGE_URL+"brand1", iter.next().getCanonicalUri());
@@ -128,7 +128,7 @@ public class PaProgrammeProcessorTest {
         
         progProcessor.selectImages(pictures, described, PaProgrammeProcessor.PA_PICTURE_TYPE_EPISODE, PaProgrammeProcessor.PA_PICTURE_TYPE_SERIES, Maybe.<String>nothing());
         verify(described).setImages(imageListCaptor.capture());
-        verify(described).setImage(PaProgrammeProcessor.NEW_IMAGE_BASE_IMAGE_URL+"series1");
+        verify(described).setImage(PaProgrammeProcessor.PA_BASE_IMAGE_URL+"series1");
         verifyNoMoreInteractions(described);
         
         Iterator<Image> iter = imageListCaptor.getValue().iterator();
@@ -144,7 +144,7 @@ public class PaProgrammeProcessorTest {
         
         progProcessor.selectImages(pictures, described, PaProgrammeProcessor.PA_PICTURE_TYPE_EPISODE, PaProgrammeProcessor.PA_PICTURE_TYPE_SERIES, Maybe.just(PaProgrammeProcessor.PA_PICTURE_TYPE_BRAND));
         verify(described).setImages(imageListCaptor.capture());
-        verify(described).setImage(PaProgrammeProcessor.NEW_IMAGE_BASE_IMAGE_URL+"series1");
+        verify(described).setImage(PaProgrammeProcessor.PA_BASE_IMAGE_URL+"series1");
         verifyNoMoreInteractions(described);
         
         Iterator<Image> iter = imageListCaptor.getValue().iterator();
@@ -165,7 +165,7 @@ public class PaProgrammeProcessorTest {
         verify(described, atLeastOnce()).setImage(stringCaptor.capture());
         verifyNoMoreInteractions(described);
         
-        assertEquals(PaProgrammeProcessor.NEW_IMAGE_BASE_IMAGE_URL+"brand1", stringCaptor.getValue()); // The latest version should be...
+        assertEquals(PaProgrammeProcessor.PA_BASE_IMAGE_URL+"brand1", stringCaptor.getValue()); // The latest version should be...
         
         Iterator<Image> iter = imageListCaptor.getValue().iterator();
         assertEquals(PaProgrammeProcessor.NEW_IMAGE_BASE_IMAGE_URL+"brand1", iter.next().getCanonicalUri());
