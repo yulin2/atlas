@@ -33,6 +33,7 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentType;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.topic.PopularTopicIndex;
@@ -183,6 +184,7 @@ public class QueryWebModule {
     private QueryAttributeParser contentQueryAttributeParser() {
         return new QueryAttributeParser(ImmutableList.of(
             QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())),
+            QueryAtomParser.valueOf(Attributes.CONTENT_TYPE, AttributeCoercers.enumCoercer(ContentType.fromKey())),
             QueryAtomParser.valueOf(Attributes.SOURCE, AttributeCoercers.enumCoercer(Publisher.fromKey())),
             QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
             QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer()),
@@ -208,6 +210,7 @@ public class QueryWebModule {
         return new StandardQueryParser<Topic>(Resource.TOPIC, 
             new QueryAttributeParser(ImmutableList.of(
                 QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())),
+                QueryAtomParser.valueOf(Attributes.TOPIC_TYPE, AttributeCoercers.enumCoercer(Topic.Type.fromKey())),
                 QueryAtomParser.valueOf(Attributes.SOURCE, AttributeCoercers.enumCoercer(Publisher.fromKey())),
                 QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
                 QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer())
