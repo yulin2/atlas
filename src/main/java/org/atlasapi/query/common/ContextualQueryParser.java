@@ -25,7 +25,7 @@ public class ContextualQueryParser<C, R> {
     private final ContextualQueryContextParser queryContextParser;
     private final QueryAttributeParser attributeParser;
 
-    private final SetBasedRequestParameterValidator parameterValidator;
+    private final AbstractRequestParameterValidator parameterValidator;
     private final Pattern contextResourcePattern;
 
     public ContextualQueryParser(Resource context,
@@ -37,7 +37,7 @@ public class ContextualQueryParser<C, R> {
         this.queryContextParser = checkNotNull(contextParser);
         this.contextResouceAttribute = checkNotNull(contextResouceAttribute);
         this.idCodec = checkNotNull(idCodec);
-        this.parameterValidator = new SetBasedRequestParameterValidator(attributeParser, contextParser);
+        this.parameterValidator = new QueryRequestParameterValidator(attributeParser, contextParser.getParameterNames());
         this.contextResourcePattern = contextResourcePattern(query, context);
     }
 

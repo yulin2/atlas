@@ -18,9 +18,9 @@ public class QueryRequestParameterValidator extends AbstractRequestParameterVali
     private final ReplacementSuggestion replacementSuggestion;
 
     public QueryRequestParameterValidator(QueryAttributeParser attributeParser,
-        QueryContextParser contextParser) {
+            ImmutableSet<String> otherParameters) {
         this.attributeParameters = initAttributeParams(attributeParser);
-        this.contextParameters = ImmutableSet.copyOf(contextParser.getParameterNames());
+        this.contextParameters = ImmutableSet.copyOf(otherParameters);
         this.replacementSuggestion = new ReplacementSuggestion(allParams(), "Invalid parameters: ", " (did you mean %s?)");
     }
     
