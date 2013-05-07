@@ -49,6 +49,15 @@ public class SequenceItemScorer implements EquivalenceScorer<Item> {
         
         Episode candidateEpisode = (Episode) candidate;
         
+        if (childOfTopLevelSeries(subject) && !childOfTopLevelSeries(candidateEpisode)) {
+            desc.appendText("%s not in top-level series, subject is", candidate);
+            return Score.NULL_SCORE;
+        }
+        if (!childOfTopLevelSeries(subject) && childOfTopLevelSeries(candidateEpisode)) {
+            desc.appendText("%s in top-level series, subject not", candidate);
+            return Score.NULL_SCORE;
+        }
+        
         Score score;
         if (nullableSeriesNumbersEqual(subject, candidateEpisode)
             && nonNullEpisodeNumbersEqual(subject, candidateEpisode)) {
@@ -70,6 +79,10 @@ public class SequenceItemScorer implements EquivalenceScorer<Item> {
         );
     }
 
+    private boolean childOfTopLevelSeries(Episode episode) {
+        return episode.getContainer().equals(episode.getSeriesRef());
+    }
+    
     private boolean nonNullEpisodeNumbersEqual(Episode episode, Episode candidate) {
         return episode.getEpisodeNumber() != null
             && episode.getEpisodeNumber().equals(candidate.getEpisodeNumber());
