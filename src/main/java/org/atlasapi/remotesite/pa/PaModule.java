@@ -139,7 +139,7 @@ public class PaModule {
     }
     
     @Bean PaProgDataProcessor paProgrammeProcessor() {
-        return new PaProgrammeProcessor(contentWriter, contentResolver, channelResolver, peopleWriter, log);
+        return new PaProgrammeProcessor(contentWriter, contentResolver, peopleWriter, log);
     }
     
     @Bean PaCompleteUpdater paCompleteUpdater() {
