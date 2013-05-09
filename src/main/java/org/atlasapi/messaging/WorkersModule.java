@@ -15,7 +15,6 @@ import org.atlasapi.messaging.workers.TopicIndexerWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
@@ -23,7 +22,6 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import com.metabroadcast.common.properties.Configurer;
 
 @Configuration
-@Import(ContentReadModule.class)
 public class WorkersModule {
 
     private String contentIndexerDestination = Configurer.get("messaging.destination.content.indexer").get();
