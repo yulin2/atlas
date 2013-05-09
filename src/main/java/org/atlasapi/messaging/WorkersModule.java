@@ -4,17 +4,15 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.jms.ConnectionFactory;
 
-import org.atlasapi.media.content.ContentIndexer;
-import org.atlasapi.media.content.ContentStore;
-import org.atlasapi.media.topic.TopicIndex;
-import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.messaging.worker.Worker;
 import org.atlasapi.messaging.workers.ContentIndexerWorker;
 import org.atlasapi.messaging.workers.ReplayingWorker;
 import org.atlasapi.messaging.workers.TopicIndexerWorker;
+import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
@@ -22,6 +20,7 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import com.metabroadcast.common.properties.Configurer;
 
 @Configuration
+@Import({AtlasPersistenceModule.class, AtlasMessagingModule.class})
 public class WorkersModule {
 
     private String contentIndexerDestination = Configurer.get("messaging.destination.content.indexer").get();
@@ -34,15 +33,12 @@ public class WorkersModule {
     private long replayInterruptThreshold = Long.parseLong(Configurer.get("messaging.replay.interrupt.threshold").get());
 
     @Autowired private ConnectionFactory connectionFactory;
-    @Autowired private ContentIndexer contentIndexer;
-    @Autowired private ContentStore contentStore;
-    @Autowired private TopicIndex topicIndex;
-    @Autowired private TopicStore topicStore;
-
+    @Autowired private AtlasPersistenceModule persistence;
+    
     @Bean
     @Lazy(true)
     public ReplayingWorker contentIndexerWorker() {
-        return new ReplayingWorker(new ContentIndexerWorker(contentStore, contentIndexer));
+        return new ReplayingWorker(new ContentIndexerWorker(persistence.contentStore(), persistence.contentIndexer()));
     }
 
     @Bean
@@ -60,7 +56,7 @@ public class WorkersModule {
     @Bean
     @Lazy(true)
     public ReplayingWorker topicIndexerWorker() {
-        return new ReplayingWorker(new TopicIndexerWorker(topicStore, topicIndex));
+        return new ReplayingWorker(new TopicIndexerWorker(persistence.topicStore(), persistence.topicIndex()));
     }
     
     @Bean
