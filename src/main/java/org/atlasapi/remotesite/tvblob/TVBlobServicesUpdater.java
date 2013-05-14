@@ -7,7 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 
-import com.google.inject.internal.Lists;
+import com.google.common.collect.Lists;
 
 public class TVBlobServicesUpdater implements Runnable {
 
