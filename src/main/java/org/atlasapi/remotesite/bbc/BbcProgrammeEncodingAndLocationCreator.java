@@ -11,7 +11,7 @@ import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.joda.time.Interval;
 
 import com.google.common.base.Preconditions;
-import com.google.inject.internal.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
 

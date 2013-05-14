@@ -21,7 +21,7 @@ import org.codehaus.jackson.JsonToken;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.internal.Sets;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 

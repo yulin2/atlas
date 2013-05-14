@@ -6,7 +6,7 @@ import org.atlasapi.media.entity.simple.KeyPhrase;
 import org.atlasapi.media.entity.simple.TopicRef;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.internal.Lists;
+import com.google.common.collect.Lists;
 
 public class MagpieScheduleItem {
     private final String uri;

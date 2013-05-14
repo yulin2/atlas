@@ -15,7 +15,7 @@ import org.atlasapi.media.entity.Content;
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
-import com.google.inject.internal.Lists;
+import com.google.common.collect.Lists;
 
 public class FileEquivalenceResultStore implements EquivalenceResultStore {
 
