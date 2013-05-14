@@ -49,7 +49,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.inject.internal.Iterables;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.MongoTestHelper;

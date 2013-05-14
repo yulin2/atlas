@@ -24,7 +24,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-import com.google.inject.internal.Sets;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.media.MimeType;

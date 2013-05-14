@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
-import com.google.inject.internal.ImmutableSet;
+import com.google.common.collect.ImmutableSet;
 
 public class NetflixXmlElementContentExtractor implements ContentExtractor<Element, Set<? extends Content>> {
     private static final String TYPE_ATTRIBUTE = "type";

@@ -7,7 +7,7 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.google.inject.internal.Lists;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class TVBlobServicesClient implements RemoteSiteClient<List<TVBlobService>>{

@@ -29,7 +29,7 @@ import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.internal.Iterables;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.intl.Countries;
 
 public class NetflixEpisodeParseTest {

@@ -13,7 +13,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.ContentMerger;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.internal.Iterables;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 
 
