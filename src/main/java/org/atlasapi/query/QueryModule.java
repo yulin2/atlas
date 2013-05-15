@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.atlasapi.query;
 
 import org.atlasapi.equiv.DefaultMergingEquivalentsResolver;
+import org.atlasapi.equiv.MergingEquivalentsResolver;
 import org.atlasapi.equiv.OutputContentMerger;
 import org.atlasapi.equiv.StrategyBackedEquivalentsMerger;
 import org.atlasapi.media.content.Content;
@@ -53,18 +54,20 @@ public class QueryModule {
     
     @Bean
     public ContextualQueryExecutor<Topic, Content> topicContentQueryExecutor() {
-        return new TopicContentQueryExecutor(persistenceModule.topicStore(), persistenceModule.contentIndex(), persistenceModule.contentStore());
+        return new TopicContentQueryExecutor(persistenceModule.topicStore(), persistenceModule.contentIndex(), mergingContentResolver());
     }
     
     @Bean
     public QueryExecutor<Content> contentQueryExecutor() {
-        DefaultMergingEquivalentsResolver<Content> mergingContentResolver
-            = new DefaultMergingEquivalentsResolver<Content>(
-                persistenceModule.equivalentContentResolver(), 
-                new StrategyBackedEquivalentsMerger<Content>(new OutputContentMerger())
-            );
         return new IndexBackedEquivalentContentQueryExecutor(persistenceModule.contentIndex(), 
-            mergingContentResolver);
+            mergingContentResolver());
+    }
+
+    private MergingEquivalentsResolver<Content> mergingContentResolver() {
+        return new DefaultMergingEquivalentsResolver<Content>(
+            persistenceModule.equivalentContentResolver(), 
+            new StrategyBackedEquivalentsMerger<Content>(new OutputContentMerger())
+        );
     }
 
     @Bean

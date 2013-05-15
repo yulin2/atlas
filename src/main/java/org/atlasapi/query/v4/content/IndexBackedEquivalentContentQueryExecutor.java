@@ -100,21 +100,10 @@ public class IndexBackedEquivalentContentQueryExecutor implements QueryExecutor<
         return new Function<ResolvedEquivalents<Content>, QueryResult<Content>>() {
             @Override
             public QueryResult<Content> apply(ResolvedEquivalents<Content> input) {
-                Iterable<Content> resources = resourcesFrom(input);
+                Iterable<Content> resources = input.getFirstElems();
                 return QueryResult.listResult(resources, query.getContext());
             }
         };
-    }
-
-    private Iterable<Content> resourcesFrom(ResolvedEquivalents<Content> equivs) {
-        return Iterables.transform(equivs.asMap().values(),
-            new Function<Collection<Content>, Content>() {
-                @Override
-                public Content apply(Collection<Content> input) {
-                    return input.iterator().next();
-                }
-            }
-        );
     }
 
     private Selection selection(Query<Content> query) {

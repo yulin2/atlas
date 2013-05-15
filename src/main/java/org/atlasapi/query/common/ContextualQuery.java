@@ -7,6 +7,10 @@ import org.atlasapi.query.common.Query.SingleQuery;
 
 public class ContextualQuery<CONTEXT, RESOURCE> {
     
+    public static final <C, R> ContextualQuery<C, R> valueOf(SingleQuery<C> contextQuery, ListQuery<R> resourceQuery, QueryContext context) {
+        return new ContextualQuery<C, R>(contextQuery, resourceQuery, context);
+    }
+    
     private final SingleQuery<CONTEXT> contextQuery;
     private final ListQuery<RESOURCE> resourceQuery;
     private final QueryContext context;

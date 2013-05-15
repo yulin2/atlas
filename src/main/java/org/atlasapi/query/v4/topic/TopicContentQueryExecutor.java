@@ -3,17 +3,23 @@ package org.atlasapi.query.v4.topic;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.util.Set;
+
+import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.equiv.MergingEquivalentsResolver;
+import org.atlasapi.equiv.ResolvedEquivalents;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentIndex;
-import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.TopicResolver;
 import org.atlasapi.media.util.Resolved;
+import org.atlasapi.output.Annotation;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.query.common.ContextualQuery;
 import org.atlasapi.query.common.ContextualQueryExecutor;
 import org.atlasapi.query.common.ContextualQueryResult;
+import org.atlasapi.query.common.ForbiddenException;
 import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryExecutionException;
@@ -34,13 +40,13 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
 
     private final TopicResolver topicResolver;
     private final ContentIndex index;
-    private final ContentResolver contentResolver;
+    private final MergingEquivalentsResolver<Content> contentResolver;
 
     public TopicContentQueryExecutor(TopicResolver topicResolver, ContentIndex index,
-        ContentResolver contentResolver) {
+        MergingEquivalentsResolver<Content> equivalentsResolver) {
         this.topicResolver = checkNotNull(topicResolver);
         this.index = checkNotNull(index);
-        this.contentResolver = checkNotNull(contentResolver);
+        this.contentResolver = checkNotNull(equivalentsResolver);
     }
 
     @Override
@@ -69,38 +75,44 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
             
                     final QueryContext context = query.getContext();
                     if (!context.getApplicationConfiguration().isEnabled(topic.getPublisher())) {
-                        throw new QueryExecutionException();
+                        throw new ForbiddenException(topic.getId());
                     }
         
-                    return Futures.transform(resolveContent(queryIndex(query.getResourceQuery())), 
+                    return Futures.transform(resolveContent(queryIndex(query.getResourceQuery()), query.getContext()), 
                             toContextualQuery(topic, context));
                 }
 
             };
     }
     
-    private Function<Resolved<Content>, ContextualQueryResult<Topic, Content>> toContextualQuery(
+    private Function<ResolvedEquivalents<Content>, ContextualQueryResult<Topic, Content>> toContextualQuery(
             final Topic topic, final QueryContext context) {
-        return new Function<Resolved<Content>, ContextualQueryResult<Topic, Content>>() {
+        return new Function<ResolvedEquivalents<Content>, ContextualQueryResult<Topic, Content>>() {
             @Override
-            public ContextualQueryResult<Topic, Content> apply(Resolved<Content> content) {
+            public ContextualQueryResult<Topic, Content> apply(ResolvedEquivalents<Content> content) {
                 return ContextualQueryResult.valueOf(
                         QueryResult.singleResult(topic, context),
-                        QueryResult.listResult(content.getResources(), context),
+                        QueryResult.listResult(content.getFirstElems(), context),
                         context);
             }
 
         };
     }
 
-    private ListenableFuture<Resolved<Content>> resolveContent(
-            ListenableFuture<FluentIterable<Id>> queryHits) {
+    private ListenableFuture<ResolvedEquivalents<Content>> resolveContent(
+            ListenableFuture<FluentIterable<Id>> queryIndex, QueryContext context) {
+        return resolveContent(queryIndex, context.getApplicationConfiguration(), context.getAnnotations().all());
+    }
+
+    private ListenableFuture<ResolvedEquivalents<Content>> resolveContent(
+            ListenableFuture<FluentIterable<Id>> queryHits, 
+            final ApplicationConfiguration config, final Set<Annotation> annotations) {
         return Futures.transform(queryHits,
-                new AsyncFunction<FluentIterable<Id>, Resolved<Content>>() {
+                new AsyncFunction<FluentIterable<Id>, ResolvedEquivalents<Content>>() {
                     @Override
-                    public ListenableFuture<Resolved<Content>> apply(FluentIterable<Id> ids)
+                    public ListenableFuture<ResolvedEquivalents<Content>> apply(FluentIterable<Id> ids)
                             throws Exception {
-                        return contentResolver.resolveIds(ids);
+                        return contentResolver.resolveIds(ids, config, annotations);
                     }
                 });
     }
@@ -113,7 +125,7 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
         return index.query(
             query.getOperands(), 
             query.getContext().getApplicationConfiguration().getEnabledSources(), 
-            query.getContext().getSelection().or(Selection.ALL)
+            query.getContext().getSelection().or(Selection.all())
         );
     }
 

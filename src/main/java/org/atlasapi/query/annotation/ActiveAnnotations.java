@@ -2,6 +2,7 @@ package org.atlasapi.query.annotation;
 
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -56,6 +57,10 @@ public final class ActiveAnnotations extends ForwardingSetMultimap<List<Resource
 
     public ImmutableSet<Annotation> forPath(List<Resource> resources) {
         return activeAnnotations.get(resources);
+    }
+
+    public ImmutableSet<Annotation> all() {
+        return ImmutableSet.copyOf(activeAnnotations.values());
     }
 
 }

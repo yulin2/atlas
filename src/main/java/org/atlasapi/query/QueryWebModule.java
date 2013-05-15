@@ -104,6 +104,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -115,6 +116,7 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 import com.metabroadcast.common.time.SystemClock;
 
 @Configuration
+@Import({QueryModule.class})
 public class QueryWebModule {
     
     private @Value("${local.host.name}") String localHostName;
