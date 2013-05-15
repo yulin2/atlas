@@ -11,6 +11,7 @@ import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.SeriesRef;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.persistence.media.product.ProductResolver;
@@ -41,6 +42,14 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         @Override
         public ContentIdentifier apply(ChildRef input) {
             return ContentIdentifier.identifierFor(input, idCodec);
+        }
+    };
+    
+    private final Function<SeriesRef, SeriesIdentifier> toSeriesIdentifier = new Function<SeriesRef, SeriesIdentifier>() {
+
+        @Override
+        public SeriesIdentifier apply(SeriesRef input) {
+            return ContentIdentifier.seriesIdentifierFor(input, idCodec);
         }
     };
 
@@ -75,8 +84,7 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         if (annotations.contains(Annotation.SERIES)) {
             if (fullPlayList instanceof Brand) {
                 Brand brand = (Brand) fullPlayList;
-                simplePlaylist.setSeriesList(Iterables.filter(Lists.transform(brand.getSeriesRefs(), 
-                        toContentIdentifier), SeriesIdentifier.class));
+                simplePlaylist.setSeriesList(Lists.transform(brand.getSeriesRefs(), toSeriesIdentifier));
             }
         }
 

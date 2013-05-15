@@ -21,6 +21,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.SeriesRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
@@ -99,7 +100,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
         
         resolvedBrand = resolve(brand);
         assertThat(resolvedBrand.getId(), is(1L));
-        checkIds(resolvedBrand.getSeriesRefs(), 2L, 3L);
+        checkSeriesIds(resolvedBrand.getSeriesRefs(), 2L, 3L);
         checkIds(resolvedBrand.getChildRefs(), 4L, 5L, 6L);
         
         checkSeries(resolve(series1), 2L, 1L, 4L, 5L);
@@ -181,6 +182,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
                 assertThat(seriesId, is(nullValue()));
             }
         }
+<<<<<<< HEAD
     }
 
     private void checkSeries(Series resolvedSeries, long seriesId, Long brandId, Long...childIds) {
@@ -230,6 +232,13 @@ public class ChildRefUpdateTaskTest extends TestCase {
         mongo.collection(collection).update(where().idEquals(id).build(), update().setField("aid", aid).build());
     }
 
+    private void checkSeriesIds(ImmutableList<SeriesRef> seriesRefs, Long... ids) {
+        Iterator<Long> idIter = Lists.newArrayList(ids).iterator();
+        for (SeriesRef seriesRef : seriesRefs) {
+            assertThat(seriesRef.toString(), seriesRef.getId(), is(idIter.next()));
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     private <T extends Content> T resolve(T content) {
         String uri = content.getCanonicalUri();
