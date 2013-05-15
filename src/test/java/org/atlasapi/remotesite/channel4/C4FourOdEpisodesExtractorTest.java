@@ -34,7 +34,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import com.google.inject.internal.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;

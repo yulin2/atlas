@@ -19,7 +19,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.internal.Iterables;
+import com.google.common.collect.Iterables;
 
 public class BtVodItemDataExtractionTest {
 

@@ -28,8 +28,8 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.internal.Iterables;
-import com.google.inject.internal.Sets;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.intl.Countries;
 
 public class BtVodEpisodeParseTest {

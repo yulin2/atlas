@@ -24,7 +24,7 @@ import org.apache.commons.io.IOUtils;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.google.inject.internal.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.HttpResponsePrologue;

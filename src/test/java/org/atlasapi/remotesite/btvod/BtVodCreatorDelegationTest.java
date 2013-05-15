@@ -17,7 +17,7 @@ import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Series;
 import org.junit.Test;
 
-import com.google.inject.internal.Iterables;
+import com.google.common.collect.Iterables;
 
 public class BtVodCreatorDelegationTest {
     

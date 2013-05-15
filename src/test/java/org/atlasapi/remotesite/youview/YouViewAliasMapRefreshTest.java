@@ -13,8 +13,8 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.google.inject.internal.ImmutableMap;
-import com.google.inject.internal.ImmutableMap.Builder;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.metabroadcast.common.base.Maybe;
 
 public class YouViewAliasMapRefreshTest {
