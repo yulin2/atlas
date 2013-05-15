@@ -2,7 +2,6 @@ package org.atlasapi.query.annotation;
 
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 

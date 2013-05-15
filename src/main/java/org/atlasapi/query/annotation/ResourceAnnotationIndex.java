@@ -13,8 +13,8 @@ import org.atlasapi.query.common.Resource;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.inject.internal.Maps;
 
 /**
  * <p>

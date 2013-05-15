@@ -4,8 +4,8 @@ import java.util.Set;
 
 import nu.xom.Element;
 
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Series;
@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 public class NetflixXmlElementContentExtractor implements ContentExtractor<Element, Set<? extends Content>> {
     private static final String TYPE_ATTRIBUTE = "type";
