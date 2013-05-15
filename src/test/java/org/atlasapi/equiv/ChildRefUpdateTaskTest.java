@@ -86,7 +86,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
         
         Brand resolvedBrand = resolve(brand);
         assertThat(resolvedBrand.getId(), is(1L));
-        checkIds(resolvedBrand.getSeriesRefs(), null, null);
+        checkSeriesIds(resolvedBrand.getSeriesRefs(), null, null);
         checkIds(resolvedBrand.getChildRefs(), null, null, null);
         
         checkSeries(resolve(series1), 2L, null, null, null);
@@ -182,7 +182,6 @@ public class ChildRefUpdateTaskTest extends TestCase {
                 assertThat(seriesId, is(nullValue()));
             }
         }
-<<<<<<< HEAD
     }
 
     private void checkSeries(Series resolvedSeries, long seriesId, Long brandId, Long...childIds) {
