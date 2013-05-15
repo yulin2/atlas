@@ -21,6 +21,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.SeriesRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
@@ -85,7 +86,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
         
         Brand resolvedBrand = resolve(brand);
         assertThat(resolvedBrand.getId(), is(1L));
-        checkIds(resolvedBrand.getSeriesRefs(), null, null);
+        checkSeriesIds(resolvedBrand.getSeriesRefs(), null, null);
         checkIds(resolvedBrand.getChildRefs(), null, null, null);
         
         checkSeries(resolve(series1), 2L, null, null, null);
@@ -99,7 +100,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
         
         resolvedBrand = resolve(brand);
         assertThat(resolvedBrand.getId(), is(1L));
-        checkIds(resolvedBrand.getSeriesRefs(), 2L, 3L);
+        checkSeriesIds(resolvedBrand.getSeriesRefs(), 2L, 3L);
         checkIds(resolvedBrand.getChildRefs(), 4L, 5L, 6L);
         
         checkSeries(resolve(series1), 2L, 1L, 4L, 5L);
@@ -197,6 +198,13 @@ public class ChildRefUpdateTaskTest extends TestCase {
         Iterator<Long> idIter = Lists.newArrayList(ids).iterator();
         for (ChildRef childRef : childRefs) {
             assertThat(childRef.toString(), childRef.getId(), is(idIter.next()));
+        }
+    }
+    
+    private void checkSeriesIds(ImmutableList<SeriesRef> seriesRefs, Long... ids) {
+        Iterator<Long> idIter = Lists.newArrayList(ids).iterator();
+        for (SeriesRef seriesRef : seriesRefs) {
+            assertThat(seriesRef.toString(), seriesRef.getId(), is(idIter.next()));
         }
     }
     

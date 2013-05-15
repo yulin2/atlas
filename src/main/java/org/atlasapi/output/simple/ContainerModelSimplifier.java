@@ -49,7 +49,7 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
 
         @Override
         public SeriesIdentifier apply(SeriesRef input) {
-            return ContentIdentifier.seriesIdentifierFor(input);
+            return ContentIdentifier.seriesIdentifierFor(input, idCodec);
         }
     };
 

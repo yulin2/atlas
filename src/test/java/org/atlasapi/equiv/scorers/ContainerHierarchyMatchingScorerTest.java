@@ -74,7 +74,7 @@ public class ContainerHierarchyMatchingScorerTest {
         final Brand subject = brandWithSeries(5);
 
         context.checking(new Expectations(){{
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),ChildRef.TO_URI))));
+            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),SeriesRef.TO_URI))));
                 will(returnValue(ResolvedContent.builder().putAll(series(5)).build()));
         }});
 
@@ -90,9 +90,9 @@ public class ContainerHierarchyMatchingScorerTest {
         final Brand suggestion = brandWithSeries(6);
 
         context.checking(new Expectations(){{
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),ChildRef.TO_URI))));
+            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),SeriesRef.TO_URI))));
                 will(returnValue(ResolvedContent.builder().putAll(series(5)).build()));
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(suggestion.getSeriesRefs(),ChildRef.TO_URI))));
+            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(suggestion.getSeriesRefs(),SeriesRef.TO_URI))));
                 will(returnValue(ResolvedContent.builder().putAll(series(6)).build()));
         }});
 
