@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.youview;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Map;
@@ -14,6 +15,7 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
@@ -56,7 +58,7 @@ public class YouViewItemParseTest {
         assertEquals("http://youview.com/scheduleevent/7780297", item.getCanonicalUri());
         assertEquals("Hatfields & McCoys", item.getTitle());
         assertEquals(MediaType.VIDEO, item.getMediaType());
-        assertEquals(ImmutableSet.of("http://youview.com/programme/7655992", "crid://www.five.tv/V65K2"), item.getAliasUrls());
+        assertEquals(ImmutableSet.of("http://youview.com/programme/7655992"), item.getAliasUrls());
         assertEquals(Publisher.YOUVIEW, item.getPublisher());
         
         Version version = Iterables.getOnlyElement(item.getVersions());
@@ -68,7 +70,13 @@ public class YouViewItemParseTest {
         assertEquals(new DateTime(2012, 11, 18, 23, 30, 00), broadcast.getTransmissionTime());
         assertEquals(new DateTime(2012, 11, 19, 00, 30, 00), broadcast.getTransmissionEndTime());
         assertThat(broadcast.getBroadcastDuration(), is(3600));
-        assertEquals(ImmutableSet.of("dvb://233a..2134;8696"), broadcast.getAliasUrls());
+        assertEquals(ImmutableSet.of("dvb://233a..2134;8696", "pcrid:crid://www.five.tv/V65K2", "scrid:crid://www.five.tv/RBJW"), broadcast.getAliasUrls());
+        assertEquals(ImmutableSet.of(
+                    new Alias("dvb:event-locator", "dvb://233a..2134;8696"), 
+                    new Alias("dvb:pcrid", "crid://www.five.tv/V65K2"), 
+                    new Alias("dvb:scrid", "crid://www.five.tv/RBJW")
+                ), 
+                broadcast.getAliases());
         assertEquals("youview:7780297", broadcast.getSourceId());
         
         Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
@@ -85,7 +93,7 @@ public class YouViewItemParseTest {
     public void testItemParsingNoProgrammeId() throws ValidityException, ParsingException, IOException {
         Item item = contentExtractor.extract(getContentElementFromFile("youview-item-no-programme-id.xml"));
         
-        assertEquals(ImmutableSet.of("crid://www.five.tv/V65K2"), item.getAliasUrls());
+        assertTrue(item.getAliasUrls().isEmpty());
     }
     
     public static Element getContentElementFromFile(String fileName) throws ValidityException, ParsingException, IOException {
