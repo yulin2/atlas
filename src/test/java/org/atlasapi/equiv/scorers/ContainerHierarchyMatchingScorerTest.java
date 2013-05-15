@@ -17,6 +17,7 @@ import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.SeriesRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.jmock.Expectations;
@@ -130,7 +131,7 @@ public class ContainerHierarchyMatchingScorerTest {
     
     private Brand brandWithSeries(int series) {
         Brand brand = new Brand();
-        brand.setSeriesRefs(Iterables.limit(Iterables.cycle(new ChildRef(1234L, "uri", "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), series));
+        brand.setSeriesRefs(Iterables.limit(Iterables.cycle(new SeriesRef(1234L, "uri", "sk", 1, new DateTime(DateTimeZones.UTC))), series));
         return brand;
     }
 

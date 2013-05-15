@@ -110,7 +110,16 @@ public final class DefaultGsonModelReader extends GsonModelReader {
         @Override
         public ContentIdentifier deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             JsonObject jsonObj = json.getAsJsonObject();
-            return ContentIdentifier.identifierFrom(jsonObj.get("uri").getAsString(), jsonObj.get("type").getAsString());
+            String uri = jsonObj.get("uri").getAsString();
+            String type = jsonObj.get("type").getAsString();
+            
+            if ("series".equals(type)) {
+                JsonElement seriesElement = jsonObj.get("seriesNumber");
+                Integer seriesNumber = seriesElement != null ? seriesElement.getAsInt() : null;
+                return ContentIdentifier.seriesIdentifierFrom(uri, seriesNumber);
+            } else {
+                return ContentIdentifier.identifierFrom(uri, type);
+            }
         }
     }
     
