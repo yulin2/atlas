@@ -7,8 +7,8 @@ import org.atlasapi.media.entity.Policy.Platform;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.internal.ImmutableMap;
-import com.google.inject.internal.Sets;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 public class BtVodLocationData {
     private final String uri;

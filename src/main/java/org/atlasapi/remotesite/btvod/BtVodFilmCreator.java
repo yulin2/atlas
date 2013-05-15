@@ -7,7 +7,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.remotesite.btvod.model.BtVodItemData;
 import org.atlasapi.remotesite.btvod.model.BtVodLocationData;
 
-import com.google.inject.internal.ImmutableSet;
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.intl.Countries;
 
 public class BtVodFilmCreator implements BtVodContentCreator<Film> {
