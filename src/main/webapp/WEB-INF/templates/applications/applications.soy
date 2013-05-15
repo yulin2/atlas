@@ -252,6 +252,8 @@
  */
 {template .sources}
 {call atlas.templates.applications.head}
+	{param applications: null /}
+	{param application: null /}
 	{param sources: $sources /}
 {/call}
     <h1>Sources</h1>
@@ -281,6 +283,8 @@
 {template .sourceReaders}
 {call atlas.templates.applications.head}
 	{param applications: $applications /}
+    {param application: null /}
+    {param sources: null /}
 {/call}
     <div class="cf sub">
     <h1>{$source.title}</h1>
@@ -483,7 +487,11 @@
  * 
  */
 {template .login}
-{call atlas.templates.applications.head /}
+{call atlas.templates.applications.head}
+    {param applications: null /}
+    {param application: null /}
+    {param sources: null /}
+{/call}
 			<div class="main pm">
 				<h1>Welcome to Atlas</h1>
 				<div class="alert inf mtl mbl">To set up a new application or configure an existing one, sign in using Twitter to get started.</div>
