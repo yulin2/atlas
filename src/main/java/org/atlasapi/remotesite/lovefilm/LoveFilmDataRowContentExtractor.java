@@ -291,12 +291,12 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setDescription(SYNOPSIS.valueFrom(source));
         
         String asin = ASIN.valueFrom(source);
-        if (asin.length() > 0) {
+        if (!Strings.isNullOrEmpty(asin)) {
             content.addAliasUrl(AMAZON_ALIAS_URL_PREFIX + asin);
             content.addAlias(new Alias(ASIN_NAMESPACE, asin));
         }
         String imdbId = IMDB_ID.valueFrom(source);
-        if (imdbId.length() > 0) {
+        if (!Strings.isNullOrEmpty(imdbId)) {
             content.addAliasUrl(IMDB_ALIAS_URL_PREFIX + imdbId);
             content.addAlias(new Alias(IMDB_NAMESPACE, imdbId));
         }
