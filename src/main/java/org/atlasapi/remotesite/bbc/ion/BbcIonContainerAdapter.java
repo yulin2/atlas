@@ -97,10 +97,17 @@ public class BbcIonContainerAdapter implements BbcContainerAdapter, SiteSpecific
         }
         
         setCommonFields(ionContainer, series);
-        series.withSeriesNumber(Ints.saturatedCast(ionContainer.getPosition()));
+        series.withSeriesNumber(getSeriesNumber(ionContainer));
         BbcImageUrlCreator.addIplayerImagesTo(ionContainer.getId(), series);
 
         return Maybe.just(series);
+    }
+
+    // abuse the ION position to get a series number. 
+    // top-level series have a position of 0 in ION but it should be null in Atlas.
+    private Integer getSeriesNumber(IonContainer ionContainer) {
+        int seriesNumber = Ints.saturatedCast(ionContainer.getPosition());
+        return seriesNumber > 0 ? seriesNumber : null;
     }
     
     private void setCommonFields(IonContainer src, Container dst) {
