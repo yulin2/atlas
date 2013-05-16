@@ -61,15 +61,15 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             RadioPlayerModule.class,
             XmlTvModule.class, 
             RemoteSiteHealthModule.class, 
-            EquivModule.class,
-            ChildRefUpdateModule.class
+            EquivModule.class
         );
         
         if(runProcessingOnly()) {
             builder.add(
                 ManualScheduleRebuildModule.class, 
                 InterlinkingDeltaModule.class,
-                EquivTaskModule.class
+                EquivTaskModule.class,
+                ChildRefUpdateModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(YouViewUploadModule.class);
