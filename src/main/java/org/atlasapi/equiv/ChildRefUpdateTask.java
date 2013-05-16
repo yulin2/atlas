@@ -22,6 +22,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.SeriesRef;
 import org.atlasapi.persistence.content.ContentCategory;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
@@ -187,7 +188,7 @@ public class ChildRefUpdateTask extends ScheduledTask {
         Map<String, ChildRef> seriesRefs = Maps.newLinkedHashMap();
 
         if (container instanceof Brand) {
-            ResolvedContent resolvedSeries = resolver.findByCanonicalUris(Iterables.transform(((Brand)container).getSeriesRefs(),ChildRef.TO_URI));
+            ResolvedContent resolvedSeries = resolver.findByCanonicalUris(Iterables.transform(((Brand)container).getSeriesRefs(),SeriesRef.TO_URI));
             for (Series series : Iterables.filter(resolvedSeries.getAllResolvedResults(), Series.class)) {
                 seriesRefs.put(series.getCanonicalUri(), series.childRef());
             }

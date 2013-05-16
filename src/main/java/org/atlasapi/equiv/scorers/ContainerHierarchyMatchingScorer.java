@@ -13,6 +13,7 @@ import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.SeriesRef;
 import org.atlasapi.persistence.content.ContentResolver;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -149,7 +150,7 @@ public class ContainerHierarchyMatchingScorer implements EquivalenceScorer<Conta
     }
 
     public ImmutableList<Series> seriesFor(Brand brand) {
-        Iterable<String> uris = ImmutableList.copyOf(Iterables.transform(brand.getSeriesRefs(), ChildRef.TO_URI));
+        Iterable<String> uris = ImmutableList.copyOf(Iterables.transform(brand.getSeriesRefs(), SeriesRef.TO_URI));
         List<Identified> allResolvedSeries = contentResolver.findByCanonicalUris(uris).getAllResolvedResults();
         return ImmutableList.copyOf(Iterables.filter(allResolvedSeries, Series.class));
     }

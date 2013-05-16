@@ -228,7 +228,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 
 		Playlist list = playlist().build();
 
-		list.add(ContentIdentifier.identifierFrom("http://www.bbc.co.uk/bluepeter", "item"));
+		list.add(ContentIdentifier.identifierFrom("dd", "http://www.bbc.co.uk/bluepeter", "item"));
 		
         Document outputDoc = serializeToXml(new ContentQueryResult(list));
         
@@ -240,6 +240,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
                 hasChildElem(allOf(of(
                         localName(is("item")),
                         hasChildElem(allOf(of(localName(is("type")), value(is("item"))))),
+                        hasChildElem(allOf(of(localName(is("id")), value(is("dd"))))),
                         hasChildElem(allOf(of(localName(is("uri")), value(is(getOnlyElement(list.getContent()).getUri())))))
                 )))
         ))));
