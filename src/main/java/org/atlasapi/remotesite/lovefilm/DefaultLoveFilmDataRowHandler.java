@@ -29,8 +29,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
@@ -49,6 +52,13 @@ import com.metabroadcast.common.base.Maybe;
  * 
  */
 public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
+    
+    private static final Predicate<Content> IS_SERIES = new Predicate<Content>() {
+        @Override
+        public boolean apply(Content input) {
+            return input instanceof Series;
+        }
+    };
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -59,6 +69,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     private final Map<String, Container> seen = Maps.newHashMap();
     private final SetMultimap<String, Content> cached = HashMultimap.create();
+    private final Map<String, Brand> unwrittenBrands = Maps.newHashMap();
     private final Set<Content> seenContent = Sets.newHashSet();
     private final int missingContentPercentage;
 
@@ -102,6 +113,10 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     @Override
     public void finish() {
+        if (!unwrittenBrands.isEmpty()) {
+            processTopLevelSeries();
+        }
+        
         if (cached.values().size() > 0) {
             log.warn("{} extracted but unwritten", cached.values().size());
             for (Entry<String, Collection<Content>> mapping : cached.asMap().entrySet()) {
@@ -109,14 +124,71 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
             }
 
         }
+        
         seen.clear();
         cached.clear();
+        unwrittenBrands.clear();
         
         checkForDeletedContent();
         
         seenContent.clear();
     }
 
+    private void processTopLevelSeries() {
+        for (Entry<String, Brand> entry : unwrittenBrands.entrySet()) {
+            Iterable<Content> seriesForBrand = Iterables.filter(cached.get(entry.getKey()), IS_SERIES);
+            if (mightBeTopLevelSeries(entry.getValue(), seriesForBrand)) {
+                
+                seen.put(entry.getKey(), entry.getValue());
+                
+                Series series = (Series) Iterables.getOnlyElement(seriesForBrand);
+                cached.remove(entry.getKey(), series);
+                series.setParentRef(null);
+                String seriesUri = series.getCanonicalUri();
+                write(series);
+                for (Content child : cached.removeAll(seriesUri)) {
+                    Episode episode = (Episode) child;
+                    episode.setParentRef(ParentRef.parentRefFrom(series));
+                    episode.setSeriesRef(null);
+                    episode.setSeriesNumber(null);
+                    write(episode);
+                }
+                for (Content child : cached.removeAll(entry.getKey())) {
+                    if (child instanceof Item) {
+                        Item item = (Item) child;
+                        if (item instanceof Episode) {
+                            Episode episode = (Episode) child;
+                            episode.setSeriesRef(null);
+                            episode.setSeriesNumber(null);
+                        } 
+                        item.setParentRef(ParentRef.parentRefFrom(series));
+                        write(item);
+                    }
+                }
+            } else {
+                writeBrand(entry.getValue());
+            }
+        }
+    }
+    
+    /*
+     * This check can only truely check whether a brand and children constitutes a top-level series
+     * once all information is known. When only some rows have been parsed, the check can only be
+     * used to reject a potential top-level series
+     * 
+     * If a brand has two or more series, than it can be said to be non-topLevel, whereas if it only 
+     * has one, then you can only say that it is not a top-level series if the brand name and series 
+     * name do not match. if they do, you cannot assert that it is a top-level series, as another series
+     * may yet be ingested for that brand.  
+     */
+    private boolean mightBeTopLevelSeries(Brand brand, Iterable<Content> seriesForBrand) {
+        if (Iterables.size(seriesForBrand) == 1) {
+            Content series = Iterables.getOnlyElement(seriesForBrand);
+            return series.getTitle().equals(brand.getTitle());
+        }
+        return false;
+    }
+    
     private void checkForDeletedContent() {
         Set<Content> allLoveFilmContent = ImmutableSet.copyOf(resolveAllLoveFilmContent());
         Set<Content> notSeen = Sets.difference(allLoveFilmContent, seenContent);
@@ -163,7 +235,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
             if (content instanceof Series) {
                 cacheOrWriteSeriesAndSubContents((Series) content);
             } else if (content instanceof Brand) {
-                writeBrandAndCachedSubContents((Brand) content);
+                cacheOrWriteBrandAndCachedSubContents((Brand) content);
             } else {
                 writer.createOrUpdate((Container) content);
             }
@@ -176,7 +248,17 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         }
     }
 
-    private void writeBrandAndCachedSubContents(Brand brand) {
+    private void cacheOrWriteBrandAndCachedSubContents(Brand brand) {
+        String brandUri = brand.getCanonicalUri();
+        Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(brandUri), IS_SERIES);
+        if (!mightBeTopLevelSeries(brand, cachedSeriesForBrand)) {
+            writeBrand(brand);
+        } else {
+            unwrittenBrands.put(brandUri, brand);
+        }
+    }
+    
+    private void writeBrand(Brand brand) {
         writer.createOrUpdate(brand);
         String brandUri = brand.getCanonicalUri();
         seen.put(brandUri, brand);
@@ -188,14 +270,30 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     private void cacheOrWriteSeriesAndSubContents(Series series) {
         ParentRef parent = series.getParent();
         if (parent != null && !seen.containsKey(parent.getUri())) {
+            // series has parent, parent not written
+            if (unwrittenBrands.containsKey(parent.getUri())) {
+                Brand brand = unwrittenBrands.get(parent.getUri());
+                Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(parent.getUri()), IS_SERIES);
+                if (!mightBeTopLevelSeries(brand, Iterables.concat(cachedSeriesForBrand, ImmutableList.of(series)))) {
+                    // have brand, is now definitely not a top level series, so can write brand, etc
+                    unwrittenBrands.remove(parent.getUri());
+                    writeBrand(brand);
+                    writeSeries(series);
+                    return;
+                } 
+            }
             cached.put(parent.getUri(), series);
         } else {
-            String seriesUri = series.getCanonicalUri();
-            writer.createOrUpdate(series);
-            seen.put(seriesUri, series);
-            for (Content episode : cached.removeAll(seriesUri)) {
-                write(episode);
-            }
+            writeSeries(series);
+        }
+    }
+
+    public void writeSeries(Series series) {
+        String seriesUri = series.getCanonicalUri();
+        writer.createOrUpdate(series);
+        seen.put(seriesUri, series);
+        for (Content episode : cached.removeAll(seriesUri)) {
+            write(episode);
         }
     }
 

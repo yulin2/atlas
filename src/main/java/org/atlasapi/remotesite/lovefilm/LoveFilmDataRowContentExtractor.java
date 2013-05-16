@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Certificate;
@@ -281,7 +282,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setLanguages(languagesFrom(LANGUAGE.valueFrom(source)));
         content.setCertificates(certificatesFrom(BBFC_RATING.valueFrom(source)));
         content.setMediaType(MediaType.VIDEO);
-        content.setDescription(SYNOPSIS.valueFrom(source));
+        content.setDescription(StringEscapeUtils.unescapeXml(SYNOPSIS.valueFrom(source)));
         
         return content;
     }
@@ -387,7 +388,11 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     }
 
     private String getSeriesTitle(LoveFilmDataRow source) {
-        Iterable<String> parts = TITLE_SPLIT.split(ITEM_NAME.valueFrom(source));
-        return Iterables.get(parts, 1);
+        String seriesTitle = ITEM_NAME.valueFrom(source);
+        Iterable<String> parts = TITLE_SPLIT.split(seriesTitle);
+        if (Iterables.size(parts) > 1) {
+            return Iterables.get(parts, 1);
+        }
+        return seriesTitle;
     }
 }
