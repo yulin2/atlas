@@ -11,6 +11,7 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 
@@ -142,9 +143,37 @@ public class SequenceItemScorerTest {
         assertEquals("should score one if series number absent and episode numbers match",
             ONE, scores.candidates().get(candidate));
     }
+    
+    @Test
+    public void testScoresNullIfSubjectChildOfTopLevelSeriesAndCandidateNot() {
+        Episode subject = episode("subject", 5, 6);
+        subject.setSeriesRef(subject.getContainer());
+        Episode candidate = episode("candidate", 5, 6);
+        
+        ScoredCandidates<Item> scores = scorer.score(subject, set(candidate), desc);
+        
+        assertEquals("should score null if subject child of top-level series and candidate not",
+            NULL_SCORE, scores.candidates().get(candidate));
+        
+    }
+
+    @Test
+    public void testScoresNullIfCandidateChildOfTopLevelSeriesAndSubjectNot() {
+        Episode subject = episode("subject", 5, 6);
+        Episode candidate = episode("candidate", 5, 6);
+        candidate.setSeriesRef(candidate.getContainer());
+        
+        ScoredCandidates<Item> scores = scorer.score(subject, set(candidate), desc);
+        
+        assertEquals("should score null if candidate child of top-level series and subject not",
+                NULL_SCORE, scores.candidates().get(candidate));
+        
+    }
 
     private Episode episode(String uri, Integer seriesNumber, Integer episodeNumber) {
         Episode candidate = new Episode(uri, uri, Publisher.BBC);
+        candidate.setParentRef(new ParentRef("b"+uri));
+        candidate.setParentRef(new ParentRef("s"+uri));
         candidate.setSeriesNumber(seriesNumber);
         candidate.setEpisodeNumber(episodeNumber);
         return candidate;
