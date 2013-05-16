@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.lovefilm;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.atlasapi.remotesite.FetchException;
@@ -9,7 +10,6 @@ import org.jets3t.service.S3Service;
 import org.jets3t.service.ServiceException;
 import org.jets3t.service.model.S3Object;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Supplier;
 import com.google.common.io.CharStreams;
 import com.google.common.io.InputSupplier;
@@ -40,7 +40,8 @@ public class S3LoveFilmDataSupplier implements LoveFilmDataSupplier {
                 throw new FetchException(String.format("No data file in %s/%s", bucketName, folder));
             }
             InputSupplier<InputStream> in = inputStreamFor(service, file);
-            return new LoveFilmData(CharStreams.newReaderSupplier(in, Charsets.UTF_8));
+            Charset charset = Charset.forName("windows-1252");
+            return new LoveFilmData(CharStreams.newReaderSupplier(in, charset));
         } catch (ServiceException e) {
             throw new FetchException(e.getMessage(), e);
         } 
