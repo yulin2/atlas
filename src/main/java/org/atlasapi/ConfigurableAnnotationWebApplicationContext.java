@@ -1,6 +1,7 @@
 package org.atlasapi;
 
 import org.atlasapi.application.ApplicationModule;
+import org.atlasapi.equiv.ChildRefUpdateModule;
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.EquivTaskModule;
 import org.atlasapi.feeds.AtlasFeedsModule;
@@ -67,7 +68,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             builder.add(
                 ManualScheduleRebuildModule.class, 
                 InterlinkingDeltaModule.class,
-                EquivTaskModule.class
+                EquivTaskModule.class,
+                ChildRefUpdateModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(YouViewUploadModule.class);
