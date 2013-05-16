@@ -160,6 +160,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
         broadcast = version.getBroadcasts().iterator().next();
         assertEquals("pa:71118472", broadcast.getSourceId());
+        assertTrue(broadcast.getRepeat());
 
 //        // Test people get created
 //        for (CrewMember crewMember : item.people()) {
