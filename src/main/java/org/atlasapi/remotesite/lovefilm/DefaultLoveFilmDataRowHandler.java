@@ -137,7 +137,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     private void processTopLevelSeries() {
         for (Entry<String, Brand> entry : unwrittenBrands.entrySet()) {
             Iterable<Content> seriesForBrand = Iterables.filter(cached.get(entry.getKey()), IS_SERIES);
-            if (isTopLevelSeries(entry.getValue(), seriesForBrand)) {
+            if (mightBeTopLevelSeries(entry.getValue(), seriesForBrand)) {
                 
                 seen.put(entry.getKey(), entry.getValue());
                 
@@ -171,7 +171,17 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         }
     }
     
-    private boolean isTopLevelSeries(Brand brand, Iterable<Content> seriesForBrand) {
+    /*
+     * This check can only truely check whether a brand and children constitutes a top-level series
+     * once all information is known. When only some rows have been parsed, the check can only be
+     * used to reject a potential top-level series
+     * 
+     * If a brand has two or more series, than it can be said to be non-topLevel, whereas if it only 
+     * has one, then you can only say that it is not a top-level series if the brand name and series 
+     * name do not match. if they do, you cannot assert that it is a top-level series, as another series
+     * may yet be ingested for that brand.  
+     */
+    private boolean mightBeTopLevelSeries(Brand brand, Iterable<Content> seriesForBrand) {
         if (Iterables.size(seriesForBrand) == 1) {
             Content series = Iterables.getOnlyElement(seriesForBrand);
             return series.getTitle().equals(brand.getTitle());
@@ -179,18 +189,6 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         return false;
     }
     
-    private boolean isNotTopLevelSeries(Brand brand, Iterable<Content> seriesForBrand) {
-        if (Iterables.size(seriesForBrand) > 1) {
-            return true;
-        } else if (Iterables.size(seriesForBrand) == 1) {
-            Content series = Iterables.getOnlyElement(seriesForBrand);
-            if (!series.getTitle().equals(brand.getTitle())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void checkForDeletedContent() {
         Set<Content> allLoveFilmContent = ImmutableSet.copyOf(resolveAllLoveFilmContent());
         Set<Content> notSeen = Sets.difference(allLoveFilmContent, seenContent);
@@ -253,7 +251,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     private void cacheOrWriteBrandAndCachedSubContents(Brand brand) {
         String brandUri = brand.getCanonicalUri();
         Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(brandUri), IS_SERIES);
-        if (isNotTopLevelSeries(brand, cachedSeriesForBrand)) {
+        if (!mightBeTopLevelSeries(brand, cachedSeriesForBrand)) {
             writeBrand(brand);
         } else {
             unwrittenBrands.put(brandUri, brand);
@@ -276,7 +274,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
             if (unwrittenBrands.containsKey(parent.getUri())) {
                 Brand brand = unwrittenBrands.get(parent.getUri());
                 Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(parent.getUri()), IS_SERIES);
-                if (isNotTopLevelSeries(brand, Iterables.concat(cachedSeriesForBrand, ImmutableList.of(series)))) {
+                if (!mightBeTopLevelSeries(brand, Iterables.concat(cachedSeriesForBrand, ImmutableList.of(series)))) {
                     // have brand, is now definitely not a top level series, so can write brand, etc
                     unwrittenBrands.remove(parent.getUri());
                     writeBrand(brand);
