@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.lovefilm;
 
 import static org.atlasapi.feeds.utils.lovefilm.LoveFilmGenreConverter.TO_ATLAS_GENRE;
+import static org.atlasapi.feeds.utils.lovefilm.LoveFilmGenreConverter.TO_ATLAS_SUB_GENRE;
 import static org.atlasapi.media.entity.Policy.RevenueContract.FREE_TO_VIEW;
 import static org.atlasapi.media.entity.Policy.RevenueContract.PAY_TO_RENT;
 import static org.atlasapi.media.entity.Policy.RevenueContract.SUBSCRIPTION;
@@ -15,6 +16,7 @@ import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.DRM_RIGHTS;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.EPISODE_SEQUENCE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.EXTERNAL_PRODUCT_DESCRIPTION_URL;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.GENRE;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.GENRE_HIERARCHY;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.HD_AVAILABLE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.HEROSHOT_URL;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.IMDB_ID;
@@ -284,7 +286,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setTitle(ITEM_NAME.valueFrom(source));
         content.setImage(HEROSHOT_URL.valueFrom(source));
         content.setYear(yearFrom(ORIGINAL_PUBLICATION_DATE.valueFrom(source)));
-        content.setGenres(genresFrom(GENRE.valueFrom(source)));
+        content.setGenres(processGenres(source));
         content.setPeople(peopleFrom(CONTRIBUTOR.valueFrom(source)));
         content.setLanguages(languagesFrom(LANGUAGE.valueFrom(source)));
         content.setCertificates(certificatesFrom(BBFC_RATING.valueFrom(source)));
@@ -292,12 +294,12 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setDescription(StringEscapeUtils.unescapeXml(SYNOPSIS.valueFrom(source)));
         
         String asin = ASIN.valueFrom(source);
-        if (asin.length() > 0) {
+        if (!Strings.isNullOrEmpty(asin)) {
             content.addAliasUrl(AMAZON_ALIAS_URL_PREFIX + asin);
             content.addAlias(new Alias(ASIN_NAMESPACE, asin));
         }
         String imdbId = IMDB_ID.valueFrom(source);
-        if (imdbId.length() > 0) {
+        if (!Strings.isNullOrEmpty(imdbId)) {
             content.addAliasUrl(IMDB_ALIAS_URL_PREFIX + imdbId);
             content.addAlias(new Alias(IMDB_NAMESPACE, imdbId));
         }
@@ -305,6 +307,18 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         return content;
     }
     
+    private Iterable<String> processGenres(LoveFilmDataRow source) {
+        Iterable<String> topLevelGenres = genresFrom(GENRE.valueFrom(source));
+        Iterable<String> subGenres = subGenresFrom(GENRE_HIERARCHY.valueFrom(source));
+        
+        return Iterables.concat(topLevelGenres, subGenres);
+    }
+
+    private Iterable<String> subGenresFrom(String genreString) {
+        Iterable<String> subGenres = COMMA_SPLITTER.split(genreString);
+        return Iterables.transform(subGenres,TO_ATLAS_SUB_GENRE);
+    }
+
     private Integer yearFrom(String pubDate) {
         if (Strings.isNullOrEmpty(pubDate)) {
             return null;
