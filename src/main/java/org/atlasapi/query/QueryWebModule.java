@@ -190,6 +190,7 @@ public class QueryWebModule {
             QueryAtomParser.valueOf(Attributes.SOURCE, AttributeCoercers.enumCoercer(Publisher.fromKey())),
             QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
             QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer()),
+            QueryAtomParser.valueOf(Attributes.TOPIC_ID, AttributeCoercers.idCoercer(idCodec())),
             QueryAtomParser.valueOf(Attributes.TOPIC_RELATIONSHIP, AttributeCoercers.stringCoercer()),
             QueryAtomParser.valueOf(Attributes.TOPIC_SUPERVISED, AttributeCoercers.booleanCoercer()),
             QueryAtomParser.valueOf(Attributes.TOPIC_WEIGHTING, AttributeCoercers.floatCoercer())
