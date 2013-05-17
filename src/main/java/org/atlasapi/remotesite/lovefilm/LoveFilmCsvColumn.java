@@ -25,6 +25,7 @@ public enum LoveFilmCsvColumn {
     FORMAT("format"),
     FSK_RATING("fsk_rating"),
     GENRE("genre"),
+    GENRE_HIERARCHY("genre_hierarchy"),
     HD_AVAILABLE("hd_available"),
     HEROSHOT_URL("heroshot_url"),
     IMAGE_URL("image_url"),
