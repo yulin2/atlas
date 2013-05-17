@@ -40,6 +40,17 @@ public class AttributeLookupTreeTest {
         assertTrue(tree.attributeFor("aliases.namespace.equals").isPresent());
         
     }
+    
+    @Test
+    public void testDoesntProduceNullWhenBestMatchIsNonLeafNode() {
+        AttributeLookupTree tree = new AttributeLookupTree();
+        
+        tree.put(Attributes.TOPIC_RELATIONSHIP);
+        tree.put(Attributes.TOPIC_SUPERVISED);
+        
+        assertNotNull(tree.attributeFor(Attributes.TOPIC_ID.externalName()));
+        
+    }
 
     @Test
     public void testGetAllKeys() {

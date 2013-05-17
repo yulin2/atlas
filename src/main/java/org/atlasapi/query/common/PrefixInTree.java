@@ -51,10 +51,16 @@ public class PrefixInTree<T> extends ConcurrentRadixTree<Optional<T>> {
     private Optional<T> processResult(String key, Node curNode, int matchLen,
                                                  int curNodeMatch) {
         int incomingEdgeLength = curNode.getIncomingEdge().length();
-        if (matchLen > 0 && matchLen <= key.length() && curNodeMatch == incomingEdgeLength) {
-            return (Optional<T>) curNode.getValue();
+        Optional<T> value = Optional.absent();
+        if (matchLen > 0 && matchLen <= key.length()
+                && curNodeMatch == incomingEdgeLength && leafNode(curNode)) {
+            value = (Optional<T>) curNode.getValue();
         }
-        return Optional.absent();
+        return value;
+    }
+
+    private boolean leafNode(Node curNode) {
+        return curNode.getValue() != null;
     }
     
     public Set<String> allKeys() {
