@@ -40,6 +40,12 @@ public class ScheduleEquivalenceUpdateTaskTest {
                     Iterable<Publisher> publisher, Optional<ApplicationConfiguration> mergeConfig) {
                 return schedule;
             }
+            
+            @Override
+            public Schedule schedule(DateTime from, int count, Iterable<Channel> channels,
+                    Iterable<Publisher> publisher, Optional<ApplicationConfiguration> mergeConfig) {
+                return schedule;
+            }
         };
     };
     
