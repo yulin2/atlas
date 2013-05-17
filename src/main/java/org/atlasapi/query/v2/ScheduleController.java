@@ -1,5 +1,6 @@
 package org.atlasapi.query.v2;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.atlasapi.application.ApplicationConfiguration.defaultConfiguration;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
@@ -53,8 +55,9 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
     }
 
     @RequestMapping("/3.0/schedule.*")
-    public void schedule(
-            @RequestParam(required=false) String to, @RequestParam(required=false) String from, 
+    public void schedule(@RequestParam(required=false) String from, 
+            @RequestParam(required=false) String to, 
+            @RequestParam(required=false, value="count") String itemCount,
             @RequestParam(required=false) String on, 
             @RequestParam(required=false) String channel, @RequestParam(value="channel_id",required=false) String channelId, 
             @RequestParam(required=false) String publisher, 
@@ -62,15 +65,24 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
         try {
             DateTime fromWhen = null;
             DateTime toWhen = null;
+            Integer count = null; 
 
-            if (! Strings.isNullOrEmpty(on)) {
+            if (!Strings.isNullOrEmpty(on)) {
                 fromWhen = dateTimeInQueryParser.parse(on);
                 toWhen = dateTimeInQueryParser.parse(on);
-            } else if (! Strings.isNullOrEmpty(to) && ! Strings.isNullOrEmpty(from)) {
+                checkArgument(nullOrEmpty(to, from, itemCount), "'from', 'to' and 'count' cannot be provided with 'on'");
+            } else if (!Strings.isNullOrEmpty(to) && !Strings.isNullOrEmpty(from)) {
                 fromWhen = dateTimeInQueryParser.parse(from);
                 toWhen = dateTimeInQueryParser.parse(to);
+                checkArgument(nullOrEmpty(on, itemCount), "'on' and 'count' cannot be provided with 'from' and 'to'");
+            } else if (!Strings.isNullOrEmpty(from) && !Strings.isNullOrEmpty(itemCount)) {
+                fromWhen = dateTimeInQueryParser.parse(from);
+                count = Integer.parseInt(itemCount);
+                checkArgument(nullOrEmpty(on, to), "'on' and 'to' cannot be provided with 'from' and 'count'");
             } else {
-                throw new IllegalArgumentException("You must pass either 'on' or 'from' and 'to'");
+                throw new IllegalArgumentException("You must supply either 'on' "
+                        + "or 'from' and 'to'"
+                        + "or 'from' and 'count'");
             }
             
             String apiKey = request.getParameter("apiKey");
@@ -89,7 +101,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
                 throw new IllegalArgumentException("You must specify at least one publisher that you have permission to view");
             }
             
-            if (Strings.isNullOrEmpty(channelId) && Strings.isNullOrEmpty(channel) || !Strings.isNullOrEmpty(channelId) && !Strings.isNullOrEmpty(channel)) {
+            if (!(Strings.isNullOrEmpty(channelId) ^ Strings.isNullOrEmpty(channel))) {
                 throw new IllegalArgumentException("You must specify exactly one of channel and channel_id");
             }
             Set<Channel> channels = Strings.isNullOrEmpty(channel) ? channelsFromIds(channelId) : channelsFromKeys(channel);
@@ -98,12 +110,27 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
             }
             
             ApplicationConfiguration mergeConfig = apiKeySupplied && !publishersSupplied ? appConfig : null;
-            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers, Optional.fromNullable(mergeConfig)).scheduleChannels(), appConfig);
+            Schedule schedule;
+            if (count != null) {
+                schedule = scheduleResolver.schedule(fromWhen, count, channels, publishers, Optional.fromNullable(mergeConfig));
+            } else {
+                schedule = scheduleResolver.schedule(fromWhen, toWhen, channels, publishers, Optional.fromNullable(mergeConfig));
+            }
+            modelAndViewFor(request, response, schedule.scheduleChannels(), appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
     }
-    
+
+    private boolean nullOrEmpty(String... params) {
+        for (String param : params) {
+            if (!Strings.isNullOrEmpty(param)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private Set<Publisher> getPublishers(String publisher,
                                          ApplicationConfiguration appConfig) {
         if (!Strings.isNullOrEmpty(publisher)) {
