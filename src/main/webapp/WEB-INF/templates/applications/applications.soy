@@ -134,6 +134,7 @@
 {call atlas.templates.applications.head}
 	{param applications: $applications /}
 	{param application: null /}
+	{param sources: null /}
 {/call}
 	<h1>Applications</h1>
 	<div class="form fr mrm">
@@ -228,6 +229,7 @@
 {call atlas.templates.applications.head}
 	{param applications: null /}
 	{param application: $application /}
+	{param sources: null /}
 {/call}
 	{call atlas.templates.applications.widgets.applicationContent}
 		{param application: $application /}
