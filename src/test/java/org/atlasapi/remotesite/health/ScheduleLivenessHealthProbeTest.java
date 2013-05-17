@@ -135,5 +135,11 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 			
 		}
 		
+		@Override
+		public Schedule schedule(DateTime from, int count, Iterable<Channel> channels,
+		        Iterable<Publisher> publisher, Optional<ApplicationConfiguration> mergeConfig) {
+		    return null;
+		}
+		
 	}
 }
