@@ -14,18 +14,22 @@ public class LoveFilmCsvUpdateTask extends ScheduledTask {
 
     private static final Logger log = LoggerFactory.getLogger(LoveFilmCsvUpdateTask.class);
     
-    private LoveFilmDataSupplier dataSupplier;
-    private LoveFilmDataRowHandler dataHandler;
+    private final LoveFilmFileUpdater updater;
+    private final LoveFilmDataRowHandler dataHandler;
+    private final LoveFilmFileStore store;
 
-    public LoveFilmCsvUpdateTask(LoveFilmDataSupplier dataSupplier, LoveFilmDataRowHandler dataHandler) {
-        this.dataSupplier = dataSupplier;
+    public LoveFilmCsvUpdateTask(LoveFilmFileUpdater updater, LoveFilmFileStore store, LoveFilmDataRowHandler dataHandler) {
+        this.updater = updater;
+        this.store = store;
         this.dataHandler = dataHandler;
     }
     
     @Override
     protected void runTask() {
         try {
-            LoveFilmData latestData = dataSupplier.getLatestData();
+//            LoveFilmData latestData = dataSupplier.getLatestData();
+            updater.update();
+            LoveFilmData latestData = store.fetchLatestData();
             
             dataHandler.prepare();
             UpdateProgress progress = latestData.processData(processor());

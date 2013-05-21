@@ -59,6 +59,13 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
             return input instanceof Series;
         }
     };
+    
+    private static final Predicate<Content> IS_ITEM = new Predicate<Content>() {
+        @Override
+        public boolean apply(Content input) {
+            return input instanceof Item;
+        }
+    };
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -69,21 +76,29 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     private final Map<String, Container> seen = Maps.newHashMap();
     private final SetMultimap<String, Content> cached = HashMultimap.create();
-    private final Map<String, Brand> unwrittenBrands = Maps.newHashMap();
+//    private final Map<String, Brand> unwrittenBrands = Maps.newHashMap();
+    
+    private final Map<String, Brand> topLevelSeries = Maps.newHashMap();
+    private final Map<String, Brand> standAloneEpisodes = Maps.newHashMap();
+    
     private final Set<Content> seenContent = Sets.newHashSet();
     private final int missingContentPercentage;
+    
+    //TODO test this approach
+    private final LoveFilmBrandProcessor brandProcessor;
 
-    public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer, ContentLister lister, int missingContentPercentage) {
-        this(resolver, writer, lister, new LoveFilmDataRowContentExtractor(), missingContentPercentage);
+    public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer, ContentLister lister, int missingContentPercentage, LoveFilmBrandProcessor brandProcessor) {
+        this(resolver, writer, lister, new LoveFilmDataRowContentExtractor(), missingContentPercentage, brandProcessor);
     }
 
     public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer, ContentLister lister, 
-            ContentExtractor<LoveFilmDataRow, Optional<Content>> extractor, int missingContentPercentage) {
+            ContentExtractor<LoveFilmDataRow, Optional<Content>> extractor, int missingContentPercentage, LoveFilmBrandProcessor brandProcessor) {
         this.resolver = resolver;
         this.writer = writer;
         this.lister = lister;
         this.extractor = extractor;
         this.missingContentPercentage = missingContentPercentage;
+        this.brandProcessor = brandProcessor;
     }
 
     @Override
@@ -113,68 +128,116 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     @Override
     public void finish() {
-        if (!unwrittenBrands.isEmpty()) {
+//        if (!unwrittenBrands.isEmpty()) {
             processTopLevelSeries();
-        }
+//        }
+            processStandAloneEpisodes();
         
         if (cached.values().size() > 0) {
             log.warn("{} extracted but unwritten", cached.values().size());
             for (Entry<String, Collection<Content>> mapping : cached.asMap().entrySet()) {
                 log.warn(mapping.toString());
             }
-
         }
         
         seen.clear();
         cached.clear();
-        unwrittenBrands.clear();
+//        unwrittenBrands.clear();
+        topLevelSeries.clear();
+        standAloneEpisodes.clear();
         
         checkForDeletedContent();
         
         seenContent.clear();
     }
 
+    private void processStandAloneEpisodes() {
+        for (Entry<String, Brand> entry : standAloneEpisodes.entrySet()) {
+            Item item = (Item) Iterables.getOnlyElement(Iterables.filter(cached.get(entry.getKey()), IS_ITEM));
+            cached.removeAll(entry.getKey());
+            
+            if (item instanceof Episode) {
+                Episode episode = (Episode) item;
+                episode.setSeriesRef(null);
+                episode.setSeriesNumber(null);
+            }
+            item.setContainer(null);
+            write(item);
+        }
+    }
+
     private void processTopLevelSeries() {
-        for (Entry<String, Brand> entry : unwrittenBrands.entrySet()) {
-            Iterable<Content> seriesForBrand = Iterables.filter(cached.get(entry.getKey()), IS_SERIES);
-            if (mightBeTopLevelSeries(entry.getValue(), seriesForBrand)) {
-                
-                seen.put(entry.getKey(), entry.getValue());
-                
-                Series series = (Series) Iterables.getOnlyElement(seriesForBrand);
-                cached.remove(entry.getKey(), series);
-                series.setParentRef(null);
-                String seriesUri = series.getCanonicalUri();
-                write(series);
-                for (Content child : cached.removeAll(seriesUri)) {
-                    Episode episode = (Episode) child;
-                    episode.setParentRef(ParentRef.parentRefFrom(series));
-                    episode.setSeriesRef(null);
-                    episode.setSeriesNumber(null);
-                    write(episode);
+//        for (Entry<String, Brand> entry : unwrittenBrands.entrySet()) {
+//            Iterable<Content> seriesForBrand = Iterables.filter(cached.get(entry.getKey()), IS_SERIES);
+//            if (mightBeTopLevelSeries(entry.getValue(), seriesForBrand)) {
+//                
+//                seen.put(entry.getKey(), entry.getValue());
+//                
+//                Series series = (Series) Iterables.getOnlyElement(seriesForBrand);
+//                cached.remove(entry.getKey(), series);
+//                series.setParentRef(null);
+//                String seriesUri = series.getCanonicalUri();
+//                write(series);
+//                for (Content child : cached.removeAll(seriesUri)) {
+//                    Episode episode = (Episode) child;
+//                    episode.setParentRef(ParentRef.parentRefFrom(series));
+//                    episode.setSeriesRef(null);
+//                    episode.setSeriesNumber(null);
+//                    write(episode);
+//                }
+//                for (Content child : cached.removeAll(entry.getKey())) {
+//                    if (child instanceof Item) {
+//                        Item item = (Item) child;
+//                        if (item instanceof Episode) {
+//                            Episode episode = (Episode) child;
+//                            episode.setSeriesRef(null);
+//                            episode.setSeriesNumber(null);
+//                        } 
+//                        item.setParentRef(ParentRef.parentRefFrom(series));
+//                        write(item);
+//                    }
+//                }
+//            } else {
+//                writeBrand(entry.getValue());
+//            }
+//        }
+        for (Entry<String, Brand> entry : topLevelSeries.entrySet()) {
+            
+            Series series = (Series) Iterables.getOnlyElement(Iterables.filter(cached.get(entry.getKey()), IS_SERIES));
+            cached.remove(entry.getKey(), series);
+            
+            series.setParentRef(null);
+            String seriesUri = series.getCanonicalUri();
+            // TODO will this update the refs?
+            for (Content child : cached.get(seriesUri)) {
+                Episode episode = (Episode) child;
+                episode.setParentRef(ParentRef.parentRefFrom(series));
+                episode.setSeriesRef(null);
+                episode.setSeriesNumber(null);
+                //write(episode);
+            }
+            // this will write those items cached against the series
+            write(series);
+            
+            for (Content child : cached.removeAll(entry.getKey())) {
+                if (child instanceof Item) {
+                    Item item = (Item) child;
+                    if (item instanceof Episode) {
+                        Episode episode = (Episode) child;
+                        episode.setSeriesRef(null);
+                        episode.setSeriesNumber(null);
+                    } 
+                    item.setParentRef(ParentRef.parentRefFrom(series));
+                    write(item);
                 }
-                for (Content child : cached.removeAll(entry.getKey())) {
-                    if (child instanceof Item) {
-                        Item item = (Item) child;
-                        if (item instanceof Episode) {
-                            Episode episode = (Episode) child;
-                            episode.setSeriesRef(null);
-                            episode.setSeriesNumber(null);
-                        } 
-                        item.setParentRef(ParentRef.parentRefFrom(series));
-                        write(item);
-                    }
-                }
-            } else {
-                writeBrand(entry.getValue());
             }
         }
     }
     
     /*
-     * This check can only truely check whether a brand and children constitutes a top-level series
+     * This check can only truly check whether a brand and children constitutes a top-level series
      * once all information is known. When only some rows have been parsed, the check can only be
-     * used to reject a potential top-level series
+     * used to reject a potential top-level series.
      * 
      * If a brand has two or more series, than it can be said to be non-topLevel, whereas if it only 
      * has one, then you can only say that it is not a top-level series if the brand name and series 
@@ -185,6 +248,18 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         if (Iterables.size(seriesForBrand) == 1) {
             Content series = Iterables.getOnlyElement(seriesForBrand);
             return series.getTitle().equals(brand.getTitle());
+        }
+        return false;
+    }
+    
+    private boolean mightBeStandAloneEpisode(Brand brand, Iterable<Content> seriesForBrand, Iterable<Content> itemsForBrand) {
+        if (Iterables.size(seriesForBrand) == 1) {
+            if (Iterables.size(itemsForBrand) == 1) {
+                Content series = Iterables.getOnlyElement(seriesForBrand);
+                Content item = Iterables.getOnlyElement(itemsForBrand);
+                return (series.getTitle().equals(brand.getTitle())
+                    && item.getTitle().equals(brand.getTitle()));
+            }
         }
         return false;
     }
@@ -250,11 +325,19 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     private void cacheOrWriteBrandAndCachedSubContents(Brand brand) {
         String brandUri = brand.getCanonicalUri();
-        Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(brandUri), IS_SERIES);
-        if (!mightBeTopLevelSeries(brand, cachedSeriesForBrand)) {
-            writeBrand(brand);
+//        Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(brandUri), IS_SERIES);
+//        Iterable<Content> cachedItemsForBrand = Iterables.filter(cached.get(brandUri), IS_ITEM);
+//        if (!mightBeStandAloneEpisode(brand, cachedSeriesForBrand, cachedItemsForBrand) 
+//            && !mightBeTopLevelSeries(brand, cachedSeriesForBrand)) {
+//            writeBrand(brand);
+        BrandType brandType = brandProcessor.getBrandType(brandUri);
+        
+        if (brandType.equals(BrandType.TOP_LEVEL_SERIES)) {
+            topLevelSeries.put(brandUri, brand);
+        } else if (brandType.equals(BrandType.STAND_ALONE_EPISODE)) {
+            standAloneEpisodes.put(brandUri, brand);
         } else {
-            unwrittenBrands.put(brandUri, brand);
+            writeBrand(brand);
         }
     }
     
@@ -269,19 +352,36 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     private void cacheOrWriteSeriesAndSubContents(Series series) {
         ParentRef parent = series.getParent();
+//        if (parent != null && !seen.containsKey(parent.getUri())) {
+//            // series has parent, parent not written
+//            if (unwrittenBrands.containsKey(parent.getUri())) {
+//                Brand brand = unwrittenBrands.get(parent.getUri());
+//                Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(parent.getUri()), IS_SERIES);
+//                Iterable<Content> cachedItemsForBrand = Iterables.filter(cached.get(parent.getUri()), IS_ITEM);
+//                if (!mightBeTopLevelSeries(brand, Iterables.concat(cachedSeriesForBrand, ImmutableList.of(series)))) {
+//                    // have brand, is now definitely not a top level series, so can write brand, etc
+//                    unwrittenBrands.remove(parent.getUri());
+//                    writeBrand(brand);
+//                    writeSeries(series);
+//                    return;
+//                }
+//                if (!mightBeStandAloneEpisode(brand, Iterables.concat(cachedSeriesForBrand, ImmutableList.of(series)), cachedItemsForBrand)) {
+//                    // have brand, is now definitely not a top level series, so can write brand, etc
+//                    unwrittenBrands.remove(parent.getUri());
+//                    writeBrand(brand);
+//                    writeSeries(series);
+//                    return;
+//                }
+//            }
+//            cached.put(parent.getUri(), series);
+//        } else {
+//            writeSeries(series);
+//        }
+        
+        // parent will be cached if toplevelseries, or standaloneepisode, so won't have been seen
+        // hence series will be cached as well
+        
         if (parent != null && !seen.containsKey(parent.getUri())) {
-            // series has parent, parent not written
-            if (unwrittenBrands.containsKey(parent.getUri())) {
-                Brand brand = unwrittenBrands.get(parent.getUri());
-                Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(parent.getUri()), IS_SERIES);
-                if (!mightBeTopLevelSeries(brand, Iterables.concat(cachedSeriesForBrand, ImmutableList.of(series)))) {
-                    // have brand, is now definitely not a top level series, so can write brand, etc
-                    unwrittenBrands.remove(parent.getUri());
-                    writeBrand(brand);
-                    writeSeries(series);
-                    return;
-                } 
-            }
             cached.put(parent.getUri(), series);
         } else {
             writeSeries(series);
@@ -301,6 +401,24 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         Item item = (Item) content;
         ParentRef parent = item.getContainer();
         if (parent != null && !seen.containsKey(parent.getUri())) {
+//            // TODO is this a brand or series?
+//            // currently unwrittenBrands only contains brands, but should probably contain both brands and series
+//            if (unwrittenBrands.containsKey(parent.getUri())) {
+//                Brand brand = unwrittenBrands.get(parent.getUri());
+//                Iterable<Content> cachedSeriesForBrand = Iterables.filter(cached.get(parent.getUri()), IS_SERIES);
+//                Iterable<Content> cachedItemsForBrand = Iterables.filter(cached.get(parent.getUri()), IS_ITEM);
+//                if (!mightBeStandAloneEpisode(brand, cachedSeriesForBrand, Iterables.concat(cachedItemsForBrand, ImmutableList.of(item)))) {
+//                    // is definitely not a stand alone episode 
+//                    if (!mightBeTopLevelSeries(brand, cachedSeriesForBrand)) {
+//                        // can only write brand if it's certain that it isn't also a top-level series
+//                        unwrittenBrands.remove(parent.getUri());
+//                        writeBrand(brand);
+//                        writer.createOrUpdate((Item) content);
+//                        return;
+//                    }
+//                }
+//            }
+            
             cached.put(parent.getUri(), item);
         } else {
             writer.createOrUpdate((Item) content);
