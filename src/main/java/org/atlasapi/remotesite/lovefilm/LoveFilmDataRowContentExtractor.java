@@ -359,6 +359,8 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         return certificateMap.get(certificate).asSet();
     }
     
+    // if no start/end date, don't add a location
+    // prevents issues with sending missing availability windows to youview
     private Set<Version> versionAndLocationFrom(LoveFilmDataRow source) {
         Version version = new Version();
         String duration = RUN_TIME_SEC.valueFrom(source);
@@ -366,39 +368,50 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             version.setDuration(Duration.standardSeconds(Long.parseLong(duration)));
         }
         
-        Encoding encoding = new Encoding();
-        if (HD_AVAILABLE.valueFrom(source).equals("1")) {
-            // HD
-            encoding.setVideoHorizontalSize(1280);
-            encoding.setVideoVerticalSize(720);
-            encoding.setVideoAspectRatio("16:9");
-            encoding.setBitRate(3308);
-        } else {
-            // SD
-            encoding.setVideoHorizontalSize(720);
-            encoding.setVideoVerticalSize(576);
-            encoding.setVideoAspectRatio("16:9");
-            encoding.setBitRate(1600);
+        Optional<Policy> policy = policyFrom(source);
+        if (policy.isPresent()) {
+            Encoding encoding = new Encoding();
+            if (HD_AVAILABLE.valueFrom(source).equals("1")) {
+                // HD
+                encoding.setVideoHorizontalSize(1280);
+                encoding.setVideoVerticalSize(720);
+                encoding.setVideoAspectRatio("16:9");
+                encoding.setBitRate(3308);
+            } else {
+                // SD
+                encoding.setVideoHorizontalSize(720);
+                encoding.setVideoVerticalSize(576);
+                encoding.setVideoAspectRatio("16:9");
+                encoding.setBitRate(1600);
+            }
+
+            Location location = new Location();
+            location.setUri(EXTERNAL_PRODUCT_DESCRIPTION_URL.valueFrom(source));
+            location.setPolicy(policy.get());
+            location.setTransportType(TransportType.LINK);
+            encoding.addAvailableAt(location);
+            version.addManifestedAs(encoding);
         }
         
-        Location location = new Location();
-        location.setUri(EXTERNAL_PRODUCT_DESCRIPTION_URL.valueFrom(source));
-        location.setTransportType(TransportType.LINK);
-        location.setPolicy(policyFrom(source));
-        
-        encoding.addAvailableAt(location);
-        version.addManifestedAs(encoding);
         return ImmutableSet.of(version);
     }
 
-    private Policy policyFrom(LoveFilmDataRow source) {
+    private Optional<Policy> policyFrom(LoveFilmDataRow source) {
         Policy policy = new Policy();
         
         String availabilityStartDate = AVAILABILITY_START_DATE.valueFrom(source);
-        policy.setAvailabilityStart(dateTimeFromAvailability(availabilityStartDate));
+        DateTime startDate = dateTimeFromAvailability(availabilityStartDate);
+        if (startDate == null) {
+            return Optional.absent();
+        }
+        policy.setAvailabilityStart(startDate);
         
         String availabilityEndDate = AVAILABILITY_END_DATE.valueFrom(source);
-        policy.setAvailabilityEnd(dateTimeFromAvailability(availabilityEndDate));
+        DateTime endDate = dateTimeFromAvailability(availabilityEndDate);
+        if (endDate == null) {
+            return Optional.absent();
+        }
+        policy.setAvailabilityEnd(endDate);
         
         String drmRights = DRM_RIGHTS.valueFrom(source);
         RevenueContract revenueContract = revenueContractMap.get(drmRights);
@@ -409,7 +422,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         
         policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
         
-        return policy;
+        return Optional.of(policy);
     }
 
     private DateTime dateTimeFromAvailability(String date) {
