@@ -7,6 +7,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import java.util.List;
 import java.util.Map;
 
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -17,7 +18,6 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.channel4.C4BrandUpdater;
 import org.atlasapi.remotesite.channel4.epg.model.C4EpgEntry;
-import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;

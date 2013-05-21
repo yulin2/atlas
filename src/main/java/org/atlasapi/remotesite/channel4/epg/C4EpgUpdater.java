@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import java.util.Map;
 
+import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -10,7 +11,6 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.channel4.C4AtomApi;
 import org.atlasapi.remotesite.channel4.C4BrandUpdater;
-import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
