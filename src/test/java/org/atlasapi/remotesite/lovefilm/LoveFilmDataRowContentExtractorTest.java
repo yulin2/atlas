@@ -10,6 +10,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
@@ -25,6 +27,7 @@ import org.junit.Test;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 
@@ -51,6 +54,19 @@ public class LoveFilmDataRowContentExtractorTest {
         assertThat(episode.getTitle(), is("Stoke Me a Clipper"));
         assertThat(episode.getDescription(), is("Rimmer's alter ego, Ace, arrives on Starbug badly wounded."));
         assertEquals(Specialization.TV, episode.getSpecialization());
+        
+        Set<String> expectedGenres = ImmutableSet.of(
+            "http://lovefilm.com/genres/comedy",
+            "http://lovefilm.com/genres/television",
+            "http://lovefilm.com/genres/sci-fi-fantasy",
+            "http://lovefilm.com/genres/sci-fi-fantasy/comedy", 
+            "http://lovefilm.com/genres/comedy/sci-fi-fantasy",
+            "http://lovefilm.com/genres/comedy/television",
+            "http://lovefilm.com/genres/television/bbc",
+            "http://lovefilm.com/genres/television/comedy"
+            );
+        
+        assertEquals(expectedGenres, episode.getGenres());
     }
     
     @Test
@@ -110,8 +126,7 @@ public class LoveFilmDataRowContentExtractorTest {
     
     /* TODO
      * This has been disabled as the example below now has a series in the latest lovefilm data.
-     * It may well be that this case no longer exists. The data in human-planet-e08.csv has not
-     * been changed
+     * It may well be that this case no longer exists.
      */
     @Ignore
     @Test
@@ -127,7 +142,7 @@ public class LoveFilmDataRowContentExtractorTest {
         assertThat(content, is(Episode.class));
         Episode episode = (Episode) content;
         
-        assertThat(episode.getContainer().getUri(), endsWith("181684"));
+        assertThat(episode.getContainer().getUri(), endsWith("192242"));
         assertThat(episode.getSeriesRef(), is(nullValue()));
         assertThat(episode.getEpisodeNumber(), is(8));
         assertThat(episode.getGenres(), hasItem("http://lovefilm.com/genres/specialinterest"));
@@ -154,8 +169,7 @@ public class LoveFilmDataRowContentExtractorTest {
     }
 
     /* TODO
-     * Check whether this case still applies, and if so find an appropriate case to support it. The data 
-     * in blackadder-specials.csv has not been updated with the new columns
+     * Check whether this case still applies, and if so find an appropriate case to support it.
      */
     @Ignore
     @Test
