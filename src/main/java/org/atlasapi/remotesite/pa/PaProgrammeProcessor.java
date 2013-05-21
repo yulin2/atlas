@@ -85,92 +85,18 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private final ContentWriter contentWriter;
     private final ContentResolver contentResolver;
-    private final ChannelResolver channelResolver;
     private final AdapterLog log;
     private final PaCountryMap countryMap = new PaCountryMap();
     
     private final GenreMap genreMap = new PaGenreMap();
     
     private final ItemsPeopleWriter personWriter;
-	private final ImmutableList<Channel> terrestrialChannels;
 
-    public PaProgrammeProcessor(ContentWriter contentWriter, ContentResolver contentResolver, ChannelResolver channelResolver, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
+    public PaProgrammeProcessor(ContentWriter contentWriter, ContentResolver contentResolver, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
         this.contentWriter = contentWriter;
         this.contentResolver = contentResolver;
         this.log = log;
         this.personWriter = itemsPeopleWriter;
-        this.channelResolver = channelResolver;
-        this.terrestrialChannels = ImmutableList.<Channel>builder()
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/east").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/london").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbchd").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/west_midlands").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/east_midlands").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/yorkshire").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/north_east").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/north_west").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/ni").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/wales").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/scotland").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/south").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/south_west").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/west").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/south_east").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbctwo/england").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbctwo/ni").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbctwo/scotland").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbctwo/wales").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/cbbc").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/cbeebies").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/anglia").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/bordersouth").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/london").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/carltoncentral").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/channel").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/granada").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/meridian").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/tynetees").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/hd").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv2/hd").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv3/hd").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv4/hd").requireValue())
-        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/ytv").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/carltonwestcountry").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/wales").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/west").requireValue())
-        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/stvcentral").requireValue())
-        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/ulster").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/bordernorth").requireValue())
-        		.add(channelResolver.fromUri("http://www.channel4.com").requireValue())
-        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/s4c").requireValue())
-        		.add(channelResolver.fromUri("http://www.five.tv").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio1/england").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio2").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio3").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio4/fm").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio7").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio4/lw").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/5live").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/5livesportsextra").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/6music").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/1xtra").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/asiannetwork").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/worldservice").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcthree").requireValue())
-        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcfour").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv2").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv3").requireValue())
-        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv4").requireValue())
-        		.add(channelResolver.fromUri("http://www.five.tv/channels/five_hd").requireValue())
-        		.add(channelResolver.fromUri("http://www.five.tv/channels/five-usa").requireValue())
-        		.add(channelResolver.fromUri("http://www.e4.com/hd").requireValue())
-        		.add(channelResolver.fromUri("http://www.e4.com").requireValue())
-        		.add(channelResolver.fromUri("http://www.channel4.com/more4").requireValue())
-        		.add(channelResolver.fromUri("http://film4.com").requireValue())
-        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/stvhd").requireValue())
-        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/channel4hd").requireValue())
-        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/film4hd").requireValue())
-        		.build();
     }
 
     @Override
@@ -608,15 +534,15 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         broadcast.setLastUpdated(updateAt.toDateTimeUTC());
         return broadcast;
     }
-    
+ 
+    //If the repeat flag is "yes" it's definitely a repeat. If it's "no" 
+    // then we can't be sure so ingest it as null.  
     private Boolean isRepeat(Channel channel, Attr attr) {
-        // If the broadcast is on a 'terrestrial' channel only inspect repeat flag
-        if (terrestrialChannels.contains(channel)) {
-            return getBooleanValue(attr.getRepeat());
+        Boolean repeat = getBooleanValue(attr.getRepeat());
+        if (Boolean.FALSE.equals(repeat)) {
+            return null;
         }
-        // check new episode flag, will be set to yes only if definitely new content 
-        // so only then can we assert it's NOT a repeat. Return null (don't know) otherwise.
-        return Boolean.TRUE.equals(getBooleanValue(attr.getNewEpisode())) ? Boolean.FALSE : null;
+        return repeat;
     }
 
     private void addBroadcast(Version version, Broadcast broadcast) {
