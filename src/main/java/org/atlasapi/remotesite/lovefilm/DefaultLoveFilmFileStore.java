@@ -2,21 +2,28 @@ package org.atlasapi.remotesite.lovefilm;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.google.common.io.Files;
-import com.metabroadcast.common.base.Maybe;
+import com.google.common.primitives.Longs;
 
 
 public class DefaultLoveFilmFileStore implements LoveFilmFileStore {
+
+    private static final Charset CHARSET = Charset.forName("windows-1252");
+    private static final Ordering<File> BY_TIME_ORDERING = new Ordering<File>() { 
+        @Override
+        public int compare(File left, File right) {
+            return Longs.compare(left.lastModified(), right.lastModified());
+        }
+    };
     
     private final File localFolder;
 
@@ -46,16 +53,11 @@ public class DefaultLoveFilmFileStore implements LoveFilmFileStore {
 
     @Override
     public LoveFilmData fetchLatestData() {
-        // TODO Auto-generated method stub
-        localFolder.listFiles(filter);
-        
-        Charset charset = Charset.forName("windows-1252");
-        return new LoveFilmData(Files.newReaderSupplier(data, charset));
+        return new LoveFilmData(Files.newReaderSupplier(fetchLatestFile(), CHARSET));
     }
 
     private File fetchLatestFile() {
         List<File> allFiles = Lists.newArrayList(localFolder.listFiles());
-        Collections.sort(allFiles, COMPARE_BY_TIME);
-        return allFiles.get(0);
+        return BY_TIME_ORDERING.max(allFiles);
     }
 }

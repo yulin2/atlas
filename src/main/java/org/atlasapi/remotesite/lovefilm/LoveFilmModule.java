@@ -41,11 +41,17 @@ public class LoveFilmModule {
         String s3bucket = Configurer.get("lovefilm.s3.bucket").get();
         String s3folder = Configurer.get("lovefilm.s3.folder").get();
         String s3fileName = Configurer.get("lovefilm.s3.fileName").get();
+        String localFilesPath = Configurer.get("lovefilm.s3.localFilesPath").get();
         int missingThreshold = Configurer.get("lovefilm.missingThresholdPercentage").toInt();
         AWSCredentials credentials = new AWSCredentials(s3access, s3secret);
         RestS3ServiceSupplier serviceSupplier = new RestS3ServiceSupplier(credentials);
-        LoveFilmDataSupplier dataSupplier = new S3LoveFilmDataSupplier(serviceSupplier, s3bucket, s3folder, s3fileName);
-        LoveFilmDataRowHandler dataHandler = new DefaultLoveFilmDataRowHandler(contentResolver, contentWriter, contentLister, missingThreshold);
-        return new LoveFilmCsvUpdateTask(dataSupplier, dataHandler);
+//        LoveFilmDataSupplier dataSupplier = new S3LoveFilmDataSupplier(serviceSupplier, s3bucket, s3folder, s3fileName);
+        LoveFilmFileStore store = new DefaultLoveFilmFileStore(localFilesPath);
+        LoveFilmFileUpdater updater = new S3LoveFilmFileUpdater(store, serviceSupplier, s3bucket, s3folder, s3fileName);
+        
+        LoveFilmBrandProcessor brandProcessor = new DefaultLoveFilmBrandProcessor();
+        
+        LoveFilmDataRowHandler dataHandler = new DefaultLoveFilmDataRowHandler(contentResolver, contentWriter, contentLister, missingThreshold, brandProcessor);
+        return new LoveFilmCsvUpdateTask(updater, store, dataHandler);
     }
 }

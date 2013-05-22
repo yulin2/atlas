@@ -17,22 +17,26 @@ public class LoveFilmCsvUpdateTask extends ScheduledTask {
     private final LoveFilmFileUpdater updater;
     private final LoveFilmDataRowHandler dataHandler;
     private final LoveFilmFileStore store;
+    private final LoveFilmBrandProcessor brandProcessor;
 
-    public LoveFilmCsvUpdateTask(LoveFilmFileUpdater updater, LoveFilmFileStore store, LoveFilmDataRowHandler dataHandler) {
+    public LoveFilmCsvUpdateTask(LoveFilmFileUpdater updater, LoveFilmFileStore store, LoveFilmDataRowHandler dataHandler, LoveFilmBrandProcessor brandProcessor) {
         this.updater = updater;
         this.store = store;
         this.dataHandler = dataHandler;
+        this.brandProcessor = brandProcessor;
     }
     
     @Override
     protected void runTask() {
         try {
-//            LoveFilmData latestData = dataSupplier.getLatestData();
             updater.update();
-            LoveFilmData latestData = store.fetchLatestData();
             
             dataHandler.prepare();
-            UpdateProgress progress = latestData.processData(processor());
+            UpdateProgress progress = store.fetchLatestData().processData(preprocessor());
+            dataHandler.finish();
+            
+            dataHandler.prepare();
+            progress = store.fetchLatestData().processData(processor());
             dataHandler.finish();
             
             reportStatus(progress.toString());
@@ -43,7 +47,32 @@ public class LoveFilmCsvUpdateTask extends ScheduledTask {
         }
     }
 
-    protected LoveFilmDataProcessor<UpdateProgress> processor() {
+    private LoveFilmDataProcessor<UpdateProgress> preprocessor() {
+        return new LoveFilmDataProcessor<UpdateProgress>() {
+            
+            UpdateProgress progress = UpdateProgress.START;
+            
+            @Override
+            public boolean process(LoveFilmDataRow row) {
+                try {
+                    brandProcessor.handle(row);
+                    progress = progress.reduce(UpdateProgress.SUCCESS);
+                } catch (Exception e) {
+                    log.warn("Row: " + SKU.valueFrom(row), e);
+                    progress = progress.reduce(UpdateProgress.FAILURE);
+                }
+                reportStatus("Brand Preprocessor: " + progress.toString());
+                return shouldContinue();
+            }
+
+            @Override
+            public UpdateProgress getResult() {
+                return progress;
+            }
+        };
+    }
+
+    private LoveFilmDataProcessor<UpdateProgress> processor() {
         return new LoveFilmDataProcessor<UpdateProgress>() {
             
             UpdateProgress progress = UpdateProgress.START;
@@ -57,7 +86,7 @@ public class LoveFilmCsvUpdateTask extends ScheduledTask {
                     log.warn("Row: " + SKU.valueFrom(row), e);
                     progress = progress.reduce(UpdateProgress.FAILURE);
                 }
-                reportStatus(progress.toString());
+                reportStatus("Ingesting content: " + progress.toString());
                 return shouldContinue();
             }
 

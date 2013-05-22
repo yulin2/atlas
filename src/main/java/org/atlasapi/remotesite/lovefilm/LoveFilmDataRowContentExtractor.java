@@ -5,7 +5,6 @@ import static org.atlasapi.media.entity.Policy.RevenueContract.FREE_TO_VIEW;
 import static org.atlasapi.media.entity.Policy.RevenueContract.PAY_TO_RENT;
 import static org.atlasapi.media.entity.Policy.RevenueContract.SUBSCRIPTION;
 import static org.atlasapi.media.entity.Publisher.LOVEFILM;
-import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ACCESS_METHOD;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ASIN;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.AVAILABILITY_END_DATE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.AVAILABILITY_START_DATE;
@@ -19,7 +18,6 @@ import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.HD_AVAILABLE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.HEROSHOT_URL;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.IMDB_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ITEM_NAME;
-import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ITEM_TYPE_KEYWORD;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.LANGUAGE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ORIGINAL_PUBLICATION_DATE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.RUN_TIME_SEC;
@@ -27,6 +25,11 @@ import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SERIES_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SHOW_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SKU;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SYNOPSIS;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmDataRowUtils.EPISODE_RESOURCE_TYPE;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmDataRowUtils.FILM_RESOURCE_TYPE;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmDataRowUtils.LOVEFILM_URI_PATTERN;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmDataRowUtils.SEASON_RESOURCE_TYPE;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmDataRowUtils.SHOW_RESOURCE_TYPE;
 
 import java.util.Currency;
 import java.util.List;
@@ -86,19 +89,6 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private static final String UNKNOWN_LANGUAGE = "unknown";
     private static final String LOVEFILM_PEOPLE_PREFIX = "http://lovefilm.com/people/";
     private static final String LOVEFILM_CURIE_PATTERN = "lf:%s-%s";
-    private static final String LOVEFILM_URI_PATTERN = "http://lovefilm.com/%s/%s";
-
-    private static final String EPISODE_RESOURCE_TYPE = "episodes";
-    private static final String SEASON_RESOURCE_TYPE = "seasons";
-    private static final String SHOW_RESOURCE_TYPE = "shows";
-    private static final String FILM_RESOURCE_TYPE = "films";
-    
-    private static final String TELE_VIDEO_RECS = "television-video-recordings";
-    private static final String MOVIE_VIDEO_RECS = "movie-video-recordings";
-    private static final String VOD = "VOD";
-    private static final String EPISODE = "episode";
-    private static final String SEASON = "season";
-    private static final String SHOW = "show";
 
     private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
     private static final Splitter TITLE_SPLIT = Splitter.on(" - ").trimResults();
@@ -124,22 +114,17 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
 
     @Override
     public Optional<Content> extract(LoveFilmDataRow source) {
-        if(ACCESS_METHOD.valueIs(source, VOD) 
-            && ITEM_TYPE_KEYWORD.valueIs(source, MOVIE_VIDEO_RECS)) {
+        if(LoveFilmDataRowUtils.isFilm(source)) {
             return extractFilm(source);                
         }
-        if (LoveFilmCsvColumn.ENTITY.valueIs(source, SHOW)) {
+        if (LoveFilmDataRowUtils.isBrand(source)) {
             return extractBrand(source);
         }
-        if (LoveFilmCsvColumn.ENTITY.valueIs(source, SEASON)) {
+        if (LoveFilmDataRowUtils.isSeries(source)) {
             return extractSeries(source);
         }
-        if (LoveFilmCsvColumn.ENTITY.valueIs(source, EPISODE)) {
-            if (ACCESS_METHOD.valueIs(source, VOD) 
-                && ITEM_TYPE_KEYWORD.valueIs(source, TELE_VIDEO_RECS)) {
-                return extractEpisode(source);                
-            }
-            return Optional.absent();
+        if (LoveFilmDataRowUtils.isEpisode(source)) {
+            return extractEpisode(source);                
         }
         return Optional.absent();
     }
@@ -161,7 +146,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             if (!Strings.isNullOrEmpty(episodeSequence)) {
                 series.withSeriesNumber(Integer.valueOf(episodeSequence));
             }
-            series.setParentRef(new ParentRef(uri(SHOW_ID.valueFrom(source),SHOW_RESOURCE_TYPE)));
+            series.setParentRef(new ParentRef(uri(SHOW_ID.valueFrom(source), SHOW_RESOURCE_TYPE)));
             content = series;
         }
         setCommonFields(content, source);

@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -84,7 +83,6 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     private final Set<Content> seenContent = Sets.newHashSet();
     private final int missingContentPercentage;
     
-    //TODO test this approach
     private final LoveFilmBrandProcessor brandProcessor;
 
     public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer, ContentLister lister, int missingContentPercentage, LoveFilmBrandProcessor brandProcessor) {
