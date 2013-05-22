@@ -47,9 +47,9 @@ public class BootstrapModule {
     private Integer contentReadMongoPort = Configurer.get("mongo.readOnly.port").toInt();
     private String contentReadMongoName = Configurer.get("mongo.readOnly.dbName").get();
     
-    private String contentReadDestination = Configurer.get("messaging.destination.content").get();
-    private String topicReadDestination = Configurer.get("messaging.destination.topics").get();
-    private String equivReadDestination = Configurer.get("messaging.destination.equiv").get();
+    private String contentReadDestination = Configurer.get("messaging.destination.content.stream").get();
+    private String topicReadDestination = Configurer.get("messaging.destination.topics.stream").get();
+    private String equivReadDestination = Configurer.get("messaging.destination.equiv.stream").get();
     
     @Autowired private AtlasPersistenceModule persistence;
     @Autowired private ConnectionFactory connectionFactory;
