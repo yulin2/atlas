@@ -38,6 +38,10 @@ import com.metabroadcast.common.http.HttpStatusCode;
 
 public class ContentWriteController {
     
+    //TODO: replace with proper merge strategies.
+    private static final boolean MERGE = true;
+    private static final boolean OVERWRITE = false;
+
     private static final Logger log = LoggerFactory.getLogger(ContentWriteController.class);
 
     private final ApplicationConfigurationFetcher appConfigFetcher;
@@ -56,8 +60,17 @@ public class ContentWriteController {
     }
     
     @RequestMapping(value="/3.0/content.json", method = RequestMethod.POST)
-    public Void writeContent(HttpServletRequest req, HttpServletResponse resp) {
-        
+    public Void postContent(HttpServletRequest req, HttpServletResponse resp) {
+        return deserializeAndUpdateContent(req, resp, MERGE);
+    }
+
+    @RequestMapping(value="/3.0/content.json", method = RequestMethod.PUT)
+    public Void putContent(HttpServletRequest req, HttpServletResponse resp) {
+        return deserializeAndUpdateContent(req, resp, OVERWRITE);
+    }
+
+    private Void deserializeAndUpdateContent(HttpServletRequest req, HttpServletResponse resp,
+            boolean merge) {
         Maybe<ApplicationConfiguration> possibleConfig = appConfigFetcher.configurationFor(req);
         
         if (possibleConfig.isNothing()) {
@@ -84,7 +97,7 @@ public class ContentWriteController {
         }
         
         try {
-            content = merge(resolveExisting(content), content);
+            content = merge(resolveExisting(content), content, merge);
             if (content instanceof Item) {
                 writer.createOrUpdate((Item) content);
             } else {
@@ -100,54 +113,54 @@ public class ContentWriteController {
         return null;
     }
     
-    private Content merge(Maybe<Identified> possibleExisting, Content posted) {
+    private Content merge(Maybe<Identified> possibleExisting, Content update, boolean merge) {
         if (possibleExisting.isNothing()) {
-            return posted;
+            return update;
         }
         Identified existing = possibleExisting.requireValue();
         if (existing instanceof Content) {
-            return merge((Content) existing, posted);
+            return merge((Content) existing, update, merge);
         }
-        throw new IllegalStateException("Entity for "+posted.getCanonicalUri()+" not Content");
+        throw new IllegalStateException("Entity for "+update.getCanonicalUri()+" not Content");
     }
 
-    private Content merge(Content existing, Content posted) {
-        existing.setLastUpdated(posted.getLastUpdated());
-        existing.setTitle(posted.getTitle());
-        existing.setDescription(posted.getDescription());
-        existing.setImage(posted.getImage());
-        existing.setThumbnail(posted.getThumbnail());
-        existing.setMediaType(posted.getMediaType());
-        existing.setSpecialization(posted.getSpecialization());
-        existing.setTopicRefs(merge(existing.getTopicRefs(), posted.getTopicRefs()));
-        existing.setPeople(merge(existing.people(), posted.people()));
-        existing.setKeyPhrases(posted.getKeyPhrases());
-        if (existing instanceof Item && posted instanceof Item) {
-            return mergeItems((Item)existing, (Item) posted);
+    private Content merge(Content existing, Content update, boolean merge) {
+        existing.setLastUpdated(update.getLastUpdated());
+        existing.setTitle(update.getTitle());
+        existing.setDescription(update.getDescription());
+        existing.setImage(update.getImage());
+        existing.setThumbnail(update.getThumbnail());
+        existing.setMediaType(update.getMediaType());
+        existing.setSpecialization(update.getSpecialization());
+        existing.setTopicRefs(merge ? merge(existing.getTopicRefs(), update.getTopicRefs()) : update.getTopicRefs());
+        existing.setPeople(merge ? merge(existing.people(), update.people()) : update.people());
+        existing.setKeyPhrases(update.getKeyPhrases());
+        if (existing instanceof Item && update instanceof Item) {
+            return mergeItems((Item)existing, (Item) update);
         }
         return existing;
     }
 
-    private Item mergeItems(Item existing, Item posted) {
-        if (!posted.getVersions().isEmpty()) {
+    private Item mergeItems(Item existing, Item update) {
+        if (!update.getVersions().isEmpty()) {
             Version existingVersion = Iterables.getFirst(existing.getVersions(), new Version());
-            Version postedVersion = Iterables.getOnlyElement(posted.getVersions());
+            Version postedVersion = Iterables.getOnlyElement(update.getVersions());
             mergeVersions(existingVersion, postedVersion);
         }
-        if (existing instanceof Song && posted instanceof Song) {
-            return mergeSongs((Song)existing, (Song)posted);
+        if (existing instanceof Song && update instanceof Song) {
+            return mergeSongs((Song)existing, (Song)update);
         }
         return existing;
     }
 
-    private void mergeVersions(Version existing, Version posted) {
-        existing.setManifestedAs(posted.getManifestedAs());
-        existing.setBroadcasts(posted.getBroadcasts());
+    private void mergeVersions(Version existing, Version update) {
+        existing.setManifestedAs(update.getManifestedAs());
+        existing.setBroadcasts(update.getBroadcasts());
     }
 
-    private Song mergeSongs(Song existing, Song posted) {
-        existing.setIsrc(posted.getIsrc());
-        existing.setDuration(posted.getDuration());
+    private Song mergeSongs(Song existing, Song update) {
+        existing.setIsrc(update.getIsrc());
+        existing.setDuration(update.getDuration());
         return existing;
     }
 
