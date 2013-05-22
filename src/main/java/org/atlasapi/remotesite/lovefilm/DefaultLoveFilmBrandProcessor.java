@@ -63,13 +63,20 @@ public class DefaultLoveFilmBrandProcessor implements LoveFilmBrandProcessor {
                 String series = Iterables.getOnlyElement(brandSeriesMapping.get(brand));
                 if (seriesEpisodeMapping.get(series).size() == 1) {
                     String episode = Iterables.getOnlyElement(seriesEpisodeMapping.get(series));
-                    if (uriTitleMapping.get(brand).equals(uriTitleMapping.get(series))
-                            && uriTitleMapping.get(brand).equals(uriTitleMapping.get(episode))) {
-                        brandTypeMapping.put(brand, BrandType.STAND_ALONE_EPISODE);
+                    if (uriTitleMapping.get(brand).equals(uriTitleMapping.get(series))) {
+                        if (uriTitleMapping.get(brand).equals(uriTitleMapping.get(episode))) {
+                            brandTypeMapping.put(brand, BrandType.STAND_ALONE_EPISODE);
+                        } else {
+                            brandTypeMapping.put(brand, BrandType.TOP_LEVEL_SERIES);
+                        }
+                    } else {
+                        brandTypeMapping.put(brand, BrandType.BRAND_SERIES_EPISODE);
                     }
                 } else {
                     if (uriTitleMapping.get(brand).equals(uriTitleMapping.get(series))) {
                         brandTypeMapping.put(brand, BrandType.TOP_LEVEL_SERIES);
+                    } else {
+                        brandTypeMapping.put(brand, BrandType.BRAND_SERIES_EPISODE);
                     }
                 }
             } else {
