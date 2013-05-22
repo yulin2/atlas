@@ -19,19 +19,26 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 @RunWith(MockitoJUnitRunner.class)
 public class LoveFilmCsvUpdateTaskTest {
 
-    private LoveFilmDataSupplier dataSupplier = mock(LoveFilmDataSupplier.class);
+//    private LoveFilmDataSupplier dataSupplier = mock(LoveFilmDataSupplier.class);
     private LoveFilmDataRowHandler dataHandler = mock(LoveFilmDataRowHandler.class);
-    private final ScheduledTask task = new LoveFilmCsvUpdateTask(dataSupplier, dataHandler);
+    private LoveFilmFileUpdater updater = mock(LoveFilmFileUpdater.class);
+    private LoveFilmFileStore store = mock(LoveFilmFileStore.class);
+    private LoveFilmBrandProcessor brandProcessor = mock(LoveFilmBrandProcessor.class);
+    private final ScheduledTask task = new LoveFilmCsvUpdateTask(updater, store, dataHandler, brandProcessor);
     
     @Test
-    public void test() {
+    public void testUpdateTask() {
         
         LoveFilmData data = new LoveFilmData(CharStreams.newReaderSupplier("\"header\",\"row\"\n\"value\",\"row\""));
-        when(dataSupplier.getLatestData()).thenReturn(data);
+        when(store.fetchLatestData()).thenReturn(data);
         
         task.run();
         
         ArgumentCaptor<LoveFilmDataRow> rowCaptor = ArgumentCaptor.forClass(LoveFilmDataRow.class);
+        
+        verify(brandProcessor).prepare();
+        verify(brandProcessor, times(1)).handle(rowCaptor.capture());
+        verify(brandProcessor).finish();
         
         verify(dataHandler).prepare();
         verify(dataHandler, times(1)).handle(rowCaptor.capture());

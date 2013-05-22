@@ -52,6 +52,6 @@ public class LoveFilmModule {
         LoveFilmBrandProcessor brandProcessor = new DefaultLoveFilmBrandProcessor();
         
         LoveFilmDataRowHandler dataHandler = new DefaultLoveFilmDataRowHandler(contentResolver, contentWriter, contentLister, missingThreshold, brandProcessor);
-        return new LoveFilmCsvUpdateTask(updater, store, dataHandler);
+        return new LoveFilmCsvUpdateTask(updater, store, dataHandler, brandProcessor);
     }
 }

@@ -31,9 +31,9 @@ public class LoveFilmCsvUpdateTask extends ScheduledTask {
         try {
             updater.update();
             
-            dataHandler.prepare();
+            brandProcessor.prepare();
             UpdateProgress progress = store.fetchLatestData().processData(preprocessor());
-            dataHandler.finish();
+            brandProcessor.finish();
             
             dataHandler.prepare();
             progress = store.fetchLatestData().processData(processor());

@@ -26,6 +26,7 @@ import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.mockito.stubbing.OngoingStubbing;
 
 import com.google.common.base.Optional;
@@ -43,11 +44,14 @@ public class DefaultLoveFilmDataRowHandlerTest {
     private final ContentLister lister = new DummyContentLister();
     @SuppressWarnings("unchecked")
     private final ContentExtractor<LoveFilmDataRow, Optional<Content>> extractor = mock(ContentExtractor.class);
+    private LoveFilmBrandProcessor brandProcessor = mock(LoveFilmBrandProcessor.class);
     
-    private final DefaultLoveFilmDataRowHandler handler = new DefaultLoveFilmDataRowHandler(resolver, writer, lister, extractor, 10);
+    private final DefaultLoveFilmDataRowHandler handler = new DefaultLoveFilmDataRowHandler(resolver, writer, lister, extractor, 10, brandProcessor);
     
     @Test
     public void testHandlesWritingContentInAnyOrder() {
+        
+        when(brandProcessor.getBrandType("brand")).thenReturn(BrandType.BRAND_SERIES_EPISODE);
         
         Brand brand = new Brand("brand", "b", LOVEFILM);
         brand.setTitle("brand");
@@ -91,11 +95,10 @@ public class DefaultLoveFilmDataRowHandlerTest {
     @Test
     public void testWritingTopLevelSeries() {
         
-        // write top level series
+        when(brandProcessor.getBrandType("brand")).thenReturn(BrandType.TOP_LEVEL_SERIES);
+        
         Brand brand = new Brand("brand", "b", LOVEFILM);
-        brand.setTitle("matching title");
         Series series = new Series("series", "s", LOVEFILM);
-        series.setTitle("matching title");
         series.setParent(brand);
         series.withSeriesNumber(1);
         Episode episode = new Episode("episode", "e", LOVEFILM);
@@ -121,6 +124,46 @@ public class DefaultLoveFilmDataRowHandlerTest {
             
             InOrder inOrder = inOrder(writer);
             inOrder.verify(writer, times(1)).createOrUpdate(series);
+            inOrder.verify(writer, times(1)).createOrUpdate(episode);
+            inOrder.verifyNoMoreInteractions();
+            reset(writer);
+            
+            series.setParent(brand);
+            episode.setContainer(brand);
+        }
+    }
+
+    @Test
+    public void testWritingStandAloneEpisode() {
+        
+        when(brandProcessor.getBrandType("brand")).thenReturn(BrandType.STAND_ALONE_EPISODE);
+        
+        Brand brand = new Brand("brand", "b", LOVEFILM);
+        Series series = new Series("series", "s", LOVEFILM);
+        series.setParent(brand);
+        series.withSeriesNumber(1);
+        Episode episode = new Episode("episode", "e", LOVEFILM);
+        episode.setContainer(brand);
+        episode.setSeries(series);
+        
+        for(List<Content> contentOrdering : Collections2.permutations(ImmutableList.of(brand, series, episode))) {
+            
+            
+            OngoingStubbing<Optional<Content>> stubbing = when(extractor.extract(EMPTY_ROW));
+            for (Content content : contentOrdering) {
+                stubbing = stubbing.thenReturn(Optional.of(content));
+            }
+            when(resolver.findByCanonicalUris(Matchers.<Iterable<String>>any())).thenReturn(NOTHING_RESOLVED);
+            
+            handler.prepare();
+
+            for (int i = 0; i < contentOrdering.size(); i++) {
+                handler.handle(EMPTY_ROW);
+            }
+            
+            handler.finish();
+            
+            InOrder inOrder = inOrder(writer);
             inOrder.verify(writer, times(1)).createOrUpdate(episode);
             inOrder.verifyNoMoreInteractions();
             reset(writer);
