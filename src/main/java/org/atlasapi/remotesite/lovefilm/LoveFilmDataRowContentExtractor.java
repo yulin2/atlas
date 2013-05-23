@@ -399,14 +399,14 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private Optional<Policy> policyFrom(LoveFilmDataRow source) {
         Policy policy = new Policy();
         
-        String availabilityStartDate = YOUVIEW_AVAILABILITY_START_DATE.valueFrom.valueFrom(source);
+        String availabilityStartDate = YOUVIEW_AVAILABILITY_START_DATE.valueFrom(source);
         DateTime startDate = dateTimeFromAvailability(availabilityStartDate);
         if (startDate == null) {
             return Optional.absent();
         }
         policy.setAvailabilityStart(startDate);
         
-        String availabilityEndDate = YOUVIEW_AVAILABILITY_END_DATE.valueFrom.valueFrom(source);
+        String availabilityEndDate = YOUVIEW_AVAILABILITY_END_DATE.valueFrom(source);
         DateTime endDate = dateTimeFromAvailability(availabilityEndDate);
         if (endDate == null) {
             return Optional.absent();
