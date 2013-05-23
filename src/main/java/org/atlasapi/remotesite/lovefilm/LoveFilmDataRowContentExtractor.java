@@ -8,8 +8,6 @@ import static org.atlasapi.media.entity.Policy.RevenueContract.SUBSCRIPTION;
 import static org.atlasapi.media.entity.Publisher.LOVEFILM;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ACCESS_METHOD;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.ASIN;
-import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.AVAILABILITY_END_DATE;
-import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.AVAILABILITY_START_DATE;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.BBFC_RATING;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.CONTRIBUTOR;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.DRM_RIGHTS;
@@ -29,6 +27,8 @@ import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SERIES_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SHOW_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SKU;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SYNOPSIS;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.YOUVIEW_AVAILABILITY_END_DATE;
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.YOUVIEW_AVAILABILITY_START_DATE;
 
 import java.util.Currency;
 import java.util.List;
@@ -394,10 +394,10 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private Policy policyFrom(LoveFilmDataRow source) {
         Policy policy = new Policy();
         
-        String availabilityStartDate = AVAILABILITY_START_DATE.valueFrom(source);
+        String availabilityStartDate = YOUVIEW_AVAILABILITY_START_DATE.valueFrom(source);
         policy.setAvailabilityStart(dateTimeFromAvailability(availabilityStartDate));
         
-        String availabilityEndDate = AVAILABILITY_END_DATE.valueFrom(source);
+        String availabilityEndDate = YOUVIEW_AVAILABILITY_END_DATE.valueFrom(source);
         policy.setAvailabilityEnd(dateTimeFromAvailability(availabilityEndDate));
         
         String drmRights = DRM_RIGHTS.valueFrom(source);
