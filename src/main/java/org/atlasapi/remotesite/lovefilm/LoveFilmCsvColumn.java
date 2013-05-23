@@ -53,6 +53,8 @@ public enum LoveFilmCsvColumn {
     STUDIO("studio"),
     TITLE_MASTER_ID("title_master_id"),
     TVOD_PRICE("tvod_price"),
+    YOUVIEW_AVAILABILITY_START_DATE("youview_availability_start_date"),
+    YOUVIEW_AVAILABILITY_END_DATE("youview_availability_end_date"),
     ASIN("asin"),
     IMDB_ID("imdb_id");
 
