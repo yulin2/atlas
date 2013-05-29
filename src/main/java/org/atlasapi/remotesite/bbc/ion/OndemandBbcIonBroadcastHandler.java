@@ -5,6 +5,8 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import java.util.Set;
 
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
@@ -14,9 +16,6 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.util.ItemAndBroadcast;
-import org.atlasapi.media.content.Content;
-import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ContentLock;
@@ -45,11 +44,11 @@ public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     }
 
     @Override
-    public Maybe<ItemAndBroadcast> handle(IonBroadcast broadcast) {
+    public Maybe<ItemAndPossibleBroadcast> handle(IonBroadcast broadcast) {
         try {
             Maybe<Item> item = tryHandle(broadcast);
             if(item.hasValue()) {
-                return Maybe.just(new ItemAndBroadcast(item.requireValue(), Maybe.<Broadcast>nothing()));
+                return Maybe.just(new ItemAndPossibleBroadcast(item.requireValue(), Optional.<Broadcast>absent()));
             }
         } catch (Exception e) {
             log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Failed to process ondemand for %s", broadcast.getEpisodeId()));

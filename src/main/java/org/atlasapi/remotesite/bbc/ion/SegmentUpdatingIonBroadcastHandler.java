@@ -11,7 +11,6 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.segment.SegmentEvent;
-import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 
@@ -30,7 +29,7 @@ public class SegmentUpdatingIonBroadcastHandler implements BbcIonBroadcastHandle
     }
 
     @Override
-    public Maybe<ItemAndBroadcast> handle(IonBroadcast broadcast) {
+    public Maybe<ItemAndPossibleBroadcast> handle(IonBroadcast broadcast) {
         
         final String itemId = BbcFeeds.slashProgrammesUriForPid(broadcast.getEpisodeId());
         Alias itemProgrammesUrl = new Alias("bbc:programmes:url", itemId);
@@ -47,7 +46,7 @@ public class SegmentUpdatingIonBroadcastHandler implements BbcIonBroadcastHandle
                 store.writeContent(item);
             }
             
-            return Maybe.just(new ItemAndBroadcast(item, Maybe.<Broadcast>nothing()));
+            return Maybe.just(new ItemAndPossibleBroadcast(item, Optional.<Broadcast>absent()));
         }
         return Maybe.nothing();
     }

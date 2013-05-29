@@ -19,7 +19,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.segment.SegmentEvent;
-import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -83,7 +82,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     }
 
     @Override
-    public Maybe<ItemAndBroadcast> handle(IonBroadcast ionBroadcast) {
+    public Maybe<ItemAndPossibleBroadcast> handle(IonBroadcast ionBroadcast) {
         String itemUri = slashProgrammesUriForPid(ionBroadcast.getEpisodeId());
         try {
             lock.lock(itemUri);
@@ -94,7 +93,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             }
                 
             //ensure broadcast is included.
-            Maybe<Broadcast> broadcast = addBroadcastToItem(item, ionBroadcast);
+            Optional<Broadcast> broadcast = addBroadcastToItem(item, ionBroadcast);
 
             addSegmentEventsToItemIfPermitted(item, ionBroadcast);
             String canonicalUri = item.getCanonicalUri();
@@ -124,7 +123,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             store.writeContent(item);
             createOrUpdatePeople((Item) item);
             
-            return Maybe.just(new ItemAndBroadcast(item, broadcast));
+            return Maybe.just(new ItemAndPossibleBroadcast(item, broadcast));
 
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass())
@@ -301,16 +300,16 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         BbcImageUrlCreator.addImagesTo("http://www.bbc.co.uk/iplayer/images/progbrand/", broadcast.getBrandId(), brand);
     }
 
-    private Maybe<Broadcast> addBroadcastToItem(Item item, IonBroadcast ionBroadcast) {
+    private Optional<Broadcast> addBroadcastToItem(Item item, IonBroadcast ionBroadcast) {
         Version broadcastVersion = getBroadcastVersion(item, ionBroadcast);
         if (broadcastVersion == null) {
             broadcastVersion = versionFrom(ionBroadcast);
             item.addVersion(broadcastVersion);
         }
 
-        Maybe<Broadcast> broadcast = broadcastExtractor.extract(ionBroadcast);
-        if (broadcast.hasValue()) {
-            broadcastVersion.addBroadcast(broadcast.requireValue());
+        Optional<Broadcast> broadcast = Optional.fromNullable(broadcastExtractor.extract(ionBroadcast).valueOrNull());
+        if (broadcast.isPresent()) {
+            broadcastVersion.addBroadcast(broadcast.get());
         } else {
             log.record(AdapterLogEntry.warnEntry().withSource(getClass()).withDescription("Couldn't find service URI for Ion Service %s", ionBroadcast.getService()));
         }

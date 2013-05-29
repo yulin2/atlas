@@ -12,7 +12,6 @@ import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.TopicRef;
-import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
@@ -35,7 +34,7 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
     }
 
     @Override
-    public Maybe<ItemAndBroadcast> handle(IonBroadcast broadcast) {
+    public Maybe<ItemAndPossibleBroadcast> handle(IonBroadcast broadcast) {
 
         updateSocialDataFor(broadcast.getEpisodeId());
 

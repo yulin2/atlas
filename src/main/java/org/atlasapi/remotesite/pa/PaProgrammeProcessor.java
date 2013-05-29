@@ -222,7 +222,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 itemAndBroadcast = Maybe.just(new ItemAndBroadcast(writtenItem.getResource(), itemAndBroadcast.requireValue().getBroadcast()));
                 personWriter.createOrUpdatePeople(item);
             }
-            return new ItemRefAndBroadcast(itemAndBroadcast.requireValue().getItem(), itemAndBroadcast.requireValue().getBroadcast().requireValue());
+            return new ItemRefAndBroadcast(itemAndBroadcast.requireValue().getItem(), itemAndBroadcast.requireValue().getBroadcast());
         } catch (Exception e) {
         	e.printStackTrace();
         	log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
@@ -255,7 +255,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Broadcast broadcast = broadcast(progData, channel, zone, updatedAt);
         addBroadcast(version, broadcast);
 
-        return Maybe.just(new ItemAndBroadcast(episode, Maybe.just(broadcast)));
+        return Maybe.just(new ItemAndBroadcast(episode, broadcast));
     }
     
     private String getClosedPostfix(Channel channel) {
@@ -438,7 +438,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             film.setYear(Integer.parseInt(progData.getFilmYear()));
         }
         
-        return Maybe.just(new ItemAndBroadcast(film, Maybe.just(broadcast)));
+        return Maybe.just(new ItemAndBroadcast(film, broadcast));
     }
     
     private Broadcast setCommonDetails(ProgData progData, Channel channel, DateTimeZone zone, Item episode, Timestamp updatedAt) {
@@ -559,7 +559,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             //log.
         }
         
-        return Maybe.just(new ItemAndBroadcast(item, Maybe.just(broadcast)));
+        return Maybe.just(new ItemAndBroadcast(item, broadcast));
     }
 
     private Optional<Content> resolveAlias(Alias alias) {

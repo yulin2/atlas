@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
@@ -43,10 +42,10 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
 
         try {
             IonSchedule schedule = scheduleClient.get(scheduleUrl);
-            List<ItemAndBroadcast> itemAndBroadcasts = Lists.newArrayList();
+            List<ItemAndPossibleBroadcast> itemAndBroadcasts = Lists.newArrayList();
             for (IonBroadcast broadcast : schedule.getBlocklist()) {
-                Maybe<ItemAndBroadcast> itemAndBroadcast = handler.handle(broadcast);
-                if(itemAndBroadcast.hasValue() && itemAndBroadcast.requireValue().getBroadcast().hasValue()) {
+                Maybe<ItemAndPossibleBroadcast> itemAndBroadcast = handler.handle(broadcast);
+                if(itemAndBroadcast.hasValue() && itemAndBroadcast.requireValue().getBroadcast().isPresent()) {
                     itemAndBroadcasts.add(itemAndBroadcast.requireValue());
                 }
             }
@@ -58,16 +57,16 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
         }
     }
 
-    private void trimBroadcasts(List<ItemAndBroadcast> itemAndBroadcasts) {
+    private void trimBroadcasts(List<ItemAndPossibleBroadcast> itemAndBroadcasts) {
         DateTime scheduleStartTime = null;
         DateTime scheduleEndTime = null;
         String broadcastOn = null;
         
         if(!itemAndBroadcasts.isEmpty()) {
             Builder<String, String> acceptableIds = ImmutableMap.builder();
-            for(ItemAndBroadcast itemAndBroadcast : itemAndBroadcasts) {
-                if(itemAndBroadcast.getBroadcast().hasValue()) {
-                    Broadcast broadcast = itemAndBroadcast.getBroadcast().requireValue();
+            for(ItemAndPossibleBroadcast itemAndBroadcast : itemAndBroadcasts) {
+                if(itemAndBroadcast.getBroadcast().isPresent()) {
+                    Broadcast broadcast = itemAndBroadcast.getBroadcast().get();
                     
                     if(broadcastOn != null && !broadcastOn.equals(broadcast.getBroadcastOn())) {
                         throw new IllegalStateException("Not expecting broadcasts on multiple channels from a single schedule URL");
