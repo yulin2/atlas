@@ -16,6 +16,8 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.channel4.epg.C4EpgChannelDayUpdater;
+import org.atlasapi.remotesite.channel4.epg.C4EpgClient;
 import org.atlasapi.remotesite.channel4.epg.C4EpgUpdater;
 import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.joda.time.Duration;
@@ -68,10 +70,14 @@ public class C4Module {
     }
     
 	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
-        return new C4EpgUpdater(atomApi(), httpsClient(), lastUpdatedSettingContentWriter(),
-                contentResolver, c4BrandFetcher(Optional.<Platform>absent()), trimmer, log, new DayRangeGenerator().withLookAhead(7).withLookBack(7));
+	    return new C4EpgUpdater(atomApi(), c4EpgChannelDayUpdater(), log, new DayRangeGenerator().withLookAhead(7).withLookBack(7));
     }
+	
+	@Bean public C4EpgChannelDayUpdater c4EpgChannelDayUpdater() {
+	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
+	    return new C4EpgChannelDayUpdater(new C4EpgClient(httpsClient()), lastUpdatedSettingContentWriter(),
+                contentResolver, c4BrandFetcher(Optional.<Platform>absent()), trimmer, log);
+	}
 	
 	@Bean protected C4AtoZAtomContentUpdateTask pcC4AtozUpdater() {
 		return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.<Platform>absent()));
@@ -99,6 +105,10 @@ public class C4Module {
 	
 	@Bean protected C4BrandUpdateController c4BrandUpdateController() {
 	    return new C4BrandUpdateController(c4BrandFetcher(Optional.<Platform>absent()), ImmutableMap.of(Platform.XBOX, c4BrandFetcher(Optional.of(Platform.XBOX))));
+	}
+	
+	@Bean protected C4EpgChannelDayUpdateController c4EpgChannelDayUpdateController() {
+	    return new C4EpgChannelDayUpdateController(atomApi(), c4EpgChannelDayUpdater());
 	}
 	
     @Bean protected LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter() {
