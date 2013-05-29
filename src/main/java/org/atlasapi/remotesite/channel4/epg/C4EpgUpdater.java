@@ -4,8 +4,6 @@ import java.util.Map;
 
 import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -18,7 +16,6 @@ import org.joda.time.format.PeriodFormat;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Iterables;
-import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.DayRange;
@@ -32,10 +29,10 @@ public class C4EpgUpdater extends ScheduledTask {
 
     private C4EpgChannelDayUpdater channelDayUpdater;
 
-    public C4EpgUpdater(C4AtomApi atomApi, SimpleHttpClient client, ContentWriter writer, ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer, AdapterLog log, DayRangeGenerator generator) {
+    public C4EpgUpdater(C4AtomApi atomApi, C4EpgChannelDayUpdater updater, AdapterLog log, DayRangeGenerator generator) {
         this.c4AtomApi = atomApi;
         this.log = log;
-        this.channelDayUpdater = new C4EpgChannelDayUpdater(new C4EpgClient(client), writer, resolver, brandUpdater, trimmer, log);
+        this.channelDayUpdater = updater;
         this.rangeGenerator = generator;
     }
 
@@ -53,14 +50,22 @@ public class C4EpgUpdater extends ScheduledTask {
         
         for (Map.Entry<String, Channel> channelEntry : channelMap.entrySet()) {
             for (LocalDate scheduleDay : dayRange) {
-                reportStatus(String.format("Processing %s/%s. %s failures. %s broadcasts processed", processed++, total, progress.getFailures(), progress.getProcessed()));
+                reportStatus(progressReport("Processing", processed++, total, progress));
                 progress = progress.reduce(channelDayUpdater.update(channelEntry.getKey(), channelEntry.getValue(), scheduleDay));
             }
         }
         
-        reportStatus(String.format("Processed %s/%s. %s failures. %s broadcasts processed", processed++, total, progress.getFailures(), progress.getProcessed()));
+        reportStatus(progressReport("Processed", processed++, total, progress));
         String runTime = new Period(start, new DateTime(DateTimeZones.UTC)).toString(PeriodFormat.getDefault());
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("C4 EPG Update finished in " + runTime));
+        
+        if (progress.hasFailures()) {
+            throw new IllegalStateException(String.format("Completed with %s failures", progress.getFailures()));
+        }
+    }
+
+    private String progressReport(String prefix, int processed, int total, UpdateProgress progress) {
+        return String.format("%s %s/%s. %s failures. %s broadcasts processed", prefix, processed, total, progress.getFailures(), progress.getProcessed());
     }
 
 }
