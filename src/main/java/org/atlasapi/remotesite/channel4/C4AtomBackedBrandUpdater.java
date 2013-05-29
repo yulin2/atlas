@@ -359,7 +359,7 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
     private Location findExistingLocation(Location fetched, Set<Location> existingLocations) {
         for (Location existing : existingLocations) {
             if (existing.getUri() != null && existing.getUri().equals(fetched.getUri())
-                || existing.getEmbedId() != null && existing.getEmbedId().equals(existing.getEmbedId())) {
+                || existing.getEmbedId() != null && existing.getEmbedId().equals(fetched.getEmbedId())) {
                 return existing;
             }
         }
