@@ -8,6 +8,7 @@ import org.atlasapi.feeds.AtlasFeedsModule;
 import org.atlasapi.feeds.interlinking.delta.InterlinkingDeltaModule;
 import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
 import org.atlasapi.feeds.xmltv.XmlTvModule;
+import org.atlasapi.feeds.youview.YouViewFeedsWebModule;
 import org.atlasapi.feeds.youview.YouViewUploadModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
@@ -72,7 +73,10 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 ChildRefUpdateModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
-                builder.add(YouViewUploadModule.class);
+                builder.add(
+                    YouViewUploadModule.class,
+                    YouViewFeedsWebModule.class
+                );
             }
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
