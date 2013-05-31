@@ -47,6 +47,18 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
         return new Schedule(scheduleChannels.build(), schedule.interval());
     }
 
+    @Override
+    public Schedule schedule(DateTime from, int count, Iterable<Channel> channels, Iterable<Publisher> publishers, Optional<ApplicationConfiguration> mergeConfig) {
+        Schedule schedule = scheduleResovler.schedule(from, count, channels, publishers, mergeConfig);
+        
+        ImmutableList.Builder<ScheduleChannel> scheduleChannels = ImmutableList.builder();
+        for (ScheduleChannel channel : schedule.scheduleChannels()) {
+            scheduleChannels.add(new ScheduleChannel(channel.channel(), processOverlaps(channel.items())));
+        }
+        
+        return new Schedule(scheduleChannels.build(), schedule.interval());
+    }
+
     public List<Item> processOverlaps(List<Item> items) {
         if (items.size() < 2) {
             return items;
