@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -32,13 +33,15 @@ public class BbcIonScheduleUpdater extends ScheduledTask {
     private final AdapterLog log;
     private final BroadcastTrimmer trimmer;
     private final ChannelResolver channelResolver;
+    private final ScheduleWriter scheduleWriter;
 
-    public BbcIonScheduleUpdater(Supplier<Iterable<String>> urlSupplier, RemoteSiteClient<IonSchedule> client, BbcIonBroadcastHandler handler, BroadcastTrimmer trimmer, ChannelResolver channelResolver, AdapterLog log) {
+    public BbcIonScheduleUpdater(Supplier<Iterable<String>> urlSupplier, RemoteSiteClient<IonSchedule> client, BbcIonBroadcastHandler handler, BroadcastTrimmer trimmer, ChannelResolver channelResolver, ScheduleWriter scheduleWriter, AdapterLog log) {
         this.urlSupplier = urlSupplier;
         this.scheduleClient = client;
         this.handler = handler;
         this.trimmer = trimmer;
         this.channelResolver = channelResolver;
+        this.scheduleWriter = scheduleWriter;
         this.log = log;
     }
 
@@ -53,7 +56,7 @@ public class BbcIonScheduleUpdater extends ScheduledTask {
         int submitted = 0;
 
         for (String url : urlSupplier.get()) {
-            completer.submit(new BbcIonScheduleUpdateTask(url, scheduleClient, handler, trimmer, channelResolver, log));
+            completer.submit(new BbcIonScheduleUpdateTask(url, scheduleClient, handler, trimmer, channelResolver, scheduleWriter, log));
             submitted++;
         }
 

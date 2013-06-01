@@ -3,18 +3,22 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.remotesite.bbc.BbcFeeds.slashProgrammesUriForPid;
 import static org.atlasapi.remotesite.bbc.BbcModule.SCHEDULE_DEFAULT_FORMAT;
 import static org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient.ionClient;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.core.AllOf.allOf;
-import junit.framework.TestCase;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
@@ -26,10 +30,14 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -39,7 +47,8 @@ import com.google.common.io.Resources;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class BbcIonScheduleUpdaterTest extends TestCase {
+@RunWith(JMock.class)
+public class BbcIonScheduleUpdaterTest {
 
     private static final String SERVICE = "the_service";
     private static final String DAY = "21010101";
@@ -51,17 +60,25 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     private final ContentResolver resolver = context.mock(ContentResolver.class);
     private final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);
     private final ChannelResolver channelResolver = context.mock(ChannelResolver.class);
+    private final ScheduleWriter scheduleWriter = context.mock(ScheduleWriter.class);
     private final AdapterLog log = new SystemOutAdapterLog(); 
     private final Channel channel = Channel.builder().build();
     private final BbcIonBroadcastHandler handler = new DefaultBbcIonBroadcastHandler(resolver, writer, log, new ContentLock());
     
-    protected void setUp() {
+    @Before
+    public void setUp() {
         DateTimeZone.setDefault(DateTimeZones.UTC);
     }
 
     @SuppressWarnings("unchecked")
+    @Test
     public void testProcessNewItemWithNoBrandOrSeries() throws Exception {
 
+        final Broadcast broadcast = new Broadcast("http://www.bbc.co.uk/services/bbcone/london", 
+                new DateTime(2011, DateTimeConstants.JANUARY, 25, 22, 35, 0, 0),
+                new DateTime(2011, DateTimeConstants.JANUARY, 25, 23, 35, 0, 0),
+                null);
+        
         RemoteSiteClient<IonSchedule> client = ionClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-no-brand-no-series.json")),IonSchedule.class);
         
         context.checking(new Expectations(){{
@@ -75,14 +92,23 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
                     new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 25, 22, 35, 0, 0), new DateTime(2011, DateTimeConstants.JANUARY, 25, 23, 35, 0, 0)), 
                     channel, 
                     ImmutableMap.<String, String>of("bbc:p00dbbvg", slashProgrammesUriForPid("b00y377q")));
+            
+            one(scheduleWriter).replaceScheduleBlock(with(Publisher.BBC), with(channel), 
+                    with(hasItems(new ItemRefAndBroadcast(slashProgrammesUriForPid("b00y377q"), broadcast))));
         }});
 
-        new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, trimmer, channelResolver, log).call();
+        new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, trimmer, channelResolver, scheduleWriter, log).call();
     }
     
     @SuppressWarnings("unchecked")
+    @Test
     public void testProcessNewEpisodeWithBrandNoSeries() throws Exception {
 
+        final Broadcast expectedBroadcast = new Broadcast("http://www.bbc.co.uk/services/bbcone/london", 
+                new DateTime(2011, DateTimeConstants.JANUARY, 28, 20, 00, 0, 0),
+                new DateTime(2011, DateTimeConstants.JANUARY, 28, 20, 30, 0, 0),
+                null);
+        
     	final String item1 = slashProgrammesUriForPid("b00y1w9h");
     	final String item2 = slashProgrammesUriForPid("b006m86d");
     	
@@ -103,15 +129,23 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
                     new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 28, 20, 00, 0, 0), new DateTime(2011, DateTimeConstants.JANUARY, 28, 20, 30, 0, 0)), 
                     channel, 
                     ImmutableMap.<String, String>of("bbc:p00dd6dm", slashProgrammesUriForPid("b00y1w9h")));
+            one(scheduleWriter).replaceScheduleBlock(with(Publisher.BBC), with(channel), 
+                    with(hasItems(new ItemRefAndBroadcast(slashProgrammesUriForPid("b00y1w9h"), expectedBroadcast))));
         }});
 
-        new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, trimmer, channelResolver, log).call();
+        new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, trimmer, channelResolver, scheduleWriter, log).call();
     }
 
     @SuppressWarnings("unchecked")
+    @Test
     public void testProcessNewEpisodeWithBrandAndSeries() throws Exception {
         RemoteSiteClient<IonSchedule> client = ionClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-series.json")), IonSchedule.class);
 
+        final Broadcast expectedBroadcast = new Broadcast("http://www.bbc.co.uk/services/bbcone/london", 
+                new DateTime(2011, DateTimeConstants.JANUARY, 28, 21, 00, 0, 0),
+                new DateTime(2011, DateTimeConstants.JANUARY, 28, 22, 00, 0, 0),
+                null);
+        
         context.checking(new Expectations(){{
             allowing(resolver).findByCanonicalUris((Iterable<String>)with(anything()));will(returnValue(ResolvedContent.builder().build()));
             one(writer).createOrUpdate((Item)with(allOf(
@@ -130,9 +164,55 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
                     new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 28, 21, 00, 0, 0), new DateTime(2011, DateTimeConstants.JANUARY, 28, 22, 00, 0, 0)), 
                     channel, 
                     ImmutableMap.<String, String>of("bbc:p00dd6dp", slashProgrammesUriForPid("b00y439c")));
+            one(scheduleWriter).replaceScheduleBlock(with(Publisher.BBC), with(channel), 
+                    with(hasItems(new ItemRefAndBroadcast(slashProgrammesUriForPid("b00y439c"), expectedBroadcast))));
         }});
 
-        new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, trimmer, channelResolver, log).call();
+        new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, trimmer, channelResolver, scheduleWriter, log).call();
+    }
+    
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testScheduleWritingWithMultipleItemsInSchedule() throws Exception {
+        RemoteSiteClient<IonSchedule> client = ionClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-schedule-multiple-items.json")), IonSchedule.class);
+        
+        final Broadcast item1ExpectedBroadcast = new Broadcast("http://www.bbc.co.uk/services/bbcone/london", 
+                new DateTime(2013, DateTimeConstants.JUNE, 1, 5, 00, 0, 0),
+                new DateTime(2013, DateTimeConstants.JUNE, 1, 9, 00, 0, 0),
+                null);
+        
+        final Broadcast item2ExpectedBroadcast = new Broadcast("http://www.bbc.co.uk/services/bbcone/london", 
+                new DateTime(2013, DateTimeConstants.JUNE, 1, 9, 00, 0, 0),
+                new DateTime(2013, DateTimeConstants.JUNE, 1, 10, 30, 0, 0),
+                null);
+        
+        context.checking(new Expectations() {{
+            allowing(resolver).findByCanonicalUris((Iterable<String>)with(anything()));will(returnValue(ResolvedContent.builder().build()));
+            
+            one(writer).createOrUpdate((Brand)with(allOf(uri(slashProgrammesUriForPid("b006v5tb")))));
+            one(writer).createOrUpdate((Item) with(allOf(uri(slashProgrammesUriForPid("b0223xhq")))));
+            one(writer).createOrUpdate((Brand)with(allOf(uri(slashProgrammesUriForPid("b006v5y2")))));
+            one(writer).createOrUpdate((Item) with(allOf(uri(slashProgrammesUriForPid("b02tsmxb")))));
+            
+            one(channelResolver).fromUri("http://www.bbc.co.uk/services/bbcone/london"); will(returnValue(Maybe.just(channel)));
+            one(trimmer).trimBroadcasts(
+                    new Interval(
+                            new DateTime(2013, DateTimeConstants.JUNE, 1, 05, 00, 0, 0), 
+                            new DateTime(2013, DateTimeConstants.JUNE, 1, 10, 30, 0, 0)), 
+                    channel, 
+                    ImmutableMap.<String, String>of(
+                            "bbc:p019hbvh", slashProgrammesUriForPid("b0223xhq"), 
+                            "bbc:p019hbwx", slashProgrammesUriForPid("b02tsmxb")));
+            
+            one(scheduleWriter).replaceScheduleBlock(with(Publisher.BBC), with(channel), 
+                    with(hasItems(
+                            new ItemRefAndBroadcast(slashProgrammesUriForPid("b0223xhq"), item1ExpectedBroadcast),
+                            new ItemRefAndBroadcast(slashProgrammesUriForPid("b02tsmxb"), item2ExpectedBroadcast)
+                    )));
+            
+        }});
+        
+        new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, trimmer, channelResolver, scheduleWriter, log).call();
     }
     
     private Matcher<Item> version(final Matcher<? super Version> versionMatcher) {
