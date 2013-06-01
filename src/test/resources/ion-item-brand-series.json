@@ -105,6 +105,7 @@
          "is_audiodescribed" : "0",
          "version_id" : "b00y4336",
          "service" : "bbc_one_london",
+         "broadcast_service" : "bbc_one_london",
          "end" : "2011-01-28T22:00:00+0000",
          "on_now" : "0",
          "is_blanked" : "0",

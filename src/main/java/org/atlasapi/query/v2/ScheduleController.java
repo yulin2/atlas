@@ -1,10 +1,8 @@
 package org.atlasapi.query.v2;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.atlasapi.application.ApplicationConfiguration.defaultConfiguration;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,11 +26,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Range;
+import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -41,6 +39,8 @@ import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 
 @Controller
 public class ScheduleController extends BaseController<Iterable<ScheduleChannel>> {
+    
+    private static final Range<Integer> COUNT_RANGE = Ranges.closed(1, 10);
     
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final ScheduleResolver scheduleResolver;
@@ -70,15 +70,16 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
             if (!Strings.isNullOrEmpty(on)) {
                 fromWhen = dateTimeInQueryParser.parse(on);
                 toWhen = dateTimeInQueryParser.parse(on);
-                checkArgument(nullOrEmpty(to, from, itemCount), "'from', 'to' and 'count' cannot be provided with 'on'");
+                checkArgument(allNullOrEmpty(to, from, itemCount), "'from', 'to' or 'count' cannot be provided with 'on'");
             } else if (!Strings.isNullOrEmpty(to) && !Strings.isNullOrEmpty(from)) {
                 fromWhen = dateTimeInQueryParser.parse(from);
                 toWhen = dateTimeInQueryParser.parse(to);
-                checkArgument(nullOrEmpty(on, itemCount), "'on' and 'count' cannot be provided with 'from' and 'to'");
+                checkArgument(allNullOrEmpty(on, itemCount), "'on' or 'count' cannot be provided with 'from' and 'to'");
             } else if (!Strings.isNullOrEmpty(from) && !Strings.isNullOrEmpty(itemCount)) {
                 fromWhen = dateTimeInQueryParser.parse(from);
                 count = Integer.parseInt(itemCount);
-                checkArgument(nullOrEmpty(on, to), "'on' and 'to' cannot be provided with 'from' and 'count'");
+                checkArgument(COUNT_RANGE.contains(count), "'count' must be in range %s", COUNT_RANGE);
+                checkArgument(allNullOrEmpty(on, to), "'on' or 'to' cannot be provided with 'from' and 'count'");
             } else {
                 throw new IllegalArgumentException("You must supply either 'on' "
                         + "or 'from' and 'to'"
@@ -122,7 +123,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
         }
     }
 
-    private boolean nullOrEmpty(String... params) {
+    private boolean allNullOrEmpty(String... params) {
         for (String param : params) {
             if (!Strings.isNullOrEmpty(param)) {
                 return false;

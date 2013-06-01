@@ -121,10 +121,11 @@ public class ScheduleControllerTest {
     @Test
     public void testScheduleRequestWithCountParameter() throws IOException {
         
-        when(scheduleResolver.schedule(eq(from), eq(5), argThat(hasItems(channel)), argThat(hasItems(Publisher.BBC)), eq(Optional.<ApplicationConfiguration>absent())))
+        int count = 10;
+        when(scheduleResolver.schedule(eq(from), eq(count), argThat(hasItems(channel)), argThat(hasItems(Publisher.BBC)), eq(Optional.<ApplicationConfiguration>absent())))
             .thenReturn(Schedule.fromChannelMap(ImmutableMap.<Channel,List<Item>>of(), new Interval(from, to)));
         
-        controller.schedule(from.toString(), NO_TO, "5", NO_ON, NO_CHANNEL_KEY, "cbbh", "bbc.co.uk", request, response);
+        controller.schedule(from.toString(), NO_TO, String.valueOf(count), NO_ON, NO_CHANNEL_KEY, "cbbh", "bbc.co.uk", request, response);
         
         verify(outputter).writeTo(argThat(is(request)), argThat(is(response)), anyChannelSchedules(), anySetOfPublishers(), any(ApplicationConfiguration.class));
     }
@@ -274,6 +275,26 @@ public class ScheduleControllerTest {
         controller.schedule(from.toString(), NO_TO, "5", NO_ON, "bbcone", null, "bbc.co.uk", request, response);
         
         verify(outputter).writeTo(argThat(is(request)), argThat(is(response)), anyChannelSchedules(), anySetOfPublishers(), any(ApplicationConfiguration.class));
+        
+    }
+    
+    @Test
+    public void testErrorsWhenCountIsNotPositive() throws Exception {
+        
+        controller.schedule(from.toString(), NO_TO, "0", NO_ON, NO_CHANNEL_KEY, "cbbh", "bbc.co.uk", request, response);
+        
+        verify(outputter, never()).writeTo(argThat(is(request)), argThat(is(response)), anyChannelSchedules(), anySetOfPublishers(), any(ApplicationConfiguration.class));
+        verifyExceptionThrownAndWrittenToUser(IllegalArgumentException.class);
+        
+    }
+
+    @Test
+    public void testErrorsWhenCountIsAboveMax() throws Exception {
+        
+        controller.schedule(from.toString(), NO_TO, "11", NO_ON, NO_CHANNEL_KEY, "cbbh", "bbc.co.uk", request, response);
+        
+        verify(outputter, never()).writeTo(argThat(is(request)), argThat(is(response)), anyChannelSchedules(), anySetOfPublishers(), any(ApplicationConfiguration.class));
+        verifyExceptionThrownAndWrittenToUser(IllegalArgumentException.class);
         
     }
 
