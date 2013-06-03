@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.joda.time.DateTime;
@@ -17,6 +18,7 @@ import org.joda.time.Duration;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.time.Timestamp;
 
 public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
@@ -50,7 +52,7 @@ public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
             return true;
         }
         
-        List<Item> items = Iterables.getOnlyElement(schedule.channelSchedules()).items();
+        List<Item> items = Lists.transform(Iterables.getOnlyElement(schedule.channelSchedules()).getEntries(), ItemAndBroadcast.toItem());
         return items.isEmpty();
     }
 }

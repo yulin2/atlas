@@ -25,6 +25,7 @@ import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.media.util.Resolved;
 import org.atlasapi.query.common.QueryContext;
 import org.joda.time.DateTime;
@@ -35,6 +36,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -62,8 +64,8 @@ public class IndexBackedScheduleQueryExecutorTest {
 
         verify(contentResolver, never()).resolveIds(argThat(any(Iterable.class)));
         
-        assertThat(channelSchedule.channel(), is(channel));
-        assertThat(channelSchedule.items().isEmpty(), is(true));
+        assertThat(channelSchedule.getChannel(), is(channel));
+        assertThat(channelSchedule.getEntries().isEmpty(), is(true));
     }
 
     @Test
@@ -90,9 +92,9 @@ public class IndexBackedScheduleQueryExecutorTest {
 
         verify(contentResolver).resolveIds(argThat(hasItems(item.getId())));
         
-        assertThat(channelSchedule.channel(), is(channel));
+        assertThat(channelSchedule.getChannel(), is(channel));
         
-        Item scheduleItem = Iterables.getOnlyElement(channelSchedule.items());
+        Item scheduleItem = Iterables.getOnlyElement(channelSchedule.getEntries()).getItem();
         assertThat(scheduleItem.getCanonicalUri(), is(item.getCanonicalUri()));
         Version scheduleVersion = Iterables.getOnlyElement(scheduleItem.getVersions());
         Broadcast scheduleBroadcast = Iterables.getOnlyElement(scheduleVersion.getBroadcasts());
@@ -124,9 +126,9 @@ public class IndexBackedScheduleQueryExecutorTest {
     
         verify(contentResolver).resolveIds(argThat(hasItems(item.getId())));
         
-        assertThat(channelSchedule.channel(), is(channel));
+        assertThat(channelSchedule.getChannel(), is(channel));
         
-        List<Item> items = channelSchedule.items();
+        List<Item> items = Lists.transform(channelSchedule.getEntries(),ItemAndBroadcast.toItem());
         assertThat(items.size(), is(2));
         
         Item firstItem = items.get(0);

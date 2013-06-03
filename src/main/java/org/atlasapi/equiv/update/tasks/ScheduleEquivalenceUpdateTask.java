@@ -6,21 +6,17 @@ import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.ChannelSchedule;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,9 +101,9 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
                 }
                 ChannelSchedule scheduleChannel = channelItr.next();
                 
-                Iterator<Item> channelItems = scheduleChannel.items().iterator();
+                Iterator<ItemAndBroadcast> channelItems = scheduleChannel.getEntries().iterator();
                 while (channelItems.hasNext() && shouldContinue()) {
-                    Item scheduleItem = channelItems.next();
+                    Item scheduleItem = channelItems.next().getItem();
                     progress = progress.reduce(process(scheduleItem));
                     reportStatus(generateStatus(progress, publisher, scheduleItem, channel));
                 }

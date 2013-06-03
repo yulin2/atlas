@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.ChannelSchedule;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.OutputContext;
@@ -13,6 +14,8 @@ import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.query.annotation.ActiveAnnotations;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryResult;
+
+import com.google.common.collect.Lists;
 
 public class ScheduleQueryResultWriter implements QueryResultWriter<ChannelSchedule> {
 
@@ -49,8 +52,8 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ChannelSched
                 "available to the general public.");
         }
         
-        writer.writeObject(channelWriter, channelSchedule.channel(), ctxt);
-        writer.writeList(contentWriter, channelSchedule.items(), ctxt);
+        writer.writeObject(channelWriter, channelSchedule.getChannel(), ctxt);
+        writer.writeList(contentWriter, Lists.transform(channelSchedule.getEntries(),ItemAndBroadcast.toItem()), ctxt);
     }
 
     private OutputContext outputContext(QueryContext queryContext) {

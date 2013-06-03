@@ -7,11 +7,13 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.ChannelSchedule;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
@@ -48,15 +50,20 @@ public class ScheduleEquivalenceUpdateTaskTest {
         
         Channel bbcOne = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", false, MediaType.VIDEO, "bbconeuri");
         
-        Item yvItemOne = new Item("yv1", "yv1c", Publisher.YOUVIEW);
-        Item yvItemTwo = new Item("yv2", "yv2c", Publisher.YOUVIEW);
-        
         DateTime now = new DateTime().withZone(DateTimeZone.UTC);
+        
+        Item yvItemOne = new Item("yv1", "yv1c", Publisher.YOUVIEW);
+        Broadcast yvBroadcastOne = new Broadcast(bbcOne.getCanonicalUri(), now, now);
+        ItemAndBroadcast one = new ItemAndBroadcast(yvItemOne, yvBroadcastOne);
+
+        Item yvItemTwo = new Item("yv2", "yv2c", Publisher.YOUVIEW);
+        Broadcast yvBroadcastTwo = new Broadcast(bbcOne.getCanonicalUri(), now, now);
+        ItemAndBroadcast two = new ItemAndBroadcast(yvItemTwo, yvBroadcastTwo);
         
         LocalDate today = new LocalDate();
         LocalDate tomorrow = today.plusDays(1);
         Interval interval = new Interval(today.toDateTimeAtStartOfDay(), tomorrow.toDateTimeAtStartOfDay());
-        ChannelSchedule schChannel1 = new ChannelSchedule(bbcOne, interval, ImmutableList.of(yvItemOne, yvItemTwo));
+        ChannelSchedule schChannel1 = new ChannelSchedule(bbcOne, interval, ImmutableList.of(one, two));
         Schedule schedule1 = new Schedule(ImmutableList.of(schChannel1), interval);
         
         ScheduleResolver resolver = scheduleResolver(schedule1);

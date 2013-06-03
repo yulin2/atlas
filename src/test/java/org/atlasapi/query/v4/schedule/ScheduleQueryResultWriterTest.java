@@ -1,9 +1,6 @@
 package org.atlasapi.query.v4.schedule;
 
-import static org.hamcrest.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
@@ -11,10 +8,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
@@ -22,10 +20,8 @@ import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryResult;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
@@ -53,7 +49,9 @@ public class ScheduleQueryResultWriterTest {
         item.setId(4321l);
         item.setTitle("aTitle");
         
-        Iterable<Item> entries = ImmutableList.of(item);
+        Broadcast broadcast = new Broadcast(channel.getCanonicalUri(), from, to);
+        ItemAndBroadcast itemAndBroadcast = new ItemAndBroadcast(item, broadcast );
+        Iterable<ItemAndBroadcast> entries = ImmutableList.of(itemAndBroadcast);
         ChannelSchedule cs = new ChannelSchedule(channel, interval, entries);
         
         HttpServletRequest request = new StubHttpServletRequest();

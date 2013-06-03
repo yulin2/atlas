@@ -18,12 +18,14 @@ import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -67,15 +69,22 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
 
     @Test
     public void testGenerateEquivalencesForOneMatchingBroadcast() {
-        final Item item1 = episodeWithBroadcasts("subjectItem", Publisher.PA, 
-                new Broadcast(BBC_ONE.uri(), utcTime(100000), utcTime(200000)),
+        Broadcast commonBroadcast = new Broadcast(BBC_ONE.uri(), utcTime(100000), utcTime(200000));
+        
+        Item item1 = episodeWithBroadcasts("subjectItem", Publisher.PA, 
+                commonBroadcast,
                 new Broadcast(BBC_ONE_CAMBRIDGE.uri(), utcTime(100000), utcTime(200000)));//ignored
         
-        final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(BBC_ONE.uri(), utcTime(100000), utcTime(200000)));
+        Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, commonBroadcast);
         
+        Interval interval = interval(40000, 260000);
+        ItemAndBroadcast item2AndBroadcast = new ItemAndBroadcast(item2, commonBroadcast);
+        final Schedule schedule = new Schedule(ImmutableList.of(
+                new ChannelSchedule(BBC_ONE, interval, ImmutableList.of(item2AndBroadcast))),
+                interval);
         context.checking(new Expectations(){{
             one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC), Optional.<ApplicationConfiguration>absent());
-                will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
+                will(returnValue(schedule));
         }});
         
         ScoredCandidates<Item> equivalents = generator.generate(item1, new DefaultDescription());

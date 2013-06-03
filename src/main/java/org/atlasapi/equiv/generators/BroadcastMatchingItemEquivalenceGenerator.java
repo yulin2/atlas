@@ -16,6 +16,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -78,9 +79,9 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
             return;
         }
         for (ChannelSchedule channel : schedule.channelSchedules()) {
-            for (Item scheduleItem : channel.items()) {
-                if (scheduleItem instanceof Item && hasQualifyingBroadcast(scheduleItem, broadcast)) {
-                    scores.addEquivalent((Item) scheduleItem, Score.valueOf(1.0));
+            for (ItemAndBroadcast scheduleItem : channel.getEntries()) {
+                if (hasQualifyingBroadcast(scheduleItem.getItem(), broadcast)) {
+                    scores.addEquivalent((Item) scheduleItem.getItem(), Score.valueOf(1.0));
                 }
             }
         }

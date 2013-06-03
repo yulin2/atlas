@@ -169,7 +169,7 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 
 				@Override
 				public boolean apply(ChannelSchedule input) {
-					return channelList.contains(input.channel());
+					return channelList.contains(input.getChannel());
 				}
 				
 				

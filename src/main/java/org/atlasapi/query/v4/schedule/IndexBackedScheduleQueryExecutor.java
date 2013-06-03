@@ -20,6 +20,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.media.util.Resolved;
 import org.atlasapi.query.common.QueryResult;
 import org.slf4j.Logger;
@@ -84,7 +85,7 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor {
 
     private ListenableFuture<ChannelSchedule> transformToChannelSchedule(final ScheduleQuery query, final ScheduleRef scheduleRef) {
         if (scheduleRef.isEmpty()) {
-            return Futures.immediateFuture(new ChannelSchedule(query.getChannel(), query.getInterval(), ImmutableList.<Item>of()));
+            return Futures.immediateFuture(new ChannelSchedule(query.getChannel(), query.getInterval(), ImmutableList.<ItemAndBroadcast>of()));
         }
         
         return Futures.transform(contentResolver.resolveIds(
@@ -98,8 +99,8 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor {
         });
     }
 
-    private Iterable<Item> contentList(ScheduleQuery query, ScheduleRef scheduleRef, OptionalMap<Id, Content> resolvedContent) {
-        Builder<Item> contentList = ImmutableList.builder();
+    private Iterable<ItemAndBroadcast> contentList(ScheduleQuery query, ScheduleRef scheduleRef, OptionalMap<Id, Content> resolvedContent) {
+        Builder<ItemAndBroadcast> contentList = ImmutableList.builder();
         for (ScheduleRefEntry entry : scheduleRef.getScheduleEntries()){
             Optional<Content> resolved = resolvedContent.get(entry.getItemId());
             if (!resolved.isPresent()) {
@@ -112,8 +113,9 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor {
                  * twice but will only appear in resolvedContent once.
                  */
                 item = item.copy();
-                if (trimBroadcasts(entry, item)) {
-                    contentList.add(item);
+                ItemAndBroadcast itemAndBroadcast = trimBroadcasts(entry, item);
+                if (itemAndBroadcast != null) {
+                    contentList.add(itemAndBroadcast);
                 }
             }
         }
@@ -137,22 +139,22 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor {
         return null;
     }
 
-    private boolean trimBroadcasts(ScheduleRefEntry entry, Item item) {
-        boolean found = false;
+    private ItemAndBroadcast trimBroadcasts(ScheduleRefEntry entry, Item item) {
+        ItemAndBroadcast itemAndBroadcast = null;
         for (Version version : item.getVersions()) {
             Set<Broadcast> allBroadcasts = version.getBroadcasts();
             version.setBroadcasts(Sets.<Broadcast>newHashSet());
-            if (found) {
+            if (itemAndBroadcast != null) {
                 continue;
             }
             for (Broadcast broadcast : allBroadcasts) {
                 if (relevantBroadcast(broadcast, entry)) {
                     version.setBroadcasts(Sets.newHashSet(broadcast));
-                    found = true;
+                    itemAndBroadcast = new ItemAndBroadcast(item, broadcast);
                 }
             }
         }
-        return found;
+        return itemAndBroadcast;
     }
 
     private boolean relevantBroadcast(Broadcast broadcast, ScheduleRefEntry entry) {
