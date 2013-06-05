@@ -6,10 +6,10 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.junit.Test;
 
 import com.google.common.io.Resources;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.social.facebook.FacebookInteracter;
 

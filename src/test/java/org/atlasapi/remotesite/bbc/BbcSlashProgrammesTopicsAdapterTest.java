@@ -8,7 +8,6 @@ import junit.framework.TestCase;
 
 import org.apache.commons.io.IOUtils;
 import org.atlasapi.media.entity.TopicRef;
-import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -18,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 @Deprecated

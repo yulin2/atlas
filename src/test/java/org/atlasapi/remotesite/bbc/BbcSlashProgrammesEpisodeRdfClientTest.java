@@ -26,13 +26,13 @@ import java.io.IOException;
 import junit.framework.TestCase;
 
 import org.apache.commons.io.IOUtils;
-import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesDescription;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
