@@ -108,6 +108,10 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                 }
             }
             
+            if (annotations.contains(Annotation.DESCRIPTION)) {
+                simpleItem.setSpecial(episode.getSpecial());
+            }
+            
             if (annotations.contains(Annotation.DESCRIPTION) || annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
                 simpleItem.setEpisodeNumber(episode.getEpisodeNumber());
             }
