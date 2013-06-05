@@ -21,9 +21,9 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.remotesite.FixedResponseHttpClient;
 
 import com.google.common.io.Resources;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**

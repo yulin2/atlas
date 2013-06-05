@@ -18,7 +18,6 @@ import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 import org.atlasapi.remotesite.channel4.RecordingContentWriter;
@@ -35,6 +34,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 
 @RunWith(JMock.class)
 public class BbcSlashProgrammesEpisodeIntegrationTest {

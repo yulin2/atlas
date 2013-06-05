@@ -18,7 +18,6 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
@@ -37,6 +36,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class BbcIonScheduleUpdaterTest extends TestCase {
