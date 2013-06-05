@@ -25,6 +25,7 @@ import org.atlasapi.media.content.EsContentIndex;
 import org.atlasapi.media.content.EsContentIndexer;
 import org.atlasapi.media.content.EsContentSearcher;
 import org.atlasapi.media.content.schedule.EsScheduleIndex;
+import org.atlasapi.media.content.schedule.ScheduleStore;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
@@ -108,6 +109,11 @@ public class AtlasPersistenceModule {
     public TopicStore topicStore() {
         return new MessageQueueingTopicStore(topicChanges,
             persistenceModule().topicStore());
+    }
+    
+    @Bean
+    public ScheduleStore scheduleStore() {
+        return persistenceModule().scheduleStore();
     }
     
     @Bean

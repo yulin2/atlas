@@ -6,17 +6,22 @@ import static org.atlasapi.media.entity.Publisher.METABROADCAST;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.atLeastOnce;
 
 import java.util.Iterator;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Film;
@@ -24,7 +29,6 @@ import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.util.Resolved;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
@@ -46,9 +50,6 @@ import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.collect.ImmutableOptionalMap;
 import com.metabroadcast.common.time.Timestamp;
-import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.media.content.Content;
-import org.atlasapi.media.content.ContentStore;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaProgrammeProcessorTest {
@@ -75,7 +76,7 @@ public class PaProgrammeProcessorTest {
                 return Maybe.just(new Channel(METABROADCAST, input, input, false, VIDEO, input));
             }
         });
-        progProcessor = new PaProgrammeProcessor(contentStore, channelResolver, itemsPeopleWriter, log);
+        progProcessor = new PaProgrammeProcessor(contentStore, channelResolver, itemsPeopleWriter);
     }
     
     @Test 

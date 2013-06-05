@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.content.schedule.ScheduleHierarchy;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
@@ -32,13 +32,9 @@ public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
     }
 
     @Override
-    public ItemRefAndBroadcast process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
-        if (emptySlot(progData, channel, zone)) {
-            return delegate.process(progData, channel, zone, updatedAt);
-        }
-        else {
-        	return null;
-        }
+    public Optional<ScheduleHierarchy> process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
+        return emptySlot(progData, channel, zone) ? delegate.process(progData, channel, zone, updatedAt)
+                                                  : Optional.<ScheduleHierarchy>absent();
     }
     
     private boolean emptySlot(ProgData progData, Channel channel, DateTimeZone zone) {

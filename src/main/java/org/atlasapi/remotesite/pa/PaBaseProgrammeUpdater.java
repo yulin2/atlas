@@ -11,9 +11,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
 import javax.annotation.PreDestroy;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -25,6 +27,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.util.WriteException;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.listings.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
@@ -41,13 +44,16 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.Striped;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.scheduling.ScheduledTask;
@@ -66,7 +72,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     private static final Pattern FILEDATE = Pattern.compile("^.*(\\d{8})_tvdata.xml$");
 
     private final PaChannelMap channelMap;
-    private final Set<String> currentlyProcessing = Sets.newHashSet();
+    private final Striped<Lock> currentlyProcessing = Striped.lock(64);
     
     private List<Channel> supportedChannels = ImmutableList.of();
 
@@ -168,8 +174,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		            
 		            reader.parse(fileToProcess.toURI().toString());
 		            storeResult(FileUploadResult.successfulUpload(SERVICE, file.getName()));
-		        }
-		        else {
+		        } else {
 		            log.info("Not processing file " + file.toString() + " as filename format is not recognised");
 		            storeResult(FileUploadResult.failedUpload(SERVICE, file.getName()).withMessage("Format not recognised"));
 		        }
@@ -223,7 +228,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
             public void afterUnmarshal(Object target, Object parent) {
                 if (target instanceof ChannelData) {
                     
-                    ChannelData channelData = (ChannelData) target;
+                    final ChannelData channelData = (ChannelData) target;
                     
                     Interval schedulePeriod;
                     if(channelData.getStartTime() == null) {
@@ -236,36 +241,77 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                         schedulePeriod = new Interval(CHANNELINTERVAL_FORMAT.parseDateTime(channelData.getStartTime()), CHANNELINTERVAL_FORMAT.parseDateTime(channelData.getEndTime()));
                     }
                    
-                    Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
+                    Maybe<Channel> possibleChannel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
                     
                     LocalDate scheduleDay = FILEDATE_FORMAT.parseDateTime(fileDate).toLocalDate();
                     long version = deltaFileHelper.versionNumber(fileToProcess);
-                    if (channel.hasValue() 
-                            && isSupported(channel.requireValue()) 
+                    if (!(possibleChannel.hasValue() 
+                            && isSupported(possibleChannel.requireValue()) 
                             && shouldContinue()
-                            && shouldUpdateVersion(channel.requireValue(), version, scheduleDay)) {
+                            && shouldUpdateVersion(possibleChannel.requireValue(), version, scheduleDay))) {
+                        return;
+                    }
+                    
+                    final Channel channel = possibleChannel.requireValue();
+                    try {
                         
-                        try {
-                            
-                            final PaChannelData data = new PaChannelData(
-                                    channel.requireValue(),
-                                    channelData.getProgData(), 
-                                    schedulePeriod, 
-                                    getTimeZone(fileDate), 
-                                    Timestamp.of(fileToProcess.lastModified()),
-                                    scheduleDay,
-                                    version
-                            );
-                            Future<Integer> future = completion.submit(new Callable<Integer>() {
-                                @Override
-                                public Integer call() {
-                                    return processor.process(data, currentlyProcessing);
+                        final PaChannelData data = new PaChannelData(
+                                channel,
+                                channelData.getProgData(), 
+                                schedulePeriod, 
+                                getTimeZone(fileDate), 
+                                Timestamp.of(fileToProcess.lastModified()),
+                                scheduleDay,
+                                version
+                        );
+                        Future<Integer> future = completion.submit(new Callable<Integer>() {
+                            @Override
+                            public Integer call() {
+                                Iterable<Lock> locks = acquire(currentlyProcessing.bulkGet(lockIds(data.programmes())));
+                                try {
+                                    int processed = processor.process(data);
+                                    if (paScheduleVersionStore.isPresent()) {
+                                        paScheduleVersionStore.get().store(channel, data.scheduleDay(), data.version());
+                                    }
+                                    return processed;
+                                } catch (WriteException e) {
+                                    log.error(String.format("%s/%s",fileToProcess.getName(),channelData.getChannelId()), e);
+                                    return 0;
+                                } finally {
+                                    release(locks);
                                 }
-                            });
-                            submitted.add(future);
-                        } catch (Throwable e) {
-                            log.error("Exception submitting PA channel update job in file " + fileToProcess.getName(), e);
-                        }
+                            }
+
+                            private void release(Iterable<Lock> locks) {
+                                for (Lock lock : locks) {
+                                    lock.unlock();
+                                }
+                            }
+
+                            private Iterable<Lock> acquire(Iterable<Lock> locks) {
+                                for (Lock lock : locks) {
+                                    lock.lock();
+                                }
+                                return locks;
+                            }
+
+                            private Iterable<String> lockIds(List<ProgData> programmes) {
+                                return Lists.transform(programmes,
+                                    new Function<ProgData, String>() {
+                                        @Override
+                                        public String apply(ProgData input) {
+                                            boolean seriesId = Strings.isNullOrEmpty(input.getSeriesId());
+                                            return seriesId ? input.getProgId()
+                                                            : input.getSeriesId();
+                                        }
+                                    }
+                                );
+                            }
+                            
+                        });
+                        submitted.add(future);
+                    } catch (Throwable e) {
+                        log.error("Exception submitting PA channel update job in file " + fileToProcess.getName(), e);
                     }
                 }
             }
@@ -287,14 +333,14 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     public static class PaChannelData {
         
         private final Channel channel;
-        private final Iterable<ProgData> programmes;
+        private final List<ProgData> programmes;
         private final Interval schedulePeriod;
         private final DateTimeZone zone;
         private final Timestamp lastUpdated;
         private final LocalDate scheduleDay;
         private final long version;
 
-        public PaChannelData(Channel channel, Iterable<ProgData> programmes, Interval schedulePeriod, DateTimeZone zone, Timestamp lastUpdated, LocalDate scheduleDay, long version) {
+        public PaChannelData(Channel channel, List<ProgData> programmes, Interval schedulePeriod, DateTimeZone zone, Timestamp lastUpdated, LocalDate scheduleDay, long version) {
             this.channel = channel;
             this.programmes = programmes;
             this.schedulePeriod = schedulePeriod;
@@ -308,7 +354,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
             return channel;
         }
 
-        public Iterable<ProgData> programmes() {
+        public List<ProgData> programmes() {
             return programmes;
         }
 

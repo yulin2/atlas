@@ -2,33 +2,23 @@ package org.atlasapi.remotesite.pa;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.feeds.upload.persistence.FileUploadResultStore;
+import org.atlasapi.feeds.upload.persistence.MongoFileUploadResultStore;
+import org.atlasapi.media.PersistenceModule;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.ChannelWriter;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.people.PeopleResolver;
-import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.feeds.upload.persistence.MongoFileUploadResultStore;
-import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
+import org.atlasapi.persistence.content.people.PeopleResolver;
 import org.atlasapi.persistence.content.people.PersonWriter;
-import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
-import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.atlasapi.remotesite.pa.channels.PaChannelDataHandler;
 import org.atlasapi.remotesite.pa.channels.PaChannelGroupsIngester;
 import org.atlasapi.remotesite.pa.channels.PaChannelsIngester;
@@ -40,7 +30,6 @@ import org.atlasapi.remotesite.pa.people.PaCompletePeopleUpdater;
 import org.atlasapi.remotesite.pa.people.PaDailyPeopleUpdater;
 import org.atlasapi.remotesite.pa.persistence.MongoPaScheduleVersionStore;
 import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
-import org.atlasapi.remotesite.rt.RtFilmModule;
 import org.atlasapi.s3.DefaultS3Client;
 import org.atlasapi.s3.S3Client;
 import org.joda.time.Duration;
@@ -49,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
@@ -67,6 +55,8 @@ public class PaModule {
     private final static RepetitionRule RECENT_FILE_INGEST = RepetitionRules.every(Duration.standardMinutes(10)).withOffset(Duration.standardMinutes(15));
     private final static RepetitionRule RECENT_FILE_DOWNLOAD = RepetitionRules.every(Duration.standardMinutes(10));
     private final static RepetitionRule COMPLETE_INGEST = RepetitionRules.NEVER;//weekly(DayOfWeek.FRIDAY, new LocalTime(22, 0, 0));
+
+    private @Autowired PersistenceModule persistence;
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentGroupWriter contentGroupWriter;
@@ -75,7 +65,6 @@ public class PaModule {
     private @Autowired PersonWriter personWriter;
     private @Autowired ChannelGroupWriter channelGroupWriter;
     private @Autowired ChannelGroupResolver channelGroupResolver;
-    private @Autowired ContentStore contentStore;
     private @Autowired AdapterLog log;
     private @Autowired ItemsPeopleWriter peopleWriter;
     private @Autowired ChannelResolver channelResolver;
@@ -125,7 +114,7 @@ public class PaModule {
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {
-        return new PaFeaturesUpdater(paProgrammeDataStore(), contentStore, contentGroupResolver, contentGroupWriter);
+        return new PaFeaturesUpdater(paProgrammeDataStore(), persistence.contentStore(), contentGroupResolver, contentGroupWriter);
     }
 
     @Bean PaFtpFileUpdater ftpFileUpdater() {
@@ -138,17 +127,20 @@ public class PaModule {
     }
     
     @Bean PaProgDataProcessor paProgrammeProcessor() {
-        return new PaProgrammeProcessor(contentStore, channelResolver, peopleWriter, log);
+        return new PaProgrammeProcessor(persistence.contentStore(), channelResolver, peopleWriter);
     }
     
     @Bean PaCompleteUpdater paCompleteUpdater() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), paScheduleVersionStore());
-        return new PaCompleteUpdater(channelProcessor, paProgrammeDataStore(), channelResolver);
+        return new PaCompleteUpdater(paChannelProcessor(), paProgrammeDataStore(), channelResolver);
+    }
+
+    private PaChannelProcessor paChannelProcessor() {
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(persistence.scheduleStore(), paProgrammeProcessor());
+        return channelProcessor;
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), paScheduleVersionStore());
-        return new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), channelResolver, new MongoFileUploadResultStore(mongo), paScheduleVersionStore());
+        return new PaRecentUpdater(paChannelProcessor(), paProgrammeDataStore(), channelResolver, new MongoFileUploadResultStore(mongo), paScheduleVersionStore());
     }
     
     @Bean PaFileUpdater paFileUpdater() {
@@ -156,8 +148,7 @@ public class PaModule {
     }
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), paScheduleVersionStore());
-        return new PaSingleDateUpdatingController(channelProcessor, channelResolver, log, paProgrammeDataStore());
+        return new PaSingleDateUpdatingController(paChannelProcessor(), channelResolver, log, paProgrammeDataStore());
     }
     
     public @Bean PaScheduleVersionStore paScheduleVersionStore() {

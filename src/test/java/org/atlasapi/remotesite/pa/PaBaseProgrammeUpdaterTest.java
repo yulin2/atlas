@@ -2,12 +2,14 @@ package org.atlasapi.remotesite.pa;
 
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyCollectionOf;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,8 +23,12 @@ import java.util.Map;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.content.schedule.ScheduleHierarchy;
+import org.atlasapi.media.content.schedule.ScheduleWriter;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
@@ -43,6 +49,7 @@ import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,10 +72,10 @@ import com.metabroadcast.common.media.MimeType;
 @RunWith(MockitoJUnitRunner.class)
 public class PaBaseProgrammeUpdaterTest {
 
-    private final ContentStore contentStore = mock(ContentStore.class);
+    private final ContentResolver contentStore = mock(ContentResolver.class);
+    private final ScheduleWriter scheduleWriter = mock(ScheduleWriter.class);
     private final ChannelResolver channelResolver = new DummyChannelResolver();
-    private final AdapterLog log = new NullAdapterLog(); 
-    private final PaProgDataProcessor programmeProcessor = new PaProgrammeProcessor(contentStore, channelResolver, new DummyItemsPeopleWriter(), log);
+    private final PaProgDataProcessor programmeProcessor = new PaProgrammeProcessor(contentStore, channelResolver, new DummyItemsPeopleWriter());
 
     private static long id = 0;
     
@@ -83,20 +90,11 @@ public class PaBaseProgrammeUpdaterTest {
             .thenReturn(Optional.<Long>of(1L))
             .thenReturn(Optional.<Long>of(201202251115L))
             .thenReturn(Optional.<Long>of(201202251115L));
-        when(contentStore.writeContent(argThat(any(Content.class))))
-            .then(new Answer<WriteResult<Content>>() {
-                @Override
-                public WriteResult<Content> answer(InvocationOnMock invocation) throws Throwable {
-                    Content written = (Content) invocation.getArguments()[0];
-                    written.setId(id++);
-                    return WriteResult.written(written).build();
-                }
-            });
         when(contentStore.resolveAliases(anyCollectionOf(Alias.class), argThat(is(Publisher.PA))))
             .thenReturn(ImmutableOptionalMap.fromMap(ImmutableMap.<Alias, Content>of()));
         
         TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(
-            programmeProcessor, channelResolver, scheduleVersionStore, log,
+            programmeProcessor, channelResolver, scheduleVersionStore, scheduleWriter, 
                 new File(Resources.getResource("20110115_tvdata.xml").getFile()), 
                 new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())
         );
@@ -105,12 +103,12 @@ public class PaBaseProgrammeUpdaterTest {
         verify(scheduleVersionStore).store(channel, scheduleDay, 1);
         verify(scheduleVersionStore).store(channel, scheduleDay, 201202251115L);
         
-        ArgumentCaptor<Content> contentCapture = ArgumentCaptor.forClass(Content.class);
-        verify(contentStore, atLeast(2)).writeContent(contentCapture.capture());
+        ArgumentCaptor<List> contentCapture = ArgumentCaptor.forClass(List.class);
+        verify(scheduleWriter, atLeast(2)).writeSchedule((List<ScheduleHierarchy>)contentCapture.capture(), argThat(is(channel)), argThat(isA(Interval.class)));
         
-        List<Content> capturedContent = contentCapture.getAllValues();
-        String brandUri = "http://pressassociation.com/brands/122139";
-        String itemUri = "http://pressassociation.com/episodes/1424497";
+        List<ScheduleHierarchy> capturedContent = (List<ScheduleHierarchy>) contentCapture.getValue();
+        String brandUri = "122139";
+        String itemUri = "1424497";
         Identified content = findContent(capturedContent, brandUri);
 
         assertNotNull(content);
@@ -147,10 +145,10 @@ public class PaBaseProgrammeUpdaterTest {
         updater.run();
         Thread.sleep(1000);
 
-        contentCapture = ArgumentCaptor.forClass(Content.class);
-        verify(contentStore, atLeast(2)).writeContent(contentCapture.capture());
+        contentCapture = ArgumentCaptor.forClass(List.class);
+        verify(scheduleWriter, atLeast(2)).writeSchedule(contentCapture.capture(), argThat(is(channel)), argThat(isA(Interval.class)));
         
-        content = findContent(contentCapture.getAllValues(), brandUri);
+        content = findContent(contentCapture.getValue(), brandUri);
 
         assertNotNull(content);
         assertTrue(content instanceof Brand);
@@ -175,12 +173,25 @@ public class PaBaseProgrammeUpdaterTest {
 
 
 
-    private Identified findContent(List<Content> capturedContent, String uri) {
-        Iterator<Content> iterator = Lists.reverse(capturedContent).iterator();
+    private Identified findContent(List<ScheduleHierarchy> capturedContent, String uri) {
+        Iterator<ScheduleHierarchy> iterator = Lists.reverse(capturedContent).iterator();
         while(iterator.hasNext()) {
-            Content next = iterator.next();
-            if (uri.equals(next.getCanonicalUri())) {
-                return next;
+            ScheduleHierarchy next = iterator.next();
+            if (next.getPrimaryContainer().isPresent()) {
+                for (Alias alias : next.getPrimaryContainer().get().getAliases()) {
+                    if (alias.getValue().equals(uri)) {
+                        return next.getPrimaryContainer().get();
+                    }
+                }
+            }
+            if (next.getPossibleSeries().isPresent()) {
+                for (Alias alias : next.getPossibleSeries().get().getAliases()) {
+                }
+            }
+            for(Alias alias : next.getItemAndBroadcast().getItem().getAliases()) {
+                if (alias.getValue().equals(uri)) {
+                    return next.getItemAndBroadcast().getItem();
+                }
             }
         }
         return null;
@@ -190,8 +201,8 @@ public class PaBaseProgrammeUpdaterTest {
 
         private List<File> files;
 
-        public TestPaProgrammeUpdater(PaProgDataProcessor processor, ChannelResolver channelResolver, PaScheduleVersionStore scheduleVersionStore, AdapterLog log, File... files) {
-            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, scheduleVersionStore), new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver, Optional.fromNullable(scheduleVersionStore));
+        public TestPaProgrammeUpdater(PaProgDataProcessor processor, ChannelResolver channelResolver, PaScheduleVersionStore scheduleVersionStore, ScheduleWriter scheduleWriter, File... files) {
+            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(scheduleWriter, processor), new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver, Optional.fromNullable(scheduleVersionStore));
             this.files = ImmutableList.copyOf(files);
         }
 

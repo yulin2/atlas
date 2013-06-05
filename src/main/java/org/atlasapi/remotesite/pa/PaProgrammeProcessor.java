@@ -1,8 +1,6 @@
 package org.atlasapi.remotesite.pa;
 
 import static org.atlasapi.media.entity.Publisher.PA;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.List;
 import java.util.Set;
@@ -11,7 +9,8 @@ import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.Content;
-import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.schedule.ScheduleHierarchy;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
@@ -28,16 +27,11 @@ import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.util.ItemAndBroadcast;
-import org.atlasapi.media.util.WriteResult;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.pa.listings.bindings.Attr;
 import org.atlasapi.remotesite.pa.listings.bindings.Billing;
 import org.atlasapi.remotesite.pa.listings.bindings.CastMember;
@@ -52,6 +46,8 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -69,6 +65,8 @@ import com.metabroadcast.common.time.Timestamp;
 
 public class PaProgrammeProcessor implements PaProgDataProcessor {
     
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    
     static final String PA_PICTURE_TYPE_EPISODE = "episode";
     static final String PA_PICTURE_TYPE_BRAND   = "series";  // Counter-intuitively PA use 'series' where we use 'brand'
     static final String PA_PICTURE_TYPE_SERIES  = "season";  // .. and 'season' where we use 'series'
@@ -85,8 +83,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private static final String CLOSED_CURIE = "pa:closed";
     private static final List<String> IGNORED_BRANDS = ImmutableList.of("70214", "84575");    // 70214 is 'TBA' brand, 84575 is 'Film TBA'
     
-    private final ContentStore contentStore;
-    private final AdapterLog log;
+    private final ContentResolver contentResolver;
     private final PaCountryMap countryMap = new PaCountryMap();
     
     private final GenreMap genreMap = new PaGenreMap();
@@ -94,9 +91,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private final ItemsPeopleWriter personWriter;
 	private final ImmutableList<Channel> terrestrialChannels;
 
-    public PaProgrammeProcessor(ContentStore contentStore, ChannelResolver channelResolver, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
-        this.contentStore = contentStore;
-        this.log = log;
+    public PaProgrammeProcessor(ContentResolver contentResolver, ChannelResolver channelResolver, ItemsPeopleWriter itemsPeopleWriter) {
+        this.contentResolver = contentResolver;
         this.personWriter = itemsPeopleWriter;
         this.terrestrialChannels = ImmutableList.<Channel>builder()
         		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/east").requireValue())
@@ -172,69 +168,47 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
 
     @Override
-    public ItemRefAndBroadcast process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
+    public Optional<ScheduleHierarchy> process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         try {
             if (! Strings.isNullOrEmpty(progData.getSeriesId()) && IGNORED_BRANDS.contains(progData.getSeriesId())) {
-                return null;
+                return Optional.absent();
             }
             
-            Maybe<Brand> possibleBrand = getBrand(progData, channel);
-            if (possibleBrand.hasValue()) {
-                Brand brand = possibleBrand.requireValue();
+            Optional<Brand> possibleBrand = getBrand(progData, channel);
+            if (possibleBrand.isPresent()) {
+                Brand brand = possibleBrand.get();
                 if (isClosedBrand(possibleBrand)) {
                     brand.setScheduleOnly(true);
                 }
                 brand.setLastUpdated(updatedAt.toDateTimeUTC());
-                WriteResult<Brand> written = contentStore.writeContent(brand);
-                possibleBrand = Maybe.just(written.getResource());
             }
             
-            Maybe<Series> series = getSeries(progData, channel, possibleBrand.hasValue());
-            if (series.hasValue()) {
-                if (possibleBrand.hasValue()) {
-                    series.requireValue().setParent(possibleBrand.requireValue());
-                }
-                series.requireValue().setLastUpdated(updatedAt.toDateTimeUTC());
-                WriteResult<Series> written = contentStore.writeContent(series.requireValue());
-                series = Maybe.just(written.getResource());
+            Optional<Series> series = getSeries(progData, channel, possibleBrand.isPresent());
+            if (series.isPresent()) {
+                series.get().setLastUpdated(updatedAt.toDateTimeUTC());
             }
             
-            Maybe<ItemAndBroadcast> itemAndBroadcast;
+            ItemAndBroadcast itemAndBroadcast;
             if (isClosedBrand(possibleBrand)) {
-                itemAndBroadcast = getClosedEpisode(possibleBrand.requireValue(), progData, channel, zone, updatedAt);
+                itemAndBroadcast = getClosedEpisode(possibleBrand.get(), progData, channel, zone, updatedAt);
             } else {
-                itemAndBroadcast = getFilmOrEpisode(progData, channel, zone, possibleBrand.hasValue() || series.hasValue(), updatedAt);
+                itemAndBroadcast = getFilmOrEpisode(progData, channel, zone, possibleBrand.isPresent() || series.isPresent(), updatedAt);
             }
                 
-            if (itemAndBroadcast.hasValue()) {
-            	    Item item = itemAndBroadcast.requireValue().getItem();
-                if (series.hasValue() && item instanceof Episode) {
-                	Episode episode = (Episode) item;
-                    episode.setSeries(series.requireValue());
-                }
-                if (possibleBrand.hasValue()) {
-                	item.setContainer(possibleBrand.requireValue());
-                } else if (series.hasValue()) {
-                	item.setContainer(series.requireValue());
-                }
-                item.setLastUpdated(updatedAt.toDateTimeUTC());
-                WriteResult<Item> writtenItem = contentStore.writeContent(item);
-                itemAndBroadcast = Maybe.just(new ItemAndBroadcast(writtenItem.getResource(), itemAndBroadcast.requireValue().getBroadcast()));
-                personWriter.createOrUpdatePeople(item);
-            }
-            return new ItemRefAndBroadcast(itemAndBroadcast.requireValue().getItem(), itemAndBroadcast.requireValue().getBroadcast());
+            itemAndBroadcast.getItem().setLastUpdated(updatedAt.toDateTimeUTC());
+            personWriter.createOrUpdatePeople(itemAndBroadcast.getItem());
+            return Optional.of(new ScheduleHierarchy(itemAndBroadcast, possibleBrand, series));
         } catch (Exception e) {
-        	e.printStackTrace();
-        	log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
+        	    log.error(progData.getShowingId(), e);
+        	    return Optional.absent();
         }
-        return null;
     }
     
-    private boolean isClosedBrand(Maybe<Brand> brand) {
-        return brand.hasValue() && CLOSED_BRAND.equals(brand.requireValue().getCanonicalUri());
+    private boolean isClosedBrand(Optional<Brand> brand) {
+        return brand.isPresent() && CLOSED_BRAND.equals(brand.get().getCanonicalUri());
     }
     
-    private Maybe<ItemAndBroadcast> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
+    private ItemAndBroadcast getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         String uri = CLOSED_EPISODE+getClosedPostfix(channel);
         Optional<Content> resolvedContent = resolveAlias(new Alias("pa:episode", uri));
 
@@ -255,17 +229,17 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Broadcast broadcast = broadcast(progData, channel, zone, updatedAt);
         addBroadcast(version, broadcast);
 
-        return Maybe.just(new ItemAndBroadcast(episode, broadcast));
+        return new ItemAndBroadcast(episode, broadcast);
     }
     
     private String getClosedPostfix(Channel channel) {
         return "_"+channel.key();
     }
     
-    private Maybe<Brand> getBrand(ProgData progData, Channel channel) {
+    private Optional<Brand> getBrand(ProgData progData, Channel channel) {
         String brandId = progData.getSeriesId();
         if (Strings.isNullOrEmpty(brandId) || Strings.isNullOrEmpty(brandId.trim())) {
-            return Maybe.nothing();
+            return Optional.absent();
         }
 
         String brandUri = PaHelper.getBrandUri(brandId);
@@ -283,7 +257,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         selectImages(progData.getPictures(), brand, PA_PICTURE_TYPE_BRAND, PA_PICTURE_TYPE_SERIES, Maybe.<String>nothing());
 
-        return Maybe.just(brand);
+        return Optional.of(brand);
     }
 
     /**
@@ -363,9 +337,9 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
 
-    private Maybe<Series> getSeries(ProgData progData, Channel channel, boolean hasBrand) {
+    private Optional<Series> getSeries(ProgData progData, Channel channel, boolean hasBrand) {
         if (Strings.isNullOrEmpty(progData.getSeriesNumber()) || Strings.isNullOrEmpty(progData.getSeriesId())) {
-            return Maybe.nothing();
+            return Optional.absent();
         }
         String seriesUri = PaHelper.getSeriesUri(progData.getSeriesId(), progData.getSeriesNumber());
         Alias seriesAlias = PaHelper.getSeriesAlias(progData.getSeriesId(), progData.getSeriesNumber());
@@ -380,7 +354,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             try {
                 series.setTotalEpisodes(Integer.parseInt(progData.getEpisodeTotal().trim()));
             } catch (NumberFormatException e) {
-                log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Couldn't parse episode_total %s", progData.getEpisodeTotal().trim()));
+                log.warn("%s : couldn't parse total episodes of %s: %s", 
+                    progData.getShowingId(), progData.getSeriesId(), progData.getEpisodeTotal().trim());
             }
         }
         
@@ -388,7 +363,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             try {
                 series.withSeriesNumber(Integer.parseInt(progData.getSeriesNumber().trim()));
             } catch (NumberFormatException e) {
-                log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Couldn't parse series_number %s", progData.getSeriesNumber().trim()));
+                log.warn("%s : couldn't parse series number of %s: %s", 
+                    progData.getShowingId(), progData.getSeriesId(), progData.getSeriesNumber().trim());
             }
         }
     
@@ -399,7 +375,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         selectImages(progData.getPictures(), series, PA_PICTURE_TYPE_SERIES, PA_PICTURE_TYPE_BRAND, Maybe.<String>nothing());
         
-        return Maybe.just(series);
+        return Optional.of(series);
     }
     
     private DateTime fromPaDate(String paDate) {
@@ -409,11 +385,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return PA_DATE_FORMAT.parseDateTime(paDate).withZone(DateTimeZone.UTC);
     }
     
-    private Maybe<ItemAndBroadcast> getFilmOrEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode, Timestamp updatedAt) {
+    private ItemAndBroadcast getFilmOrEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode, Timestamp updatedAt) {
         return specialization(progData, channel) == Specialization.FILM ? getFilm(progData, channel, zone, updatedAt) : getEpisode(progData, channel, zone, isEpisode, updatedAt);
     }
     
-    private Maybe<ItemAndBroadcast> getFilm(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
+    private ItemAndBroadcast getFilm(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         String filmUri = PaHelper.getFilmUri(programmeId(progData));
         Optional<Content> possiblePreviousData = resolveAlias(new Alias("pa:film", filmUri));
         
@@ -438,7 +414,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             film.setYear(Integer.parseInt(progData.getFilmYear()));
         }
         
-        return Maybe.just(new ItemAndBroadcast(film, broadcast));
+        return new ItemAndBroadcast(film, broadcast);
     }
     
     private Broadcast setCommonDetails(ProgData progData, Channel channel, DateTimeZone zone, Item episode, Timestamp updatedAt) {
@@ -523,7 +499,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
     }
 
-    private Maybe<ItemAndBroadcast> getEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode, Timestamp updatedAt) {
+    private ItemAndBroadcast getEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode, Timestamp updatedAt) {
         
         String episodeUri = PaHelper.getEpisodeUri(programmeId(progData));
         Optional<Content> possiblePrevious = resolveAlias(new Alias("pa:episode", episodeUri));
@@ -532,10 +508,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         if (possiblePrevious.isPresent()) {
             item = (Item) possiblePrevious.get();
             if (!(item instanceof Episode) && isEpisode) {
-                log.record(warnEntry().withSource(getClass()).withDescription("%s resolved as %s being ingested as Episode", episodeUri, item.getClass().getSimpleName()));
+                log.warn("%s resolved as %s being ingested as Episode", episodeUri, item.getClass().getSimpleName());
                 item = convertItemToEpisode(item);
             } else if(item instanceof Episode && !isEpisode) {
-                log.record(errorEntry().withSource(getClass()).withDescription("%s resolved as %s being ingested as Item", episodeUri, item.getClass().getSimpleName()));
+                log.error("%s resolved as %s being ingested as Item", episodeUri, item.getClass().getSimpleName());
             }
         } else {
             item = getBasicEpisode(progData, isEpisode);
@@ -559,11 +535,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             //log.
         }
         
-        return Maybe.just(new ItemAndBroadcast(item, broadcast));
+        return new ItemAndBroadcast(item, broadcast);
     }
 
     private Optional<Content> resolveAlias(Alias alias) {
-        return contentStore.resolveAliases(ImmutableList.of(alias), PA).get(alias);
+        return contentResolver.resolveAliases(ImmutableList.of(alias), PA).get(alias);
     }
 
     private Item convertItemToEpisode(Item item) {
