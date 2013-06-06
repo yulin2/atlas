@@ -39,6 +39,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.HttpStatusCode;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 @Controller
 public class QueryController extends BaseController<QueryResult<Content, ? extends Identified>> {
@@ -50,7 +51,7 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
     private final ContentWriteController contentWriteController;
 	
     public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content, ? extends Identified>> outputter, ContentWriteController contentWriteController) {
-	    super(configFetcher, log, outputter);
+	    super(configFetcher, log, outputter, SubstitutionTableNumberCodec.lowerCaseOnly());
         this.executor = executor;
         this.contentWriteController = contentWriteController;
 	}
