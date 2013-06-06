@@ -38,14 +38,20 @@ public abstract class BaseController<T> {
     protected final AtlasModelWriter<? super T> outputter;
     private final QueryParameterAnnotationsExtractor annotationExtractor;
     private final ApplicationConfigurationFetcher configFetcher;
-    public final NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
+    public final NumberToShortStringCodec idCodec;
 
-    protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<? super T> outputter) {
+    protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<? super T> outputter,
+            NumberToShortStringCodec idCodec) {
         this.configFetcher = configFetcher;
         this.log = log;
         this.outputter = outputter;
         this.builder = new ApplicationConfigurationIncludingQueryBuilder(new QueryStringBackedQueryBuilder(), configFetcher);
         this.annotationExtractor = new QueryParameterAnnotationsExtractor();
+        this.idCodec = idCodec;
+    }
+    
+    protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<? super T> outputter) {
+        this(configFetcher, log, outputter, new SubstitutionTableNumberCodec());
     }
 
     protected void errorViewFor(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary ae) throws IOException {
