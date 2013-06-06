@@ -53,10 +53,12 @@ public class ScheduleEquivalenceUpdateTaskTest {
         DateTime now = new DateTime().withZone(DateTimeZone.UTC);
         
         Item yvItemOne = new Item("yv1", "yv1c", Publisher.YOUVIEW);
+        yvItemOne.setId(1);
         Broadcast yvBroadcastOne = new Broadcast(bbcOne.getCanonicalUri(), now, now);
         ItemAndBroadcast one = new ItemAndBroadcast(yvItemOne, yvBroadcastOne);
 
         Item yvItemTwo = new Item("yv2", "yv2c", Publisher.YOUVIEW);
+        yvItemTwo.setId(2);
         Broadcast yvBroadcastTwo = new Broadcast(bbcOne.getCanonicalUri(), now, now);
         ItemAndBroadcast two = new ItemAndBroadcast(yvItemTwo, yvBroadcastTwo);
         

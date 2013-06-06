@@ -77,6 +77,7 @@ public class ContentTitleScorerTest {
 
     private Container brandWithTitle(String title) {
         Brand brand = new Brand("uri","curie",Publisher.BBC);
+        brand.setId(brand.getCanonicalUri().hashCode());
         brand.setTitle(title);
         return brand;
     }
