@@ -53,7 +53,6 @@ public class PaProgrammeProcessorTest {
 
     private final ContentWriter contentWriter = mock(ContentWriter.class);
     private final ContentResolver contentResolver = mock(ContentResolver.class);
-    private final ChannelResolver channelResolver = mock(ChannelResolver.class);
     private final ItemsPeopleWriter itemsPeopleWriter = mock(ItemsPeopleWriter.class);
     private final Described described = mock(Described.class);
     private final AdapterLog log = new NullAdapterLog();
@@ -67,14 +66,7 @@ public class PaProgrammeProcessorTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         
-        when(channelResolver.fromUri(argThat(any(String.class)))).then(new Answer<Maybe<Channel>>() {
-            @Override
-            public Maybe<Channel> answer(InvocationOnMock invocation) throws Throwable {
-                String input = (String)invocation.getArguments()[0];
-                return Maybe.just(new Channel(METABROADCAST, input, input, false, VIDEO, input));
-            }
-        });
-        progProcessor = new PaProgrammeProcessor(contentWriter, contentResolver, channelResolver, itemsPeopleWriter, log);
+        progProcessor = new PaProgrammeProcessor(contentWriter, contentResolver, itemsPeopleWriter, log);
     }
     
     @Test 
