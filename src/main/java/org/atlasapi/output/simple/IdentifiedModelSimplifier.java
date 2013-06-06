@@ -10,11 +10,21 @@ import org.atlasapi.media.entity.simple.Audit;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.output.Annotation;
 
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 public abstract class IdentifiedModelSimplifier<F extends Identified, T extends Aliased> implements ModelSimplifier<F, T> {
 
-    protected final SubstitutionTableNumberCodec idCodec = new SubstitutionTableNumberCodec();
+    protected final NumberToShortStringCodec idCodec;
+    
+    protected IdentifiedModelSimplifier() {
+        this.idCodec = new SubstitutionTableNumberCodec();
+    }
+    
+    protected IdentifiedModelSimplifier(NumberToShortStringCodec idCodec) {
+        this.idCodec = idCodec;
+    }
+    
     private final PublisherSimplifier publisherSimplifier = new PublisherSimplifier();
     
     protected void copyIdentifiedAttributesTo(Identified identified, Aliased aliased, Set<Annotation> annotations) {
