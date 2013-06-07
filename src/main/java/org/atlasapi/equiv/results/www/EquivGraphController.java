@@ -45,7 +45,7 @@ public class EquivGraphController {
         
         if (subj != null) {
             Iterable<LookupEntry> equivs = lookupStore.entriesForCanonicalUris(
-                Iterables.transform(subj.equivalents(), LookupRef.TO_ID));
+                Iterables.transform(subj.equivalents(), LookupRef.TO_URI));
             
             List<SimpleModel> nodes = Lists.newLinkedList(); 
 
@@ -69,11 +69,11 @@ public class EquivGraphController {
             .put("uri", equiv.uri())
             .put("source", equiv.lookupRef().publisher().key())
             .putStrings("direct", Collections2.filter(
-                    Collections2.transform(equiv.directEquivalents(), LookupRef.TO_ID),
+                    Collections2.transform(equiv.directEquivalents(), LookupRef.TO_URI),
                     Predicates.not(Predicates.equalTo(equiv.uri()))
             ))
             .putStrings("explicit", Collections2.filter(
-                    Collections2.transform(equiv.explicitEquivalents(), LookupRef.TO_ID),
+                    Collections2.transform(equiv.explicitEquivalents(), LookupRef.TO_URI),
                     Predicates.not(Predicates.equalTo(equiv.uri()))
             ));
     }
