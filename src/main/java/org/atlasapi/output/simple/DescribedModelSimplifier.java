@@ -1,6 +1,9 @@
 package org.atlasapi.output.simple;
 
+import java.math.BigInteger;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.LookupRef;
@@ -10,6 +13,7 @@ import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Image;
 import org.atlasapi.output.Annotation;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
@@ -52,7 +56,9 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
             simpleDescription.setGenres(content.getGenres());
             simpleDescription.setTags(content.getTags());
-            simpleDescription.setSameAs(Iterables.transform(content.getEquivalentTo(),LookupRef.TO_ID));
+            simpleDescription.setSameAs(Iterables.transform(content.getEquivalentTo(),LookupRef.TO_URI));
+            simpleDescription.setSameAsIds(Iterables.transform(
+                    Iterables.transform(content.getEquivalentTo(),LookupRef.TO_ID), TO_ID_STRING));
             simpleDescription.setPresentationChannel(content.getPresentationChannel());
             simpleDescription.setMediumDescription(content.getMediumDescription());
             simpleDescription.setLongDescription(content.getLongDescription());
@@ -108,4 +114,12 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         
         return simpleImage;
     }
+    
+    private Function<Long, String> TO_ID_STRING = new Function<Long, String>() {
+
+        @Override
+        public String apply(Long input) {
+            return idCodec.encode(BigInteger.valueOf(input));
+        }
+    };
 }
