@@ -27,16 +27,14 @@ import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.v4.content.IndexBackedEquivalentContentQueryExecutor;
 import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
+import org.atlasapi.query.v4.schedule.ScheduleResolverBackedScheduleQueryExecutor;
 import org.atlasapi.query.v4.search.support.ContentResolvingSearcher;
 import org.atlasapi.query.v4.topic.IndexBackedTopicQueryExecutor;
 import org.atlasapi.query.v4.topic.TopicContentQueryExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
 @Configuration
 //@Import(EquivModule.class)
@@ -44,8 +42,9 @@ public class QueryModule {
 
     private @Autowired AtlasPersistenceModule persistenceModule;
 
+    @Qualifier("index")
     @Bean ScheduleQueryExecutor scheduleQueryExecutor() {
-        return new IndexBackedScheduleQueryExecutor(persistenceModule.scheduleIndex(), persistenceModule.contentStore());
+        return new IndexBackedScheduleQueryExecutor(persistenceModule.channelStore(), persistenceModule.scheduleIndex(), persistenceModule.contentStore());
     }
     
     @Bean QueryExecutor<Topic> topicQueryExecutor() {
@@ -68,6 +67,12 @@ public class QueryModule {
             persistenceModule.equivalentContentResolver(), 
             new StrategyBackedEquivalentsMerger<Content>(new OutputContentMerger())
         );
+    }
+    
+    @Qualifier("store")
+    @Bean ScheduleQueryExecutor scheduleStoreScheduleQueryExecutor() {
+        return new ScheduleResolverBackedScheduleQueryExecutor(persistenceModule.channelStore(), 
+            persistenceModule.scheduleStore(), mergingContentResolver());
     }
 
     @Bean

@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.query.annotation.ActiveAnnotations;
@@ -43,11 +42,9 @@ import com.metabroadcast.common.time.TimeMachine;
 public class ScheduleRequestParserTest {
 
     private final ApplicationConfigurationFetcher applicationFetcher = mock(ApplicationConfigurationFetcher.class);
-    private final ChannelResolver channelResolver = mock(ChannelResolver.class);
     private final DateTime time = new DateTime(2012, 12, 14, 10,00,00,000, DateTimeZones.UTC);
     private final ContextualAnnotationsExtractor annotationsExtractor = mock(ContextualAnnotationsExtractor.class);
     private final ScheduleRequestParser builder = new ScheduleRequestParser(
-        channelResolver,
         applicationFetcher,
         Duration.standardDays(1),
         new TimeMachine(time), annotationsExtractor 
@@ -59,8 +56,6 @@ public class ScheduleRequestParserTest {
     @Before
     public void setup() throws Exception {
         channel.setId(1234L);
-        when(channelResolver.fromId(channel.getId()))
-            .thenReturn(Maybe.just(channel));
         when(annotationsExtractor.extractFromRequest(any(HttpServletRequest.class)))
             .thenReturn(ActiveAnnotations.standard());
         when(applicationFetcher.configurationFor(any(HttpServletRequest.class)))
@@ -82,7 +77,7 @@ public class ScheduleRequestParserTest {
         
         ScheduleQuery query = builder.queryFrom(request);
         
-        assertThat(query.getChannel(), is(channel));
+        assertThat(query.getChannelId(), is(channel.getId()));
         assertThat(query.getInterval(), is(intvl));
         assertThat(query.getSource(), is(BBC));
         assertThat(query.getContext().getAnnotations().forPath(ImmutableList.of(Resource.CONTENT)), is(Annotation.standard()));
@@ -104,7 +99,7 @@ public class ScheduleRequestParserTest {
         
         ScheduleQuery query = builder.queryFrom(request);
         
-        assertThat(query.getChannel(), is(channel));
+        assertThat(query.getChannelId(), is(channel.getId()));
         assertThat(query.getInterval(), is(intvl));
         assertThat(query.getSource(), is(BBC));
         assertThat(query.getContext().getAnnotations().forPath(ImmutableList.of(Resource.CONTENT)), is(Annotation.standard()));

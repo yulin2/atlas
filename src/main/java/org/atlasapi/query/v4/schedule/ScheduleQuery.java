@@ -2,7 +2,7 @@ package org.atlasapi.query.v4.schedule;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.query.common.QueryContext;
 import org.joda.time.Interval;
@@ -10,11 +10,11 @@ import org.joda.time.Interval;
 public final class ScheduleQuery {
     
     private final Publisher source;
-    private final Channel channel;
+    private final Id channel;
     private final Interval interval;
     private final QueryContext context;
 
-    public ScheduleQuery(Publisher source, Channel channel, Interval interval, QueryContext context) {
+    public ScheduleQuery(Publisher source, Id channel, Interval interval, QueryContext context) {
         this.source = checkNotNull(source);
         this.channel = checkNotNull(channel);
         this.interval = checkNotNull(interval);
@@ -25,7 +25,7 @@ public final class ScheduleQuery {
         return source;
     }
 
-    public Channel getChannel() {
+    public Id getChannelId() {
         return channel;
     }
     

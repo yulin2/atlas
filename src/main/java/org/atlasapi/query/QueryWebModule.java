@@ -145,8 +145,8 @@ public class QueryWebModule {
 
     @Bean
     ScheduleController v4ScheduleController() {
-        return new ScheduleController(queryModule.scheduleQueryExecutor(),
-            channelResolver, configFetcher, new ScheduleQueryResultWriter(channelListWriter(), contentListWriter()),
+        return new ScheduleController(queryModule.scheduleStoreScheduleQueryExecutor(),
+            configFetcher, new ScheduleQueryResultWriter(channelListWriter(), contentListWriter()),
             new IndexContextualAnnotationsExtractor(ResourceAnnotationIndex.combination()
                 .addExplicitSingleContext(channelAnnotationIndex())
                 .addExplicitListContext(contentAnnotationIndex())

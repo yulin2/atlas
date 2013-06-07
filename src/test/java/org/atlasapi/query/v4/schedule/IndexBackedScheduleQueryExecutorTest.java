@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentResolver;
@@ -39,24 +40,30 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IndexBackedScheduleQueryExecutorTest {
 
+    private final ChannelResolver channelResolver = mock(ChannelResolver.class);
     private final ScheduleIndex index = mock(ScheduleIndex.class);
     private final ContentResolver contentResolver = mock(ContentResolver.class);
-    private final IndexBackedScheduleQueryExecutor queryExecutor = new IndexBackedScheduleQueryExecutor(index, contentResolver);
+    private final IndexBackedScheduleQueryExecutor queryExecutor
+            = new IndexBackedScheduleQueryExecutor(channelResolver, index, contentResolver);
     
     
     @Test
     @SuppressWarnings("unchecked")
     public void testDoesntResolveContentOnEmptyScheduleRef() throws Exception {
         Channel channel = Channel.builder().build();
+        channel.setId(1);
         channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
-        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.standard());
+        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel.getId(), interval, QueryContext.standard());
 
+        when(channelResolver.fromId(channel.getId()))
+            .thenReturn(Maybe.just(channel));
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(ScheduleRef.forChannel(channel.getCanonicalUri()).build()));
         
@@ -71,13 +78,16 @@ public class IndexBackedScheduleQueryExecutorTest {
     @Test
     public void testHandlesSimpleScheduleQuery() throws Exception {
         Channel channel = Channel.builder().build();
+        channel.setId(1);
         channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
-        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.standard());
+        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel.getId(), interval, QueryContext.standard());
         
         Item item = itemWithBroadcast("item", channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid");
         addBroadcast(item, channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2");
         
+        when(channelResolver.fromId(channel.getId()))
+            .thenReturn(Maybe.just(channel));
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(
                 ScheduleRef.forChannel(channel.getCanonicalUri())
@@ -104,13 +114,16 @@ public class IndexBackedScheduleQueryExecutorTest {
     @Test
     public void testRepeatedScheduleItemAppearsTwice() throws Exception {
         Channel channel = Channel.builder().build();
+        channel.setId(1);
         channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
-        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.standard());
+        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel.getId(), interval, QueryContext.standard());
         
         Item item = itemWithBroadcast("item", channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid");
         addBroadcast(item, channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2");
         
+        when(channelResolver.fromId(channel.getId()))
+            .thenReturn(Maybe.just(channel));
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(
                 ScheduleRef.forChannel(channel.getCanonicalUri())

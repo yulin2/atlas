@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
@@ -37,12 +36,10 @@ public class ScheduleController {
     private ResponseWriterFactory writerResolver = new ResponseWriterFactory();
 
     public ScheduleController(ScheduleQueryExecutor queryExecutor,
-        ChannelResolver channelResolver,
         ApplicationConfigurationFetcher appFetcher,
         QueryResultWriter<ChannelSchedule> resultWriter,
         ContextualAnnotationsExtractor annotationsExtractor) {
         this.requestParser = new ScheduleRequestParser(
-            channelResolver,
             appFetcher,
             MAX_REQUEST_DURATION,
             new SystemClock(), annotationsExtractor

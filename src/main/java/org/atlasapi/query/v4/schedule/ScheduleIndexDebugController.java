@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.content.schedule.ScheduleRef;
@@ -42,10 +43,12 @@ public class ScheduleIndexDebugController {
     private final ScheduleIndex index;
     private final ScheduleRequestParser requestParser;
 
+    private final ChannelResolver channelResolver;
+
     public ScheduleIndexDebugController(ScheduleIndex index, ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher) {
         this.index = index;
+        this.channelResolver = channelResolver;
         this.requestParser = new ScheduleRequestParser(
-            channelResolver,
             appFetcher,
             MAX_REQUEST_DURATION,
             new SystemClock(), new ContextualAnnotationsExtractor() {
@@ -68,7 +71,8 @@ public class ScheduleIndexDebugController {
     @RequestMapping({"/system/debug/schedules/{cid}.*","/system/debug/schedules/{cid}"})
     public void debugSchedule(HttpServletRequest request, HttpServletResponse response) throws Exception {
         ScheduleQuery query = requestParser.queryFrom(request);
-        ListenableFuture<ScheduleRef> resolveSchedule = index.resolveSchedule(query.getSource(), query.getChannel(), query.getInterval());
+        Channel channel = channelResolver.fromId(query.getChannelId()).requireValue();
+        ListenableFuture<ScheduleRef> resolveSchedule = index.resolveSchedule(query.getSource(), channel, query.getInterval());
         gson.toJson(resolveSchedule.get(5, TimeUnit.SECONDS), response.getWriter());
     }
     

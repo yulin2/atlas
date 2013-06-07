@@ -11,8 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
@@ -40,7 +38,6 @@ class ScheduleRequestParser {
         ".*schedules/([^.]+)(.[\\w\\d.]+)?$"
     );
     
-    private final ChannelResolver channelResolver;
     private final ApplicationConfigurationFetcher applicationStore;
 
     private final SetBasedRequestParameterValidator validator = SetBasedRequestParameterValidator.builder()
@@ -54,8 +51,7 @@ class ScheduleRequestParser {
     private final Duration maxQueryDuration;
     private final Clock clock;
 
-    public ScheduleRequestParser(ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration, Clock clock, ContextualAnnotationsExtractor annotationsExtractor) {
-        this.channelResolver = channelResolver;
+    public ScheduleRequestParser(ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration, Clock clock, ContextualAnnotationsExtractor annotationsExtractor) {
         this.applicationStore = appFetcher;
         this.maxQueryDuration = maxQueryDuration;
         this.idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
@@ -70,9 +66,7 @@ class ScheduleRequestParser {
     }
 
     public ScheduleQuery queryFrom(HttpServletRequest request) throws QueryParseException, NotFoundException {
-        // Attempt to extract channel first so we can 404 if missing before
-        // 400ing from bad params.
-        Channel channel = extractChannel(request);
+        Id channel = extractChannel(request);
 
         validator.validateParameters(request);
         
@@ -107,7 +101,7 @@ class ScheduleRequestParser {
         return openInterval.contains(interval);
     }
 
-    private Channel extractChannel(HttpServletRequest request) throws QueryParseException, NotFoundException {
+    private Id extractChannel(HttpServletRequest request) throws QueryParseException, NotFoundException {
         String channelId = getChannelId(request.getRequestURI());
         
         Id cid;
@@ -116,13 +110,7 @@ class ScheduleRequestParser {
         } catch (IllegalArgumentException e) {
             throw new QueryParseException("Invalid id " + channelId);
         }
-        Maybe<Channel> channel = channelResolver.fromId(cid);
-
-        
-        if (channel.hasValue()) {
-            return channel.requireValue();
-        }
-        throw new NotFoundException(cid);
+        return cid;
     }
 
     private String getChannelId(String requestUri) {
