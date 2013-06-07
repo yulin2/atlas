@@ -20,6 +20,7 @@ import org.atlasapi.media.entity.Subtitles;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.Channel;
+import org.atlasapi.media.entity.simple.Identified;
 import org.atlasapi.media.entity.simple.Language;
 import org.atlasapi.media.entity.simple.Restriction;
 import org.atlasapi.media.entity.simple.SeriesSummary;
@@ -321,18 +322,22 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
     private SeriesSummary seriesSummaryFromResolved(ParentRef seriesRef, Set<Annotation> annotations) {
         SeriesSummary baseSummary = new SeriesSummary();
-        baseSummary.setUri(seriesRef.getUri());
+        setIdAndUriFromParentRef(seriesRef, baseSummary);
 
         return annotations.contains(Annotation.SERIES_SUMMARY) ? containerSummaryResolver.summarizeSeries(seriesRef).or(baseSummary) : baseSummary;
     }
 
     private BrandSummary summaryFromResolved(ParentRef container, Set<Annotation> annotations) {
         BrandSummary baseSummary = new BrandSummary();
-        baseSummary.setUri(container.getUri());
-        Long id = container.getId();
-        baseSummary.setId(id != null ? idCodec.encode(BigInteger.valueOf(id)) : null);
+        setIdAndUriFromParentRef(container, baseSummary);
 
         return annotations.contains(Annotation.BRAND_SUMMARY) ? containerSummaryResolver.summarizeTopLevelContainer(container).or(baseSummary) : baseSummary;
+    }
+    
+    private void setIdAndUriFromParentRef(ParentRef parentRef, Identified summary) {
+        summary.setUri(summary.getUri());
+        Long id = parentRef.getId();
+        summary.setId(id != null ? idCodec.encode(BigInteger.valueOf(id)) : null);
     }
 
     private void copyProperties(Encoding encoding, org.atlasapi.media.entity.simple.Location simpleLocation) {
