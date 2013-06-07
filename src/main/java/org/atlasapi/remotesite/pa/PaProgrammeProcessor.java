@@ -469,6 +469,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         try {
             if (item instanceof Episode) {
+                Boolean special = getBooleanValue(progData.getAttr().getSpecial());
+                if (special != null && special) {
+                    ((Episode) item).setSpecial(true);
+                }
                 if (progData.getEpisodeNumber() != null) {
                     ((Episode) item).setEpisodeNumber(Integer.valueOf(progData.getEpisodeNumber()));
                 }

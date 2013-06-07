@@ -108,6 +108,10 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                 }
             }
             
+            if (annotations.contains(Annotation.DESCRIPTION)) {
+                simpleItem.setSpecial(episode.getSpecial());
+            }
+            
             if (annotations.contains(Annotation.DESCRIPTION) || annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
                 simpleItem.setEpisodeNumber(episode.getEpisodeNumber());
             }
@@ -325,6 +329,8 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private BrandSummary summaryFromResolved(ParentRef container, Set<Annotation> annotations) {
         BrandSummary baseSummary = new BrandSummary();
         baseSummary.setUri(container.getUri());
+        Long id = container.getId();
+        baseSummary.setId(id != null ? idCodec.encode(BigInteger.valueOf(id)) : null);
 
         return annotations.contains(Annotation.BRAND_SUMMARY) ? containerSummaryResolver.summarizeTopLevelContainer(container).or(baseSummary) : baseSummary;
     }
