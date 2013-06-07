@@ -103,7 +103,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
                     @Override
                     public Identified apply(LookupRef input) {
-                        return allResolvedResults.get(input.id()).valueOrNull();
+                        return allResolvedResults.get(input.uri()).valueOrNull();
                     }
                 }), Predicates.notNull()));
                 
@@ -120,7 +120,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     private boolean containsRequestedUri(Iterable<LookupRef> equivRefs, String uri) {
         for (LookupRef equivRef : equivRefs) {
-            if (equivRef.id().equals(uri)) {
+            if (equivRef.uri().equals(uri)) {
                 return true;
             }
         }
@@ -159,7 +159,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
             @Override
             public LookupRef apply(String input) {
-                return new LookupRef(input, null, null);
+                return new LookupRef(input, null, null, null);
             }
         }));
         return Maps.transformValues(Maps.filterValues(result.asResolvedMap(), new Predicate<Identified>() {
