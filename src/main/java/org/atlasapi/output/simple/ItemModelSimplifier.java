@@ -335,7 +335,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     }
     
     private void setIdAndUriFromParentRef(ParentRef parentRef, Identified summary) {
-        summary.setUri(summary.getUri());
+        summary.setUri(parentRef.getUri());
         Long id = parentRef.getId();
         summary.setId(id != null ? idCodec.encode(BigInteger.valueOf(id)) : null);
     }
