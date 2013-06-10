@@ -5,6 +5,7 @@ import org.atlasapi.input.BrandModelTransformer;
 import org.atlasapi.input.DefaultGsonModelReader;
 import org.atlasapi.input.DelegatingModelTransformer;
 import org.atlasapi.input.ItemModelTransformer;
+import org.atlasapi.input.TopicModelTransformer;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
@@ -90,6 +91,7 @@ import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.query.v2.SearchController;
 import org.atlasapi.query.v2.TopicController;
+import org.atlasapi.query.v2.TopicWriteController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -193,6 +195,10 @@ public class QueryWebModule {
     ContentWriteController contentWriteController() {
         return new ContentWriteController(configFetcher, contentResolver, contentWriter, new DefaultGsonModelReader(), new DelegatingModelTransformer(brandTransformer(), itemTransformer()));
     }
+    
+    TopicWriteController topicWriteController() {
+        return new TopicWriteController(configFetcher, topicStore, new DefaultGsonModelReader(), new TopicModelTransformer());
+    }
 
     @Bean
     ScheduleOverlapListener scheduleOverlapListener() {
@@ -224,7 +230,7 @@ public class QueryWebModule {
 
     @Bean
     TopicController topicController() {
-        return new TopicController(new PublisherFilteringTopicResolver(topicResolver), new PublisherFilteringTopicContentLister(topicContentLister), configFetcher, log, topicModelOutputter(), queryController());
+        return new TopicController(new PublisherFilteringTopicResolver(topicResolver), new PublisherFilteringTopicContentLister(topicContentLister), configFetcher, log, topicModelOutputter(), queryController(), topicWriteController());
     }
 
     @Bean

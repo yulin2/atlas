@@ -19,6 +19,7 @@ import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
@@ -34,12 +35,14 @@ public class TopicController extends BaseController<Iterable<Topic>> {
     private final TopicQueryResolver topicResolver;
     private final TopicContentLister contentLister;
     private final QueryController queryController;
+    private final TopicWriteController topicWriteController;
 
-    public TopicController(TopicQueryResolver topicResolver, TopicContentLister contentLister, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Topic>> atlasModelOutputter, QueryController queryController) {
+    public TopicController(TopicQueryResolver topicResolver, TopicContentLister contentLister, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Topic>> atlasModelOutputter, QueryController queryController, TopicWriteController topicWriteController) {
         super(configFetcher, log, atlasModelOutputter);
         this.topicResolver = topicResolver;
         this.contentLister = contentLister;
         this.queryController = queryController;
+        this.topicWriteController = topicWriteController;
     }
 
     @RequestMapping(value={"3.0/topics.*","/topics.*"})
@@ -112,4 +115,8 @@ public class TopicController extends BaseController<Iterable<Topic>> {
         };
     }
      
+    @RequestMapping(value="/3.0/topics.json", method = RequestMethod.POST)
+    public Void writeContent(HttpServletRequest req, HttpServletResponse resp) {
+        return topicWriteController.writeContent(req, resp);
+    }
 }
