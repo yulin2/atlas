@@ -2,8 +2,10 @@ package org.atlasapi.equiv.results.www;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.persistence.lookup.entry.LookupEntry;
@@ -30,14 +32,19 @@ public class EquivGraphController {
     }
     
     @RequestMapping("/system/equivalence/graph")
-    public String graphEquiv(Map<String,Object> model, @RequestParam("uri") String uri) {
+    public String graphEquiv(Map<String,Object> model, @RequestParam("uri") String uri, 
+            @RequestParam(value="min_edges", required=false, defaultValue="1") String minEdges) {
         model.put("uri", uri);
+        model.put("min_edges", Integer.parseInt(minEdges));
         return "equivalence.graph";
     }
     
     @RequestMapping("/system/equivalence/graph/data.json")
-    public String graphData(Map<String,Object> model, @RequestParam("uri") String uri) {
+    public String graphData(Map<String,Object> model, @RequestParam("uri") String uri, 
+            @RequestParam(value="min_edges", required=false, defaultValue="1") String minEdges) {
+        int minimumEdgeCount = Integer.parseInt(minEdges);
         model.put("uri", uri);
+        model.put("min_edges", minimumEdgeCount);
         LookupEntry subj = Iterables.getOnlyElement(
             lookupStore.entriesForCanonicalUris(ImmutableList.of(uri)), 
             null
@@ -49,13 +56,14 @@ public class EquivGraphController {
             
             List<SimpleModel> nodes = Lists.newLinkedList(); 
 
-            int i = 0;
             for (LookupEntry equiv : equivs) {
-                SimpleModel nodeModel = modelNode(equiv, i++);
-                if (equiv.uri().equals(uri)) {
-                    nodeModel.put("fixed", true);
+                if (edgeCount(equiv) >= minimumEdgeCount) {
+                    SimpleModel nodeModel = modelNode(equiv);
+                    if (equiv.uri().equals(uri)) {
+                        nodeModel.put("fixed", true);
+                    }
+                    nodes.add(nodeModel);
                 }
-                nodes.add(nodeModel);
             }
             
             model.put("content", new SimpleModelList(nodes));
@@ -64,18 +72,24 @@ public class EquivGraphController {
         return "equivalence.graph";
     }
 
-    private SimpleModel modelNode(LookupEntry equiv, int index) {
+    private int edgeCount(LookupEntry equiv) {
+        return nonReflexiveIds(equiv, equiv.directEquivalents()).size()
+                + nonReflexiveIds(equiv, equiv.explicitEquivalents()).size();
+    }
+
+    private Collection<String> nonReflexiveIds(LookupEntry equiv, Set<LookupRef> directEquivalents) {
+        return Collections2.filter(
+                Collections2.transform(directEquivalents, LookupRef.TO_URI),
+                Predicates.not(Predicates.equalTo(equiv.uri())));
+    }
+
+    private SimpleModel modelNode(LookupEntry equiv) {
         return new SimpleModel()
             .put("uri", equiv.uri())
             .put("source", equiv.lookupRef().publisher().key())
-            .putStrings("direct", Collections2.filter(
-                    Collections2.transform(equiv.directEquivalents(), LookupRef.TO_URI),
-                    Predicates.not(Predicates.equalTo(equiv.uri()))
-            ))
-            .putStrings("explicit", Collections2.filter(
-                    Collections2.transform(equiv.explicitEquivalents(), LookupRef.TO_URI),
-                    Predicates.not(Predicates.equalTo(equiv.uri()))
-            ));
+            .putStrings("direct", nonReflexiveIds(equiv, equiv.directEquivalents()))
+            .putStrings("explicit", nonReflexiveIds(equiv, equiv.explicitEquivalents()))
+            ;
     }
     
 }
