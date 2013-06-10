@@ -135,4 +135,4 @@ var renderGraph = function(error, data) {
 
 }
 
-d3.json("graph/data.json?uri=" + uri, renderGraph);
+d3.json("graph/data.json?uri=" + uri + "&min_edges=" + min_edges, renderGraph);
