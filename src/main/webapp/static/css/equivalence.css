@@ -210,3 +210,7 @@ padding-left: 48px!important;
 #equiv h3, #equiv p {
     margin-left:12px;
 }
+
+.strong {
+	background-color: #9f9;
+}
