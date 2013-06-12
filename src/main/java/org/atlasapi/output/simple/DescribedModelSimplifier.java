@@ -13,8 +13,17 @@ import org.atlasapi.output.Annotation;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public abstract class DescribedModelSimplifier<F extends Described, T extends Description> extends IdentifiedModelSimplifier<F,T> {
+    
+    protected DescribedModelSimplifier() {
+        
+    }
+    
+    protected DescribedModelSimplifier(NumberToShortStringCodec idCodec) {
+        super(idCodec);
+    }
     
     protected void copyBasicDescribedAttributes(F content, T simpleDescription, Set<Annotation> annotations) {
         

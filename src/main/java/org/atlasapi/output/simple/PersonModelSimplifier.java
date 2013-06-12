@@ -10,9 +10,14 @@ import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.output.Annotation;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 public class PersonModelSimplifier extends DescribedModelSimplifier<Person, org.atlasapi.media.entity.simple.Person> {
 
+    public PersonModelSimplifier() {
+        super(SubstitutionTableNumberCodec.lowerCaseOnly());
+    }
+    
     @Override
     public org.atlasapi.media.entity.simple.Person simplify(Person fullPerson, Set<Annotation> annotations, ApplicationConfiguration config) {
         org.atlasapi.media.entity.simple.Person person = new org.atlasapi.media.entity.simple.Person();
