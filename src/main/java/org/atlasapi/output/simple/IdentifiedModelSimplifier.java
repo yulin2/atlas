@@ -18,7 +18,7 @@ public abstract class IdentifiedModelSimplifier<F extends Identified, T extends 
     protected final NumberToShortStringCodec idCodec;
     
     protected IdentifiedModelSimplifier() {
-        this.idCodec = new SubstitutionTableNumberCodec();
+        this(new SubstitutionTableNumberCodec());
     }
     
     protected IdentifiedModelSimplifier(NumberToShortStringCodec idCodec) {

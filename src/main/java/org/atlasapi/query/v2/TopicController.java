@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.query.Selection;
 
 @Controller
@@ -38,7 +39,7 @@ public class TopicController extends BaseController<Iterable<Topic>> {
     private final TopicWriteController topicWriteController;
 
     public TopicController(TopicQueryResolver topicResolver, TopicContentLister contentLister, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Topic>> atlasModelOutputter, QueryController queryController, TopicWriteController topicWriteController) {
-        super(configFetcher, log, atlasModelOutputter);
+        super(configFetcher, log, atlasModelOutputter, SubstitutionTableNumberCodec.lowerCaseOnly());
         this.topicResolver = topicResolver;
         this.contentLister = contentLister;
         this.queryController = queryController;
