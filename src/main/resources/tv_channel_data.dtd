@@ -94,9 +94,9 @@
 <!-- name which can be date dependent due to entity changing its name from a particular date -->
 <!ELEMENT names (name+)>
 <!ELEMENT name (#PCDATA)>
-<!ATTLIST name 	start_date	CDATA	#REQUIRED>
-<!ATTLIST name 	end_date	CDATA	#IMPLIED>
-<!ATTLIST name 	type CDATA	#IMPLIED>
+<!ATTLIST name  start_date  CDATA   #REQUIRED>
+<!ATTLIST name  end_date    CDATA   #IMPLIED>
+<!ATTLIST name  type CDATA  #IMPLIED>
 
 
 <!-- platform_epg_content -->
