@@ -131,7 +131,12 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
     }
     
     @RequestMapping(value="/3.0/content.json", method = RequestMethod.POST)
-    public Void writeContent(HttpServletRequest req, HttpServletResponse resp) {
-        return contentWriteController.writeContent(req, resp);
+    public Void postContent(HttpServletRequest req, HttpServletResponse resp) {
+        return contentWriteController.postContent(req, resp);
+    }
+
+    @RequestMapping(value="/3.0/content.json", method = RequestMethod.PUT)
+    public Void putContent(HttpServletRequest req, HttpServletResponse resp) {
+        return contentWriteController.putContent(req, resp);
     }
 }
