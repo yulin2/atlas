@@ -35,7 +35,8 @@
                             <schemaIncludes>
                                 <schemaInclude>TVListings.dtd</schemaInclude>
                             </schemaIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/pa-listings</generateDirectory>
+                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <staleFile>${project.build.directory}/jaxb2/.paListingsStaleFlag</staleFile>
                         </configuration>
                     </execution>
                     <execution>
@@ -48,7 +49,9 @@
                             <schemaIncludes>
                                 <schemaInclude>features.dtd</schemaInclude>
                             </schemaIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/pa-features</generateDirectory>
+                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <staleFile>${project.build.directory}/jaxb2/.paFeaturesStaleFlag</staleFile>
+                            <clearOutputDir>false</clearOutputDir>
                         </configuration>
                     </execution>
                     <execution>
@@ -61,7 +64,9 @@
                             <schemaIncludes>
                                 <schemaInclude>profiles.dtd</schemaInclude>
                             </schemaIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/pa-profiles</generateDirectory>
+                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <staleFile>${project.build.directory}/jaxb2/.paProfilesStaleFlag</staleFile>
+                            <clearOutputDir>false</clearOutputDir>
                         </configuration>
                     </execution>
                     <execution>
@@ -74,7 +79,9 @@
                             <schemaIncludes>
                                 <schemaInclude>tv_channel_data.dtd</schemaInclude>
                             </schemaIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/pa-channels</generateDirectory>
+                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <staleFile>${project.build.directory}/jaxb2/.paChannelsStaleFlag</staleFile>
+                            <clearOutputDir>false</clearOutputDir>
                         </configuration>
                     </execution>
                 </executions>
@@ -203,7 +210,7 @@
             </plugin>
         </plugins>
         <extensions>
-	    <extension>
+            <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-webdav-jackrabbit</artifactId>
                 <version>2.3</version>
