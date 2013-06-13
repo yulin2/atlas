@@ -47,11 +47,13 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     private boolean exposeIds = false;
     private final Map<String, Locale> localeMap;
 
-    public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver) {
+    public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, 
+            ProductResolver productResolver, ImageSimplifier imageSimplifier) {
+        super(imageSimplifier);
         this.contentGroupResolver = contentGroupResolver;
         this.topicResolver = topicResolver;
         this.productResolver = productResolver;
-        this.contentGroupSimplifier = new ContentGroupModelSimplifier();
+        this.contentGroupSimplifier = new ContentGroupModelSimplifier(imageSimplifier);
         this.topicSimplifier = new TopicModelSimplifier(localHostName);
         this.productSimplifier = new ProductModelSimplifier(localHostName);
         this.localeMap = initLocalMap();

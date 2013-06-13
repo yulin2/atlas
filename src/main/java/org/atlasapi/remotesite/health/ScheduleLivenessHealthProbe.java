@@ -53,11 +53,11 @@ public class ScheduleLivenessHealthProbe implements HealthProbe {
 					Schedule schedule = scheduleResolver.schedule(startTime, endTime, ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<ApplicationConfiguration>absent());
 					int itemCount = Iterables.getOnlyElement(schedule.scheduleChannels()).items().size();
 							
-					result.add(channel.title(), String.format("%d items in schedule from %s to %s", itemCount, startTime.toString("dd/MM/yy HH:mm"), endTime.toString("dd/MM/yy HH:mm")), itemCount > 0);
+					result.add(channel.getTitle(), String.format("%d items in schedule from %s to %s", itemCount, startTime.toString("dd/MM/yy HH:mm"), endTime.toString("dd/MM/yy HH:mm")), itemCount > 0);
 				}
 				catch(Exception e) {
-					result.add(channel.title(), "Exception processing channel", false);
-					log.error("Exception processing channel " + channel.title(), e);
+					result.add(channel.getTitle(), "Exception processing channel", false);
+					log.error("Exception processing channel " + channel.getTitle(), e);
 				}
 			}
 		}

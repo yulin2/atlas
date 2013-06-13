@@ -1,18 +1,21 @@
 package org.atlasapi.output.simple;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.media.channel.TemporalString;
+import org.atlasapi.media.channel.TemporalField;
+import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.HistoricalChannelEntry;
 import org.atlasapi.media.entity.simple.PublisherDetails;
+import org.atlasapi.output.Annotation;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
@@ -21,11 +24,13 @@ public class ChannelSimplifier {
     private final NumberToShortStringCodec idCodec;
     private final ChannelResolver channelResolver;
     private final PublisherSimplifier publisherSimplifier;
+    private final ImageSimplifier imageSimplifier;
     
-    public ChannelSimplifier(NumberToShortStringCodec idCodec, ChannelResolver channelResolver, PublisherSimplifier publisherSimplifier) {
+    public ChannelSimplifier(NumberToShortStringCodec idCodec, ChannelResolver channelResolver, PublisherSimplifier publisherSimplifier, ImageSimplifier imageSimplifier) {
         this.idCodec = idCodec;
         this.channelResolver = channelResolver;
         this.publisherSimplifier = publisherSimplifier;
+        this.imageSimplifier = imageSimplifier;
     }
     
     public org.atlasapi.media.entity.simple.Channel simplify(Channel input, final boolean showHistory, boolean showParent, final boolean showVariations) {
@@ -38,30 +43,42 @@ public class ChannelSimplifier {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
         }
         simple.setAliases(input.getAliasUrls());
-        simple.setHighDefinition(input.highDefinition());
-        simple.setRegional(input.regional());
-        if (input.timeshift() != null) {
-            simple.setTimeshift(input.timeshift().getStandardSeconds());
+        simple.setHighDefinition(input.getHighDefinition());
+        simple.setRegional(input.getRegional());
+        if (input.getTimeshift() != null) {
+            simple.setTimeshift(input.getTimeshift().getStandardSeconds());
         }
-        simple.setTitle(input.title());
-        simple.setImage(input.image());
-        simple.setMediaType(input.mediaType() != null ? input.mediaType().toString().toLowerCase() : null);
-        simple.setStartDate(input.startDate());            
-        simple.setEndDate(input.endDate());    
+        simple.setTitle(input.getTitle());
+        Image image = input.getImage();
+        if (image != null) {
+            simple.setImage(image.getCanonicalUri());
+        }
+        simple.setImages(Iterables.transform(
+            input.getImages(), 
+            new Function<Image, org.atlasapi.media.entity.simple.Image>() {
+                @Override
+                public org.atlasapi.media.entity.simple.Image apply(Image input) {
+                    return imageSimplifier.simplify(input, ImmutableSet.<Annotation>of(), null);
+                }
+            }
+        ));
+        simple.setMediaType(input.getMediaType() != null ? input.getMediaType().toString().toLowerCase() : null);
+        simple.setStartDate(input.getStartDate());            
+        simple.setEndDate(input.getEndDate());    
         
-        simple.setPublisherDetails(publisherSimplifier.simplify(input.source()));
-        simple.setBroadcaster(publisherSimplifier.simplify(input.broadcaster()));
-        simple.setAvailableFrom(Iterables.transform(input.availableFrom(), new Function<Publisher, PublisherDetails>() {
+        simple.setPublisherDetails(publisherSimplifier.simplify(input.getSource()));
+        simple.setBroadcaster(publisherSimplifier.simplify(input.getBroadcaster()));
+        simple.setAvailableFrom(Iterables.transform(input.getAvailableFrom(), new Function<Publisher, PublisherDetails>() {
             @Override
             public PublisherDetails apply(Publisher input) {
                 return publisherSimplifier.simplify(input);
             }
         }));
         
-        if (input.parent() != null) {
-            Maybe<Channel> channel = channelResolver.fromId(input.parent());
+        if (input.getParent() != null) {
+            Maybe<Channel> channel = channelResolver.fromId(input.getParent());
             if (!channel.hasValue()) {
-                throw new RuntimeException("Could not resolve channel with id " +  input.parent());
+                throw new RuntimeException("Could not resolve channel with id " +  input.getParent());
             }
             if (showParent) {
                 simple.setParent(simplify(channel.requireValue(), showHistory, false, false));
@@ -69,9 +86,9 @@ public class ChannelSimplifier {
                 simple.setParent(toSubChannel(channel.requireValue()));
             }
         }
-        if (input.variations() != null && !input.variations().isEmpty()) {
+        if (input.getVariations() != null && !input.getVariations().isEmpty()) {
             simple.setVariations(Iterables.transform(
-                channelResolver.forIds(input.variations()), 
+                channelResolver.forIds(input.getVariations()), 
                 new Function<Channel, org.atlasapi.media.entity.simple.Channel>() {
                     @Override
                     public org.atlasapi.media.entity.simple.Channel apply(Channel input) {
@@ -92,29 +109,53 @@ public class ChannelSimplifier {
         return simple;
     }
     
-    private List<HistoricalChannelEntry> calculateChannelHistory(Channel input) {
-        List<HistoricalChannelEntry> entries = Lists.newArrayList();
-        for (TemporalString title : input.allTitles()) {
+    private Set<HistoricalChannelEntry> calculateChannelHistory(Channel input) {
+        Builder<HistoricalChannelEntry> entries = ImmutableSet.<HistoricalChannelEntry>builder();
+        for (TemporalField<String> title : input.getAllTitles()) {
             HistoricalChannelEntry entry = new HistoricalChannelEntry();
             entry.setStartDate(title.getStartDate());
             entry.setTitle(title.getValue());
-            entry.setImage(input.imageForDate(title.getStartDate()));
+            Iterable<Image> primaryImages = Iterables.filter(
+                input.getImagesForDate(title.getStartDate()), 
+                Channel.IS_PRIMARY_IMAGE
+            );
+            if (!Iterables.isEmpty(primaryImages)) {
+                entry.setImage(Iterables.getOnlyElement(primaryImages).getCanonicalUri());
+            }
+            entry.setImages(Iterables.transform(
+                input.getImagesForDate(title.getStartDate()), 
+                new Function<Image, org.atlasapi.media.entity.simple.Image>() {
+                    @Override
+                    public org.atlasapi.media.entity.simple.Image apply(Image input) {
+                        return imageSimplifier.simplify(input, ImmutableSet.<Annotation>of(), null);
+                    }
+                }
+            ));
             entries.add(entry);
         }
-        for (TemporalString image : input.allImages()) {
+        for (TemporalField<Image> image : input.getAllImages()) {
             HistoricalChannelEntry entry = new HistoricalChannelEntry();
             entry.setStartDate(image.getStartDate());
-            entry.setTitle(input.titleForDate(image.getStartDate()));
-            entry.setImage(image.getValue());
+            entry.setTitle(input.getTitleForDate(image.getStartDate()));
+            entry.setImage(image.getValue().getCanonicalUri());
+            entry.setImages(Iterables.transform(
+                input.getImagesForDate(image.getStartDate()), 
+                new Function<Image, org.atlasapi.media.entity.simple.Image>() {
+                    @Override
+                    public org.atlasapi.media.entity.simple.Image apply(Image input) {
+                        return imageSimplifier.simplify(input, ImmutableSet.<Annotation>of(), null);
+                    }
+                }
+            ));
             entries.add(entry);
         }
-        return entries;
+        return entries.build();
     }
 
     private org.atlasapi.media.entity.simple.Channel toSubChannel(Channel input) {
         org.atlasapi.media.entity.simple.Channel simple = new org.atlasapi.media.entity.simple.Channel();
         simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
-        simple.setTitle(input.title());
+        simple.setTitle(input.getTitle());
         return simple;
     }
 }

@@ -12,6 +12,10 @@ import com.google.common.collect.Lists;
 
 public class ContentGroupModelSimplifier extends DescribedModelSimplifier<org.atlasapi.media.entity.ContentGroup, org.atlasapi.media.entity.simple.ContentGroup> {
 
+    public ContentGroupModelSimplifier(ImageSimplifier imageSimplifier) {
+        super(imageSimplifier);
+    }
+    
     @Override
     public org.atlasapi.media.entity.simple.ContentGroup simplify(org.atlasapi.media.entity.ContentGroup model, Set<Annotation> annotations, ApplicationConfiguration config) {
 

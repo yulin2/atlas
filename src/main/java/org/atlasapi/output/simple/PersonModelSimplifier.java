@@ -13,6 +13,11 @@ import com.google.common.collect.Lists;
 
 public class PersonModelSimplifier extends DescribedModelSimplifier<Person, org.atlasapi.media.entity.simple.Person> {
 
+    
+    public PersonModelSimplifier(ImageSimplifier imageSimplifier) {
+        super(imageSimplifier);
+    }
+    
     @Override
     public org.atlasapi.media.entity.simple.Person simplify(Person fullPerson, Set<Annotation> annotations, ApplicationConfiguration config) {
         org.atlasapi.media.entity.simple.Person person = new org.atlasapi.media.entity.simple.Person();

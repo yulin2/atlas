@@ -103,17 +103,17 @@ public class PaChannelDataHandler {
         if (existing.hasValue()) {
             Channel existingChannel = existing.requireValue();
 
-            existingChannel.setTitles(newChannel.allTitles());
-            existingChannel.setImages(newChannel.allImages());
-            existingChannel.setStartDate(newChannel.startDate());
-            existingChannel.setEndDate(newChannel.endDate());
+            existingChannel.setTitles(newChannel.getAllTitles());
+            existingChannel.setImages(newChannel.getAllImages());
+            existingChannel.setStartDate(newChannel.getStartDate());
+            existingChannel.setEndDate(newChannel.getEndDate());
             existingChannel.addAliasUrls(newChannel.getAliasUrls());
-            existingChannel.setParent(newChannel.parent());
-            existingChannel.setMediaType(newChannel.mediaType());
-            existingChannel.setHighDefinition(newChannel.highDefinition());
-            existingChannel.setRegional(newChannel.regional());
-            existingChannel.setTimeshift(newChannel.timeshift());
-            existingChannel.setChannelNumbers(newChannel.channelNumbers());
+            existingChannel.setParent(newChannel.getParent());
+            existingChannel.setMediaType(newChannel.getMediaType());
+            existingChannel.setHighDefinition(newChannel.getHighDefinition());
+            existingChannel.setRegional(newChannel.getRegional());
+            existingChannel.setTimeshift(newChannel.getTimeshift());
+            existingChannel.setChannelNumbers(newChannel.getChannelNumbers());
             
             return channelWriter.createOrUpdate(existingChannel);
         } else {

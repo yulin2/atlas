@@ -83,7 +83,7 @@ public class FullProgrammeItemExtractorTest extends TestCase {
         assertEquals(new DateTime(2011, 10, 11, 16, 00, 00, 000,DateTimeZones.UTC), broadcast.getTransmissionTime());
         assertEquals(new DateTime(2011, 10, 11, 16, 15, 00, 000,DateTimeZones.UTC), broadcast.getTransmissionEndTime());
         assertEquals(programme.getDuration(), broadcast.getBroadcastDuration().toString());
-        assertEquals(channel.uri(), broadcast.getBroadcastOn());
+        assertEquals(channel.getUri(), broadcast.getBroadcastOn());
         assertTrue(broadcast.getSubtitled());
         assertFalse(broadcast.getSigned());
         assertFalse(broadcast.getHighDefinition());

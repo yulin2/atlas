@@ -53,8 +53,11 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         }
     };
 
-    public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, AvailableChildrenResolver availableChildren, UpcomingChildrenResolver upcomingChildren, ProductResolver productResolver, RecentlyBroadcastChildrenResolver recentChildren) {
-        super(localHostName, contentGroupResolver, topicResolver, productResolver);
+    public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, String localHostName, 
+            ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, AvailableChildrenResolver availableChildren, 
+            UpcomingChildrenResolver upcomingChildren, ProductResolver productResolver, RecentlyBroadcastChildrenResolver recentChildren,
+            ImageSimplifier imageSimplifier) {
+        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier);
         this.itemSimplifier = itemSimplifier;
         this.availableChildrenResolver = availableChildren;
         this.upcomingChildrenResolver = upcomingChildren;

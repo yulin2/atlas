@@ -331,7 +331,7 @@ public class C4EpgEntryProcessor {
     }
 
     private static Broadcast broadcastFrom(C4EpgEntry entry, Channel channel, DateTime now) {
-        Broadcast broadcast = broadcast().withChannel(channel.uri()).withTransmissionStart(entry.txDate()).withDuration(entry.duration()).withAtomId(entry.id()).build();
+        Broadcast broadcast = broadcast().withChannel(channel.getUri()).withTransmissionStart(entry.txDate()).withDuration(entry.duration()).withAtomId(entry.id()).build();
 
         broadcast.setIsActivelyPublished(true);
 

@@ -32,7 +32,7 @@ public class PaChannelMap {
     
     public String getChannelUri(int channelId) {
         if (channelMap.containsKey(channelId)) {
-            return channelMap.get(channelId).uri();
+            return channelMap.get(channelId).getUri();
         }
         return null;
     }

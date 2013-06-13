@@ -16,6 +16,7 @@ import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
+import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
@@ -43,6 +44,7 @@ import com.metabroadcast.common.servlet.StubHttpServletResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class FullToSimpleModelTranslatorTest {
     
+    private final ImageSimplifier imageSimplifier = new ImageSimplifier();
     private final ContentGroupResolver contentGroupResolver = mock(ContentGroupResolver.class);
     private final TopicQueryResolver topicResolver = mock(TopicQueryResolver.class);
     private final SegmentResolver segmentResolver = mock(SegmentResolver.class);
@@ -58,8 +60,8 @@ public class FullToSimpleModelTranslatorTest {
     private ProductModelSimplifier productSimplifier = new ProductModelSimplifier("localhostName");
     private ProductResolver productResolver = mock(ProductResolver.class); 
 
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", contentGroupResolver, topicResolver, productResolver , segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec());
-    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, "localhostName", contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren),topicSimplifier, productSimplifier);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", contentGroupResolver, topicResolver, productResolver , segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec(), imageSimplifier);
+    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, "localhostName", contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren, imageSimplifier),topicSimplifier, productSimplifier, imageSimplifier);
     
 	private StubHttpServletRequest request;
 	private StubHttpServletResponse response;

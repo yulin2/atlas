@@ -55,7 +55,7 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
                     for (Version version : item.nativeVersions()) {
                         for (Broadcast broadcast : version.getBroadcasts()) {
                             // double-check the broadcast is in the valid interval/channel
-                            if (contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.uri())) {
+                            if (contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.getUri())) {
                                 if (broadcast.getSourceId() != null && !itemEmbeddedInScheduleUri.equals(acceptableIds.get(broadcast.getSourceId()))) {
                                     if(!Boolean.FALSE.equals(broadcast.isActivelyPublished())) {
                                         broadcast.setIsActivelyPublished(false);
@@ -71,7 +71,7 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
                 }
             }
         } catch (Exception e) {
-            log.error("Exception attempting to trim broadcasts for " + channel.title() + " between " + scheduleInterval, e);
+            log.error("Exception attempting to trim broadcasts for " + channel.getTitle() + " between " + scheduleInterval, e);
         }
     }
 

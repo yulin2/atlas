@@ -43,6 +43,6 @@ public class MongoPaScheduleVersionStore implements PaScheduleVersionStore {
     }
     
     private String idFor(Channel channel, LocalDate scheduleDay) {
-        return joiner.join(channel.key(), scheduleDay.toString());
+        return joiner.join(channel.getKey(), scheduleDay.toString());
     }
 }

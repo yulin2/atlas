@@ -16,6 +16,12 @@ import com.google.common.collect.Iterables;
 
 public abstract class DescribedModelSimplifier<F extends Described, T extends Description> extends IdentifiedModelSimplifier<F,T> {
     
+    private final ImageSimplifier imageSimplifier;
+    
+    public DescribedModelSimplifier(ImageSimplifier imageSimplifier) {
+        this.imageSimplifier = imageSimplifier;
+    }
+    
     protected void copyBasicDescribedAttributes(F content, T simpleDescription, Set<Annotation> annotations) {
         
         copyIdentifiedAttributesTo(content, simpleDescription, annotations);
@@ -51,52 +57,16 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         }
         
         if (annotations.contains(Annotation.IMAGES)) {
-            simpleDescription.setImages(toImages(content.getImages()));
+            simpleDescription.setImages(toImages(content.getImages(), annotations));
         }
         
     }
 
-    private Iterable<Image> toImages(Iterable<org.atlasapi.media.entity.Image> images) {
+    private Iterable<Image> toImages(Iterable<org.atlasapi.media.entity.Image> images, Set<Annotation> annotations) {
         Builder<Image> simpleImages = ImmutableSet.builder();
         for(org.atlasapi.media.entity.Image image : images) {
-            simpleImages.add(toImage(image));
+            simpleImages.add(imageSimplifier.simplify(image, annotations, null));
         }
         return simpleImages.build();
-    }
-    
-    private Image toImage(org.atlasapi.media.entity.Image image) {
-        if (image == null) {
-            return new Image();
-        }
-        Image simpleImage = new Image(image.getCanonicalUri());
-        if (image.getType() != null) {
-            simpleImage.setType(image.getType().getName());
-        }
-        if (image.getColor() != null) {
-            simpleImage.setColor(image.getColor().getName());
-        }
-        if (image.getBackground() != null) {
-            simpleImage.setBackground(image.getBackground().getName());
-        }
-        if (image.getWidth() != null) {
-            simpleImage.setWidth(image.getWidth());
-        }
-        if (image.getHeight() != null) {
-            simpleImage.setHeight(image.getHeight());
-        }
-        if (image.getAspectRatio() != null) {
-            simpleImage.setAspectRatio(image.getAspectRatio().getName());
-        }
-        if (image.getMimeType() != null) {
-            simpleImage.setMimeType(image.getMimeType().toString());
-        }
-        if (image.getAvailabilityStart() != null) {
-            simpleImage.setAvailabilityStart(image.getAvailabilityStart().toDate());
-        }
-        if (image.getAvailabilityEnd() != null) {
-            simpleImage.setAvailabilityEnd(image.getAvailabilityEnd().toDate());
-        }
-        
-        return simpleImage;
     }
 }

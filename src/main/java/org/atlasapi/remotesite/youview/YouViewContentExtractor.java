@@ -235,7 +235,7 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         if (!channel.isPresent()) {
             throw new RuntimeException("Channel with YouView Id: " + serviceId.getValue() + " not found");
         }
-        return channel.get().mediaType();
+        return channel.get().getMediaType();
     }
 
     private String getTitle(Element source) {
