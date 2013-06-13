@@ -52,7 +52,7 @@ public class PaChannelProcessor {
                     scheduleVersionStore.store(channel, channelData.scheduleDay(), channelData.version());
                     processed++;
                 } catch (Exception e) {
-                    log.error(String.format("Error processing channel %s, prog id %s", channel.key(), programme.getProgId()));
+                    log.error(String.format("Error processing channel %s, prog id %s", channel.getKey(), programme.getProgId()));
                 } finally {
                     unlock(currentlyProcessing, programmeLock);
                 }
@@ -64,7 +64,7 @@ public class PaChannelProcessor {
             
         } catch (Exception e) {
             //TODO: should we just throw e?
-            log.error(String.format("Error processing channel %s", channel.key()));
+            log.error(String.format("Error processing channel %s", channel.getKey()));
         }
         return processed;
     }

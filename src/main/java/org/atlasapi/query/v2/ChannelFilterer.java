@@ -29,19 +29,19 @@ public class ChannelFilterer {
             @Override
             public boolean apply(Channel input) {
                 
-                if (filter.broadcaster.isPresent() && !filter.broadcaster.get().equals(input.broadcaster())) {
+                if (filter.broadcaster.isPresent() && !filter.broadcaster.get().equals(input.getBroadcaster())) {
                     return false;
                 }
                 
-                if (filter.mediaType.isPresent() && !filter.mediaType.get().equals(input.mediaType())) {
+                if (filter.mediaType.isPresent() && !filter.mediaType.get().equals(input.getMediaType())) {
                     return false;
                 }
                 
-                if (filter.availableFrom.isPresent() && !input.availableFrom().contains(filter.availableFrom.get())) {
+                if (filter.availableFrom.isPresent() && !input.getAvailableFrom().contains(filter.availableFrom.get())) {
                     return false;
                 }
                 
-                if (filter.channelGroups.isPresent() && Sets.intersection(filter.channelGroups.get(), ImmutableSet.copyOf(Iterables.transform(input.channelNumbers(), ChannelNumbering.TO_CHANNEL_GROUP))).isEmpty()) {
+                if (filter.channelGroups.isPresent() && Sets.intersection(filter.channelGroups.get(), ImmutableSet.copyOf(Iterables.transform(input.getChannelNumbers(), ChannelNumbering.TO_CHANNEL_GROUP))).isEmpty()) {
                     return false;
                 }
                 

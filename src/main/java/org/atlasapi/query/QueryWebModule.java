@@ -53,6 +53,7 @@ import org.atlasapi.output.simple.ChannelNumberingsChannelToChannelGroupModelSim
 import org.atlasapi.output.simple.ChannelSimplifier;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ContentGroupModelSimplifier;
+import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.PublisherSimplifier;
@@ -150,11 +151,16 @@ public class QueryWebModule {
     }
     
     @Bean ChannelSimplifier channelSimplifier() {
-        return new ChannelSimplifier(v3ChannelCodec(), v4ChannelCodec(), channelResolver, publisherSimplifier());
+        return new ChannelSimplifier(v3ChannelCodec(), v4ChannelCodec(), channelResolver, publisherSimplifier(), imageSimplifier());
     }
     
     @Bean ChannelGroupSimplifier channelGroupSimplifier() {
         return new ChannelGroupSimplifier(new SubstitutionTableNumberCodec(), channelGroupResolver, publisherSimplifier());
+    }
+    
+    @Bean
+    ImageSimplifier imageSimplifier() {
+        return new ImageSimplifier();
     }
 
     private SubstitutionTableNumberCodec v3ChannelCodec() {
@@ -255,8 +261,8 @@ public class QueryWebModule {
     @Bean
     AtlasModelWriter<QueryResult<Content, ? extends Identified>> contentModelOutputter() {
         return this.<QueryResult<Content, ? extends Identified>>standardWriter(
-                new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier()),
-                new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier()));
+                new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier()),
+                new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier()));
     }
 
     @Bean
@@ -264,7 +270,7 @@ public class QueryWebModule {
         AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo);
         UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
         RecentlyBroadcastChildrenResolver recentChildren = new MongoRecentlyBroadcastChildrenResolver(mongo);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren, imageSimplifier());
         containerSimplier.exposeIds(Boolean.valueOf(exposeIds));
         return containerSimplier;
     }
@@ -274,7 +280,7 @@ public class QueryWebModule {
         NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
         NumberToShortStringCodec channelIdCodec = new SubstitutionTableNumberCodec();
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo, idCodec);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, idCodec, channelIdCodec);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, idCodec, channelIdCodec, imageSimplifier());
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }
@@ -282,8 +288,8 @@ public class QueryWebModule {
     @Bean
     AtlasModelWriter<Iterable<Person>> personModelOutputter() {
         return this.<Iterable<Person>>standardWriter(
-                new SimplePersonModelWriter(new JsonTranslator<PeopleQueryResult>()),
-                new SimplePersonModelWriter(new JaxbXmlTranslator<PeopleQueryResult>()));
+                new SimplePersonModelWriter(new JsonTranslator<PeopleQueryResult>(), imageSimplifier()),
+                new SimplePersonModelWriter(new JaxbXmlTranslator<PeopleQueryResult>(), imageSimplifier()));
     }
 
     @Bean
@@ -319,7 +325,7 @@ public class QueryWebModule {
 
     @Bean
     ContentGroupModelSimplifier contentGroupSimplifier() {
-        ContentGroupModelSimplifier contentGroupModelSimplifier = new ContentGroupModelSimplifier();
+        ContentGroupModelSimplifier contentGroupModelSimplifier = new ContentGroupModelSimplifier(imageSimplifier());
         return contentGroupModelSimplifier;
     }
 

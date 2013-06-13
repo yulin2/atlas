@@ -93,7 +93,7 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
                     throw new RuntimeException(String.format(
                         "No schedule channel in schedule for %s, channel %s, from %s to %s", 
                         publisher.name(), 
-                        channel.title(), 
+                        channel.getTitle(), 
                         start.toString(), 
                         end.toString()
                     ));

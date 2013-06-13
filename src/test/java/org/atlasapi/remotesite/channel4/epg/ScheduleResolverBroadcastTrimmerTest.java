@@ -70,14 +70,14 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
     public void testTrimsBroadcastsOfWrongItems() {
         Item item1 = new Item("testUri1", "testCurie", Publisher.C4);
         Version version = new Version();
-        Broadcast remove = new Broadcast(CHANNEL4.uri(), new DateTime(50), new DateTime(103)).withId("c4:2234");
+        Broadcast remove = new Broadcast(CHANNEL4.getUri(), new DateTime(50), new DateTime(103)).withId("c4:2234");
         remove.setIsActivelyPublished(true);
         version.setBroadcasts(ImmutableSet.of(remove));
         item1.addVersion(version);
         
         Item item2 = new Item("testUri2", "testCurie", Publisher.C4);
         version = new Version();
-        Broadcast keep = new Broadcast(CHANNEL4.uri(), new DateTime(150), new DateTime(153)).withId("c4:1234");
+        Broadcast keep = new Broadcast(CHANNEL4.getUri(), new DateTime(150), new DateTime(153)).withId("c4:1234");
         remove.setIsActivelyPublished(true);
         version.setBroadcasts(ImmutableSet.of(keep));
         item2.addVersion(version);
@@ -133,11 +133,11 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
 		Item item = new Item("testUri", "testCurie", Publisher.C4);
         Version version = new Version();
         
-        Broadcast ignore = new Broadcast(CHANNEL4.uri(), new DateTime(50), new DateTime(103)).withId("c4:0234");
+        Broadcast ignore = new Broadcast(CHANNEL4.getUri(), new DateTime(50), new DateTime(103)).withId("c4:0234");
         ignore.setIsActivelyPublished(true);
-        Broadcast retain = new Broadcast(CHANNEL4.uri(), new DateTime(105), new DateTime(120)).withId("c4:1234");
+        Broadcast retain = new Broadcast(CHANNEL4.getUri(), new DateTime(105), new DateTime(120)).withId("c4:1234");
         retain.setIsActivelyPublished(true);
-        Broadcast remove = new Broadcast(CHANNEL4.uri(), new DateTime(150), new DateTime(165)).withId("c4:2234");
+        Broadcast remove = new Broadcast(CHANNEL4.getUri(), new DateTime(150), new DateTime(165)).withId("c4:2234");
         remove.setIsActivelyPublished(true);
         
         version.setBroadcasts(ImmutableSet.of(ignore, retain, remove));

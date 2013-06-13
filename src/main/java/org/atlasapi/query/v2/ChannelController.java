@@ -108,7 +108,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
                 new Predicate<Channel>() {
                     @Override
                     public boolean apply(Channel input) {
-                        return appConfig.isEnabled(input.source());
+                        return appConfig.isEnabled(input.getSource());
                     }
                 }));
             
@@ -132,7 +132,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
                 errorViewFor(request, response, NOT_FOUND);
             } else {
                 ApplicationConfiguration appConfig = appConfig(request);
-                if (!appConfig.isEnabled(possibleChannel.requireValue().source())) {
+                if (!appConfig.isEnabled(possibleChannel.requireValue().getSource())) {
                     outputter.writeError(request, response, FORBIDDEN.withMessage("Channel " + id + " not available"));
                 }
 
@@ -167,7 +167,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
     private static final Function<Channel, String> TO_TITLE = new Function<Channel, String>() {
         @Override
         public String apply(Channel input) {
-            return input.title();
+            return input.getTitle();
         }
     };
     

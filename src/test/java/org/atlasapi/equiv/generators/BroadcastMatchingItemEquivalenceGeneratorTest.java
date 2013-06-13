@@ -56,9 +56,9 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
     	final ChannelResolver channelResolver = context.mock(ChannelResolver.class);
     	context.checking(new Expectations() {
 			{
-				allowing(channelResolver).fromUri(BBC_ONE.uri());
+				allowing(channelResolver).fromUri(BBC_ONE.getUri());
 				will(returnValue(Maybe.just(BBC_ONE)));
-				allowing(channelResolver).fromUri(BBC_ONE_CAMBRIDGE.uri());
+				allowing(channelResolver).fromUri(BBC_ONE_CAMBRIDGE.getUri());
 				will(returnValue(Maybe.just(BBC_ONE_CAMBRIDGE)));
 			}
 		});
@@ -68,10 +68,10 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
     @Test
     public void testGenerateEquivalencesForOneMatchingBroadcast() {
         final Item item1 = episodeWithBroadcasts("subjectItem", Publisher.PA, 
-                new Broadcast(BBC_ONE.uri(), utcTime(100000), utcTime(200000)),
-                new Broadcast(BBC_ONE_CAMBRIDGE.uri(), utcTime(100000), utcTime(200000)));//ignored
+                new Broadcast(BBC_ONE.getUri(), utcTime(100000), utcTime(200000)),
+                new Broadcast(BBC_ONE_CAMBRIDGE.getUri(), utcTime(100000), utcTime(200000)));//ignored
         
-        final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(BBC_ONE.uri(), utcTime(100000), utcTime(200000)));
+        final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(BBC_ONE.getUri(), utcTime(100000), utcTime(200000)));
         
         context.checking(new Expectations(){{
             one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC), Optional.<ApplicationConfiguration>absent());

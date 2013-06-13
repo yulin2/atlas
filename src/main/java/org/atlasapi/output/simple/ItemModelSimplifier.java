@@ -10,6 +10,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
@@ -58,25 +59,29 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private final Clock clock;
     private final SegmentModelSimplifier segmentSimplifier;
     private final NumberToShortStringCodec channelIdCodec;
+    private final ImageSimplifier imageSimplifier;
     
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
             TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, 
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
-            NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec) {
-        
+            NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, 
+            ImageSimplifier imageSimplifier) {
         this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, 
-                containerSummaryResolver, channelResolver, idCodec, channelIdCodec, new SystemClock());
+                containerSummaryResolver, channelResolver, idCodec, channelIdCodec, new SystemClock(), 
+                imageSimplifier);
     }
 
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
             TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, 
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
-            NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, Clock clock) {
+            NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, Clock clock, 
+            ImageSimplifier imageSimplifier) {
         
-        super(localHostName, contentGroupResolver, topicResolver, productResolver);
+        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier);
         
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
+        this.imageSimplifier = imageSimplifier;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;
         this.channelResolver = channelResolver;
         this.idCodec = idCodec;
@@ -270,8 +275,17 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         Channel simpleChannel = new Channel();
         simpleChannel.setId(channelIdCodec.encode(BigInteger.valueOf(channel.getId())));
         if(annotations.contains(Annotation.CHANNEL_SUMMARY)) {
-            simpleChannel.setTitle(channel.title());
-            simpleChannel.setImage(channel.image());
+            simpleChannel.setTitle(channel.getTitle());
+            simpleChannel.setImage(channel.getImage().getCanonicalUri());
+            simpleChannel.setImages(Iterables.transform(
+                channel.getImages(), 
+                new Function<Image, org.atlasapi.media.entity.simple.Image>() {
+                    @Override
+                    public org.atlasapi.media.entity.simple.Image apply(Image input) {
+                        return imageSimplifier.simplify(input, ImmutableSet.<Annotation>of(), null);
+                    }
+                }
+            ));
         }
         return simpleChannel;
     }
