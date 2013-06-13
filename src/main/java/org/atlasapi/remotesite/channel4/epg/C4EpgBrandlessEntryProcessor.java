@@ -169,7 +169,7 @@ public class C4EpgBrandlessEntryProcessor {
                 Set<Broadcast> broadcasts = Sets.newHashSet();
                 Broadcast newBroadcast = null;
                 for (Broadcast broadcast : version.getBroadcasts()) {
-                    if(broadcast.getSourceId() != null && broadcast.getSourceId().equals(C4BroadcastBuilder.idFrom(channel.uri(), entry.id()))) {
+                    if(broadcast.getSourceId() != null && broadcast.getSourceId().equals(C4BroadcastBuilder.idFrom(channel.getUri(), entry.id()))) {
                         newBroadcast = createBroadcast(entry, channel);
                         broadcasts.add(newBroadcast);
                         found = true;
@@ -190,9 +190,9 @@ public class C4EpgBrandlessEntryProcessor {
     }
 
     private Broadcast createBroadcast(C4EpgEntry entry, Channel channel) {
-        Broadcast entryBroadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration()).withId(C4BroadcastBuilder.idFrom(channel.uri(), entry.id()));
+        Broadcast entryBroadcast = new Broadcast(channel.getUri(), entry.txDate(), entry.duration()).withId(C4BroadcastBuilder.idFrom(channel.getUri(), entry.id()));
         // TODO new alias
-        entryBroadcast.addAliasUrl(C4BroadcastBuilder.aliasFrom(channel.uri(), entry.id()));
+        entryBroadcast.addAliasUrl(C4BroadcastBuilder.aliasFrom(channel.getUri(), entry.id()));
         entryBroadcast.setIsActivelyPublished(true);
         entryBroadcast.setLastUpdated(entry.updated() != null ? entry.updated() : new DateTime());
         return entryBroadcast;

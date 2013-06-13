@@ -60,16 +60,16 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         Maybe<Channel> maybeChannel = channelStore.forAlias("http://pressassociation.com/channels/1");
         assertTrue(maybeChannel.hasValue());
         Channel channel = maybeChannel.requireValue();
-        assertEquals("BBC One Northern Ireland", channel.title());
+        assertEquals("BBC One Northern Ireland", channel.getTitle());
         // test parent is correct
-        Long parent = channel.parent();
+        Long parent = channel.getParent();
         assertNotNull(parent);
         Maybe<Channel> maybeParent = channelStore.fromId(parent);
         assertTrue(maybeParent.hasValue());
-        assertEquals("BBC One", maybeParent.requireValue().title());
+        assertEquals("BBC One", maybeParent.requireValue().getTitle());
         
         // check numbering
-        ChannelNumbering numbering = Iterables.getOnlyElement(channel.channelNumbers());
+        ChannelNumbering numbering = Iterables.getOnlyElement(channel.getChannelNumbers());
         assertEquals(numbering.getChannelNumber(), "1");
         assertEquals(channel.getId(), numbering.getChannel());
         

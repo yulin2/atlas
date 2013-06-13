@@ -75,8 +75,8 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
 
         Channel channel = reduxServices.channelMap().get(source.getService());
         
-        item.setMediaType(channel.mediaType());
-        item.setSpecialization(MediaType.AUDIO.equals(channel.mediaType()) ? Specialization.RADIO : Specialization.TV);
+        item.setMediaType(channel.getMediaType());
+        item.setSpecialization(MediaType.AUDIO.equals(channel.getMediaType()) ? Specialization.RADIO : Specialization.TV);
         
         item.setVersions(ImmutableSet.of(
             versionFrom(source)
@@ -176,7 +176,7 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
         Channel channel = reduxServices.channelMap().get(source.getService());
         Duration duration = getDuration(source);
         if (channel != null && duration != null) {
-            Broadcast broadcast = new Broadcast(channel.uri(), ISO_FORMAT.parseDateTime(source.getWhen()), duration);
+            Broadcast broadcast = new Broadcast(channel.getUri(), ISO_FORMAT.parseDateTime(source.getWhen()), duration);
             
             broadcast.setSigned(source.getSigned());
             broadcast.setSubtitled(source.getSubtitles());

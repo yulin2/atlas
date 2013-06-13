@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Image;
+import org.atlasapi.media.entity.ImageColor;
+import org.atlasapi.media.entity.ImageTheme;
+import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
@@ -29,6 +33,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.primitives.Ints;
 
 public class PaChannelsIngester {
 
@@ -45,6 +50,12 @@ public class PaChannelsIngester {
         .put("TV", MediaType.VIDEO)
         .put("Radio", MediaType.AUDIO)
         .build();
+    
+    private static final Map<String, ImageTheme> IMAGE_THEME_MAPPING = ImmutableMap.<String, ImageTheme>builder()
+            .put("Normal", ImageTheme.LIGHT_OPAQUE)
+            .put("Transparent Dark", ImageTheme.DARK_TRANSPARENT)
+            .put("Transparent Light", ImageTheme.LIGHT_TRANSPARENT)
+            .build();
     
     private static final Predicate<Variation> IS_REGIONAL = new Predicate<Variation>() {
         @Override
@@ -223,11 +234,19 @@ public class PaChannelsIngester {
 
         for (Logo logo : images) {
             LocalDate imageStartDate = formatter.parseLocalDate(logo.getStartDate());
+            String type = logo.getType();
+            Image image = new Image(IMAGE_PREFIX + logo.getvalue());
+            image.setTheme(IMAGE_THEME_MAPPING.get(type));
+            image.setWidth(Ints.tryParse(logo.getWidth()));
+            image.setHeight(Ints.tryParse(logo.getHeight()));
+            image.setType(ImageType.LOGO);
+            image.setColor(ImageColor.COLOR);
+            
             if (logo.getEndDate() != null) {
                 LocalDate imageEndDate = formatter.parseLocalDate(logo.getEndDate());
-                channel.addImage(IMAGE_PREFIX + logo.getvalue(), imageStartDate, imageEndDate.plusDays(1));
+                channel.addImage(image, imageStartDate, imageEndDate.plusDays(1));
             } else {
-                channel.addImage(IMAGE_PREFIX + logo.getvalue(), imageStartDate);
+                channel.addImage(image, imageStartDate);
             }
         }    
     }
