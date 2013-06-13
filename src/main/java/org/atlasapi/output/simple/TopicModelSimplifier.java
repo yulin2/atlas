@@ -6,6 +6,8 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.output.Annotation;
 
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+
 public class TopicModelSimplifier extends IdentifiedModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> {
 
     private final static String EXTENSION = ".json";
@@ -13,6 +15,7 @@ public class TopicModelSimplifier extends IdentifiedModelSimplifier<Topic, org.a
     private String topicUriBase;
     
     public TopicModelSimplifier(String localHostName) {
+        super(SubstitutionTableNumberCodec.lowerCaseOnly());
         this.topicUriBase = String.format("http://%s/topics/", localHostName);
     }
     
