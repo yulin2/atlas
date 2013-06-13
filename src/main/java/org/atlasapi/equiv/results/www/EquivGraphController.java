@@ -52,7 +52,7 @@ public class EquivGraphController {
         
         if (subj != null) {
             Iterable<LookupEntry> equivs = lookupStore.entriesForCanonicalUris(
-                Iterables.transform(subj.equivalents(), LookupRef.TO_ID));
+                Iterables.transform(subj.equivalents(), LookupRef.TO_URI));
             
             List<SimpleModel> nodes = Lists.newLinkedList(); 
 
@@ -79,7 +79,7 @@ public class EquivGraphController {
 
     private Collection<String> nonReflexiveIds(LookupEntry equiv, Set<LookupRef> directEquivalents) {
         return Collections2.filter(
-                Collections2.transform(directEquivalents, LookupRef.TO_ID),
+                Collections2.transform(directEquivalents, LookupRef.TO_URI),
                 Predicates.not(Predicates.equalTo(equiv.uri())));
     }
 

@@ -1,15 +1,17 @@
 package org.atlasapi.output.simple;
 
+import java.math.BigInteger;
 import java.util.Set;
-
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Image;
+import org.atlasapi.media.entity.simple.SameAs;
 import org.atlasapi.output.Annotation;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
@@ -52,7 +54,8 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
             simpleDescription.setGenres(content.getGenres());
             simpleDescription.setTags(content.getTags());
-            simpleDescription.setSameAs(Iterables.transform(content.getEquivalentTo(),LookupRef.TO_ID));
+            simpleDescription.setSameAs(Iterables.transform(content.getEquivalentTo(),LookupRef.TO_URI));
+            simpleDescription.setEquivalents(Iterables.transform(content.getEquivalentTo(), TO_SAME_AS));
             simpleDescription.setPresentationChannel(content.getPresentationChannel());
             simpleDescription.setMediumDescription(content.getMediumDescription());
             simpleDescription.setLongDescription(content.getLongDescription());
@@ -108,4 +111,13 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         
         return simpleImage;
     }
+    
+    private Function<LookupRef, SameAs> TO_SAME_AS = new Function<LookupRef, SameAs>() {
+
+        @Override
+        public SameAs apply(LookupRef input) {
+            Long id = input.id();
+            return new SameAs(id != null ? idCodec.encode(BigInteger.valueOf(id)) : null, input.uri());
+        }
+    };
 }
