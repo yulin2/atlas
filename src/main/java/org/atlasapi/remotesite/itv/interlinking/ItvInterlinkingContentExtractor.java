@@ -187,7 +187,7 @@ public class ItvInterlinkingContentExtractor {
         Duration duration = periodFormatter.parsePeriod(requireElemValue(contentElem, "duration", INTERLINKING_NS)).toStandardDuration();
         Channel channel = channelMap.get(requireElemValue(contentElem, "service", INTERLINKING_NS));
         
-        Broadcast broadcast = new Broadcast(channel.uri(), startTime, duration);
+        Broadcast broadcast = new Broadcast(channel.getUri(), startTime, duration);
         broadcast.withId(id);
         
         return new InterlinkingEntry<Broadcast>(broadcast, id, parentId);

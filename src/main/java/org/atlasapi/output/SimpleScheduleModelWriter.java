@@ -38,9 +38,9 @@ public class SimpleScheduleModelWriter extends TransformingModelWriter<Iterable<
 
 	org.atlasapi.media.entity.simple.ScheduleChannel scheduleChannelFrom(ScheduleChannel scheduleChannel, Set<Annotation> annotations, ApplicationConfiguration config) {
 	    org.atlasapi.media.entity.simple.ScheduleChannel newScheduleChannel = new org.atlasapi.media.entity.simple.ScheduleChannel();
-	    newScheduleChannel.setChannelUri(scheduleChannel.channel().uri());
-	    newScheduleChannel.setChannelKey(scheduleChannel.channel().key());
-	    newScheduleChannel.setChannelTitle(scheduleChannel.channel().title());
+	    newScheduleChannel.setChannelUri(scheduleChannel.channel().getUri());
+	    newScheduleChannel.setChannelKey(scheduleChannel.channel().getKey());
+	    newScheduleChannel.setChannelTitle(scheduleChannel.channel().getTitle());
 	    
 	    if (annotations.contains(Annotation.CHANNEL)) {
 	        newScheduleChannel.setChannel(channelSimplifier.simplify(scheduleChannel.channel(), false, false, false));

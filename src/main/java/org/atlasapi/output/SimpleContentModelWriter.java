@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.simple.ContentQueryResult.Pagination;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ContentGroupModelSimplifier;
+import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
@@ -35,13 +36,15 @@ public class SimpleContentModelWriter extends TransformingModelWriter<QueryResul
     private final TopicModelSimplifier topicSimplifier;
     private final ProductModelSimplifier productSimplifier;
 
-	public SimpleContentModelWriter(AtlasModelWriter<ContentQueryResult> outputter, ItemModelSimplifier itemModelSimplifier, ContainerModelSimplifier containerModelSimplifier, TopicModelSimplifier topicSimplifier, ProductModelSimplifier productSimplifier) {
+	public SimpleContentModelWriter(AtlasModelWriter<ContentQueryResult> outputter, ItemModelSimplifier itemModelSimplifier, 
+	        ContainerModelSimplifier containerModelSimplifier, TopicModelSimplifier topicSimplifier, ProductModelSimplifier productSimplifier,
+	        ImageSimplifier imageSimplifier) {
 	    super(outputter);
 	    this.itemModelSimplifier = itemModelSimplifier;
 		this.containerModelSimplifier = containerModelSimplifier;
         this.topicSimplifier = topicSimplifier;
         this.productSimplifier = productSimplifier;
-		this.contentGroupSimplifier = new ContentGroupModelSimplifier();
+		this.contentGroupSimplifier = new ContentGroupModelSimplifier(imageSimplifier);
 	}
 	
 	@Override

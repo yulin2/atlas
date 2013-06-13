@@ -165,7 +165,7 @@ public class ScheduleProbeTest extends TestCase {
         item.setLastFetched(new DateTime(lastFetched, DateTimeZones.UTC));
         
         Version version = new Version();
-        Broadcast broadcast = new Broadcast(CHANNEL4.uri(), new DateTime(start, DateTimeZones.UTC), new Duration(duration));
+        Broadcast broadcast = new Broadcast(CHANNEL4.getUri(), new DateTime(start, DateTimeZones.UTC), new Duration(duration));
 
         version.addBroadcast(broadcast);
         item.addVersion(version);

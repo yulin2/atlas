@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
-import org.atlasapi.media.channel.TemporalString;
+import org.atlasapi.media.channel.TemporalField;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.channels.bindings.Epg;
 import org.atlasapi.remotesite.pa.channels.bindings.EpgContent;
@@ -46,7 +46,7 @@ public class BasicChannelGroupIngestTest {
         
         // test that platform fields are picked up ok
         assertEquals("Freeview", platform.getTitle());
-        assertEquals(new TemporalString("Freeview", new LocalDate(2011, 9, 28), null), Iterables.getOnlyElement(platform.getAllTitles()));
+        assertEquals(new TemporalField<String>("Freeview", new LocalDate(2011, 9, 28), null), Iterables.getOnlyElement(platform.getAllTitles()));
         assertEquals("http://ref.atlasapi.org/platforms/pressassociation.com/3", platform.getCanonicalUri());
         assertEquals("http://pressassociation.com/platforms/3", Iterables.getOnlyElement(platform.getAliasUrls()));
         assertEquals(Publisher.METABROADCAST, platform.getPublisher());
@@ -84,7 +84,7 @@ public class BasicChannelGroupIngestTest {
         Region region = Iterables.getOnlyElement(regions.values());
         
         assertEquals("South", region.getTitle());
-        assertEquals(new TemporalString("South", new LocalDate(2009, 1, 28), null), Iterables.getOnlyElement(region.getAllTitles()));
+        assertEquals(new TemporalField<String>("South", new LocalDate(2009, 1, 28), null), Iterables.getOnlyElement(region.getAllTitles()));
         assertEquals("http://ref.atlasapi.org/regions/pressassociation.com/3-61", region.getCanonicalUri());
         assertEquals("http://pressassociation.com/regions/3-61", Iterables.getOnlyElement(region.getAliasUrls()));
         assertEquals(Publisher.METABROADCAST, region.getPublisher());

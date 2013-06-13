@@ -14,8 +14,8 @@ import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 public class PersonModelSimplifier extends DescribedModelSimplifier<Person, org.atlasapi.media.entity.simple.Person> {
 
-    public PersonModelSimplifier() {
-        super(SubstitutionTableNumberCodec.lowerCaseOnly());
+    public PersonModelSimplifier(ImageSimplifier imageSimplifier) {
+        super(SubstitutionTableNumberCodec.lowerCaseOnly(), imageSimplifier);
     }
     
     @Override

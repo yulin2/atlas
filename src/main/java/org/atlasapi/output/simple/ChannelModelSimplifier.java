@@ -26,7 +26,7 @@ public class ChannelModelSimplifier extends IdentifiedModelSimplifier<Channel, o
                 annotations.contains(Annotation.VARIATIONS));
         
         if(annotations.contains(Annotation.CHANNEL_GROUPS)) {
-            simple.setChannelGroups(numberingSimplifier.simplify(input.channelNumbers(), annotations, config));
+            simple.setChannelGroups(numberingSimplifier.simplify(input.getChannelNumbers(), annotations, config));
         }
 
         return simple;
