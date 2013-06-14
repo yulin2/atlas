@@ -60,7 +60,7 @@ public class FullToSimpleModelTranslatorTest {
     private ProductModelSimplifier productSimplifier = new ProductModelSimplifier("localhostName");
     private ProductResolver productResolver = mock(ProductResolver.class); 
 
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", contentGroupResolver, topicResolver, productResolver , segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec(), imageSimplifier);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", contentGroupResolver, topicResolver, productResolver , segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec(), new SubstitutionTableNumberCodec(), imageSimplifier);
     private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, "localhostName", contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren, imageSimplifier),topicSimplifier, productSimplifier, imageSimplifier);
     
 	private StubHttpServletRequest request;
