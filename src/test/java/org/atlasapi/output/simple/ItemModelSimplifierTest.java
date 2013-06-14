@@ -53,7 +53,7 @@ public class ItemModelSimplifierTest {
     private final ChannelResolver channelResolver = context.mock(ChannelResolver.class);
     
     
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec() );
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec(), new SubstitutionTableNumberCodec());
     
     @Test
     @SuppressWarnings("unchecked")
