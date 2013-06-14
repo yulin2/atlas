@@ -9,9 +9,12 @@ import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.output.Annotation;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 public class ContentGroupModelSimplifier extends DescribedModelSimplifier<org.atlasapi.media.entity.ContentGroup, org.atlasapi.media.entity.simple.ContentGroup> {
 
+    private final SubstitutionTableNumberCodec codecForContent = SubstitutionTableNumberCodec.lowerCaseOnly();
+    
     @Override
     public org.atlasapi.media.entity.simple.ContentGroup simplify(org.atlasapi.media.entity.ContentGroup model, Set<Annotation> annotations, ApplicationConfiguration config) {
 
@@ -28,7 +31,7 @@ public class ContentGroupModelSimplifier extends DescribedModelSimplifier<org.at
     private List<ContentIdentifier> simpleContentListFrom(Iterable<ChildRef> contents) {
         List<ContentIdentifier> contentList = Lists.newArrayList();
         for (ChildRef ref : contents) {
-            contentList.add(ContentIdentifier.identifierFor(ref, idCodec));
+            contentList.add(ContentIdentifier.identifierFor(ref, codecForContent));
         }
         return contentList;
     }
