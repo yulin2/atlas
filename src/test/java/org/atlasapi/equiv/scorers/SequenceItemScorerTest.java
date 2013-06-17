@@ -173,7 +173,7 @@ public class SequenceItemScorerTest {
     private Episode episode(String uri, Integer seriesNumber, Integer episodeNumber) {
         Episode candidate = new Episode(uri, uri, Publisher.BBC);
         candidate.setParentRef(new ParentRef("b"+uri));
-        candidate.setParentRef(new ParentRef("s"+uri));
+        candidate.setSeriesRef(new ParentRef("s"+uri));
         candidate.setSeriesNumber(seriesNumber);
         candidate.setEpisodeNumber(episodeNumber);
         return candidate;
