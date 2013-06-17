@@ -23,7 +23,6 @@ import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Charsets;
@@ -35,6 +34,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;

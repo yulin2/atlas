@@ -77,7 +77,6 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             ImageSimplifier imageSimplifier) {
         
         super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier);
-        
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.imageSimplifier = imageSimplifier;

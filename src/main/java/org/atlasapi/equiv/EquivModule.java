@@ -68,6 +68,7 @@ import org.atlasapi.equiv.results.persistence.FileEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.scorers.ContainerHierarchyMatchingScorer;
 import org.atlasapi.equiv.scorers.CrewMemberScorer;
+import org.atlasapi.equiv.scorers.SeriesSequenceItemScorer;
 import org.atlasapi.equiv.scorers.EquivalenceScorer;
 import org.atlasapi.equiv.scorers.SequenceItemScorer;
 import org.atlasapi.equiv.scorers.SongCrewMemberExtractor;
@@ -211,15 +212,16 @@ public class EquivModule {
         Set<Publisher> facebookAcceptablePublishers = Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK));
         updaters.register(FACEBOOK, Container.class, facebookContainerEquivalenceUpdater(facebookAcceptablePublishers));
 
-        updaters.register(ITUNES, Item.class, vodItemUpdater(acceptablePublishers));
+        updaters.register(ITUNES, Item.class, vodItemUpdater(acceptablePublishers).build());
         updaters.register(ITUNES, Container.class, vodContainerUpdater(acceptablePublishers));
 
         Set<Publisher> lfPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(LOVEFILM));
-        updaters.register(LOVEFILM, Item.class, vodItemUpdater(lfPublishers));
+        updaters.register(LOVEFILM, Item.class, vodItemUpdater(lfPublishers)
+                .withScorer(new SeriesSequenceItemScorer()).build());
         updaters.register(LOVEFILM, Container.class, vodContainerUpdater(lfPublishers));
         
         Set<Publisher> netflixPublishers = ImmutableSet.of(BBC, NETFLIX);
-        updaters.register(NETFLIX, Item.class, vodItemUpdater(netflixPublishers));
+        updaters.register(NETFLIX, Item.class, vodItemUpdater(netflixPublishers).build());
         updaters.register(NETFLIX, Container.class, vodContainerUpdater(netflixPublishers));
 
         Set<Publisher> itunesAndMusicPublishers = Sets.union(musicPublishers, ImmutableSet.of(ITUNES));
@@ -283,7 +285,7 @@ public class EquivModule {
             .build();
     }
 
-    private EquivalenceUpdater<Item> vodItemUpdater(Set<Publisher> acceptablePublishers) {
+    private ContentEquivalenceUpdater.Builder<Item> vodItemUpdater(Set<Publisher> acceptablePublishers) {
         return ContentEquivalenceUpdater.<Item> builder()
             .withGenerator(
                 new CandidateContainerEquivalenceGenerator(contentResolver, equivSummaryStore)
@@ -305,8 +307,7 @@ public class EquivModule {
                 ),
                 new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
                 new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore)
-            )))
-            .build();
+            )));
     }
 
     private EquivalenceUpdater<Container> broadcastItemContainerEquivalenceUpdater(Set<Publisher> reduxPublishers) {

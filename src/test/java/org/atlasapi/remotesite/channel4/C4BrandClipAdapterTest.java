@@ -13,7 +13,6 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.FixedResponseHttpClient;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
@@ -21,6 +20,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.time.SystemClock;
 

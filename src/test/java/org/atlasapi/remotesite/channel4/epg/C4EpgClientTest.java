@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
-import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.channel4.epg.model.C4EpgEntry;
 import org.atlasapi.remotesite.channel4.epg.model.C4EpgMedia;
 import org.joda.time.DateTime;
@@ -14,6 +13,7 @@ import org.junit.Test;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.DateTimeZones;
 
