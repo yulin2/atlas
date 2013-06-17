@@ -29,7 +29,6 @@ import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.mongo.MongoContentLister;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentWriter;
-import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.entity.ContainerTranslator;
 import org.atlasapi.persistence.media.entity.ItemTranslator;
@@ -119,6 +118,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
             if (content instanceof Item) {
                 writer.createOrUpdate((Item) content);
             }
+            
         }
     }
 
@@ -236,6 +236,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
 
     private void setId(String collection, String id, long aid) {
         mongo.collection(collection).update(where().idEquals(id).build(), update().setField("aid", aid).build());
+        mongo.collection("lookup").update(where().idEquals(id).build(), update().setField("aid", aid).build());
     }
 
     @SuppressWarnings("unchecked")
