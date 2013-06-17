@@ -64,7 +64,7 @@ public class QueryModule {
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 	    
-	    KnownTypeContentResolver mongoContentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo));
+	    KnownTypeContentResolver mongoContentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo, new MongoLookupEntryStore(mongo)));
         KnownTypeContentResolver cassandraContentResolver = new CassandraKnownTypeContentResolver(cassandra);
 		
         KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, new MongoLookupEntryStore(mongo));

@@ -49,7 +49,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
 
     ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
     MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo);
-    ContentResolver resolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo), lookupStore);
+    ContentResolver resolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo, lookupStore), lookupStore);
     ContentWriter writer = new MongoContentWriter(mongo, lookupStore, new SystemClock());
     ContentLister lister = new MongoContentLister(mongo);
     
