@@ -129,10 +129,12 @@ public class PersonRefUpdateTask extends ScheduledTask {
         ChildRef childRef = item.childRef();
         Map<String, Long> peopleIds = getPeopleIds(item.getPeople());
         for (CrewMember crew : item.getPeople()) {
-            Long personId = peopleIds.get(crew.getCanonicalUri());
-            if (personId != null) {
-                addRefToPerson(crew.getCanonicalUri(), childRef);
-                crew.setId(personId);
+            if (crew.getCanonicalUri() != null) {
+                Long personId = peopleIds.get(crew.getCanonicalUri());
+                if (personId != null) {
+                    addRefToPerson(crew.getCanonicalUri(), childRef);
+                    crew.setId(personId);
+                }
             }
         }
         DBCollection coll = item.getContainer() == null ? standalone
