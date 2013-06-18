@@ -16,7 +16,6 @@ import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentCategory;
@@ -34,7 +33,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
@@ -88,6 +86,9 @@ public class PersonRefUpdateTask extends ScheduledTask {
         ContentListingProgress progress = progressStore.progressForTask(scheduleKey);
         log.info("Started: {} from {}", scheduleKey, startProgress(progress));
         
+        Map<String, Long> peopleIds = getPeopleIds();
+        log.info("People ID map has {} entries", peopleIds.size());
+        
         Iterator<Content> children = contentStore.listContent(defaultCriteria()
                 .forPublishers(publishers)
                 .forContent(ImmutableList.of(TOP_LEVEL_ITEM, CHILD_ITEM))
@@ -101,7 +102,7 @@ public class PersonRefUpdateTask extends ScheduledTask {
             while (children.hasNext() && shouldContinue()) {
                 try {
                     content = children.next();
-                    updatePeopleReferences((Item) content);
+                    updatePeopleReferences((Item) content, peopleIds);
                     reportStatus(String.format("%s. Processing %s", processed, content));
                     processed = processed.reduce(SUCCESS);
                     if (processed.getTotalProgress() % 100 == 0) {
@@ -122,12 +123,11 @@ public class PersonRefUpdateTask extends ScheduledTask {
     }
  
     
-    private void updatePeopleReferences(Item item) {
+    private void updatePeopleReferences(Item item, Map<String, Long> peopleIds) {
         if (item.getPeople().isEmpty()) {
             return;
         }
         ChildRef childRef = item.childRef();
-        Map<String, Long> peopleIds = getPeopleIds(item.getPeople());
         for (CrewMember crew : item.getPeople()) {
             if (crew.getCanonicalUri() != null) {
                 Long personId = peopleIds.get(crew.getCanonicalUri());
@@ -147,21 +147,22 @@ public class PersonRefUpdateTask extends ScheduledTask {
         );
     }
 
-    private Map<String, Long> getPeopleIds(List<CrewMember> people) {
-        BasicDBObject peopleFields = new BasicDBObject(ImmutableMap.of(MongoConstants.ID,1,IdentifiedTranslator.OPAQUE_ID,1));
+    private Map<String, Long> getPeopleIds() {
         DBCursor peopleIds = this.people.find(
-            new BasicDBObject(MongoConstants.ID, 
-                new BasicDBObject(MongoConstants.IN,
-                    Lists.transform(people, Identified.TO_URI)
-                )
-            ),
-            peopleFields);
-        Map<String,Long> idMap = Maps.newHashMapWithExpectedSize(people.size());
+            new BasicDBObject(),
+            new BasicDBObject(ImmutableMap.of(
+                MongoConstants.ID,1,
+                IdentifiedTranslator.OPAQUE_ID,1)
+            )
+        );
+        Map<String,Long> idMap = Maps.newHashMap();
         for (DBObject dbObject : peopleIds) {
-            idMap.put(
-                TranslatorUtils.toString(dbObject, MongoConstants.ID),
-                TranslatorUtils.toLong(dbObject, IdentifiedTranslator.OPAQUE_ID)
-            );
+            if (dbObject.get(MongoConstants.ID) instanceof String) {
+                idMap.put(
+                    TranslatorUtils.toString(dbObject, MongoConstants.ID),
+                    TranslatorUtils.toLong(dbObject, IdentifiedTranslator.OPAQUE_ID)
+                );
+            }
         }
         return idMap;
     }
