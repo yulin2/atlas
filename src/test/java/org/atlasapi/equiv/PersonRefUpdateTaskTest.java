@@ -27,6 +27,7 @@ import org.atlasapi.persistence.content.mongo.MongoContentTables;
 import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.persistence.content.people.PersonStore;
+import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.entity.IdentifiedTranslator;
 import org.junit.Before;
@@ -42,23 +43,20 @@ import com.metabroadcast.common.time.SystemClock;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 
-
 public class PersonRefUpdateTaskTest {
     
-    DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
+    private final DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
 
-    ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
-    MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo);
-    ContentResolver resolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo, lookupStore), lookupStore);
-    ContentWriter writer = new MongoContentWriter(mongo, lookupStore, new SystemClock());
-    ContentLister lister = new MongoContentLister(mongo);
+    private final ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
+    private final MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo);
+    private final ContentLister lister = new MongoContentLister(mongo);
     
-    PersonRefUpdateTask updateTask = new PersonRefUpdateTask(lister, mongo, progressStore)
+    private final PersonRefUpdateTask updateTask = new PersonRefUpdateTask(lister, mongo, progressStore)
         .forPublishers(Publisher.BBC);
     
-    ContentWriter contentWriter = new MongoContentWriter(mongo, lookupStore, new SystemClock());
-    ContentResolver contentResolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo, lookupStore), lookupStore);
-    PersonStore personStore = new MongoPersonStore(mongo);
+    private final ContentWriter contentWriter = new MongoContentWriter(mongo, lookupStore, new SystemClock());
+    private final ContentResolver contentResolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo, lookupStore), lookupStore);
+    private final PersonStore personStore = new MongoPersonStore(mongo);
 
     private Item item1;
     private Item item2;
@@ -88,22 +86,12 @@ public class PersonRefUpdateTaskTest {
         personStore.createOrUpdatePerson(person);
         personStore.updatePersonItems(person);
         
-        DBCollection tlis = new MongoContentTables(mongo)
-            .collectionFor(ContentCategory.TOP_LEVEL_ITEM);
-        tlis.update(
-            new BasicDBObject(MongoConstants.ID, item1.getCanonicalUri()),
-            new BasicDBObject(MongoConstants.SET, 
-                new BasicDBObject(IdentifiedTranslator.OPAQUE_ID, new Long(1))
-            )
-        );
-        DBCollection children = new MongoContentTables(mongo)
-        .collectionFor(ContentCategory.CHILD_ITEM);
-        children.update(
-            new BasicDBObject(MongoConstants.ID, item2.getCanonicalUri()),
-            new BasicDBObject(MongoConstants.SET, 
-                new BasicDBObject(IdentifiedTranslator.OPAQUE_ID, new Long(2))
-            )
-        );
+        MongoContentTables tables = new MongoContentTables(mongo);
+        updateId(tables.collectionFor(ContentCategory.TOP_LEVEL_ITEM), item1.getCanonicalUri(), new Long(1));
+        updateId(tables.collectionFor(ContentCategory.CHILD_ITEM), item2.getCanonicalUri(), new Long(2));
+        updateId(mongo.collection("lookup"), item1.getCanonicalUri(), new Long(1));
+        updateId(mongo.collection("lookup"), item2.getCanonicalUri(), new Long(2));
+        
         mongo.collection("people").update(
             new BasicDBObject(MongoConstants.ID, person.getCanonicalUri()),
             new BasicDBObject(MongoConstants.SET, 
@@ -111,6 +99,15 @@ public class PersonRefUpdateTaskTest {
             )
         );
         
+    }
+
+    private void updateId(DBCollection coll, String uri, Long id) {
+        coll.update(
+            new BasicDBObject(MongoConstants.ID, uri),
+            new BasicDBObject(MongoConstants.SET, 
+                new BasicDBObject(IdentifiedTranslator.OPAQUE_ID, id)
+            )
+        );
     }
     
     @Test
