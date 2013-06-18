@@ -153,13 +153,16 @@ public class PersonRefUpdateTask extends ScheduledTask {
             new BasicDBObject(ImmutableMap.of(
                 MongoConstants.ID,1,
                 IdentifiedTranslator.OPAQUE_ID,1)
-            ));
+            )
+        );
         Map<String,Long> idMap = Maps.newHashMap();
         for (DBObject dbObject : peopleIds) {
-            idMap.put(
-                TranslatorUtils.toString(dbObject, MongoConstants.ID),
-                TranslatorUtils.toLong(dbObject, IdentifiedTranslator.OPAQUE_ID)
-            );
+            if (dbObject.get(MongoConstants.ID) instanceof String) {
+                idMap.put(
+                    TranslatorUtils.toString(dbObject, MongoConstants.ID),
+                    TranslatorUtils.toLong(dbObject, IdentifiedTranslator.OPAQUE_ID)
+                );
+            }
         }
         return idMap;
     }
