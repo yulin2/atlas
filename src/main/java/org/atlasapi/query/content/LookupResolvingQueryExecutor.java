@@ -132,7 +132,11 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
         for (Identified ided : resolvedResults) {
             if (ided instanceof Described) {
                 Described described = (Described) ided;
-                equivRefs.put(described, LookupRef.from(described));
+                LookupRef ref = LookupRef.from(described);
+                if (ref.id() == null) {
+                    log.info("null id for {}", ref);
+                }
+                equivRefs.put(described, ref);
             }
         }
         Set<LookupRef> lookupRefs = ImmutableSet.copyOf(equivRefs.values());

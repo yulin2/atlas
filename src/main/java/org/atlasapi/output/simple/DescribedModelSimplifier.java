@@ -10,6 +10,8 @@ import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Image;
 import org.atlasapi.media.entity.simple.SameAs;
 import org.atlasapi.output.Annotation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
@@ -18,6 +20,8 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public abstract class DescribedModelSimplifier<F extends Described, T extends Description> extends IdentifiedModelSimplifier<F,T> {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
     
     protected DescribedModelSimplifier() {
         
@@ -117,6 +121,9 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         @Override
         public SameAs apply(LookupRef input) {
             Long id = input.id();
+            if (id == null) {
+                log.info("null id for {}", input);
+            }
             return new SameAs(id != null ? idCodec.encode(BigInteger.valueOf(id)) : null, input.uri());
         }
     };
