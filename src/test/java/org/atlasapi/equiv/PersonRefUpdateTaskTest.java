@@ -119,14 +119,14 @@ public class PersonRefUpdateTaskTest {
         Maybe<Identified> possibleItem = resolved.get(item1.getCanonicalUri());
         Item item1 = (Item) possibleItem.requireValue();
         CrewMember member = Iterables.getOnlyElement(item1.getPeople());
-        assertThat(member.getId(), is(person.getId()));
+        assertThat(member.getId(), is(3L));
         
         resolved = contentResolver.findByCanonicalUris(ImmutableList.of(item2.getCanonicalUri()));
         
         possibleItem = resolved.get(item2.getCanonicalUri());
         Item item2 = (Item) possibleItem.requireValue();
         member = Iterables.getOnlyElement(item2.getPeople());
-        assertThat(member.getId(), is(person.getId()));
+        assertThat(member.getId(), is(3L));
         
         Person resolvedPerson = personStore.person(person.getCanonicalUri());
         List<ChildRef> itemRefs = resolvedPerson.getContents();
