@@ -72,8 +72,8 @@ public class BootstrapModule {
     }
 
     @Bean
-    IndividualBootstrapController contentBootstrapController() {
-        return new IndividualBootstrapController(bootstrapContentResolver(), persistence.contentStore());
+    IndividualContentBootstrapController contentBootstrapController() {
+        return new IndividualContentBootstrapController(bootstrapContentResolver(), persistence.contentStore());
     }
 
     private ContentBootstrapper cassandraTopicBootstrapper() {

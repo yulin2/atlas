@@ -31,12 +31,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 @Controller
-public class IndividualBootstrapController {
+public class IndividualContentBootstrapController {
 
     private final ContentResolver read;
     private final ContentWriter write;
 
-    public IndividualBootstrapController(ContentResolver read, ContentWriter write) {
+    public IndividualContentBootstrapController(ContentResolver read, ContentWriter write) {
         this.read = checkNotNull(read);
         this.write = checkNotNull(write);
     }
