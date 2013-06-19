@@ -26,6 +26,7 @@ public class ChildRefUpdateModule {
     @PostConstruct
     public void setup() {
         scheduler.schedule(childRefUpdateTask(), RepetitionRules.NEVER);
+        scheduler.schedule(personRefUpdateTask(), RepetitionRules.NEVER);
     }
     
     @Bean
@@ -35,7 +36,14 @@ public class ChildRefUpdateModule {
     
     @Bean
     public ChildRefUpdateTask childRefUpdateTask() {
-        return new ChildRefUpdateTask(lister, resolver, mongo, progressStore).forPublishers(Publisher.all().toArray(new Publisher[]{}));
+        return new ChildRefUpdateTask(lister, resolver, mongo, progressStore)
+            .forPublishers(Publisher.all().toArray(new Publisher[]{}));
+    }
+    
+    @Bean
+    public PersonRefUpdateTask personRefUpdateTask() {
+        return new PersonRefUpdateTask(lister, mongo, progressStore)
+            .forPublishers(Publisher.RADIO_TIMES, Publisher.BBC, Publisher.PA);
     }
     
 }
