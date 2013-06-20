@@ -55,7 +55,11 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
         if (broadcasts.isEmpty()) {
             log.info(String.format("No broadcasts for channel %s (%s) on %s", channel.getTitle(), getYouViewId(channel), startTime.toString()));
         } else {
-            scheduleWriter.replaceScheduleBlock(Publisher.YOUVIEW, channel, broadcasts);
+            try {
+                scheduleWriter.replaceScheduleBlock(Publisher.YOUVIEW, channel, broadcasts);
+            } catch (IllegalArgumentException e) {
+                log.error(e.getMessage(), e);
+            }
         }
         
         return progress;
