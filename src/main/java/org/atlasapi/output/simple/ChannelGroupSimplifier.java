@@ -86,8 +86,10 @@ public class ChannelGroupSimplifier {
     private Set<HistoricalChannelGroupEntry> calculateChannelHistory(ChannelGroup input) {
         Builder<HistoricalChannelGroupEntry> entries = ImmutableSet.<HistoricalChannelGroupEntry>builder();
         for (TemporalField<String> title : input.getAllTitles()) {
-            HistoricalChannelGroupEntry entry = new HistoricalChannelGroupEntry();
-            entry.setStartDate(title.getStartDate());
+            if (title.getStartDate() == null) {
+                continue;
+            }
+            HistoricalChannelGroupEntry entry = new HistoricalChannelGroupEntry(title.getStartDate());
             entry.setTitle(title.getValue());
             entries.add(entry);
         }
