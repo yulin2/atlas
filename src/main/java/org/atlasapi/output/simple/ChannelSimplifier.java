@@ -112,8 +112,10 @@ public class ChannelSimplifier {
     private Set<HistoricalChannelEntry> calculateChannelHistory(Channel input) {
         Builder<HistoricalChannelEntry> entries = ImmutableSet.<HistoricalChannelEntry>builder();
         for (TemporalField<String> title : input.getAllTitles()) {
-            HistoricalChannelEntry entry = new HistoricalChannelEntry();
-            entry.setStartDate(title.getStartDate());
+            if (title.getStartDate() == null) {
+                continue;
+            }
+            HistoricalChannelEntry entry = new HistoricalChannelEntry(title.getStartDate());
             entry.setTitle(title.getValue());
             Iterable<Image> primaryImages = Iterables.filter(
                 input.getImagesForDate(title.getStartDate()), 
@@ -134,8 +136,10 @@ public class ChannelSimplifier {
             entries.add(entry);
         }
         for (TemporalField<Image> image : input.getAllImages()) {
-            HistoricalChannelEntry entry = new HistoricalChannelEntry();
-            entry.setStartDate(image.getStartDate());
+            if (image.getStartDate() == null) {
+                continue;
+            }
+            HistoricalChannelEntry entry = new HistoricalChannelEntry(image.getStartDate());
             entry.setTitle(input.getTitleForDate(image.getStartDate()));
             entry.setImage(image.getValue().getCanonicalUri());
             entry.setImages(Iterables.transform(
