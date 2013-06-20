@@ -45,13 +45,17 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
         .build();
     
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
+        .withMessage("No such Channel Group exists")
         .withErrorCode("Channel Group not found")
         .withStatusCode(HttpStatusCode.NOT_FOUND);
     private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException())
+        .withMessage("You require an API key to view this data")
+        .withErrorCode("Api Key required")
         .withStatusCode(HttpStatusCode.FORBIDDEN);
     
     private static final AtlasErrorSummary BAD_ANNOTATION = new AtlasErrorSummary(new NullPointerException())
         .withMessage("Invalid annotation specified. Valid annotations are: " + Joiner.on(',').join(Iterables.transform(validAnnotations, Annotation.TO_KEY)))
+        .withErrorCode("Invalid annotation")
         .withStatusCode(HttpStatusCode.BAD_REQUEST);
     
     private static final String TYPE_KEY = "type";
