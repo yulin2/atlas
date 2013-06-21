@@ -8,12 +8,14 @@ import java.util.Map;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.remotesite.pa.PaChannelMap;
 import org.atlasapi.remotesite.pa.channels.bindings.Logo;
 import org.atlasapi.remotesite.pa.channels.bindings.Name;
 import org.atlasapi.remotesite.pa.channels.bindings.ProviderChannelId;
 import org.atlasapi.remotesite.pa.channels.bindings.ServiceProvider;
 import org.atlasapi.remotesite.pa.channels.bindings.Station;
+import org.atlasapi.remotesite.pa.channels.bindings.Url;
 import org.atlasapi.remotesite.pa.channels.bindings.Variation;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -30,6 +32,7 @@ import com.google.common.collect.Iterables;
 
 public class PaChannelsIngester {
 
+    private static final String SIMULCAST_LINK_TYPE = "Web_Simulcast";
     private static final String REGIONAL_VARIATION = "regional";
     static final String IMAGE_PREFIX = "http://images.atlas.metabroadcast.com/pressassociation.com/channels/";
     private static final String CHANNEL_URI_PREFIX = "http://ref.atlasapi.org/channels/pressassociation.com/";
@@ -43,7 +46,6 @@ public class PaChannelsIngester {
         .put("Radio", MediaType.AUDIO)
         .build();
     
-
     private static final Predicate<Variation> IS_REGIONAL = new Predicate<Variation>() {
         @Override
         public boolean apply(Variation input) {
@@ -134,6 +136,17 @@ public class PaChannelsIngester {
         if (paChannel.getProviderChannelIds() != null) {
             for (ProviderChannelId providerChannelId : paChannel.getProviderChannelIds().getProviderChannelId()) {
                 channel.addAliasUrl(lookupAlias(providerChannelId, serviceProviders));                
+            }
+        }
+        
+        if (paChannel.getUrls() != null) {
+            for (Url paUrl : paChannel.getUrls().getUrl()) {
+                if (paUrl.getType().equals(SIMULCAST_LINK_TYPE)) {
+                    RelatedLink relatedLink = RelatedLink.simulcastLink(paUrl.getvalue()).build();
+                    channel.addRelatedLink(relatedLink);
+                } else {
+                    throw new RuntimeException("Link type " + paUrl.getType() + " not supported");
+                }
             }
         }
         

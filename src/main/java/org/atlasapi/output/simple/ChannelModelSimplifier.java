@@ -20,10 +20,12 @@ public class ChannelModelSimplifier extends IdentifiedModelSimplifier<Channel, o
     public org.atlasapi.media.entity.simple.Channel simplify(Channel input, final Set<Annotation> annotations,
             final ApplicationConfiguration config) {
         org.atlasapi.media.entity.simple.Channel simple = simplifier.simplify(
-                input, 
-                annotations.contains(Annotation.HISTORY), 
-                annotations.contains(Annotation.PARENT), 
-                annotations.contains(Annotation.VARIATIONS));
+            input, 
+            annotations.contains(Annotation.HISTORY), 
+            annotations.contains(Annotation.PARENT), 
+            annotations.contains(Annotation.VARIATIONS),
+            annotations.contains(Annotation.RELATED_LINKS)
+        );
         
         if(annotations.contains(Annotation.CHANNEL_GROUPS)) {
             simple.setChannelGroups(numberingSimplifier.simplify(input.channelNumbers(), annotations, config));

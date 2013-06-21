@@ -105,6 +105,7 @@ public class PaChannelDataHandler {
 
             existingChannel.setTitles(newChannel.allTitles());
             existingChannel.setImages(newChannel.allImages());
+            existingChannel.setRelatedLinks(newChannel.getRelatedLinks());
             existingChannel.setStartDate(newChannel.startDate());
             existingChannel.setEndDate(newChannel.endDate());
             existingChannel.addAliasUrls(newChannel.getAliasUrls());
