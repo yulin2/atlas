@@ -8,6 +8,7 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.TemporalField;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.simple.HistoricalChannelEntry;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.output.Annotation;
@@ -33,7 +34,7 @@ public class ChannelSimplifier {
         this.imageSimplifier = imageSimplifier;
     }
     
-    public org.atlasapi.media.entity.simple.Channel simplify(Channel input, final boolean showHistory, boolean showParent, final boolean showVariations) {
+    public org.atlasapi.media.entity.simple.Channel simplify(Channel input, final boolean showHistory, boolean showParent, final boolean showVariations, final boolean showRelatedLinks) {
         
         org.atlasapi.media.entity.simple.Channel simple = new org.atlasapi.media.entity.simple.Channel();
         
@@ -64,7 +65,10 @@ public class ChannelSimplifier {
         ));
         simple.setMediaType(input.getMediaType() != null ? input.getMediaType().toString().toLowerCase() : null);
         simple.setStartDate(input.getStartDate());            
-        simple.setEndDate(input.getEndDate());    
+        simple.setEndDate(input.getEndDate());
+        if (showRelatedLinks) {
+            simple.setRelatedLinks(simplifyRelatedLinks(input.getRelatedLinks()));
+        }
         
         simple.setPublisherDetails(publisherSimplifier.simplify(input.getSource()));
         simple.setBroadcaster(publisherSimplifier.simplify(input.getBroadcaster()));
@@ -81,7 +85,7 @@ public class ChannelSimplifier {
                 throw new RuntimeException("Could not resolve channel with id " +  input.getParent());
             }
             if (showParent) {
-                simple.setParent(simplify(channel.requireValue(), showHistory, false, false));
+                simple.setParent(simplify(channel.requireValue(), showHistory, false, false, showRelatedLinks));
             } else {
                 simple.setParent(toSubChannel(channel.requireValue()));
             }
@@ -93,7 +97,7 @@ public class ChannelSimplifier {
                     @Override
                     public org.atlasapi.media.entity.simple.Channel apply(Channel input) {
                         if (showVariations) {
-                            return simplify(input, showHistory, false, false);
+                            return simplify(input, showHistory, false, false, showRelatedLinks);
                         } else {
                             return toSubChannel(input);
                         }
@@ -107,6 +111,27 @@ public class ChannelSimplifier {
         }
 
         return simple;
+    }
+    
+    public Iterable<org.atlasapi.media.entity.simple.RelatedLink> simplifyRelatedLinks(Iterable<RelatedLink> relatedLinks) {
+        return Iterables.transform(relatedLinks, new Function<RelatedLink, org.atlasapi.media.entity.simple.RelatedLink>() {
+
+            @Override
+            public org.atlasapi.media.entity.simple.RelatedLink apply(RelatedLink relatedLink) {
+                org.atlasapi.media.entity.simple.RelatedLink simpleLink = new org.atlasapi.media.entity.simple.RelatedLink();
+
+                simpleLink.setUrl(relatedLink.getUrl());
+                simpleLink.setType(relatedLink.getType().toString().toLowerCase());
+                simpleLink.setSourceId(relatedLink.getSourceId());
+                simpleLink.setShortName(relatedLink.getShortName());
+                simpleLink.setTitle(relatedLink.getTitle());
+                simpleLink.setDescription(relatedLink.getDescription());
+                simpleLink.setImage(relatedLink.getImage());
+                simpleLink.setThumbnail(relatedLink.getThumbnail());
+
+                return simpleLink;
+            }
+        });
     }
     
     private Set<HistoricalChannelEntry> calculateChannelHistory(Channel input) {

@@ -52,6 +52,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
         .add(Annotation.HISTORY)
         .add(Annotation.PARENT)
         .add(Annotation.VARIATIONS)
+        .add(Annotation.RELATED_LINKS)
         .build();
 
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
