@@ -145,7 +145,7 @@ public class PaChannelsIngester {
                     RelatedLink relatedLink = RelatedLink.simulcastLink(paUrl.getvalue()).build();
                     channel.addRelatedLink(relatedLink);
                 } else {
-                    throw new RuntimeException("Link type " + paUrl.getType() + " not supported");
+                    log.error("Link type " + paUrl.getType() + " not supported");
                 }
             }
         }
