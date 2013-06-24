@@ -27,12 +27,13 @@ import org.atlasapi.persistence.content.mongo.MongoContentTables;
 import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.persistence.content.people.PersonStore;
-import org.atlasapi.persistence.lookup.entry.LookupEntry;
+import org.atlasapi.persistence.lookup.TransitiveLookupWriter;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.entity.IdentifiedTranslator;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
@@ -48,7 +49,7 @@ public class PersonRefUpdateTaskTest {
     private final DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
 
     private final ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
-    private final MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo);
+    private final MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo.collection("lookup"));
     private final ContentLister lister = new MongoContentLister(mongo);
     
     private final PersonRefUpdateTask updateTask = new PersonRefUpdateTask(lister, mongo, progressStore)
@@ -56,7 +57,7 @@ public class PersonRefUpdateTaskTest {
     
     private final ContentWriter contentWriter = new MongoContentWriter(mongo, lookupStore, new SystemClock());
     private final ContentResolver contentResolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo, lookupStore), lookupStore);
-    private final PersonStore personStore = new MongoPersonStore(mongo);
+    private final PersonStore personStore = new MongoPersonStore(mongo, TransitiveLookupWriter.explicitTransitiveLookupWriter(lookupStore), lookupStore);
 
     private Item item1;
     private Item item2;
@@ -128,8 +129,8 @@ public class PersonRefUpdateTaskTest {
         member = Iterables.getOnlyElement(item2.getPeople());
         assertThat(member.getId(), is(3L));
         
-        Person resolvedPerson = personStore.person(person.getCanonicalUri());
-        List<ChildRef> itemRefs = resolvedPerson.getContents();
+        Optional<Person> resolvedPerson = personStore.person(person.getCanonicalUri());
+        List<ChildRef> itemRefs = resolvedPerson.get().getContents();
         assertThat(itemRefs.get(0).getId(), is(item1.getId()));
         assertThat(itemRefs.get(1).getId(), is(item2.getId()));
         
