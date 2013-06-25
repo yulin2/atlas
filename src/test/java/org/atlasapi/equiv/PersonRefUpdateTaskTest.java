@@ -28,6 +28,7 @@ import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.persistence.content.people.PersonStore;
 import org.atlasapi.persistence.lookup.TransitiveLookupWriter;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.entity.IdentifiedTranslator;
 import org.junit.Before;
@@ -49,15 +50,17 @@ public class PersonRefUpdateTaskTest {
     private final DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
 
     private final ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
-    private final MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo.collection("lookup"));
+    private final MongoLookupEntryStore contentLookup = new MongoLookupEntryStore(mongo.collection("lookup"));
     private final ContentLister lister = new MongoContentLister(mongo);
     
     private final PersonRefUpdateTask updateTask = new PersonRefUpdateTask(lister, mongo, progressStore)
         .forPublishers(Publisher.BBC);
     
-    private final ContentWriter contentWriter = new MongoContentWriter(mongo, lookupStore, new SystemClock());
-    private final ContentResolver contentResolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo, lookupStore), lookupStore);
-    private final PersonStore personStore = new MongoPersonStore(mongo, TransitiveLookupWriter.explicitTransitiveLookupWriter(lookupStore), lookupStore);
+    private final ContentWriter contentWriter = new MongoContentWriter(mongo, contentLookup, new SystemClock());
+    private final ContentResolver contentResolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo, contentLookup), contentLookup);
+
+    private final LookupEntryStore peopleLookup = new MongoLookupEntryStore(mongo.collection("peopleLookup"));
+    private final PersonStore personStore = new MongoPersonStore(mongo, TransitiveLookupWriter.explicitTransitiveLookupWriter(peopleLookup), peopleLookup);
 
     private Item item1;
     private Item item2;
