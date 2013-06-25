@@ -29,7 +29,7 @@ public class ChannelSimplifier {
         this.publisherSimplifier = publisherSimplifier;
     }
     
-    public org.atlasapi.media.entity.simple.Channel simplify(Channel input, final boolean showHistory, boolean showParent, final boolean showVariations, final boolean showRelatedLinks) {
+    public org.atlasapi.media.entity.simple.Channel simplify(Channel input, final boolean showHistory, boolean showParent, final boolean showVariations) {
         
         org.atlasapi.media.entity.simple.Channel simple = new org.atlasapi.media.entity.simple.Channel();
         
@@ -49,9 +49,7 @@ public class ChannelSimplifier {
         simple.setMediaType(input.mediaType() != null ? input.mediaType().toString().toLowerCase() : null);
         simple.setStartDate(input.startDate());            
         simple.setEndDate(input.endDate());
-        if (showRelatedLinks) {
-            simple.setRelatedLinks(simplifyRelatedLinks(input.getRelatedLinks()));
-        }
+        simple.setRelatedLinks(simplifyRelatedLinks(input.getRelatedLinks()));
         
         simple.setPublisherDetails(publisherSimplifier.simplify(input.source()));
         simple.setBroadcaster(publisherSimplifier.simplify(input.broadcaster()));
@@ -68,7 +66,7 @@ public class ChannelSimplifier {
                 throw new RuntimeException("Could not resolve channel with id " +  input.parent());
             }
             if (showParent) {
-                simple.setParent(simplify(channel.requireValue(), showHistory, false, false, showRelatedLinks));
+                simple.setParent(simplify(channel.requireValue(), showHistory, false, false));
             } else {
                 simple.setParent(toSubChannel(channel.requireValue()));
             }
@@ -80,7 +78,7 @@ public class ChannelSimplifier {
                     @Override
                     public org.atlasapi.media.entity.simple.Channel apply(Channel input) {
                         if (showVariations) {
-                            return simplify(input, showHistory, false, false, showRelatedLinks);
+                            return simplify(input, showHistory, false, false);
                         } else {
                             return toSubChannel(input);
                         }
