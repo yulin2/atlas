@@ -43,8 +43,7 @@ public class SimpleScheduleModelWriter extends TransformingModelWriter<Iterable<
 	    newScheduleChannel.setChannelTitle(scheduleChannel.channel().getTitle());
 	    
 	    if (annotations.contains(Annotation.CHANNEL)) {
-	        boolean expandRelatedLinks = annotations.contains(Annotation.RELATED_LINKS);
-	        newScheduleChannel.setChannel(channelSimplifier.simplify(scheduleChannel.channel(), false, false, false, expandRelatedLinks));
+	        newScheduleChannel.setChannel(channelSimplifier.simplify(scheduleChannel.channel(), false, false, false));
 	    }
 	    
 	    ImmutableList.Builder<org.atlasapi.media.entity.simple.Item> items = ImmutableList.builder();
