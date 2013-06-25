@@ -142,7 +142,7 @@ public class PaDailyPeopleUpdater extends ScheduledTask {
             }
 
             reportStatus(String.format("found %s profiles files, processed %s file%s", 
-                    Iterables.size(files), filesProcessed, filesProcessed!=1?"":"s"));
+                    Iterables.size(files), filesProcessed, filesProcessed==1?"":"s"));
         } catch (Exception e) {
             log.error("Exception running PA People updater", e);
             // this will stop the task
