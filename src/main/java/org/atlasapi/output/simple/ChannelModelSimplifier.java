@@ -23,8 +23,7 @@ public class ChannelModelSimplifier extends IdentifiedModelSimplifier<Channel, o
             input, 
             annotations.contains(Annotation.HISTORY), 
             annotations.contains(Annotation.PARENT), 
-            annotations.contains(Annotation.VARIATIONS),
-            annotations.contains(Annotation.RELATED_LINKS)
+            annotations.contains(Annotation.VARIATIONS)
         );
         
         if(annotations.contains(Annotation.CHANNEL_GROUPS)) {
