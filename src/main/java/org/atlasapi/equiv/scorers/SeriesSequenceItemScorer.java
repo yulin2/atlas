@@ -68,4 +68,8 @@ public class SeriesSequenceItemScorer implements EquivalenceScorer<Item> {
         return score;
     }
 
+    @Override
+    public String toString() {
+        return "Series Sequence";
+    }
 }
