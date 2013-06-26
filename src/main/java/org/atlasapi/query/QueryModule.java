@@ -30,6 +30,7 @@ import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
+import org.atlasapi.query.content.FilterScheduleOnlyQueryExecutor;
 import org.atlasapi.query.content.LookupResolvingQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
@@ -64,7 +65,7 @@ public class QueryModule {
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 	    
-	    KnownTypeContentResolver mongoContentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo, new MongoLookupEntryStore(mongo)));
+	    KnownTypeContentResolver mongoContentResolver = new MongoContentResolver(mongo, new MongoLookupEntryStore(mongo));
         KnownTypeContentResolver cassandraContentResolver = new CassandraKnownTypeContentResolver(cassandra);
 		
         KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, new MongoLookupEntryStore(mongo));
@@ -74,6 +75,7 @@ public class QueryModule {
 	    queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
 		
 	    queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
+	    queryExecutor = new FilterScheduleOnlyQueryExecutor(queryExecutor);
 	    
 	    return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
 	}
