@@ -72,7 +72,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     private static final Pattern FILEDATE = Pattern.compile("^.*(\\d{8})_tvdata.xml$");
 
     private final PaChannelMap channelMap;
-    private final Striped<Lock> currentlyProcessing = Striped.lock(64);
+    private static final Striped<Lock> currentlyProcessing = Striped.lock(4192);
     
     private List<Channel> supportedChannels = ImmutableList.of();
 
