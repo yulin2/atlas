@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TVDataInterfaceResponse xmlns="http://www.example.org/TVDataInterfaceModel">
+  <Result>0</Result>
+  <GuideList>
+    <Guide>
+      <Id>CAPALL</Id>
+      <Title>All Channels</Title>
+      <Description>New Guide Grid Title</Description>
+    </Guide>
+  </GuideList>
+  <ChannelList>
+    <Channel>
+      <Id>BBC1Hold</Id>
+      <Title>BBC1 Holding</Title>
+      <Description>BBC1 Holding</Description>
+      <Type>HOLDING</Type>
+      <Number>1</Number>
+      <ImageList>
+        <Image>
+          <filename>bbc1.70_120.png</filename>
+          <size>LOG_LDPI</size>
+        </Image>
+        <Image>
+          <filename>bbc1.70_160.png</filename>
+          <size>LOG_MDPI</size>
+        </Image>
+        <Image>
+          <filename>bbc1.70_240.png</filename>
+          <size>LOG_HDPI</size>
+        </Image>
+        <Image>
+          <filename>bbc1.70_320.png</filename>
+          <size>LOG_XDPI</size>
+        </Image>
+      </ImageList>
+      <RatingCode>U</RatingCode>
+      <RegionalVariantList>
+        <RegionalVariant>
+          <ChannelId>BBC1Camb</ChannelId>
+          <Title>BBC1 Cambridgeshire</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1Cha</ChannelId>
+          <Title>BBC1 Channel Islands</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1East</ChannelId>
+          <Title>BBC1 East</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1EM</ChannelId>
+          <Title>BBC1 East Midlands</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1Lond</ChannelId>
+          <Title>BBC1 London</Title>
+          <DefaultInRegion>true</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1NEC</ChannelId>
+          <Title>BBC1 North East &amp; Cumbria</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC12NW</ChannelId>
+          <Title>BBC1 North West</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1NI</ChannelId>
+          <Title>BBC1 Northern Ireland</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1Oxf</ChannelId>
+          <Title>BBC1 Oxfordshire</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1Sth</ChannelId>
+          <Title>BBC1 South</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1SE</ChannelId>
+          <Title>BBC1 South East</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1SWes</ChannelId>
+          <Title>BBC1 South West</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1Wst</ChannelId>
+          <Title>BBC1 West</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBCWest</ChannelId>
+          <Title>BBC1 West Midlands</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBCYLin</ChannelId>
+          <Title>BBC1 Yorks and Lincs</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>BBC1York</ChannelId>
+          <Title>BBC1 Yorkshire</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>bbc1wale</ChannelId>
+          <Title>BBC1 Wales</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>bbc1scot</ChannelId>
+          <Title>BBC1 Scotland</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+        <RegionalVariant>
+          <ChannelId>bbc1nort</ChannelId>
+          <Title>BBC1 North</Title>
+          <DefaultInRegion>false</DefaultInRegion>
+        </RegionalVariant>
+      </RegionalVariantList>
+    </Channel>
+    <TotalChannelCount>0</TotalChannelCount>
+  </ChannelList>
+  <AllChannelListCode>TTIMAGE1</AllChannelListCode>
+  <OdListCode>COMPAPP2</OdListCode>
+  <HelpListCode>TTIMAGE6</HelpListCode>
+  <TvGenreList>
+    <Genre>
+      <GenreCode>COMEDY</GenreCode>
+      <GenreDescription>Comedy</GenreDescription>
+    </Genre>
+  </TvGenreList>
+  <FilmGenreList>
+    <Genre>
+      <GenreCode>THRILLER</GenreCode>
+      <GenreDescription>Thriller</GenreDescription>
+    </Genre>
+  </FilmGenreList>
+  <ParentMovieGenreCode>CHMOVIES</ParentMovieGenreCode>
+  <ParentTvGenreCode>CHTV</ParentTvGenreCode>
+</TVDataInterfaceResponse>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TVDataInterfaceResponse xmlns="http://www.example.org/TVDataInterfaceModel">
+    <Result>0</Result>
+    <VodList>
+        <VodEntity>
+            <Id>ABCCAST1</Id>
+            <ItemType>SERIES</ItemType>
+            <Title>Castle S1</Title>
+            <ImageList>
+                <Image>
+                    <filename>Castle01S111123.png</filename>
+                    <size>HI576</size>
+                </Image>
+                <Image>
+                    <filename>Castle01S111123_sm.png</filename>
+                    <size>TTTV</size>
+                </Image>
+                <Image>
+                    <filename>Castle01S111123_smLA.png</filename>
+                    <size>TTTV2</size>
+                </Image>
+            </ImageList>
+            <Synopsis>Rick Castle, a famous crime novelist and rock star of the literary world, finds inspiration for a new character from an unlikely source - the smart, beautiful, no-nonsense Det. Kate Beckett - whether she likes it or not.</Synopsis>
+            <NavTargetId>22959509</NavTargetId>
+        </VodEntity>
+        <VodEntity>
+            <Id>ABCCAST2</Id>
+            <ItemType>SERIES</ItemType>
+            <Title>Castle S2</Title>
+            <ImageList>
+                <Image>
+                    <filename>castle_se02.png</filename>
+                    <size>HI576</size>
+                </Image>
+                <Image>
+                    <filename>castle_se02_sm3.png</filename>
+                    <size>TTTV</size>
+                </Image>
+                <Image>
+                    <filename>castle_se02_sm13.png</filename>
+                    <size>TTTV2</size>
+                </Image>
+            </ImageList>
+            <Synopsis>As Season Two begins, Castle wrestles with how to repair his relationship with Beckett, but a mysterious murder forces the pair back together. Though their relationship remains rocky, their passion for cracking cases keeps their collaboration cooking.</Synopsis>
+            <NavTargetId>27782335</NavTargetId>
+        </VodEntity>
+        <VodEntity>
+            <Id>ABCCAST3</Id>
+            <ItemType>SERIES</ItemType>
+            <Title>Castle S3</Title>
+            <ImageList>
+                <Image>
+                    <filename>castle_se03.png</filename>
+                    <size>HI576</size>
+                </Image>
+                <Image>
+                    <filename>castle_se03_sm13.png</filename>
+                    <size>TTTV2</size>
+                </Image>
+                <Image>
+                    <filename>castle_se03_sm3.png</filename>
+                    <size>TTTV</size>
+                </Image>
+            </ImageList>
+            <Synopsis>Successful New York mystery author Richard 'Ricky' Castle gets permission from the mayor, as a personal favour, to seek inspiration and factual documentation by tagging along with an NYPD detective's team.</Synopsis>
+            <NavTargetId>27796545</NavTargetId>
+        </VodEntity>
+        <VodEntity>
+            <Id>ABCCAST4</Id>
+            <ItemType>SERIES</ItemType>
+            <Title>Castle S4</Title>
+            <ImageList>
+                <Image>
+                    <filename>castle_se04.png</filename>
+                    <size>HI576</size>
+                </Image>
+                <Image>
+                    <filename>castle_se04_sm3.png</filename>
+                    <size>TTTV</size>
+                </Image>
+                <Image>
+                    <filename>castle_se04_sm13.png</filename>
+                    <size>TTTV2</size>
+                </Image>
+            </ImageList>
+            <Synopsis>After recovering from her close encounter with death, Detective Kate Beckett resumes her duties at the NYPD, once again working alongside Castle; while undertaking various murder investigations, the pair attempt to find Beckett's shooter.</Synopsis>
+            <NavTargetId>27796546</NavTargetId>
+        </VodEntity>
+        <TotalEntityCount>4</TotalEntityCount>
+    </VodList>
+</TVDataInterfaceResponse>
