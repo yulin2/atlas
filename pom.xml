@@ -89,6 +89,22 @@
                             <clearOutputDir>false</clearOutputDir>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-tt-vod-schema</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatePackage>org.atlasapi.remotesite.talktalk.vod.bindings</generatePackage>
+                            <schemaIncludes>
+                                <schemaInclude>TVDataInterfaceModel.xsd</schemaInclude>
+                            </schemaIncludes>
+                            <forceRegenerate>true</forceRegenerate>
+                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <staleFile>${project.build.directory}/generated-sources/.talktalkVodStaleFlag</staleFile>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
