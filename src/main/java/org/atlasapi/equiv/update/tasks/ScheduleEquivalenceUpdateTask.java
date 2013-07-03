@@ -6,8 +6,6 @@ import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.feeds.utils.UpdateProgress;
@@ -18,9 +16,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,19 +104,21 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
                 while (channelItems.hasNext() && shouldContinue()) {
                     Item scheduleItem = channelItems.next();
                     progress = progress.reduce(process(scheduleItem));
-                    reportStatus(generateStatus(progress, publisher, scheduleItem, channel));
+                    reportStatus(generateStatus(start, end, progress, publisher, scheduleItem, channel));
                 }
             }   
         }
         return progress;
     }
 
-    private String generateStatus(UpdateProgress progress, Publisher publisher, Item item, Channel channel) {
+    private String generateStatus(LocalDate start, LocalDate end, UpdateProgress progress, Publisher publisher, Item item, Channel channel) {
         return String.format(
-            "Updating %s on %s, with publisher %s. Current progress: %d processed, %d failures",
+            "Updating %s on %s, with publisher %s, between %s and %s. Current progress: %d processed, %d failures",
             item.getCanonicalUri(),
             channel.getCanonicalUri(),
-            publisher.name(),
+            publisher.name(), 
+            start.toString(), 
+            end.toString(),
             progress.getProcessed(),
             progress.getFailures()
         );

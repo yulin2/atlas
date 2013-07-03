@@ -60,7 +60,8 @@ public class EquivTaskModule {
 
     private static final Set<String> ignored = ImmutableSet.of("http://www.bbc.co.uk/programmes/b006mgyl"); 
     private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
-    private static final RepetitionRule YOUVIEW_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(12, 00));
+    private static final RepetitionRule YOUVIEW_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(15, 00));
+    private static final RepetitionRule YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(13, 00));
     
     private @Value("${equiv.updater.enabled}") String updaterEnabled;
     
@@ -98,7 +99,7 @@ public class EquivTaskModule {
                     youViewChannelResolver().getAllChannels(),
                     0,
                     7
-                ).withName("YouView Schedule Equivalence (8 day) Updater"), RepetitionRules.NEVER);
+                ).withName("YouView Schedule Equivalence (8 day) Updater"), YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
         }
     }
     
