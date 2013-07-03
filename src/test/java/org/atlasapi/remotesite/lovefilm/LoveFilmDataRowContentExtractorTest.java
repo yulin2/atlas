@@ -5,12 +5,12 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Alias;
@@ -27,7 +27,6 @@ import org.junit.Test;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 
@@ -208,6 +207,21 @@ public class LoveFilmDataRowContentExtractorTest {
         
         assertEquals(ImmutableSet.of(new Alias("gb:amazon:asin", "B00995Y076"), new Alias("zz:imdb:id", "tt0266308")), film.getAliases());
         assertEquals(ImmutableSet.of("http://gb.amazon.com/asin/B00995Y076", "http://www.imdb.com/title/tt0266308"), film.getAliasUrls());
+    }
+
+    @Test
+    public void testNoAvailabilitiesSetsActivelyPublishedToFalse() throws IOException {
+        
+        LoveFilmDataRow row = rowFromFile("battle-royale-no-availability.csv");
+        
+        Optional<Content> extracted = extractor.extract(row);
+        
+        assertTrue(extracted.isPresent());
+        Content content = extracted.get();
+        
+        Film film = (Film) content;
+        
+        assertFalse(film.isActivelyPublished());
     }
     
     private LoveFilmDataRow rowFromFile(String filename) throws IOException {
