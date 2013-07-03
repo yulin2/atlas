@@ -87,7 +87,7 @@ public class YouTubeSource extends BaseSource {
         return videoEntry.getRecorded();
     }
 	
-	public List<Video> getVideos() {
+    public List<Video> getVideos() {
 		List<Video> result = Lists.newArrayList();
 		if (videoEntry != null && videoEntry.getPlayer() != null && videoEntry.getPlayer().getDefaultUrl() != null) {
     		Video video = new Video("application/x-shockwave-flash", Duration.standardSeconds(videoEntry.getDuration()), videoEntry.getPlayer().getDefaultUrl(), topContent(), true, videoEntry.getUploaded());
@@ -96,7 +96,7 @@ public class YouTubeSource extends BaseSource {
 		return result;
 	}
 	
-	public int topContent() {
+    public int topContent() {
 	    if (videoEntry.getContent() != null) {
 	        if (videoEntry.getContent().getSix() != null) {
 	            return 6;
@@ -177,7 +177,7 @@ public class YouTubeSource extends BaseSource {
 		
 	}
 
-	public Set<String> getCategories() {
+    public Set<String> getCategories() {
         Set<String> result = Sets.newHashSet();
         if (videoEntry != null && videoEntry.getCategory() != null) {
             try {

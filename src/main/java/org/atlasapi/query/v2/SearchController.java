@@ -106,18 +106,9 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
             ApplicationConfiguration appConfig = appConfig(request);
             Set<Specialization> specializations = specializations(specialization);
             Set<Publisher> publishers = publishers(publisher, appConfig);
-            List<Identified> content = searcher.search(SearchQuery.builder(q)
-                .withSelection(selection)
-                .withSpecializations(specializations)
-                .withPublishers(publishers)
-                .withTitleWeighting(titleWeighting)
-                .withBroadcastWeighting(broadcastWeighting)
-                .withCatchupWeighting(catchupWeighting)
-                .withPriorityChannelWeighting(priorityChannelWeighting)
-                .withType(type)
-                .isTopLevelOnly(!Strings.isNullOrEmpty(topLevel) ? Boolean.valueOf(topLevel) : null)
-                .withCurrentBroadcastsOnly(!Strings.isNullOrEmpty(currentBroadcastsOnly) ? Boolean.valueOf(currentBroadcastsOnly) : null)
-                .build(), appConfig);
+            SearchQuery searchQuery = new SearchQuery.Builder(q).withSelection(selection).withSpecializations(specializations).withPublishers(publishers)
+                    .withTitleWeighting(titleWeighting).withBroadcastWeighting(broadcastWeighting).withCatchupWeighting(catchupWeighting).build();
+            List<Identified> content = searcher.search(searchQuery, appConfig);
 
             modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)), appConfig);
         } catch (Exception e) {
