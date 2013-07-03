@@ -115,6 +115,7 @@ public class PaDailyPeopleUpdater extends ScheduledTask {
                 if(!shouldContinue()) {
                     break;
                 }
+                FileUploadResult result;
                 try {
                     final String filename = file.toURI().toString();
                     Matcher matcher = FILE_DATE.matcher(filename);
@@ -127,19 +128,21 @@ public class PaDailyPeopleUpdater extends ScheduledTask {
                         reader.parse(fileToProcess.toURI().toString());
 
                         filesProcessed++;
-                        FileUploadResult.successfulUpload(SERVICE, file.getName());
+                        result = FileUploadResult.successfulUpload(SERVICE, file.getName());
                     }
                     else {
                         log.info("Not processing file " + file.toString() + " as filename format is not recognised");
-                        FileUploadResult.failedUpload(SERVICE, file.getName()).withMessage("Format not recognised");
+                        result = FileUploadResult.failedUpload(SERVICE, file.getName()).withMessage("Format not recognised");
                     }
                 } catch (Exception e) {
-                    FileUploadResult.failedUpload(SERVICE, file.getName()).withCause(e);
+                    result = FileUploadResult.failedUpload(SERVICE, file.getName()).withCause(e);
                     log.error("Error processing file " + file.toString(), e);
                 }
+                fileUploadResultStore.store(file.getName(), result);
             }
 
-            reportStatus(String.format("found profiles files, processed %s file", Iterables.size(files), filesProcessed));
+            reportStatus(String.format("found %s profiles files, processed %s file%s", 
+                    Iterables.size(files), filesProcessed, filesProcessed==1?"":"s"));
         } catch (Exception e) {
             log.error("Exception running PA People updater", e);
             // this will stop the task
