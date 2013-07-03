@@ -20,10 +20,8 @@ import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
@@ -54,7 +52,8 @@ public class QueryModule {
     private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
 	
 	private @Value("${applications.enabled}") String applicationsEnabled;
-	private @Value("${atlas.search.host}") String searchHost;
+    private @Value("${atlas.search.host}") String searchHost;
+    private @Value("${cassandra.enabled}") boolean cassandraEnabled;
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 	    
@@ -73,15 +72,4 @@ public class QueryModule {
 	    
 	    return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
 	}
-//	
-//	@Bean @Lazy SearchResolver searchResolver() {
-//	    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + applicationsEnabled);
-//	    if (! Strings.isNullOrEmpty(searchHost)) {
-//	        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + searchHost);
-//    	    ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
-//    	    return new ContentResolvingSearcher(titleSearcher, queryExecutor());
-//	    }
-//	    
-//	    return new DummySearcher();
-//	}
 }
