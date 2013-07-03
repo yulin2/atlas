@@ -1,0 +1,21 @@
+
+
+  <product id="925858" title="Back to Back 5 - Peppa Pig" prices="1.5,536c8a75-a38c-4626-ba55-03375220d9cd,2013-05-31T00:00:00.0000000,2013-11-30T23:59:00.0000000" period="1440" availability="2013-05-31T00:00:00.0000000~2013-11-30T23:59:00.0000000" sids="S0128048" rating="U" genre="Preschool Back to Back" services="YOU,CAR" promotion="0" trailer_id="" trailer="" multipleavailability="2013-05-31T00:00:00~2013-11-30T23:59:00" content_provider="E1E">
+    <titles>
+      <pack len="26">Back to Back 5 - Peppa Pig</pack>
+      <search>Peppa Pig</search>
+    </titles>
+    <asset id="890189" genre="Preschool Back to Back" synopsis="View an hour of great adventures with Peppa Pig back to back, for an hour of safe and educational fun without interruptions or commercials. &lt;br&gt;&lt;br&gt; Episodes include: Freddy Fox/Whistling/Doctor Hamster's Tortoise/Sun, Sea and Snow/Grandpa Pig's Computer/Hospital/Spring/Miss Rabbit's Helicopter/Baby Alexander/Grampy Rabbit's Lighthouse/Miss Rabbit's Day Off/Santa's Grotto/Santa's Visit" packshot="content_providers/e1_entertainment/images/single/3409d345-3ffe-49d3-afc0-913ee8091be3/files/97089/Peppa_Pig_B2B_CAR.png" background="content_providers/e1_entertainment/images/single/81c909c9-66f5-4bae-bf98-baa05ce518e4/files/97090/Peppa_Pig_WP_Ep_CAR.png" year="2010" rating="U" duration="0:01" hd="0" artist="" category_id="Kids" downloadplay="0" type="Kids" subGenre="Animation,Animals,Nature,Educational,Family,Adventure,Comedy,Preschool" schedulerChannel="Kids">
+      <service name="CAR">
+        <rating />
+        <feature region="main" src="content.qtl?pid=HYkV5_RB1bITCTUfKLasmDL2QJP5HTcw&amp;format=SMIL" title="Peppa Pig (B2B 5) _S4_E1-13" abstract="" filesize="677216134" releaseid="http://facade.mpx.btvision.nat.bt.com/data/Release/732493" protected="1" scheme="wmDrm" dur="PT1H07M36.52S" encodingformat="WM" aspectratio="16:9" />
+        <category id="10" />
+      </service>
+      <service name="YOU">
+        <rating />
+        <feature region="main" src="content.qtl?pid=O4qzcWLYNx_Vb3v8pHcJXBnENkEQZH3J&amp;format=SMIL" title="Peppa Pig (B2B 5) _S4_E1-13" abstract="" filesize="772088552" releaseid="http://facade.mpx.btvision.nat.bt.com/data/Release/732577" protected="1" scheme="marlin" dur="PT1H07M37.294S" encodingformat="MPEG" aspectratio="16:9" />
+        <category id="10" />
+      </service>
+      <brand id="481530" brand_id="PeppaPig-01" title="Peppa Pig" />
+    </asset>
+  </product>

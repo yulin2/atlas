@@ -6,7 +6,6 @@ import nu.xom.Element;
 
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.ContentGroup;
 
 import com.google.common.base.Optional;
 
@@ -26,7 +25,5 @@ public interface SimpleElementHandler {
      * @return The id of a product to be expanded, or absent
      */
     public Optional<Content> handle(Element element, @Nonnull Optional<Container> parent);
-
-    public void withContentGroup(ContentGroup contentGroup);
 
 }

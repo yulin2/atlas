@@ -2,15 +2,22 @@ package org.atlasapi.remotesite.btfeatured;
 
 import nu.xom.Element;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 
 public class BTFeaturedProductElement extends Element {
 
+    private static final String AVAILABILITY_ATTR = "availability";
     private static final String SERIES_ELEM = "series";
     private static final String COLLECTION_ELEM = "collection";
     private static final String ID_ATTR = "id";
     private static final String TITLE_ATTR = "title";
     private static final String ASSET_ELEM = "asset";
     
+    private static final DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS"); //2013-11-30T23:59:00.0000000
+
     public BTFeaturedProductElement(String name, String namespace) {
         super(name, namespace);
     }
@@ -63,5 +70,23 @@ public class BTFeaturedProductElement extends Element {
 
     public Element getAsset() {
         return getFirstChildElement(ASSET_ELEM);
+    }
+
+    public DateTime getAvailabilityStart() {
+        String availString = getAttributeValue(AVAILABILITY_ATTR);
+        int end = availString.indexOf('~');
+        if (end > 0) {
+            availString = availString.substring(0, end);
+        }
+        return DateTime.parse(availString, dateFormat);
+    }
+ 
+    public DateTime getAvailabilityEnd() {
+        String availString = getAttributeValue(AVAILABILITY_ATTR);
+        int start = availString.indexOf('~');
+        if (start > 0 && start < availString.length()) {
+            availString = availString.substring(start+1);
+        }
+        return DateTime.parse(availString, dateFormat);
     }
 }

@@ -1,0 +1,19 @@
+
+
+  <product id="954440" title="A Day in Your Life With BT Vision" prices="0,fde412f8-982e-4a87-8165-5330eedf11b9,2013-06-07T00:00:00.0000000,2013-07-31T23:59:00.0000000" period="1440" availability="2013-06-07T00:00:00.0000000~2013-07-31T23:59:00.0000000" sids="S0115263" rating="U" genre="Drama" services="CAR,YOU" promotion="0" trailer_id="" trailer="" multipleavailability="2013-06-07T00:00:00~2013-07-31T23:59:00" content_provider="BTV">
+    <titles>
+      <pack len="33">A Day in Your Life With BT Vision</pack>
+    </titles>
+    <asset id="922439" genre="Drama" synopsis="Find out what BT Vision has to offer; &#xA;Great TV Box Sets and the latest Movie Releases, available all day, every day. Includes:&#xA;Django Unchained&#xA;Les Miserable&#xA;Zero Dark 30&#xA;Life of Pi&#xA;The Impossible&#xA;Flight&#xA;Quartet&#xA;Miranda&#xA;Blue Bloods&#xA;Upstairs Downstairs&#xA;" packshot="content_providers/bt_vision_pvods/images/single/06479ab3-cdda-47de-b89a-21091fbb3a35/files/100612/A_Day_In_Your_Life_With_BT_Vision_June2013_CAR.png" background="" year="0" rating="U" duration="0:01" hd="0" artist="" category_id="TV" downloadplay="0" type="Promotion" subGenre="" schedulerChannel="TV">
+      <service name="CAR">
+        <rating />
+        <feature region="main" src="content.qtl?pid=CU_YmI5WXPjODL_vuCYJxu1flB4FNgI8&amp;format=SMIL" title="Trailer: TV and Films Image June 2013" abstract="" filesize="17638268" releaseid="http://facade.mpx.btvision.nat.bt.com/data/Release/753508" protected="1" scheme="wmDrm" dur="PT0H01M20.48S" encodingformat="WM" aspectratio="16:9" />
+        <category id="8" />
+      </service>
+      <service name="YOU">
+        <rating />
+        <feature region="main" src="content.qtl?pid=BhSZmm8F0FilmXin6l5ySx_KS_05jmkr&amp;format=SMIL" title="Trailer: TV and Films Image June 2013" abstract="" filesize="15456232" releaseid="http://facade.mpx.btvision.nat.bt.com/data/Release/753484" protected="1" scheme="marlin" dur="PT0H01M21.211S" encodingformat="MPEG" aspectratio="16:9" />
+        <category id="8" />
+      </service>
+    </asset>
+  </product>
