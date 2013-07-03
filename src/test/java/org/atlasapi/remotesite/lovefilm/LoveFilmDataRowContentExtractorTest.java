@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
@@ -41,10 +40,8 @@ public class LoveFilmDataRowContentExtractorTest {
         
         Optional<Content> extracted = extractor.extract(row);
         
-        assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Episode.class));
         Episode episode = (Episode) content;
         
         assertThat(episode.getContainer().getUri(), endsWith("shows/179260"));
@@ -75,10 +72,8 @@ public class LoveFilmDataRowContentExtractorTest {
         
         Optional<Content> extracted = extractor.extract(row);
         
-        assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Episode.class));
         Episode episode = (Episode) content;
         
         assertThat(episode.getContainer().getUri(), endsWith("shows/180765"));
@@ -95,10 +90,8 @@ public class LoveFilmDataRowContentExtractorTest {
         
         Optional<Content> extracted = extractor.extract(row);
         
-        assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Episode.class));
         Episode episode = (Episode) content;
         
         assertThat(episode.getContainer().getUri(), endsWith("shows/188387"));
@@ -115,7 +108,6 @@ public class LoveFilmDataRowContentExtractorTest {
         
         Optional<Content> extracted = extractor.extract(row);
         
-        assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
         Series series = (Series) content;
@@ -135,10 +127,8 @@ public class LoveFilmDataRowContentExtractorTest {
         
         Optional<Content> extracted = extractor.extract(row);
         
-        assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Episode.class));
         Episode episode = (Episode) content;
         
         assertThat(episode.getContainer().getUri(), endsWith("192242"));
@@ -156,10 +146,8 @@ public class LoveFilmDataRowContentExtractorTest {
         
         Optional<Content> extracted = extractor.extract(row);
         
-        assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Item.class));
         Item episode = (Item) content;
         
         assertThat(episode.getContainer().getUri(), endsWith("177351"));
@@ -178,10 +166,8 @@ public class LoveFilmDataRowContentExtractorTest {
         
         Optional<Content> extracted = extractor.extract(row);
         
-        assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Brand.class));
         Brand episode = (Brand) content;
         
         assertThat(episode.getTitle(), is("Blackadder - Special"));
@@ -195,10 +181,8 @@ public class LoveFilmDataRowContentExtractorTest {
         
         Optional<Content> extracted = extractor.extract(row);
         
-        assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
-        assertThat(content, is(Film.class));
         Film film = (Film) content;
         
         assertThat(film.getTitle(), is("Battle Royale"));
@@ -216,7 +200,6 @@ public class LoveFilmDataRowContentExtractorTest {
         
         Optional<Content> extracted = extractor.extract(row);
         
-        assertTrue(extracted.isPresent());
         Content content = extracted.get();
         
         Film film = (Film) content;
