@@ -29,7 +29,7 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 
 public class BTFeaturedContentUpdater extends ScheduledTask {
 
-    private static final String CONTENT_GROUP_URI = "http://featured.bt.com";
+    static final String CONTENT_GROUP_URI = "http://featured.bt.com";
 
     private static final String XML_SUFFIX = ".xml";
 
@@ -81,8 +81,6 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
                 } else {
                     contentGroup = new ContentGroup(CONTENT_GROUP_URI, Publisher.BT_FEATURED_CONTENT);
                 }
-                
-                handler.withContentGroup(contentGroup);
             }
             
             Document rootDocument = client.get(rootDocumentUri);
@@ -90,7 +88,7 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
             
             // Add each product to the BT Featured Content content group
             // If a product is a collection (contains a collection element), treat it as a container and ingest each of the products it contains
-            BTFeaturedContentProcessor processor = processor();
+            BTFeaturedContentProcessor processor = processor(contentGroup);
             
             Element rootElement = rootDocument.getRootElement();
             evaluateProducts(processor, rootElement, Optional.<Container>absent());
@@ -113,6 +111,7 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
 
             if (!this.shouldContinue()) return;
 
+            log.info("Reading "+product.getAttributeValue("id"));
             Element hydratedProduct = client.get(productBaseUri+product.getAttributeValue("id")+XML_SUFFIX).getRootElement();
             Optional<Content> item = processor.process(hydratedProduct, parent);
             
@@ -136,7 +135,7 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
         return productBaseUri+curie.substring(BTFeaturedElementHandler.CURIE_PREFIX.length())+XML_SUFFIX;
     }
 
-    private BTFeaturedContentProcessor processor() {
+    private BTFeaturedContentProcessor processor(final ContentGroup contentGroup) {
         return new BTFeaturedContentProcessor() {
             UpdateProgress progress = UpdateProgress.START;
 
@@ -147,6 +146,7 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
                 try {
                     content = handler.handle(element, parent);
                     
+                   
                     if (content.isPresent()) {
                         ResolvedContent resolved = contentResolver.findByCanonicalUris(ImmutableList.of(content.get().getCanonicalUri()));
                         
@@ -169,6 +169,13 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
                                 contentWriter.createOrUpdate((Container)resolvedContent);
                             }
                         }
+                        
+                        if (content.get() instanceof Item) {
+                            resolved = contentResolver.findByCanonicalUris(ImmutableList.of(content.get().getCanonicalUri()));
+                            Item item = (Item)(Content)resolved.get(content.get().getCanonicalUri()).requireValue();
+                            contentGroup.addContent(item.childRef());    
+                        }
+
                     }
                     
                     progress = progress.reduce(UpdateProgress.SUCCESS);
