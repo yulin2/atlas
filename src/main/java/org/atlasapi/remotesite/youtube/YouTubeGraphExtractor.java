@@ -31,11 +31,14 @@ import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.reference.entity.ContainerFormat;
+import org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
 import org.atlasapi.remotesite.youtube.entity.YouTubeSource.Video;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.media.MimeType;
@@ -50,6 +53,9 @@ import com.metabroadcast.common.media.MimeType;
  * @author Augusto Uehara (augusto@metabroadcast.com)
  */
 public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, Item> {
+
+    private final Logger log = LoggerFactory.getLogger(YouTubeGraphExtractor.class);
+
     static enum EMBED_TYPE {
         IFRAME, IFRAME_WITH_API, AS3_OBJECT
     };
@@ -84,11 +90,15 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
         item.addVersion(version);
 
         if (source.getDefaultPlayerUrl().isPresent()) {
+            try {
             String defaultPlayerNamespace = "";
             Alias defaultPlayer = new Alias(defaultPlayerNamespace,
                     YoutubeUriCanonicaliser.standardURL(YoutubeUriCanonicaliser.videoIdFrom(source.getURL().orNull())));
             aliases.add(defaultPlayer);
             aliasesUrl.add(defaultPlayer.getValue());
+            } catch (YouTubeException e) {
+                log.error(e.getMessage(), e);
+            }
         }
 
         item.addAliases(aliases);
@@ -163,8 +173,9 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
      * 
      * @param url
      * @return
+     * @throws YouTubeException 
      */
-    public String embedCodeFor(String url) {
+    public String embedCodeFor(String url) throws YouTubeException {
         String videoId = YoutubeUriCanonicaliser.videoIdFrom(url);
         return embedCodeFor(videoId, EMBED_TYPE.IFRAME);
     }
