@@ -176,13 +176,20 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private Optional<Content> extractFilm(LoveFilmDataRow source) {
         Film film = createFilm(source);
         
-        film.setVersions(versionAndLocationFrom(source));
-        
         Content itemWithCommonFields = setCommonFields(film, source);
         itemWithCommonFields.setTitle(episodeTitle(source, film));
+        
+        Optional<Policy> policy = policyFrom(source);
+        film.setVersions(versionAndLocationFrom(source, policy));
+        film.setActivelyPublished(isActivelyPublished(policy));
+        
         return Optional.of(itemWithCommonFields);
     }
     
+    private boolean isActivelyPublished(Optional<Policy> policy) {
+        return policy.isPresent();
+    }
+
     private Optional<Content> extractEpisode(LoveFilmDataRow source) {
         String parentId = SHOW_ID.valueFrom(source);
         Item item;
@@ -205,10 +212,14 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             item.setParentRef(new ParentRef(uri(parentId, SHOW_RESOURCE_TYPE)));
         }
         
-        item.setVersions(versionAndLocationFrom(source));
         item.setSpecialization(Specialization.TV);
         Content itemWithCommonFields = setCommonFields(item, source);
         itemWithCommonFields.setTitle(episodeTitle(source, item));
+        
+        Optional<Policy> policy = policyFrom(source);
+        item.setVersions(versionAndLocationFrom(source, policy));
+        item.setActivelyPublished(isActivelyPublished(policy));
+        
         return Optional.of(itemWithCommonFields);
     }
     
@@ -361,14 +372,13 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     
     // if no start/end date, don't add a location
     // prevents issues with sending missing availability windows to youview
-    private Set<Version> versionAndLocationFrom(LoveFilmDataRow source) {
+    private Set<Version> versionAndLocationFrom(LoveFilmDataRow source, Optional<Policy> policy) {
         Version version = new Version();
         String duration = RUN_TIME_SEC.valueFrom(source);
         if (!duration.equals("")) {
             version.setDuration(Duration.standardSeconds(Long.parseLong(duration)));
         }
         
-        Optional<Policy> policy = policyFrom(source);
         if (policy.isPresent()) {
             Encoding encoding = new Encoding();
             if (HD_AVAILABLE.valueFrom(source).equals("1")) {
