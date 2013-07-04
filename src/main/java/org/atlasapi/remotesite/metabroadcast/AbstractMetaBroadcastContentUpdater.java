@@ -1,11 +1,10 @@
 package org.atlasapi.remotesite.metabroadcast;
 
-import static org.atlasapi.feeds.utils.UpdateProgress.FAILURE;
-import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
+import static com.metabroadcast.common.scheduling.UpdateProgress.FAILURE;
+import static com.metabroadcast.common.scheduling.UpdateProgress.SUCCESS;
 
 import java.util.List;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Container;
@@ -37,6 +36,7 @@ import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public abstract class AbstractMetaBroadcastContentUpdater {
 

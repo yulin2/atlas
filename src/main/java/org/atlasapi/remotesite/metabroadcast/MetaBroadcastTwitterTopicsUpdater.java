@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.metabroadcast;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
@@ -21,6 +20,7 @@ import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastContentUpdater {
     

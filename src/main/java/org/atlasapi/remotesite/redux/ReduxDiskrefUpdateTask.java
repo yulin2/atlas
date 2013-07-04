@@ -4,11 +4,12 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.concurrent.Callable;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class ReduxDiskrefUpdateTask implements Callable<UpdateProgress>{
 

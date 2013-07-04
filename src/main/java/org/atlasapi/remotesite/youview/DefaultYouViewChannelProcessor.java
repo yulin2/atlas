@@ -4,7 +4,6 @@ import java.util.List;
 
 import nu.xom.Elements;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
 
