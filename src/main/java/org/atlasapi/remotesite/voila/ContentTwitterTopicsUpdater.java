@@ -1,12 +1,11 @@
 package org.atlasapi.remotesite.voila;
 
-import static org.atlasapi.feeds.utils.UpdateProgress.FAILURE;
-import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
+import static com.metabroadcast.common.scheduling.UpdateProgress.FAILURE;
+import static com.metabroadcast.common.scheduling.UpdateProgress.SUCCESS;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.List;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
@@ -31,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class ContentTwitterTopicsUpdater {
 

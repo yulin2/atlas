@@ -1,14 +1,13 @@
 package org.atlasapi.equiv.update.tasks;
 
-import static org.atlasapi.feeds.utils.UpdateProgress.FAILURE;
-import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
+import static com.metabroadcast.common.scheduling.UpdateProgress.FAILURE;
+import static com.metabroadcast.common.scheduling.UpdateProgress.SUCCESS;
 
 import java.util.Iterator;
 import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
@@ -23,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 import com.metabroadcast.common.time.DayRange;
 import com.metabroadcast.common.time.DayRangeGenerator;
 

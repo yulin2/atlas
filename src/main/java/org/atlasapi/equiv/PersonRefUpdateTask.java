@@ -1,7 +1,7 @@
 package org.atlasapi.equiv;
 
-import static org.atlasapi.feeds.utils.UpdateProgress.FAILURE;
-import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
+import static com.metabroadcast.common.scheduling.UpdateProgress.FAILURE;
+import static com.metabroadcast.common.scheduling.UpdateProgress.SUCCESS;
 import static org.atlasapi.persistence.content.ContentCategory.CHILD_ITEM;
 import static org.atlasapi.persistence.content.ContentCategory.TOP_LEVEL_ITEM;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.equiv.update.tasks.ScheduleTaskProgressStore;
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
@@ -38,6 +37,7 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;

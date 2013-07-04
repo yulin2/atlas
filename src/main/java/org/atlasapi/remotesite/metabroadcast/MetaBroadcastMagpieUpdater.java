@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.metabroadcast;
 
 import java.util.List;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic.Type;
@@ -21,6 +20,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpdater {
 

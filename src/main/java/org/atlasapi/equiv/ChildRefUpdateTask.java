@@ -2,11 +2,11 @@ package org.atlasapi.equiv;
 
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.update;
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
+import static com.metabroadcast.common.scheduling.UpdateProgress.FAILURE;
+import static com.metabroadcast.common.scheduling.UpdateProgress.SUCCESS;
 import static org.atlasapi.persistence.content.ContentCategory.CONTAINER;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
 import static org.atlasapi.persistence.content.listing.ContentListingProgress.progressFrom;
-import static org.atlasapi.feeds.utils.UpdateProgress.FAILURE;
-import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -32,7 +32,6 @@ import org.atlasapi.persistence.content.mongo.MongoContentTables;
 import org.atlasapi.persistence.media.entity.ChildRefTranslator;
 import org.atlasapi.persistence.media.entity.ContainerTranslator;
 import org.atlasapi.persistence.media.entity.ItemTranslator;
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +47,7 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.persistence.mongo.MongoBuilders;
 import com.metabroadcast.common.persistence.mongo.MongoUpdateBuilder;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;

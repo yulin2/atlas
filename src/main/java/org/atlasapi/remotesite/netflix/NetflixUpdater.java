@@ -3,12 +3,12 @@ package org.atlasapi.remotesite.netflix;
 import nu.xom.Document;
 import nu.xom.Element;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class NetflixUpdater extends ScheduledTask {
 
