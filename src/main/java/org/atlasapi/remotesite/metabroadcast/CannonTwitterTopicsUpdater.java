@@ -2,11 +2,11 @@ package org.atlasapi.remotesite.metabroadcast;
 
 import java.util.List;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class CannonTwitterTopicsUpdater extends ScheduledTask {
 

@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.redux;
 
-import org.atlasapi.feeds.utils.Reducible;
+import com.metabroadcast.common.scheduling.Reducible;
 
 public interface ResultProcessor<I, O extends Reducible<O>> {
 

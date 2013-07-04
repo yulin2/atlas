@@ -4,11 +4,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 import com.metabroadcast.common.time.Timestamp;
 
 public class MagpieUpdaterTask extends ScheduledTask{

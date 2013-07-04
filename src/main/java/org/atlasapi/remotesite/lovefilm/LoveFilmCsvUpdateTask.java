@@ -2,13 +2,13 @@ package org.atlasapi.remotesite.lovefilm;
 
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SKU;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class LoveFilmCsvUpdateTask extends ScheduledTask {
 

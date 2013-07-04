@@ -9,7 +9,6 @@ import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
@@ -19,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 
 public class YouViewUpdater extends ScheduledTask {

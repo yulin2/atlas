@@ -1,8 +1,9 @@
 package org.atlasapi.remotesite.youview;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.joda.time.DateTime;
+
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 import nu.xom.Elements;
 
