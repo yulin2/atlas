@@ -24,16 +24,16 @@ import com.metabroadcast.common.http.SimpleHttpClient;
  * @author andrewtoone
  *
  */
-public class BTFeaturedClient implements RemoteSiteClient<Document> {
+public class BtFeaturedClient implements RemoteSiteClient<Document> {
 
     private final SimpleHttpClient client;
     private final Builder builder;
     
-    public BTFeaturedClient(SimpleHttpClient client) {
+    public BtFeaturedClient(SimpleHttpClient client) {
         this(client, new Builder());
     }
 
-    public BTFeaturedClient(SimpleHttpClient client, Builder builder) {
+    public BtFeaturedClient(SimpleHttpClient client, Builder builder) {
         this.client = client;
         this.builder = builder;
     }
@@ -54,7 +54,7 @@ public class BTFeaturedClient implements RemoteSiteClient<Document> {
         }));
     }
 
-    public static Document readDocument(final String uri, InputStreamReader bodyReader, Builder builder)
+    static Document readDocument(final String uri, InputStreamReader bodyReader, Builder builder)
             throws IOException, ParsingException, ValidityException {
         BufferedReader reader = new BufferedReader(bodyReader);
         StringBuilder sb = new StringBuilder();

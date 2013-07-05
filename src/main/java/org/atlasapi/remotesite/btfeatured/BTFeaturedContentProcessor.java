@@ -15,7 +15,7 @@ import com.google.common.base.Optional;
  * @author andrewtoone
  *
  */
-public interface BTFeaturedContentProcessor {
+public interface BtFeaturedContentProcessor {
     
     /**
      * Process an element, optionally returning an id of a further element to be processed

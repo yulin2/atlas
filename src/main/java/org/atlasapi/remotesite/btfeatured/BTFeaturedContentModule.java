@@ -25,7 +25,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
  *
  */
 @Configuration
-public class BTFeaturedContentModule {
+public class BtFeaturedContentModule {
 
     private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 15, 0)); // TODO: When should this be, should it be configurable?
 
@@ -43,13 +43,13 @@ public class BTFeaturedContentModule {
         scheduler.schedule(btFeaturedContentUpdater(groupResolver, groupWriter, contentResolver, contentWriter).withName("BT Featured Content Updater"), DAILY);
     }
 
-    private BTFeaturedContentUpdater btFeaturedContentUpdater(ContentGroupResolver groupResolver, ContentGroupWriter groupWriter, ContentResolver contentResolver, ContentWriter contentWriter) {
-        BTFeaturedNodeFactory factory = new BTFeaturedNodeFactory();
+    private BtFeaturedContentUpdater btFeaturedContentUpdater(ContentGroupResolver groupResolver, ContentGroupWriter groupWriter, ContentResolver contentResolver, ContentWriter contentWriter) {
+        BtFeaturedNodeFactory factory = new BtFeaturedNodeFactory();
         
-        BTFeaturedClient client = new BTFeaturedClient(new SimpleHttpClientBuilder().build(), new Builder(factory));
-        BTFeaturedElementHandler handler = new BTFeaturedElementHandler();
+        BtFeaturedClient client = new BtFeaturedClient(new SimpleHttpClientBuilder().build(), new Builder(factory));
+        BtFeaturedElementHandler handler = new BtFeaturedElementHandler();
         
-        BTFeaturedContentUpdater updater = new BTFeaturedContentUpdater(client, handler, groupResolver, groupWriter, contentResolver, contentWriter, productBaseUri, rootDocumentUri);
+        BtFeaturedContentUpdater updater = new BtFeaturedContentUpdater(client, handler, groupResolver, groupWriter, contentResolver, contentWriter, productBaseUri, rootDocumentUri);
         
         return updater;
     }

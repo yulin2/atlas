@@ -37,7 +37,7 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.intl.Countries;
 
 
-public class BTFeaturedElementHandler implements SimpleElementHandler {
+public class BtFeaturedElementHandler implements SimpleElementHandler {
 
     private static final String SERIES_NUMBER_ATTR = "series_number";
     private static final String EPISODE_NUMBER_ATTR = "episode_number";
@@ -66,16 +66,16 @@ public class BTFeaturedElementHandler implements SimpleElementHandler {
     private static final String PLATFORM_BTVISION = "CAR";
 
  
-    private static final Logger log = LoggerFactory.getLogger(BTFeaturedElementHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(BtFeaturedElementHandler.class);
 
     @Override
     public Optional<Content> handle(Element element, @Nonnull Optional<Container> parent) {
-        if (!(element instanceof BTFeaturedProductElement)) {
+        if (!(element instanceof BtFeaturedProductElement)) {
             return Optional.absent();
         }
-        BTFeaturedProductElement product = (BTFeaturedProductElement)element;
+        BtFeaturedProductElement product = (BtFeaturedProductElement)element;
         
-        log.debug("Parsing product "+product);
+        log.debug("Parsing product {}", product);
         if (product.isCollection()) { 
             /**
              * title          title
@@ -117,8 +117,7 @@ public class BTFeaturedElementHandler implements SimpleElementHandler {
             setSeriesAndEpsiode(assetElement, episode);
 
             item = episode;
-        }
-        else {
+        } else {
             item = new Item(getUriFrom(product.getProductId()), getCurieFrom(product.getProductId()), Publisher.BT_FEATURED_CONTENT);
         }
         
@@ -149,7 +148,7 @@ public class BTFeaturedElementHandler implements SimpleElementHandler {
     }
 
 
-    protected void createVersionAndLocationsFor(Item item, BTFeaturedProductElement product,
+    protected void createVersionAndLocationsFor(Item item, BtFeaturedProductElement product,
             Element assetElement) {
         Elements serviceElements = assetElement.getChildElements(SERVICE_ELEMENT);
 
@@ -197,7 +196,7 @@ public class BTFeaturedElementHandler implements SimpleElementHandler {
     }
 
 
-    private void setDuration(Element assetElement, Version version, BTFeaturedProductElement product) {
+    private void setDuration(Element assetElement, Version version, BtFeaturedProductElement product) {
         String durationString = assetElement.getAttributeValue("duration");
         if (StringUtils.isEmpty(durationString)) {
             log.warn("Missing duration for product "+product);
@@ -241,7 +240,7 @@ public class BTFeaturedElementHandler implements SimpleElementHandler {
     }
 
 
-    private void setCommonFields(Content content, BTFeaturedProductElement product, Element described) {
+    private void setCommonFields(Content content, BtFeaturedProductElement product, Element described) {
         content.setTitle(product.getTitle());
         content.setImage(BT_FEATURED_IMAGE_URI+described.getAttributeValue(IMAGE_ATTR));
         
