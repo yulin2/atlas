@@ -7,7 +7,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 
-public class BTFeaturedProductElement extends Element {
+public class BtFeaturedProductElement extends Element {
 
     private static final String AVAILABILITY_ATTR = "availability";
     private static final String SERIES_ELEM = "series";
@@ -18,7 +18,7 @@ public class BTFeaturedProductElement extends Element {
     
     private static final DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS"); //2013-11-30T23:59:00.0000000
 
-    public BTFeaturedProductElement(String name, String namespace) {
+    public BtFeaturedProductElement(String name, String namespace) {
         super(name, namespace);
     }
 

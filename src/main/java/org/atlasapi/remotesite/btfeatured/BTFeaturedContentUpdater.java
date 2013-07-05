@@ -27,13 +27,13 @@ import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
 
-public class BTFeaturedContentUpdater extends ScheduledTask {
+public class BtFeaturedContentUpdater extends ScheduledTask {
 
     static final String CONTENT_GROUP_URI = "http://featured.bt.com";
 
     private static final String XML_SUFFIX = ".xml";
 
-    private final BTFeaturedClient client;
+    private final BtFeaturedClient client;
     private final SimpleElementHandler handler;
     private final ContentGroupResolver groupResolver;
     private final ContentGroupWriter groupWriter;
@@ -42,13 +42,13 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
 
     private ContentWriter contentWriter;
     
-    private static final Logger log = LoggerFactory.getLogger(BTFeaturedContentUpdater.class);
+    private static final Logger log = LoggerFactory.getLogger(BtFeaturedContentUpdater.class);
 
     private final String productBaseUri;
 
     private final String rootDocumentUri;
 
-    public BTFeaturedContentUpdater(BTFeaturedClient client, 
+    public BtFeaturedContentUpdater(BtFeaturedClient client, 
             SimpleElementHandler handler, 
             ContentGroupResolver groupResolver, 
             ContentGroupWriter groupWriter, 
@@ -88,7 +88,7 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
             
             // Add each product to the BT Featured Content content group
             // If a product is a collection (contains a collection element), treat it as a container and ingest each of the products it contains
-            BTFeaturedContentProcessor processor = processor(contentGroup);
+            BtFeaturedContentProcessor processor = processor(contentGroup);
             
             Element rootElement = rootDocument.getRootElement();
             evaluateProducts(processor, rootElement, Optional.<Container>absent());
@@ -104,7 +104,7 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
         }
     }
 
-    protected void evaluateProducts(BTFeaturedContentProcessor processor, Element rootElement, Optional<Container> parent)
+    protected void evaluateProducts(BtFeaturedContentProcessor processor, Element rootElement, Optional<Container> parent)
             throws Exception {
         for (int i = 0; i < rootElement.getChildElements().size(); i++) {
             Element product = rootElement.getChildElements().get(i);
@@ -119,8 +119,8 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
                 log.info("Product has child "+item.get());
                 Document childDoc = client.get(urlForProductWithCurie(item.get().getCurie()));
                 
-                if (childDoc.getRootElement() instanceof BTFeaturedProductElement) {
-                    Element container = ((BTFeaturedProductElement)childDoc.getRootElement()).getContainer();
+                if (childDoc.getRootElement() instanceof BtFeaturedProductElement) {
+                    Element container = ((BtFeaturedProductElement)childDoc.getRootElement()).getContainer();
                     evaluateProducts(processor, container, Optional.of((Container)item.get()));
                 }
             }
@@ -129,14 +129,14 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
     }
 
     protected String urlForProductWithCurie(String curie) {
-        if (!curie.startsWith(BTFeaturedElementHandler.CURIE_PREFIX)) {
+        if (!curie.startsWith(BtFeaturedElementHandler.CURIE_PREFIX)) {
             throw new RuntimeException("Not a recognised curie for BT Featured Content: "+curie);
         }
-        return productBaseUri+curie.substring(BTFeaturedElementHandler.CURIE_PREFIX.length())+XML_SUFFIX;
+        return productBaseUri+curie.substring(BtFeaturedElementHandler.CURIE_PREFIX.length())+XML_SUFFIX;
     }
 
-    private BTFeaturedContentProcessor processor(final ContentGroup contentGroup) {
-        return new BTFeaturedContentProcessor() {
+    private BtFeaturedContentProcessor processor(final ContentGroup contentGroup) {
+        return new BtFeaturedContentProcessor() {
             UpdateProgress progress = UpdateProgress.START;
 
             @Override
