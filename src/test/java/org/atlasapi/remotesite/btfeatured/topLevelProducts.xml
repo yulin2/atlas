@@ -1,0 +1,15 @@
+
+  <page correlationId="1dbd357e-d36a-475e-be30-bfd76d071c5b" total="5" start="1" end="5">
+    <product id="954440" title="A Day in Your Life With BT Vision" genre="Drama" sids="S0115263" prices="0,fde412f8-982e-4a87-8165-5330eedf11b9,2013-06-07T00:00:00.0000000,2013-07-31T23:59:00.0000000" availability="2013-06-07T00:00:00~2013-07-31T23:59:00" rating="U" services="CAR,YOU" trailer="" trailer_id="" promotion="0">
+      <titles>
+        <pack len="33">A Day in Your Life With BT Vision</pack>
+      </titles>
+      <asset id="922439" packshot="content_providers/bt_vision_pvods/images/single/06479ab3-cdda-47de-b89a-21091fbb3a35/files/100612/A_Day_In_Your_Life_With_BT_Vision_June2013_CAR.png" artist="" genre="Drama" year="0" type="Promotion" />
+    </product>
+    <product id="925860" title="Peppa Pig - Back to Backs" genre="Preschool Back to Back" sids="S0128048" prices="" availability="2013-05-31T00:00:00~2013-11-30T23:59:00" rating="U" services="YOU,CAR" trailer="" trailer_id="" promotion="0">
+      <titles>
+        <pack len="25">Peppa Pig - Back to Backs</pack>
+      </titles>
+      <collection id="925859" count="2" packshot="content_providers/e1_entertainment/images/single/7dbdc828-3d9e-46d4-9e72-f21c4de92257/files/97089/Peppa_Pig_B2B_CAR.png" artist="" />
+    </product>
+  </page>

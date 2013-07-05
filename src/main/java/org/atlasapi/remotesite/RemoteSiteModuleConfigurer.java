@@ -10,6 +10,7 @@ import org.atlasapi.feeds.lakeview.LakeviewModule;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
+import org.atlasapi.remotesite.btfeatured.BtFeaturedContentModule;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.five.FiveModule;
 import org.atlasapi.remotesite.hulu.HuluModule;
@@ -67,6 +68,7 @@ public class RemoteSiteModuleConfigurer {
         .put("musicbrainz", MusicBrainzModule.class)
         .put("emipub", EmiPubModule.class)
         .put("metabroadcast", MetaBroadcastModule.class)
+        .put("btfeatured", BtFeaturedContentModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {

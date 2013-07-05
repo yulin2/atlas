@@ -1,0 +1,20 @@
+
+
+  <product id="936814" title="Back to Back 6 - Peppa Pig" prices="1.5,e40b1226-a590-44e8-9637-c74693af8759,2013-05-31T00:00:00.0000000,2013-11-30T23:59:00.0000000" period="1440" availability="2013-05-31T00:00:00.0000000~2013-11-30T23:59:00.0000000" sids="S0128048" rating="U" genre="Preschool Back to Back" services="YOU,CAR" promotion="0" trailer_id="" trailer="" multipleavailability="2013-05-31T00:00:00~2013-11-30T23:59:00" content_provider="E1E">
+    <titles>
+      <pack len="26">Back to Back 6 - Peppa Pig</pack>
+      <search>Peppa Pig</search>
+    </titles>
+    <asset id="890193" genre="Preschool Back to Back" synopsis="View an hour of great adventures with Peppa Pig back to back, for an hour of safe and educational fun without interruptions or commercials. &lt;br&gt;&lt;br&gt; Episodes include: The Secret Club/Grampy Rabbit's Boatyard/Shake, Rattle and Bang/Champion Daddy Pig/Chatterbox/Mr Fox's Van/Chloe's Big Friends/Gym Class/The Blackberry Bush/Pottery/Paper Aeroplanes/Edmond Elephant's Birthday/The Biggest Muddy Puddle In The World" packshot="content_providers/e1_entertainment/images/single/117c1b3f-4c05-442d-8b1b-f370aadafd29/files/97089/Peppa_Pig_B2B_CAR.png" background="content_providers/e1_entertainment/images/single/73ed54dd-f0f2-4193-8144-ec01069bd166/files/97090/Peppa_Pig_WP_Ep_CAR.png" year="2010" rating="U" duration="0:01" hd="0" artist="" category_id="Kids" downloadplay="0" type="Kids" subGenre="Animation,Animals,Nature,Educational,Family,Adventure,Comedy,Preschool" schedulerChannel="Kids">
+      <service name="CAR">
+        <rating />
+        <feature region="main" src="content.qtl?pid=6a53769ebApfL9XeW90JhIBDn7YwVoJJ&amp;format=SMIL" title="Peppa Pig (B2B 6) _S4_E14-26" abstract="" filesize="656064134" releaseid="http://facade.mpx.btvision.nat.bt.com/data/Release/735088" protected="1" scheme="wmDrm" dur="PT1H07M36.4S" encodingformat="WM" aspectratio="16:9" />
+        <category id="10" />
+      </service>
+      <service name="YOU">
+        <rating />
+        <feature region="main" src="content.qtl?pid=5qmshnyS1ArRqoLQ1MlnQi4YrSHxgee3&amp;format=SMIL" title="Peppa Pig (B2B 6) _S4_E14-26" abstract="" filesize="772071444" releaseid="http://facade.mpx.btvision.nat.bt.com/data/Release/735319" protected="1" scheme="marlin" dur="PT1H07M37.219S" encodingformat="MPEG" aspectratio="16:9" />
+        <category id="10" />
+      </service>
+    </asset>
+  </product>
