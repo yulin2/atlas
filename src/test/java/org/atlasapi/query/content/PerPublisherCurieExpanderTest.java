@@ -2,6 +2,7 @@ package org.atlasapi.query.content;
 
 import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.BBC;
 import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.BLIP;
+import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.BTFEATURED;
 import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.C4;
 import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.DM;
 import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.FB;
@@ -185,5 +186,13 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	
 	public void testProducesWikipediaCuries() throws Exception {
 		assertThat(WIKI.compact("http://en.wikipedia.org/foo"), is("wiki:en:foo"));
+	}
+	
+	public void testExpandsBTFeaturedContentCuries() throws Exception {
+	    assertThat(expander.expand("btfeatured:943507"), is(Maybe.just("http://featured.bt.com/products/943507")));
+	}
+	
+	public void testProducesBTFeaturedContentCuries() throws Exception {
+	    assertThat(BTFEATURED.compact("http://featured.bt.com/products/943507"), is("btfeatured:943507"));
 	}
 }

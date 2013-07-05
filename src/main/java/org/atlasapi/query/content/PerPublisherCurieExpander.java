@@ -346,6 +346,34 @@ public class PerPublisherCurieExpander implements CurieExpander {
                 return null;
             }
             
+        },
+        
+        BTFEATURED {
+            public final String  BTFEATURED_CURIE = "btfeatured:"; // Matches curie in BTFeaturedElementHandler
+            public final String  BTFEATURED_URL = "http://featured.bt.com/products/"; // Matches uri in BTFeaturedElementHandler
+            
+            private final Pattern BTFEATURED_CURIE_PATTERN = Pattern.compile(BTFEATURED_CURIE+"(\\d+)");
+            
+            @Override
+            public String expand(String curie) {
+                Matcher matcher = BTFEATURED_CURIE_PATTERN.matcher(curie);
+                if (matcher.matches()) {
+                    return BTFEATURED_URL+matcher.group(1);
+                }
+                return null;
+            }
+
+            private final Pattern BTFEATURED_URL_PATTERN = Pattern.compile(BTFEATURED_URL+"(\\d+)");
+
+            @Override
+            public String compact(String url) {
+                Matcher matcher = BTFEATURED_URL_PATTERN.matcher(url);
+                if (matcher.matches()) {
+                    return BTFEATURED_CURIE+matcher.group(1);
+                }
+                return null;
+            }
+            
         }, 
         
         PA {
