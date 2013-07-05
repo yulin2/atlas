@@ -63,8 +63,7 @@ public class TheSunTvPicksEntryProcessor {
         } else {
             log.record(new AdapterLogEntry(ERROR).withSource(getClass()).withDescription("Could not find equivalent item for: " + itemUri));   
             // TODO fail here?
-        }        
-
+        }    
         return item;
     }
 
@@ -80,6 +79,7 @@ public class TheSunTvPicksEntryProcessor {
             // lookup item to get id (so we can add it to the content group)
             Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableSet.of(item.getCanonicalUri())).get(item.getCanonicalUri());
             if (resolved.hasValue()) {
+                ChildRef childRef;
                 Item resolvedItem = (Item) resolved.valueOrNull();
                 childRefs.add(resolvedItem.childRef());
             } else {
