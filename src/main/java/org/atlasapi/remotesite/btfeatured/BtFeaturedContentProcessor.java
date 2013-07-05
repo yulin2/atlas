@@ -4,7 +4,8 @@ import javax.annotation.Nonnull;
 
 import nu.xom.Element;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
+import com.metabroadcast.common.scheduling.UpdateProgress;
+
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 
