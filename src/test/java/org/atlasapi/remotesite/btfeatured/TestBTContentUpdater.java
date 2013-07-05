@@ -34,9 +34,9 @@ public class TestBTContentUpdater {
     private static String ROOT_DOCUMENT_URL = "http://test.bt.featured";
     
     @Mock
-    BTFeaturedClient client;
+    BtFeaturedClient client;
     
-    BTFeaturedElementHandler handler;
+    BtFeaturedElementHandler handler;
     
     @Mock
     ContentResolver contentResolver;
@@ -58,29 +58,29 @@ public class TestBTContentUpdater {
     
     @Before
     public void setup() throws ValidityException, IOException, ParsingException, Exception {
-        BTFeaturedNodeFactory factory = new BTFeaturedNodeFactory();     
+        BtFeaturedNodeFactory factory = new BtFeaturedNodeFactory();     
 
         InputStreamReader bodyReader = new InputStreamReader(getClass().getResourceAsStream("topLevelProducts.xml"));
         
-        when(client.get(ROOT_DOCUMENT_URL)).thenReturn(BTFeaturedClient.readDocument(ROOT_DOCUMENT_URL, bodyReader, new Builder(factory)));
+        when(client.get(ROOT_DOCUMENT_URL)).thenReturn(BtFeaturedClient.readDocument(ROOT_DOCUMENT_URL, bodyReader, new Builder(factory)));
         
-        when(contentGroupResolver.findByCanonicalUris(ImmutableList.of(BTFeaturedContentUpdater.CONTENT_GROUP_URI))).thenReturn(resolvedContent);
+        when(contentGroupResolver.findByCanonicalUris(ImmutableList.of(BtFeaturedContentUpdater.CONTENT_GROUP_URI))).thenReturn(resolvedContent);
         when(resolvedContent.get(any(String.class))).thenReturn(identified);
         when(identified.hasValue()).thenReturn(false);
         
         bodyReader = new InputStreamReader(getClass().getResourceAsStream("singleProduct_954440.xml"));
-        when(client.get(PRODUCT_BASE_URL+"954440.xml")).thenReturn(BTFeaturedClient.readDocument(PRODUCT_BASE_URL+"954440.xml", bodyReader, new Builder(factory)));
+        when(client.get(PRODUCT_BASE_URL+"954440.xml")).thenReturn(BtFeaturedClient.readDocument(PRODUCT_BASE_URL+"954440.xml", bodyReader, new Builder(factory)));
 
         bodyReader = new InputStreamReader(getClass().getResourceAsStream("collection_925860.xml"));
-        when(client.get(PRODUCT_BASE_URL+"925860.xml")).thenReturn(BTFeaturedClient.readDocument(PRODUCT_BASE_URL+"925860.xml", bodyReader, new Builder(factory)));
+        when(client.get(PRODUCT_BASE_URL+"925860.xml")).thenReturn(BtFeaturedClient.readDocument(PRODUCT_BASE_URL+"925860.xml", bodyReader, new Builder(factory)));
  
         bodyReader = new InputStreamReader(getClass().getResourceAsStream("childProduct_925858.xml"));
-        when(client.get(PRODUCT_BASE_URL+"925858.xml")).thenReturn(BTFeaturedClient.readDocument(PRODUCT_BASE_URL+"925858.xml", bodyReader, new Builder(factory)));
+        when(client.get(PRODUCT_BASE_URL+"925858.xml")).thenReturn(BtFeaturedClient.readDocument(PRODUCT_BASE_URL+"925858.xml", bodyReader, new Builder(factory)));
 
         bodyReader = new InputStreamReader(getClass().getResourceAsStream("childProduct_936814.xml"));
-        when(client.get(PRODUCT_BASE_URL+"936814.xml")).thenReturn(BTFeaturedClient.readDocument(PRODUCT_BASE_URL+"936814.xml", bodyReader, new Builder(factory)));
+        when(client.get(PRODUCT_BASE_URL+"936814.xml")).thenReturn(BtFeaturedClient.readDocument(PRODUCT_BASE_URL+"936814.xml", bodyReader, new Builder(factory)));
 
-        handler = new BTFeaturedElementHandler();
+        handler = new BtFeaturedElementHandler();
 
         when(contentResolver.findByCanonicalUris(any(Iterable.class))).thenReturn(resolvedContent);
         when(resolvedContent.resolved(any(String.class))).thenReturn(false);
@@ -90,7 +90,7 @@ public class TestBTContentUpdater {
     @Test
     public void testParsesTopLevelProducts() {
         assertNotNull(handler);
-        BTFeaturedContentUpdater updater = new BTFeaturedContentUpdater(client, handler, contentGroupResolver, contentGroupWriter, contentResolver, contentWriter, PRODUCT_BASE_URL, ROOT_DOCUMENT_URL);
+        BtFeaturedContentUpdater updater = new BtFeaturedContentUpdater(client, handler, contentGroupResolver, contentGroupWriter, contentResolver, contentWriter, PRODUCT_BASE_URL, ROOT_DOCUMENT_URL);
         
         updater.run();
         
