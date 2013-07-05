@@ -148,32 +148,38 @@ public class BTFeaturedContentUpdater extends ScheduledTask {
                     
                    
                     if (content.isPresent()) {
-                        ResolvedContent resolved = contentResolver.findByCanonicalUris(ImmutableList.of(content.get().getCanonicalUri()));
+                        Content content2 = content.get();
+                        ResolvedContent resolved = contentResolver.findByCanonicalUris(ImmutableList.of(content2.getCanonicalUri()));
                         
-                        if (!resolved.resolved(content.get().getCanonicalUri())) {
-                            if (content.get() instanceof Item) {
-                                contentWriter.createOrUpdate((Item)content.get());
+                        if (!resolved.resolved(content2.getCanonicalUri())) {
+                            if (content2 instanceof Item) {
+                                contentWriter.createOrUpdate((Item)content2);
                             }
                             else {
-                                contentWriter.createOrUpdate((Container)content.get());
+                                contentWriter.createOrUpdate((Container)content2);
                             }
                         }
                         else {
-                            Content resolvedContent = (Content)resolved.get(content.get().getCanonicalUri()).requireValue();
-                            if (content.get() instanceof Item) {
-                                ContentMerger.merge((Item)resolvedContent, (Item)content.get());
+                            Content resolvedContent = (Content)resolved.get(content2.getCanonicalUri()).requireValue();
+                            if (content2 instanceof Item) {
+                                ContentMerger.merge((Item)resolvedContent, (Item)content2);
                                 contentWriter.createOrUpdate((Item)resolvedContent);
                             }
                             else {
-                                ContentMerger.merge((Container)resolvedContent, (Container)content.get());
+                                ContentMerger.merge((Container)resolvedContent, (Container)content2);
                                 contentWriter.createOrUpdate((Container)resolvedContent);
                             }
                         }
                         
-                        if (content.get() instanceof Item) {
-                            resolved = contentResolver.findByCanonicalUris(ImmutableList.of(content.get().getCanonicalUri()));
-                            Item item = (Item)(Content)resolved.get(content.get().getCanonicalUri()).requireValue();
-                            contentGroup.addContent(item.childRef());    
+                        if (!parent.isPresent()) {
+                            resolved = contentResolver.findByCanonicalUris(ImmutableList.of(content2.getCanonicalUri()));
+                            if (content2 instanceof Item) {
+                                Item item = (Item)(Content)resolved.get(content.get().getCanonicalUri()).requireValue();
+                                contentGroup.addContent(item.childRef());    
+                            } else {
+                                Container container = (Container)(Content)resolved.get(content.get().getCanonicalUri()).requireValue();
+                                contentGroup.addContent(container.childRef());                                    
+                            }
                         }
 
                     }

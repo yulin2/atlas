@@ -23,6 +23,7 @@ import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -249,7 +250,7 @@ public class BTFeaturedElementHandler implements SimpleElementHandler {
     }
     
     private String getCurieFrom(String productId) {
-        return CURIE_PREFIX+productId;
+        return CurieAlgorithm.BTFEATURED.compact(getUriFrom(productId));
     }
 
     private String getUriFrom(String productId) {
