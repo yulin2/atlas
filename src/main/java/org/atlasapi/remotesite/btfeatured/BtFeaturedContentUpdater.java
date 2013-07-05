@@ -2,10 +2,11 @@ package org.atlasapi.remotesite.btfeatured;
 
 import javax.annotation.Nonnull;
 
+import com.metabroadcast.common.scheduling.UpdateProgress;
+
 import nu.xom.Document;
 import nu.xom.Element;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
