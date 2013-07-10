@@ -50,6 +50,7 @@ public class TheSunTvPicksEntryProcessor {
         String itemUri = URI_PREFIX + itemElement.getGuid();
         item.setCanonicalUri(itemUri);
         item.setDescription(itemElement.getDescription());
+        item.setLongDescription(itemElement.getStory());
         List<TheSunRssEnclosureElement> enclosures = itemElement.getEnclosures();
         if (!enclosures.isEmpty()) {
             item.setImage(enclosures.get(0).getUrl());
@@ -79,7 +80,6 @@ public class TheSunTvPicksEntryProcessor {
             // lookup item to get id (so we can add it to the content group)
             Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableSet.of(item.getCanonicalUri())).get(item.getCanonicalUri());
             if (resolved.hasValue()) {
-                ChildRef childRef;
                 Item resolvedItem = (Item) resolved.valueOrNull();
                 childRefs.add(resolvedItem.childRef());
             } else {

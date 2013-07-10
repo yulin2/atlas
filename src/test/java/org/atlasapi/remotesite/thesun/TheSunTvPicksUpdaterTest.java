@@ -1,16 +1,16 @@
 package org.atlasapi.remotesite.thesun;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Set;
 
-import junit.framework.TestCase;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
@@ -22,16 +22,17 @@ import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
-import com.hp.hpl.jena.rdf.model.Container;
-import com.metabroadcast.common.base.Maybe;
 
-public class TheSunTvPicksUpdaterTest extends TestCase {
+@RunWith(JMock.class)
+public class TheSunTvPicksUpdaterTest {
     protected static final int ContentGroup = 0;
     private static String FEED_URL = "http://www.thesun.co.uk/sol/homepage/feeds/smartphone/newsection/";
     private static String TEST_CONTENT_ID = "http://pressassociation.com/programmes/abc1234";    
