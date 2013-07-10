@@ -13,23 +13,24 @@ import com.google.common.collect.ImmutableList;
 public class TheSunTvPicksContentGroupUpdater {
     private final ContentGroupResolver contentGroupResolver;
     private final ContentGroupWriter contentGroupWriter;
-    private static String CONTENT_GROUP_URI = "http://www.thesun.co.uk/sol/homepage/feeds/smartphone/newsection/";
+    private final String contentGroupUri; 
     
     public TheSunTvPicksContentGroupUpdater(ContentGroupResolver contentGroupResolver,
-            ContentGroupWriter contentGroupWriter) {
+            ContentGroupWriter contentGroupWriter, String contentGroupUri) {
         super();
         this.contentGroupResolver = contentGroupResolver;
         this.contentGroupWriter = contentGroupWriter;
+        this.contentGroupUri = contentGroupUri;
     }
 
     public ContentGroup createOrRetrieveGroup() {
         ContentGroup contentGroup;
-        ResolvedContent resolvedContent = contentGroupResolver.findByCanonicalUris(ImmutableList.of(CONTENT_GROUP_URI));
-        if (resolvedContent.get(CONTENT_GROUP_URI).hasValue()) {
-            contentGroup = (ContentGroup) resolvedContent.get(CONTENT_GROUP_URI).requireValue();
+        ResolvedContent resolvedContent = contentGroupResolver.findByCanonicalUris(ImmutableList.of(contentGroupUri));
+        if (resolvedContent.get(contentGroupUri).hasValue()) {
+            contentGroup = (ContentGroup) resolvedContent.get(contentGroupUri).requireValue();
             contentGroup.setContents(ImmutableList.<ChildRef>of());
         } else {
-            contentGroup = new ContentGroup(CONTENT_GROUP_URI, Publisher.THE_SUN);
+            contentGroup = new ContentGroup(contentGroupUri, Publisher.THE_SUN);
         }
         return contentGroup;
     };

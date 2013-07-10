@@ -25,6 +25,7 @@ import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.preview.PreviewNetworksModule;
 import org.atlasapi.remotesite.redux.ReduxModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
+import org.atlasapi.remotesite.thesun.TheSunModule;
 import org.atlasapi.remotesite.tvblob.TVBlobModule;
 import org.atlasapi.remotesite.voila.VoilaModule;
 import org.atlasapi.remotesite.worldservice.WorldServicesModule;
@@ -67,6 +68,7 @@ public class RemoteSiteModuleConfigurer {
         .put("musicbrainz", MusicBrainzModule.class)
         .put("emipub", EmiPubModule.class)
         .put("metabroadcast", MetaBroadcastModule.class)
+        .put("thesuntvpicks", TheSunModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {

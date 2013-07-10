@@ -18,6 +18,7 @@ import org.atlasapi.remotesite.channel4.XmlClient;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,6 +37,8 @@ public class TheSunModule {
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired AdapterLog log;
+    private @Value("${thesuntvpicks.rss.url}") String feedUrl;
+    private @Value("${thesuntvpicks.contentgroup.uri}") String contentGroupUri;
     
     @PostConstruct
     public void startBackgroundTasks() {
@@ -56,7 +59,7 @@ public class TheSunModule {
     @Bean
     public TheSunTvPicksUpdater theSunTvPicksUpdater() {
         TheSunTvPicksEntryProcessor entryProcessor = new TheSunTvPicksEntryProcessor(contentWriter, contentResolver, log);
-        TheSunTvPicksContentGroupUpdater groupUpdater = new TheSunTvPicksContentGroupUpdater(contentGroupResolver, contentGroupWriter);
-        return new TheSunTvPicksUpdater(theSunTvPicksClient(), entryProcessor, groupUpdater, log);
+        TheSunTvPicksContentGroupUpdater groupUpdater = new TheSunTvPicksContentGroupUpdater(contentGroupResolver, contentGroupWriter, contentGroupUri);
+        return new TheSunTvPicksUpdater(feedUrl, theSunTvPicksClient(), entryProcessor, groupUpdater, log);
     }
 }

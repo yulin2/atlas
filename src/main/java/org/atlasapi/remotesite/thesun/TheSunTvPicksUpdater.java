@@ -17,7 +17,7 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 
 
 public class TheSunTvPicksUpdater extends ScheduledTask  {
-    private static String FEED_URL = "http://www.thesun.co.uk/sol/homepage/feeds/smartphone/newsection/";
+    private final String feedUrl; 
     private final TheSunTvPicksEntryProcessor entryProcessor;
     private final TheSunTvPicksContentGroupUpdater groupUpdater;
     private final RemoteSiteClient<Document> rssFetcher;
@@ -25,8 +25,9 @@ public class TheSunTvPicksUpdater extends ScheduledTask  {
     private int itemsProcessed;
     private int groupSize;
     
-    public TheSunTvPicksUpdater(RemoteSiteClient<Document> rssFetcher, TheSunTvPicksEntryProcessor entryProcessor, TheSunTvPicksContentGroupUpdater groupUpdater, AdapterLog log) {
+    public TheSunTvPicksUpdater(String feedUrl, RemoteSiteClient<Document> rssFetcher, TheSunTvPicksEntryProcessor entryProcessor, TheSunTvPicksContentGroupUpdater groupUpdater, AdapterLog log) {
         super();
+        this.feedUrl = feedUrl;
         this.rssFetcher = rssFetcher;
         this.entryProcessor = entryProcessor;
         this.groupUpdater = groupUpdater;
@@ -44,7 +45,7 @@ public class TheSunTvPicksUpdater extends ScheduledTask  {
     
     @Override
     protected void runTask() {
-        Document scheduleDocument = getFeed(FEED_URL);
+        Document scheduleDocument = getFeed(this.feedUrl);
         Preconditions.checkNotNull(scheduleDocument);
         Nodes entryNodes = scheduleDocument.query("rss/channel/item");
         Collection<Item> items = entryProcessor.convertToItems(entryNodes);

@@ -29,9 +29,9 @@ import com.google.common.io.Resources;
 
 public class TheSunTvPicksUpdaterTest {
     protected static final int ContentGroup = 0;
-    private static String FEED_URL = "http://www.thesun.co.uk/sol/homepage/feeds/smartphone/newsection/";
+    private static String FEED_URL = "http://example.org/sunfeed";
     private static String TEST_CONTENT_ID = "http://pressassociation.com/programmes/abc1234";    
-    private static String CONTENT_GROUP_URI = "http://www.thesun.co.uk/sol/homepage/feeds/smartphone/newsection/";   
+    private static String CONTENT_GROUP_URI = "http://example.org/sunfeed";   
     private final Builder builder = new Builder(new TheSunTvPicksElementFactory());
     private final AdapterLog log = new NullAdapterLog();
     private ContentWriter contentWriter;
@@ -60,8 +60,8 @@ public class TheSunTvPicksUpdaterTest {
         groupResolvedContent = generateGroupResolvedContent();
         tvPicksFeed = builder.build(new InputStreamReader(Resources.getResource("thesun-tvpicks-2013-07-02.xml").openStream()));
         entryProcessor = new TheSunTvPicksEntryProcessor(contentWriter, resolver, log);
-        groupUpdater = new TheSunTvPicksContentGroupUpdater(contentGroupResolver, contentGroupWriter);
-        updater = new TheSunTvPicksUpdater(rssFetcher, entryProcessor, groupUpdater, log);
+        groupUpdater = new TheSunTvPicksContentGroupUpdater(contentGroupResolver, contentGroupWriter, CONTENT_GROUP_URI);
+        updater = new TheSunTvPicksUpdater(FEED_URL, rssFetcher, entryProcessor, groupUpdater, log);
     }
     
     private Item generateResolvedItem(long id, String uri) {

@@ -29,7 +29,7 @@ import com.metabroadcast.common.base.Maybe;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-public class TheSunTvPicksParserTest {
+public class TheSunTvPicksEntryProcessorTest {
     private final AdapterLog log = new NullAdapterLog();
     private Document tvPicksFeed;
     private TheSunTvPicksEntryProcessor entryProcessor;
