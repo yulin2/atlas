@@ -267,8 +267,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         String imageUri = PA_BASE_IMAGE_URL + pictureUsage.getvalue();
         Image image = new Image(imageUri);
         
-        image.setHeight(360);
-        image.setWidth(640);
+        image.setHeight(576);
+        image.setWidth(1024);
         image.setType(ImageType.ADDITIONAL); 
         image.setAspectRatio(ImageAspectRatio.SIXTEEN_BY_NINE);
         image.setMimeType(MimeType.IMAGE_JPG);
