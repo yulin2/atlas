@@ -17,7 +17,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -27,8 +26,8 @@ public class ChannelSimplifier {
     private final NumberToShortStringCodec idCodec;
     private final ChannelResolver channelResolver;
     private final PublisherSimplifier publisherSimplifier;
-    private final ImageSimplifier imageSimplifier;
     private final NumberToShortStringCodec v4Codec;
+    private final ImageSimplifier imageSimplifier;
     
     public ChannelSimplifier(NumberToShortStringCodec idCodec, NumberToShortStringCodec v4Codec, ChannelResolver channelResolver, PublisherSimplifier publisherSimplifier, ImageSimplifier imageSimplifier) {
         this.idCodec = idCodec;
@@ -47,6 +46,7 @@ public class ChannelSimplifier {
         if (input.getId() != null) {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
         }
+
         simple.setAliases(Sets.union(input.getAliasUrls(), ImmutableSet.of(createV4AliasUrl(input))));
         simple.setHighDefinition(input.getHighDefinition());
         simple.setRegional(input.getRegional());
@@ -69,7 +69,6 @@ public class ChannelSimplifier {
         ));
         simple.setMediaType(input.getMediaType() != null ? input.getMediaType().toString().toLowerCase() : null);
         simple.setStartDate(input.getStartDate());            
-        simple.setEndDate(input.getEndDate());
         simple.setRelatedLinks(simplifyRelatedLinks(input.getRelatedLinks()));
         
         simple.setPublisherDetails(publisherSimplifier.simplify(input.getSource()));

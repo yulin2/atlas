@@ -2,13 +2,11 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import java.util.Map;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.channel4.C4AtomApi;
-import org.atlasapi.remotesite.channel4.C4BrandUpdater;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
@@ -17,6 +15,7 @@ import org.joda.time.format.PeriodFormat;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.DayRange;
 import com.metabroadcast.common.time.DayRangeGenerator;

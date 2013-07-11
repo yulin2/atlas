@@ -7,7 +7,6 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -25,6 +24,7 @@ import org.joda.time.LocalTime;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class C4EpgChannelDayUpdater {

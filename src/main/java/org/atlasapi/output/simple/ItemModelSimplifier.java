@@ -64,10 +64,11 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
             TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, 
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
-            NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, ImageSimplifier imageSimplifier) {
-        
+            NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, 
+            ImageSimplifier imageSimplifier) {
         this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, 
-                containerSummaryResolver, channelResolver, idCodec, channelIdCodec, new SystemClock(), imageSimplifier);
+                containerSummaryResolver, channelResolver, idCodec, channelIdCodec, new SystemClock(), 
+                imageSimplifier);
     }
 
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
@@ -77,6 +78,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             ImageSimplifier imageSimplifier) {
         
         super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier);
+        
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.imageSimplifier = imageSimplifier;

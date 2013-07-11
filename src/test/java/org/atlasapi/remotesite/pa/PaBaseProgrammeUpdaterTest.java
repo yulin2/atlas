@@ -122,8 +122,8 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         assertEquals(new DateTime(2011, DateTimeConstants.FEBRUARY, 6, 0, 0, 0, 0).withZone(DateTimeZone.UTC), brandImage.getAvailabilityEnd());
         assertEquals(MimeType.IMAGE_JPG, brandImage.getMimeType());
         assertEquals(ImageType.PRIMARY, brandImage.getType());
-        assertEquals((Integer)640, brandImage.getWidth());
-        assertEquals((Integer)360, brandImage.getHeight());
+        assertEquals((Integer)1024, brandImage.getWidth());
+        assertEquals((Integer)576, brandImage.getHeight());
         
 
         Item item = loadItemAtPosition(brand, 0);

@@ -2,6 +2,7 @@ package org.atlasapi.output.simple;
 
 import java.math.BigInteger;
 import java.util.Set;
+
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.MediaType;
@@ -17,20 +18,14 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
-import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public abstract class DescribedModelSimplifier<F extends Described, T extends Description> extends IdentifiedModelSimplifier<F,T> {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     private final ImageSimplifier imageSimplifier;
-
-    protected DescribedModelSimplifier(ImageSimplifier imageSimplifier) {
-        this.imageSimplifier = imageSimplifier;
-    }
     
-    protected DescribedModelSimplifier(NumberToShortStringCodec idCodec, ImageSimplifier imageSimplifier) {
-        super(idCodec);
+    protected DescribedModelSimplifier(ImageSimplifier imageSimplifier) {
         this.imageSimplifier = imageSimplifier;
     }
     
