@@ -12,8 +12,10 @@ import org.atlasapi.media.entity.simple.HistoricalChannelEntry;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
@@ -22,9 +24,11 @@ public class ChannelSimplifier {
     private final NumberToShortStringCodec idCodec;
     private final ChannelResolver channelResolver;
     private final PublisherSimplifier publisherSimplifier;
+    private final NumberToShortStringCodec v4Codec;
     
-    public ChannelSimplifier(NumberToShortStringCodec idCodec, ChannelResolver channelResolver, PublisherSimplifier publisherSimplifier) {
+    public ChannelSimplifier(NumberToShortStringCodec idCodec, NumberToShortStringCodec v4Codec, ChannelResolver channelResolver, PublisherSimplifier publisherSimplifier) {
         this.idCodec = idCodec;
+        this.v4Codec = v4Codec;
         this.channelResolver = channelResolver;
         this.publisherSimplifier = publisherSimplifier;
     }
@@ -38,7 +42,7 @@ public class ChannelSimplifier {
         if (input.getId() != null) {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
         }
-        simple.setAliases(input.getAliasUrls());
+        simple.setAliases(Sets.union(input.getAliasUrls(), ImmutableSet.of(createV4AliasUrl(input))));
         simple.setHighDefinition(input.highDefinition());
         simple.setRegional(input.regional());
         if (input.timeshift() != null) {
@@ -53,6 +57,7 @@ public class ChannelSimplifier {
         
         simple.setPublisherDetails(publisherSimplifier.simplify(input.source()));
         simple.setBroadcaster(publisherSimplifier.simplify(input.broadcaster()));
+        
         simple.setAvailableFrom(Iterables.transform(input.availableFrom(), new Function<Publisher, PublisherDetails>() {
             @Override
             public PublisherDetails apply(Publisher input) {
@@ -139,5 +144,9 @@ public class ChannelSimplifier {
         simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
         simple.setTitle(input.title());
         return simple;
+    }
+    
+    private String createV4AliasUrl(Channel input) {
+        return String.format("http://metabroadcast.com/atlas/channels/v4/%s", v4Codec.encode(BigInteger.valueOf(input.getId())));
     }
 }
