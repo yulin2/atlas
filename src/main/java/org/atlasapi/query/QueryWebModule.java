@@ -151,7 +151,7 @@ public class QueryWebModule {
     }
     
     @Bean ChannelSimplifier channelSimplifier() {
-        return new ChannelSimplifier(new SubstitutionTableNumberCodec(), channelResolver, publisherSimplifier(), imageSimplifier());
+        return new ChannelSimplifier(v3ChannelCodec(), v4ChannelCodec(), channelResolver, publisherSimplifier(), imageSimplifier());
     }
     
     @Bean ChannelGroupSimplifier channelGroupSimplifier() {
@@ -163,6 +163,13 @@ public class QueryWebModule {
         return new ImageSimplifier();
     }
 
+    private SubstitutionTableNumberCodec v3ChannelCodec() {
+        return new SubstitutionTableNumberCodec();
+    }
+    
+    private SubstitutionTableNumberCodec v4ChannelCodec() {
+        return SubstitutionTableNumberCodec.lowerCaseOnly();
+    }
 
     @Bean
     ChannelGroupController channelGroupController() {
