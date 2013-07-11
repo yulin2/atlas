@@ -190,6 +190,6 @@ public class ChannelSimplifier {
     }
     
     private String createV4AliasUrl(Channel input) {
-        return String.format("http://metabroadcast.com/atlas/channels/v4/%s", v4Codec.encode(BigInteger.valueOf(input.getId())));
+        return String.format("http://atlas.metabroadcast.com/4.0/channels/%s", v4Codec.encode(BigInteger.valueOf(input.getId())));
     }
 }
