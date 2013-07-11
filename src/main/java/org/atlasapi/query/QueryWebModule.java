@@ -150,13 +150,20 @@ public class QueryWebModule {
     }
     
     @Bean ChannelSimplifier channelSimplifier() {
-        return new ChannelSimplifier(new SubstitutionTableNumberCodec(), channelResolver, publisherSimplifier());
+        return new ChannelSimplifier(v3ChannelCodec(), v4ChannelCodec(), channelResolver, publisherSimplifier());
     }
     
     @Bean ChannelGroupSimplifier channelGroupSimplifier() {
         return new ChannelGroupSimplifier(new SubstitutionTableNumberCodec(), channelGroupResolver, publisherSimplifier());
     }
 
+    private SubstitutionTableNumberCodec v3ChannelCodec() {
+        return new SubstitutionTableNumberCodec();
+    }
+    
+    private SubstitutionTableNumberCodec v4ChannelCodec() {
+        return SubstitutionTableNumberCodec.lowerCaseOnly();
+    }
 
     @Bean
     ChannelGroupController channelGroupController() {
