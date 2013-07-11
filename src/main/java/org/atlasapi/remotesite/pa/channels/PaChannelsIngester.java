@@ -236,7 +236,8 @@ public class PaChannelsIngester {
             LocalDate imageStartDate = formatter.parseLocalDate(logo.getStartDate());
             String type = logo.getType();
             Image image = new Image(IMAGE_PREFIX + logo.getvalue());
-            image.setTheme(IMAGE_THEME_MAPPING.get(type));
+            ImageTheme theme = type == null ? ImageTheme.LIGHT_OPAQUE : IMAGE_THEME_MAPPING.get(type);
+            image.setTheme(theme);
             image.setWidth(Ints.tryParse(logo.getWidth()));
             image.setHeight(Ints.tryParse(logo.getHeight()));
             image.setType(ImageType.LOGO);
