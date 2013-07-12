@@ -277,6 +277,11 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         if(annotations.contains(Annotation.CHANNEL_SUMMARY)) {
             simpleChannel.setTitle(channel.getTitle());
             simpleChannel.setImage(channel.getImage().getCanonicalUri());
+            simpleChannel.setHighDefinition(channel.getHighDefinition());
+            simpleChannel.setRegional(channel.getRegional());
+            if (channel.getTimeshift() != null) {
+                simpleChannel.setTimeshift(channel.getTimeshift().getStandardSeconds());
+            }
             simpleChannel.setImages(Iterables.transform(
                 channel.getImages(), 
                 new Function<Image, org.atlasapi.media.entity.simple.Image>() {
