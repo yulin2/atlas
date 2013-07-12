@@ -85,8 +85,9 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             return new Image();
         }
         Image simpleImage = new Image(image.getCanonicalUri());
+        simpleImage.setType(image.getClass().getSimpleName().toLowerCase());
         if (image.getType() != null) {
-            simpleImage.setType(image.getType().getName());
+            simpleImage.setImageType(image.getType().getName());
         }
         if (image.getColor() != null) {
             simpleImage.setColor(image.getColor().getName());
