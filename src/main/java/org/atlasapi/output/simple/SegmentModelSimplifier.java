@@ -75,7 +75,7 @@ public class SegmentModelSimplifier implements ModelSimplifier<List<SegmentEvent
             seg.setDuration(Ints.saturatedCast(segment.getDuration().getStandardSeconds()));
         }
         if (segment.getType() != null) {
-            seg.setType(segment.getType().toString());
+            seg.setSegmentType(segment.getType().toString());
         }
         
         return seg;
