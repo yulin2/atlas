@@ -11,6 +11,8 @@ import java.util.Set;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.TemporalField;
 import org.atlasapi.media.entity.Image;
+import org.atlasapi.media.entity.ImageColor;
+import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.channels.bindings.Channels;
@@ -44,7 +46,7 @@ public class ChannelHierarchyTest {
         channel.setId("1741");
         channel.setName("Heat TV", "2009-10-11", "2010-01-10");
         channel.setName("Newer Heat TV", "2010-01-11", null);
-        channel.setImage("p131906.png", "2009-10-11");
+        channel.setImage("p131906.png", "2009-10-11", 360, 240);
         channel.setProviderAlias("9", "1078");
         channel.setFormat();
         channel.setRegional();
@@ -78,8 +80,13 @@ public class ChannelHierarchyTest {
         TemporalField<String> newName = new TemporalField<String>("Newer Heat TV", new LocalDate(2010, 1, 11), null);
         assertEquals(ImmutableSet.of(oldName, newName), ImmutableSet.copyOf(createdChannel.getAllTitles()));
         
-        assertEquals("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131906.png", createdChannel.getImages());
-        assertEquals(new TemporalField<String>("p131906.png", new LocalDate(2009, 10, 11), null), Iterables.getOnlyElement(createdChannel.getAllImages()));
+        Image expectedImage = new Image("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131906.png");
+        expectedImage.setType(ImageType.LOGO);
+        expectedImage.setColor(ImageColor.COLOR);
+        expectedImage.setWidth(360);
+        expectedImage.setHeight(240);
+        assertEquals(ImmutableSet.of(expectedImage), createdChannel.getImages());
+        assertEquals(new TemporalField<Image>(expectedImage, new LocalDate(2009, 10, 11), null), Iterables.getOnlyElement(createdChannel.getAllImages()));
         
         assertEquals(Publisher.METABROADCAST, createdChannel.getSource());
         assertTrue(createdChannel.getHighDefinition());
@@ -93,7 +100,7 @@ public class ChannelHierarchyTest {
         westMidlands.setStartDate("2010-06-01");
         westMidlands.setId("11");
         westMidlands.setName("BBC One West Midlands", "2011-09-28", null);
-        westMidlands.setImage("p131474.png", "2011-09-28");
+        westMidlands.setImage("p131474.png", "2011-09-28", 360, 240);
         westMidlands.setFormat();
         westMidlands.setMediaType("TV");
         
@@ -102,7 +109,7 @@ public class ChannelHierarchyTest {
         channelIslands.setEndDate("2013-04-23");
         channelIslands.setId("1663");
         channelIslands.setName("BBC One Channel Islands", "2011-10-15", null);
-        channelIslands.setImage("p131731.png", "2011-10-15");
+        channelIslands.setImage("p131731.png", "2011-10-15", 360, 240);
         channelIslands.setFormat();
         channelIslands.setMediaType("TV");
         
@@ -191,6 +198,8 @@ public class ChannelHierarchyTest {
         private String id;
         private String image;
         private String imageStartDate;
+        private String imageWidth;
+        private String imageHeight;
         private String startDate;
         private String endDate;
         private String serviceProviderId;
@@ -210,9 +219,11 @@ public class ChannelHierarchyTest {
         public void setId(String id) {
             this.id = id;
         }
-        public void setImage(String image, String imageStartDate) {
+        public void setImage(String image, String imageStartDate, int width, int height) {
             this.image = image;
             this.imageStartDate = imageStartDate;
+            this.imageWidth = "" + width;
+            this.imageHeight = "" + height;
         }
         
         public void setStartDate(String startDate) {
@@ -274,6 +285,8 @@ public class ChannelHierarchyTest {
             Logo logo = new Logo();
             logo.setvalue(image);
             logo.setStartDate(imageStartDate);
+            logo.setHeight(imageHeight);
+            logo.setWidth(imageWidth);
             logos.getLogo().add(logo);
             paChannel.setLogos(logos);
             
