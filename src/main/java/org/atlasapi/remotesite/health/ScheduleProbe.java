@@ -104,7 +104,7 @@ public class ScheduleProbe implements HealthProbe {
 
     @Override
     public String title() {
-        return String.format("Schedule %s: %s", publisher.title(), channel == null ? "Unknown Channel" : channel.title());
+        return String.format("Schedule %s: %s", publisher.title(), channel == null ? "Unknown Channel" : channel.getTitle());
     }
 
     @Override

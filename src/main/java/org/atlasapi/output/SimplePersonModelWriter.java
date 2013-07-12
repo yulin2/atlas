@@ -5,6 +5,7 @@ import java.util.Set;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
+import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.PersonModelSimplifier;
 
 import com.google.common.base.Function;
@@ -20,9 +21,9 @@ public class SimplePersonModelWriter extends TransformingModelWriter<Iterable<Pe
 
     private final PersonModelSimplifier personSimplifier;
 
-	public SimplePersonModelWriter(AtlasModelWriter<PeopleQueryResult> outputter) {
+	public SimplePersonModelWriter(AtlasModelWriter<PeopleQueryResult> outputter, ImageSimplifier imageSimplifier) {
 		super(outputter);
-        this.personSimplifier = new PersonModelSimplifier();
+        this.personSimplifier = new PersonModelSimplifier(imageSimplifier);
 	}
 	
 	@Override

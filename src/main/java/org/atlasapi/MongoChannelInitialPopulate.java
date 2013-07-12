@@ -30,7 +30,7 @@ public class MongoChannelInitialPopulate {
         MongoChannelStore store = new MongoChannelStore(dbMongo, channelGroupStore, channelGroupStore);
 		int written = 0;
 		for(OldChannel oldChannel: OldChannel.all()) {
-			if(oldChannel.title().toLowerCase().contains("radio") || NEW_RADIO_STATIONS.contains(oldChannel)) {
+			if(oldChannel.getTitle().toLowerCase().contains("radio") || NEW_RADIO_STATIONS.contains(oldChannel)) {
 				oldChannel.setMediaType(MediaType.AUDIO);
 			}
 			else {
@@ -53,7 +53,7 @@ public class MongoChannelInitialPopulate {
 				// TODO new alias
 			}
 			oldChannel.setSource(Publisher.METABROADCAST);
-			oldChannel.setCanonicalUri(oldChannel.uri());
+			oldChannel.setCanonicalUri(oldChannel.getUri());
 			store.createOrUpdate(oldChannel);
 			written++;
 		}

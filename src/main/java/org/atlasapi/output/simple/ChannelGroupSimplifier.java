@@ -1,19 +1,20 @@
 package org.atlasapi.output.simple;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
-import org.atlasapi.media.channel.TemporalString;
+import org.atlasapi.media.channel.TemporalField;
 import org.atlasapi.media.entity.simple.HistoricalChannelGroupEntry;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.intl.Countries;
 
@@ -82,14 +83,16 @@ public class ChannelGroupSimplifier {
         return simple;
     }
     
-    private List<HistoricalChannelGroupEntry> calculateChannelHistory(ChannelGroup input) {
-        List<HistoricalChannelGroupEntry> entries = Lists.newArrayList();
-        for (TemporalString title : input.getAllTitles()) {
-            HistoricalChannelGroupEntry entry = new HistoricalChannelGroupEntry();
-            entry.setStartDate(title.getStartDate());
+    private Set<HistoricalChannelGroupEntry> calculateChannelHistory(ChannelGroup input) {
+        Builder<HistoricalChannelGroupEntry> entries = ImmutableSet.<HistoricalChannelGroupEntry>builder();
+        for (TemporalField<String> title : input.getAllTitles()) {
+            if (title.getStartDate() == null) {
+                continue;
+            }
+            HistoricalChannelGroupEntry entry = new HistoricalChannelGroupEntry(title.getStartDate());
             entry.setTitle(title.getValue());
             entries.add(entry);
         }
-        return entries;
+        return entries.build();
     }
 }

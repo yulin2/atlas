@@ -40,10 +40,10 @@ public class ScheduleOverlapResolverTest extends TestCase {
     private final Publisher publisher = Publisher.BBC;
     private final DateTime now = new DateTime(DateTimeZones.UTC);
     
-    private final Broadcast b1 = new Broadcast(channel.uri(), now, now.plusMinutes(30)).withId("1");
-    private final Broadcast b2 = new Broadcast(channel.uri(), now.plusMinutes(30), now.plusMinutes(30)).withId("2");
-    private final Broadcast b3 = new Broadcast(channel.uri(), now.plusMinutes(30), now.plusMinutes(60)).withId("3");
-    private final Broadcast b4 = new Broadcast(channel.uri(), now.plusMinutes(60), now.plusMinutes(120)).withId("4");
+    private final Broadcast b1 = new Broadcast(channel.getUri(), now, now.plusMinutes(30)).withId("1");
+    private final Broadcast b2 = new Broadcast(channel.getUri(), now.plusMinutes(30), now.plusMinutes(30)).withId("2");
+    private final Broadcast b3 = new Broadcast(channel.getUri(), now.plusMinutes(30), now.plusMinutes(60)).withId("3");
+    private final Broadcast b4 = new Broadcast(channel.getUri(), now.plusMinutes(60), now.plusMinutes(120)).withId("4");
     
     private final Item item = new Item("item1", "item1", publisher);
     
@@ -69,7 +69,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
     
     @Test
     public void testOverlappingWithIdBroadcast() {
-        final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(35), now.plusMinutes(60)).withId("3");
+        final Broadcast overlap = new Broadcast(channel.getUri(), now.plusMinutes(35), now.plusMinutes(60)).withId("3");
         overlap.setLastUpdated(now);
         b3.setLastUpdated(now.plusMinutes(1));
         final Item overlappingItem = item(overlap);
@@ -87,7 +87,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
     
     @Test
     public void testOverlappingLastWithIdBroadcast() {
-        final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(70), now.plusMinutes(80)).withId("4");
+        final Broadcast overlap = new Broadcast(channel.getUri(), now.plusMinutes(70), now.plusMinutes(80)).withId("4");
         overlap.setLastUpdated(now);
         b4.setLastUpdated(now.plusMinutes(1));
         final Item overlappingItem = item(overlap);
@@ -105,7 +105,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
     
     @Test
     public void testOverlappingBroadcastSwap() {
-        final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(35), now.plusMinutes(70)).withId("somethingElse");
+        final Broadcast overlap = new Broadcast(channel.getUri(), now.plusMinutes(35), now.plusMinutes(70)).withId("somethingElse");
         final Item overlappingItem = item(overlap);
         
         final Schedule overlappingSchedule = schedule(channel, item(b1), item(b2), item(b3), overlappingItem, item(b4));
@@ -121,7 +121,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
     
     @Test
     public void testOverlappingEarlierBroadcastSwap() {
-        final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(20), now.plusMinutes(70)).withId("somethingElse");
+        final Broadcast overlap = new Broadcast(channel.getUri(), now.plusMinutes(20), now.plusMinutes(70)).withId("somethingElse");
         final Item overlappingItem = item(overlap);
         
         final Schedule overlappingSchedule = schedule(channel, item(b1), overlappingItem, item(b2), item(b3), item(b4));
@@ -137,9 +137,9 @@ public class ScheduleOverlapResolverTest extends TestCase {
     
     @Test
     public void testMultipleOverlappingBroadcastSwap() {
-        final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(20), now.plusMinutes(70)).withId("somethingElse");
+        final Broadcast overlap = new Broadcast(channel.getUri(), now.plusMinutes(20), now.plusMinutes(70)).withId("somethingElse");
         final Item overlappingItem = item(overlap);
-        final Broadcast overlap2 = new Broadcast(channel.uri(), now.plusMinutes(35), now.plusMinutes(75)).withId("somethingElse");
+        final Broadcast overlap2 = new Broadcast(channel.getUri(), now.plusMinutes(35), now.plusMinutes(75)).withId("somethingElse");
         final Item overlappingItem2 = item(overlap2);
         
         final Schedule overlappingSchedule = schedule(channel, item(b1), overlappingItem, item(b2), item(b3), overlappingItem2, item(b4));
@@ -156,7 +156,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
     
     @Test
     public void testOverlappingBroadcastExactSwap() {
-        final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(35), now.plusMinutes(60)).withId("somethingElse");
+        final Broadcast overlap = new Broadcast(channel.getUri(), now.plusMinutes(35), now.plusMinutes(60)).withId("somethingElse");
         overlap.setLastUpdated(now);
         b3.setLastUpdated(now.plusMinutes(1));
         final Item overlappingItem = item(overlap);

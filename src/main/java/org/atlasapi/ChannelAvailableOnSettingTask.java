@@ -42,8 +42,8 @@ public class ChannelAvailableOnSettingTask extends ScheduledTask {
         for (Channel channel : resolver.all()) {
             Set<String> availableOn = Sets.newHashSet();
             
-            if (channel.broadcaster() != null) {
-                availableOn.add(channel.broadcaster().key());
+            if (channel.getBroadcaster() != null) {
+                availableOn.add(channel.getBroadcaster().key());
             }
             
             addAll(availableOn, filter(transform(channel.getAliasUrls(), TO_AVAILABLE_ON), notNull()));

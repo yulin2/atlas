@@ -56,14 +56,18 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
         .build();
 
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
+        .withMessage("No such Channel exists")
         .withMessage("Channel not found")
         .withStatusCode(HttpStatusCode.NOT_FOUND);
     
     private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException())
+        .withMessage("You require an API key to view this data")
+        .withErrorCode("Api Key required")
         .withStatusCode(HttpStatusCode.FORBIDDEN);
     
     private static final AtlasErrorSummary BAD_ANNOTATION = new AtlasErrorSummary(new NullPointerException())
         .withMessage("Invalid annotation specified. Valid annotations are: " + Joiner.on(',').join(Iterables.transform(validAnnotations, Annotation.TO_KEY)))
+        .withErrorCode("Invalid annotation")
         .withStatusCode(HttpStatusCode.BAD_REQUEST);
     
     private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(100).withDefaultLimit(10);
@@ -108,7 +112,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
                 new Predicate<Channel>() {
                     @Override
                     public boolean apply(Channel input) {
-                        return appConfig.isEnabled(input.source());
+                        return appConfig.isEnabled(input.getSource());
                     }
                 }));
             
@@ -132,7 +136,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
                 errorViewFor(request, response, NOT_FOUND);
             } else {
                 ApplicationConfiguration appConfig = appConfig(request);
-                if (!appConfig.isEnabled(possibleChannel.requireValue().source())) {
+                if (!appConfig.isEnabled(possibleChannel.requireValue().getSource())) {
                     outputter.writeError(request, response, FORBIDDEN.withMessage("Channel " + id + " not available"));
                 }
 
@@ -167,7 +171,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
     private static final Function<Channel, String> TO_TITLE = new Function<Channel, String>() {
         @Override
         public String apply(Channel input) {
-            return input.title();
+            return input.getTitle();
         }
     };
     

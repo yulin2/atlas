@@ -24,6 +24,7 @@
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.8.1</version>
                 <executions>
                     <execution>
                         <id>generate-tv-listings-schema</id>
@@ -35,7 +36,9 @@
                             <schemaIncludes>
                                 <schemaInclude>TVListings.dtd</schemaInclude>
                             </schemaIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/pa-listings</generateDirectory>
+                            <forceRegenerate>true</forceRegenerate>
+                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <staleFile>${project.build.directory}/generated-sources/.paListingsStaleFlag</staleFile>
                         </configuration>
                     </execution>
                     <execution>
@@ -48,7 +51,10 @@
                             <schemaIncludes>
                                 <schemaInclude>features.dtd</schemaInclude>
                             </schemaIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/pa-features</generateDirectory>
+                            <forceRegenerate>true</forceRegenerate>
+                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <staleFile>${project.build.directory}/generated-sources/.paFeaturesStaleFlag</staleFile>
+                            <clearOutputDir>false</clearOutputDir>
                         </configuration>
                     </execution>
                     <execution>
@@ -61,7 +67,10 @@
                             <schemaIncludes>
                                 <schemaInclude>profiles.dtd</schemaInclude>
                             </schemaIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/pa-profiles</generateDirectory>
+                            <forceRegenerate>true</forceRegenerate>
+                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <staleFile>${project.build.directory}/generated-sources/.paProfilesStaleFlag</staleFile>
+                            <clearOutputDir>false</clearOutputDir>
                         </configuration>
                     </execution>
                     <execution>
@@ -74,18 +83,13 @@
                             <schemaIncludes>
                                 <schemaInclude>tv_channel_data.dtd</schemaInclude>
                             </schemaIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/pa-channels</generateDirectory>
+                            <forceRegenerate>true</forceRegenerate>
+                            <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
+                            <staleFile>${project.build.directory}/generated-sources/.paChannelsStaleFlag</staleFile>
+                            <clearOutputDir>false</clearOutputDir>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.0.2</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -203,7 +207,7 @@
             </plugin>
         </plugins>
         <extensions>
-	    <extension>
+            <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-webdav-jackrabbit</artifactId>
                 <version>2.3</version>

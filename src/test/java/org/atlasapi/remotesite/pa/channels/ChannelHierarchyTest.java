@@ -9,7 +9,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.TemporalString;
+import org.atlasapi.media.channel.TemporalField;
+import org.atlasapi.media.entity.Image;
+import org.atlasapi.media.entity.ImageColor;
+import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.channels.bindings.Channels;
@@ -25,11 +28,11 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import com.google.common.base.Equivalence;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
 public class ChannelHierarchyTest {
@@ -43,7 +46,7 @@ public class ChannelHierarchyTest {
         channel.setId("1741");
         channel.setName("Heat TV", "2009-10-11", "2010-01-10");
         channel.setName("Newer Heat TV", "2010-01-11", null);
-        channel.setImage("p131906.png", "2009-10-11");
+        channel.setImage("p131906.png", "2009-10-11", 360, 240);
         channel.setProviderAlias("9", "1078");
         channel.setFormat();
         channel.setRegional();
@@ -70,20 +73,25 @@ public class ChannelHierarchyTest {
         assertThat(firstAlias, isOneOf("http://pressassociation.com/channels/1741", "http://youview.com/service/1078"));
         assertThat(secondAlias, isOneOf("http://pressassociation.com/channels/1741", "http://youview.com/service/1078"));
         
-        assertEquals("Newer Heat TV", createdChannel.title());
-        assertEquals(new LocalDate(2009, 6, 6), createdChannel.startDate());
+        assertEquals("Newer Heat TV", createdChannel.getTitle());
+        assertEquals(new LocalDate(2009, 6, 6), createdChannel.getStartDate());
         
-        TemporalString oldName = new TemporalString("Heat TV", new LocalDate(2009, 10, 11), new LocalDate(2010, 1, 11));
-        TemporalString newName = new TemporalString("Newer Heat TV", new LocalDate(2010, 1, 11), null);
-        assertEquals(ImmutableSet.of(oldName, newName), ImmutableSet.copyOf(createdChannel.allTitles()));
+        TemporalField<String> oldName = new TemporalField<String>("Heat TV", new LocalDate(2009, 10, 11), new LocalDate(2010, 1, 11));
+        TemporalField<String> newName = new TemporalField<String>("Newer Heat TV", new LocalDate(2010, 1, 11), null);
+        assertEquals(ImmutableSet.of(oldName, newName), ImmutableSet.copyOf(createdChannel.getAllTitles()));
         
-        assertEquals("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131906.png", createdChannel.image());
-        assertEquals(new TemporalString("p131906.png", new LocalDate(2009, 10, 11), null), Iterables.getOnlyElement(createdChannel.allImages()));
+        Image expectedImage = new Image("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131906.png");
+        expectedImage.setType(ImageType.LOGO);
+        expectedImage.setColor(ImageColor.COLOR);
+        expectedImage.setWidth(360);
+        expectedImage.setHeight(240);
+        assertEquals(ImmutableSet.of(expectedImage), createdChannel.getImages());
+        assertEquals(new TemporalField<Image>(expectedImage, new LocalDate(2009, 10, 11), null), Iterables.getOnlyElement(createdChannel.getAllImages()));
         
-        assertEquals(Publisher.METABROADCAST, createdChannel.source());
-        assertTrue(createdChannel.highDefinition());
-        assertTrue(createdChannel.regional());
-        assertEquals(Duration.standardSeconds(3600), createdChannel.timeshift());
+        assertEquals(Publisher.METABROADCAST, createdChannel.getSource());
+        assertTrue(createdChannel.getHighDefinition());
+        assertTrue(createdChannel.getRegional());
+        assertEquals(Duration.standardSeconds(3600), createdChannel.getTimeshift());
     }
     
     @Test
@@ -92,7 +100,7 @@ public class ChannelHierarchyTest {
         westMidlands.setStartDate("2010-06-01");
         westMidlands.setId("11");
         westMidlands.setName("BBC One West Midlands", "2011-09-28", null);
-        westMidlands.setImage("p131474.png", "2011-09-28");
+        westMidlands.setImage("p131474.png", "2011-09-28", 360, 240);
         westMidlands.setFormat();
         westMidlands.setMediaType("TV");
         
@@ -101,7 +109,7 @@ public class ChannelHierarchyTest {
         channelIslands.setEndDate("2013-04-23");
         channelIslands.setId("1663");
         channelIslands.setName("BBC One Channel Islands", "2011-10-15", null);
-        channelIslands.setImage("p131731.png", "2011-10-15");
+        channelIslands.setImage("p131731.png", "2011-10-15", 360, 240);
         channelIslands.setFormat();
         channelIslands.setMediaType("TV");
         
@@ -122,22 +130,22 @@ public class ChannelHierarchyTest {
         Channel parent = tree.getParent();
         List<Channel> children = tree.getChildren();
         
-        assertEquals(Publisher.METABROADCAST, parent.source());
-        assertEquals("http://ref.atlasapi.org/channels/pressassociation.com/stations/1", parent.uri());
-        assertEquals("BBC One", parent.title());
-        assertEquals(new TemporalString("BBC One", new LocalDate(2002, 3, 12), null), Iterables.getOnlyElement(parent.allTitles()));
+        assertEquals(Publisher.METABROADCAST, parent.getSource());
+        assertEquals("http://ref.atlasapi.org/channels/pressassociation.com/stations/1", parent.getUri());
+        assertEquals("BBC One", parent.getTitle());
+        assertEquals(new TemporalField<String>("BBC One", new LocalDate(2002, 3, 12), null), Iterables.getOnlyElement(parent.getAllTitles()));
 //      assertEquals("", parent.image());
         
         assertEquals("http://pressassociation.com/stations/1", Iterables.getOnlyElement(parent.getAliasUrls()));
         
-        assertTrue(parent.highDefinition());
-        assertEquals(MediaType.VIDEO, parent.mediaType());
+        assertTrue(parent.getHighDefinition());
+        assertEquals(MediaType.VIDEO, parent.getMediaType());
         
         Channel westMids = Channel.builder()
             .withSource(Publisher.METABROADCAST)
             .withUri("http://ref.atlasapi.org/channels/pressassociation.com/11")
             .withTitle("BBC One West Midlands", new LocalDate(2011, 9, 28))
-            .withImage("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131474.png", new LocalDate(2011, 9, 28))
+            .withImage(new Image("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131474.png"), new LocalDate(2011, 9, 28))
             .withStartDate(new LocalDate(2010, 6, 1))
             .withMediaType(MediaType.VIDEO)
             .withHighDefinition(true)
@@ -149,7 +157,7 @@ public class ChannelHierarchyTest {
             .withSource(Publisher.METABROADCAST)
             .withUri("http://ref.atlasapi.org/channels/pressassociation.com/1663")
             .withTitle("BBC One Channel Islands", new LocalDate(2011, 10, 15))
-            .withImage("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131731.png", new LocalDate(2011, 10, 15))
+            .withImage(new Image("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131731.png"), new LocalDate(2011, 10, 15))
             .withStartDate(new LocalDate(2010, 4, 23))
             .withMediaType(MediaType.VIDEO)
             .withHighDefinition(true)
@@ -165,17 +173,17 @@ public class ChannelHierarchyTest {
 
         @Override
         protected boolean doEquivalent(Channel a, Channel b) {
-            return a.source().equals(b.source())
-                && Objects.equal(a.uri(), b.uri())
-                && Objects.equal(a.title(), b.title())
-                && Objects.equal(a.image(), b.image())
-                && Objects.equal(a.mediaType(), b.mediaType())
-                && Objects.equal(a.highDefinition(), b.highDefinition())
-                && Objects.equal(a.regional(), b.regional())
-                && Objects.equal(a.timeshift(), b.timeshift())
-                && Objects.equal(a.variations(), b.variations())
-                && Objects.equal(a.parent(), b.parent())
-                && Objects.equal(a.startDate(), b.startDate());
+            return a.getSource().equals(b.getSource())
+                && Objects.equal(a.getUri(), b.getUri())
+                && Objects.equal(a.getTitle(), b.getTitle())
+                && Objects.equal(a.getImages(), b.getImages())
+                && Objects.equal(a.getMediaType(), b.getMediaType())
+                && Objects.equal(a.getHighDefinition(), b.getHighDefinition())
+                && Objects.equal(a.getRegional(), b.getRegional())
+                && Objects.equal(a.getTimeshift(), b.getTimeshift())
+                && Objects.equal(a.getVariations(), b.getVariations())
+                && Objects.equal(a.getParent(), b.getParent())
+                && Objects.equal(a.getStartDate(), b.getStartDate());
         }
 
         @Override
@@ -190,6 +198,8 @@ public class ChannelHierarchyTest {
         private String id;
         private String image;
         private String imageStartDate;
+        private String imageWidth;
+        private String imageHeight;
         private String startDate;
         private String endDate;
         private String serviceProviderId;
@@ -209,9 +219,11 @@ public class ChannelHierarchyTest {
         public void setId(String id) {
             this.id = id;
         }
-        public void setImage(String image, String imageStartDate) {
+        public void setImage(String image, String imageStartDate, int width, int height) {
             this.image = image;
             this.imageStartDate = imageStartDate;
+            this.imageWidth = "" + width;
+            this.imageHeight = "" + height;
         }
         
         public void setStartDate(String startDate) {
@@ -273,6 +285,8 @@ public class ChannelHierarchyTest {
             Logo logo = new Logo();
             logo.setvalue(image);
             logo.setStartDate(imageStartDate);
+            logo.setHeight(imageHeight);
+            logo.setWidth(imageWidth);
             logos.getLogo().add(logo);
             paChannel.setLogos(logos);
             

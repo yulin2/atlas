@@ -168,7 +168,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         episode.setCurie(CLOSED_CURIE+getClosedPostfix(channel));
         episode.setTitle(progData.getTitle());
         episode.setScheduleOnly(true);
-        episode.setMediaType(channel.mediaType());
+        episode.setMediaType(channel.getMediaType());
         
         Version version = findBestVersion(episode.getVersions());
 
@@ -179,7 +179,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private String getClosedPostfix(Channel channel) {
-        return "_"+channel.key();
+        return "_"+channel.getKey();
     }
     
     private Maybe<Brand> getBrand(ProgData progData, Channel channel) {
@@ -368,7 +368,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         //currently Welsh channels have Welsh titles/descriptions 
         // which flip the English ones, resulting in many writes. We'll only take the Welsh title if we don't
     	// already have a title from another channel
-        if (episode.getTitle() == null || !channel.uri().contains("wales")) {
+        if (episode.getTitle() == null || !channel.getUri().contains("wales")) {
             if (progData.getEpisodeTitle() != null) {
                 episode.setTitle(progData.getEpisodeTitle());
             } else {
@@ -378,26 +378,26 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         if (progData.getBillings() != null) {
             for (Billing billing : progData.getBillings().getBilling()) {
-                if((episode.getDescription() == null || !channel.uri().contains("wales")) 
+                if((episode.getDescription() == null || !channel.getUri().contains("wales")) 
                         && billing.getType().equals("synopsis")) {
                     episode.setDescription(billing.getvalue());
                 }
-                if ((episode.getShortDescription() == null || !channel.uri().contains("wales"))
+                if ((episode.getShortDescription() == null || !channel.getUri().contains("wales"))
                         && billing.getType().equals("pa_detail1")) {
                     episode.setShortDescription(billing.getvalue());
                 }
-                if ((episode.getMediumDescription() == null || !channel.uri().contains("wales"))
+                if ((episode.getMediumDescription() == null || !channel.getUri().contains("wales"))
                         && billing.getType().equals("pa_detail2")) {
                     episode.setMediumDescription(billing.getvalue());
                 }
-                if ((episode.getLongDescription() == null || !channel.uri().contains("wales"))
+                if ((episode.getLongDescription() == null || !channel.getUri().contains("wales"))
                         && billing.getType().equals("pa_detail3")) {
                     episode.setLongDescription(billing.getvalue());
                 }
             }
         }
 
-        episode.setMediaType(channel.mediaType());
+        episode.setMediaType(channel.getMediaType());
         episode.setSpecialization(specialization(progData, channel));
         setGenres(progData, episode);
         
@@ -521,7 +521,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
         
-        Broadcast broadcast = new Broadcast(channel.uri(), transmissionTime, duration).withId(PaHelper.getBroadcastId(progData.getShowingId()));
+        Broadcast broadcast = new Broadcast(channel.getUri(), transmissionTime, duration).withId(PaHelper.getBroadcastId(progData.getShowingId()));
         
         if (progData.getAttr() != null) {
             broadcast.setRepeat(isRepeat(channel, progData.getAttr()));
@@ -642,7 +642,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     protected Specialization specialization(ProgData progData, Channel channel) {
-        if (MediaType.AUDIO.equals(channel.mediaType())) {
+        if (MediaType.AUDIO.equals(channel.getMediaType())) {
             return Specialization.RADIO;
         }
         return Strings.isNullOrEmpty(progData.getRtFilmnumber()) ? Specialization.TV : Specialization.FILM;
