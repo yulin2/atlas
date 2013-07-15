@@ -78,7 +78,6 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         return simpleImages.build();
     }
     
-
     private Function<LookupRef, SameAs> TO_SAME_AS = new Function<LookupRef, SameAs>() {
 
         @Override
