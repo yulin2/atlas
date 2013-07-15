@@ -23,6 +23,7 @@ public class TopicModelSimplifier extends IdentifiedModelSimplifier<Topic, org.a
     public org.atlasapi.media.entity.simple.Topic simplify(Topic fullTopic, Set<Annotation> annotations, final ApplicationConfiguration config) {
         org.atlasapi.media.entity.simple.Topic topic = new org.atlasapi.media.entity.simple.Topic();
         copyIdentifiedAttributesTo(fullTopic, topic, annotations);
+        topic.setType(fullTopic.getClass().getSimpleName().toLowerCase());
         topic.setUri(topicUriBase + topic.getId() + EXTENSION);
         topic.setTitle(fullTopic.getTitle());
         topic.setDescription(fullTopic.getDescription());
@@ -30,7 +31,7 @@ public class TopicModelSimplifier extends IdentifiedModelSimplifier<Topic, org.a
         topic.setThumbnail(fullTopic.getThumbnail());
         topic.setPublisher(toPublisherDetails(fullTopic.getPublisher()));
         if (fullTopic.getType() != null) {
-            topic.setType(fullTopic.getType().toString());
+            topic.setTopicType(fullTopic.getType().toString());
         }
         topic.setValue(fullTopic.getValue());
         topic.setNamespace(fullTopic.getNamespace());
