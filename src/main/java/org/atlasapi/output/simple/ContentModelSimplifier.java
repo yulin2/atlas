@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 public abstract class ContentModelSimplifier<F extends Content, T extends Description> extends DescribedModelSimplifier<F, T> {
 
@@ -48,7 +49,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     private final Map<String, Locale> localeMap;
 
     public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, ImageSimplifier imageSimplifier) {
-        super(imageSimplifier);
+        super(imageSimplifier, SubstitutionTableNumberCodec.lowerCaseOnly());
         this.contentGroupResolver = contentGroupResolver;
         this.topicResolver = topicResolver;
         this.productResolver = productResolver;
