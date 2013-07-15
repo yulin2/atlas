@@ -21,7 +21,12 @@ import junit.framework.TestCase;
  */
 public class YoutubeUriCanonicaliserTest extends TestCase {
 
-    public class YoutubeUriCanonicaliserTest extends TestCase {
+    private YoutubeUriCanonicaliser canonicaliser;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        canonicaliser = new YoutubeUriCanonicaliser();
     }
 
     public void testThatTheAdapterCanExtractVideoIdFromYoutubeUri() throws Exception {
