@@ -4,11 +4,21 @@ import java.util.Map;
 
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
-import org.atlasapi.remotesite.youtube.YouTubeModel.Content;
-import org.atlasapi.remotesite.youtube.YouTubeModel.FeedWrapper;
-import org.atlasapi.remotesite.youtube.YouTubeModel.Player;
-import org.atlasapi.remotesite.youtube.YouTubeModel.Thumbnail;
-import org.atlasapi.remotesite.youtube.YouTubeModel.VideoFeed;
+import org.atlasapi.remotesite.deserializers.DateTimeDeserializer;
+import org.atlasapi.remotesite.deserializers.LocalDateDeserializer;
+import org.atlasapi.remotesite.youtube.deserializers.YouTubeAccessControlDeserializer;
+import org.atlasapi.remotesite.youtube.deserializers.YouTubeContentDeserializer;
+import org.atlasapi.remotesite.youtube.deserializers.YouTubePlayerDeserializer;
+import org.atlasapi.remotesite.youtube.deserializers.YouTubeThumbnailDeserializer;
+import org.atlasapi.remotesite.youtube.entity.YouTubeAccessControl;
+import org.atlasapi.remotesite.youtube.entity.YouTubeContent;
+import org.atlasapi.remotesite.youtube.entity.YouTubeFeedWrapper;
+import org.atlasapi.remotesite.youtube.entity.YouTubePlayer;
+import org.atlasapi.remotesite.youtube.entity.YouTubeThumbnail;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoFeed;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.FieldNamingPolicy;
@@ -19,15 +29,18 @@ import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.url.Urls;
 
-public class YouTubeFeedClient implements RemoteSiteClient<VideoFeed> {
+public class YouTubeFeedClient implements RemoteSiteClient<YouTubeVideoFeed> {
     
     private static final Map<String, String> FETCH_PARAMETERS = ImmutableMap.of("v", "2", "alt", "jsonc");
 
     private final SimpleHttpClient client;
-    private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-            .registerTypeAdapter(Content.class, new YouTubeModel.ContentDeserializer())
-            .registerTypeAdapter(Thumbnail.class, new YouTubeModel.ThumbnailDeserializer())
-            .registerTypeAdapter(Player.class, new YouTubeModel.PlayerDeserializer())
+    private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).setDateFormat("yyyy-MM-dd'T'HH:mm:ssz")
+            .registerTypeAdapter(YouTubeContent.class, new YouTubeContentDeserializer())
+            .registerTypeAdapter(YouTubeThumbnail.class, new YouTubeThumbnailDeserializer())
+            .registerTypeAdapter(YouTubePlayer.class, new YouTubePlayerDeserializer())
+            .registerTypeAdapter(DateTime.class, new DateTimeDeserializer(ISODateTimeFormat.dateTime()))
+            .registerTypeAdapter(LocalDate.class, new LocalDateDeserializer(ISODateTimeFormat.date()))
+            .registerTypeAdapter(YouTubeAccessControl.class, new YouTubeAccessControlDeserializer())
             .create();
     
     public YouTubeFeedClient() {
@@ -38,12 +51,12 @@ public class YouTubeFeedClient implements RemoteSiteClient<VideoFeed> {
         this.client = client;
     }
 
-    public VideoFeed get(String uri) throws Exception {
+    public YouTubeVideoFeed get(String uri) throws Exception {
         HttpResponse httpResponse = client.get(Urls.appendParameters(uri, FETCH_PARAMETERS));
         if (httpResponse.statusCode() >= 300) {
             throw new HttpStatusCodeException(httpResponse.statusCode(), httpResponse.statusLine()); 
         }
-        FeedWrapper wrapper = gson.fromJson(httpResponse.body(), FeedWrapper.class);
+        YouTubeFeedWrapper wrapper = gson.fromJson(httpResponse.body(), YouTubeFeedWrapper.class);
         if (wrapper != null && wrapper.getData() != null) {
             return wrapper.getData();
         }

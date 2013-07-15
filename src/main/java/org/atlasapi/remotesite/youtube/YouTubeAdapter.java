@@ -17,12 +17,15 @@ package org.atlasapi.remotesite.youtube;
 
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
-import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
+import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 
 import com.metabroadcast.common.http.HttpStatusCodeException;
 
@@ -33,16 +36,18 @@ import com.metabroadcast.common.http.HttpStatusCodeException;
  */
 public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 
-	private static final Pattern YOUTUBE_CANONICAL_URI_PATTERN = Pattern.compile("http://www\\.youtube\\.com/watch\\?v=[^\\./&=]+");
+    private static final Log log = LogFactory.getLog(YouTubeAdapter.class);
+
+    private static final Pattern YOUTUBE_CANONICAL_URI_PATTERN = Pattern.compile("http://www\\.youtube\\.com/watch\\?v=[^\\./&=]+");
 	
-	private final RemoteSiteClient<VideoEntry> gdataClient;
+	private final RemoteSiteClient<YouTubeVideoEntry> gdataClient;
 	private final ContentExtractor<YouTubeSource, Item> contentExtractor;
 	
 	public YouTubeAdapter() {
 		this(new YouTubeGDataClient(), new YouTubeGraphExtractor()); 
 	}
 	
-	YouTubeAdapter(RemoteSiteClient<VideoEntry> gdataClient, ContentExtractor<YouTubeSource, Item> youTubeGraphExtractor) {
+	YouTubeAdapter(RemoteSiteClient<YouTubeVideoEntry> gdataClient, ContentExtractor<YouTubeSource, Item> youTubeGraphExtractor) {
 		this.gdataClient = gdataClient;
 		this.contentExtractor = youTubeGraphExtractor;
 	}
@@ -50,9 +55,12 @@ public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 	@Override
 	public Item fetch(String uri) {
 		try {
-		    VideoEntry videoEntry = gdataClient.get(uri);
-			return contentExtractor.extract(new YouTubeSource(videoEntry, uri));
+		    YouTubeVideoEntry videoEntry = gdataClient.get(uri);
+		    String itemUri = YoutubeUriCanonicaliser.canonicalUriFor(YoutubeUriCanonicaliser.videoIdFrom(uri));
+
+		    return contentExtractor.extract(new YouTubeSource(videoEntry, itemUri));
 		} catch (HttpStatusCodeException e) {
+		    log.error("HTTP Error Status code:", e);
 		    return null;
 		} catch (Exception e) {
 			throw new FetchException("Failed to fetch: " + uri, e);
