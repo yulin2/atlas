@@ -19,10 +19,6 @@ public class ContentGroupModelSimplifier extends DescribedModelSimplifier<org.at
         super(imageSimplifier);
     }
     
-    public ContentGroupModelSimplifier(ImageSimplifier imageSimplifier) {
-        super(imageSimplifier);
-    }
-    
     @Override
     public org.atlasapi.media.entity.simple.ContentGroup simplify(org.atlasapi.media.entity.ContentGroup model, Set<Annotation> annotations, ApplicationConfiguration config) {
 

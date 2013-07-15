@@ -18,6 +18,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public abstract class DescribedModelSimplifier<F extends Described, T extends Description> extends IdentifiedModelSimplifier<F,T> {
 
@@ -26,6 +27,11 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
     private final ImageSimplifier imageSimplifier;
     
     protected DescribedModelSimplifier(ImageSimplifier imageSimplifier) {
+        this.imageSimplifier = imageSimplifier;
+    }
+    
+    protected DescribedModelSimplifier(ImageSimplifier imageSimplifier, NumberToShortStringCodec codec) {
+        super(codec);
         this.imageSimplifier = imageSimplifier;
     }
     
