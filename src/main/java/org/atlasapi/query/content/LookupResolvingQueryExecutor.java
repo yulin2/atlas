@@ -43,7 +43,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
         this.cassandraContentResolver = cassandraContentResolver;
         this.mongoContentResolver = mongoContentResolver;
         this.mongoLookupResolver = mongoLookupResolver;
-	this.cassandraEnabled = cassandraEnabled;
+        this.cassandraEnabled = cassandraEnabled;
     }
 
     @Override

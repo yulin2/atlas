@@ -62,7 +62,7 @@ public class QueryModule {
 	
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	private @Value("${atlas.search.host}") String searchHost;
-	private @Value("${cassandra.enabled}") boolean cassandraEnabled;
+    private @Value("${cassandra.enabled}") boolean cassandraEnabled;
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 	    

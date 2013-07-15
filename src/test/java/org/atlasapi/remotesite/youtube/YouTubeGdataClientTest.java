@@ -20,7 +20,7 @@ import static org.hamcrest.Matchers.containsString;
 import junit.framework.TestCase;
 
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 
 /**
  * Test of the behaviour of the third-party YouTube GData client from Google.
@@ -33,15 +33,14 @@ public class YouTubeGdataClientTest extends TestCase {
 	YouTubeGDataClient gdataClient = new YouTubeGDataClient();
 
 	public void testCanRetrieveDataRelatingToGivenYouTubePage() throws Exception {
-		VideoEntry entry = gdataClient.get("http://www.youtube.com/watch?v=pdyYe7sDlhA");
-		assertThat(entry.title, containsString("BBC News 24"));
-		assertNotNull(entry.thumbnail);
-		assertNotNull(entry.thumbnail.hqDefault);
-		// Remove this assertion as the gdata api appears to have changed: check this asertion when the
-		// youtube adapter is re-enabled
-		// assertFalse(entry.tags.isEmpty());
-		assertNotNull(entry.category);
-		assertNotNull(entry.player.defaultUrl);
+	    YouTubeVideoEntry entry = gdataClient.get("http://www.youtube.com/watch?v=pdyYe7sDlhA");
+		assertThat(entry.getTitle(), containsString("BBC News 24"));
+		assertNotNull(entry.getThumbnail());
+		assertNotNull(entry.getThumbnail().getHqDefault());
+		assertNotNull(entry.getCategory());
+		assertNotNull(entry.getPlayer().getDefaultUrl());
+        assertThat(entry.getUploader(), containsString("biasedbbc"));
+        assertThat(entry.getLocation(), containsString("BBC Television Centre"));
 	}
 	
 	public void testhrowsExceptionIfSubmittedUriDoesNotContainVideoId() throws Exception {
