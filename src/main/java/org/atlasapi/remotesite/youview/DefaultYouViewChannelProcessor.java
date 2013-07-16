@@ -14,8 +14,6 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
@@ -36,21 +34,19 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
     public UpdateProgress process(Channel channel, Elements elements, DateTime startTime) {
         
         List<ItemRefAndBroadcast> broadcasts = Lists.newArrayList();
-        Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
         
         UpdateProgress progress = UpdateProgress.START;
         for (int i = 0; i < elements.size(); i++) {
             ItemRefAndBroadcast itemAndBroadcast = processor.process(elements.get(i));
             if (itemAndBroadcast != null) {
                 broadcasts.add(itemAndBroadcast);
-                acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
                 progress = progress.reduce(UpdateProgress.SUCCESS);
             } else {
                 progress = progress.reduce(UpdateProgress.FAILURE);
             }
         }
         if (trimmer != null) {
-            trimmer.trimBroadcasts(new Interval(startTime, startTime.plusDays(1)), channel, acceptableBroadcastIds.build());
+            trimmer.trimBroadcasts(new Interval(startTime, startTime.plusDays(1)), channel, broadcasts);
         }
         if (broadcasts.isEmpty()) {
             log.info(String.format("No broadcasts for channel %s (%s) on %s", channel.getTitle(), getYouViewId(channel), startTime.toString()));

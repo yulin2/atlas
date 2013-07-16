@@ -28,7 +28,6 @@ import org.joda.time.format.PeriodFormat;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.ScheduledTask;
@@ -110,15 +109,7 @@ public class C4EpgUpdater extends ScheduledTask {
     private void trim(LocalDate scheduleDay, Channel channel, List<ItemRefAndBroadcast> processedItems) {
         DateTime scheduleStart = scheduleDay.toDateTime(new LocalTime(6,0,0), DateTimeZones.LONDON);
         Interval scheduleInterval = new Interval(scheduleStart, scheduleStart.plusDays(1));
-        trimmer.trimBroadcasts(scheduleInterval, channel, broacastIdsFrom(processedItems));
-    }
-
-    private Map<String, String> broacastIdsFrom(List<ItemRefAndBroadcast> processedItems) {
-        ImmutableMap.Builder<String, String> broadcastIdItemIdMap = ImmutableMap.builder();
-        for (ItemRefAndBroadcast itemRefAndBroadcast : processedItems) {
-            broadcastIdItemIdMap.put(itemRefAndBroadcast.getBroadcast().getSourceId(), itemRefAndBroadcast.getItemUri());
-        }
-        return broadcastIdItemIdMap.build();
+        trimmer.trimBroadcasts(scheduleInterval, channel, processedItems);
     }
 
     private Document getSchedule(String uri) {

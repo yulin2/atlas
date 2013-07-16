@@ -2,25 +2,28 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.isIn;
 
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
-
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -32,6 +35,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.Test;
@@ -114,16 +118,21 @@ public class C4EpgUpdaterTest extends TestCase {
             one(trimmer).trimBroadcasts(
                     with(new Interval(day, day.plusDays(1))), 
                     with(CHANNEL_FOUR),
-                    (Map<String,String>)with(allOf(
-                            hasKey("c4:25939874"),hasValue("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-51"),
-                            hasKey("c4:25955760"),hasValue("http://www.channel4.com/programmes/synthesized/25955760")
+                    (List<ItemRefAndBroadcast>)with(hasItems(
+                        new ItemRefAndBroadcast("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-51", broadcast("c4:25939874")),
+                        new ItemRefAndBroadcast("http://www.channel4.com/programmes/synthesized/25955760", broadcast("c4:25955760"))
                     ))
             );
-            allowing(trimmer).trimBroadcasts(with(new Interval(day, day.plusDays(1))), with(isIn(ImmutableSet.of(MORE_FOUR, E_FOUR, FILM_4, FOUR_MUSIC))), with(any(Map.class)));
+            allowing(trimmer).trimBroadcasts(with(new Interval(day, day.plusDays(1))), with(isIn(ImmutableSet.of(MORE_FOUR, E_FOUR, FILM_4, FOUR_MUSIC))), with(any(List.class)));
         }});
         
         updater.run();
         
         context.assertIsSatisfied();
     }
+
+    private Broadcast broadcast(String id) {
+        return new Broadcast("channel", new DateTime(DateTimeZones.UTC), Duration.ZERO).withId(id);
+    }
+    
 }

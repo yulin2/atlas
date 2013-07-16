@@ -9,8 +9,11 @@ import junit.framework.TestCase;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.ScheduleEntry;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -28,11 +31,12 @@ import org.jmock.Mockery;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.base.Maybe;
@@ -74,10 +78,14 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             one(trimmer).trimBroadcasts(
                     new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 25, 22, 35, 0, 0), new DateTime(2011, DateTimeConstants.JANUARY, 25, 23, 35, 0, 0)), 
                     channel, 
-                    ImmutableMap.<String, String>of("bbc:p00dbbvg", slashProgrammesUriForPid("b00y377q")));
+                    ImmutableList.of(new ScheduleEntry.ItemRefAndBroadcast(slashProgrammesUriForPid("b00y377q"),broadcast("bbc:p00dbbvg"))));
         }});
 
         new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, trimmer, channelResolver, log).call();
+    }
+    
+    private Broadcast broadcast(String id) {
+        return new Broadcast("channel", new DateTime(DateTimeZones.UTC), Duration.ZERO).withId(id);
     }
     
     @SuppressWarnings("unchecked")
@@ -102,7 +110,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             one(trimmer).trimBroadcasts(
                     new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 28, 20, 00, 0, 0), new DateTime(2011, DateTimeConstants.JANUARY, 28, 20, 30, 0, 0)), 
                     channel, 
-                    ImmutableMap.<String, String>of("bbc:p00dd6dm", slashProgrammesUriForPid("b00y1w9h")));
+                    ImmutableList.of(new ItemRefAndBroadcast(slashProgrammesUriForPid("b00y1w9h"), broadcast("bbc:p00dd6dm"))));
         }});
 
         new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, trimmer, channelResolver, log).call();
@@ -129,7 +137,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             one(trimmer).trimBroadcasts(
                     new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 28, 21, 00, 0, 0), new DateTime(2011, DateTimeConstants.JANUARY, 28, 22, 00, 0, 0)), 
                     channel, 
-                    ImmutableMap.<String, String>of("bbc:p00dd6dp", slashProgrammesUriForPid("b00y439c")));
+                    ImmutableList.of(new ItemRefAndBroadcast(slashProgrammesUriForPid("b00y439c"), broadcast("bbc:p00dd6dp"))));
         }});
 
         new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, trimmer, channelResolver, log).call();

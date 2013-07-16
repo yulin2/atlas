@@ -16,6 +16,7 @@ import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -38,6 +39,7 @@ import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.junit.Before;
@@ -176,7 +178,8 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         final Interval firstFileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 6, 0, 0, 0, DateTimeZones.LONDON), new DateTime(2011, DateTimeConstants.JANUARY, 16, 6, 0, 0, 0, DateTimeZones.LONDON));
          
         context.checking(new Expectations() {{
-            oneOf (trimmer).trimBroadcasts(firstFileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118471", "http://pressassociation.com/episodes/1424497"));
+            oneOf (trimmer).trimBroadcasts(firstFileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), 
+                    ImmutableList.of(new ItemRefAndBroadcast("http://pressassociation.com/episodes/1424497",broadcast("pa:71118471"))));
         }});
         
         TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), trimmer, null);
@@ -189,13 +192,18 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         final Interval fileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 21, 40, 0, 0, DateTimeZones.LONDON), new DateTime(2011, DateTimeConstants.JANUARY, 15, 23, 30, 0, 0, DateTimeZones.LONDON));  
         
         context.checking(new Expectations() {{
-            oneOf (trimmer).trimBroadcasts(fileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118472", "http://pressassociation.com/episodes/1424497"));
+            oneOf (trimmer).trimBroadcasts(fileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), 
+                    ImmutableList.of(new ItemRefAndBroadcast("http://pressassociation.com/episodes/1424497", broadcast("pa:71118472"))));
         }});
         
         TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())), trimmer, null);
         updater.run();
     }    
 
+    private Broadcast broadcast(String id) {
+        return new Broadcast("channel", new DateTime(DateTimeZones.UTC), Duration.ZERO).withId(id);
+    }
+    
     private Item loadItemAtPosition(Brand brand, int index) {
         return (Item) resolver.findByCanonicalUris(ImmutableList.of(brand.getChildRefs().get(index).getUri())).getFirstValue().requireValue();
     }

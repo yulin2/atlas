@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.channel4.epg;
 
+import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.application.ApplicationConfiguration;
@@ -10,18 +11,20 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.Interval;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
 
 public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
@@ -39,8 +42,10 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
         this.writer = writer;
     }
 
-    public void trimBroadcasts(Interval scheduleInterval, Channel channel, Map<String, String> acceptableIds) {
+    public void trimBroadcasts(Interval scheduleInterval, Channel channel, List<ItemRefAndBroadcast> acceptableBroadcasts) {
         try {
+            Map<String, ItemRefAndBroadcast> acceptableItemBroadcasts = index(acceptableBroadcasts);
+            
             //Get items currently broadcast in the interval
             Schedule schedule = scheduleResolver.schedule(scheduleInterval.getStart(), scheduleInterval.getEnd(), ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<ApplicationConfiguration>absent());
 
@@ -49,25 +54,28 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
             	// load the item from the main db to avoid reading stale data
             	String itemEmbeddedInScheduleUri = itemEmbeddedInSchedule.getCanonicalUri();
                 Maybe<Identified> maybeItem = resolver.findByCanonicalUris(ImmutableList.of(itemEmbeddedInScheduleUri)).get(itemEmbeddedInScheduleUri);
-                if(maybeItem.hasValue()) {
-                    Item item = (Item) maybeItem.requireValue();
-                    boolean changed = false;
-                    for (Version version : item.nativeVersions()) {
-                        for (Broadcast broadcast : version.getBroadcasts()) {
-                            // double-check the broadcast is in the valid interval/channel
-                            if (contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.getUri())) {
-                                if (broadcast.getSourceId() != null && !itemEmbeddedInScheduleUri.equals(acceptableIds.get(broadcast.getSourceId()))) {
-                                    if(!Boolean.FALSE.equals(broadcast.isActivelyPublished())) {
-                                        broadcast.setIsActivelyPublished(false);
-                                        changed = true;
-                                    }
-                                }
+                if(!maybeItem.hasValue()) {
+                    continue;
+                }
+                Item item = (Item) maybeItem.requireValue();
+                boolean changed = false;
+                for (Version version : item.nativeVersions()) {
+                    for (Broadcast broadcast : version.getBroadcasts()) {
+                        // double-check the broadcast is in the valid interval/channel
+                        if (!(contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.getUri()))) {
+                            continue;
+                        }
+                        ItemRefAndBroadcast acceptable = acceptableItemBroadcasts.get(broadcast.getSourceId());
+                        if (!matchesAcceptable(itemEmbeddedInScheduleUri, broadcast, acceptable)) {
+                            if(!Boolean.FALSE.equals(broadcast.isActivelyPublished())) {
+                                broadcast.setIsActivelyPublished(false);
+                                changed = true;
                             }
                         }
                     }
-                    if (changed) {
-                        writer.createOrUpdate(item);
-                    }
+                }
+                if (changed) {
+                    writer.createOrUpdate(item);
                 }
             }
         } catch (Exception e) {
@@ -75,7 +83,27 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
         }
     }
 
+    private boolean matchesAcceptable(String itemEmbeddedInScheduleUri, Broadcast broadcast,
+            ItemRefAndBroadcast acceptable) {
+        if (broadcast.getSourceId() == null) {
+            return true;
+        }
+        return acceptable != null
+            && itemEmbeddedInScheduleUri.equals(acceptable.getItemUri())
+            && acceptable.getBroadcast().getTransmissionTime().equals(broadcast.getTransmissionTime());
+    }
+
+    private Map<String, ItemRefAndBroadcast> index(List<ItemRefAndBroadcast> acceptableBroadcasts) {
+        return Maps.uniqueIndex(acceptableBroadcasts, new Function<ItemRefAndBroadcast, String>() {
+            @Override
+            public String apply(ItemRefAndBroadcast input) {
+                return input.getBroadcast().getSourceId();
+            }
+        });
+    }
+
     private boolean contained(Broadcast broadcast, Interval interval) {
-        return broadcast.getTransmissionTime().isAfter(interval.getStart().minusMillis(1)) && broadcast.getTransmissionTime().isBefore(interval.getEnd());
+        return !broadcast.getTransmissionTime().isBefore(interval.getStart())
+            && broadcast.getTransmissionTime().isBefore(interval.getEnd());
     }
 }

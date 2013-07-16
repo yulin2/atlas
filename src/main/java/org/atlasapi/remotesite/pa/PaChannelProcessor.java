@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.pa;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
@@ -11,13 +12,13 @@ import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.pa.PaBaseProgrammeUpdater.PaChannelData;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Lists;
 
 public class PaChannelProcessor {
 
@@ -36,10 +37,9 @@ public class PaChannelProcessor {
 
     public int process(PaChannelData channelData, Set<String> currentlyProcessing) {
         int processed = 0;
-        Set<ItemRefAndBroadcast> broadcasts = new HashSet<ItemRefAndBroadcast>();
+        List<ItemRefAndBroadcast> broadcasts = Lists.newArrayList();
         Channel channel = channelData.channel();
         try {
-            Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
             for (ProgData programme : channelData.programmes()) {
                 String programmeLock = lockIdentifier(programme);
                 lock(currentlyProcessing, programmeLock);
@@ -47,7 +47,6 @@ public class PaChannelProcessor {
                     ItemRefAndBroadcast itemAndBroadcast = processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
                     if(itemAndBroadcast != null) {
 	                    broadcasts.add(itemAndBroadcast);
-	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
                     }
                     scheduleVersionStore.store(channel, channelData.scheduleDay(), channelData.version());
                     processed++;
@@ -58,7 +57,7 @@ public class PaChannelProcessor {
                 }
             }
             if (trimmer != null) {
-                trimmer.trimBroadcasts(channelData.schedulePeriod(), channel, acceptableBroadcastIds.build());
+                trimmer.trimBroadcasts(channelData.schedulePeriod(), channel, broadcasts);
             }
             scheduleWriter.replaceScheduleBlock(Publisher.PA, channel, broadcasts);
             

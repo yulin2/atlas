@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
@@ -18,8 +19,7 @@ import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
 
@@ -68,7 +68,7 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
         String broadcastOn = null;
         
         if(!itemAndBroadcasts.isEmpty()) {
-            Builder<String, String> acceptableIds = ImmutableMap.builder();
+            ImmutableList.Builder<ItemRefAndBroadcast> acceptableBroadcasts = ImmutableList.builder();
             for(ItemAndBroadcast itemAndBroadcast : itemAndBroadcasts) {
                 if(itemAndBroadcast.getBroadcast().hasValue()) {
                     Broadcast broadcast = itemAndBroadcast.getBroadcast().requireValue();
@@ -85,12 +85,12 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
                     if(scheduleEndTime == null || scheduleEndTime.isBefore(broadcast.getTransmissionEndTime())) {
                         scheduleEndTime = broadcast.getTransmissionEndTime();
                     }
-                    acceptableIds.put(broadcast.getSourceId(), itemAndBroadcast.getItem().getCanonicalUri());
+                    acceptableBroadcasts.add(new ItemRefAndBroadcast(itemAndBroadcast.getItem(), broadcast));
                 }
             }
             
             Channel channel = channelResolver.fromUri(broadcastOn).requireValue();
-            trimmer.trimBroadcasts(new Interval(scheduleStartTime, scheduleEndTime), channel, acceptableIds.build());
+            trimmer.trimBroadcasts(new Interval(scheduleStartTime, scheduleEndTime), channel, acceptableBroadcasts.build());
         }
     }
 }

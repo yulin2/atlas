@@ -1,6 +1,5 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
 import java.util.Map;
@@ -25,17 +24,21 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.joda.time.Interval;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+@RunWith(JMock.class)
 public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
 	private static final Channel CHANNEL4 = new Channel(Publisher.METABROADCAST, "Channel 4", "c4", false, MediaType.AUDIO, "http://channel4.com");
 
@@ -46,11 +49,25 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
     private final Set<Channel> channels = ImmutableSet.of(CHANNEL4);
     private final Set<Publisher> publishers = ImmutableSet.of(Publisher.C4);
 
-    private Item item = buildItem();
 
     @Test
     public void testTrimBroadcasts() {
-        final Schedule schedule = Schedule.fromChannelMap(channelMap(), new Interval(100, 200));
+        Item item = new Item("testUri", "testCurie", Publisher.C4);
+        Version version = new Version();
+        
+        Broadcast ignore = new Broadcast(CHANNEL4.getUri(), new DateTime(50), new DateTime(103)).withId("c4:0234");
+        ignore.setIsActivelyPublished(true);
+        Broadcast retain = new Broadcast(CHANNEL4.getUri(), new DateTime(105), new DateTime(120)).withId("c4:1234");
+        retain.setIsActivelyPublished(true);
+        Broadcast remove = new Broadcast(CHANNEL4.getUri(), new DateTime(150), new DateTime(165)).withId("c4:2234");
+        remove.setIsActivelyPublished(true);
+        
+        version.setBroadcasts(ImmutableSet.of(ignore, retain, remove));
+        item.addVersion(version);
+        
+        Map<Channel, List<Item>> channelMap = Maps.newHashMap();
+        channelMap.put(CHANNEL4, Lists.newArrayList(item));
+        final Schedule schedule = Schedule.fromChannelMap(channelMap, new Interval(100, 200));
         
         ContentResolver resolver = new StubContentResolver().respondTo(item);
         
@@ -62,7 +79,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
         ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter);
         
         Interval scheduleInterval = new Interval(100, 200);
-        trimmer.trimBroadcasts(scheduleInterval, CHANNEL4, ImmutableMap.of("c4:1234", item.getCanonicalUri()));
+        trimmer.trimBroadcasts(scheduleInterval, CHANNEL4, ImmutableList.of(new ItemRefAndBroadcast(item, retain)));
         
     }
 
@@ -97,7 +114,49 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
         ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter);
         
         Interval scheduleInterval = new Interval(50, 200);
-        trimmer.trimBroadcasts(scheduleInterval, CHANNEL4, ImmutableMap.of("c4:1234", item2.getCanonicalUri()));
+        trimmer.trimBroadcasts(scheduleInterval, CHANNEL4, ImmutableList.of(new ItemRefAndBroadcast(item2, keep)));
+        
+        assertTrue(Iterables.getOnlyElement(Iterables.getOnlyElement(item2.getVersions()).getBroadcasts()).isActivelyPublished());
+        
+    }
+
+    @Test
+    public void testTrimsBroadcastsOfWithSameItemAndBroadcastIdButWrongStartTime() {
+        Item item1 = new Item("testUri1", "testCurie", Publisher.C4);
+        Version version = new Version();
+        Broadcast remove = new Broadcast(CHANNEL4.getUri(), new DateTime(50), new DateTime(103)).withId("c4:2234");
+        remove.setIsActivelyPublished(true);
+        version.setBroadcasts(ImmutableSet.of(remove));
+        item1.addVersion(version);
+        
+        Item item2 = new Item("testUri2", "testCurie", Publisher.C4);
+        version = new Version();
+        Broadcast keep = new Broadcast(CHANNEL4.getUri(), new DateTime(150), new DateTime(153)).withId("c4:1234");
+        remove.setIsActivelyPublished(true);
+        version.setBroadcasts(ImmutableSet.of(keep));
+        item2.addVersion(version);
+        
+        Map<Channel, List<Item>> channelMap = Maps.newHashMap();
+        channelMap.put(CHANNEL4, Lists.newArrayList(item1, item2));
+        final Schedule schedule = Schedule.fromChannelMap(channelMap, new Interval(50, 200));
+        
+        ContentResolver resolver = new StubContentResolver().respondTo(item1).respondTo(item2);
+        
+        context.checking(new Expectations() {{
+            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<ApplicationConfiguration>absent()));
+            will(returnValue(schedule));
+            one(contentWriter).createOrUpdate(with(trimmedItem()));
+        }});
+        
+        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter);
+        
+        Broadcast updatedRemove = new Broadcast(CHANNEL4.getUri(), new DateTime(55), new DateTime(103)).withId("c4:2234");
+
+        Interval scheduleInterval = new Interval(50, 200);
+        trimmer.trimBroadcasts(scheduleInterval, CHANNEL4, ImmutableList.of(
+            new ItemRefAndBroadcast(item2, keep),
+            new ItemRefAndBroadcast(item1, updatedRemove)
+        ));
         
         assertTrue(Iterables.getOnlyElement(Iterables.getOnlyElement(item2.getVersions()).getBroadcasts()).isActivelyPublished());
         
@@ -144,10 +203,4 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
         item.addVersion(version);
 		return item;
 	}
-    
-    private Map<Channel, List<Item>> channelMap() {
-        Map<Channel, List<Item>> channelMap = Maps.newHashMap();
-        channelMap.put(CHANNEL4, Lists.newArrayList(item));
-        return channelMap;
-    }
 }
