@@ -34,6 +34,7 @@ public class YoutubeUriCanonicaliser implements Canonicaliser {
         Pattern.compile("https?://.*\\.youtube.com.*v=([^\\./&=]+).*"),
         Pattern.compile("https?://.*\\.youtube.com/v/([^\\./&=]+).*"),
         Pattern.compile("http://.*\\.youtube.com/watch?v/([^\\./&=]+).*"),
+        Pattern.compile("http://.*\\.youtube.com/feeds/api/videos/([^\\./&=]+).*"),
 		Pattern.compile("tag:youtube.com,\\d+:\\w+:([^\\./&=]+)")
     );
 
@@ -53,7 +54,7 @@ public class YoutubeUriCanonicaliser implements Canonicaliser {
                 return matcher.group(1);
             }
         }
-        throw new YouTubeException(String.format("Provided URI %s deosn't match any known YouTube URI patterns", uri));
+        throw new YouTubeException(String.format("Provided URI %s doesn't match any known YouTube URI patterns", uri));
 	}
 
 	@Override
