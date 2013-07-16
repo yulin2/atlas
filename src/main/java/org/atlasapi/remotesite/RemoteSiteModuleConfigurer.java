@@ -29,6 +29,7 @@ import org.atlasapi.remotesite.space.TheSpaceModule;
 import org.atlasapi.remotesite.tvblob.TVBlobModule;
 import org.atlasapi.remotesite.voila.VoilaModule;
 import org.atlasapi.remotesite.worldservice.WorldServicesModule;
+import org.atlasapi.remotesite.youtube.YouTubeModule;
 import org.atlasapi.remotesite.youview.YouViewModule;
 
 import com.google.common.collect.ImmutableMap;
@@ -52,7 +53,7 @@ public class RemoteSiteModuleConfigurer {
         .put("itunes",  ItunesModule.class)
  //       .put("msn",     MsnVideoModule.class)
         .put("pa",      PaModule.class)
-  //      .put("youtube", YouTubeModule.class)
+        //.put("youtube", YouTubeModule.class)
         .put("tvblob",  TVBlobModule.class)
         .put("preview", PreviewNetworksModule.class)
         .put("itvinterlinking", ItvInterlinkingModule.class)

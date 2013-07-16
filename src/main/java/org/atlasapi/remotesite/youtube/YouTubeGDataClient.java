@@ -21,8 +21,6 @@ import java.util.regex.Pattern;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.HttpClients;
-import org.atlasapi.remotesite.deserializers.DateTimeDeserializer;
-import org.atlasapi.remotesite.deserializers.LocalDateDeserializer;
 import org.atlasapi.remotesite.youtube.deserializers.YouTubeAccessControlDeserializer;
 import org.atlasapi.remotesite.youtube.deserializers.YouTubeContentDeserializer;
 import org.atlasapi.remotesite.youtube.deserializers.YouTubePlayerDeserializer;
@@ -34,8 +32,6 @@ import org.atlasapi.remotesite.youtube.entity.YouTubeThumbnail;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoWrapper;
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -55,8 +51,7 @@ public class YouTubeGDataClient implements RemoteSiteClient<YouTubeVideoEntry> {
             .registerTypeAdapter(YouTubeContent.class, new YouTubeContentDeserializer())
             .registerTypeAdapter(YouTubeThumbnail.class, new YouTubeThumbnailDeserializer())
             .registerTypeAdapter(YouTubePlayer.class, new YouTubePlayerDeserializer())
-            .registerTypeAdapter(DateTime.class, new DateTimeDeserializer(ISODateTimeFormat.dateTime()))
-            .registerTypeAdapter(LocalDate.class, new LocalDateDeserializer(ISODateTimeFormat.date()))
+            .registerTypeHierarchyAdapter(DateTime.class, new DateTimeTypeConverter())
             .registerTypeAdapter(YouTubeAccessControl.class, new YouTubeAccessControlDeserializer())
             .create();
     

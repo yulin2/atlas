@@ -30,13 +30,15 @@ import org.atlasapi.application.ApplicationConfiguration;
 @RunWith(JMock.class)
 public class LookupResolvingQueryExecutorTest extends TestCase {
     private final Mockery context = new Mockery();
-    
+
+    private final boolean CASSANDRA_ENABLED = true;
+
     private KnownTypeContentResolver cassandraContentResolver = context.mock(KnownTypeContentResolver.class, "cassandraContentResolver");
     private KnownTypeContentResolver mongoContentResolver = context.mock(KnownTypeContentResolver.class, "mongoContentResolver");
-    
+
     private final InMemoryLookupEntryStore lookupStore = new InMemoryLookupEntryStore();
-    
-    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore);
+
+    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore, CASSANDRA_ENABLED);
 
     @Test
     public void testSetsSameAs() {

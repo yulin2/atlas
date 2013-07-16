@@ -7,7 +7,10 @@ import org.atlasapi.remotesite.bbc.BbcIplayerHightlightsAdapter;
 import org.atlasapi.remotesite.bbc.BbcUriCanonicaliser;
 import org.atlasapi.remotesite.channel4.C4HighlightsAdapter;
 import org.atlasapi.remotesite.itv.ItvMercuryBrandAdapter;
+import org.atlasapi.remotesite.youtube.YouTubeException;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
@@ -17,6 +20,8 @@ import com.metabroadcast.common.base.Maybe;
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public class PerPublisherCurieExpander implements CurieExpander {
+
+    private static final Logger log = LoggerFactory.getLogger(PerPublisherCurieExpander.class);
 
 	public enum CurieAlgorithm {
 		BBC {
@@ -140,7 +145,14 @@ public class PerPublisherCurieExpander implements CurieExpander {
 
 			@Override
 			public String compact(String url) {
-				return "yt:" + YoutubeUriCanonicaliser.videoIdFrom(url);
+                String curie ="yt:";
+                try {
+                    return curie + YoutubeUriCanonicaliser.videoIdFrom(url);
+                } catch (YouTubeException e) {
+                    log.error(e.getMessage(), e);
+                }
+
+                return curie;
 			}	
 		},
 		FB {
