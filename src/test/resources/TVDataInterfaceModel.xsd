@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/TVDataInterfaceModel"
+	xmlns:tns="http://www.example.org/TVDataInterfaceModel"
+	elementFormDefault="qualified">
+
+	<element name="TVDataInterfaceResponse">
+		<complexType>
+			<sequence>
+				<element name="Result" type="int"></element>
+				<element name="ErrorMessage" type="string" maxOccurs="1"
+					minOccurs="0">
+				</element>
+				<element name="GuideList" type="tns:GuideListType"
+					maxOccurs="1" minOccurs="0">
+				</element>
+				<element name="ChannelList" type="tns:ChannelListType"
+					maxOccurs="1" minOccurs="0">
+				</element>
+				<element name="ItemDetail" type="tns:ItemDetailType"
+					maxOccurs="1" minOccurs="0">
+				</element>
+
+				<element name="VodList" type="tns:VodListType"
+					maxOccurs="1" minOccurs="0">
+				</element>
+				<element name="AllChannelListCode" type="string"
+					maxOccurs="1" minOccurs="0">
+				</element>
+				<element name="OdListCode" type="string" maxOccurs="1"
+					minOccurs="0">
+				</element>
+				<element name="HelpListCode" type="string" minOccurs="0"
+					maxOccurs="1">
+				</element>
+				<element name="TvGenreList" type="tns:GenreListType"
+					maxOccurs="1" minOccurs="0">
+				</element>
+				<element name="FilmGenreList" type="tns:GenreListType"
+					maxOccurs="1" minOccurs="0">
+				</element>
+				<element name="ParentMovieGenreCode" type="string"
+					maxOccurs="1" minOccurs="0">
+				</element>
+				<element name="ParentTvGenreCode" type="string"
+					maxOccurs="1" minOccurs="0">
+				</element>
+				<element name="ImageWall" type="tns:ImageWallType"
+					maxOccurs="1" minOccurs="0">
+				</element>
+				<element name="AccountDetails"
+					type="tns:AccountDetailsType" maxOccurs="1" minOccurs="0">
+				</element>
+			</sequence>
+		</complexType>
+	</element>
+
+
+	<complexType name="ChannelListType">
+		<sequence>
+			<element name="Channel" type="tns:ChannelType"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+			<element name="TotalChannelCount" type="int"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="GuideListType">
+		<sequence>
+			<element name="Guide" type="tns:GuideType" maxOccurs="unbounded"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="ChannelType">
+		<sequence>
+			<element name="Id" type="string"></element>
+			<element name="Title" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="Description" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="Type" type="tns:ChannelTypeType"></element>
+			<element name="Number" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="ParentChannelId" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="ImageList" type="tns:ImageListType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="RatingCode" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="ProgrammeItemList"
+				type="tns:ProgrammeItemListType" maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="RegionalVariantList"
+				type="tns:RegionalVariantListType" maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="VodHighlightsList"
+				type="tns:VODHighlightsListType" maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="ChannelGenreList" type="tns:GenreListType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="ProductList" type="tns:ProductListType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<simpleType name="ChannelTypeType">
+		<restriction base="string">
+			<enumeration value="VOD"></enumeration>
+			<enumeration value="BROADCAST"></enumeration>
+			<enumeration value="HOLDING"></enumeration>
+		</restriction>
+	</simpleType>
+
+	<complexType name="GuideType">
+		<sequence>
+			<element name="Id" type="string"></element>
+			<element name="Title" type="string"></element>
+			<element name="Description" type="string"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="ScheduleDataType">
+		<sequence>
+			<element name="Channel" type="tns:ChannelType" maxOccurs="unbounded"
+				minOccurs="0"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="ItemDetailType">
+		<sequence>
+			<element name="Id" type="string"></element>
+			<element name="ItemType" type="tns:ItemTypeType"></element>
+			<element name="Title" type="string"></element>
+			<element name="RatingCode" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="YearMade" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="Duration" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="GenreList" type="tns:GenreListType"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+			<element name="Availability" type="tns:AvailabilityType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="CreditList" type="tns:CreditListType"
+				minOccurs="0" maxOccurs="1">
+			</element>
+			<element name="ImageList" type="tns:ImageListType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="SynopsisList" type="tns:SynopsisListType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="Media" type="tns:MediaType" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="AssociatedAssets"
+				type="tns:AssociatedAssetsType" maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="ProductType" type="tns:ProductTypeType"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<element name="Channel" type="tns:ChannelType" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="NavTargetId" type="integer" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="NextEpisodeId" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+			<element name="CurrentSeriesId" type="string" maxOccurs="1" minOccurs="0"></element>
+		</sequence>
+	</complexType>
+
+
+	<complexType name="ItemType "></complexType>
+
+	<complexType name="ProgrammeItemListType">
+		<sequence>
+
+			<element name="ProgrammeItem" type="tns:ProgrammeItemType"
+				maxOccurs="unbounded" minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="AvailabilityType">
+		<sequence>
+			<element name="StartDt" type="dateTime"></element>
+			<element name="EndDt" type="dateTime" maxOccurs="1"
+				minOccurs="0"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="CreditListType">
+		<sequence>
+			<element name="Credit" type="tns:CreditType" maxOccurs="unbounded"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="ImageListType">
+		<sequence>
+			<element name="Image" type="tns:ImageType" maxOccurs="unbounded"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="SynopsisListType">
+		<sequence>
+			<element name="Synopsis" type="tns:SynopsisType" maxOccurs="unbounded"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="MediaType">
+		<sequence>
+			<element name="MediaFormat" type="tns:MediaFormatType"
+				maxOccurs="unbounded" minOccurs="0"></element>
+
+		</sequence>
+	</complexType>
+
+	<complexType name="CreditType">
+		<sequence>
+			<element name="Role" type="string"></element>
+			<element name="Person" type="string"></element>
+			<element name="Code" type="string"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="ImageType">
+		<sequence>
+			<element name="filename" type="string"></element>
+			<element name="size" type="string"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="SynopsisType">
+		<sequence>
+			<element name="Text" type="string"></element>
+			<element name="Type" type="string"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="MediaFormatType">
+		<sequence>
+			<element name="bitrate" type="int"></element>
+			<element name="hd" type="boolean"></element>
+		</sequence>
+	</complexType>
+
+    <complexType name="ProgrammeItemType">
+         <sequence>
+         	<element name="Id" type="string"></element>
+         	<element name="Title" type="string"></element>
+         	<element name="Synopsis" type="tns:SynopsisType"
+         		maxOccurs="1" minOccurs="0">
+         	</element>
+         	<element name="Genre" type="string" maxOccurs="unbounded"
+         		minOccurs="0">
+         	</element>
+         	<element name="Availability" type="tns:AvailabilityType"></element>
+         	<element name="Duration" type="string" maxOccurs="1"
+         		minOccurs="0">
+         	</element>
+         	<element name="Rating" type="string" maxOccurs="1"
+         		minOccurs="0">
+         	</element>
+         	<element name="OffAirInd" type="boolean" maxOccurs="1"
+         		minOccurs="0">
+         	</element>
+         	<element name="AvailableForCatchup" type="boolean"
+         		maxOccurs="1" minOccurs="1">
+         	</element>
+         	<element name="Image" type="tns:ImageType" maxOccurs="1" minOccurs="0"></element>
+         </sequence>
+    </complexType>
+
+    <complexType name="RegionalVariantListType">
+    	<sequence>
+    		<element name="RegionalVariant"
+    			type="tns:RegionalVariantType" maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="RegionalVariantType">
+    	<sequence>
+    		<element name="ChannelId" type="string"></element>
+    		<element name="Title" type="string"></element>
+    		<element name="DefaultInRegion" type="boolean"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="PricingInformationType"></complexType>
+
+    <simpleType name="ProductTypeType">
+    <restriction base="string">
+    	<enumeration value="value"></enumeration>
+    	<enumeration value="FREE"></enumeration>
+    	<enumeration value="SUBSCRIPTION"></enumeration>
+    	<enumeration value="RENTAL"></enumeration>
+    	</restriction>
+    </simpleType>
+
+    <complexType name="VODHighlightsListType">
+    	<sequence>
+    		<element name="VodHighlightItem" type="tns:VODHighlightType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="VODHighlightType">
+    	<sequence>
+    		<element name="ItemId" type="string"></element>
+    		<element name="ItemType" type="tns:ItemTypeType"></element>
+    		<element name="Title" type="string"></element>
+    		<element name="ImageList" type="tns:ImageListType"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="VodListType">
+    	<sequence>
+    		<element name="VodEntity" type="tns:VODEntityType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="TotalEntityCount" type="int"></element>
+    		<element name="BackgroundImage" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="LogoImage" type="string" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="VODEntityType">
+    	<sequence>
+    		<element name="Id" type="string"></element>
+    		<element name="ItemType" type="tns:ItemTypeType"></element>
+    		<element name="Title" type="string"></element>
+    		<element name="ImageList" type="tns:ImageListType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="Availability" type="tns:AvailabilityType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="RatingCode" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="ProductType" type="tns:ProductTypeType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="Synopsis" type="string"></element>
+    		<element name="Rating" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="Channel" type="tns:ChannelType" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="Trailer" type="tns:AssociatedAssetType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="Duration" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="NavTargetId" type="int" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <simpleType name="ItemTypeType">
+    	<restriction base="string">
+    		<enumeration value="BRAND"></enumeration>
+    		<enumeration value="SERIES"></enumeration>
+    		<enumeration value="EPISODE"></enumeration>
+    		<enumeration value="BROADCAST_ITEM"></enumeration>
+    		<enumeration value="CHANNEL"></enumeration>
+    		<enumeration value="LOCATION"></enumeration>
+    		<enumeration value="IMGWALL"></enumeration>
+    	</restriction>
+    </simpleType>
+
+    <complexType name="AssociatedAssetsType">
+    	<sequence>
+    		<element name="AssociatedAsset"
+    			type="tns:AssociatedAssetType" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    		
+    	</sequence>
+    </complexType>
+
+    <complexType name="AssociatedAssetType">
+    	<sequence>
+    		<element name="Id" type="string"></element>
+    		<element name="Duration" type="string"></element>
+    		<element name="AssetType" type="tns:AssetType"></element>
+    		<element name="Filename" type="string"></element>
+    		<element name="AvailableInHD" type="boolean"></element>
+    		<element name="path" type="string"></element>
+    		<element name="IsEncrypted" type="boolean"></element>
+    		<element name="NavTargetId" type="int"></element>
+    	</sequence>
+    </complexType>
+
+
+    <simpleType name="AssetType">
+    	<restriction base="string">
+    		<enumeration value="TRAILER"></enumeration>
+    	</restriction>
+    </simpleType>
+
+    <complexType name="GenreListType">
+    	<sequence>
+    		<element name="Genre" type="tns:GenreType" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="GenreType">
+    	<sequence>
+    		<element name="GenreCode" type="string"></element>
+    		<element name="GenreDescription" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="ImageWallType">
+    	<sequence>
+    		<element name="VodList" type="tns:VodListType" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="Menu" type="tns:MenuListType" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="BackgroundImage" type="string"></element>
+    		<element name="TemplateType" type="tns:TemplateTypeType">
+    		</element>
+    		<element name="Title" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="MenuListType">
+    	<sequence>
+    		<element name="MenuOption" type="tns:MenuOptionType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+
+  
+
+    <complexType name="TargetType">
+    	<sequence>
+    		<element name="Code" type="string"></element>
+    		<element name="Type" type="string"></element>
+    	</sequence>
+    </complexType>
+
+
+    <simpleType name="TemplateTypeType">
+    	<restriction base="string">
+    		<enumeration value="FIVE_ITEM"></enumeration>
+    		<enumeration value="THREE_ITEM"></enumeration>
+    	</restriction>
+    </simpleType>
+
+    <complexType name="MenuOptionType">
+    	<sequence>
+    		<element name="DisplayTarget" type="tns:TargetType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="NavigationTarget" type="tns:TargetType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="Title" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="AccountDetailsType">
+    	<sequence>
+    		<element name="AccountStatus"
+    			type="tns:AccountStatusType">
+    		</element>
+    		<element name="RegistrationStatus"
+    			type="tns:RegistrationStatusType">
+    		</element>
+    		<element name="User" type="tns:UserType"></element>
+    		<element name="BootId" type="long"></element>
+    		<element name="EntitlementList" type="tns:ProductListType"
+    			maxOccurs="1" minOccurs="0">
+    		</element>
+    		<element name="MulticastInd" type="int"></element>
+    	</sequence>
+    </complexType>
+    <simpleType name="AccountStatusType">
+		<restriction base="string">
+			<enumeration value="Open"/>
+			<enumeration value="Closed"/>
+			<enumeration value="paymentBar"/>
+			<enumeration value="Suspended"/>
+			<enumeration value="None"/>
+		</restriction>
+	</simpleType>
+	<simpleType name="RegistrationStatusType">
+		<restriction base="string">
+			<enumeration value="Registered"/>
+			<enumeration value="Unregistered"/>
+		</restriction>
+	</simpleType>
+
+    <complexType name="UserType">
+		<sequence>
+			<element name="personId" type="long"/>
+			<element name="pin" type="tns:PinType"/>
+		</sequence>
+	</complexType>
+	<simpleType name="PinType">
+		<restriction base="string">
+			<pattern value="[0-9][0-9][0-9][0-9]"/>
+		</restriction>
+	</simpleType>
+
+	
+	
+
+	<complexType name="ProductListType">
+		<sequence>
+			<element name="Entitlement" type="int" maxOccurs="unbounded" minOccurs="0"></element>
+		</sequence>
+	</complexType>
+</schema>
