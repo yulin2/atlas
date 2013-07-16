@@ -68,6 +68,7 @@ public class ChannelSimplifier {
             }
         ));
         simple.setMediaType(input.getMediaType() != null ? input.getMediaType().toString().toLowerCase() : null);
+        simple.setRelatedLinks(simplifyRelatedLinks(input.getRelatedLinks()));
         simple.setStartDate(input.getStartDate());            
         simple.setEndDate(input.getEndDate());    
         
