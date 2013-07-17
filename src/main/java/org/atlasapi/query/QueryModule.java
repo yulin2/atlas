@@ -62,6 +62,7 @@ public class QueryModule {
 	
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	private @Value("${atlas.search.host}") String searchHost;
+	private @Value("${cassandra.enabled}") boolean cassandraEnabled;
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 	    
@@ -69,7 +70,7 @@ public class QueryModule {
 	    KnownTypeContentResolver mongoContentResolver = new MongoContentResolver(mongo, lookupStore);
         KnownTypeContentResolver cassandraContentResolver = new CassandraKnownTypeContentResolver(cassandra);
 		
-        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore);
+        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore, cassandraEnabled);
 		
 		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor, equivUpdater, ImmutableSet.of(FACEBOOK));
 		

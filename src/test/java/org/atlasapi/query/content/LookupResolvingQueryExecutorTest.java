@@ -36,7 +36,7 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
     
     private final InMemoryLookupEntryStore lookupStore = new InMemoryLookupEntryStore();
     
-    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore);
+    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore, true);
 
     @Test
     public void testSetsSameAs() {
