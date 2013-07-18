@@ -207,6 +207,28 @@ public class LoveFilmDataRowContentExtractorTest {
         assertFalse(film.isActivelyPublished());
     }
     
+    @Test
+    public void testHyphenatedFilmTitleExtraction() throws Exception {
+        
+        LoveFilmDataRow row = rowFromFile("legends-in-concert.csv");
+        
+        assertThat(extractRow(row).getTitle(), is("Al Martino - Legends in Concert"));
+        
+    }
+
+    @Test
+    public void testHyphenatedEpisodeTitleExtraction() throws Exception {
+        
+        LoveFilmDataRow row = rowFromFile("knight-rider-goliath.csv");
+        
+        assertThat(extractRow(row).getTitle(), is("Goliath - Part 1"));
+        
+    }
+
+    private Content extractRow(LoveFilmDataRow row) {
+        return extractor.extract(row).get();
+    }
+    
     private LoveFilmDataRow rowFromFile(String filename) throws IOException {
         URL testFile = Resources.getResource(getClass(), filename);
         LoveFilmData data = new LoveFilmData(Resources.newReaderSupplier(testFile, Charsets.UTF_8));
