@@ -243,12 +243,12 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         return null;
     }
 
-    private static final Pattern EPISODE_TITLE_PATTERN = Pattern.compile("^[\\S ]+ - (E\\d+|S\\d+ E\\d+|)( - )?(.*)$");
+    private static final Pattern EPISODE_TITLE_PATTERN = Pattern.compile("^([\\S ]+ - (S\\d+ )?E\\d+)?( - )?(.*)$");
 
     private String extractTitle(String title) {
         Matcher matcher = EPISODE_TITLE_PATTERN.matcher(title);
-        if (matcher.matches() && matcher.groupCount() >= 3) {
-            return matcher.group(3);
+        if (matcher.matches() && matcher.groupCount() >= 4) {
+            return matcher.group(4);
         }
         return title;
     }
