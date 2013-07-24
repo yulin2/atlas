@@ -56,9 +56,7 @@ import com.metabroadcast.common.time.Timestamp;
 public class PaProgrammeProcessorTest {
 
     private final int SUMMARY_BRAND_INDEX = 0;
-    private final int ITEM_BRAND_INDEX = 1;
     private final int SUMMARY_SERIES_INDEX = 2;
-    private final int ITEM_SERIES_INDEX = 3;
 
     private final ContentWriter contentWriter = mock(ContentWriter.class);
     private final ContentResolver contentResolver = mock(ContentResolver.class);
