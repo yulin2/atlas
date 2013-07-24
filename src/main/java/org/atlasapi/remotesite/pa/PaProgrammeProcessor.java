@@ -703,9 +703,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private static Boolean getBooleanValue(String value) {
-        if (value != null) {
-            return value.equalsIgnoreCase(YES);
-        }
-        return null;
+        return !Strings.isNullOrEmpty(value);
     }
 }
