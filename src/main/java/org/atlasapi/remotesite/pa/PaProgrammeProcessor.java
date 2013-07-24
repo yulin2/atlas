@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
@@ -24,6 +23,7 @@ import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.ImageAspectRatio;
 import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
@@ -105,38 +105,43 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             if (! Strings.isNullOrEmpty(progData.getSeriesId()) && IGNORED_BRANDS.contains(progData.getSeriesId())) {
                 return null;
             }
-            
-            Maybe<Brand> possibleBrand = getBrand(progData, channel);
+
+            Maybe<Brand> possibleBrand = getBrand(progData, channel, updatedAt);
             if (possibleBrand.hasValue()) {
-                Brand brand = possibleBrand.requireValue();
-                if (isClosedBrand(possibleBrand)) {
-                    brand.setScheduleOnly(true);
+                Brand originalBrand = possibleBrand.requireValue();
+                contentWriter.createOrUpdate(originalBrand);
+                if (hasBrandSummary(progData)) {
+                    Brand summaryBrand = extractSummaryBrand(progData, originalBrand.getCanonicalUri(), updatedAt);
+                    summaryBrand.setEquivalentTo(ImmutableSet.of(LookupRef.from(originalBrand)));
+
+                    contentWriter.createOrUpdate(summaryBrand);
                 }
-                brand.setLastUpdated(updatedAt.toDateTimeUTC());
-            	contentWriter.createOrUpdate(brand);
             }
-            
-            Maybe<Series> series = getSeries(progData, channel, possibleBrand.hasValue());
-            if (series.hasValue()) {
-            	if (possibleBrand.hasValue()) {
-            		series.requireValue().setParent(possibleBrand.requireValue());
-            	}
-            	series.requireValue().setLastUpdated(updatedAt.toDateTimeUTC());
-            	contentWriter.createOrUpdate(series.requireValue());
+
+            Maybe<Series> possibleSeries = getSeries(progData, channel, possibleBrand, updatedAt);
+            if (possibleSeries.hasValue()) {
+                Series originalSeries = possibleSeries.requireValue();
+                contentWriter.createOrUpdate(originalSeries);
+                if (hasSeriesSummary(progData)) {
+                    Series summarySeries = extractSummarySeries(progData, originalSeries.getCanonicalUri(), updatedAt);
+                    summarySeries.setEquivalentTo(ImmutableSet.of(LookupRef.from(originalSeries)));
+
+                    contentWriter.createOrUpdate(summarySeries);
+                }
             }
-            
-            Maybe<ItemAndBroadcast> itemAndBroadcast = isClosedBrand(possibleBrand) ? getClosedEpisode(possibleBrand.requireValue(), progData, channel, zone, updatedAt) : getFilmOrEpisode(progData, channel, zone, possibleBrand.hasValue() || series.hasValue(), updatedAt);
+
+            Maybe<ItemAndBroadcast> itemAndBroadcast = isClosedBrand(possibleBrand) ? getClosedEpisode(possibleBrand.requireValue(), progData, channel, zone, updatedAt) : getFilmOrEpisode(progData, channel, zone, possibleBrand.hasValue() || possibleSeries.hasValue(), updatedAt);
 
             if (itemAndBroadcast.hasValue()) {
             	Item item = itemAndBroadcast.requireValue().getItem();
-                if (series.hasValue() && item instanceof Episode) {
+                if (possibleSeries.hasValue() && item instanceof Episode) {
                 	Episode episode = (Episode) item;
-                    episode.setSeries(series.requireValue());
+                    episode.setSeries(possibleSeries.requireValue());
                 }
                 if (possibleBrand.hasValue()) {
                 	item.setContainer(possibleBrand.requireValue());
-                } else if (series.hasValue()) {
-                	item.setContainer(series.requireValue());
+                } else if (possibleSeries.hasValue()) {
+                	item.setContainer(possibleSeries.requireValue());
                 }
                 item.setLastUpdated(updatedAt.toDateTimeUTC());
                 contentWriter.createOrUpdate(item);
@@ -149,11 +154,39 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
         return null;
     }
-    
+
+    private Brand extractSummaryBrand(ProgData progData, String originalURI, Timestamp updatedAt) {
+        Brand summaryBrand = new Brand();
+        summaryBrand.setCanonicalUri(originalURI.replace(Publisher.PA.key(), Publisher.PA_SERIES_SUMMARIES.key()));
+        summaryBrand.setPublisher(Publisher.PA_SERIES_SUMMARIES);
+        summaryBrand.setLongDescription(progData.getSeriesSummary());
+        summaryBrand.setLastUpdated(updatedAt.toDateTimeUTC());
+
+        return summaryBrand;
+    }
+
+    private Series extractSummarySeries(ProgData progData, String originalUri, Timestamp updatedAt) {
+        Series summarySeries = new Series();
+        summarySeries.setCanonicalUri(originalUri.replace(Publisher.PA.key(), Publisher.PA_SERIES_SUMMARIES.key()));
+        summarySeries.setPublisher(Publisher.PA_SERIES_SUMMARIES);
+        summarySeries.setLongDescription(progData.getSeason().getSeasonSummary());
+        summarySeries.setLastUpdated(updatedAt.toDateTimeUTC());
+        return summarySeries;
+    }
+
+    private boolean hasSeriesSummary(ProgData progData) {
+        return (progData.getSeason() != null
+            && !Strings.isNullOrEmpty(progData.getSeason().getSeasonSummary()));
+    }
+
+    private boolean hasBrandSummary(ProgData progData) {
+        return !Strings.isNullOrEmpty(progData.getSeriesSummary());
+    }
+
     private boolean isClosedBrand(Maybe<Brand> brand) {
         return brand.hasValue() && CLOSED_BRAND.equals(brand.requireValue().getCanonicalUri());
     }
-    
+
     private Maybe<ItemAndBroadcast> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         String uri = CLOSED_EPISODE+getClosedPostfix(channel);
         Maybe<Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).getFirstValue();
@@ -177,12 +210,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         return Maybe.just(new ItemAndBroadcast(episode, Maybe.just(broadcast)));
     }
-    
+
+    @SuppressWarnings("deprecation")
     private String getClosedPostfix(Channel channel) {
         return "_"+channel.getKey();
     }
     
-    private Maybe<Brand> getBrand(ProgData progData, Channel channel) {
+    private Maybe<Brand> getBrand(ProgData progData, Channel channel, Timestamp updatedAt) {
         String brandId = progData.getSeriesId();
         if (Strings.isNullOrEmpty(brandId) || Strings.isNullOrEmpty(brandId.trim())) {
             return Maybe.nothing();
@@ -203,6 +237,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         setGenres(progData, brand);
 
         selectImages(progData.getPictures(), brand, PA_PICTURE_TYPE_BRAND, PA_PICTURE_TYPE_SERIES, Maybe.<String>nothing());
+
+        if (isClosedBrand(Maybe.just(brand))) {
+            brand.setScheduleOnly(true);
+        }
+        brand.setLastUpdated(updatedAt.toDateTimeUTC());
 
         return Maybe.just(brand);
     }
@@ -284,7 +323,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
 
-    private Maybe<Series> getSeries(ProgData progData, Channel channel, boolean hasBrand) {
+    private Maybe<Series> getSeries(ProgData progData, Channel channel, Maybe<Brand> possibleBrand, Timestamp updatedAt) {
+        
         if (Strings.isNullOrEmpty(progData.getSeriesNumber()) || Strings.isNullOrEmpty(progData.getSeriesId())) {
             return Maybe.nothing();
         }
@@ -320,7 +360,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         setGenres(progData, series);
         
         selectImages(progData.getPictures(), series, PA_PICTURE_TYPE_SERIES, PA_PICTURE_TYPE_BRAND, Maybe.<String>nothing());
-        
+        if (possibleBrand.hasValue()) {
+            series.setParent(possibleBrand.requireValue());
+        }
+        series.setLastUpdated(updatedAt.toDateTimeUTC());
+
         return Maybe.just(series);
     }
     
