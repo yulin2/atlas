@@ -71,7 +71,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     static final String PA_PICTURE_TYPE_BRAND   = "series";  // Counter-intuitively PA use 'series' where we use 'brand'
     static final String PA_PICTURE_TYPE_SERIES  = "season";  // .. and 'season' where we use 'series'
     
-    static final String PA_BASE_SUMMARIES_URI = "http://" + Publisher.PA_SERIES_SUMMARIES.key() + "/";
     static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
     static final String NEW_IMAGE_BASE_IMAGE_URL = "http://images.atlas.metabroadcast.com/pressassociation.com/";
     public static final String BROADCAST_ID_PREFIX = "pa:";
