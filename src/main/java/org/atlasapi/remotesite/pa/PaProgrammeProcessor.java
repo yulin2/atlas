@@ -108,26 +108,26 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
             Maybe<Brand> possibleBrand = getBrand(progData, channel, updatedAt);
             if (possibleBrand.hasValue()) {
-                Brand brand = possibleBrand.requireValue();
+                Brand originalBrand = possibleBrand.requireValue();
+                contentWriter.createOrUpdate(originalBrand);
                 if (hasBrandSummary(progData)) {
-                    Brand summaryBrand = extractSummaryBrand(progData, brand.getCanonicalUri(), updatedAt);
-                    summaryBrand.setEquivalentTo(ImmutableSet.of(LookupRef.from(brand)));
+                    Brand summaryBrand = extractSummaryBrand(progData, originalBrand.getCanonicalUri(), updatedAt);
+                    summaryBrand.setEquivalentTo(ImmutableSet.of(LookupRef.from(originalBrand)));
 
                     contentWriter.createOrUpdate(summaryBrand);
                 }
-                contentWriter.createOrUpdate(brand);
             }
 
             Maybe<Series> possibleSeries = getSeries(progData, channel, possibleBrand, updatedAt);
             if (possibleSeries.hasValue()) {
                 Series originalSeries = possibleSeries.requireValue();
+                contentWriter.createOrUpdate(originalSeries);
                 if (hasSeriesSummary(progData)) {
                     Series summarySeries = extractSummarySeries(progData, originalSeries.getCanonicalUri(), updatedAt);
                     summarySeries.setEquivalentTo(ImmutableSet.of(LookupRef.from(originalSeries)));
 
                     contentWriter.createOrUpdate(summarySeries);
                 }
-                contentWriter.createOrUpdate(possibleSeries.requireValue());
             }
 
             Maybe<ItemAndBroadcast> itemAndBroadcast = isClosedBrand(possibleBrand) ? getClosedEpisode(possibleBrand.requireValue(), progData, channel, zone, updatedAt) : getFilmOrEpisode(progData, channel, zone, possibleBrand.hasValue() || possibleSeries.hasValue(), updatedAt);
