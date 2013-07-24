@@ -67,8 +67,6 @@ import com.metabroadcast.common.time.Timestamp;
 
 public class PaProgrammeProcessor implements PaProgDataProcessor {
     
-    private static final String SERIES_URL_PART = "series/";
-    private static final String BRANDS_URL_PART = "brands/";
     static final String PA_PICTURE_TYPE_EPISODE = "episode";
     static final String PA_PICTURE_TYPE_BRAND   = "series";  // Counter-intuitively PA use 'series' where we use 'brand'
     static final String PA_PICTURE_TYPE_SERIES  = "season";  // .. and 'season' where we use 'series'
