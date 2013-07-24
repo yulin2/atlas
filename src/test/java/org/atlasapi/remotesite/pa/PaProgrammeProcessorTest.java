@@ -201,7 +201,7 @@ public class PaProgrammeProcessorTest {
     public void testPaSummaries() {
         Brand expectedItemBrand = new Brand("http://pressassociation.com/brands/5", "pa:b-5", Publisher.PA);
         Series expectedItemSeries= new Series("http://pressassociation.com/series/5-6", "pa:s-5-6", Publisher.PA);
-        Brand expectedSummaryBrand = new Brand("http://summaries.pressassociation.com/brands/null", "pa:b-5", Publisher.PA_SERIES_SUMMARIES);
+        Brand expectedSummaryBrand = new Brand("http://summaries.pressassociation.com/brands/5", "pa:b-5", Publisher.PA_SERIES_SUMMARIES);
         Series expectedSummarySeries= new Series("http://summaries.pressassociation.com/series/5-6", "pa:s-5-6", Publisher.PA_SERIES_SUMMARIES);
         LookupRef expectedItemBrandLookupRef = LookupRef.from(expectedItemBrand);
         LookupRef expectedItemSeriesLookupRef = LookupRef.from(expectedItemSeries);
