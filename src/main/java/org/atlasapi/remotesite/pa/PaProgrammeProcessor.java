@@ -160,9 +160,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
     private Brand extractSummaryBrand(ProgData progData, Brand brand, Timestamp updatedAt) {
         Brand summaryBrand = new Brand();
-        summaryBrand.setCanonicalUri(PA_BASE_SUMMARIES_URI
-            + BRANDS_URL_PART
-            + brand.getId());
+        summaryBrand.setCanonicalUri(brand.getCanonicalUri().replace(Publisher.PA.key(), Publisher.PA_SERIES_SUMMARIES.key()));
         summaryBrand.setPublisher(Publisher.PA_SERIES_SUMMARIES);
         summaryBrand.setLongDescription(progData.getSeriesSummary());
         summaryBrand.setLastUpdated(updatedAt.toDateTimeUTC());
