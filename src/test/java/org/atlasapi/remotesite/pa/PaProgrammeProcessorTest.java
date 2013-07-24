@@ -55,8 +55,6 @@ import com.metabroadcast.common.time.Timestamp;
 @RunWith(MockitoJUnitRunner.class)
 public class PaProgrammeProcessorTest {
 
-    private final int SUMMARY_BRAND_INDEX = 0;
-    private final int SUMMARY_SERIES_INDEX = 2;
 
     private final ContentWriter contentWriter = mock(ContentWriter.class);
     private final ContentResolver contentResolver = mock(ContentResolver.class);
@@ -64,7 +62,6 @@ public class PaProgrammeProcessorTest {
     private final Described described = mock(Described.class);
     private final AdapterLog log = new NullAdapterLog();
 
-    private Film film = new Film("http://pressassociation.com/films/5", "pa:f-5", Publisher.PA);
     @SuppressWarnings("deprecation")
     private Channel channel = new Channel(METABROADCAST, "c", "c", false, VIDEO, "c");
 
@@ -197,6 +194,11 @@ public class PaProgrammeProcessorTest {
 
     @Test
     public void testPaSummaries() {
+        int SUMMARY_BRAND_INDEX = 0;
+        int SUMMARY_SERIES_INDEX = 2;
+
+        Film film = new Film("http://pressassociation.com/films/5", "pa:f-5", Publisher.PA);
+
         Brand expectedItemBrand = new Brand("http://pressassociation.com/brands/5", "pa:b-5", Publisher.PA);
         Series expectedItemSeries= new Series("http://pressassociation.com/series/5-6", "pa:s-5-6", Publisher.PA);
         Brand expectedSummaryBrand = new Brand("http://summaries.pressassociation.com/brands/5", "pa:b-5", Publisher.PA_SERIES_SUMMARIES);
