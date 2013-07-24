@@ -1,9 +1,6 @@
 package org.atlasapi.remotesite.itv.whatson;
 
-import java.util.Collection;
-
 import javax.annotation.PostConstruct;
-
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -15,7 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import com.google.common.collect.FluentIterable;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -42,7 +39,7 @@ public class ItvWhatsOnModule {
     }
     
     @Bean
-    public RemoteSiteClient<Collection<ItvWhatsOnEntryDuration>> itvWhatsOnClient() {
+    public RemoteSiteClient<FluentIterable<ItvWhatsOnEntry>> itvWhatsOnClient() {
         return new ItvWhatsOnClient(httpClient());
     }
     
