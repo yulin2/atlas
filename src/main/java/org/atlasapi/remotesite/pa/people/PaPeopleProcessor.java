@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.pa.people;
 
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.ImageType;
@@ -58,6 +59,7 @@ public class PaPeopleProcessor {
         existing.setQuotes(newPerson.getQuotes());
         existing.setPublisher(Publisher.PA_PEOPLE);
         existing.setImages(newPerson.getImages());
+        existing.setImage(newPerson.getImage());
     }
 
     private Person ingestPerson(org.atlasapi.remotesite.pa.profiles.bindings.Person paPerson) {
@@ -83,10 +85,20 @@ public class PaPeopleProcessor {
         person.addQuote(paPerson.getQuote());
         person.setPublisher(Publisher.PA_PEOPLE);
         person.setImages(extractImages(paPerson.getPictures()));
+        person.setImage(getPrimary(person.getImages()));
         setDirectEquivalentToPAPerson(person, paPerson.getId());
         return person;
     }
     
+    private String getPrimary(Set<Image> images) {
+        for (Image image : images) {
+            if (ImageType.PRIMARY.equals(image.getType())) {
+                return image.getCanonicalUri();
+            }
+        }
+        return null;
+    }
+
     private ImmutableSet<Image> extractImages(Pictures pictures) {
         return pictures != null ? extractImages(pictures.getPicture())
                                 : ImmutableSet.<Image>of();
