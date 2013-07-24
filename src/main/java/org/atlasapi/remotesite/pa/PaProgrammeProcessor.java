@@ -113,7 +113,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             if (possibleBrand.hasValue()) {
                 Brand brand = possibleBrand.requireValue();
                 if (hasBrandSummary(progData)) {
-                    Brand summaryBrand = extractSummaryBrand(progData, brand, updatedAt);
+                    Brand summaryBrand = extractSummaryBrand(progData, brand.getCanonicalUri(), updatedAt);
                     summaryBrand.setEquivalentTo(ImmutableSet.of(LookupRef.from(brand)));
 
                     contentWriter.createOrUpdate(summaryBrand);
@@ -158,9 +158,9 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return null;
     }
 
-    private Brand extractSummaryBrand(ProgData progData, Brand brand, Timestamp updatedAt) {
+    private Brand extractSummaryBrand(ProgData progData, String originalURI, Timestamp updatedAt) {
         Brand summaryBrand = new Brand();
-        summaryBrand.setCanonicalUri(brand.getCanonicalUri().replace(Publisher.PA.key(), Publisher.PA_SERIES_SUMMARIES.key()));
+        summaryBrand.setCanonicalUri(originalURI.replace(Publisher.PA.key(), Publisher.PA_SERIES_SUMMARIES.key()));
         summaryBrand.setPublisher(Publisher.PA_SERIES_SUMMARIES);
         summaryBrand.setLongDescription(progData.getSeriesSummary());
         summaryBrand.setLastUpdated(updatedAt.toDateTimeUTC());
