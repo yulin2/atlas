@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited by Gary Bielby "PA" Listings -->
-<!-- listings Radio Times DTD v2.08 16/08/2012 mj -->
+<!-- listings Radio Times DTD v2.09 12/06/2013 mj -->
 
 
 <!ELEMENT tv_data (listings_date+)>
 
 
 <!-- the TV listings for a particular date
-	date: the date of the listings in the form DD/MM/YYYY, where YYYY indicates the year, MM indicates the month and DD indicates the day -->
+    date: the date of the listings in the form DD/MM/YYYY, where YYYY indicates the year, MM indicates the month and DD indicates the day -->
 <!ELEMENT listings_date (channel_data+)>
 <!ATTLIST listings_date
-	date CDATA #REQUIRED
+    date CDATA #REQUIRED
 >
 
 
@@ -20,12 +20,20 @@ channel_id: the id of the TV channel
 start_time: the starttime of the channel in xsd:dateTime format. The first prog_data element will start on or after this time.
 end_time: the endtime of the channel in xsd:dateTime format. The last prog_data element will start before this time.
 -->
-<!ELEMENT channel_data (epgdetails?, prog_data+)>
+<!ELEMENT channel_data (channel_logo?, epgdetails?, prog_data+)>
 <!ATTLIST channel_data 
-	name CDATA #REQUIRED
-	channel_id CDATA #REQUIRED
-	start_time CDATA #REQUIRED
-	end_time CDATA #REQUIRED
+    name CDATA #REQUIRED
+    channel_id CDATA #REQUIRED
+    start_time CDATA #REQUIRED
+    end_time CDATA #REQUIRED
+>
+
+<!-- channel logo -->
+
+<!ELEMENT channel_logo (#PCDATA)>
+<!ATTLIST channel_logo
+    width CDATA #REQUIRED 
+    height CDATA #REQUIRED 
 >
 
 <!-- epg data -->
@@ -46,7 +54,10 @@ channel_number: the channel_number of the current channel for this provider
 
 
 <!-- the data for a TV programme -->
-<!ELEMENT prog_data (showing_id, prog_id, series_id?, series_synopsis?, series_version?, rt_filmnumber?, date, time, duration, group?, title, episode_title?, programme_version?, episode_number?, episode_total?, series_number?, category*, rt_category?, film_year?, genre?, certificate?,country?,colour?,warning?,subtitles?,dubbing?,star_rating?, cast_member*, staff_member*, billings?, videoplus, attr, rovi_genre? ,rovi_description?, pictures?)>
+<!ELEMENT prog_data (showing_id, prog_id, series_id?, series_synopsis?, series_summary?, series_version?, season?, rt_filmnumber?, date, time, duration, group?, title, episode_title?, programme_version?, episode_number?, episode_total?, series_number?, category*, rt_category?, film_year?, genre?, certificate?,country?,colour?,warning?,subtitles?,dubbing?,star_rating?, cast_member*, staff_member*, billings?, videoplus, attr, rovi_genre? ,rovi_description?, links?, pictures?)>
+
+
+
 
 <!-- The id of a showing of a programme on a particular channel. If the time of a showing changes, the showing_id remains the same -->
 <!ELEMENT showing_id (#PCDATA)>
@@ -60,8 +71,27 @@ channel_number: the channel_number of the current channel for this provider
 <!-- String containing synopsis of series -->
 <!ELEMENT series_synopsis (#PCDATA)>
 
+<!-- String containing summary of series -->
+<!ELEMENT series_summary (#PCDATA)>
+
+
 <!-- String to help clarify exactly which series this is in cases where there are other series or programmes with the same title -->
 <!ELEMENT series_version (#PCDATA)>
+
+<!-- Season Information -->
+<!ELEMENT season (season_title?, season_summary?)>
+<!-- id: Unique id for this season -->
+<!-- number: The season number -->
+<!ATTLIST season
+    id CDATA #REQUIRED
+    number CDATA #IMPLIED
+>
+
+<!-- The Season Title -->
+<!ELEMENT season_title (#PCDATA)>
+
+<!-- The Season Summary -->
+<!ELEMENT season_summary (#PCDATA)>
 
 
 <!-- programme broadcast date in the form DD/MM/YYYYY, where YYYY indicates the year, MM indicates the month and DD indicates the day -->
@@ -175,7 +205,7 @@ person_id: A unique id for this person
 -->
 <!ELEMENT actor (#PCDATA)>
 <!ATTLIST actor
-	person_id CDATA #REQUIRED
+    person_id CDATA #REQUIRED
 >
 
 <!-- name of member of the production staff 
@@ -183,10 +213,10 @@ person_id: A unique id for this person
 -->
 <!ELEMENT person (#PCDATA)>
 <!ATTLIST person
-	person_id CDATA #REQUIRED
+    person_id CDATA #REQUIRED
 >
 <!-- programme synopsis 
-	programme billings such as synopsis, extra detail and x-refs
+    programme billings such as synopsis, extra detail and x-refs
 -->
 <!ELEMENT billings (billing+)>
 
@@ -194,72 +224,79 @@ person_id: A unique id for this person
 -->
 <!ELEMENT billing (#PCDATA)>
 <!ATTLIST billing
-	type CDATA #REQUIRED
-	reviewer_initials CDATA #IMPLIED
-	reviewer_name CDATA #IMPLIED
+    type CDATA #REQUIRED
+    reviewer_initials CDATA #IMPLIED
+    reviewer_name CDATA #IMPLIED
 >
 
 <!ELEMENT videoplus (#PCDATA)>
 
 <!-- programme attributes 
-	stereo: the programme in stereo.
-	subtitles: the programme carries Teletext or Ceefax subtitles.
-	repeat: the programme a repeat.
-	bw: the programme broadcast in Black and White.
-	premiere: this a broadcast premiere.
+    stereo: the programme in stereo.
+    subtitles: the programme carries Teletext or Ceefax subtitles.
+    repeat: the programme a repeat.
+    bw: the programme broadcast in Black and White.
+    premiere: this a broadcast premiere.
     new_episode: this is the first showing of this programme on this channel.
     new_series: this is the first episode of a news series of this programme.
-	last_in_series: this is the last in a series of showings of this programme.
-	surround: the programme is being broadcast in surround sound.
-	widescreen: the programme being shown in widescreen format.
-	film: the programme a film.
-	sign_lang: the programme have sign language.
-	in_vision:  the programme has in vision subtitles.
-	audio_des: the programme is audio described.
-	interactive: the programme has interactive content.
-	hd: the programme is also showing on the High Definition channel
-	live: this is a live broadcast
-	as_live: this programme is being shown as-live
-	follow_on: this is a follow_on programme. (The programme follows the previous 
-	programme but doesn't have an exact broadcast time). In the xml, the time
-	field will contain the time of the previous programme. 
-	tv_movie: this programme is a made-for-tv movie
-	web_choice: RT web choice
-	special: this programme is part of a series but should generally be referred to by the episode title rather than the series title. E.g. "The X-Factor Live Final", "Never Mind the Buzzcocks Christmas Special". E.g. if displaying these programmes on a schedule list, the episode titles should be prominent. 
-	three_d: the programme employs techniques of 3D presentation.
-	 
+    last_in_series: this is the last in a series of showings of this programme.
+    surround: the programme is being broadcast in surround sound.
+    widescreen: the programme being shown in widescreen format.
+    film: the programme a film.
+    sign_lang: the programme have sign language.
+    in_vision:  the programme has in vision subtitles.
+    audio_des: the programme is audio described.
+    interactive: the programme has interactive content.
+    hd: the programme is also showing on the High Definition channel
+    live: this is a live broadcast
+    as_live: this programme is being shown as-live
+    follow_on: this is a follow_on programme. (The programme follows the previous 
+    programme but doesn't have an exact broadcast time). In the xml, the time
+    field will contain the time of the previous programme. 
+    tv_movie: this programme is a made-for-tv movie
+    web_choice: RT web choice
+    special: this programme is part of a series but should generally be referred to by the episode title rather than the series title. E.g. "The X-Factor Live Final", "Never Mind the Buzzcocks Christmas Special". E.g. if displaying these programmes on a schedule list, the episode titles should be prominent. 
+    three_d: the programme employs techniques of 3D presentation.
+     
 -->
 <!ELEMENT attr EMPTY>
 <!ATTLIST attr
-	stereo (yes | no) "no"
-	subtitles (yes | no) "no"
-	repeat (yes | no) "no"
-	bw (yes | no) "no"
-	premiere (yes | no) "no"
-	new_episode (yes | no) "no"
-	new_series (yes | no) "no"
-	last_in_series (yes | no) "no"
-	surround (yes | no) "no"
-	widescreen (yes | no) "no"
-	film (yes | no) "no"
-	sign_lang (yes | no) "no"
-	in_vision (yes | no) "no"
-	audio_des (yes | no) "no"
-	interactive (yes | no) "no"
-	hd (yes | no) "no"
-	live (yes | no) "no"
-	as_live (yes | no) "no"
-	follow_on (yes | no) "no"
-	choice (yes | no) "no"
-	familychoice (yes | no) "no"
-	tv_movie (yes | no) "no"
-	web_choice (yes | no) "no"
-	special (yes | no) "no"
-	three_d (yes | no) "no"
+    stereo (yes | no) "no"
+    subtitles (yes | no) "no"
+    repeat (yes | no) "no"
+    bw (yes | no) "no"
+    premiere (yes | no) "no"
+    new_episode (yes | no) "no"
+    new_series (yes | no) "no"
+    last_in_series (yes | no) "no"
+    surround (yes | no) "no"
+    widescreen (yes | no) "no"
+    film (yes | no) "no"
+    sign_lang (yes | no) "no"
+    in_vision (yes | no) "no"
+    audio_des (yes | no) "no"
+    interactive (yes | no) "no"
+    hd (yes | no) "no"
+    live (yes | no) "no"
+    as_live (yes | no) "no"
+    follow_on (yes | no) "no"
+    choice (yes | no) "no"
+    familychoice (yes | no) "no"
+    tv_movie (yes | no) "no"
+    web_choice (yes | no) "no"
+    special (yes | no) "no"
+    three_d (yes | no) "no"
 >
 
 
-<!-- Element containing list of pictures fior this showing -->
+<!-- Element containing a list links for this showing -->
+<!ELEMENT links ( link+ )>
+
+<!ELEMENT link (#PCDATA)>
+<!ATTLIST link type (Website | Twitter | email | Phone | Text | Contact) #REQUIRED>
+
+
+<!-- Element containing list of pictures for this showing -->
 <!ELEMENT pictures ( pictureUsage+ )>
 
 
@@ -268,12 +305,12 @@ person_id: A unique id for this person
 
 
 <!-- pictureUsage attributes
-	pictureUsage_id: unique ID for this image for this showing
-	copyright: Copyright information for this image.
-	type: Indicates whether picture content refers to this specific episode,
-				season or the whole series. 
-	start_date: date from which this picture can be used alongside this showing.
-	expiry_date: last date on which picture can be used alongside this showing.
+    pictureUsage_id: unique ID for this image for this showing
+    copyright: Copyright information for this image.
+    type: Indicates whether picture content refers to this specific episode,
+                season or the whole series. 
+    start_date: date from which this picture can be used alongside this showing.
+    expiry_date: last date on which picture can be used alongside this showing.
 -->
 
 <!ATTLIST pictureUsage
