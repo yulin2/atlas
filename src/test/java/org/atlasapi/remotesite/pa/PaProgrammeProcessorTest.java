@@ -3,25 +3,30 @@ package org.atlasapi.remotesite.pa;
 import static com.metabroadcast.common.time.DateTimeZones.UTC;
 import static org.atlasapi.media.entity.MediaType.VIDEO;
 import static org.atlasapi.media.entity.Publisher.METABROADCAST;
-import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.argThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.atLeastOnce;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -29,9 +34,11 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
+import org.atlasapi.remotesite.pa.listings.bindings.Attr;
 import org.atlasapi.remotesite.pa.listings.bindings.PictureUsage;
 import org.atlasapi.remotesite.pa.listings.bindings.Pictures;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
+import org.atlasapi.remotesite.pa.listings.bindings.Season;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,14 +46,11 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Timestamp;
-import org.atlasapi.media.channel.ChannelResolver;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaProgrammeProcessorTest {
@@ -56,7 +60,10 @@ public class PaProgrammeProcessorTest {
     private final ItemsPeopleWriter itemsPeopleWriter = mock(ItemsPeopleWriter.class);
     private final Described described = mock(Described.class);
     private final AdapterLog log = new NullAdapterLog();
-    
+
+    @SuppressWarnings("deprecation")
+    private Channel channel = new Channel(METABROADCAST, "c", "c", false, VIDEO, "c");
+
     @Captor
     private ArgumentCaptor<Iterable<Image>> imageListCaptor;
     
@@ -183,10 +190,96 @@ public class PaProgrammeProcessorTest {
         return usage;
     }
     
+
+    @Test
+    public void testPaSummaries() {
+        int SUMMARY_BRAND_INDEX = 1;
+        int SUMMARY_SERIES_INDEX = 3;
+
+        Film film = new Film("http://pressassociation.com/films/5", "pa:f-5", Publisher.PA);
+
+        Brand expectedItemBrand = new Brand("http://pressassociation.com/brands/5", "pa:b-5", Publisher.PA);
+        Series expectedItemSeries= new Series("http://pressassociation.com/series/5-6", "pa:s-5-6", Publisher.PA);
+        Brand expectedSummaryBrand = new Brand("http://summaries.pressassociation.com/brands/5", "pa:b-5", Publisher.PA_SERIES_SUMMARIES);
+        Series expectedSummarySeries= new Series("http://summaries.pressassociation.com/series/5-6", "pa:s-5-6", Publisher.PA_SERIES_SUMMARIES);
+        LookupRef expectedItemBrandLookupRef = LookupRef.from(expectedItemBrand);
+        LookupRef expectedItemSeriesLookupRef = LookupRef.from(expectedItemSeries);
+
+        ProgData inputProgData = setupProgData();
+        
+        Version version = new Version();
+        version.setProvider(Publisher.PA);
+        film.addVersion(version);
+        
+        setupContentResolver(film, expectedItemBrand, expectedItemSeries);
+
+        progProcessor.process(inputProgData, channel, UTC, Timestamp.of(0));
+
+        ArgumentCaptor<Item> itemArgCaptor = ArgumentCaptor.forClass(Item.class);
+        verify(contentWriter, atLeastOnce()).createOrUpdate(itemArgCaptor.capture());
+
+        ArgumentCaptor<Container> containerArgCaptor = ArgumentCaptor.forClass(Container.class);
+        verify(contentWriter, atLeastOnce()).createOrUpdate(containerArgCaptor.capture());
+
+        List<Container> writtenContainers = containerArgCaptor.getAllValues();
+
+        Brand actualSummaryBrand = (Brand)writtenContainers.get(SUMMARY_BRAND_INDEX);
+        Series actualSummarySeries = (Series)writtenContainers.get(SUMMARY_SERIES_INDEX); 
+
+        assertEquals(expectedSummaryBrand, actualSummaryBrand);
+        assertEquals(expectedSummarySeries, actualSummarySeries);
+
+        assertThat(actualSummaryBrand.getEquivalentTo(), hasItem(expectedItemBrandLookupRef));
+        assertThat(actualSummarySeries.getEquivalentTo(), hasItem(expectedItemSeriesLookupRef));
+    }
+
+    private ProgData setupProgData() {
+        ProgData inputProgData = new ProgData();
+        inputProgData.setProgId("1");
+        inputProgData.setRtFilmnumber("5");
+        inputProgData.setDuration("1");
+        inputProgData.setDate("06/08/2012");
+        inputProgData.setTime("11:40");
+        Attr threeDAttr = new Attr();
+        threeDAttr.setThreeD("true");
+        inputProgData.setAttr(threeDAttr);
+        inputProgData.setSeriesSummary("This is the series summary!");
+        Season season = new Season();
+        season.setSeasonSummary("This is the season summary!");
+        inputProgData.setSeason(season);
+
+        //PA Brand data
+        inputProgData.setSeriesId("5");
+        inputProgData.setTitle("My title");
+
+        //PA Series data
+        inputProgData.setSeriesId("5");
+        inputProgData.setSeriesNumber("6");
+        inputProgData.setEpisodeTotal("15");
+        return inputProgData;
+    }
+
+    private void setupContentResolver(Film film, Brand brand, Series series) {
+        when(contentResolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/films/5")))
+        .thenReturn(ResolvedContent.builder()
+            .put("http://pressassociation.com/films/5", film)
+            .build() 
+        );
+        when(contentResolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/5")))
+        .thenReturn(ResolvedContent.builder()
+            .put("http://pressassociation.com/brands/5", brand)
+            .build() 
+        );
+        when(contentResolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/series/5-6")))
+        .thenReturn(ResolvedContent.builder()
+            .put("http://pressassociation.com/series/5", series)
+            .build() 
+        );
+    }
+
     @Test
     @Ignore
     public void testExtractsNewFilmWithEpisodeUri() {
-        Channel channel = new Channel(METABROADCAST, "c", "c", false, VIDEO, "c");
         ProgData progData = new ProgData();
         progData.setProgId("1");
         progData.setRtFilmnumber("5");
@@ -207,15 +300,15 @@ public class PaProgrammeProcessorTest {
         
         assertThat(written.getCanonicalUri(), is("http://pressassociation.com/episodes/1"));
         assertThat(written.getCurie(), is("pa:e-1"));
+
         // TODO new aliases
         assertThat(written.getAliasUrls(), hasItem("http://pressassociation.com/films/5"));
         
     }
-    
+
     @Test
     @Ignore
     public void testAddsEpisodesAliasForFilmWithRtFilmNumberUri() {
-        Channel channel = new Channel(METABROADCAST, "c", "c", false, VIDEO, "c");
         ProgData progData = new ProgData();
         progData.setProgId("1");
         progData.setRtFilmnumber("5");
@@ -251,7 +344,6 @@ public class PaProgrammeProcessorTest {
     @Test
     @Ignore
     public void testAddsRtFilmNumberAliasForFilmWithEpisodesUri() {
-        Channel channel = new Channel(METABROADCAST, "c", "c", false, VIDEO, "c");
         ProgData progData = new ProgData();
         progData.setProgId("1");
         progData.setRtFilmnumber("5");
