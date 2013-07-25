@@ -1,6 +1,8 @@
 package org.atlasapi.remotesite.itv.whatson;
 
 import javax.annotation.PostConstruct;
+
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -23,6 +25,7 @@ import com.metabroadcast.common.social.http.HttpClients;
 @Configuration
 public class ItvWhatsOnModule {
     private @Autowired SimpleScheduler scheduler;
+    private @Autowired ChannelResolver channelResolver;
     private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
     private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
     private @Value("${itv.whatson.schedule.url}") String feedUrl;
