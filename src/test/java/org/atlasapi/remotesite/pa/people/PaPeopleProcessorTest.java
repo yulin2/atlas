@@ -81,6 +81,7 @@ public class PaPeopleProcessorTest {
         assertThat(image.getCanonicalUri(), is("http://images.atlas.metabroadcast.com/people.pressassociation.com/image.jpg"));
         assertThat(String.valueOf(image.getWidth()), is(picture.getWidth()));
         assertThat(String.valueOf(image.getHeight()), is(picture.getHeight()));
+        assertThat(written.getImage(), is(image.getCanonicalUri()));
         
         assertTrue(image.getEquivalentTo().isEmpty());
         
