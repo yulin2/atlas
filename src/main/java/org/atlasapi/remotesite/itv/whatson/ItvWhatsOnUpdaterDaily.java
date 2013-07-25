@@ -17,9 +17,11 @@ public class ItvWhatsOnUpdaterDaily extends ScheduledTask {
        this.clock = clock;
        this.itvUpdater = itvUpdater;
     }
+    
+    
 
     @Override
     protected void runTask() {
-        itvUpdater.run(clock.now());
+        itvUpdater.run(clock.now().toLocalDate());
     }
 }

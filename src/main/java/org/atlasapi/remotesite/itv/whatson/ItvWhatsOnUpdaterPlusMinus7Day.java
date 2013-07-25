@@ -1,8 +1,11 @@
 package org.atlasapi.remotesite.itv.whatson;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.DayRange;
+import com.metabroadcast.common.time.DayRangeGenerator;
 import com.metabroadcast.common.time.SystemClock;
 
 
@@ -21,11 +24,12 @@ public class ItvWhatsOnUpdaterPlusMinus7Day extends ScheduledTask {
 
     @Override
     protected void runTask() {
-        DateTime date = clock.now().minusDays(7);
-        DateTime endDate = clock.now().plusDays(8);
-        while (date.isBefore(endDate)) {
+        DayRangeGenerator dateRangeGenerator = new DayRangeGenerator()
+                                        .withLookBack(7)
+                                        .withLookAhead(7);
+        DayRange dayRange = dateRangeGenerator.generate(clock.now().toLocalDate());
+        for (LocalDate date : dayRange) {
             itvUpdater.run(date);
-            date = date.plusDays(1);
         }
     }
 

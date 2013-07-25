@@ -25,7 +25,7 @@ public class ItvWhatsOnModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
     private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
-    private @Value("${itv.whaton.schedule.url}") String feedUrl;
+    private @Value("${itv.whatson.schedule.url}") String feedUrl;
     
     private static final Every EVERY_FIFTEEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(15));
     private static final Every EVERY_HOUR = RepetitionRules.every(Duration.standardHours(1));
@@ -51,7 +51,7 @@ public class ItvWhatsOnModule {
     
     @Bean
     public ItvWhatsOnUpdater itvWhatsOnUpdater() {
-        return new ItvWhatsOnUpdater(feedUrl, itvWhatsOnClient());
+        return new ItvWhatsOnUpdater(feedUrl, itvWhatsOnClient(), log);
     }
     
     @Bean
