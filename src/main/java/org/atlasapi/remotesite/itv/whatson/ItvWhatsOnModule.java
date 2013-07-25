@@ -7,6 +7,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.collect.FluentIterable;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.scheduling.RepetitionRules;
+import com.metabroadcast.common.scheduling.RepetitionRules.Every;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.social.http.HttpClients;
 
@@ -25,11 +27,15 @@ public class ItvWhatsOnModule {
     private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
     private @Value("${itv.whaton.schedule.url}") String feedUrl;
     
+    private static final Every EVERY_FIFTEEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(15));
+    private static final Every EVERY_HOUR = RepetitionRules.every(Duration.standardHours(1));
+    
     private @Autowired AdapterLog log;
     
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(itvWhatsOnUpdater(), RepetitionRules.NEVER);
+        scheduler.schedule(itvWhatsOnUpdaterDaily(), EVERY_FIFTEEN_MINUTES);
+        scheduler.schedule(itvWhatsOnUpdaterPlusMinus7Day(), EVERY_HOUR);
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("ITV What's On Schedule task installed.").withSource(getClass()));
     }
     
@@ -47,5 +53,14 @@ public class ItvWhatsOnModule {
     public ItvWhatsOnUpdater itvWhatsOnUpdater() {
         return new ItvWhatsOnUpdater(feedUrl, itvWhatsOnClient());
     }
-
+    
+    @Bean
+    public ItvWhatsOnUpdaterDaily itvWhatsOnUpdaterDaily() {
+        return new ItvWhatsOnUpdaterDaily(itvWhatsOnUpdater());
+    }
+    
+    @Bean
+    public ItvWhatsOnUpdaterPlusMinus7Day itvWhatsOnUpdaterPlusMinus7Day() {
+        return new ItvWhatsOnUpdaterPlusMinus7Day(itvWhatsOnUpdater());
+    }   
 }
