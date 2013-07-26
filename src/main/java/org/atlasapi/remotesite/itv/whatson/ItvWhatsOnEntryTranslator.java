@@ -2,22 +2,24 @@ package org.atlasapi.remotesite.itv.whatson;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.Location;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.intl.Countries;
+import com.metabroadcast.common.url.UrlEncoding;
 
 
 public class ItvWhatsOnEntryTranslator {
@@ -30,18 +32,15 @@ public class ItvWhatsOnEntryTranslator {
     private static final String LOCATION_PREFIX = "http://www.itv.com/itvplayer/video/?filter=";
     private static final Publisher PUBLISHER_ITV = Publisher.ITV;
     
-    private final BiMap<String, Channel> channelMap;
+    private final BiMap<String, String> channelMap;
     
-    public ItvWhatsOnEntryTranslator(ChannelResolver channelResolver) {
-        // TODO what about ITV HD, regions, +1 etc
-        // ITV1+1 http://www.itv.com/channels/itv1#plus1
-        // TODO check channel URIs
-        channelMap = ImmutableBiMap.<String, Channel>builder()
-                .put("ITV1", channelResolver.fromUri("http://www.itv.com/channels/itv1").requireValue())
-                .put("ITV2", channelResolver.fromUri("http://www.itv.com/channels/itv2").requireValue())
-                .put("ITV3", channelResolver.fromUri("http://www.itv.com/channels/itv3").requireValue())
-                .put("ITV4", channelResolver.fromUri("http://www.itv.com/channels/itv4").requireValue())
-                .put("CITV", channelResolver.fromUri("http://www.itv.com/channels/citv").requireValue())
+    public ItvWhatsOnEntryTranslator() {
+        channelMap = ImmutableBiMap.<String, String>builder()
+                .put("ITV1", "http://www.itv.com/channels/itv1/london")
+                .put("ITV2", "http://www.itv.com/channels/itv2")
+                .put("ITV3", "http://www.itv.com/channels/itv3")
+                .put("ITV4", "http://www.itv.com/channels/itv4")
+                .put("CITV", "http://www.itv.com/channels/citv")
                 .build();
     }
    
@@ -74,40 +73,52 @@ public class ItvWhatsOnEntryTranslator {
         episode.setImage(entry.getImageUri());
         episode.addAliasUrl(EPISODE_ALIASES_PREFIX + entry.getVodcrid());
         episode.setPublisher(PUBLISHER_ITV);
+        episode.setContainer(toBrand(entry));
+        episode.setSeries(toSeries(entry));
+        episode.setVersions(ImmutableSet.of(toVersionAndLocation(entry)));
         return episode;
     }
     
-    public Version toVersion(ItvWhatsOnEntry entry) {
+    private Policy getPolicy(ItvWhatsOnEntry entry) {
+        Policy policy = new Policy();
+        policy.setAvailabilityStart(entry.getAvailabilityStart());
+        policy.setAvailabilityEnd(entry.getAvailabilityEnd());
+        policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
+        policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
+        return policy;
+    }
+    
+    private Location getLocation(ItvWhatsOnEntry entry, Policy policy) {
+        Location location = new Location();        
+        String uri = LOCATION_PREFIX + UrlEncoding.encode(entry.getProductionId());
+        location.setCanonicalUri(uri);     
+        location.setTransportType(TransportType.LINK);
+        location.setTransportSubType(TransportSubType.HTTP);
+        location.setPolicy(policy);
+        return location;
+    }
+    
+    public Version toVersionAndLocation(ItvWhatsOnEntry entry) {
+        Policy policy = getPolicy(entry);
+        Location location = getLocation(entry, policy);
+        Encoding encoding = new Encoding();
+        encoding.addAvailableAt(location);
         Version version = new Version();
         version.setCanonicalUri(VERSION_PREFIX + entry.getProductionId());
         version.setPublishedDuration(entry.getDuration().getTotalSeconds());
+        Duration duration = new Duration(entry.getDuration().getTotalSeconds()*1000);
+        version.setDuration(duration);
+        version.addManifestedAs(encoding);
+        version.setBroadcasts(ImmutableSet.of(toBroadcast(entry)));
         return version;
     }
     
     public Broadcast toBroadcast(ItvWhatsOnEntry entry) {
-        String channelUri = channelMap.get(entry.getChannel()).getUri();
+        String channelUri = channelMap.get(entry.getChannel());
         DateTime start = entry.getBroadcastDate();
         DateTime end = entry.getBroadcastDate().plusSeconds(entry.getDuration().getTotalSeconds());
         Broadcast broadcast = new Broadcast(channelUri, start, end);
         broadcast.setRepeat(entry.isRepeat());
         return broadcast;
-    }
-    
-    public Location toLocation(ItvWhatsOnEntry entry) {
-        Location location = new Location();
-        
-        String uri = "";
-        location.setCanonicalUri(uri);     
-        location.setTransportType(TransportType.LINK);
-        location.setTransportSubType(TransportSubType.HTTP);
-        
-        Policy policy = new Policy();
-        policy.setAvailabilityStart(entry.getAvailabilityStart());
-        policy.setAvailabilityEnd(entry.getAvailabilityEnd());
-        policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
-        
-        
-        location.setPolicy(policy);
-        return location;
     }
 }

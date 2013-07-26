@@ -87,6 +87,70 @@ public class ItvWhatsOnEntry {
         return EpisodeId;
     }
     
+    public void setChannel(String channel) {
+        Channel = channel;
+    }
+    
+    public void setBroadcastDate(DateTime broadcastDate) {
+        BroadcastDate = broadcastDate;
+    }
+    
+    public void setDuration(ItvWhatsOnEntryDuration duration) {
+        Duration = duration;
+    }
+    
+    public void setProgrammeTitle(String programmeTitle) {
+        ProgrammeTitle = programmeTitle;
+    }
+    
+    public void setEpisodeTitle(String episodeTitle) {
+        EpisodeTitle = episodeTitle;
+    }
+    
+    public void setSynopsis(String synopsis) {
+        Synopsis = synopsis;
+    }
+    
+    public void setImageUri(String imageUri) {
+        ImageUri = imageUri;
+    }
+    
+    public void setVodcrid(String vodcrid) {
+        Vodcrid = vodcrid;
+    }
+    
+    public void setAvailabilityStart(DateTime availabilityStart) {
+        AvailabilityStart = availabilityStart;
+    }
+    
+    public void setAvailabilityEnd(DateTime availabilityEnd) {
+        AvailabilityEnd = availabilityEnd;
+    }
+    
+    public void setRepeat(boolean repeat) {
+        Repeat = repeat;
+    }
+    
+    public void setComingSoon(boolean comingSoon) {
+        ComingSoon = comingSoon;
+    }
+    
+    public void setProductionId(String productionId) {
+        ProductionId = productionId;
+    }
+    
+    public void setProgrammeId(String programmeId) {
+        ProgrammeId = programmeId;
+    }
+    
+    public void setSeriesId(String seriesId) {
+        SeriesId = seriesId;
+    }
+    
+    public void setEpisodeId(String episodeId) {
+        EpisodeId = episodeId;
+    }
+
     @Override
     public String toString() {
         return Objects.toStringHelper(getClass())

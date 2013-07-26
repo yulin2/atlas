@@ -1,5 +1,4 @@
 package org.atlasapi.remotesite.itv.whatson;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import com.metabroadcast.common.scheduling.ScheduledTask;

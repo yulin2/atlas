@@ -3,14 +3,12 @@ package org.atlasapi.remotesite.itv.whatson;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-
 import java.io.IOException;
-
+import java.io.StringReader;
+import java.util.List;
 import org.joda.time.DateTime;
 import org.junit.Test;
-
 import com.google.common.base.Charsets;
-import com.google.common.collect.FluentIterable;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.time.DateTimeZones;
 
@@ -23,7 +21,7 @@ public class ItvWhatsOnClientTest {
         
         ItvWhatsOnDeserializer deserializer = new ItvWhatsOnDeserializer();
         String json =  Resources.toString(Resources.getResource("itv-whatson-schedule.json"), Charsets.UTF_8);
-        FluentIterable<ItvWhatsOnEntry> results = deserializer.deserialize(json);
+        List<ItvWhatsOnEntry> results = deserializer.deserialize(new StringReader(json));
         assertEquals(results.size(), 2);
         ItvWhatsOnEntry testItem = results.get(1);
         assertEquals(testItem.getChannel(), "ITV1");

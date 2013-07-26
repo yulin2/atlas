@@ -2,22 +2,22 @@ package org.atlasapi.remotesite.itv.whatson;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import org.atlasapi.persistence.system.RemoteSiteClient;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.FluentIterable;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 
-public class ItvWhatsOnClient implements RemoteSiteClient<FluentIterable<ItvWhatsOnEntry>> {
+public class ItvWhatsOnClient implements RemoteSiteClient<List<ItvWhatsOnEntry>> {
     private static final ItvWhatsOnDeserializer deserializer = new ItvWhatsOnDeserializer();
-    private static final HttpResponseTransformer<FluentIterable<ItvWhatsOnEntry>> ENTRIES_TRANSFORMER = new HttpResponseTransformer<FluentIterable<ItvWhatsOnEntry>>() {
+    private static final HttpResponseTransformer<List<ItvWhatsOnEntry>> ENTRIES_TRANSFORMER = new HttpResponseTransformer<List<ItvWhatsOnEntry>>() {
         @Override
-        public FluentIterable<ItvWhatsOnEntry> transform(HttpResponsePrologue prologue, InputStream body) throws HttpException, Exception {
+        public List<ItvWhatsOnEntry> transform(HttpResponsePrologue prologue, InputStream body) throws HttpException, Exception {
             return deserializer.deserialize(new InputStreamReader(body, prologue.getCharsetOrDefault(Charsets.UTF_8)));
         }
     };
@@ -29,7 +29,7 @@ public class ItvWhatsOnClient implements RemoteSiteClient<FluentIterable<ItvWhat
     }
 
     @Override
-    public FluentIterable<ItvWhatsOnEntry> get(String uri) throws Exception {
+    public List<ItvWhatsOnEntry> get(String uri) throws Exception {
         return httpClient.get(SimpleHttpRequest.httpRequestFrom(uri, ENTRIES_TRANSFORMER));
     }
 

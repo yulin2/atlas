@@ -60,6 +60,50 @@ public class ItvWhatsOnEntryDuration {
         return TotalSeconds;
     }
     
+    public void setTicks(long ticks) {
+        Ticks = ticks;
+    }
+    
+    public void setDays(int days) {
+        Days = days;
+    }
+    
+    public void setHours(int hours) {
+        Hours = hours;
+    }
+    
+    public void setMilliseconds(int milliseconds) {
+        Milliseconds = milliseconds;
+    }
+    
+    public void setMinutes(int minutes) {
+        Minutes = minutes;
+    }
+    
+    public void setSeconds(int seconds) {
+        Seconds = seconds;
+    }
+    
+    public void setTotalDays(double totalDays) {
+        TotalDays = totalDays;
+    }
+    
+    public void setTotalHours(double totalHours) {
+        TotalHours = totalHours;
+    }
+    
+    public void setTotalMilliseconds(int totalMilliseconds) {
+        TotalMilliseconds = totalMilliseconds;
+    }
+    
+    public void setTotalMinutes(int totalMinutes) {
+        TotalMinutes = totalMinutes;
+    }
+    
+    public void setTotalSeconds(int totalSeconds) {
+        TotalSeconds = totalSeconds;
+    }
+
     @Override
     public String toString() {
         return Objects.toStringHelper(getClass())
