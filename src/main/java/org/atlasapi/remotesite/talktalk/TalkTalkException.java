@@ -5,6 +5,8 @@ package org.atlasapi.remotesite.talktalk;
  */
 public class TalkTalkException extends Exception {
 
+    private static final long serialVersionUID = 7105827879653054544L;
+
     public TalkTalkException() {
         super();
     }

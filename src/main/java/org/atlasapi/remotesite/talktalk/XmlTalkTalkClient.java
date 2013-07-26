@@ -86,7 +86,7 @@ public class XmlTalkTalkClient implements TalkTalkClient {
             }
         };
     }
-    
+
     @Override
     public <R> R processVodList(ItemTypeType type, String identifier,
             TalkTalkVodEntityProcessor<R> processor, int itemsPerPage) throws TalkTalkException {
@@ -99,7 +99,7 @@ public class XmlTalkTalkClient implements TalkTalkClient {
         } while (expected != UNKNOWN && (page * itemsPerPage) < expected);
         return processor.getResult();
     }
-    
+
     private static final Function<TVDataInterfaceResponse, Integer> VOD_LIST_ENTITY_COUNT
         = new Function<TVDataInterfaceResponse, Integer>() {
             @Override

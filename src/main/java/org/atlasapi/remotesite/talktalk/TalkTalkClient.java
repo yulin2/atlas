@@ -32,7 +32,8 @@ public interface TalkTalkClient {
      * @throws TalkTalkException
      */
     <R> R processVodList(ItemTypeType type, String identifier,
-            TalkTalkVodEntityProcessor<R> processor, int itemsPerPage)
+            TalkTalkVodEntityProcessor<R> processor,
+            int itemsPerPage)
             throws TalkTalkException;
     
     /**
@@ -46,4 +47,5 @@ public interface TalkTalkClient {
     ItemDetailType getItemDetail(ItemTypeType type, String identifier)
             throws TalkTalkException;
     
+
 }

@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.talktalk;
 
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
 
 /**
@@ -13,5 +14,5 @@ public interface TalkTalkContentEntityProcessor<R> {
     R processSeriesEntity(VODEntityType entity);
     
     R processEpisodeEntity(VODEntityType entity);
-    
+
 }

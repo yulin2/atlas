@@ -11,38 +11,37 @@ import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.metabroadcast.common.scheduling.UpdateProgress;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 /**
  * TalkTalkChannelProcessor which fetches the VOD entity list for the channel
  * and processes each entity using the given TalkTalkContentEntityProcessor.
  */
-public class VodEntityProcessingTalkTalkChannelProcessor implements
-        TalkTalkChannelProcessor<UpdateProgress> {
-    
+public class VodEntityProcessingTalkTalkVodListProcessor implements
+        TalkTalkChannelProcessor<List<Content>> {
+
     private final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     private static final int _500_ITEMS_PER_PAGE = 500;
-    
-    private final int NO_FAILURES = 0;
-    
+
     private final TalkTalkClient client;
     private final TalkTalkContentEntityProcessor<List<Content>> processor;
 
-    public VodEntityProcessingTalkTalkChannelProcessor(TalkTalkClient client, TalkTalkContentEntityProcessor<List<Content>> processor) {
+    public VodEntityProcessingTalkTalkVodListProcessor(TalkTalkClient client, TalkTalkContentEntityProcessor<List<Content>> processor) {
         this.client = checkNotNull(client);
         this.processor = checkNotNull(processor);
     }
-    
+
     @Override
-    public UpdateProgress process(ChannelType channel) throws TalkTalkException {
-        return client.processVodList(ItemTypeType.CHANNEL, channel.getId(), new TalkTalkVodEntityProcessor<UpdateProgress>() {
-            
-            private UpdateProgress progress = UpdateProgress.START;
-            
+    public List<Content> process(ChannelType channel) throws TalkTalkException {
+        return client.processVodList(ItemTypeType.CHANNEL, channel.getId(), new TalkTalkVodEntityProcessor<List<Content>>() {
+
+            private Builder<Content> contentListBuilder = ImmutableList.builder();
+
             @Override
-            public UpdateProgress getResult() {
-                return progress;
+            public List<Content> getResult() {
+                return contentListBuilder.build();
             }
 
             @Override
@@ -50,13 +49,16 @@ public class VodEntityProcessingTalkTalkChannelProcessor implements
                 logProcessing(entity);
                 switch (entity.getItemType()) {
                 case BRAND:
-                    checkProgress(processor.processBrandEntity(entity));
+                    contentListBuilder.addAll(processor.processBrandEntity(entity));
                     break;
                 case SERIES:
-                    checkProgress(processor.processSeriesEntity(entity));
+                    contentListBuilder.addAll(processor.processSeriesEntity(entity));
                     break;
                 case EPISODE:
-                    checkProgress(processor.processEpisodeEntity(entity));
+                    contentListBuilder.addAll(processor.processEpisodeEntity(entity));
+                    break;
+                case IMAGE:
+                    contentListBuilder.addAll(processor.processEpisodeEntity(entity));
                     break;
                 default:
                     log.warn("Not processing unexpected entity type {}", entity.getItemType());
@@ -65,20 +67,8 @@ public class VodEntityProcessingTalkTalkChannelProcessor implements
             }
         }, _500_ITEMS_PER_PAGE);
     }
-    
+
     private void logProcessing(VODEntityType entity) {
         log.debug("processing {} {}", entity.getItemType(), entity.getId());
-    }
-    
-    private UpdateProgress checkProgress(List<Content> contentList){
-        try { 
-            checkNotNull(contentList);
-            if(contentList.isEmpty()){
-                return UpdateProgress.FAILURE;
-            }
-        } catch (NullPointerException npe) {
-            return UpdateProgress.FAILURE;
-        }
-        return new UpdateProgress(contentList.size(), NO_FAILURES);
     }
 }

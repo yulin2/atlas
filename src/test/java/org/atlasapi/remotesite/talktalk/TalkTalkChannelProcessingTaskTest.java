@@ -26,7 +26,6 @@ public class TalkTalkChannelProcessingTaskTest {
     
     @Test
     public void testUpdatesContent() throws TalkTalkException {
-        
         when(processor.process(argThat(is(any(ChannelType.class)))))
             .thenReturn(UpdateProgress.SUCCESS);
         

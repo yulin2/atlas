@@ -5,6 +5,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.HttpClients;
@@ -35,20 +37,39 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 public class TalkTalkModule {
 
     private static final String SCHEMA_FILENAME = "TVDataInterfaceModel.xsd";
-    
+
     @Autowired private ContentResolver contentResolver;
     @Autowired private ContentWriter contentWriter;
+    @Autowired private ContentGroupResolver contentGroupResolver;
+    @Autowired private ContentGroupWriter contentGroupWriter;
     @Autowired private SimpleScheduler scheduler;
-    
+
     private @Value("${talktalk.host}") String ttHost;
     private @Value("${talktalk.validate}") String validate;
-    
+
     @PostConstruct
     public void schedule() {
         scheduler.schedule(talkTalkUpdater().withName("TalkTalk Content Updater"), 
                 RepetitionRules.daily(new LocalTime(10, 00)));
+        scheduler.schedule(talkTalkVodPicksUpdater().withName("TalkTalk VOD Picks Processor"), 
+                RepetitionRules.daily(new LocalTime(10, 00)));
     }
-    
+    @Bean
+    public ScheduledTask talkTalkVodPicksUpdater() {
+        return new TalkTalkVodListsProcessingTask(talkTalkClient(), talkTalkVodListProcessor(), 
+                contentGroupResolver, contentGroupWriter, vodPicksProcessor());
+    }
+
+    @Bean
+    public ContentGroupUpdatingTalkTalkVodListsProcessor vodPicksProcessor() {
+        return new ContentGroupUpdatingTalkTalkVodListsProcessor();
+    }
+
+    @Bean
+    public VodEntityProcessingTalkTalkVodListProcessor talkTalkVodListProcessor(){
+        return new VodEntityProcessingTalkTalkVodListProcessor(talkTalkClient(), talkTalkContentEntityProcessor());
+    }
+
     @Bean
     public ScheduledTask talkTalkUpdater() {
         return new TalkTalkChannelProcessingTask(talkTalkClient(), talkTalkChannelProcessor());
@@ -65,14 +86,14 @@ public class TalkTalkModule {
             = new ContentUpdatingTalkTalkContentEntityProcessor(talkTalkClient(), contentResolver, contentWriter);
         return vodEntityProcessor;
     }
-    
+
     @Bean
     public TalkTalkClient talkTalkClient() {
         return new XmlTalkTalkClient(HttpClients.webserviceClient(), 
             HostSpecifier.fromValid(ttHost),
             new JaxbTalkTalkTvDataInterfaceResponseParser(getJaxbContext(), getSchema()));
     }
-    
+
     @Bean
     public TalkTalkContentUpdateController talkTalkChannelUpdateController() {
         return new TalkTalkContentUpdateController(talkTalkChannelProcessor(), talkTalkContentEntityProcessor());
@@ -85,7 +106,7 @@ public class TalkTalkModule {
             throw new RuntimeException(e);
         }
     }
-    
+
     private Optional<Schema> getSchema() {
         if (!Boolean.parseBoolean(validate)) {
             return Optional.absent();

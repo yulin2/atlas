@@ -1,23 +1,9 @@
 package org.atlasapi.remotesite.talktalk;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Map;
-
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemDetailType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
-
-import com.google.common.io.Resources;
-import com.metabroadcast.common.http.HttpException;
-import com.metabroadcast.common.http.HttpResponse;
-import com.metabroadcast.common.http.HttpResponsePrologue;
-import com.metabroadcast.common.http.Payload;
-import com.metabroadcast.common.http.SimpleHttpClient;
-import com.metabroadcast.common.http.SimpleHttpRequest;
 
 
 public class StubTalkTalkClient implements TalkTalkClient {
@@ -49,7 +35,7 @@ public class StubTalkTalkClient implements TalkTalkClient {
         detail.setItemType(type);
         return detail;
     }
-    
+
 //    private Map<String, URL> respondsTo;
 //
 //    public StubTalkTalkClient(Map<String, URL> respondsTo) {

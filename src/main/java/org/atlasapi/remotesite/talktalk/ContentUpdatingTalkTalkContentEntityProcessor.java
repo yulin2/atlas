@@ -4,8 +4,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import java.util.List;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
@@ -19,9 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.scheduling.UpdateProgress;
 
 /**
  * Updates {@link org.atlasapi.media.entity.Content Content} for each provided
@@ -33,13 +37,13 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
  * 
  */
 public class ContentUpdatingTalkTalkContentEntityProcessor implements
-        TalkTalkContentEntityProcessor<UpdateProgress> {
+        TalkTalkContentEntityProcessor<List<Content>> {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     private final TalkTalkClient client;
     private final ContentResolver resolver;
-    private final ContentWriter writer;
+    private final ContentWriter contentWriter;
     
     private final TalkTalkItemDetailItemExtractor itemExtractor = new TalkTalkItemDetailItemExtractor();
     private final TalkTalkItemDetailContainerExtractor containerExtractor = new TalkTalkItemDetailContainerExtractor();
@@ -47,7 +51,7 @@ public class ContentUpdatingTalkTalkContentEntityProcessor implements
     public ContentUpdatingTalkTalkContentEntityProcessor(TalkTalkClient client, ContentResolver resolver, ContentWriter writer) {
         this.client = checkNotNull(client);
         this.resolver = checkNotNull(resolver);
-        this.writer = checkNotNull(writer);
+        this.contentWriter = checkNotNull(writer);
     }
 
     private void logProcessing(VODEntityType entity) {
@@ -55,7 +59,7 @@ public class ContentUpdatingTalkTalkContentEntityProcessor implements
     }
     
     @Override
-    public UpdateProgress processBrandEntity(VODEntityType entity) {
+    public List<Content> processBrandEntity(VODEntityType entity) {
         try {
             logProcessing(entity);
             Container brand = containerExtractor.extractBrand(getEntityDetail(entity));
@@ -65,25 +69,25 @@ public class ContentUpdatingTalkTalkContentEntityProcessor implements
                 checkState(identifiedExisting instanceof Brand, "%s not Brand", existing);
                 brand = ContentMerger.merge((Brand) existing.get(), brand);
             }
-            writer.createOrUpdate(brand);
+            contentWriter.createOrUpdate(brand);
             final Optional<Brand> extractedBrand = Optional.of((Brand)brand);
-            return client.processVodList(entity.getItemType(), entity.getId(), new TalkTalkVodEntityProcessor<UpdateProgress>() {
+            return client.processVodList(entity.getItemType(), entity.getId(), new TalkTalkVodEntityProcessor<List<Content>>() {
     
-                UpdateProgress progress = UpdateProgress.SUCCESS;//include the Brand;
+                ImmutableList.Builder<Content> contentListBuilder = new ImmutableList.Builder<Content>();
                 
                 @Override
-                public UpdateProgress getResult() {
-                    return progress;
+                public List<Content> getResult() {
+                    return contentListBuilder.build();
                 }
     
                 @Override
                 public void process(VODEntityType entity) {
                     switch (entity.getItemType()) {
                     case EPISODE:
-                        progress = progress.reduce(processEpisode(extractedBrand, Optional.<Series>absent(), entity));
+                        contentListBuilder.addAll(processEpisode(extractedBrand, Optional.<Series>absent(), entity));
                         break;
                     case SERIES:
-                        progress = progress.reduce(processSeries(extractedBrand, entity));
+                        contentListBuilder.addAll(processSeries(extractedBrand, entity));
                         break;
                     default:
                         log.warn("Not processing unexpected entity type {}", entity.getItemType());
@@ -94,8 +98,8 @@ public class ContentUpdatingTalkTalkContentEntityProcessor implements
             }, 500);
         } catch (TalkTalkException tte) {
             log.error(String.format("Failed to entity list for %s %s", entity.getItemType(), entity.getId()), tte);
-            return UpdateProgress.FAILURE;
         }
+        return Lists.newArrayList();
     }
     
     private ItemDetailType getEntityDetail(VODEntityType entity) throws TalkTalkException {
@@ -103,11 +107,11 @@ public class ContentUpdatingTalkTalkContentEntityProcessor implements
     }
 
     @Override
-    public UpdateProgress processSeriesEntity(VODEntityType entity) {
+    public List<Content> processSeriesEntity(VODEntityType entity) {
         return processSeries(Optional.<Brand>absent(), entity);
     }
 
-    private UpdateProgress processSeries(final Optional<Brand> brand, VODEntityType entity) {
+    private List<Content> processSeries(final Optional<Brand> brand, VODEntityType entity) {
         try {
             logProcessing(entity);
             Series series = containerExtractor.extractSeries(getEntityDetail(entity), brand);
@@ -118,31 +122,31 @@ public class ContentUpdatingTalkTalkContentEntityProcessor implements
                 Container merged = ContentMerger.merge((Series) existing.get(), series);
                 series = (Series) merged;
             }
-            writer.createOrUpdate(series);
+            contentWriter.createOrUpdate(series);
             return processEntityList(series, brand, entity);
         } catch (TalkTalkException tte) {
             log.error(String.format("Failed to entity list for %s %s", entity.getItemType(), entity.getId()), tte);
-            return UpdateProgress.FAILURE;
         }
+        return Lists.newArrayList();
     }
 
-    private UpdateProgress processEntityList(Series series,
+    private List<Content> processEntityList(Series series,
             final Optional<Brand> brand, VODEntityType entity) throws TalkTalkException {
             final Optional<Series> extractedSeries = Optional.of((Series)series);
-            return client.processVodList(entity.getItemType(), entity.getId(), new TalkTalkVodEntityProcessor<UpdateProgress>() {
+            return client.processVodList(entity.getItemType(), entity.getId(), new TalkTalkVodEntityProcessor<List<Content>>() {
     
-                UpdateProgress progress = UpdateProgress.SUCCESS;//include the Brand;
+                ImmutableList.Builder<Content> contentListBuilder = new ImmutableList.Builder<Content>();
                 
                 @Override
-                public UpdateProgress getResult() {
-                    return progress;
+                public List<Content> getResult() {
+                    return contentListBuilder.build();
                 }
     
                 @Override
                 public void process(VODEntityType entity) {
                     switch (entity.getItemType()) {
                     case EPISODE:
-                        progress = progress.reduce(processEpisode(brand, extractedSeries, entity));
+                        contentListBuilder.addAll(processEpisode(brand, extractedSeries, entity));
                         break;
                     default:
                         log.warn("Not processing unexpected entity type {}", entity.getItemType());
@@ -154,11 +158,12 @@ public class ContentUpdatingTalkTalkContentEntityProcessor implements
     }
 
     @Override
-    public UpdateProgress processEpisodeEntity(VODEntityType entity) {
+    public List<Content> processEpisodeEntity(VODEntityType entity) {
         return processEpisode(Optional.<Brand>absent(), Optional.<Series>absent(), entity);
     }
 
-    private UpdateProgress processEpisode(Optional<Brand> brand, Optional<Series> series, VODEntityType entity) {
+    private List<Content> processEpisode(Optional<Brand> brand, Optional<Series> series, VODEntityType entity) {
+        List<Content> contentList = Lists.newArrayList();
         try {
             logProcessing(entity);
             checkArgument(ItemTypeType.EPISODE.equals(entity.getItemType()));
@@ -168,14 +173,14 @@ public class ContentUpdatingTalkTalkContentEntityProcessor implements
             Optional<Identified> existing = getExisting(item.getCanonicalUri());
             item = mergeWithExisting(item, existing);
             
-            writer.createOrUpdate(item);
+            contentWriter.createOrUpdate(item);
             
-            return UpdateProgress.SUCCESS;
+            contentList.add(item);
         } catch (TalkTalkException tte) {
             String message = String.format("Failed to process %s %s", entity.getItemType(), entity.getId());
             log.error(message,tte);
-            return UpdateProgress.FAILURE;
         }
+        return contentList;
     }
 
     private Item mergeWithExisting(Item extracted, Optional<Identified> existing) {
@@ -194,5 +199,4 @@ public class ContentUpdatingTalkTalkContentEntityProcessor implements
         }
         return Optional.absent();
     }
-    
 }
