@@ -68,6 +68,7 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoAvailableChildrenResolver;
@@ -128,6 +129,7 @@ public class QueryWebModule {
     private @Autowired SegmentResolver segmentResolver;
     private @Autowired ProductResolver productResolver;
     private @Autowired PeopleQueryResolver peopleQueryResolver;
+    private @Autowired LookupEntryStore lookupStore;
 
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
@@ -267,7 +269,7 @@ public class QueryWebModule {
 
     @Bean
     ContainerModelSimplifier containerSimplifier() {
-        AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo);
+        AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo, lookupStore);
         UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
         RecentlyBroadcastChildrenResolver recentChildren = new MongoRecentlyBroadcastChildrenResolver(mongo);
         ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren, imageSimplifier());

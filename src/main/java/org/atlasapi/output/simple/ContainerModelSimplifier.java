@@ -92,7 +92,7 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         }
 
         if (annotations.contains(Annotation.AVAILABLE_LOCATIONS)) {
-            simplePlaylist.setAvailableContent(filterAndTransformChildRefs(fullPlayList, availableFilter(fullPlayList)));
+            simplePlaylist.setAvailableContent(filterAndTransformChildRefs(fullPlayList, availableFilter(fullPlayList, config)));
         }
 
         if (annotations.contains(Annotation.UPCOMING)) {
@@ -110,8 +110,8 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         return Iterables.transform(Iterables.filter(fullPlayList.getChildRefs(), filter), toContentIdentifier);
     }
 
-    private Predicate<ChildRef> availableFilter(Container fullPlayList) {
-        return asChildRefFilter(availableChildrenResolver.availableChildrenFor(fullPlayList));
+    private Predicate<ChildRef> availableFilter(Container fullPlayList, ApplicationConfiguration config) {
+        return asChildRefFilter(availableChildrenResolver.availableChildrenFor(fullPlayList, config));
     }
 
     private Predicate<ChildRef> upcomingFilter(Container fullPlayList) {

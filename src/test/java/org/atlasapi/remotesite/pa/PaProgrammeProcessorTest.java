@@ -194,8 +194,8 @@ public class PaProgrammeProcessorTest {
 
     @Test
     public void testPaSummaries() {
-        int SUMMARY_BRAND_INDEX = 0;
-        int SUMMARY_SERIES_INDEX = 2;
+        int SUMMARY_BRAND_INDEX = 1;
+        int SUMMARY_SERIES_INDEX = 3;
 
         Film film = new Film("http://pressassociation.com/films/5", "pa:f-5", Publisher.PA);
 
