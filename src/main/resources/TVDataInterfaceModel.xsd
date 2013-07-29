@@ -395,8 +395,7 @@
     		<enumeration value="BROADCAST_ITEM"></enumeration>
     		<enumeration value="CHANNEL"></enumeration>
     		<enumeration value="LOCATION"></enumeration>
-            <enumeration value="IMGWALL"></enumeration>
-            <enumeration value="IMAGE"></enumeration>
+    		<enumeration value="IMGWALL"></enumeration>
     	</restriction>
     </simpleType>
 

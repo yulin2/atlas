@@ -27,9 +27,9 @@ import com.metabroadcast.common.http.HttpStatusCode;
 public class TalkTalkContentUpdateController {
     
     private TalkTalkChannelProcessor<?> channelProcessor;
-    private TalkTalkContentEntityProcessor<List<Content>> entityProcessor;
+    private TalkTalkVodEntityProcessor<List<Content>> entityProcessor;
 
-    public TalkTalkContentUpdateController(TalkTalkChannelProcessor<?> channelProcessor, TalkTalkContentEntityProcessor<List<Content>> entityProcessor) {
+    public TalkTalkContentUpdateController(TalkTalkChannelProcessor<?> channelProcessor, TalkTalkVodEntityProcessor<List<Content>> entityProcessor) {
         this.channelProcessor = checkNotNull(channelProcessor);
         this.entityProcessor = checkNotNull(entityProcessor);
     }
@@ -50,7 +50,7 @@ public class TalkTalkContentUpdateController {
     public void updateBrand(HttpServletResponse response, @PathVariable("id") String id) throws IOException {
         try {
             VODEntityType entity = entity(id, ItemTypeType.BRAND);
-            sendResult(response, entityProcessor.processBrandEntity(entity));
+            sendResult(response, entityProcessor.processEntity(entity));
         } catch (Exception e) {
             sendError(response, e);
         }
@@ -60,7 +60,7 @@ public class TalkTalkContentUpdateController {
     public void updateSeries(HttpServletResponse response, @PathVariable("id") String id) throws IOException {
         try {
             VODEntityType entity = entity(id, ItemTypeType.SERIES);
-            sendResult(response, entityProcessor.processSeriesEntity(entity));
+            sendResult(response, entityProcessor.processEntity(entity));
         } catch (Exception e) {
             sendError(response, e);
         }
@@ -70,7 +70,7 @@ public class TalkTalkContentUpdateController {
     public void updateEpisode(HttpServletResponse response, @PathVariable("id") String id) throws IOException {
         try {
             VODEntityType entity = entity(id, ItemTypeType.EPISODE);
-            sendResult(response, entityProcessor.processEpisodeEntity(entity));
+            sendResult(response, entityProcessor.processEntity(entity));
         } catch (Exception e) {
             sendError(response, e);
         }

@@ -11,7 +11,6 @@ import javax.xml.bind.Unmarshaller.Listener;
 import org.atlasapi.http.AbstractHttpResponseTransformer;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemDetailType;
-import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.TVDataInterfaceResponse;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
 
@@ -27,6 +26,8 @@ import com.metabroadcast.common.url.Urls;
  * XML-over-HTTP-based {@link TalkTalkClient} 
  */
 public class XmlTalkTalkClient implements TalkTalkClient {
+
+    private static final int DEFAULT_ITEMS_PER_PAGE = 500;
 
     private final <T> AbstractHttpResponseTransformer<T> transformer(Unmarshaller.Listener listener, Function<? super TVDataInterfaceResponse, ? extends T> continuation) {
         return new JaxbListeningTaklTalkResponseTransformer<T>(listener, continuation);
@@ -55,11 +56,18 @@ public class XmlTalkTalkClient implements TalkTalkClient {
     private final SimpleHttpClient client;
     private final HostSpecifier host;
     private final TalkTalkTvDataInterfaceResponseParser parser;
+    private final int itemsPerPage;
 
-    public XmlTalkTalkClient(SimpleHttpClient client, HostSpecifier host, TalkTalkTvDataInterfaceResponseParser parser) {
+
+    public XmlTalkTalkClient(SimpleHttpClient client, HostSpecifier host, TalkTalkTvDataInterfaceResponseParser parser, int itemsPerPage) {
         this.client = checkNotNull(client);
         this.host = checkNotNull(host);
         this.parser = checkNotNull(parser);
+        this.itemsPerPage = itemsPerPage;
+    }
+    
+    public XmlTalkTalkClient(SimpleHttpClient client, HostSpecifier host, TalkTalkTvDataInterfaceResponseParser parser) {
+        this(client, host, parser, DEFAULT_ITEMS_PER_PAGE);
     }
 
     @Override
@@ -88,8 +96,8 @@ public class XmlTalkTalkClient implements TalkTalkClient {
     }
 
     @Override
-    public <R> R processVodList(ItemTypeType type, String identifier,
-            TalkTalkVodEntityProcessor<R> processor, int itemsPerPage) throws TalkTalkException {
+    public <R> R processVodList(GroupType type, String identifier,
+            TalkTalkVodListProcessor<R> processor) throws TalkTalkException {
         String url = Urls.appendParameters(String.format("http://%s/TVDataInterface/VOD/List/2?", host.toString()), parameters(type, identifier));
         int page = 0;
         Integer expected = UNKNOWN;
@@ -109,7 +117,7 @@ public class XmlTalkTalkClient implements TalkTalkClient {
         };
 
     private Integer getVodPage(String url,
-            TalkTalkVodEntityProcessor<?> processor, int itemsPerPage, int page)
+            TalkTalkVodListProcessor<?> processor, int itemsPerPage, int page)
             throws TalkTalkException {
         String paginatedUrl = Urls.appendParameters(url, selection(page, itemsPerPage));
         try {
@@ -121,7 +129,7 @@ public class XmlTalkTalkClient implements TalkTalkClient {
         }
     }
     
-    private QueryStringParameters parameters(ItemTypeType type, String identifier) {
+    private QueryStringParameters parameters(GroupType type, String identifier) {
         return QueryStringParameters
             .parameters("groupType", type.toString())
             .add("groupIdentifier", identifier);
@@ -133,7 +141,7 @@ public class XmlTalkTalkClient implements TalkTalkClient {
                 .add("itemsPerPage", String.valueOf(itemsPerPage));
     }
 
-    private Unmarshaller.Listener adapt(final TalkTalkVodEntityProcessor<?> processor) {
+    private Unmarshaller.Listener adapt(final TalkTalkVodListProcessor<?> processor) {
         return new Unmarshaller.Listener() {
             @Override
             public void afterUnmarshal(Object target, Object parent) {
@@ -145,7 +153,7 @@ public class XmlTalkTalkClient implements TalkTalkClient {
     }
     
     @Override
-    public ItemDetailType getItemDetail(ItemTypeType type, String identifier)
+    public ItemDetailType getItemDetail(GroupType type, String identifier)
             throws TalkTalkException {
         String url = Urls.appendParameters(String.format("http://%s/TVDataInterface/Detail/Item/2?", host.toString()), parameters(type, identifier));
         try {

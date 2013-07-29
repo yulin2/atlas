@@ -52,22 +52,14 @@ public class TalkTalkModule {
         scheduler.schedule(talkTalkUpdater().withName("TalkTalk Content Updater"), 
                 RepetitionRules.daily(new LocalTime(10, 00)));
         scheduler.schedule(talkTalkVodPicksUpdater().withName("TalkTalk VOD Picks Processor"), 
-                RepetitionRules.daily(new LocalTime(10, 00)));
+                RepetitionRules.daily(new LocalTime(11, 00)));
     }
+    
     @Bean
     public ScheduledTask talkTalkVodPicksUpdater() {
-        return new TalkTalkVodListsProcessingTask(talkTalkClient(), talkTalkVodListProcessor(), 
-                contentGroupResolver, contentGroupWriter, vodPicksProcessor());
-    }
-
-    @Bean
-    public ContentGroupUpdatingTalkTalkVodListsProcessor vodPicksProcessor() {
-        return new ContentGroupUpdatingTalkTalkVodListsProcessor();
-    }
-
-    @Bean
-    public VodEntityProcessingTalkTalkVodListProcessor talkTalkVodListProcessor(){
-        return new VodEntityProcessingTalkTalkVodListProcessor(talkTalkClient(), talkTalkContentEntityProcessor());
+        return new TalkTalkVodContentListUpdateTask(talkTalkClient(),
+                contentGroupResolver, contentGroupWriter, talkTalkContentEntityProcessor(),
+                GroupType.IMAGE, "COMPAPP2");
     }
 
     @Bean
@@ -81,9 +73,9 @@ public class TalkTalkModule {
     }
 
     @Bean
-    public ContentUpdatingTalkTalkContentEntityProcessor talkTalkContentEntityProcessor() {
-        ContentUpdatingTalkTalkContentEntityProcessor vodEntityProcessor
-            = new ContentUpdatingTalkTalkContentEntityProcessor(talkTalkClient(), contentResolver, contentWriter);
+    public ContentUpdatingTalkTalkVodEntityProcessor talkTalkContentEntityProcessor() {
+        ContentUpdatingTalkTalkVodEntityProcessor vodEntityProcessor
+            = new ContentUpdatingTalkTalkVodEntityProcessor(talkTalkClient(), contentResolver, contentWriter);
         return vodEntityProcessor;
     }
 
