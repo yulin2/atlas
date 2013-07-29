@@ -1,16 +1,20 @@
 package org.atlasapi.remotesite.talktalk;
 
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -20,17 +24,19 @@ import org.atlasapi.remotesite.talktalk.vod.bindings.ItemDetailType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.metabroadcast.common.scheduling.UpdateProgress;
+import com.google.common.collect.ImmutableList;
 
-
+@RunWith(MockitoJUnitRunner.class)
 public class ContentUpdatingTalkTalkContentEntityProcessorTest {
     
     private final TalkTalkClient client = mock(TalkTalkClient.class);
     private final ContentResolver resolver = mock(ContentResolver.class);
     private final ContentWriter writer = mock(ContentWriter.class);
-    private final ContentUpdatingTalkTalkContentEntityProcessor processor 
-        = new ContentUpdatingTalkTalkContentEntityProcessor(client, resolver, writer);
+    private final ContentUpdatingTalkTalkVodEntityProcessor processor 
+        = new ContentUpdatingTalkTalkVodEntityProcessor(client, resolver, writer);
     
     @Test
     public void testProcessingBrandVodEntity() throws TalkTalkException {
@@ -38,50 +44,53 @@ public class ContentUpdatingTalkTalkContentEntityProcessorTest {
         VODEntityType entity = new VODEntityType();
         entity.setId("brand");
         entity.setItemType(ItemTypeType.BRAND);
-        
-        when(client.getItemDetail(entity.getItemType(), entity.getId()))
+
+        when(client.getItemDetail(groupType(entity), entity.getId()))
             .thenReturn(itemDetail(entity));
         when(resolver.findByCanonicalUris(argThat(hasItem("http://talktalk.net/brands/brand"))))
             .thenReturn(ResolvedContent.builder().build());
-        when(client.processVodList(argThat(is(entity.getItemType())), 
-                argThat(is(entity.getId())), anyVodEntityProcessor(), anyInt()))
-            .thenReturn(UpdateProgress.SUCCESS);
+        when(client.processVodList(argThat(is(groupType(entity))), 
+                argThat(is(entity.getId())), anyProcessor()))
+            .thenReturn(ImmutableList.<Content>of());
         
-        UpdateProgress progress = processor.processBrandEntity(entity);
+        List<Content> content = processor.processEntity(entity);
         
-        assertThat(progress, is(UpdateProgress.SUCCESS));
+        assertNotNull(content);
+        assertThat(content.get(0), instanceOf(Brand.class));
         
-        verify(client).getItemDetail(entity.getItemType(), entity.getId());
+        verify(client).getItemDetail(groupType(entity), entity.getId());
         verify(resolver).findByCanonicalUris(argThat(hasItem("http://talktalk.net/brands/brand")));
-        verify(client).processVodList(argThat(is(entity.getItemType())), 
-            argThat(is(entity.getId())), anyVodEntityProcessor(), anyInt());
         verify(writer).createOrUpdate(any(Brand.class));
     }
-    
+
     @Test
     public void testProcessingSeriesVodEntity() throws TalkTalkException {
         
         VODEntityType entity = new VODEntityType();
         entity.setId("series");
         entity.setItemType(ItemTypeType.SERIES);
-        
-        when(client.getItemDetail(entity.getItemType(), entity.getId()))
+
+        when(client.getItemDetail(groupType(entity), entity.getId()))
             .thenReturn(itemDetail(entity));
         when(resolver.findByCanonicalUris(argThat(hasItem("http://talktalk.net/series/series"))))
             .thenReturn(ResolvedContent.builder().build());
-        when(client.processVodList(argThat(is(entity.getItemType())), 
-                argThat(is(entity.getId())), anyVodEntityProcessor(), anyInt()))
-                .thenReturn(UpdateProgress.SUCCESS);
+        when(client.processVodList(argThat(is(groupType(entity))), 
+                argThat(is(entity.getId())), anyProcessor()))
+            .thenReturn(ImmutableList.<Content>of());
         
-        UpdateProgress progress = processor.processSeriesEntity(entity);
+        List<Content> content = processor.processEntity(entity);
         
-        assertThat(progress, is(UpdateProgress.SUCCESS));
+        assertNotNull(content);
+        assertThat(content.get(0), instanceOf(Series.class));
         
-        verify(client).getItemDetail(entity.getItemType(), entity.getId());
+        verify(client).getItemDetail(groupType(entity), entity.getId());
         verify(resolver).findByCanonicalUris(argThat(hasItem("http://talktalk.net/series/series")));
-        verify(client).processVodList(argThat(is(entity.getItemType())), 
-                argThat(is(entity.getId())), anyVodEntityProcessor(), anyInt());
         verify(writer).createOrUpdate(any(Series.class));
+    }
+
+    @SuppressWarnings("unchecked")
+    private TalkTalkVodListProcessor<List<Content>> anyProcessor() {
+        return any(TalkTalkVodListProcessor.class);
     }
 
     @Test
@@ -91,23 +100,22 @@ public class ContentUpdatingTalkTalkContentEntityProcessorTest {
         entity.setId("item");
         entity.setItemType(ItemTypeType.EPISODE);
         
-        when(client.getItemDetail(entity.getItemType(), entity.getId()))
+        when(client.getItemDetail(groupType(entity), entity.getId()))
             .thenReturn(itemDetail(entity));
         when(resolver.findByCanonicalUris(argThat(hasItem("http://talktalk.net/episodes/item"))))
             .thenReturn(ResolvedContent.builder().build());
-        
-        UpdateProgress progress = processor.processEpisodeEntity(entity);
-        
-        assertThat(progress, is(UpdateProgress.SUCCESS));
-        
-        verify(client).getItemDetail(entity.getItemType(), entity.getId());
+
+        List<Content> contentList = processor.processEntity(entity);
+
+        assertNotNull(contentList);
+
+        verify(client).getItemDetail(groupType(entity), entity.getId());
         verify(resolver).findByCanonicalUris(argThat(hasItem("http://talktalk.net/episodes/item")));
         verify(writer).createOrUpdate(any(Item.class));
     }
 
-    @SuppressWarnings("unchecked")
-    private TalkTalkVodEntityProcessor<UpdateProgress> anyVodEntityProcessor() {
-        return any(TalkTalkVodEntityProcessor.class);
+    private GroupType groupType(VODEntityType entity) {
+        return GroupType.fromItemType(entity.getItemType()).get();
     }
 
     private ItemDetailType itemDetail(VODEntityType entity) {

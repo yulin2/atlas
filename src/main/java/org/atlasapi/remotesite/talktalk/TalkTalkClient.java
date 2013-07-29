@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.talktalk;
 
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemDetailType;
-import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 
 /**
  * General interface for retrieving data from TalkTalk.
@@ -26,13 +25,12 @@ public interface TalkTalkClient {
      * @param type
      * @param identifier
      * @param processor
-     * @param itemsPerPage
      * @return the result of processing the list of entities according to the
      *         processor
      * @throws TalkTalkException
      */
-    <R> R processVodList(ItemTypeType type, String identifier,
-            TalkTalkVodEntityProcessor<R> processor, int itemsPerPage)
+    <R> R processVodList(GroupType type, String identifier,
+            TalkTalkVodListProcessor<R> processor)
             throws TalkTalkException;
     
     /**
@@ -43,7 +41,8 @@ public interface TalkTalkClient {
      * @return
      * @throws TalkTalkException
      */
-    ItemDetailType getItemDetail(ItemTypeType type, String identifier)
+    ItemDetailType getItemDetail(GroupType type, String identifier)
             throws TalkTalkException;
     
+
 }

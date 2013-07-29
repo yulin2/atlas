@@ -3,9 +3,11 @@ package org.atlasapi.remotesite.talktalk;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.metabroadcast.common.http.HttpStatusCode;
-import com.metabroadcast.common.scheduling.UpdateProgress;
 
 /**
  * Controller for updating specific channels, brands, series and episodes from
@@ -26,9 +27,9 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 public class TalkTalkContentUpdateController {
     
     private TalkTalkChannelProcessor<?> channelProcessor;
-    private TalkTalkContentEntityProcessor<UpdateProgress> entityProcessor;
+    private TalkTalkVodEntityProcessor<List<Content>> entityProcessor;
 
-    public TalkTalkContentUpdateController(TalkTalkChannelProcessor<?> channelProcessor, TalkTalkContentEntityProcessor<UpdateProgress> entityProcessor) {
+    public TalkTalkContentUpdateController(TalkTalkChannelProcessor<?> channelProcessor, TalkTalkVodEntityProcessor<List<Content>> entityProcessor) {
         this.channelProcessor = checkNotNull(channelProcessor);
         this.entityProcessor = checkNotNull(entityProcessor);
     }
@@ -49,7 +50,7 @@ public class TalkTalkContentUpdateController {
     public void updateBrand(HttpServletResponse response, @PathVariable("id") String id) throws IOException {
         try {
             VODEntityType entity = entity(id, ItemTypeType.BRAND);
-            sendResult(response, entityProcessor.processBrandEntity(entity));
+            sendResult(response, entityProcessor.processEntity(entity));
         } catch (Exception e) {
             sendError(response, e);
         }
@@ -59,7 +60,7 @@ public class TalkTalkContentUpdateController {
     public void updateSeries(HttpServletResponse response, @PathVariable("id") String id) throws IOException {
         try {
             VODEntityType entity = entity(id, ItemTypeType.SERIES);
-            sendResult(response, entityProcessor.processSeriesEntity(entity));
+            sendResult(response, entityProcessor.processEntity(entity));
         } catch (Exception e) {
             sendError(response, e);
         }
@@ -69,7 +70,7 @@ public class TalkTalkContentUpdateController {
     public void updateEpisode(HttpServletResponse response, @PathVariable("id") String id) throws IOException {
         try {
             VODEntityType entity = entity(id, ItemTypeType.EPISODE);
-            sendResult(response, entityProcessor.processEpisodeEntity(entity));
+            sendResult(response, entityProcessor.processEntity(entity));
         } catch (Exception e) {
             sendError(response, e);
         }

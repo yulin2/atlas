@@ -2,8 +2,10 @@ package org.atlasapi.remotesite.talktalk;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.List;
+
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
-import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,53 +21,36 @@ public class VodEntityProcessingTalkTalkChannelProcessor implements
     
     private final Logger log = LoggerFactory.getLogger(getClass());
     
-    private static final int _500_ITEMS_PER_PAGE = 500;
+    private final int NO_FAILURES = 0;
     
     private final TalkTalkClient client;
-    private final TalkTalkContentEntityProcessor<UpdateProgress> processor;
+    private final TalkTalkVodEntityProcessor<List<Content>> processor;
 
-    public VodEntityProcessingTalkTalkChannelProcessor(TalkTalkClient client, TalkTalkContentEntityProcessor<UpdateProgress> processor) {
+    public VodEntityProcessingTalkTalkChannelProcessor(TalkTalkClient client, TalkTalkVodEntityProcessor<List<Content>> processor) {
         this.client = checkNotNull(client);
         this.processor = checkNotNull(processor);
     }
     
     @Override
     public UpdateProgress process(ChannelType channel) throws TalkTalkException {
-        return client.processVodList(ItemTypeType.CHANNEL, channel.getId(), new TalkTalkVodEntityProcessor<UpdateProgress>() {
+        return client.processVodList(GroupType.CHANNEL, channel.getId(), 
+            new TalkTalkVodListProcessor<UpdateProgress>() {
             
-            private UpdateProgress progress = UpdateProgress.START;
-            
-            @Override
-            public UpdateProgress getResult() {
-                return progress;
-            }
-
-            @Override
-            public void process(VODEntityType entity) {
-                UpdateProgress result;
-                logProcessing(entity);
-                switch (entity.getItemType()) {
-                case BRAND:
-                    result = processor.processBrandEntity(entity);
-                    break;
-                case SERIES:
-                    result = processor.processSeriesEntity(entity);
-                    break;
-                case EPISODE:
-                    result = processor.processEpisodeEntity(entity);
-                    break;
-                default:
-                    log.warn("Not processing unexpected entity type {}", entity.getItemType());
-                    result = UpdateProgress.START;
-                    break;
+                private UpdateProgress totalProgress = UpdateProgress.START;
+                
+                @Override
+                public UpdateProgress getResult() {
+                    return totalProgress;
                 }
-                progress = progress.reduce(result);
-            }
-        }, _500_ITEMS_PER_PAGE);
-    }
     
-    private void logProcessing(VODEntityType entity) {
-        log.debug("processing {} {}", entity.getItemType(), entity.getId());
+                @Override
+                public void process(VODEntityType entity) {
+                    log.debug("processing {} {}", entity.getItemType(), entity.getId());
+                    List<Content> extracted = processor.processEntity(entity);
+                    UpdateProgress progress = extracted.isEmpty() ? UpdateProgress.FAILURE
+                                                                  : new UpdateProgress(extracted.size(), NO_FAILURES);
+                    totalProgress = totalProgress.reduce(progress);
+                }
+        });
     }
-    
 }
