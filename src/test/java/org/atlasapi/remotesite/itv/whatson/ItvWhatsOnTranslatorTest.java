@@ -2,12 +2,12 @@ package org.atlasapi.remotesite.itv.whatson;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
@@ -15,6 +15,8 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.joda.time.DateTime;
 import org.junit.Test;
+
+import com.google.common.base.Optional;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -67,28 +69,28 @@ public class ItvWhatsOnTranslatorTest {
     @Test
     public void testBrandTranslation() {
         ItvWhatsOnEntryTranslator translator = getTranslator();
-        Brand brand = translator.toBrand(getTestItem());
-        assertEquals(brand.getCanonicalUri(), "http://itv.com/brand/1/7680");
-        assertEquals(brand.getTitle(), "Huntik - Secrets and Seekers");
+        Optional<Brand> brand = translator.toBrand(getTestItem());
+        assertEquals(brand.get().getCanonicalUri(), "http://itv.com/brand/1/7680");
+        assertEquals(brand.get().getTitle(), "Huntik - Secrets and Seekers");
     }
     
     @Test
     public void testSeriesTranslation() {
         ItvWhatsOnEntryTranslator translator = getTranslator();
-        Series series = translator.toSeries(getTestItem());
-        assertEquals(series.getCanonicalUri(), "http://itv.com/series/1/7680-02");
+        Optional<Series> series = translator.toSeries(getTestItem());
+        assertEquals(series.get().getCanonicalUri(), "http://itv.com/series/1/7680-02");
     }
     
     @Test
-    public void testEpisodeTranslation() {
+    public void testItemTranslation() {
         ItvWhatsOnEntryTranslator translator = getTranslator();
-        Episode episode = translator.toEpisode(getTestItem());
-        assertEquals(episode.getCanonicalUri(), "http://itv.com/1/7680/0029");
-        assertEquals(episode.getTitle(), "Cave of the Casterwills");
-        assertEquals(episode.getDescription().length(), 139);
-        assertEquals(episode.getImage(), "http://example.com/DotCom/episode/318524/image.jpg");
-        assertEquals(episode.getAliasUrls().size(), 1);
-        for (String aliasUrl : episode.getAliasUrls()) {
+        Item item = translator.toEpisodeOrItem(getTestItem());
+        assertEquals(item.getCanonicalUri(), "http://itv.com/1/7680/0029");
+        assertEquals(item.getTitle(), "Cave of the Casterwills");
+        assertEquals(item.getDescription().length(), 139);
+        assertEquals(item.getImage(), "http://example.com/DotCom/episode/318524/image.jpg");
+        assertEquals(item.getAliasUrls().size(), 1);
+        for (String aliasUrl : item.getAliasUrls()) {
             assertEquals(aliasUrl, "http://itv.com/vodcrid/318524");
         }
     }
@@ -98,14 +100,14 @@ public class ItvWhatsOnTranslatorTest {
         ItvWhatsOnEntryTranslator translator = getTranslator();
         ItvWhatsOnEntry entry = getTestItem();
         entry.setEpisodeId("");        
-        Episode episode = translator.toEpisode(entry);
+        Episode episode = (Episode) translator.toEpisodeOrItem(entry);
         assertEquals(episode.getCanonicalUri(), "http://itv.com/synthesized/1/7680/0029#001");
     }
     
     @Test
     public void testVersion() {
         ItvWhatsOnEntryTranslator translator = getTranslator();
-        Episode episode = translator.toEpisode(getTestItem());
+        Episode episode = (Episode) translator.toEpisodeOrItem(getTestItem());
         assertEquals(episode.getVersions().size(), 1);
         for (Version version : episode.getVersions()) {
             assertEquals(version.getCanonicalUri(), "http://itv.com/version/1/7680/0029#001");
@@ -116,7 +118,7 @@ public class ItvWhatsOnTranslatorTest {
     @Test
     public void testBroadcast() {
         ItvWhatsOnEntryTranslator translator = getTranslator();
-        Episode episode = translator.toEpisode(getTestItem());
+        Episode episode = (Episode) translator.toEpisodeOrItem(getTestItem());
         DateTime expectedTransmissionStart = getDateTimeFromMillis(1374644400000L);
         DateTime expectedTransmissionEnd = expectedTransmissionStart.plusSeconds(1800);
         for (Version version : episode.getVersions()) {
@@ -134,7 +136,7 @@ public class ItvWhatsOnTranslatorTest {
     @Test
     public void testLocation() {
         ItvWhatsOnEntryTranslator translator = getTranslator();
-        Episode episode = translator.toEpisode(getTestItem());
+        Episode episode = (Episode) translator.toEpisodeOrItem(getTestItem());
         for (Version version : episode.getVersions()) {
             for (Encoding encoding : version.getManifestedAs()) {
                 assertEquals(encoding.getAvailableAt().size(), 1);

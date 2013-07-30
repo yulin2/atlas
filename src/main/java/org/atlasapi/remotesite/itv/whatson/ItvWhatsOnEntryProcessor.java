@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.itv.whatson;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -11,6 +10,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.ContentMerger;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
 
@@ -47,12 +47,15 @@ public class ItvWhatsOnEntryProcessor {
     }
     
     public void process(ItvWhatsOnEntry entry) {
-        Brand brand = translator.toBrand(entry);
-        createOrUpdate(brand);
-        Series series = translator.toSeries(entry);
-        createOrUpdate(series);
-        Episode episode = translator.toEpisode(entry);
+        Optional<Brand> brand = translator.toBrand(entry);
+        if (brand.isPresent()) {
+            createOrUpdate(brand.get());
+        }
+        Optional<Series> series = translator.toSeries(entry);
+        if (series.isPresent()) {
+            createOrUpdate(series.get());
+        }
+        Item episode = translator.toEpisodeOrItem(entry);
         createOrUpdate(episode);
     }
-
 }
