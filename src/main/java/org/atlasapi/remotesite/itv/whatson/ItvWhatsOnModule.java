@@ -51,7 +51,7 @@ public class ItvWhatsOnModule {
     
     @Bean
     public ItvWhatsOnEntryProcessor processor() {
-        return new ItvWhatsOnEntryProcessor();
+        return new ItvWhatsOnEntryProcessor(contentResolver, contentWriter);
     }
     
     @Bean

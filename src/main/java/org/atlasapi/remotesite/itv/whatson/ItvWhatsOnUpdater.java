@@ -1,20 +1,11 @@
 package org.atlasapi.remotesite.itv.whatson;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
-
 import java.util.List;
-import java.util.Map;
-
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.ParentRef;
-import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.joda.time.LocalDate;
-
-import com.google.common.collect.Maps;
 
 public class ItvWhatsOnUpdater {
     private final String feedUrl;
