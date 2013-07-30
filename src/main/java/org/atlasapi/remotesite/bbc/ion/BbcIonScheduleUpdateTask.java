@@ -9,7 +9,10 @@ import java.util.concurrent.Callable;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.util.ItemAndBroadcast;
+import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
@@ -18,8 +21,10 @@ import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
 
@@ -31,13 +36,15 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
     private final AdapterLog log;
     private final BroadcastTrimmer trimmer;
     private final ChannelResolver channelResolver;
+    private final ScheduleWriter scheduleWriter;
 
-    public BbcIonScheduleUpdateTask(String scheduleUrl, RemoteSiteClient<IonSchedule> scheduleClient, BbcIonBroadcastHandler handler, BroadcastTrimmer trimmer, ChannelResolver channelResolver, AdapterLog log) {
+    public BbcIonScheduleUpdateTask(String scheduleUrl, RemoteSiteClient<IonSchedule> scheduleClient, BbcIonBroadcastHandler handler, BroadcastTrimmer trimmer, ChannelResolver channelResolver, ScheduleWriter scheduleWriter, AdapterLog log) {
         this.scheduleUrl = scheduleUrl;
         this.scheduleClient = scheduleClient;
         this.handler = handler;
         this.trimmer = trimmer;
         this.channelResolver = channelResolver;
+        this.scheduleWriter = scheduleWriter;
         this.log = log;
     }
 
@@ -54,7 +61,7 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
                     itemAndBroadcasts.add(itemAndBroadcast.requireValue());
                 }
             }
-            trimBroadcasts(itemAndBroadcasts);
+            trimBroadcastsAndUpdateSchedule(itemAndBroadcasts);
             return schedule.getBlocklist().size();
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("exception handling schedule schedule: %s", scheduleUrl));
@@ -62,7 +69,7 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
         }
     }
 
-    private void trimBroadcasts(List<ItemAndBroadcast> itemAndBroadcasts) {
+    private void trimBroadcastsAndUpdateSchedule(List<ItemAndBroadcast> itemAndBroadcasts) {
         DateTime scheduleStartTime = null;
         DateTime scheduleEndTime = null;
         String broadcastOn = null;
@@ -91,6 +98,16 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
             
             Channel channel = channelResolver.fromUri(broadcastOn).requireValue();
             trimmer.trimBroadcasts(new Interval(scheduleStartTime, scheduleEndTime), channel, acceptableIds.build());
+            scheduleWriter.replaceScheduleBlock(Publisher.BBC, channel, Iterables.transform(itemAndBroadcasts, TO_ITEM_REF_AND_BROADCAST));
         }
     }
+    
+    private static final Function<ItemAndBroadcast, ItemRefAndBroadcast> TO_ITEM_REF_AND_BROADCAST = new Function<ItemAndBroadcast, ItemRefAndBroadcast>() {
+
+        @Override
+        public ItemRefAndBroadcast apply(ItemAndBroadcast input) {
+            return new ItemRefAndBroadcast(input.getItem(), input.getBroadcast().requireValue());
+        }
+        
+    };
 }
