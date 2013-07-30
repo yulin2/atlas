@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TVDataInterfaceResponse xmlns="http://www.example.org/TVDataInterfaceModel">
+    <Result>0</Result>
+    <ItemDetail>
+        <Id>397212</Id>
+        <ItemType>EPISODE</ItemType>
+        <Title>Ep1: Flowers For Your Grave</Title>
+        <RatingCode>12</RatingCode>
+        <Duration>0 00:41:00</Duration>
+        <GenreList>
+            <Genre>
+                <GenreCode>DRAMA</GenreCode>
+                <GenreDescription>Drama</GenreDescription>
+            </Genre>
+        </GenreList>
+        <Availability>
+            <StartDt>2013-03-01T00:00:00.000Z</StartDt>
+            <EndDt>2013-09-02T11:59:59.000+01:00</EndDt>
+        </Availability>
+        <CreditList/>
+        <ImageList>
+            <Image>
+                <filename>Castle01S01E111209.png</filename>
+                <size>HI576</size>
+            </Image>
+            <Image>
+                <filename>Castle01S01E111209_sm.png</filename>
+                <size>TTTV</size>
+            </Image>
+            <Image>
+                <filename>Castle01S01E111209_smLA.png</filename>
+                <size>TTTV2</size>
+            </Image>
+        </ImageList>
+        <SynopsisList>
+            <Synopsis>
+                <Text>Mystery novelist Richard Castle works   with New York police to find a killer   who is modeling his crimes from his</Text>
+                <Type>3LNSYNPS</Type>
+            </Synopsis>
+            <Synopsis>
+                <Text>Mystery novelist Richard Castle works with New York police to find a killer who is modeling his crimes after scenes from Castle's novels.</Text>
+                <Type>LNGSYNPS</Type>
+            </Synopsis>
+            <Synopsis>
+                <Text>Richard Castle works with the police</Text>
+                <Type>TERSE</Type>
+            </Synopsis>
+        </SynopsisList>
+        <Media>
+            <MediaFormat>
+                <bitrate>1816000</bitrate>
+                <hd>false</hd>
+            </MediaFormat>
+        </Media>
+        <AssociatedAssets/>
+        <ProductType>SUBSCRIPTION</ProductType>
+        <Channel>
+            <Id>yvabc</Id>
+            <Description>ABC TV OD</Description>
+            <Type>VOD</Type>
+            <ChannelGenreList>
+                <Genre>
+                    <GenreCode>CHTV</GenreCode>
+                    <GenreDescription>TV Channels</GenreDescription>
+                </Genre>
+            </ChannelGenreList>
+        </Channel>
+    </ItemDetail>
+</TVDataInterfaceResponse>

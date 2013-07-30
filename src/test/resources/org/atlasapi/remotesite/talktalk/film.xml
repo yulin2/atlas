@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TVDataInterfaceResponse xmlns="http://www.example.org/TVDataInterfaceModel">
+	<Result>0</Result>
+	<ItemDetail>
+		<Id>14968</Id>
+		<ItemType>EPISODE</ItemType>
+		<Title>10 Things I Hate About You</Title>
+		<RatingCode>12</RatingCode>
+		<Duration>0 01:34:00</Duration>
+		<GenreList>
+			<Genre>
+				<GenreCode>COMEDY</GenreCode>
+				<GenreDescription>Comedy</GenreDescription>
+			</Genre>
+		</GenreList>
+		<Availability>
+			<StartDt>2013-02-04T00:00:00.000Z</StartDt>
+			<EndDt>2014-12-31T23:59:59.000Z</EndDt>
+		</Availability>
+		<CreditList>
+			<Credit>
+				<Role>DIRECTOR</Role>
+				<Person>Gil Junger</Person>
+				<Code>SM000100</Code>
+			</Credit>
+			<Credit>
+				<Role>STARRING</Role>
+				<Person>Heath Ledger</Person>
+				<Code>SM010069</Code>
+			</Credit>
+			<Credit>
+				<Role>STARRING</Role>
+				<Person>Julia Stiles</Person>
+				<Code>SM020197</Code>
+			</Credit>
+			<Credit>
+				<Role>STARRING</Role>
+				<Person>Joseph Gordon-Levitt</Person>
+				<Code>2031</Code>
+			</Credit>
+		</CreditList>
+		<ImageList>
+			<Image>
+				<filename>10_things_i_hate_about_you_c.png</filename>
+				<size>TTTVKEY</size>
+			</Image>
+			<Image>
+				<filename>10_things_i_hate_about_you.png</filename>
+				<size>HI576</size>
+			</Image>
+			<Image>
+				<filename>10_things_i_hate_about_you_sm13.png</filename>
+				<size>TTTV2</size>
+			</Image>
+			<Image>
+				<filename>10_things_i_hate_about_you_sm3.png</filename>
+				<size>TTTV</size>
+			</Image>
+		</ImageList>
+		<SynopsisList>
+			<Synopsis>
+				<Text>A great-looking cast and a sassy script boost this high school tale of romance, deception and match-making.</Text>
+				<Type>LNGSYNPS</Type>
+			</Synopsis>
+			<Synopsis>
+				<Text>Shakespeare with a modern twist...</Text>
+				<Type>TERSE</Type>
+			</Synopsis>
+		</SynopsisList>
+		<Media>
+			<MediaFormat>
+				<bitrate>1816000</bitrate>
+				<hd>false</hd>
+			</MediaFormat>
+		</Media>
+		<AssociatedAssets>
+			<AssociatedAsset>
+				<Duration>0 00:00:41</Duration>
+				<AssetType>TRAILER</AssetType>
+				<Filename>disae_tld88372</Filename>
+				<AvailableInHD>false</AvailableInHD>
+				<path>disney</path>
+			</AssociatedAsset>
+		</AssociatedAssets>
+		<ProductType>RENTAL</ProductType>
+		<Channel>
+			<Id>yvlovef</Id>
+			<Description>LOVEFiLM BOX OFFICE</Description>
+			<Type>VOD</Type>
+			<ChannelGenreList>
+				<Genre>
+					<GenreCode>CHMOVIES</GenreCode>
+					<GenreDescription>Movie Channels</GenreDescription>
+				</Genre>
+			</ChannelGenreList>
+		</Channel>
+	</ItemDetail>
+</TVDataInterfaceResponse>
