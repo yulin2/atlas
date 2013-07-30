@@ -13,6 +13,7 @@ import org.atlasapi.remotesite.ContentMerger;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 
 
 public class ItvWhatsOnEntryProcessor {
@@ -39,9 +40,8 @@ public class ItvWhatsOnEntryProcessor {
             if (content instanceof Item && resolvedContent instanceof Episode) {
                 Item resolvedItem = (Item)resolvedContent;
                 Item contentItem = (Item)content;
-                contentItem.setParentRef(resolvedItem.getContainer());
-                ContentMerger.merge(resolvedItem, contentItem);
-                contentWriter.createOrUpdate((Item)resolvedContent);
+                contentItem.setParentRef(resolvedItem.getContainer());                
+                contentWriter.createOrUpdate(ContentMerger.merge(resolvedItem, (Item)resolvedContent));
             } else if (content instanceof Item) {
                 ContentMerger.merge((Item)resolvedContent, (Item) content);
                 contentWriter.createOrUpdate((Item)resolvedContent);
