@@ -29,6 +29,7 @@ import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.joda.time.DateTime;
@@ -65,19 +66,19 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, 
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
             NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, 
-            ImageSimplifier imageSimplifier) {
+            ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver) {
         this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, 
                 containerSummaryResolver, channelResolver, idCodec, channelIdCodec, new SystemClock(), 
-                imageSimplifier);
+                imageSimplifier, personResolver);
     }
 
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
             TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, 
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
             NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, Clock clock, 
-            ImageSimplifier imageSimplifier) {
+            ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver) {
         
-        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier);
+        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, personResolver);
         
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;

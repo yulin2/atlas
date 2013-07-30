@@ -30,6 +30,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.PeopleQueryResolver;
 
 public class ContainerModelSimplifier extends ContentModelSimplifier<Container, Playlist> {
 
@@ -56,8 +57,8 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, String localHostName, 
             ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, AvailableChildrenResolver availableChildren, 
             UpcomingChildrenResolver upcomingChildren, ProductResolver productResolver, RecentlyBroadcastChildrenResolver recentChildren,
-            ImageSimplifier imageSimplifier) {
-        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier);
+            ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver) {
+        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, peopleResolver);
         this.itemSimplifier = itemSimplifier;
         this.availableChildrenResolver = availableChildren;
         this.upcomingChildrenResolver = upcomingChildren;
