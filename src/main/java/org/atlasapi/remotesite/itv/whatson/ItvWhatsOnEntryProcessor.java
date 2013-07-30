@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.itv.whatson;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -35,7 +36,13 @@ public class ItvWhatsOnEntryProcessor {
             }
         } else {
             Content resolvedContent = (Content)resolved.get(content.getCanonicalUri()).requireValue();
-            if (content instanceof Item) {
+            if (content instanceof Item && resolvedContent instanceof Episode) {
+                Item resolvedItem = (Item)resolvedContent;
+                Item contentItem = (Item)content;
+                contentItem.setParentRef(resolvedItem.getContainer());
+                ContentMerger.merge(resolvedItem, contentItem);
+                contentWriter.createOrUpdate((Item)resolvedContent);
+            } else if (content instanceof Item) {
                 ContentMerger.merge((Item)resolvedContent, (Item) content);
                 contentWriter.createOrUpdate((Item)resolvedContent);
             }
@@ -55,7 +62,7 @@ public class ItvWhatsOnEntryProcessor {
         if (series.isPresent()) {
             createOrUpdate(series.get());
         }
-        Item episode = translator.toEpisodeOrItem(entry);
-        createOrUpdate(episode);
+        Item item = translator.toEpisodeOrItem(entry);
+        createOrUpdate(item);
     }
 }
