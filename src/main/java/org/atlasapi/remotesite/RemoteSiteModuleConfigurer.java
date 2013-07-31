@@ -17,6 +17,7 @@ import org.atlasapi.remotesite.hulu.HuluModule;
 import org.atlasapi.remotesite.itunes.ItunesModule;
 import org.atlasapi.remotesite.itv.ItvModule;
 import org.atlasapi.remotesite.itv.interlinking.ItvInterlinkingModule;
+import org.atlasapi.remotesite.itv.whatson.ItvWhatsOnModule;
 import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
 import org.atlasapi.remotesite.metabroadcast.MetaBroadcastModule;
 import org.atlasapi.remotesite.music.emipub.EmiPubModule;
@@ -73,6 +74,7 @@ public class RemoteSiteModuleConfigurer {
         .put("btfeatured", BtFeaturedContentModule.class)
         .put("thesuntvpicks", TheSunModule.class)
         .put("talktalk", TalkTalkModule.class)
+        .put("itvwhatson", ItvWhatsOnModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
