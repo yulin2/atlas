@@ -33,6 +33,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -130,7 +131,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     }
     
     private List<CrewMemberAndPerson> resolve(List<CrewMember> crews, ApplicationConfiguration config) {
-        Iterable<Person> people = peopleQueryResolver.people(Lists.transform(crews, Identified.TO_URI), config);
+        Iterable<Person> people = peopleQueryResolver.people(ImmutableSet.copyOf(Lists.transform(crews, Identified.TO_URI)), config);
         final ImmutableMap<String, Person> peopleIndex = Maps.uniqueIndex(people, Identified.TO_URI);
         return Lists.transform(crews, new Function<CrewMember, CrewMemberAndPerson>() {
             @Override
