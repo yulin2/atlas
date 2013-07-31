@@ -11,6 +11,7 @@ import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
@@ -36,7 +37,8 @@ public class ContentModelSimplifierTest {
         Mockito.mock(UpcomingChildrenResolver.class), 
         Mockito.mock(ProductResolver.class), 
         Mockito.mock(RecentlyBroadcastChildrenResolver.class), 
-        Mockito.mock(ImageSimplifier.class)
+        Mockito.mock(ImageSimplifier.class),
+        Mockito.mock(PeopleQueryResolver.class)
     );
     
     private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(
@@ -49,7 +51,8 @@ public class ContentModelSimplifierTest {
         Mockito.mock(ChannelResolver.class), 
         Mockito.mock(NumberToShortStringCodec.class), 
         Mockito.mock(NumberToShortStringCodec.class), 
-        Mockito.mock(ImageSimplifier.class)
+        Mockito.mock(ImageSimplifier.class),
+        Mockito.mock(PeopleQueryResolver.class)
     );
 
     @Test
