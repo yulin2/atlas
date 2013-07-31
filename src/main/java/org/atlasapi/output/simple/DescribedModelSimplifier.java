@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
@@ -71,7 +73,11 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         }
         
         if (annotations.contains(Annotation.IMAGES)) {
-            simpleDescription.setImages(toImages(content.getImages(), annotations));
+            if (content.getImages().isEmpty() && !Strings.isNullOrEmpty(content.getImage())) {
+                simpleDescription.setImages(ImmutableList.of(new Image(content.getImage())));
+            } else {
+                simpleDescription.setImages(toImages(content.getImages(), annotations));
+            }
         }
         
     }
