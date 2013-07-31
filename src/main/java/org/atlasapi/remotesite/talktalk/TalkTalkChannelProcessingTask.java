@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.talktalk;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkTvStructureCallback;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,7 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
 /**
- * {@link ScheduledTask} which retrives the TV Structure via the provided
+ * {@link ScheduledTask} which retrieves the TV Structure via the provided
  * {@link TalkTalkClient} and processes each {@link ChannelType} in turn using
  * the provided {@link TalkTalkChannelProcessor}.
  */
@@ -30,7 +31,7 @@ public class TalkTalkChannelProcessingTask extends ScheduledTask {
     @Override
     protected void runTask() {
         try {
-            client.processTvStructure(new TalkTalkTvStructureProcessor<UpdateProgress>() {
+            client.processTvStructure(new TalkTalkTvStructureCallback<UpdateProgress>() {
 
                 private UpdateProgress progress = UpdateProgress.START;
                 
@@ -53,8 +54,8 @@ public class TalkTalkChannelProcessingTask extends ScheduledTask {
                 
             });
         } catch (TalkTalkException tte) {
-            log.error("content update failed", tte);
-            //ensure task is marked failed
+            // ensure task is marked failed, the exception is logged by the
+            // scheduler.
             throw new RuntimeException(tte);
         }
     }

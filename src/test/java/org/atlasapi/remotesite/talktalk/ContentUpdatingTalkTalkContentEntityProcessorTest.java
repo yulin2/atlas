@@ -20,6 +20,7 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkVodListCallback;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemDetailType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
@@ -89,8 +90,8 @@ public class ContentUpdatingTalkTalkContentEntityProcessorTest {
     }
 
     @SuppressWarnings("unchecked")
-    private TalkTalkVodListProcessor<List<Content>> anyProcessor() {
-        return any(TalkTalkVodListProcessor.class);
+    private TalkTalkVodListCallback<List<Content>> anyProcessor() {
+        return any(TalkTalkVodListCallback.class);
     }
 
     @Test

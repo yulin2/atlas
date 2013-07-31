@@ -30,16 +30,21 @@ public class XmlTalkTalkClient implements TalkTalkClient {
     private static final int DEFAULT_ITEMS_PER_PAGE = 500;
 
     private final <T> AbstractHttpResponseTransformer<T> transformer(Unmarshaller.Listener listener, Function<? super TVDataInterfaceResponse, ? extends T> continuation) {
-        return new JaxbListeningTaklTalkResponseTransformer<T>(listener, continuation);
+        return new JaxbListeningTalkTalkResponseTransformer<T>(listener, continuation);
     }
     
-    private final class JaxbListeningTaklTalkResponseTransformer<T> extends
+    /*
+     * Parses the HTTP response with the parser. The parsing is listened to with
+     * the provided listener. A final continuation is applied to the final
+     * TVDataInterfaceResponse to project a value from it. 
+     */
+    private final class JaxbListeningTalkTalkResponseTransformer<T> extends
             AbstractHttpResponseTransformer<T> {
         
         private final Listener listener;
         private final Function<? super TVDataInterfaceResponse, ? extends T> continuation;
         
-        private JaxbListeningTaklTalkResponseTransformer(Unmarshaller.Listener listener, Function<? super TVDataInterfaceResponse, ? extends T> continuation) {
+        private JaxbListeningTalkTalkResponseTransformer(Unmarshaller.Listener listener, Function<? super TVDataInterfaceResponse, ? extends T> continuation) {
             this.listener = checkNotNull(listener);
             this.continuation = checkNotNull(continuation);
         }
@@ -71,25 +76,25 @@ public class XmlTalkTalkClient implements TalkTalkClient {
     }
 
     @Override
-    public <R> R processTvStructure(final TalkTalkTvStructureProcessor<R> processor) throws TalkTalkException {
+    public <R> R processTvStructure(final TalkTalkTvStructureCallback<R> callback) throws TalkTalkException {
         String url = String.format("http://%s/TVDataInterface/TVStructure/Structure/1", host.toString());
         try {
             client.get(SimpleHttpRequest.httpRequestFrom(
                 url,
-                transformer(adapt(processor), Functions.<Void>constant(null))
+                transformer(toUnmarshallListener(callback), Functions.<Void>constant(null))
             ));
-            return processor.getResult();
+            return callback.getResult();
         } catch (Exception e) {
             throw new TalkTalkException(url, e);
         }
     }
     
-    private Unmarshaller.Listener adapt(final TalkTalkTvStructureProcessor<?> processor) {
+    private Unmarshaller.Listener toUnmarshallListener(final TalkTalkTvStructureCallback<?> callback) {
         return new Unmarshaller.Listener() {
             @Override
             public void afterUnmarshal(Object target, Object parent) {
                 if (target instanceof ChannelType) {
-                    processor.process((ChannelType)target);
+                    callback.process((ChannelType)target);
                 }
             }
         };
@@ -97,15 +102,15 @@ public class XmlTalkTalkClient implements TalkTalkClient {
 
     @Override
     public <R> R processVodList(GroupType type, String identifier,
-            TalkTalkVodListProcessor<R> processor) throws TalkTalkException {
+            TalkTalkVodListCallback<R> callback) throws TalkTalkException {
         String url = Urls.appendParameters(String.format("http://%s/TVDataInterface/VOD/List/2?", host.toString()), parameters(type, identifier));
         int page = 0;
         Integer expected = UNKNOWN;
         do {
-            expected = getVodPage(url, processor, itemsPerPage, page);
+            expected = getVodPage(url, callback, itemsPerPage, page);
             page++;
         } while (expected != UNKNOWN && (page * itemsPerPage) < expected);
-        return processor.getResult();
+        return callback.getResult();
     }
 
     private static final Function<TVDataInterfaceResponse, Integer> VOD_LIST_ENTITY_COUNT
@@ -117,12 +122,12 @@ public class XmlTalkTalkClient implements TalkTalkClient {
         };
 
     private Integer getVodPage(String url,
-            TalkTalkVodListProcessor<?> processor, int itemsPerPage, int page)
+            TalkTalkVodListCallback<?> callback, int itemsPerPage, int page)
             throws TalkTalkException {
         String paginatedUrl = Urls.appendParameters(url, selection(page, itemsPerPage));
         try {
             return client.get(new SimpleHttpRequest<Integer>(
-                paginatedUrl, transformer(adapt(processor), VOD_LIST_ENTITY_COUNT)
+                paginatedUrl, transformer(toUnmarshallListener(callback), VOD_LIST_ENTITY_COUNT)
             ));
         } catch (Exception e) {
             throw new TalkTalkException(paginatedUrl, e);
@@ -141,12 +146,12 @@ public class XmlTalkTalkClient implements TalkTalkClient {
                 .add("itemsPerPage", String.valueOf(itemsPerPage));
     }
 
-    private Unmarshaller.Listener adapt(final TalkTalkVodListProcessor<?> processor) {
+    private Unmarshaller.Listener toUnmarshallListener(final TalkTalkVodListCallback<?> callback) {
         return new Unmarshaller.Listener() {
             @Override
             public void afterUnmarshal(Object target, Object parent) {
                 if (target instanceof VODEntityType) {
-                    processor.process((VODEntityType)target);
+                    callback.process((VODEntityType)target);
                 }
             }
         };

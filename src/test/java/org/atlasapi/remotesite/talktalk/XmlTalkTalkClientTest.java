@@ -15,6 +15,8 @@ import java.util.Map;
 
 import javax.xml.bind.Unmarshaller;
 
+import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkTvStructureCallback;
+import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkVodListCallback;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemDetailType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.TVDataInterfaceResponse;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VodListType;
@@ -39,8 +41,8 @@ public class XmlTalkTalkClientTest {
 
     private TalkTalkClient ttClient;
 
-    @Mock private TalkTalkTvStructureProcessor<Integer> structureProcessor;
-    @Mock private TalkTalkVodListProcessor<Integer> vodEntityProcessor;
+    @Mock private TalkTalkTvStructureCallback<Integer> structureProcessor;
+    @Mock private TalkTalkVodListCallback<Integer> vodEntityProcessor;
 
     @Before
     public void setUp() {

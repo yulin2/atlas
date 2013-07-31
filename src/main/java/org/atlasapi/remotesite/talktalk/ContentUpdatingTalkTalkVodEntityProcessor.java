@@ -15,6 +15,7 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.ContentMerger;
+import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkVodListCallback;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemDetailType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
@@ -156,9 +157,9 @@ public class ContentUpdatingTalkTalkVodEntityProcessor implements
             }
     }
     
-    private TalkTalkVodListProcessor<ImmutableList<Content>> entityProcessor(
+    private TalkTalkVodListCallback<ImmutableList<Content>> entityProcessor(
             final Optional<Brand> brand, final Optional<Series> series) {
-        return new TalkTalkVodListProcessor<ImmutableList<Content>>() {
+        return new TalkTalkVodListCallback<ImmutableList<Content>>() {
             
             ImmutableList.Builder<Content> contents = ImmutableList.builder();
             

@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.List;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkVodListCallback;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class VodEntityProcessingTalkTalkChannelProcessor implements
     @Override
     public UpdateProgress process(ChannelType channel) throws TalkTalkException {
         return client.processVodList(GroupType.CHANNEL, channel.getId(), 
-            new TalkTalkVodListProcessor<UpdateProgress>() {
+            new TalkTalkVodListCallback<UpdateProgress>() {
             
                 private UpdateProgress totalProgress = UpdateProgress.START;
                 

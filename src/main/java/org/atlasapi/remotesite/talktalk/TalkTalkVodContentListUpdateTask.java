@@ -12,6 +12,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkVodListCallback;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class TalkTalkVodContentListUpdateTask extends ScheduledTask {
         try {
             
             ContentGroup group = resolveOrCreateContentGroup();
-            List<ChildRef> refs = client.processVodList(type, identifier, new TalkTalkVodListProcessor<List<ChildRef>>() {
+            List<ChildRef> refs = client.processVodList(type, identifier, new TalkTalkVodListCallback<List<ChildRef>>() {
 
                 private UpdateProgress progress = UpdateProgress.START;
                 private ImmutableList.Builder<ChildRef> refs = ImmutableList.builder();

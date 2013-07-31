@@ -8,7 +8,7 @@ import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
 public class StubTalkTalkClient implements TalkTalkClient {
     
     @Override
-    public <R> R processTvStructure(TalkTalkTvStructureProcessor<R> processor)
+    public <R> R processTvStructure(TalkTalkTvStructureCallback<R> processor)
             throws TalkTalkException {
         ChannelType channel = new ChannelType();
         channel.setId("channelId");
@@ -18,7 +18,7 @@ public class StubTalkTalkClient implements TalkTalkClient {
     
     @Override
     public <R> R processVodList(GroupType type, String identifier,
-            TalkTalkVodListProcessor<R> processor) throws TalkTalkException {
+            TalkTalkVodListCallback<R> processor) throws TalkTalkException {
         VODEntityType entity = new VODEntityType();
         entity.setId(identifier);
         entity.setItemType(type.getItemType().get());
