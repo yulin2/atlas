@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.ContentGroupRef;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.simple.Description;
@@ -24,6 +25,7 @@ import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Function;
@@ -47,8 +49,10 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
     private boolean exposeIds = false;
     private final Map<String, Locale> localeMap;
+    private final PeopleQueryResolver peopleQueryResolver;
+    private final CrewMemberAndPersonSimplifier crewMemberAndPersonSimplifier;
 
-    public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, ImageSimplifier imageSimplifier) {
+    public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver) {
         super(imageSimplifier, SubstitutionTableNumberCodec.lowerCaseOnly());
         this.contentGroupResolver = contentGroupResolver;
         this.topicResolver = topicResolver;
@@ -57,6 +61,8 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         this.topicSimplifier = new TopicModelSimplifier(localHostName);
         this.productSimplifier = new ProductModelSimplifier(localHostName);
         this.localeMap = initLocalMap();
+        this.peopleQueryResolver = peopleResolver;
+        this.crewMemberAndPersonSimplifier = new CrewMemberAndPersonSimplifier(imageSimplifier);
     }
 
     private Map<String, Locale> initLocalMap() {
@@ -102,7 +108,17 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
             simpleDescription.setProducts(resolveAndSimplifyProductsFor(content, annotations, config));
         }
         
-        if (annotations.contains(Annotation.PEOPLE)) {
+        if (annotations.contains(Annotation.PEOPLE_DETAIL)) {
+            simpleDescription.setPeople(Iterables.filter(Lists.transform(resolve(content.people(), config),
+                new Function<CrewMemberAndPerson, org.atlasapi.media.entity.simple.Person>() {
+                    @Override
+                    public org.atlasapi.media.entity.simple.Person apply(
+                            CrewMemberAndPerson input) {
+                        return crewMemberAndPersonSimplifier.simplify(input, annotations, config);
+                    }
+                }
+            ), Predicates.notNull()));
+        } else if (annotations.contains(Annotation.PEOPLE)) {
             simpleDescription.setPeople(Iterables.filter(Iterables.transform(content.people(), new Function<CrewMember, org.atlasapi.media.entity.simple.Person>() {
 
                 @Override
@@ -113,6 +129,18 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         }
     }
     
+    private List<CrewMemberAndPerson> resolve(List<CrewMember> crews, ApplicationConfiguration config) {
+        Iterable<Person> people = peopleQueryResolver.people(Lists.transform(crews, Identified.TO_URI), config);
+        final ImmutableMap<String, Person> peopleIndex = Maps.uniqueIndex(people, Identified.TO_URI);
+        return Lists.transform(crews, new Function<CrewMember, CrewMemberAndPerson>() {
+            @Override
+            public CrewMemberAndPerson apply(CrewMember input) {
+                Person person = peopleIndex.get(input.getCanonicalUri());
+                return new CrewMemberAndPerson(input, person);
+            }
+        });
+    }
+
     private Iterable<org.atlasapi.media.entity.simple.Certificate> simpleCertificates(Set<Certificate> certificates) {
         return Iterables.transform(certificates, new Function<Certificate, org.atlasapi.media.entity.simple.Certificate>() {
 

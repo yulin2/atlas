@@ -272,7 +272,7 @@ public class QueryWebModule {
         AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo, lookupStore);
         UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
         RecentlyBroadcastChildrenResolver recentChildren = new MongoRecentlyBroadcastChildrenResolver(mongo);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren, imageSimplifier());
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren, imageSimplifier(),peopleQueryResolver);
         containerSimplier.exposeIds(Boolean.valueOf(exposeIds));
         return containerSimplier;
     }
@@ -282,7 +282,7 @@ public class QueryWebModule {
         NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
         NumberToShortStringCodec channelIdCodec = new SubstitutionTableNumberCodec();
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo, idCodec);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, idCodec, channelIdCodec, imageSimplifier());
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, idCodec, channelIdCodec, imageSimplifier(),peopleQueryResolver);
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }

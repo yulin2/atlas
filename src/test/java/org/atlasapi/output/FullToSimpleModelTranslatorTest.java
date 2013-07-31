@@ -21,6 +21,7 @@ import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
@@ -54,6 +55,7 @@ public class FullToSimpleModelTranslatorTest {
     private @SuppressWarnings("unchecked") final AtlasModelWriter<ContentQueryResult> xmlOutputter = mock(AtlasModelWriter.class);
     private final ContainerSummaryResolver containerSummaryResolver = mock(ContainerSummaryResolver.class);
     private final ChannelResolver channelResolver = mock(ChannelResolver.class);
+    private final PeopleQueryResolver peopleResolver = mock(PeopleQueryResolver.class);
     
     private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier("localhostName");
 
@@ -70,7 +72,8 @@ public class FullToSimpleModelTranslatorTest {
             channelResolver, 
             new SubstitutionTableNumberCodec(), 
             new SubstitutionTableNumberCodec(), 
-            imageSimplifier
+            imageSimplifier,
+            peopleResolver
     );
     private final SimpleContentModelWriter translator = new SimpleContentModelWriter(
             xmlOutputter, 
@@ -84,7 +87,8 @@ public class FullToSimpleModelTranslatorTest {
                     upcomingChildren, 
                     productResolver, 
                     recentChildren, 
-                    imageSimplifier
+                    imageSimplifier,
+                    peopleResolver
             ), 
             topicSimplifier, 
             productSimplifier, 
