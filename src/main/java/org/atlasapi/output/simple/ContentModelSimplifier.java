@@ -131,12 +131,15 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     }
     
     private List<CrewMemberAndPerson> resolve(List<CrewMember> crews, ApplicationConfiguration config) {
-        Iterable<Person> people = peopleQueryResolver.people(ImmutableSet.copyOf(Lists.transform(crews, Identified.TO_URI)), config);
+        Iterable<Person> people = peopleQueryResolver.people(ImmutableSet.copyOf(Iterables.filter(Lists.transform(crews, Identified.TO_URI),Predicates.notNull())), config);
         final ImmutableMap<String, Person> peopleIndex = Maps.uniqueIndex(people, Identified.TO_URI);
         return Lists.transform(crews, new Function<CrewMember, CrewMemberAndPerson>() {
             @Override
             public CrewMemberAndPerson apply(CrewMember input) {
-                Person person = peopleIndex.get(input.getCanonicalUri());
+                Person person = null;
+                if (input.getCanonicalUri() != null) {
+                    person = peopleIndex.get(input.getCanonicalUri());
+                }
                 return new CrewMemberAndPerson(input, person);
             }
         });
