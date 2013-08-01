@@ -8,8 +8,14 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.simple.Person;
 import org.atlasapi.output.Annotation;
 
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+
 public class CrewMemberSimplifier extends IdentifiedModelSimplifier<CrewMember,Person> {
 
+    public CrewMemberSimplifier() {
+        super(SubstitutionTableNumberCodec.lowerCaseOnly());
+    }
+    
     public Person simplify(CrewMember fullCrew, Set<Annotation> annotations, ApplicationConfiguration config) {
         Person person = new Person();
         
