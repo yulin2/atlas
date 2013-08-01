@@ -32,6 +32,7 @@ import org.atlasapi.persistence.content.mongo.MongoContentTables;
 import org.atlasapi.persistence.media.entity.ChildRefTranslator;
 import org.atlasapi.persistence.media.entity.ContainerTranslator;
 import org.atlasapi.persistence.media.entity.ItemTranslator;
+import org.atlasapi.persistence.media.entity.SeriesRefTranslator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +68,7 @@ public class ChildRefUpdateTask extends ScheduledTask {
     private ImmutableList<Publisher> publishers;
     private String scheduleKey;
     private final ChildRefTranslator childRefTranslator = new ChildRefTranslator();
+    private final SeriesRefTranslator seriesRefTranslator = new SeriesRefTranslator();
 
     public ChildRefUpdateTask(ContentLister lister, ContentResolver resolver, DatabasedMongo mongo, ScheduleTaskProgressStore progressStore) {
         this.contentStore = lister;
@@ -145,7 +147,7 @@ public class ChildRefUpdateTask extends ScheduledTask {
      */
     private void udpateContainerReferences(Container container) {
         
-        Map<String, ChildRef> seriesRefs = getSeriesRefs(container);
+        Map<String, SeriesRef> seriesRefs = getSeriesRefs(container);
         
         Multimap<String, ChildRef> childRefs = getChildRefs(container);
         
@@ -158,7 +160,7 @@ public class ChildRefUpdateTask extends ScheduledTask {
     }
 
     private void updateChildrensRefs(Multimap<String, ChildRef> childRefs, Container container,
-                                     Map<String, ChildRef> seriesRefs) {
+                                     Map<String, SeriesRef> seriesRefs) {
         for (Entry<String, ChildRef> childRef : childRefs.entries()) {
             children.update(
                 where().idEquals(childRef.getValue().getUri()).build(),
@@ -184,48 +186,50 @@ public class ChildRefUpdateTask extends ScheduledTask {
         return seriesChildRefs;
     }
 
-    private Map<String, ChildRef> getSeriesRefs(Container container) {
-        Map<String, ChildRef> seriesRefs = Maps.newLinkedHashMap();
+    private Map<String, SeriesRef> getSeriesRefs(Container container) {
+        Map<String, SeriesRef> seriesRefs = Maps.newLinkedHashMap();
 
         if (container instanceof Brand) {
             ResolvedContent resolvedSeries = resolver.findByCanonicalUris(Iterables.transform(((Brand)container).getSeriesRefs(),SeriesRef.TO_URI));
             for (Series series : Iterables.filter(resolvedSeries.getAllResolvedResults(), Series.class)) {
-                seriesRefs.put(series.getCanonicalUri(), series.childRef());
+                seriesRefs.put(series.getCanonicalUri(), series.seriesRef());
             }
-        } else {
+        } else if (container instanceof Series) {
             // if this is a top level series then all its children *series* ref is to this too.
-            seriesRefs.put(container.getCanonicalUri(), container.childRef());
+            seriesRefs.put(container.getCanonicalUri(), ((Series)container).seriesRef());
+        } else {
+            throw new IllegalArgumentException("Unexpected Container type: " + container.getClass().getSimpleName());
         }
         return seriesRefs;
     }
 
-    private void updateSeriesRefs(Container container, Map<String, ChildRef> seriesRefs,
+    private void updateSeriesRefs(Container container, Map<String, SeriesRef> seriesRefs,
                                   Multimap<String, ChildRef> seriesChildRefs) {
         if (seriesRefs.size() == 1 && seriesRefs.containsKey(container.getCanonicalUri())) {
             return; //container is a top level series.
         }
-        for (String seriesUri : Iterables.transform(seriesRefs.values(), ChildRef.TO_URI)) {
+        for (String seriesUri : Iterables.transform(seriesRefs.values(), SeriesRef.TO_URI)) {
             MongoUpdateBuilder seriesUpdate = update()
                 .setField(ContainerTranslator.CONTAINER_ID, container.getId());
             Collection<ChildRef> seriesChildren = seriesChildRefs.get(seriesUri);
             if (!seriesChildren.isEmpty()) {
-                seriesUpdate.setField(ContainerTranslator.CHILDREN_KEY, toDbos(seriesChildren));
+                seriesUpdate.setField(ContainerTranslator.CHILDREN_KEY, dbosFromChildRefs(seriesChildren));
             }
             programmeGroups.update(where().idEquals(seriesUri).build(), seriesUpdate.build());
         }
     }
 
-    private void updateContainersRefs(Container container, Map<String, ChildRef> seriesRefs,
+    private void updateContainersRefs(Container container, Map<String, SeriesRef> seriesRefs,
                                      Multimap<String, ChildRef> childRefs) {
         MongoUpdateBuilder brandUpdate = update()
-            .setField(ContainerTranslator.CHILDREN_KEY, toDbos(childRefs.values()));
+            .setField(ContainerTranslator.CHILDREN_KEY, dbosFromChildRefs(childRefs.values()));
         if (!seriesRefs.isEmpty()) {
-            brandUpdate.setField(ContainerTranslator.FULL_SERIES_KEY, toDbos(seriesRefs.values()));
+            brandUpdate.setField(ContainerTranslator.FULL_SERIES_KEY, dbosFromSeriesRefs(seriesRefs.values()));
         }
         containers.update(where().idEquals(container.getCanonicalUri()).build(), brandUpdate.build());
     }
 
-    private DBObject updateForItem(Container container, ChildRef seriesRef) {
+    private DBObject updateForItem(Container container, SeriesRef seriesRef) {
         MongoUpdateBuilder childUpdate = MongoBuilders.update().setField(ItemTranslator.CONTAINER_ID, container.getId());
         if (seriesRef != null) {
             childUpdate.setField(ItemTranslator.SERIES_ID, seriesRef.getId());
@@ -234,8 +238,12 @@ public class ChildRefUpdateTask extends ScheduledTask {
         return update;
     }
 
-    private BasicDBList toDbos(Iterable<ChildRef> childRefs) {
+    private BasicDBList dbosFromChildRefs(Iterable<ChildRef> childRefs) {
         return childRefTranslator.toDBList(ChildRef.dedupeAndSort(childRefs));
+    }
+    
+    private BasicDBList dbosFromSeriesRefs(Iterable<SeriesRef> childRefs) {
+        return seriesRefTranslator.toDBList(SeriesRef.dedupeAndSort(childRefs));
     }
 
     public void updateProgress(ContentListingProgress progress) {

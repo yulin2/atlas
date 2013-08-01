@@ -68,8 +68,8 @@ public class ChildRefUpdateTaskTest extends TestCase {
     public void testUpdatesParentChildReferencesInBrandAndSeries() {
         
         Brand brand = new Brand("brandUri", "cBrandUri", BBC);
-        Series series1 = seriesWithParent("series1Uri", brand);
-        Series series2 = seriesWithParent("series2Uri", brand);
+        Series series1 = seriesWithParent("series1Uri", brand).withSeriesNumber(1);
+        Series series2 = seriesWithParent("series2Uri", brand).withSeriesNumber(2);
         Episode episode1 = episodeWithContainers("ep1", series1, brand);
         Item item1 = itemWithContainer("item1", brand);
         Episode episode2 = episodeWithContainers("ep2", series2, brand);
@@ -86,6 +86,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
         Brand resolvedBrand = resolve(brand);
         assertThat(resolvedBrand.getId(), is(1L));
         checkSeriesIds(resolvedBrand.getSeriesRefs(), null, null);
+        checkSeriesNumbers(resolvedBrand.getSeriesRefs(), 2, 1);
         checkIds(resolvedBrand.getChildRefs(), null, null, null);
         
         checkSeries(resolve(series1), 2L, null, null, null);
@@ -99,7 +100,8 @@ public class ChildRefUpdateTaskTest extends TestCase {
         
         resolvedBrand = resolve(brand);
         assertThat(resolvedBrand.getId(), is(1L));
-        checkSeriesIds(resolvedBrand.getSeriesRefs(), 2L, 3L);
+        checkSeriesIds(resolvedBrand.getSeriesRefs(), 3L, 2L);
+        checkSeriesNumbers(resolvedBrand.getSeriesRefs(), 2, 1);
         checkIds(resolvedBrand.getChildRefs(), 4L, 5L, 6L);
         
         checkSeries(resolve(series1), 2L, 1L, 4L, 5L);
@@ -109,7 +111,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
         checkEpisode(resolve(item1), 5L, 1L, null);
         checkEpisode(resolve(episode2), 6L, 1L, 3L);
     }
-    
+
     private void write(Content...contents) {
         for (Content content : contents) {
             if (content instanceof Container) {
@@ -205,6 +207,14 @@ public class ChildRefUpdateTaskTest extends TestCase {
         Iterator<Long> idIter = Lists.newArrayList(ids).iterator();
         for (SeriesRef seriesRef : seriesRefs) {
             assertThat(seriesRef.toString(), seriesRef.getId(), is(idIter.next()));
+        }
+    }
+    
+
+    private void checkSeriesNumbers(ImmutableList<SeriesRef> seriesRefs, Integer...numbers) {
+        Iterator<Integer> idIter = Lists.newArrayList(numbers).iterator();
+        for (SeriesRef seriesRef : seriesRefs) {
+            assertThat(seriesRef.toString(), seriesRef.getSeriesNumber(), is(idIter.next()));
         }
     }
     
