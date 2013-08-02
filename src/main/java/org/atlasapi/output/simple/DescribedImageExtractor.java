@@ -15,22 +15,32 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-
+/**
+ * Projects a <code>Set&lt;{@link Image}&gt;</code> from a {@link Described} for
+ * simplification into a {@link org.atlasapi.media.entity.simple.Description
+ * Description}.
+ * 
+ * If there are no Images present and the image field is set then an Image is
+ * synthesized from that field. If the Described is from a recognized
+ * {@link Publisher} then the synthesized Image is populated with default
+ * properties for that Publisher.
+ * 
+ */
 public class DescribedImageExtractor {
     
-    private final ImmutableMap<Publisher, Image.Builder> defaults
-        = ImmutableMap.<Publisher,Image.Builder>builder()
+    private final ImmutableMap<Publisher, Image> defaults
+        = ImmutableMap.<Publisher,Image>builder()
             .put(Publisher.BBC, Image.builder("default")
                     .withWidth(640).withHeight(360)
                     .withAspectRatio(SIXTEEN_BY_NINE)
-                    .withType(PRIMARY).withMimeType(IMAGE_JPG))
+                    .withType(PRIMARY).withMimeType(IMAGE_JPG).build())
             .put(Publisher.C4, Image.builder("default")
                     .withWidth(625).withHeight(352)
                     .withAspectRatio(SIXTEEN_BY_NINE)
-                    .withType(PRIMARY).withMimeType(IMAGE_JPG))
+                    .withType(PRIMARY).withMimeType(IMAGE_JPG).build())
             .put(Publisher.PREVIEW_NETWORKS, Image.builder("default")
                     .withAspectRatio(SIXTEEN_BY_NINE)
-                    .withType(PRIMARY).withMimeType(IMAGE_JPG))
+                    .withType(PRIMARY).withMimeType(IMAGE_JPG).build())
             .build();
     
     public Set<Image> getImages(Described described) {
@@ -46,13 +56,13 @@ public class DescribedImageExtractor {
     private Image createImage(Described described) {
         checkArgument(!Strings.isNullOrEmpty(described.getImage()),
                 "Can't create Image from null/empty image field on %s", described);
-        Image.Builder dflt = defaults.get(described.getPublisher());
+        Image dflt = defaults.get(described.getPublisher());
         if (dflt == null) {
             Image image = new Image(described.getImage());
             image.setType(PRIMARY);
             return image;
         }
-        return dflt.withUri(described.getImage()).build();
+        return Image.builder(dflt).withUri(described.getImage()).build();
     }
 
 }
