@@ -12,10 +12,10 @@ import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.PeopleQueryResolver;
-import org.atlasapi.persistence.output.AvailableChildrenResolver;
+import org.atlasapi.persistence.output.AvailableItemsResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
-import org.atlasapi.persistence.output.UpcomingChildrenResolver;
+import org.atlasapi.persistence.output.UpcomingItemsResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -33,8 +33,8 @@ public class ContentModelSimplifierTest {
         "", 
         Mockito.mock(ContentGroupResolver.class), 
         Mockito.mock(TopicQueryResolver.class), 
-        Mockito.mock(AvailableChildrenResolver.class), 
-        Mockito.mock(UpcomingChildrenResolver.class), 
+        Mockito.mock(AvailableItemsResolver.class), 
+        Mockito.mock(UpcomingItemsResolver.class), 
         Mockito.mock(ProductResolver.class), 
         Mockito.mock(RecentlyBroadcastChildrenResolver.class), 
         Mockito.mock(ImageSimplifier.class),
@@ -52,7 +52,9 @@ public class ContentModelSimplifierTest {
         Mockito.mock(NumberToShortStringCodec.class), 
         Mockito.mock(NumberToShortStringCodec.class), 
         Mockito.mock(ImageSimplifier.class),
-        Mockito.mock(PeopleQueryResolver.class)
+        Mockito.mock(PeopleQueryResolver.class),
+        Mockito.mock(UpcomingItemsResolver.class),
+        Mockito.mock(AvailableItemsResolver.class)
     );
 
     @Test

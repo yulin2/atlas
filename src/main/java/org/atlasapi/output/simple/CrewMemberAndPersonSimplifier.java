@@ -8,6 +8,8 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.output.Annotation;
+import org.atlasapi.persistence.output.AvailableItemsResolver;
+import org.atlasapi.persistence.output.UpcomingItemsResolver;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -18,8 +20,8 @@ public class CrewMemberAndPersonSimplifier implements
     private final PersonModelSimplifier personHelper;
     private final CrewMemberSimplifier crewHelper;
 
-    public CrewMemberAndPersonSimplifier(ImageSimplifier imageSimplifier) {
-        this.personHelper = new PersonModelSimplifier(imageSimplifier);
+    public CrewMemberAndPersonSimplifier(ImageSimplifier imageSimplifier, UpcomingItemsResolver upcomingResolver, AvailableItemsResolver availableResolver) {
+        this.personHelper = new PersonModelSimplifier(imageSimplifier, upcomingResolver, availableResolver);
         this.crewHelper = new CrewMemberSimplifier();
     }
     

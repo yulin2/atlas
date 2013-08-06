@@ -26,12 +26,13 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
+import org.atlasapi.persistence.output.AvailableItemsResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
+import org.atlasapi.persistence.output.UpcomingItemsResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -55,9 +56,9 @@ public class ItemModelSimplifierTest {
     private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
     private final ChannelResolver channelResolver = context.mock(ChannelResolver.class);
     private final PeopleQueryResolver peopleQueryResolver = context.mock(PeopleQueryResolver.class);
-    
-    
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec(), new SubstitutionTableNumberCodec(), new ImageSimplifier(), peopleQueryResolver);
+    private final UpcomingItemsResolver upcomingResolver = context.mock(UpcomingItemsResolver.class);
+    private final AvailableItemsResolver availableResolver = context.mock(AvailableItemsResolver.class);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec(), new SubstitutionTableNumberCodec(), new ImageSimplifier(), peopleQueryResolver,upcomingResolver,availableResolver);
     
     @Test
     @SuppressWarnings("unchecked")
