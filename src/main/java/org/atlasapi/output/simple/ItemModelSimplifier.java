@@ -30,7 +30,9 @@ import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.PeopleQueryResolver;
+import org.atlasapi.persistence.output.AvailableItemsResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
+import org.atlasapi.persistence.output.UpcomingItemsResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -66,19 +68,21 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, 
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
             NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, 
-            ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver) {
+            ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver, UpcomingItemsResolver upcomingResolver, 
+            AvailableItemsResolver availableResolver) {
         this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, 
                 containerSummaryResolver, channelResolver, idCodec, channelIdCodec, new SystemClock(), 
-                imageSimplifier, personResolver);
+                imageSimplifier, personResolver, upcomingResolver, availableResolver);
     }
 
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
             TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, 
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
             NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, Clock clock, 
-            ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver) {
+            ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver, UpcomingItemsResolver upcomingResolver, 
+            AvailableItemsResolver availableResolver) {
         
-        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, personResolver);
+        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, personResolver, upcomingResolver, availableResolver);
         
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;

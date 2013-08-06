@@ -22,10 +22,10 @@ import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.PeopleQueryResolver;
-import org.atlasapi.persistence.output.AvailableChildrenResolver;
+import org.atlasapi.persistence.output.AvailableItemsResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
-import org.atlasapi.persistence.output.UpcomingChildrenResolver;
+import org.atlasapi.persistence.output.UpcomingItemsResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -49,8 +49,8 @@ public class FullToSimpleModelTranslatorTest {
     private final ContentGroupResolver contentGroupResolver = mock(ContentGroupResolver.class);
     private final TopicQueryResolver topicResolver = mock(TopicQueryResolver.class);
     private final SegmentResolver segmentResolver = mock(SegmentResolver.class);
-    private final AvailableChildrenResolver availableChildren = mock(AvailableChildrenResolver.class);
-    private final UpcomingChildrenResolver upcomingChildren = mock(UpcomingChildrenResolver.class);
+    private final AvailableItemsResolver availableChildren = mock(AvailableItemsResolver.class);
+    private final UpcomingItemsResolver upcomingChildren = mock(UpcomingItemsResolver.class);
     private final RecentlyBroadcastChildrenResolver recentChildren = mock(RecentlyBroadcastChildrenResolver.class);
     private @SuppressWarnings("unchecked") final AtlasModelWriter<ContentQueryResult> xmlOutputter = mock(AtlasModelWriter.class);
     private final ContainerSummaryResolver containerSummaryResolver = mock(ContainerSummaryResolver.class);
@@ -61,6 +61,8 @@ public class FullToSimpleModelTranslatorTest {
 
     private ProductModelSimplifier productSimplifier = new ProductModelSimplifier("localhostName");
     private ProductResolver productResolver = mock(ProductResolver.class); 
+    private final UpcomingItemsResolver upcomingResolver = mock(UpcomingItemsResolver.class);
+    private final AvailableItemsResolver availableResolver = mock(AvailableItemsResolver.class);
 
     private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(
             "localhostName", 
@@ -73,7 +75,9 @@ public class FullToSimpleModelTranslatorTest {
             new SubstitutionTableNumberCodec(), 
             new SubstitutionTableNumberCodec(), 
             imageSimplifier,
-            peopleResolver
+            peopleResolver,
+            upcomingResolver,
+            availableResolver
     );
     private final SimpleContentModelWriter translator = new SimpleContentModelWriter(
             xmlOutputter, 
