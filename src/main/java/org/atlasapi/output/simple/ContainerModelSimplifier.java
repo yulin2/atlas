@@ -17,9 +17,9 @@ import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.entity.simple.ContentIdentifier.SeriesIdentifier;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.persistence.output.AvailableChildrenResolver;
+import org.atlasapi.persistence.output.AvailableItemsResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
-import org.atlasapi.persistence.output.UpcomingChildrenResolver;
+import org.atlasapi.persistence.output.UpcomingItemsResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Function;
@@ -35,8 +35,8 @@ import org.atlasapi.persistence.content.PeopleQueryResolver;
 public class ContainerModelSimplifier extends ContentModelSimplifier<Container, Playlist> {
 
     private final ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier;
-    private final AvailableChildrenResolver availableChildrenResolver;
-    private final UpcomingChildrenResolver upcomingChildrenResolver;
+    private final AvailableItemsResolver availableItemsResolver;
+    private final UpcomingItemsResolver upcomingItemsResolver;
     private final RecentlyBroadcastChildrenResolver recentlyBroadcastResolver;
     private final Function<ChildRef, ContentIdentifier> toContentIdentifier = new Function<ChildRef, ContentIdentifier>() {
 
@@ -55,13 +55,13 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     };
 
     public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, String localHostName, 
-            ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, AvailableChildrenResolver availableChildren, 
-            UpcomingChildrenResolver upcomingChildren, ProductResolver productResolver, RecentlyBroadcastChildrenResolver recentChildren,
+            ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, AvailableItemsResolver availableResovler, 
+            UpcomingItemsResolver upcomingResolver, ProductResolver productResolver, RecentlyBroadcastChildrenResolver recentChildren,
             ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver) {
-        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, peopleResolver);
+        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, peopleResolver, upcomingResolver, availableResovler);
         this.itemSimplifier = itemSimplifier;
-        this.availableChildrenResolver = availableChildren;
-        this.upcomingChildrenResolver = upcomingChildren;
+        this.availableItemsResolver = availableResovler;
+        this.upcomingItemsResolver = upcomingResolver;
         this.recentlyBroadcastResolver = recentChildren;
     }
 
@@ -112,11 +112,11 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     }
 
     private Predicate<ChildRef> availableFilter(Container fullPlayList, ApplicationConfiguration config) {
-        return asChildRefFilter(availableChildrenResolver.availableChildrenFor(fullPlayList, config));
+        return asChildRefFilter(availableItemsResolver.availableItemsFor(fullPlayList, config));
     }
 
     private Predicate<ChildRef> upcomingFilter(Container fullPlayList) {
-        return asChildRefFilter(upcomingChildrenResolver.availableChildrenFor(fullPlayList));
+        return asChildRefFilter(upcomingItemsResolver.upcomingItemsFor(fullPlayList));
     }
 
     private Predicate<ChildRef> recentlyBroadcastFilter(Container fullPlayList) {

@@ -26,6 +26,8 @@ import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.PeopleQueryResolver;
+import org.atlasapi.persistence.output.AvailableItemsResolver;
+import org.atlasapi.persistence.output.UpcomingItemsResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Function;
@@ -53,7 +55,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     private final PeopleQueryResolver peopleQueryResolver;
     private final CrewMemberAndPersonSimplifier crewMemberAndPersonSimplifier;
 
-    public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver) {
+    public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver, UpcomingItemsResolver upcomingResolver, AvailableItemsResolver availableResolver) {
         super(imageSimplifier, SubstitutionTableNumberCodec.lowerCaseOnly());
         this.contentGroupResolver = contentGroupResolver;
         this.topicResolver = topicResolver;
@@ -63,7 +65,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         this.productSimplifier = new ProductModelSimplifier(localHostName);
         this.localeMap = initLocalMap();
         this.peopleQueryResolver = peopleResolver;
-        this.crewMemberAndPersonSimplifier = new CrewMemberAndPersonSimplifier(imageSimplifier);
+        this.crewMemberAndPersonSimplifier = new CrewMemberAndPersonSimplifier(imageSimplifier, upcomingResolver, availableResolver);
     }
 
     private Map<String, Locale> initLocalMap() {

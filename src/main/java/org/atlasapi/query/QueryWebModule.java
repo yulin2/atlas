@@ -69,14 +69,12 @@ import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
-import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
-import org.atlasapi.persistence.output.MongoAvailableChildrenResolver;
+import org.atlasapi.persistence.output.MongoAvailableItemsResolver;
 import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoRecentlyBroadcastChildrenResolver;
-import org.atlasapi.persistence.output.MongoUpcomingChildrenResolver;
+import org.atlasapi.persistence.output.MongoUpcomingItemsResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
-import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
@@ -269,12 +267,20 @@ public class QueryWebModule {
 
     @Bean
     ContainerModelSimplifier containerSimplifier() {
-        AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo, lookupStore);
-        UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
         RecentlyBroadcastChildrenResolver recentChildren = new MongoRecentlyBroadcastChildrenResolver(mongo);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren, imageSimplifier(),peopleQueryResolver);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableItemsResolver(), upcomingItemsResolver(), productResolver, recentChildren, imageSimplifier(),peopleQueryResolver);
         containerSimplier.exposeIds(Boolean.valueOf(exposeIds));
         return containerSimplier;
+    }
+
+    @Bean
+    MongoUpcomingItemsResolver upcomingItemsResolver() {
+        return new MongoUpcomingItemsResolver(mongo);
+    }
+
+    @Bean
+    MongoAvailableItemsResolver availableItemsResolver() {
+        return new MongoAvailableItemsResolver(mongo, lookupStore);
     }
 
     @Bean
@@ -282,7 +288,7 @@ public class QueryWebModule {
         NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
         NumberToShortStringCodec channelIdCodec = new SubstitutionTableNumberCodec();
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo, idCodec);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, idCodec, channelIdCodec, imageSimplifier(),peopleQueryResolver);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, idCodec, channelIdCodec, imageSimplifier(),peopleQueryResolver, upcomingItemsResolver(), availableItemsResolver());
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }
@@ -290,8 +296,8 @@ public class QueryWebModule {
     @Bean
     AtlasModelWriter<Iterable<Person>> personModelOutputter() {
         return this.<Iterable<Person>>standardWriter(
-                new SimplePersonModelWriter(new JsonTranslator<PeopleQueryResult>(), imageSimplifier()),
-                new SimplePersonModelWriter(new JaxbXmlTranslator<PeopleQueryResult>(), imageSimplifier()));
+                new SimplePersonModelWriter(new JsonTranslator<PeopleQueryResult>(), imageSimplifier(), upcomingItemsResolver(), availableItemsResolver()),
+                new SimplePersonModelWriter(new JaxbXmlTranslator<PeopleQueryResult>(), imageSimplifier(), upcomingItemsResolver(), availableItemsResolver()));
     }
 
     @Bean
