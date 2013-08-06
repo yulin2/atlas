@@ -10,7 +10,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.Unmarshaller.Listener;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.cassandra.cli.CliParser.newColumnFamily_return;
 import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
@@ -55,7 +54,7 @@ public class PaFeaturesUpdater extends ScheduledTask {
         DateTime sixAmToday = new DateTime(DateMidnight.now()).plusHours(6);
         this.processor = new PaFeaturesProcessor(contentResolver, contentGroupResolver, contentGroupWriter, new Interval(sixAmToday, sixAmToday.plusDays(1)));
         processFiles(dataStore.localFeaturesFiles(Predicates.<File>alwaysTrue()));
-        processor.writeContentGroup();
+        processor.writeContentGroups();
     }
     
     private void processFiles(Iterable<File> files) {

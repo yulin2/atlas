@@ -22,7 +22,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 
 public class PaFeaturesProcessor {
-    private static final String CONTENT_GROUP_URI = "http://pressassocation.com/features/tvpicks";
+    private static final String TODAY_CONTENT_GROUP_URI = "http://pressassocation.com/features/tvpicks";
+    private static final String ALL_CONTENT_GROUP_URI = "http://pressassocation.com/features/tvpicks/all";
     private static final Ordering<Broadcast> BY_BROADCAST_DATE = new Ordering<Broadcast>() {
         @Override
         public int compare(Broadcast left, Broadcast right) {
@@ -33,19 +34,28 @@ public class PaFeaturesProcessor {
     private final ContentResolver contentResolver;
     private final ContentGroupWriter contentGroupWriter;
     private final Interval featureDate;
-    private ContentGroup contentGroup;
+    private final ContentGroupResolver contentGroupResolver;
+    private final ContentGroup todayContentGroup;
+    private final ContentGroup allFeaturedContentEverContentGroup;
     
     public PaFeaturesProcessor(ContentResolver contentResolver, ContentGroupResolver contentGroupResolver, ContentGroupWriter contentGroupWriter, Interval featureDate) {
         this.contentResolver = contentResolver;
         this.contentGroupWriter = contentGroupWriter;
         this.featureDate = featureDate;
+        this.contentGroupResolver = contentGroupResolver;
         
-        ResolvedContent resolvedContent = contentGroupResolver.findByCanonicalUris(ImmutableList.of(CONTENT_GROUP_URI));
-        if (resolvedContent.get(CONTENT_GROUP_URI).hasValue()) {
-            contentGroup = (ContentGroup) resolvedContent.get(CONTENT_GROUP_URI).requireValue();
+        todayContentGroup = getOrCreateContentGroup(TODAY_CONTENT_GROUP_URI);
+        allFeaturedContentEverContentGroup = getOrCreateContentGroup(ALL_CONTENT_GROUP_URI);
+    }
+
+    private ContentGroup getOrCreateContentGroup(String uri) {
+        ResolvedContent resolvedContent = contentGroupResolver.findByCanonicalUris(ImmutableList.of(uri));
+        if (resolvedContent.get(uri).hasValue()) {
+            ContentGroup contentGroup = (ContentGroup) resolvedContent.get(uri).requireValue();
             contentGroup.setContents(ImmutableList.<ChildRef>of());
+            return contentGroup;
         } else {
-            contentGroup = new ContentGroup(CONTENT_GROUP_URI, Publisher.PA_FEATURES);
+            return new ContentGroup(uri, Publisher.PA_FEATURES);
         }
     }
     
@@ -54,12 +64,14 @@ public class PaFeaturesProcessor {
         Item item = (Item) Iterables.getOnlyElement(resolvedContent.values());
         Broadcast broadcast = BY_BROADCAST_DATE.min(Iterables.concat(Iterables.transform(item.getVersions(), Version.TO_BROADCASTS)));
         if (featureDate.contains(broadcast.getTransmissionTime())) {
-            contentGroup.addContent(item.childRef()); 
+            todayContentGroup.addContent(item.childRef()); 
         }
+        allFeaturedContentEverContentGroup.addContent(item.childRef());
     }
     
-    public void writeContentGroup() {
-        contentGroupWriter.createOrUpdate(contentGroup);
+    public void writeContentGroups() {
+        contentGroupWriter.createOrUpdate(todayContentGroup);
+        contentGroupWriter.createOrUpdate(allFeaturedContentEverContentGroup);
     }
     
 }
