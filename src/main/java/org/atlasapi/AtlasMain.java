@@ -2,11 +2,13 @@ package org.atlasapi;
 
 import java.io.File;
 import java.security.ProtectionDomain;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ExecutorThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 public class AtlasMain {
@@ -14,6 +16,8 @@ public class AtlasMain {
 	private static final boolean IS_PROCESSING = Boolean.parseBoolean(System.getProperty("processing.config"));
 	
     private static final String LOCAL_WAR_DIR = "./src/main/webapp";
+    
+    private static final LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
 
 	public static void main(String[] args) throws Exception {
 		
@@ -38,7 +42,7 @@ public class AtlasMain {
         return domain.getCodeSource().getLocation().toString();
 	}
 
-	private static Server createServer() {
+	private static Server createServer() throws Exception {
 		Server server = new Server();
 		
 		final SelectChannelConnector connector = new SelectChannelConnector();
@@ -50,12 +54,18 @@ public class AtlasMain {
             port = Integer.parseInt(customPort);
         }
 		
+        String requestThreadsString = System.getProperty("request.threads");
+        int requestThreads;
+        if (requestThreadsString == null) {
+            requestThreads = 100;
+        } else {
+            requestThreads = Integer.parseInt(requestThreadsString);
+        }
 		connector.setPort(port);
-		
 		connector.setAcceptQueueSize(200);
 		
-		QueuedThreadPool pool = new QueuedThreadPool(100);
-		pool.setName("jetty-request-thread");
+		ExecutorThreadPool pool = new ExecutorThreadPool(5, requestThreads, 5, TimeUnit.MINUTES, queue);
+		pool.start();
 		connector.setThreadPool(pool);
 		
 		// one acceptor per CPU (ish)
@@ -65,10 +75,15 @@ public class AtlasMain {
 		connector.setResponseHeaderSize(1024);
 		
 		server.setConnectors(new Connector[] { connector });
+		
 		return server;
 	}
 
     private static int defaultPort() {
         return IS_PROCESSING ? 8282 : 8080;
+    }
+    
+    public static int numberOfRequestsInQueue() {
+        return queue.size();
     }
 }
