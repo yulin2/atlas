@@ -109,7 +109,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                     }
                 }
 
-                return setEquivalentToFields(identifieds);
+                return setEquivalentToFields(identifieds, entry.equivalents());
             }
         });
     }
@@ -123,21 +123,9 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
         return false;
     }
 
-    private List<Identified> setEquivalentToFields(List<Identified> resolvedResults) {
-        Map<Described, LookupRef> equivRefs = Maps.newHashMap();
-        for (Identified ided : resolvedResults) {
-            if (ided instanceof Described) {
-                Described described = (Described) ided;
-                LookupRef ref = LookupRef.from(described);
-                if (ref.id() == null) {
-                    log.info("null id for {}", ref);
-                }
-                equivRefs.put(described, ref);
-            }
-        }
-        Set<LookupRef> lookupRefs = ImmutableSet.copyOf(equivRefs.values());
-        for (Entry<Described, LookupRef> equivRef : equivRefs.entrySet()) {
-            equivRef.getKey().setEquivalentTo(Sets.difference(lookupRefs, ImmutableSet.of(equivRef.getValue())));
+    private List<Identified> setEquivalentToFields(List<Identified> resolvedResults, Set<LookupRef> equivs) {
+        for (Identified identified : resolvedResults) {
+            identified.setEquivalentTo(equivs);
         }
         return resolvedResults;
     }
