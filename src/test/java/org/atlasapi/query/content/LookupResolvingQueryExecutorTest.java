@@ -1,6 +1,8 @@
 package org.atlasapi.query.content;
 
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 import java.util.Map;
@@ -139,7 +141,58 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
         context.assertIsSatisfied();
     }
     
-    private LookupEntry lookupEntryWithEquivalents(String uri, LookupRef... equiv) {
-        return new LookupEntry(uri, null, LookupRef.from(new Item("uri","curie",Publisher.BBC)), ImmutableSet.<String>of(), ImmutableSet.<Alias>of(), ImmutableSet.<LookupRef>of(), ImmutableSet.<LookupRef>of(), ImmutableSet.copyOf(equiv), null, null);
+    @Test
+    public void testContentFromDisabledPublisherIsNotReturned() {
+        final String query = "query";
+        final Item queryItem = new Item(query, "qcurie", Publisher.PA);
+        
+        LookupEntry queryEntry = LookupEntry.lookupEntryFrom(queryItem);
+        lookupStore.store(queryEntry);
+        
+        context.checking(new Expectations(){{
+            never(mongoContentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem))));
+        }});
+        context.checking(new Expectations(){{
+            one(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
+            will(returnValue(ResolvedContent.builder().put(queryItem.getCanonicalUri(), queryItem).build()));
+        }});
+        
+        ApplicationConfiguration configWithoutPaEnabled = ApplicationConfiguration.defaultConfiguration();
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), 
+                MatchesNothing.asQuery().copyWithApplicationConfiguration(configWithoutPaEnabled));
+        
+        assertTrue(result.isEmpty());
+        
+    }
+
+    @Test
+    public void testContentFromDisabledPublisherIsNotReturnedButEnabledEquivalentIs() {
+        final String query = "query";
+        final Item queryItem = new Item(query, "qcurie", Publisher.PA);
+        final Item equivItem = new Item("equiv", "ecurie", Publisher.BBC);
+        
+        LookupEntry queryEntry = LookupEntry.lookupEntryFrom(queryItem);
+        LookupEntry equivEntry = LookupEntry.lookupEntryFrom(equivItem);
+        
+        lookupStore.store(queryEntry
+            .copyWithDirectEquivalents(ImmutableSet.of(equivEntry.lookupRef()))
+            .copyWithEquivalents(ImmutableSet.of(equivEntry.lookupRef())));
+        lookupStore.store(equivEntry
+            .copyWithDirectEquivalents(ImmutableSet.of(queryEntry.lookupRef()))
+            .copyWithDirectEquivalents(ImmutableSet.of(queryEntry.lookupRef())));
+        
+        context.checking(new Expectations(){{
+            one(mongoContentResolver).findByLookupRefs(with(hasItems(LookupRef.from(equivItem))));
+            will(returnValue(ResolvedContent.builder().put(equivItem.getCanonicalUri(), equivItem).build()));
+        }});
+        context.checking(new Expectations(){{
+            never(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
+        }});
+        
+        ApplicationConfiguration configWithoutPaEnabled = ApplicationConfiguration.defaultConfiguration();
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), 
+                MatchesNothing.asQuery().copyWithApplicationConfiguration(configWithoutPaEnabled));
+        
+        assertThat(result.get(query).get(0), is((Identified)equivItem));
     }
 }

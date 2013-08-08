@@ -75,13 +75,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     private Map<String, List<Identified>> resolveMongoEntries(final ContentQuery query, Iterable<LookupEntry> lookupEntries) {
         final ApplicationConfiguration configuration = query.getConfiguration();
-        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(Iterables.filter(lookupEntries, new Predicate<LookupEntry>() {
-
-            @Override
-            public boolean apply(LookupEntry input) {
-                return configuration.isEnabled(input.lookupRef().publisher());
-            }
-        }), LookupEntry.TO_ID);
+        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(lookupEntries, LookupEntry.TO_ID);
 
         Map<String, Set<LookupRef>> lookupRefs = Maps.transformValues(lookup, LookupEntry.TO_EQUIVS);
 
