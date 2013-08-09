@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
@@ -32,6 +31,7 @@ public class OddJobRandomTaskModule {
         scheduler.schedule(childRefUpdateTask(), RepetitionRules.NEVER);
         scheduler.schedule(personRefUpdateTask(), RepetitionRules.NEVER);
         scheduler.schedule(personLookupPopulationTask(), RepetitionRules.NEVER);
+        scheduler.schedule(lookupRefUpdateTask(), RepetitionRules.NEVER);
     }
     
     @Bean
@@ -57,4 +57,9 @@ public class OddJobRandomTaskModule {
                 new MongoLookupEntryStore(mongo.collection("peopleLookup")));
     }
     
+    @Bean
+    public LookupRefUpdateTask lookupRefUpdateTask() {
+        return new LookupRefUpdateTask(mongo.collection("lookup"),
+                mongo.collection("scheduling"));
+    }
 }
