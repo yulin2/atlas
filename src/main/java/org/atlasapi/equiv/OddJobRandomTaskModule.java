@@ -18,7 +18,7 @@ import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
-public class ChildRefUpdateModule {
+public class OddJobRandomTaskModule {
 
     private @Autowired ContentLister lister;
     private @Autowired ContentResolver resolver;
