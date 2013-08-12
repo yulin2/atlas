@@ -24,12 +24,7 @@ import com.google.common.collect.Ordering;
 public class PaFeaturesProcessor {
     private static final String TODAY_CONTENT_GROUP_URI = "http://pressassocation.com/features/tvpicks";
     private static final String ALL_CONTENT_GROUP_URI = "http://pressassocation.com/features/tvpicks/all";
-    private static final Ordering<Broadcast> BY_BROADCAST_DATE = new Ordering<Broadcast>() {
-        @Override
-        public int compare(Broadcast left, Broadcast right) {
-            return left.getTransmissionTime().compareTo(right.getTransmissionTime());
-        }
-    };
+    private static final Ordering<Broadcast> BY_BROADCAST_DATE = Ordering.natural().onResultOf(Broadcast.TO_TRANSMISSION_TIME);
     
     private final ContentResolver contentResolver;
     private final ContentGroupWriter contentGroupWriter;
