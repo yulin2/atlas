@@ -35,11 +35,7 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class PaFeaturesUpdater extends ScheduledTask {
     
-<<<<<<< HEAD
     private static final Duration UPCOMING_INTERVAL_DURATION = Duration.standardDays(2);
-=======
-    private static final Duration UPCOMING_INTERVAL_DURATION = Duration.standardDays(1);
->>>>>>> Refactor PA Featured Content updater
     private static final String SERVICE = "PA";
     private static final Pattern FILEDATE = Pattern.compile("^.*(\\d{8})_features.xml$");
     
