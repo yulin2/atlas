@@ -31,6 +31,7 @@ import org.atlasapi.remotesite.pa.channels.PaChannelsIngester;
 import org.atlasapi.remotesite.pa.channels.PaChannelsUpdater;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
+import org.atlasapi.remotesite.pa.features.PaFeaturesProcessor;
 import org.atlasapi.remotesite.pa.features.PaFeaturesUpdater;
 import org.atlasapi.remotesite.pa.people.PaCompletePeopleUpdater;
 import org.atlasapi.remotesite.pa.people.PaDailyPeopleUpdater;
@@ -125,7 +126,7 @@ public class PaModule {
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {
-        return new PaFeaturesUpdater(paProgrammeDataStore(), contentResolver, contentGroupResolver, contentGroupWriter);
+        return new PaFeaturesUpdater(paProgrammeDataStore(), fileUploadResultStore, new PaFeaturesProcessor(contentResolver, contentGroupResolver, contentGroupWriter));
     }
 
     @Bean PaFtpFileUpdater ftpFileUpdater() {
