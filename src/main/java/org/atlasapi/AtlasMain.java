@@ -19,25 +19,24 @@ public class AtlasMain {
     private static final String LOCAL_WAR_DIR = "./src/main/webapp";
     private static SelectChannelConnector CONNECTOR;
     
-    private static final BackgroundTask OPEN_CONNECTION_COUNTER_RESET = new BackgroundTask(Duration.standardMinutes(1), new Runnable() {
-        
-        @Override
-        public void run() {
-            if (CONNECTOR != null) {
-                CONNECTOR.statsReset();
-            }
-        }
-    });
-
 	public static void main(String[] args) throws Exception {
 	    if(IS_PROCESSING) {
             System.out.println(">>> Launching processing configuration");
         }
 
-	    OPEN_CONNECTION_COUNTER_RESET.start();
 	    createWebApp(warBase() + "/WEB-INF/web.xml", createApiServer());
 	    createWebApp(warBase() + "/WEB-INF/web-monitoring.xml", createMonitoringServer());
 		
+	    new BackgroundTask(Duration.standardMinutes(1), new Runnable() {
+	        
+	        @Override
+	        public void run() {
+	            if (CONNECTOR != null) {
+	                CONNECTOR.statsReset();
+	            }
+	        }
+	    }).start();
+	    
 	}
 	
 	private static void createWebApp(String descriptor, final Server server) throws Exception {
