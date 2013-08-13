@@ -34,20 +34,19 @@ public class AtlasMain implements Runnable {
 	    
 	    AtlasMain main = new AtlasMain();
 	    
-
 	    main.createWebApp(main.warBase() + "/WEB-INF/web.xml", main.createApiServer());
-	    main.createWebApp(main.warBase() + "/WEB-INF/web-monitoring.xml", main.createMonitoringServer());
-		
+	    WebAppContext monitoringContext = main.createWebApp(main.warBase() + "/WEB-INF/web-monitoring.xml", main.createMonitoringServer());
+	    monitoringContext.setAttribute("CONNECTOR", API_CONNECTOR);
 	    CONNECTOR_RESET_THREAD_SERVICE.scheduleAtFixedRate(main, 1, 1, TimeUnit.MINUTES);
 	    
 	}
 	
-	private void createWebApp(String descriptor, final Server server) throws Exception {
+	private WebAppContext createWebApp(String descriptor, final Server server) throws Exception {
 	    WebAppContext ctx = new WebAppContext(warBase(), "/");
         ctx.setDescriptor(descriptor);
-        
         server.setHandler(ctx);
         server.start();
+        return ctx;
 	}
 	
 	private String warBase() {
