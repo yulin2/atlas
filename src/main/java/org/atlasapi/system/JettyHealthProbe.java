@@ -11,7 +11,7 @@ public class JettyHealthProbe implements HealthProbe {
     @Override
     public ProbeResult probe() throws Exception {
         ProbeResult probeResult = new ProbeResult("Requests");
-        probeResult.add("request-queue", String.valueOf(AtlasMain.numberOfRequestsInQueue()), true);
+        probeResult.add("request-count", String.valueOf(AtlasMain.numberOfConnectionsInLastMinute()), true);
         return probeResult;
     }
 
