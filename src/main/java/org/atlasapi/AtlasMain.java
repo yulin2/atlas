@@ -9,6 +9,8 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.util.thread.ExecutorThreadPool;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 public class AtlasMain {
@@ -64,8 +66,9 @@ public class AtlasMain {
 		connector.setPort(port);
 		connector.setAcceptQueueSize(200);
 		
-		ExecutorThreadPool pool = new ExecutorThreadPool(5, requestThreads, 5, TimeUnit.MINUTES, queue);
-		pool.start();
+		QueuedThreadPool pool = new QueuedThreadPool(queue);
+		pool.setMaxThreads(requestThreads);
+		pool.setName("jetty-request-thread");
 		connector.setThreadPool(pool);
 		
 		// one acceptor per CPU (ish)
