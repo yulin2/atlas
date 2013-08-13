@@ -2,18 +2,19 @@ package org.atlasapi;
 
 import java.io.File;
 import java.security.ProtectionDomain;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.joda.time.Duration;
-
-import com.metabroadcast.common.caching.BackgroundTask;
 
 public class AtlasMain {
 
+    private static final ScheduledExecutorService CONNECTOR_RESET_THREAD_SERVICE = new ScheduledThreadPoolExecutor(1);
 	private static final boolean IS_PROCESSING = Boolean.parseBoolean(System.getProperty("processing.config"));
 	
     private static final String LOCAL_WAR_DIR = "./src/main/webapp";
@@ -27,15 +28,15 @@ public class AtlasMain {
 	    createWebApp(warBase() + "/WEB-INF/web.xml", createApiServer());
 	    createWebApp(warBase() + "/WEB-INF/web-monitoring.xml", createMonitoringServer());
 		
-	    new BackgroundTask(Duration.standardMinutes(1), new Runnable() {
-	        
-	        @Override
-	        public void run() {
-	            if (CONNECTOR != null) {
-	                CONNECTOR.statsReset();
-	            }
-	        }
-	    }).start();
+	    CONNECTOR_RESET_THREAD_SERVICE.scheduleAtFixedRate(new Runnable() {
+            
+            @Override
+            public void run() {
+                if (CONNECTOR != null) {
+                    CONNECTOR.statsReset();
+                }
+            }
+        }, 1, 1, TimeUnit.MINUTES);
 	    
 	}
 	
