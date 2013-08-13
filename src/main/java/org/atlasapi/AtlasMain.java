@@ -12,7 +12,7 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.webapp.WebAppContext;
 
-public class AtlasMain {
+public class AtlasMain implements Runnable {
 
     private static final ScheduledExecutorService CONNECTOR_RESET_THREAD_SERVICE = new ScheduledThreadPoolExecutor(1);
 	private static final boolean IS_PROCESSING = Boolean.parseBoolean(System.getProperty("processing.config"));
@@ -20,27 +20,29 @@ public class AtlasMain {
     private static final String LOCAL_WAR_DIR = "./src/main/webapp";
     private static SelectChannelConnector CONNECTOR;
     
+    @Override
+    public void run() {
+        if (CONNECTOR != null) {
+            CONNECTOR.statsReset();
+        }
+    }
+    
 	public static void main(String[] args) throws Exception {
 	    if(IS_PROCESSING) {
             System.out.println(">>> Launching processing configuration");
         }
+	    
+	    AtlasMain main = new AtlasMain();
+	    
 
-	    createWebApp(warBase() + "/WEB-INF/web.xml", createApiServer());
-	    createWebApp(warBase() + "/WEB-INF/web-monitoring.xml", createMonitoringServer());
+	    main.createWebApp(main.warBase() + "/WEB-INF/web.xml", main.createApiServer());
+	    main.createWebApp(main.warBase() + "/WEB-INF/web-monitoring.xml", main.createMonitoringServer());
 		
-	    CONNECTOR_RESET_THREAD_SERVICE.scheduleAtFixedRate(new Runnable() {
-            
-            @Override
-            public void run() {
-                if (CONNECTOR != null) {
-                    CONNECTOR.statsReset();
-                }
-            }
-        }, 1, 1, TimeUnit.MINUTES);
+	    CONNECTOR_RESET_THREAD_SERVICE.scheduleAtFixedRate(main, 1, 1, TimeUnit.MINUTES);
 	    
 	}
 	
-	private static void createWebApp(String descriptor, final Server server) throws Exception {
+	private void createWebApp(String descriptor, final Server server) throws Exception {
 	    WebAppContext ctx = new WebAppContext(warBase(), "/");
         ctx.setDescriptor(descriptor);
         
@@ -48,7 +50,7 @@ public class AtlasMain {
         server.start();
 	}
 	
-	private static String warBase() {
+	private String warBase() {
 		if (new File(LOCAL_WAR_DIR).exists()) {
 			return LOCAL_WAR_DIR;
 		}
@@ -56,7 +58,7 @@ public class AtlasMain {
         return domain.getCodeSource().getLocation().toString();
 	}
 
-	private static Server createApiServer() throws Exception {
+	private Server createApiServer() throws Exception {
 	    int port = defaultPort();
         
         String customPort = System.getProperty("server.port");
@@ -76,7 +78,7 @@ public class AtlasMain {
 		return server;
 	}
 	
-	private static Server createMonitoringServer() throws Exception {
+	private Server createMonitoringServer() throws Exception {
 	    int port = 8081;
         
         String customPort = System.getProperty("monitoring.port");
@@ -87,7 +89,7 @@ public class AtlasMain {
         return createServer(port, 10, 20, "monitoring-request-thread");
     }
 	
-	private static Server createServer(int port, int maxThreads, int acceptQueueSize, String threadNamePrefix) {
+	private Server createServer(int port, int maxThreads, int acceptQueueSize, String threadNamePrefix) {
 	    Server server = new Server();
         
 	    SelectChannelConnector connector = new SelectChannelConnector();
@@ -112,11 +114,13 @@ public class AtlasMain {
 	}
 	
 
-    private static int defaultPort() {
+    private int defaultPort() {
         return IS_PROCESSING ? 8282 : 8080;
     }
     
-    public static int numberOfConnectionsInLastMinute() {
+    public int numberOfConnectionsInLastMinute() {
         return CONNECTOR.getConnectionsOpen();
     }
+
+    
 }
