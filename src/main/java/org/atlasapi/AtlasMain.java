@@ -18,7 +18,7 @@ public class AtlasMain implements Runnable {
 	private static final boolean IS_PROCESSING = Boolean.parseBoolean(System.getProperty("processing.config"));
 	
     private static final String LOCAL_WAR_DIR = "./src/main/webapp";
-    private static SelectChannelConnector API_CONNECTOR;
+    private static volatile SelectChannelConnector API_CONNECTOR;
     
     @Override
     public void run() {
