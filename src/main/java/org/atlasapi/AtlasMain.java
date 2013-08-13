@@ -18,12 +18,12 @@ public class AtlasMain implements Runnable {
 	private static final boolean IS_PROCESSING = Boolean.parseBoolean(System.getProperty("processing.config"));
 	
     private static final String LOCAL_WAR_DIR = "./src/main/webapp";
-    private static SelectChannelConnector CONNECTOR;
+    private static SelectChannelConnector API_CONNECTOR;
     
     @Override
     public void run() {
-        if (CONNECTOR != null) {
-            CONNECTOR.statsReset();
+        if (API_CONNECTOR != null) {
+            API_CONNECTOR.statsReset();
         }
     }
     
@@ -74,7 +74,7 @@ public class AtlasMain implements Runnable {
             requestThreads = Integer.parseInt(requestThreadsString);
         }
 		Server server = createServer(port, requestThreads, 200, "api-request-thread");
-		CONNECTOR = (SelectChannelConnector) server.getConnectors()[0];
+		API_CONNECTOR = (SelectChannelConnector) server.getConnectors()[0];
 		return server;
 	}
 	
@@ -118,8 +118,8 @@ public class AtlasMain implements Runnable {
         return IS_PROCESSING ? 8282 : 8080;
     }
     
-    public int numberOfConnectionsInLastMinute() {
-        return CONNECTOR.getConnectionsOpen();
+    public static int numberOfConnectionsInLastMinute() {
+        return API_CONNECTOR.getConnectionsOpen();
     }
 
     
