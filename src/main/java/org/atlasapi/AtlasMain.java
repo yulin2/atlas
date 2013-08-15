@@ -82,7 +82,7 @@ public class AtlasMain implements Runnable {
     }
 
     private Server createServer(String portProperty, int defaultPort, int maxThreads,
-            int acceptors, String threadNamePrefix) {
+            int acceptQueueSize, String threadNamePrefix) {
         Server server = new Server();
 
         SelectChannelConnector connector = new SelectChannelConnector();
@@ -95,13 +95,12 @@ public class AtlasMain implements Runnable {
         }
 
         connector.setPort(port);
-        connector.setAcceptQueueSize(Runtime.getRuntime().availableProcessors());
+        connector.setAcceptors(Runtime.getRuntime().availableProcessors());
+        connector.setAcceptQueueSize(acceptQueueSize);
 
         QueuedThreadPool pool = new QueuedThreadPool(maxThreads);
         pool.setName(threadNamePrefix);
         connector.setThreadPool(pool);
-
-        connector.setAcceptors(acceptors);
 
         connector.setRequestBufferSize(1024);
         connector.setResponseHeaderSize(1024);
