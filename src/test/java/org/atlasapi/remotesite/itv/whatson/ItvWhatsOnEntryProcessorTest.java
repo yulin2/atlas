@@ -73,7 +73,7 @@ public class ItvWhatsOnEntryProcessorTest {
     
     @Test
     public void testNewItem() {
-        ItvWhatsOnEntryTranslator translator = new ItvWhatsOnEntryTranslator();
+        ItvWhatsOnEntryExtractor translator = new ItvWhatsOnEntryExtractor();
         ContentResolver contentResolver = mock(ContentResolver.class);
         ContentWriter contentWriter = mock(ContentWriter.class);
         ItvWhatsOnEntry entry = getTestItem();
