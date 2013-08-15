@@ -28,7 +28,7 @@ import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.url.UrlEncoding;
 
 
-public class ItvWhatsOnEntryTranslator {
+public class ItvWhatsOnEntryExtractor {
     private static final String BRAND_PREFIX = "http://itv.com/brand/";
     private static final String SERIES_PREFIX = "http://itv.com/series/";
     private static final String EPISODE_PREFIX = "http://itv.com/";
@@ -44,7 +44,7 @@ public class ItvWhatsOnEntryTranslator {
     
     private final BiMap<String, String> channelMap;
     
-    public ItvWhatsOnEntryTranslator() {
+    public ItvWhatsOnEntryExtractor() {
         channelMap = ImmutableBiMap.<String, String>builder()
                 .put("ITV1", "http://www.itv.com/channels/itv1/london")
                 .put("ITV2", "http://www.itv.com/channels/itv2")

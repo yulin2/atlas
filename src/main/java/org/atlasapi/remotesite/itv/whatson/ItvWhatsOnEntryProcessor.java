@@ -16,12 +16,12 @@ import com.google.common.collect.ImmutableList;
 
 
 public class ItvWhatsOnEntryProcessor {
-    private final ItvWhatsOnEntryTranslator translator;
+    private final ItvWhatsOnEntryExtractor translator;
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
   
     public ItvWhatsOnEntryProcessor(ContentResolver contentResolver, ContentWriter contentWriter) {
-        this.translator = new ItvWhatsOnEntryTranslator();
+        this.translator = new ItvWhatsOnEntryExtractor();
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
     }
