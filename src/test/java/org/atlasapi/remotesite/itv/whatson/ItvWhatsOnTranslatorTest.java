@@ -27,8 +27,8 @@ public class ItvWhatsOnTranslatorTest {
         return new DateTime(DateTimeZones.UTC).withMillis(millis);
     }
     
-    private ItvWhatsOnEntryTranslator getTranslator() {
-        return new ItvWhatsOnEntryTranslator();
+    private ItvWhatsOnEntryExtractor getTranslator() {
+        return new ItvWhatsOnEntryExtractor();
     }
     
     private ItvWhatsOnEntry getTestItem() {
@@ -68,7 +68,7 @@ public class ItvWhatsOnTranslatorTest {
     
     @Test
     public void testBrandTranslation() {
-        ItvWhatsOnEntryTranslator translator = getTranslator();
+        ItvWhatsOnEntryExtractor translator = getTranslator();
         Optional<Brand> brand = translator.toBrand(getTestItem());
         assertEquals(brand.get().getCanonicalUri(), "http://itv.com/brand/1/7680");
         assertEquals(brand.get().getTitle(), "Huntik - Secrets and Seekers");
@@ -76,14 +76,14 @@ public class ItvWhatsOnTranslatorTest {
     
     @Test
     public void testSeriesTranslation() {
-        ItvWhatsOnEntryTranslator translator = getTranslator();
+        ItvWhatsOnEntryExtractor translator = getTranslator();
         Optional<Series> series = translator.toSeries(getTestItem());
         assertEquals(series.get().getCanonicalUri(), "http://itv.com/series/1/7680-02");
     }
     
     @Test
     public void testItemTranslation() {
-        ItvWhatsOnEntryTranslator translator = getTranslator();
+        ItvWhatsOnEntryExtractor translator = getTranslator();
         Item item = translator.toEpisodeOrItem(getTestItem());
         assertEquals(item.getCanonicalUri(), "http://itv.com/1/7680/0029");
         assertEquals(item.getTitle(), "Cave of the Casterwills");
@@ -97,7 +97,7 @@ public class ItvWhatsOnTranslatorTest {
     
     @Test
     public void testEpisodeSynthesizedTranslation() {
-        ItvWhatsOnEntryTranslator translator = getTranslator();
+        ItvWhatsOnEntryExtractor translator = getTranslator();
         ItvWhatsOnEntry entry = getTestItem();
         entry.setEpisodeId("");        
         Episode episode = (Episode) translator.toEpisodeOrItem(entry);
@@ -106,7 +106,7 @@ public class ItvWhatsOnTranslatorTest {
     
     @Test
     public void testVersion() {
-        ItvWhatsOnEntryTranslator translator = getTranslator();
+        ItvWhatsOnEntryExtractor translator = getTranslator();
         Episode episode = (Episode) translator.toEpisodeOrItem(getTestItem());
         assertEquals(episode.getVersions().size(), 1);
         for (Version version : episode.getVersions()) {
@@ -117,7 +117,7 @@ public class ItvWhatsOnTranslatorTest {
     
     @Test
     public void testBroadcast() {
-        ItvWhatsOnEntryTranslator translator = getTranslator();
+        ItvWhatsOnEntryExtractor translator = getTranslator();
         Episode episode = (Episode) translator.toEpisodeOrItem(getTestItem());
         DateTime expectedTransmissionStart = getDateTimeFromMillis(1374644400000L);
         DateTime expectedTransmissionEnd = expectedTransmissionStart.plusSeconds(1800);
@@ -135,7 +135,7 @@ public class ItvWhatsOnTranslatorTest {
     
     @Test
     public void testLocation() {
-        ItvWhatsOnEntryTranslator translator = getTranslator();
+        ItvWhatsOnEntryExtractor translator = getTranslator();
         Episode episode = (Episode) translator.toEpisodeOrItem(getTestItem());
         for (Version version : episode.getVersions()) {
             for (Encoding encoding : version.getManifestedAs()) {

@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.itv.whatson;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -16,12 +15,12 @@ import com.google.common.collect.ImmutableList;
 
 
 public class ItvWhatsOnEntryProcessor {
-    private final ItvWhatsOnEntryTranslator translator;
+    private final ItvWhatsOnEntryExtractor translator;
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
   
     public ItvWhatsOnEntryProcessor(ContentResolver contentResolver, ContentWriter contentWriter) {
-        this.translator = new ItvWhatsOnEntryTranslator();
+        this.translator = new ItvWhatsOnEntryExtractor();
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
     }
