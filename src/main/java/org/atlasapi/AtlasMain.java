@@ -72,19 +72,17 @@ public class AtlasMain implements Runnable {
             requestThreads = Integer.parseInt(requestThreadsString);
         }
 
-        Server server = createServer("server.port", defaultPort(), requestThreads, 200,
-                Runtime.getRuntime().availableProcessors(), "api-request-thread");
+        Server server = createServer("server.port", defaultPort(), requestThreads, 200, "api-request-thread");
         apiConnector = (SelectChannelConnector) server.getConnectors()[0];
         return server;
     }
 
     private Server createMonitoringServer() throws Exception {
-        return createServer("monitoring.port", 8081, 10, 20, 1, "monitoring-request-thread");
+        return createServer("monitoring.port", 8081, 10, 20, "monitoring-request-thread");
     }
 
     private Server createServer(String portProperty, int defaultPort, int maxThreads,
-            int acceptors,
-            int acceptQueueSize, String threadNamePrefix) {
+            int acceptors, String threadNamePrefix) {
         Server server = new Server();
 
         SelectChannelConnector connector = new SelectChannelConnector();
@@ -97,7 +95,7 @@ public class AtlasMain implements Runnable {
         }
 
         connector.setPort(port);
-        connector.setAcceptQueueSize(acceptQueueSize);
+        connector.setAcceptQueueSize(Runtime.getRuntime().availableProcessors());
 
         QueuedThreadPool pool = new QueuedThreadPool(maxThreads);
         pool.setName(threadNamePrefix);
