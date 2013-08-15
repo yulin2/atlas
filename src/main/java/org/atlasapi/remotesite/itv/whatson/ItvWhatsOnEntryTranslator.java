@@ -6,6 +6,9 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Image;
+import org.atlasapi.media.entity.ImageAspectRatio;
+import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
@@ -21,6 +24,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.intl.Countries;
+import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.url.UrlEncoding;
 
 
@@ -33,6 +37,10 @@ public class ItvWhatsOnEntryTranslator {
     private static final String VERSION_PREFIX = "http://itv.com/version/";
     private static final String LOCATION_PREFIX = "http://www.itv.com/itvplayer/video/?filter=";
     private static final Publisher PUBLISHER_ITV = Publisher.ITV;
+    private static final int PRIMARY_IMAGE_WIDTH = 1024;
+    private static final int PRIMARY_IMAGE_HEIGHT = 576;
+    private static final ImageAspectRatio PRIMARY_IMAGE_ASPECT_RATIO = ImageAspectRatio.SIXTEEN_BY_NINE;
+    private static final MimeType PRIMARY_IMAGE_MIMETYPE = MimeType.IMAGE_JPG;
     
     private final BiMap<String, String> channelMap;
     
@@ -88,9 +96,21 @@ public class ItvWhatsOnEntryTranslator {
         target.setTitle(entry.getEpisodeTitle());
         target.setDescription(entry.getSynopsis());
         target.setImage(entry.getImageUri());
+        target.setImages(ImmutableSet.of(toImage(entry)));
         target.addAliasUrl(EPISODE_ALIASES_PREFIX + entry.getVodcrid());
         target.setPublisher(PUBLISHER_ITV);
         target.setVersions(ImmutableSet.of(toVersionAndLocation(entry)));
+    }
+    
+    private Image toImage(ItvWhatsOnEntry entry) {
+        Image image = Image.builder(entry.getImageUri())
+                .withWidth(PRIMARY_IMAGE_WIDTH)
+                .withHeight(PRIMARY_IMAGE_HEIGHT)
+                .withAspectRatio(PRIMARY_IMAGE_ASPECT_RATIO)
+                .withMimeType(PRIMARY_IMAGE_MIMETYPE)
+                .withType(ImageType.PRIMARY)
+                .build();
+        return image;
     }
     
     private Episode toEpisode(ItvWhatsOnEntry entry, Optional<Brand> brand, Optional<Series> series) {
