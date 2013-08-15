@@ -131,17 +131,21 @@ public class ItvWhatsOnEntryTranslator {
     }
     
     public Version toVersionAndLocation(ItvWhatsOnEntry entry) {
-        Policy policy = getPolicy(entry);
-        Location location = getLocation(entry, policy);
-        Encoding encoding = new Encoding();
-        encoding.addAvailableAt(location);
         Version version = new Version();
         version.setCanonicalUri(VERSION_PREFIX + entry.getProductionId());
         version.setPublishedDuration(entry.getDuration().getTotalSeconds());
         Duration duration = new Duration(entry.getDuration().getTotalSeconds()*1000);
         version.setDuration(duration);
-        version.addManifestedAs(encoding);
         version.setBroadcasts(ImmutableSet.of(toBroadcast(entry)));
+
+        if (entry.getAvailabilityStart() != null
+            && entry.getAvailabilityEnd() != null) {
+            Policy policy = getPolicy(entry);
+            Location location = getLocation(entry, policy);
+            Encoding encoding = new Encoding();
+            encoding.addAvailableAt(location);
+            version.addManifestedAs(encoding);
+        }
         return version;
     }
     
