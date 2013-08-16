@@ -1,17 +1,24 @@
 package org.atlasapi.system;
 
+import javax.servlet.ServletContext;
+
 import org.atlasapi.AtlasMain;
+import org.springframework.web.context.ServletContextAware;
 
 import com.metabroadcast.common.health.HealthProbe;
 import com.metabroadcast.common.health.ProbeResult;
 
 
-public class JettyHealthProbe implements HealthProbe {
+public class JettyHealthProbe implements HealthProbe, ServletContextAware {
+
+    private ServletContext servletContext;
 
     @Override
     public ProbeResult probe() throws Exception {
         ProbeResult probeResult = new ProbeResult("Requests");
-        probeResult.add("request-count", String.valueOf(AtlasMain.numberOfConnectionsInLastMinute()), true);
+        int connections = AtlasMain.getMaxNumberOfOpenConnectionsInLastMinute(
+                servletContext.getAttribute(AtlasMain.CONTEXT_ATTRIBUTE));
+        probeResult.add("request-count", String.valueOf(connections), true);
         return probeResult;
     }
 
@@ -23,6 +30,11 @@ public class JettyHealthProbe implements HealthProbe {
     @Override
     public String slug() {
         return "jetty";
+    }
+
+    @Override
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
     }
 
 }
