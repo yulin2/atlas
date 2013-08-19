@@ -5,6 +5,7 @@ import org.atlasapi.input.BrandModelTransformer;
 import org.atlasapi.input.DefaultGsonModelReader;
 import org.atlasapi.input.DelegatingModelTransformer;
 import org.atlasapi.input.ItemModelTransformer;
+import org.atlasapi.input.PersonModelTransformer;
 import org.atlasapi.input.TopicModelTransformer;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
@@ -66,6 +67,7 @@ import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.persistence.content.people.PersonStore;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
@@ -87,6 +89,7 @@ import org.atlasapi.query.v2.ChannelGroupController;
 import org.atlasapi.query.v2.ContentGroupController;
 import org.atlasapi.query.v2.ContentWriteController;
 import org.atlasapi.query.v2.PeopleController;
+import org.atlasapi.query.v2.PeopleWriteController;
 import org.atlasapi.query.v2.ProductController;
 import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.query.v2.ScheduleController;
@@ -127,6 +130,7 @@ public class QueryWebModule {
     private @Autowired SegmentResolver segmentResolver;
     private @Autowired ProductResolver productResolver;
     private @Autowired PeopleQueryResolver peopleQueryResolver;
+    private @Autowired PersonStore personStore;
     private @Autowired LookupEntryStore lookupStore;
 
     private @Autowired KnownTypeQueryExecutor queryExecutor;
@@ -235,7 +239,11 @@ public class QueryWebModule {
 
     @Bean
     PeopleController peopleController() {
-        return new PeopleController(peopleQueryResolver, configFetcher, log, personModelOutputter());
+        return new PeopleController(peopleQueryResolver, configFetcher, log, personModelOutputter(), peopleWriteController());
+    }
+
+    private PeopleWriteController peopleWriteController() {
+        return new PeopleWriteController(configFetcher, personStore, new DefaultGsonModelReader(), new PersonModelTransformer(new SystemClock()));
     }
 
     @Bean

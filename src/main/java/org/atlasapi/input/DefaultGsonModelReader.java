@@ -9,6 +9,7 @@ import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Playlist;
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -25,6 +26,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;
+import com.metabroadcast.common.webapp.serializers.JodaDateTimeSerializer;
 
 public final class DefaultGsonModelReader extends GsonModelReader {
 
@@ -36,7 +38,8 @@ public final class DefaultGsonModelReader extends GsonModelReader {
             .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
             .registerTypeAdapter(ContentIdentifier.class, new ContentIdentifierDeserializer())
             .registerTypeAdapter(Country.class, new CountryDeserializer())
-            .registerTypeAdapter(Description.class, new DescriptionDeserializer()));
+            .registerTypeAdapter(Description.class, new DescriptionDeserializer())
+            .registerTypeAdapter(DateTime.class, new JodaDateTimeSerializer()));
     }
     
     private static final class DescriptionDeserializer implements JsonDeserializer<Description> {

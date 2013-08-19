@@ -41,7 +41,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
     }
 
     @Override
-    protected Item createOutput(org.atlasapi.media.entity.simple.Item inputItem, DateTime now) {
+    protected Item createContentOutput(org.atlasapi.media.entity.simple.Item inputItem, DateTime now) {
         String type = inputItem.getType();
         Item item;
         if ("episode".equals(type)) {
