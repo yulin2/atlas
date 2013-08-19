@@ -270,13 +270,19 @@
  * @param source
  * @param applications
  */
-{template .source}
+{template .sourceReaders}
 {call atlas.templates.applications.head}
 	{param applications: $applications /}
     {param application: null /}
     {param sources: null /}
 {/call}
+    <div class="cf sub">
     <h1>{$source.title}</h1>
+    <nav class="sub">
+        <div>Readers</div>
+        <a href="/admin/sources/{$source.id}/applications/writers">Writers</a>
+    </nav>
+    </div>
     {if length($applications) > 0}
     	<div class="line">
     		<div class="unit size1of6">
@@ -326,6 +332,148 @@
 		<div class="alert inf">There aren't any applications yet.</div>
 	{/if}
 </body>
+{/template}
+
+/**
+ * @param source
+ * @param applications
+ */
+{template .sourceWriters}
+{call atlas.templates.applications.head}
+	{param applications: $applications /}
+    {param application: null /}
+    {param sources: null /}
+{/call}
+    <div class="cf sub">
+        <h1>{$source.title}</h1>
+        <nav class="sub">
+            <a href="/admin/sources/{$source.id}/applications">Readers</a>
+            <div>Writers</div>
+        </nav>
+        <div class="fr">
+	       <a href="/admin/sources/{$source.id}/applications/writers/add" class="btn inf mlm">Add/Remove</a>
+        </div>
+    </div>
+    
+    
+    {if length($applications) > 0}
+    	<div class="line">
+    		<div class="unit size1of4">
+    			<span class="h3">Application</span>
+    		</div>
+    		<div class="unit size1of4">
+    			<span class="h3">Description</span>
+    		</div>
+    		<div class="unit size1of4">
+    			<span class="h3">Created</span>
+    		</div>
+    		<div class="unit size1of4 lastUnit">
+    			<span class="h3">Used</span>
+    		</div>
+    	</div>
+    	{foreach $application in $applications}
+    		<div class="line app-link" data-app="{$application.slug}">
+    			<div class="unit size1of4">
+    				{$application.title}
+    			</div>
+    			<div class="unit size1of4">
+    				{$application.description}
+    			</div>
+    			<div class="unit size1of4">
+    				{$application.created}
+    			</div>
+    			<div class="unit size1of4 lastUnit">
+    				{$application.configuration.publishers[0].enabled}
+    			</div>
+    		</div>
+        {/foreach}
+	{else}
+		<div class="alert inf">There aren't any applications yet.</div>
+	{/if}
+</body>
+{/template}
+
+/**
+ * @param page
+ * @param source
+ * @param applications
+ */
+{template .addRemoveWritables}
+{call atlas.templates.applications.head}
+	{param applications: $applications /}
+	{param application: null /}
+    {param sources: null /}
+{/call}
+	<h1><a href="/admin/sources/{$source.id}/applications">{$source.title}</a></h1>
+	
+	<div class="form mrm fr">
+    	<div class="grp">
+    		<label for="search">Search</label>
+    		<div class="inputHolder">
+    			<input type="text" id="search" value="{$page.search}"/>
+    			<span class="extra pos"><a href="#" class="icn tick" id="runSearch" title="Search">Search</a></span>
+    		</div>
+    	</div>
+	</div>
+	<h4 class="headingSearch">Edit applications with write permission on this source</h4>
+	<div id="applications-list" data-apps="{length($applications)}" class="cf cb">
+		{if length($applications) > 0}
+			<div class="line">
+				<div class="unit size1of4">
+					<span class="h3">App Name</span>
+				</div>
+				<div class="unit size1of4">
+					<span class="h3">App Slug</span>
+				</div>
+				<div class="unit size1of4">
+					<span class="h3">API Key</span>
+				</div>
+				<div class="unit size1of4 lastUnit">
+
+				</div>
+			</div>
+			{foreach $application in $applications}
+				<div class="line app-link">
+		           <div class="unit size1of4">
+			           <a href="/admin/applications/{$application.slug}" data-id="{$application.slug}">{$application.title}</a>
+		           </div>
+		           <div class="unit size1of4">
+			           {$application.slug}
+		           </div>
+		           <div class="unit size1of4">
+			           {$application.credentials.apiKey}
+		           </div>
+		           <div class="unit size1of4 lastUnit">
+		              {if $application.configuration.publishers[0].canWrite}
+		                 <input type="button" class="btn neg fr mrm removeWritable" value="Remove" data-pub="{$source.id}" data-id="{$application.slug}" />
+		              {else}
+					     <input type="button" class="btn pos fr mrm addWritable" value="Add" data-pub="{$source.id}" data-id="{$application.slug}" />
+		              {/if}
+		           </div>
+	          </div>
+			{/foreach}
+		{else}
+		    {if $page.search == ''}
+			    <div class="alert inf">Search for an application</div>
+			{else}
+			    <div class="alert inf">No results</div>
+			{/if}
+		{/if}
+	</div>
+	<div>
+	{if $page.nextUrl}
+	   <div class="prevNextBtn  fr">
+	       <a href="{$page.nextUrl}" class="btn inf mlm">Next</a>
+	   </div>
+	{/if}
+	{if $page.prevUrl}
+	   <div class="prevNextBtn">
+	       <a href="{$page.prevUrl}" class="btn inf mlm">Previous</a>
+	   </div>
+	{/if}
+	</div>
+	<script src="/static/js/list.js"></script>
+{call atlas.templates.applications.foot /}
 {/template}
 
 /**

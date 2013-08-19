@@ -140,6 +140,32 @@ nav a {
 	font-size: 16px;
 }
 
+.sub h1 {
+	float: left;
+}
+
+.sub nav {
+	float: left;
+	line-height: 50px;
+	margin-left: 50px;
+}
+
+.sub nav a {
+	display: block;
+	float: left;
+	padding: 5px 10px;
+	margin: 0 5px;
+	font-size: 16px;
+}
+
+.sub nav div {
+	display: block;
+	float: left;
+	padding: 5px 10px;
+	margin: 0 5px;
+	font-size: 16px;
+}
+
 .overlayBlocker {
 	position: absolute;
 	display: block;
@@ -311,4 +337,8 @@ nav a {
 
 .prevNextBtn {
 	height: 40px;
+}
+
+.headingSearch {
+	padding-top: 5px;
 }
