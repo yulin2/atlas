@@ -16,6 +16,7 @@ import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -37,11 +38,13 @@ public class PeopleController extends BaseController<Iterable<Person>> {
         .withStatusCode(HttpStatusCode.FORBIDDEN);
 
     private final PeopleQueryResolver resolver;
+    private final PeopleWriteController personWriteController;
 
     public PeopleController(PeopleQueryResolver resolver, ApplicationConfigurationFetcher configFetcher,
-                    AdapterLog log, AtlasModelWriter<Iterable<Person>> outputter) {
+                    AdapterLog log, AtlasModelWriter<Iterable<Person>> outputter, PeopleWriteController personWriteController) {
         super(configFetcher, log, outputter, SubstitutionTableNumberCodec.lowerCaseOnly());
         this.resolver = resolver;
+        this.personWriteController = personWriteController;
     }
 
     @RequestMapping("/3.0/people.*")
@@ -92,5 +95,13 @@ public class PeopleController extends BaseController<Iterable<Person>> {
         }
     }
     
-    
+    @RequestMapping(value="/3.0/people.json", method = RequestMethod.POST)
+    public Void postContent(HttpServletRequest req, HttpServletResponse resp) {
+        return personWriteController.postPerson(req, resp);
+    }
+
+    @RequestMapping(value="/3.0/people.json", method = RequestMethod.PUT)
+    public Void putContent(HttpServletRequest req, HttpServletResponse resp) {
+        return personWriteController.putPerson(req, resp);
+    }
 }

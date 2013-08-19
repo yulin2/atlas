@@ -16,9 +16,8 @@ public class BrandModelTransformer extends ContentModelTransformer<org.atlasapi.
 	}
 
 	@Override
-	protected Brand createOutput(Playlist input, DateTime now) {
-		Brand brand = new Brand();
-		return brand;
+	protected Brand createContentOutput(Playlist input, DateTime now) {
+		return new Brand();
 	}
 
 }

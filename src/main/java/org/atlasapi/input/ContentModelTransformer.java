@@ -14,9 +14,7 @@ import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.LookupRef;
-import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.media.entity.TopicRef;
@@ -39,44 +37,28 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
 
-public abstract class ContentModelTransformer<F extends Description,T extends Content> implements ModelTransformer<F, T> {
+public abstract class ContentModelTransformer<F extends Description,T extends Content> extends DescribedModelTransformer<F, T> {
 
     private final ContentResolver resolver;
     private final TopicStore topicStore;
     protected final Clock clock;
 
     public ContentModelTransformer(ContentResolver resolver, TopicStore topicStore, Clock clock) {
+        super(clock);
         this.resolver = resolver;
         this.topicStore = topicStore;
         this.clock = clock;
     }
     
     @Override
-    public T transform(F simple) {
-        DateTime now = clock.now();
-        T output = createOutput(simple, now);
-        output.setLastUpdated(now);
-        return setContentFields(output, simple);
+    protected final T createDescribedOutput(F simple, DateTime now) {
+        return setContentFields(createContentOutput(simple, now), simple);
     }
-
-    protected abstract T createOutput(F simple, DateTime now);
+    
+    protected abstract T createContentOutput(F simple, DateTime now);
 
     private T setContentFields(T result, Description inputContent) {
-        result.setCanonicalUri(inputContent.getUri());
-        result.setCurie(inputContent.getCurie());
-        Publisher publisher = getPublisher(inputContent.getPublisher());
-        result.setPublisher(publisher);
-        result.setTitle(inputContent.getTitle());
-        result.setDescription(inputContent.getDescription());
-        result.setImage(inputContent.getImage());
-        result.setThumbnail(inputContent.getThumbnail());
-        if (inputContent.getSpecialization() != null) {
-            result.setSpecialization(Specialization.fromKey(inputContent.getSpecialization()).valueOrNull());
-        }
-        if (inputContent.getMediaType() != null) {
-            result.setMediaType(MediaType.valueOf(inputContent.getMediaType().toUpperCase()));
-        }
-        result.setPeople(transformPeople(inputContent.getPeople(), publisher));
+        result.setPeople(transformPeople(inputContent.getPeople(), result.getPublisher()));
         result.setEquivalentTo(resolveEquivalences(inputContent.getSameAs()));
         result.setTopicRefs(topicRefs(inputContent.getTopics()));
         result.setKeyPhrases(keyPhrases(inputContent.getKeyPhrases(), inputContent.getPublisher()));
@@ -187,14 +169,4 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         return member;
     }
 
-    protected Publisher getPublisher(PublisherDetails pubDets) {
-        if (pubDets == null || pubDets.getKey() == null) {
-            throw new IllegalArgumentException("missing publisher");
-        }
-        Maybe<Publisher> possiblePublisher = Publisher.fromKey(pubDets.getKey());
-        if (possiblePublisher.isNothing()) {
-            throw new IllegalArgumentException("unknown publisher " + pubDets.getKey());
-        }
-        return possiblePublisher.requireValue();
-    }
 }
