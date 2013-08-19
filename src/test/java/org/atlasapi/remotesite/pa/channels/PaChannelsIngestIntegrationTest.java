@@ -18,6 +18,7 @@ import org.atlasapi.media.channel.MongoChannelGroupStore;
 import org.atlasapi.media.channel.MongoChannelStore;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import org.junit.Test;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.MongoTestHelper;
@@ -67,6 +69,10 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         Maybe<Channel> maybeParent = channelStore.fromId(parent);
         assertTrue(maybeParent.hasValue());
         assertEquals("BBC One", maybeParent.requireValue().getTitle());
+        // test availableFrom is set correctly to PA
+        ImmutableSet<Publisher> expectedAvailableFrom = ImmutableSet.of(Publisher.PA);
+        assertEquals(expectedAvailableFrom, maybeParent.requireValue().getAvailableFrom());
+        assertEquals(expectedAvailableFrom, maybeChannel.requireValue().getAvailableFrom());
         
         // check numbering
         ChannelNumbering numbering = Iterables.getOnlyElement(channel.getChannelNumbers());
