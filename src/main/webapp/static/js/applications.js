@@ -289,6 +289,7 @@ var updateEnabled = function(callback){
 		async: false,
 		success:function(responseData, textStatus, XMLHttpRequest) {
 		    $('#saveApplicationSources').val("Changes saved");
+		    $('#applicationLastUpdated').html(responseData.application.lastUpdated);
 		    setTimeout(function() {
 		       $('#saveApplicationSources').val("Save Changes");
 		    }, 2000);
