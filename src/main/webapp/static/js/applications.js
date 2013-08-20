@@ -16,6 +16,7 @@ $(document).ready(function() {
 			data: $(this).serializeArray(),
 			success:function(responseData, textStatus, XMLHttpRequest) {
 				addApplication(slug, responseData);
+				$('.overlayBlocker').hide();
 			},
 			error:function(textStatus) {
 				console.log("fail:", textStatus);
