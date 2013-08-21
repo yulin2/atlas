@@ -54,7 +54,7 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
     public void ingestFeedFor(LocalDate date) {
         List<ItvWhatsOnEntry> entries = getFeed(getFeedForDate(date));
         for (ItvWhatsOnEntry entry : entries) {
-            processor.process(entry);
+            processor.createOrUpdateAtlasEntityFrom(entry);
         }
     }
 

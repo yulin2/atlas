@@ -5,7 +5,6 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.ImageAspectRatio;
 import org.atlasapi.media.entity.ImageType;
@@ -75,17 +74,7 @@ public class ItvWhatsOnEntryExtractor {
         return Optional.of(series);
     }
     
-    public Item toEpisodeOrItem(ItvWhatsOnEntry entry) {
-        Optional<Brand> brand = toBrand(entry);
-        Optional<Series> series = toSeries(entry);
-        if (brand.isPresent() || series.isPresent()) {
-            return toEpisode(entry, brand, series);
-        } else {
-            return toItem(entry);
-        }
-    }
-    
-    private void setCommonItemAttributes(Item target, ItvWhatsOnEntry entry) {
+    public void setCommonItemAttributes(Item target, ItvWhatsOnEntry entry) {
         String uri;
         if (entry.getEpisodeId() != null && !entry.getEpisodeId().isEmpty()) {
             uri = EPISODE_PREFIX + entry.getEpisodeId();            
@@ -111,24 +100,6 @@ public class ItvWhatsOnEntryExtractor {
                 .withType(ImageType.PRIMARY)
                 .build();
         return image;
-    }
-    
-    private Episode toEpisode(ItvWhatsOnEntry entry, Optional<Brand> brand, Optional<Series> series) {
-        Episode episode = new Episode();
-        if (brand.isPresent()) {
-            episode.setContainer(brand.get());
-        }
-        if (series.isPresent()) {
-            episode.setSeries(series.get());
-        }
-        setCommonItemAttributes(episode, entry);
-        return episode;
-    }
-    
-    private Item toItem(ItvWhatsOnEntry entry) {
-        Item item = new Item();
-        setCommonItemAttributes(item, entry);
-        return item;
     }
     
     private Policy getPolicy(ItvWhatsOnEntry entry) {
