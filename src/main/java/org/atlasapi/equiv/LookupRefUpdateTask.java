@@ -198,7 +198,7 @@ public class LookupRefUpdateTask extends ScheduledTask {
         if (progress == 0) {
             return "start";
         }
-        return String.format("%s %s %s", progress);
+        return String.format("%s", progress);
     }
     
 
