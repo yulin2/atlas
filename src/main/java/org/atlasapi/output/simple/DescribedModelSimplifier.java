@@ -9,6 +9,7 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Image;
+import org.atlasapi.media.entity.simple.RelatedLink;
 import org.atlasapi.media.entity.simple.SameAs;
 import org.atlasapi.output.Annotation;
 import org.slf4j.Logger;
@@ -73,7 +74,9 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         if (annotations.contains(Annotation.IMAGES)) {
             simpleDescription.setImages(toImages(imageExtractor.getImages(content), annotations));
         }
-        
+        if (annotations.contains(Annotation.RELATED_LINKS)) {
+            simpleDescription.setRelatedLinks(simplifyRelatedLinks(content));
+        }
     }
 
     private Iterable<Image> toImages(Iterable<org.atlasapi.media.entity.Image> images, Set<Annotation> annotations) {
@@ -95,6 +98,27 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             return new SameAs(id != null ? idCodec.encode(BigInteger.valueOf(id)) : null, input.uri());
         }
     };
+    
+    private Iterable<RelatedLink> simplifyRelatedLinks(F described) {
+        return Iterables.transform(described.getRelatedLinks(), new Function<org.atlasapi.media.entity.RelatedLink, RelatedLink>() {
+
+            @Override
+            public RelatedLink apply(org.atlasapi.media.entity.RelatedLink rl) {
+                RelatedLink simpleLink = new RelatedLink();
+
+                simpleLink.setUrl(rl.getUrl());
+                simpleLink.setType(rl.getType().toString().toLowerCase());
+                simpleLink.setSourceId(rl.getSourceId());
+                simpleLink.setShortName(rl.getShortName());
+                simpleLink.setTitle(rl.getTitle());
+                simpleLink.setDescription(rl.getDescription());
+                simpleLink.setImage(rl.getImage());
+                simpleLink.setThumbnail(rl.getThumbnail());
+
+                return simpleLink;
+            }
+        });
+    }
 
     private final DescribedImageExtractor imageExtractor = new DescribedImageExtractor();
 }
