@@ -108,6 +108,7 @@ public class PaChannelsIngester {
             .withUri(STATION_URI_PREFIX + station.getId())
             .withKey(generateStationKey(station.getId()))
             .withSource(Publisher.METABROADCAST)
+            .withAvailableFrom(ImmutableList.of(Publisher.PA))
             .build();
         
         // will soon have station images, but do not currently, hence is commented out here
@@ -140,6 +141,7 @@ public class PaChannelsIngester {
                 .withUri(CHANNEL_URI_PREFIX + paChannel.getId())
                 .withKey(generateChannelKey(paChannel.getId()))
                 .withSource(Publisher.METABROADCAST)
+                .withAvailableFrom(ImmutableList.of(Publisher.PA))
                 .withStartDate(startDate)
                 .withEndDate(null)
                 .build();
