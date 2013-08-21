@@ -115,6 +115,7 @@ public class PeopleWriteController {
         existing.setThumbnail(update.getThumbnail());
         existing.setMediaType(update.getMediaType());
         existing.setSpecialization(update.getSpecialization());
+        existing.setRelatedLinks(merge ? merge(existing.getRelatedLinks(), update.getRelatedLinks()) : update.getRelatedLinks());
         existing.setGivenName(update.getGivenName());
         existing.setFamilyName(update.getFamilyName());
         existing.setGender(update.getGender());
