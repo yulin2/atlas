@@ -104,4 +104,5 @@ public class PeopleController extends BaseController<Iterable<Person>> {
     public Void putContent(HttpServletRequest req, HttpServletResponse resp) {
         return personWriteController.putPerson(req, resp);
     }
+
 }
