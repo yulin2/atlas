@@ -1,14 +1,10 @@
 package org.atlasapi.remotesite.channel4;
 
-import java.util.List;
-
 import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.logging.NullAdapterLog;
-import org.atlasapi.remotesite.channel4.epg.C4EpgEntryItemExtractor;
 import org.junit.Test;
 
 import com.google.common.io.Resources;
@@ -24,8 +20,8 @@ public class C4BrandEpgExtractorTest extends TestCase {
     private final AtomFeedBuilder xmenAtom = new AtomFeedBuilder(Resources.getResource(getClass(), "x-men-the-last-stand-epg.atom"));
     private final Feed xmenFeed = xmenAtom.build();
     
-    private final C4EpgEpisodeExtractor extractor = new C4EpgEpisodeExtractor(new SystemClock());
-
+    private final C4EpgEpisodeExtractor extractor = new C4EpgEpisodeExtractor(new C4AtomApi(new C4DummyChannelResolver()), new SystemClock());
+    
     @Test
     public void testShouldExtractBroadcast() throws Exception {
 
