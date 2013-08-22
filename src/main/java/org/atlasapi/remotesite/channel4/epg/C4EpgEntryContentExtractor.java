@@ -92,7 +92,7 @@ public class C4EpgEntryContentExtractor implements
     }
 
     private void addOrReplaceBroadcast(Item item, Broadcast broadcast) {
-        Version version = Iterables.getOnlyElement(item.nativeVersions());
+        Version version = Iterables.getOnlyElement(item.nativeVersions(), new Version());
         
         Broadcast existingBroadcast = existingBroadcast(version, broadcast);
         if (existingBroadcast != null && changed(broadcast, existingBroadcast)) {

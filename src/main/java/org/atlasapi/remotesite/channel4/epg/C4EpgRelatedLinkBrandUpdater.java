@@ -10,7 +10,7 @@ import com.google.common.base.Preconditions;
 
 public class C4EpgRelatedLinkBrandUpdater implements C4BrandUpdater {
 
-    private final Pattern brandUriPattern = Pattern.compile("http://.+\\.channel4\\.com/[^/]+/([^./]+).*");
+    private final Pattern brandUriPattern = Pattern.compile("https?://.+\\.channel4\\.com/[^/]+/([^./]+).*");
 
     private final C4BrandUpdater delegate;
     
