@@ -18,4 +18,9 @@ public class TypedLink {
         return this.linkRelationship;
     }
     
+    @Override
+    public String toString() {
+        return String.format("%s:%s", linkRelationship, linkTarget);
+    }
+    
 }

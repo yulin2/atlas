@@ -44,7 +44,7 @@ import com.sun.syndication.feed.atom.Feed;
 
 public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 
-	private static final Pattern BRAND_PAGE_PATTERN = Pattern.compile("http://www.channel4.com/programmes/([^/\\s]+)");
+    private static final Pattern BRAND_PAGE_PATTERN = Pattern.compile("http://www.channel4.com/programmes/([^/\\s]+)");
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
@@ -105,6 +105,8 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
                     episode = resolveAndUpdate(episode);
                     episode.setContainer(brandHierarchy.getBrand());
                     writer.createOrUpdate(episode);
+                } catch (NoHierarchyUriException nhue) {
+                    log.warn(String.format("%s (%s)", nhue, brandHierarchy.getBrand().getTitle()));
                 } catch (Exception e) {
                     log.warn("Failed to write " + episode.getCanonicalUri(), e);
                 }
@@ -112,7 +114,7 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         }
     }
 
-    private Episode resolveAndUpdate(Episode episode) {
+    private Episode resolveAndUpdate(Episode episode) throws NoHierarchyUriException {
         Optional<Item> existingEpisode = resolve(episode);
         if (!existingEpisode.isPresent()) {
             return episode;
@@ -153,11 +155,33 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         return episode;
     }
 
-    private Optional<Item> resolve(Episode episode) {
+    private Optional<Item> resolve(Episode episode) throws NoHierarchyUriException {
         String hierarchyUri = hierarchyUri(episode);
         Optional<Item> resolved = resolver.itemFor(episode.getCanonicalUri(), Optional.fromNullable(hierarchyUri), Optional.<String>absent());
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(hierarchyUri)||resolved.isPresent(), "To avoid duplication %s requires hierarchy URI", episode.getCanonicalUri());
+        if(Strings.isNullOrEmpty(hierarchyUri) && !resolved.isPresent()) {
+            throw new NoHierarchyUriException(episode);
+        }
         return resolved;
+    }
+    
+    private static class NoHierarchyUriException extends Exception {
+
+        private Episode episode;
+
+        public NoHierarchyUriException(Episode episode) {
+            this.episode = episode;
+        }
+
+        @Override
+        public String getMessage() {
+            return episode.getCanonicalUri();
+        }
+        
+        @Override
+        public String toString() {
+            return String.format("no hierarchy uri %s", getMessage());
+        }
+        
     }
 
     private String hierarchyUri(Episode episode) {

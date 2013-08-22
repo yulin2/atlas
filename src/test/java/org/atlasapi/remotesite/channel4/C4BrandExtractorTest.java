@@ -81,7 +81,7 @@ public class C4BrandExtractorTest extends TestCase {
 	
 	private final ContentWriter writer = mock(ContentWriter.class);
 	private final ContentResolver resolver = mock(ContentResolver.class);
-	private final ChannelResolver channelResolver = mock(ChannelResolver.class);
+	private final ChannelResolver channelResolver = new C4DummyChannelResolver();
 	
 	private C4BrandExtractor pcExtractor;
 	private C4AtomBackedBrandUpdater pcUpdater;
@@ -97,24 +97,6 @@ public class C4BrandExtractorTest extends TestCase {
 	
 	@Before
 	public void setUp() {
-		when(channelResolver.fromUri("http://www.channel4.com")).thenReturn(
-		    Maybe.just(new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", false, MediaType.VIDEO, "http://www.channel4.com"))
-	    );
-		when(channelResolver.fromUri("http://www.channel4.com/more4")).thenReturn(
-		    Maybe.just(new Channel(Publisher.METABROADCAST, "More4", "more4", false, MediaType.VIDEO, "http://www.more4.com"))
-	    );
-		when(channelResolver.fromUri("http://film4.com")).thenReturn(
-		    Maybe.just(new Channel(Publisher.METABROADCAST, "Film4", "more4", false, MediaType.VIDEO, "http://film4.com"))
-	    );
-		when(channelResolver.fromUri("http://www.e4.com")).thenReturn(
-		    Maybe.just(new Channel(Publisher.METABROADCAST, "E4", "more4", false, MediaType.VIDEO, "http://www.e4.com"))
-	    );
-		when(channelResolver.fromUri("http://www.4music.com")).thenReturn(
-		    Maybe.just(new Channel(Publisher.METABROADCAST, "4Music", "more4", false, MediaType.VIDEO, "http://www.4music.com"))
-	    );
-		when(channelResolver.fromUri("http://www.channel4.com/4seven")).thenReturn(
-		    Maybe.just(new Channel(Publisher.METABROADCAST, "4seven", "4seven", false, MediaType.VIDEO, "http://www.channel4.com/4seven"))
-	    );
 		pcExtractor = new C4BrandExtractor(atomApiClient, Optional.<Platform> absent(), channelResolver);
 		pcUpdater = new C4AtomBackedBrandUpdater(atomApiClient, Optional.<Platform> absent(), resolver, writer, pcExtractor);
 	}

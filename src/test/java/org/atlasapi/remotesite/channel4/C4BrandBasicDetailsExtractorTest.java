@@ -5,15 +5,10 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import junit.framework.TestCase;
 
 import org.atlasapi.genres.AtlasGenre;
-import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -22,7 +17,6 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.io.Resources;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
@@ -31,28 +25,13 @@ import com.sun.syndication.feed.atom.Feed;
 @RunWith(MockitoJUnitRunner.class)
 public class C4BrandBasicDetailsExtractorTest extends TestCase {
 
-    private static final Channel FM = new Channel(Publisher.METABROADCAST, "4Music", "more4", false, MediaType.VIDEO, "http://www.4music.com");
-    private static final Channel E4 = new Channel(Publisher.METABROADCAST, "E4", "more4", false, MediaType.VIDEO, "http://www.e4.com");
-    private static final Channel F4 = new Channel(Publisher.METABROADCAST, "Film4", "more4", false, MediaType.VIDEO, "http://film4.com");
-    private static final Channel C4 = new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", false, MediaType.VIDEO, "http://www.channel4.com");
-    private static final Channel M4 = new Channel(Publisher.METABROADCAST, "More4", "more4", false, MediaType.VIDEO, "http://www.more4.com");
-    private static final Channel FS = new Channel(Publisher.METABROADCAST, "4seven", "4seven", false, MediaType.VIDEO, "http://www.channel4.com/4seven");
-
     private final Clock clock = new TimeMachine(new DateTime(DateTimeZones.UTC));
-    private final ChannelResolver channelResolver = mock(ChannelResolver.class);
     
     private C4BrandBasicDetailsExtractor extractor;
 	
     @Before
     public void setUp() {
-        when(channelResolver.fromUri("http://www.channel4.com")).thenReturn(Maybe.just(C4));
-        when(channelResolver.fromUri("http://www.channel4.com/more4")).thenReturn(Maybe.just(M4));
-        when(channelResolver.fromUri("http://film4.com")).thenReturn(Maybe.just(F4));
-        when(channelResolver.fromUri("http://www.e4.com")).thenReturn(Maybe.just(E4));
-        when(channelResolver.fromUri("http://www.4music.com")).thenReturn(Maybe.just(FM));
-        when(channelResolver.fromUri("http://www.channel4.com/4seven")).thenReturn(Maybe.just(FS));
-        
-        extractor = new C4BrandBasicDetailsExtractor(channelResolver , clock);
+        extractor = new C4BrandBasicDetailsExtractor(new C4AtomApi(new C4DummyChannelResolver()), clock);
     }
 
     @Test
