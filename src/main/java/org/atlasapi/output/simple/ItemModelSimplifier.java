@@ -265,6 +265,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         simpleModel.setLive(broadcast.getLive());
         simpleModel.setPremiere(broadcast.getPremiere());
         simpleModel.setNewSeries(broadcast.getNewSeries());
+        simpleModel.setNewEpisode(broadcast.getNewEpisode());
         simpleModel.setAliases(broadcast.getAliasUrls());
         Maybe<org.atlasapi.media.channel.Channel> channel = channelResolver.fromUri(broadcast.getBroadcastOn());
         if (channel.hasValue()) {
