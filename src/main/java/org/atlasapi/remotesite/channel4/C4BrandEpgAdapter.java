@@ -20,9 +20,9 @@ public class C4BrandEpgAdapter implements SiteSpecificAdapter<List<Episode>> {
     private final C4AtomApiClient client;
     private final C4EpgEpisodeExtractor extractor;
 
-    public C4BrandEpgAdapter(C4AtomApiClient client, Clock clock) {
+    public C4BrandEpgAdapter(C4AtomApiClient client, Clock clock, C4AtomApi atomApi) {
         this.client = client;
-        this.extractor = new C4EpgEpisodeExtractor(clock);
+        this.extractor = new C4EpgEpisodeExtractor(atomApi, clock);
     }
     
     @Override

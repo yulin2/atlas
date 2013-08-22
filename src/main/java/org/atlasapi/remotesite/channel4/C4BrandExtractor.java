@@ -28,10 +28,11 @@ public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEp
     
     public C4BrandExtractor(C4AtomApiClient feedClient, Optional<Platform> platform, ChannelResolver channelResolver) {
         SystemClock clock = new SystemClock();
-        this.basicDetailsExtractor = new C4BrandBasicDetailsExtractor(channelResolver, clock);
+        C4AtomApi c4AtomApi = new C4AtomApi(channelResolver);
+        this.basicDetailsExtractor = new C4BrandBasicDetailsExtractor(c4AtomApi, clock);
         this.episodeGuideAdapter = new C4EpisodeGuideAdapter(feedClient, clock);
         this.fourOditemAdapter = new C4OdEpisodesAdapter(feedClient, platform, clock);
-        this.brandEpgAdatper = new C4BrandEpgAdapter(feedClient, clock);
+        this.brandEpgAdatper = new C4BrandEpgAdapter(feedClient, clock, c4AtomApi);
         this.clipAdapter = new C4BrandClipAdapter(feedClient, clock);
     }
 
