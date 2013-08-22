@@ -4,8 +4,8 @@ import java.util.Map;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.jdom.Element;
 import org.joda.time.DateTime;
@@ -14,6 +14,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -26,16 +27,12 @@ public class C4EpgEpisodeExtractor extends BaseC4EpisodeExtractor implements
     private static final String DC_TX_CHANNEL = "dc:relation.TXChannel";
 
     private static final DateTimeFormatter fmt = DateTimeFormat.forPattern("EEEE dd MMMM yyyy hh:mm aa").withZone(DateTimeZones.LONDON);
-    private static Map<String, String> CHANNEL_LOOKUP = ImmutableMap.<String, String>builder()
-        .put("C4", "http://www.channel4.com")
-        .put("M4", "http://www.channel4.com/more4")
-        .put("E4", "http://www.e4.com")
-        .put("4M", "http://www.4music.com")
-        .put("F4", "http://film4.com")
-        .build();
+    private final Map<String, String> channelLookup;
 
-    public C4EpgEpisodeExtractor(Clock clock) {
+    public C4EpgEpisodeExtractor(C4AtomApi atomApi, Clock clock) {
         super(clock);
+        this.channelLookup = ImmutableMap.copyOf(
+                Maps.transformValues(atomApi.getChannelMap(), Identified.TO_URI));
     }
 
     @Override // epg.atom entries don't have media groups/content, so no images.
@@ -54,7 +51,7 @@ public class C4EpgEpisodeExtractor extends BaseC4EpisodeExtractor implements
         episode.setVersions(Sets.newHashSet(version));
 
         String channelKey = lookup.get(DC_TX_CHANNEL);
-        String txChannel = CHANNEL_LOOKUP.get(channelKey);
+        String txChannel = channelLookup.get(channelKey);
         String startTime = lookup.get(DC_START_TIME);
         Duration duration = C4AtomApi.durationFrom(lookup);
 

@@ -4,7 +4,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -36,8 +35,8 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
     
     private final C4LinkBrandNameExtractor linkExtractor = new C4LinkBrandNameExtractor();
 
-	public C4BrandBasicDetailsExtractor(ChannelResolver channelResolver, Clock clock) {
-        this.c4AtomApi = new C4AtomApi(channelResolver);
+	public C4BrandBasicDetailsExtractor(C4AtomApi c4AtomApi, Clock clock) {
+        this.c4AtomApi = c4AtomApi;
         this.clock = clock;
 	}
 	

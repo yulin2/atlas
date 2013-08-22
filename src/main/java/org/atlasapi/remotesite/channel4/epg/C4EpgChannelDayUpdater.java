@@ -13,6 +13,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.channel4.C4BrandUpdater;
@@ -35,14 +36,14 @@ public class C4EpgChannelDayUpdater {
     private final ContentWriter writer;
     private final C4EpgEntryContentExtractor epgEntryContentExtractor;
     private final BroadcastTrimmer trimmer;
-    private final AdapterLog log;
+    private final AdapterLog log = new SystemOutAdapterLog();
     
     public C4EpgChannelDayUpdater(RemoteSiteClient<List<C4EpgEntry>> scheduleClient, ContentWriter writer, ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer, AdapterLog log) {
         this.scheduleClient = scheduleClient;
         this.writer = writer;
         this.epgEntryContentExtractor = new C4EpgEntryContentExtractor(resolver, brandUpdater);
         this.trimmer = trimmer;
-        this.log = log;
+        //this.log = log;
     }
     
     public UpdateProgress update(String channelUriKey, Channel channel, LocalDate scheduleDay) {
@@ -96,21 +97,30 @@ public class C4EpgChannelDayUpdater {
     private List<ItemRefAndBroadcast> process(Iterable<C4EpgEntry> entries, Channel channel) {
         ImmutableList.Builder<ItemRefAndBroadcast> episodes = ImmutableList.builder();
         for (C4EpgEntry entry : entries) {
-            try {
-                ContentHierarchyAndBroadcast extractedContent = epgEntryContentExtractor.extract(new C4EpgChannelEntry(entry, channel));
-                if (extractedContent.getBrand().isPresent()) {
-                    writer.createOrUpdate(extractedContent.getBrand().get());
-                }
-                if (extractedContent.getSeries().isPresent()) {
-                    writer.createOrUpdate(extractedContent.getSeries().get());
-                }
-                writer.createOrUpdate(extractedContent.getItem());
-                episodes.add(new ItemRefAndBroadcast(extractedContent.getItem(), extractedContent.getBroadcast()));
-            } catch (Exception e) {
-                log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing entry %s" + entry.id()));
+            ItemRefAndBroadcast itemAndBroadcast = processEntry(channel, entry);
+            if (itemAndBroadcast != null) {
+                episodes.add(itemAndBroadcast);
             }
         }
         return episodes.build();
+    }
+
+    private ItemRefAndBroadcast processEntry(Channel channel, C4EpgEntry entry) {
+        ItemRefAndBroadcast itemAndBroadcast = null;
+        try {
+            ContentHierarchyAndBroadcast extractedContent = epgEntryContentExtractor.extract(new C4EpgChannelEntry(entry, channel));
+            if (extractedContent.getBrand().isPresent()) {
+                writer.createOrUpdate(extractedContent.getBrand().get());
+            }
+            if (extractedContent.getSeries().isPresent()) {
+                writer.createOrUpdate(extractedContent.getSeries().get());
+            }
+            writer.createOrUpdate(extractedContent.getItem());
+            itemAndBroadcast = new ItemRefAndBroadcast(extractedContent.getItem(), extractedContent.getBroadcast());
+        } catch (Exception e) {
+            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing entry %s", entry.id()));
+        }
+        return itemAndBroadcast;
     }
 
 }
