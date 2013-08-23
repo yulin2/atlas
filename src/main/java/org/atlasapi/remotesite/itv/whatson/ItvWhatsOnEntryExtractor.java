@@ -34,7 +34,7 @@ public class ItvWhatsOnEntryExtractor {
     private static final String EPISODE_ALIASES_PREFIX = "http://itv.com/vodcrid/";
     private static final String EPISODE_SYNTHESIZED_PREFIX = "http://itv.com/synthesized/";
     private static final String VERSION_PREFIX = "http://itv.com/version/";
-    private static final String LOCATION_PREFIX = "http://www.itv.com/itvplayer/video/?filter=";
+    private static final String LOCATION_PREFIX = "https://www.itv.com/itvplayer/video/?filter=";
     private static final Publisher PUBLISHER_ITV = Publisher.ITV;
     private static final int PRIMARY_IMAGE_WIDTH = 1024;
     private static final int PRIMARY_IMAGE_HEIGHT = 576;
