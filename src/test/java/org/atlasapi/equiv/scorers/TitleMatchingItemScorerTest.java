@@ -1,4 +1,4 @@
-package org.atlasapi.equiv.generators;
+package org.atlasapi.equiv.scorers;
 
 import static com.google.common.collect.ImmutableSet.of;
 import junit.framework.TestCase;
@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import com.google.common.collect.Iterables;
 
-public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
+public class TitleMatchingItemScorerTest extends TestCase {
 
     private final TitleMatchingItemScorer scorer = new TitleMatchingItemScorer();
 
