@@ -2,8 +2,9 @@
 
 /**
  * @param user
+ * @param redirectUri
  */
-{template .profile}
+{template .account}
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -26,15 +27,15 @@
                 <nav><a href="/admin/sources">Sources</a><a href="/admin/applications">Applications</a><a href="/admin/logout">Logout</a></nav>
         </div>
         <div class="body">
-           <h2 class="mlm">Your profile</h2>
-           <form id="userProfile" action="/admin/users/{$user.id}/profile" method="post" class="form cf">
+           <h2 class="mlm">Your account</h2>
+           <form id="userProfile" action="/admin/users/{$user.id}/account" method="post" class="form cf">
            
                <div class="grp">
                    <label for="fullName">
-                    Name
+                    Name *
                    </label>
                    <div class="inputHolder">
-                        <input id="fullName" name="fullName" type="text" placeholder="" value="{$user.fullName}" />
+                        <input id="fullName" name="fullName" type="text" placeholder="" value="{$user.fullName}" required />
                    </div>
                </div>
                
@@ -49,10 +50,10 @@
                
                <div class="grp">
                    <label for="email">
-                    Email
+                    Email *
                    </label>
                    <div class="inputHolder">
-                        <input id="email" name="email" type="text" placeholder="" value="{$user.email}" />
+                        <input id="email" name="email" type="text" placeholder="" value="{$user.email}" required />
                    </div>
                </div>
                
@@ -64,7 +65,10 @@
                         <input id="website" name="website" type="text" placeholder="" value="{$user.website}" />
                    </div>
                </div>
-               
+               <div>
+               * required information
+               </div>
+               <input name="redirectUri" type="hidden" value="{$redirectUri}" />
                <input type="submit" class="pos btn" value="Sign up" />
            </form>
         </div>
