@@ -104,6 +104,8 @@ public class BroadcastItemTitleScorer implements EquivalenceScorer<Item> {
             return Score.ONE;
         }
         
+        desc.appendText("%s scores %s, no item/container title matches",
+                candidate.getCanonicalUri(), Score.NULL_SCORE); 
         return Score.NULL_SCORE;
     }
 
@@ -121,6 +123,11 @@ public class BroadcastItemTitleScorer implements EquivalenceScorer<Item> {
 
     private boolean hasTitle(Content c) {
         return !Strings.isNullOrEmpty(c.getTitle());
+    }
+    
+    @Override
+    public String toString() {
+        return NAME;
     }
     
 }
