@@ -59,9 +59,9 @@ public class C4Module {
 	
     @PostConstruct
     public void startBackgroundTasks() {
-        //scheduler.schedule(c4EpgUpdater(), TWO_HOURS);
-        //scheduler.schedule(pcC4AtozUpdater().withName("C4 4OD PC Updater"), BRAND_UPDATE_TIME);
-        //scheduler.schedule(xboxC4AtozUpdater().withName("C4 4OD XBox Updater"), XBOX_UPDATE_TIME);
+        scheduler.schedule(c4EpgUpdater(), TWO_HOURS);
+        scheduler.schedule(pcC4AtozUpdater().withName("C4 4OD PC Updater"), BRAND_UPDATE_TIME);
+        scheduler.schedule(xboxC4AtozUpdater().withName("C4 4OD XBox Updater"), XBOX_UPDATE_TIME);
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("C4 update scheduled tasks installed").withSource(getClass()));
     }
 
