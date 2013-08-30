@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.five;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -22,6 +23,7 @@ private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 30, 0)
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
+    private @Autowired ChannelResolver channelResolver;
     private @Autowired AdapterLog log;
 
     @PostConstruct
@@ -33,6 +35,6 @@ private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 30, 0)
     @Bean
     public FiveUpdater fiveUpdater() {
         Integer soTimeout = Configurer.get("five.timeout.socket", "60").toInt();
-        return new FiveUpdater(contentWriter, log, soTimeout);
+        return new FiveUpdater(contentWriter, channelResolver, log, soTimeout);
     }
 }
