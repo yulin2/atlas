@@ -223,6 +223,7 @@
 {/template}
 
 /**
+ * @param user
  * @param application
  */
 {template .application}
@@ -233,6 +234,7 @@
 {/call}
 	{call atlas.templates.applications.widgets.applicationContent}
 		{param application: $application /}
+		{param userRole: $user.role /}
 	{/call}
 {call atlas.templates.applications.foot /}
 {/template}
