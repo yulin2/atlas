@@ -2,7 +2,9 @@ package org.atlasapi.remotesite.itv.whatson;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
@@ -17,6 +19,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -28,7 +31,8 @@ public class ItvWhatsOnTranslatorTest {
     }
     
     private ItvWhatsOnEntryExtractor getTranslator() {
-        return new ItvWhatsOnEntryExtractor();
+        return new ItvWhatsOnEntryExtractor(ImmutableMap.of("CITV", Channel.builder()
+                .withUri("http://www.itv.com/channels/citv").build()));
     }
     
     private ItvWhatsOnEntry getTestItem() {
