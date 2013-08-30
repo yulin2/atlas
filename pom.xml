@@ -455,17 +455,22 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>7.4.0.v20110414</version>
+            <version>${jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>7.4.0.v20110414</version>
+            <version>${jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
-            <version>7.4.0.v20110414</version>
+            <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+           <groupId>org.eclipse.jetty</groupId>
+           <artifactId>jetty-servlets</artifactId>
+           <version>${jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -508,6 +513,7 @@
         <atlas.version>${project.version}</atlas.version>
         <common.version>1.0-SNAPSHOT</common.version>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+        <jetty.version>7.4.0.v20110414</jetty.version>
     </properties>
 
     <scm>
