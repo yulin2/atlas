@@ -312,3 +312,21 @@ nav a {
 .prevNextBtn {
 	height: 40px;
 }
+
+#tac_inner {
+    background-color: white;
+    height: 150px;
+    overflow-y: scroll; 
+	font-size: 13px;
+	padding: 10px;
+	border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 1px 0px #fff, inset 0 1px 2px rgba(0,0,0,0.18);
+    border-radius: 5px;
+}
+
+#tac_inner ul {
+    padding-left: 20px;
+}
+#tac_inner li {
+    list-style: disc;
+}

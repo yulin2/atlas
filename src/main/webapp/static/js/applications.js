@@ -1,5 +1,24 @@
 goog.require('atlas.templates.applications.widgets');
 
+var termsAndConditions = {};
+
+termsAndConditions["pressassociation.com"] = ' \
+<p>Press Association data is made available without any licence fee under the following conditions:</p> \
+<ul> \
+   <li>This is a personal or research project and has no commercial model at this stage</li> \
+   <li>PA will limit the free licence to six months and may agree an extension if appropriate</li> \
+   <li>PA receive updates on progress of the work</li> \
+   <li>PA have an opportunity to be involved in the commercial exploitation of any product</li> \
+   <li>The data is marked Copyright: Press Association</li> \
+   <li>PA require us to pass on your contact details, including any company or trading name for their records</li> \
+   <li>Any fees payable to Red Bee Media on behalf of ITV are paid by yourself</li> \
+</ul> ';
+
+termsAndConditions["summaries.pressassociation.com"] = termsAndConditions["pressassociation.com"];
+
+
+
+
 var updatedPrecedence = false;
 
 $(document).ready(function() {
@@ -93,6 +112,12 @@ function resetCreateForm() {
 function requestPublisher(slug, pubkey, index){
     $('[name=pubkey]').val(pubkey);
     $('[name=index]').val(index);
+    $('#termsAndConditions').html("");
+    if (termsAndConditions[pubkey]) {
+    	$('#termsAndConditions').html("<h4>Terms and conditions</h4>");
+    	$('#termsAndConditions').append("<div id='tac_inner'></div>");
+    	$('#tac_inner').html(termsAndConditions[pubkey]);
+    }
     $('#publisherRequestForm').height($('body').height());
     $('.overlay').css({top: $('body').scrollTop() + 200});
 	$('#publisherRequestForm').show();
