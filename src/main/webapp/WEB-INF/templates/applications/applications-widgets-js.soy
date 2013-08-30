@@ -2,6 +2,7 @@
 
 /**
  * @param application
+ * @param userRole
  */
 {template .applicationContent}
 <h1>Application: {$application.title}</h1>
@@ -64,12 +65,26 @@
 </div>
 <div class="js_draggable form cb">
 	{foreach $publisher in $application.configuration.publishers}
-		{call atlas.templates.applications.widgets.publisher}
-			{param publisher: $publisher /}
-			{param precedence: $application.configuration.precedence /}
-			{param slug: $application.slug /}
-			{param index: index($publisher) /}
-		{/call}
+	    {if $publisher.restriction == 'ADMIN_ONLY'}
+	        {if $userRole == 'admin'}
+	          {call atlas.templates.applications.widgets.publisher}
+                {param publisher: $publisher /}
+                {param precedence: $application.configuration.precedence /}
+                {param slug: $application.slug /}
+                {param index: index($publisher) /}
+                {param adminOnly: true /}
+              {/call}
+	        {/if}
+	    {else}
+	      {call atlas.templates.applications.widgets.publisher}
+            {param publisher: $publisher /}
+            {param precedence: $application.configuration.precedence /}
+            {param slug: $application.slug /}
+            {param index: index($publisher) /}
+            {param adminOnly: false /}
+          {/call}
+	    {/if}
+		
 	{/foreach}
 </div>
 
@@ -140,6 +155,7 @@
  * @param precedence
  * @param slug
  * @param index
+ * @param adminOnly
  */
 {template .publisher}
 	<div class="line pr dragItem" data-publisher="{$publisher.key}">
@@ -147,7 +163,7 @@
 			<span class="extra inf"><span class="icn move"></span></span>
 		{/if}
 		<div class="dragItemContent">
-			<div class="unit size1of3 b">{$publisher.title}</div>
+			<div class="unit size1of3 b">{if $adminOnly}<i>{$publisher.title}</i>{else}{$publisher.title}{/if}</div>
 			{if $publisher.state == 'available'}
 		        <div class="unit size1of3">Available</div>
 			    <div class="unit size1of3 lastUnit"><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" {if $publisher.enabled}checked{/if}></div>
