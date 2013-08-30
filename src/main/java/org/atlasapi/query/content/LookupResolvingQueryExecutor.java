@@ -57,7 +57,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                 log.error(String.format("Cassandra resolution failed for URIS %s", uris), e);
             }
         }
-        return results;
+        return ImmutableMap.copyOf(results);
     }
 
     @Override
