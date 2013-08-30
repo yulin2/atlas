@@ -25,6 +25,7 @@ import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
@@ -52,7 +53,8 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
     private static final Function<Identified, Set<String>> TO_ALL_URIS = new Function<Identified, Set<String>>() {
         @Override
         public Set<String> apply(@Nullable Identified input) {
-            return input.getAllUris();
+            return Sets.union(input.getAllUris(), ImmutableSet.copyOf(
+                    Iterables.transform(input.getEquivalentTo(), LookupRef.TO_URI)));
         }
     };
     
@@ -108,17 +110,20 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 			}
 		}
 
-		Builder<String, List<Identified>> results = ImmutableMap.<String, List<Identified>>builder().putAll(found).putAll(youtubeContentGroups);
+		Map<String, List<Identified>> results = Maps.newHashMap();
+		results.putAll(found);
+		results.putAll(youtubeContentGroups);
 		
 		// If we couldn't resolve any of the missing uris then we should just return the results of the original query
 		if (fetched.isEmpty()) {
-            return results.build();
+            return results;
 		}
 		
 		updateEquivalences(fetched);
 		
 		// re-attempt the query now the missing uris have been fetched
-		return results.putAll(delegate.executeUriQuery(fetched.keySet(), query)).build();
+		results.putAll(delegate.executeUriQuery(fetched.keySet(), query));
+		return results;
 	}
 
     private void updateEquivalences(Map<String, Identified> fetched) {
