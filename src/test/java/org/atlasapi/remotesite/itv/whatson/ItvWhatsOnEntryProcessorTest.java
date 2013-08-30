@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.itv.whatson;
 
 import static org.mockito.Mockito.*;
 
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
@@ -12,15 +14,22 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.joda.time.DateTime;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 
 public class ItvWhatsOnEntryProcessorTest {
-    private final ItvWhatsOnEntryExtractor extractor = new ItvWhatsOnEntryExtractor();
+    
+    private final ChannelResolver channelResolver = mock(ChannelResolver.class); 
+    private final ItvWhatsOnEntryExtractor extractor = new ItvWhatsOnEntryExtractor(new ItvWhatsonChannelMap(channelResolver));
+    
     private String BRAND_URI = "http://itv.com/brand/1/7680";
     private String SERIES_URI = "http://itv.com/series/1/7680-02";
     private String ITEM_URI = "http://itv.com/1/7680/0029";
@@ -72,6 +81,17 @@ public class ItvWhatsOnEntryProcessorTest {
         return matchedItem;
     }
     
+    @Before
+    public void setup() {
+        when(channelResolver.fromUri(anyString())).then(new Answer<Maybe<Channel>>() {
+            @Override
+            public Maybe<Channel> answer(InvocationOnMock invocation) throws Throwable {
+                return Maybe.just(Channel.builder().withUri((String)invocation.getArguments()[0]).build());
+            }
+        });
+    }
+    
+    
     @Test
     public void testNewItem() {
         ContentResolver contentResolver = mock(ContentResolver.class);
@@ -80,17 +100,20 @@ public class ItvWhatsOnEntryProcessorTest {
         Optional<Brand> brand = extractor.toBrand(entry);
         Optional<Series> series = extractor.toSeries(entry);
         // Brand
-        when(contentResolver.findByCanonicalUris(ImmutableList.of(BRAND_URI))).thenReturn(ResolvedContent.builder().build());
+        when(contentResolver.findByCanonicalUris(ImmutableList.of(BRAND_URI)))
+            .thenReturn(ResolvedContent.builder().build());
         // Series
-        when(contentResolver.findByCanonicalUris(ImmutableList.of(SERIES_URI))).thenReturn(ResolvedContent.builder().build());   
+        when(contentResolver.findByCanonicalUris(ImmutableList.of(SERIES_URI)))
+            .thenReturn(ResolvedContent.builder().build());   
         // Episode
-        when(contentResolver.findByCanonicalUris(ImmutableList.of(ITEM_URI))).thenReturn(ResolvedContent.builder().build());
+        when(contentResolver.findByCanonicalUris(ImmutableList.of(ITEM_URI)))
+            .thenReturn(ResolvedContent.builder().build());
         
         Episode episode = new Episode();
         episode.setContainer(brand.get());
         episode.setSeries(series.get());
         extractor.setCommonItemAttributes(episode, entry);
-        ItvWhatsOnEntryProcessor processor = new ItvWhatsOnEntryProcessor(contentResolver, contentWriter);
+        ItvWhatsOnEntryProcessor processor = new ItvWhatsOnEntryProcessor(contentResolver, contentWriter, channelResolver);
         
         processor.createOrUpdateAtlasEntityFrom(entry);
         verify(contentResolver).findByCanonicalUris(ImmutableList.of(BRAND_URI));
@@ -114,7 +137,7 @@ public class ItvWhatsOnEntryProcessorTest {
         when(contentResolver.findByCanonicalUris(ImmutableList.of(ITEM_URI)))
             .thenReturn(  ResolvedContent.builder().put(ITEM_URI, getMatchedItem()).build()  );
         
-        ItvWhatsOnEntryProcessor processor = new ItvWhatsOnEntryProcessor(contentResolver, contentWriter);
+        ItvWhatsOnEntryProcessor processor = new ItvWhatsOnEntryProcessor(contentResolver, contentWriter, channelResolver);
         processor.createOrUpdateAtlasEntityFrom(entry);
         verify(contentWriter).createOrUpdate((Item) getMatchedItem());
     }
