@@ -20,6 +20,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 
 public class ItvWhatsOnEntryProcessorTest {
+    private final ItvWhatsOnEntryExtractor extractor = new ItvWhatsOnEntryExtractor();
     private String BRAND_URI = "http://itv.com/brand/1/7680";
     private String SERIES_URI = "http://itv.com/series/1/7680-02";
     private String ITEM_URI = "http://itv.com/1/7680/0029";
@@ -73,12 +74,11 @@ public class ItvWhatsOnEntryProcessorTest {
     
     @Test
     public void testNewItem() {
-        ItvWhatsOnEntryExtractor translator = new ItvWhatsOnEntryExtractor();
         ContentResolver contentResolver = mock(ContentResolver.class);
         ContentWriter contentWriter = mock(ContentWriter.class);
         ItvWhatsOnEntry entry = getTestItem();
-        Optional<Brand> brand = translator.toBrand(entry);
-        Optional<Series> series = translator.toSeries(entry);
+        Optional<Brand> brand = extractor.toBrand(entry);
+        Optional<Series> series = extractor.toSeries(entry);
         // Brand
         when(contentResolver.findByCanonicalUris(ImmutableList.of(BRAND_URI))).thenReturn(ResolvedContent.builder().build());
         // Series
@@ -86,16 +86,19 @@ public class ItvWhatsOnEntryProcessorTest {
         // Episode
         when(contentResolver.findByCanonicalUris(ImmutableList.of(ITEM_URI))).thenReturn(ResolvedContent.builder().build());
         
-        Item item = translator.toEpisodeOrItem(entry);
+        Episode episode = new Episode();
+        episode.setContainer(brand.get());
+        episode.setSeries(series.get());
+        extractor.setCommonItemAttributes(episode, entry);
         ItvWhatsOnEntryProcessor processor = new ItvWhatsOnEntryProcessor(contentResolver, contentWriter);
         
-        processor.process(entry);
+        processor.createOrUpdateAtlasEntityFrom(entry);
         verify(contentResolver).findByCanonicalUris(ImmutableList.of(BRAND_URI));
         verify(contentResolver).findByCanonicalUris(ImmutableList.of(SERIES_URI));
         verify(contentResolver).findByCanonicalUris(ImmutableList.of(ITEM_URI));
         verify(contentWriter).createOrUpdate(brand.get());
         verify(contentWriter).createOrUpdate(series.get());
-        verify(contentWriter).createOrUpdate(item);
+        verify(contentWriter).createOrUpdate(episode);
     }
     
     @Test
@@ -112,7 +115,7 @@ public class ItvWhatsOnEntryProcessorTest {
             .thenReturn(  ResolvedContent.builder().put(ITEM_URI, getMatchedItem()).build()  );
         
         ItvWhatsOnEntryProcessor processor = new ItvWhatsOnEntryProcessor(contentResolver, contentWriter);
-        processor.process(entry);
+        processor.createOrUpdateAtlasEntityFrom(entry);
         verify(contentWriter).createOrUpdate((Item) getMatchedItem());
     }
 

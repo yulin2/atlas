@@ -16,12 +16,12 @@ import com.google.common.collect.ImmutableList;
 
 
 public class ItvWhatsOnEntryProcessor {
-    private final ItvWhatsOnEntryExtractor translator;
+    private final ItvWhatsOnEntryExtractor extractor;
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
   
     public ItvWhatsOnEntryProcessor(ContentResolver contentResolver, ContentWriter contentWriter) {
-        this.translator = new ItvWhatsOnEntryExtractor();
+        this.extractor = new ItvWhatsOnEntryExtractor();
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
     }
@@ -53,16 +53,21 @@ public class ItvWhatsOnEntryProcessor {
         }
     }
     
-    public void process(ItvWhatsOnEntry entry) {
-        Optional<Brand> brand = translator.toBrand(entry);
-        if (brand.isPresent()) {
-            createOrUpdate(brand.get());
-        }
-        Optional<Series> series = translator.toSeries(entry);
+    public void createOrUpdateAtlasEntityFrom(ItvWhatsOnEntry entry) {
+        Item item = new Item();
+        Optional<Series> series = extractor.toSeries(entry);
         if (series.isPresent()) {
             createOrUpdate(series.get());
+            Episode epsiode = new Episode();
+            epsiode.setSeries(series.get());
+            item = epsiode;
         }
-        Item item = translator.toEpisodeOrItem(entry);
+        Optional<Brand> brand = extractor.toBrand(entry);
+        if (brand.isPresent()) {
+            createOrUpdate(brand.get());
+            item.setContainer(brand.get());
+        }
+        extractor.setCommonItemAttributes(item, entry);
         createOrUpdate(item);
     }
 }
