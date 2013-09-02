@@ -18,11 +18,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.metabroadcast.common.http.HttpClients;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Every;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
-import com.metabroadcast.common.social.http.HttpClients;
 
 @Configuration
 public class ItvWhatsOnModule {
@@ -40,8 +40,8 @@ public class ItvWhatsOnModule {
     
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(itvWhatsOnUpdaterDaily(), EVERY_FIFTEEN_MINUTES);
-        scheduler.schedule(itvWhatsOnUpdaterPlusMinus7Day(), EVERY_HOUR);
+        scheduler.schedule(itvWhatsOnUpdaterDaily().withName("ITV What's On Daily"), EVERY_FIFTEEN_MINUTES);
+        scheduler.schedule(itvWhatsOnUpdaterPlusMinus7Day().withName("ITV What's On +/- 7 days"), EVERY_HOUR);
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("ITV What's On Schedule task installed.").withSource(getClass()));
     }
     
@@ -61,17 +61,26 @@ public class ItvWhatsOnModule {
     }
     
     @Bean
-    public ItvWhatsOnUpdater itvWhatsOnUpdater() {
-        return new ItvWhatsOnUpdater(feedUrl, itvWhatsOnClient(), processor(), log);
+    public ItvWhatsOnUpdater itvWhatsOnUpdaterDaily() {
+        return ItvWhatsOnUpdater.builder()
+                .withFeedUrl(feedUrl)
+                .withWhatsOnClient(itvWhatsOnClient())
+                .withProcessor(processor())
+                .withLookBack(0)
+                .withLookAhead(0)
+                .withLog(log)
+                .build();
     }
     
     @Bean
-    public ItvWhatsOnUpdaterDaily itvWhatsOnUpdaterDaily() {
-        return new ItvWhatsOnUpdaterDaily(itvWhatsOnUpdater());
-    }
-    
-    @Bean
-    public ItvWhatsOnUpdaterPlusMinus7Day itvWhatsOnUpdaterPlusMinus7Day() {
-        return new ItvWhatsOnUpdaterPlusMinus7Day(itvWhatsOnUpdater());
+    public ItvWhatsOnUpdater itvWhatsOnUpdaterPlusMinus7Day() {
+        return ItvWhatsOnUpdater.builder()
+                .withFeedUrl(feedUrl)
+                .withWhatsOnClient(itvWhatsOnClient())
+                .withProcessor(processor())
+                .withLookBack(7)
+                .withLookAhead(7)
+                .withLog(log)
+                .build();
     }   
 }
