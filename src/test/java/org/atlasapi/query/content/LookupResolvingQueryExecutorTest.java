@@ -1,6 +1,8 @@
 package org.atlasapi.query.content;
 
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,8 @@ import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+
 import org.atlasapi.application.ApplicationConfiguration;
 
 @RunWith(JMock.class)
@@ -42,21 +46,14 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
     public void testSetsSameAs() {
         final String query = "query";
         final Item queryItem = new Item(query, "qcurie", Publisher.BBC);
-        final Item equivItem = new Item("equiv", "ecurie", Publisher.YOUTUBE);
+        final Item enabledEquivItem = new Item("eequiv", "eecurie", Publisher.YOUTUBE);
+        final Item disabledEquivItem = new Item("dequiv", "decurie", Publisher.PA);
         
-        LookupEntry queryEntry = LookupEntry.lookupEntryFrom(queryItem);
-        LookupEntry equivEntry = LookupEntry.lookupEntryFrom(equivItem);
-        
-        lookupStore.store(queryEntry
-            .copyWithDirectEquivalents(ImmutableSet.of(equivEntry.lookupRef()))
-            .copyWithEquivalents(ImmutableSet.of(equivEntry.lookupRef())));
-        lookupStore.store(equivEntry
-            .copyWithDirectEquivalents(ImmutableSet.of(queryEntry.lookupRef()))
-            .copyWithDirectEquivalents(ImmutableSet.of(queryEntry.lookupRef())));
+        writeEquivalenceEntries(queryItem, enabledEquivItem, disabledEquivItem);
         
         context.checking(new Expectations(){{
-            one(mongoContentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem), LookupRef.from(equivItem))));
-            will(returnValue(ResolvedContent.builder().put(queryItem.getCanonicalUri(), queryItem).put(equivItem.getCanonicalUri(), equivItem).build()));
+            one(mongoContentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem), LookupRef.from(enabledEquivItem))));
+            will(returnValue(ResolvedContent.builder().put(queryItem.getCanonicalUri(), queryItem).put(enabledEquivItem.getCanonicalUri(), enabledEquivItem).build()));
         }});
         context.checking(new Expectations(){{
             never(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
@@ -65,17 +62,27 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
         Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), MatchesNothing.asQuery());
         
         assertEquals(2, result.get(query).size());
+        ImmutableSet<LookupRef> expectedEquivs = ImmutableSet.of(
+            LookupRef.from(queryItem),
+            LookupRef.from(enabledEquivItem), 
+            LookupRef.from(disabledEquivItem)
+        );
         for (Identified resolved : result.get(query)) {
-            if(resolved.getCanonicalUri().equals(query)) {
-                assertEquals(ImmutableSet.of(LookupRef.from(equivItem)), resolved.getEquivalentTo());
-            } else if(resolved.getCanonicalUri().equals("equiv")) {
-                assertEquals(ImmutableSet.of(LookupRef.from(queryItem)), resolved.getEquivalentTo());
-            }
+            assertEquals(expectedEquivs, resolved.getEquivalentTo());
         }
         
         context.assertIsSatisfied();
     }
     
+    private void writeEquivalenceEntries(Item... items) {
+        ImmutableSet<LookupRef> refs = ImmutableSet.copyOf(Iterables.transform(ImmutableList.copyOf(items), LookupRef.FROM_DESCRIBED));
+        for (Item item : items) {
+            lookupStore.store(LookupEntry.lookupEntryFrom(item)
+                    .copyWithDirectEquivalents(refs)
+                    .copyWithEquivalents(refs));
+        }
+    }
+
     @Test
     public void testCassandraIsNotCalledIfMongoReturnsSomething() {
         final String query = "query";
@@ -139,7 +146,67 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
         context.assertIsSatisfied();
     }
     
-    private LookupEntry lookupEntryWithEquivalents(String uri, LookupRef... equiv) {
-        return new LookupEntry(uri, null, LookupRef.from(new Item("uri","curie",Publisher.BBC)), ImmutableSet.<String>of(), ImmutableSet.<Alias>of(), ImmutableSet.<LookupRef>of(), ImmutableSet.<LookupRef>of(), ImmutableSet.copyOf(equiv), null, null);
+    @Test
+    public void testContentFromDisabledPublisherIsNotReturned() {
+        final String query = "query";
+        final Item queryItem = item(1L, query, Publisher.PA);
+        
+        LookupEntry queryEntry = LookupEntry.lookupEntryFrom(queryItem);
+        lookupStore.store(queryEntry);
+        
+        context.checking(new Expectations(){{
+            never(mongoContentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem))));
+        }});
+        context.checking(new Expectations(){{
+            one(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
+            will(returnValue(ResolvedContent.builder().put(queryItem.getCanonicalUri(), queryItem).build()));
+        }});
+        
+        ApplicationConfiguration configWithoutPaEnabled = ApplicationConfiguration.defaultConfiguration();
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), 
+                MatchesNothing.asQuery().copyWithApplicationConfiguration(configWithoutPaEnabled));
+        
+        assertTrue(result.isEmpty());
+        
+    }
+
+    @Test
+    public void testContentFromDisabledPublisherIsNotReturnedButEnabledEquivalentIs() {
+        final String query = "query";
+        final Item queryItem = item(1L, query, Publisher.PA);
+        final Item equivItem = item(2L, "equiv", Publisher.BBC);
+        
+        LookupEntry queryEntry = LookupEntry.lookupEntryFrom(queryItem);
+        LookupEntry equivEntry = LookupEntry.lookupEntryFrom(equivItem);
+        
+        lookupStore.store(queryEntry
+            .copyWithDirectEquivalents(ImmutableSet.of(equivEntry.lookupRef()))
+            .copyWithEquivalents(ImmutableSet.of(equivEntry.lookupRef())));
+        lookupStore.store(equivEntry
+            .copyWithDirectEquivalents(ImmutableSet.of(queryEntry.lookupRef()))
+            .copyWithDirectEquivalents(ImmutableSet.of(queryEntry.lookupRef())));
+        
+        context.checking(new Expectations(){{
+            one(mongoContentResolver).findByLookupRefs(with(hasItems(LookupRef.from(equivItem))));
+            will(returnValue(ResolvedContent.builder().put(equivItem.getCanonicalUri(), equivItem).build()));
+        }});
+        context.checking(new Expectations(){{
+            never(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
+        }});
+        
+        ApplicationConfiguration configWithoutPaEnabled = ApplicationConfiguration.defaultConfiguration()
+                .copyWithPrecedence(ImmutableList.of(Publisher.BBC));
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), 
+                MatchesNothing.asQuery().copyWithApplicationConfiguration(configWithoutPaEnabled));
+        
+        Identified mergedResult = result.get(query).get(0);
+        assertThat(mergedResult, is((Identified)equivItem));
+        assertThat(mergedResult.getEquivalentTo().size(), is(2));
+    }
+
+    private Item item(Long id, String query, Publisher source) {
+        Item item = new Item(query, query+"curie", source);
+        item.setId(id);
+        return item;
     }
 }

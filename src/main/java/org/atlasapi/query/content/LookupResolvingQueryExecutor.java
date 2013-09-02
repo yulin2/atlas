@@ -57,31 +57,25 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                 log.error(String.format("Cassandra resolution failed for URIS %s", uris), e);
             }
         }
-        return results;
+        return ImmutableMap.copyOf(results);
     }
 
     @Override
     public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
         Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForIds(ids));
-        return mongoResults;
+        return ImmutableMap.copyOf(mongoResults);
     }
 
     @Override
     public Map<String, List<Identified>> executeAliasQuery(Optional<String> namespace, Iterable<String> values,
             ContentQuery query) {
         Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForAliases(namespace, values));
-        return mongoResults;
+        return ImmutableMap.copyOf(mongoResults);
     }
 
     private Map<String, List<Identified>> resolveMongoEntries(final ContentQuery query, Iterable<LookupEntry> lookupEntries) {
         final ApplicationConfiguration configuration = query.getConfiguration();
-        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(Iterables.filter(lookupEntries, new Predicate<LookupEntry>() {
-
-            @Override
-            public boolean apply(LookupEntry input) {
-                return configuration.isEnabled(input.lookupRef().publisher());
-            }
-        }), LookupEntry.TO_ID);
+        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(lookupEntries, LookupEntry.TO_ID);
 
         Map<String, Set<LookupRef>> lookupRefs = Maps.transformValues(lookup, LookupEntry.TO_EQUIVS);
 
@@ -115,7 +109,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                     }
                 }
 
-                return setEquivalentToFields(identifieds);
+                return setEquivalentToFields(identifieds, entry.equivalents());
             }
         });
     }
@@ -129,21 +123,9 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
         return false;
     }
 
-    private List<Identified> setEquivalentToFields(List<Identified> resolvedResults) {
-        Map<Described, LookupRef> equivRefs = Maps.newHashMap();
-        for (Identified ided : resolvedResults) {
-            if (ided instanceof Described) {
-                Described described = (Described) ided;
-                LookupRef ref = LookupRef.from(described);
-                if (ref.id() == null) {
-                    log.info("null id for {}", ref);
-                }
-                equivRefs.put(described, ref);
-            }
-        }
-        Set<LookupRef> lookupRefs = ImmutableSet.copyOf(equivRefs.values());
-        for (Entry<Described, LookupRef> equivRef : equivRefs.entrySet()) {
-            equivRef.getKey().setEquivalentTo(Sets.difference(lookupRefs, ImmutableSet.of(equivRef.getValue())));
+    private List<Identified> setEquivalentToFields(List<Identified> resolvedResults, Set<LookupRef> equivs) {
+        for (Identified identified : resolvedResults) {
+            identified.setEquivalentTo(equivs);
         }
         return resolvedResults;
     }
