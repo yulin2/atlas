@@ -221,7 +221,7 @@ public class EquivModule {
         
         Set<Publisher> youViewPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(YOUVIEW));
         updaters.register(YOUVIEW, SourceSpecificEquivalenceUpdater.builder(YOUVIEW)
-                .withItemUpdater(broadcastItemEquivalenceUpdater(youViewPublishers, Score.ZERO))
+                .withItemUpdater(broadcastItemEquivalenceUpdater(youViewPublishers, Score.negativeOne()))
                 .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(youViewPublishers))
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
@@ -389,11 +389,11 @@ public class EquivModule {
             .build();
     }
 
-    private EquivalenceUpdater<Item> broadcastItemEquivalenceUpdater(Set<Publisher> sources, Score broadcastTitleMismatch) {
+    private EquivalenceUpdater<Item> broadcastItemEquivalenceUpdater(Set<Publisher> sources, Score titleMismatch) {
         return standardItemUpdater(sources, ImmutableSet.of(
             new TitleMatchingItemScorer(), 
             new SequenceItemScorer(), 
-            new BroadcastItemTitleScorer(contentResolver, broadcastTitleMismatch)
+            new BroadcastItemTitleScorer(contentResolver, titleMismatch)
         ));
     }
 
