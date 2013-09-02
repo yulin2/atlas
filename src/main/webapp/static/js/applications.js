@@ -265,7 +265,8 @@ var updateEnabled = function(callback){
 	var slug = app.slug;
 	var count = 0;
 	var sources = {'enabled':[], 'disabled':[]};
-	
+	var enabledSection = $(".publisherSection[data-section='available-enabled']");
+	var disabledSection = $(".publisherSection[data-section='available-disabled']");
 	for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
 		var enabled = app.configuration.publishers[i].enabled;
 		var publisher = app.configuration.publishers[i].key;
@@ -274,9 +275,17 @@ var updateEnabled = function(callback){
 		if (!available) {
 			continue;
 		}
+		var newPub = $(".publisherLine[data-publisher='" + publisher + "']");
 		if (enabled) {
 			sources.enabled.push(publisher);
+			// move html to new section
+			if (enabledSection.find(".publisherLine[data-publisher='" + publisher + "']").length == 0) {
+				enabledSection.append(newPub);
+			}
 		} else {
+			if (disabledSection.find(".publisherLine[data-publisher='" + publisher + "']").length == 0) {
+				disabledSection.append(newPub);
+			}
 			sources.disabled.push(publisher);
 		}
 	}
@@ -372,7 +381,6 @@ $("#app-publishers a.down").live('click', function() {
 var page = {
 	redraw: function(newApp){
 		app = newApp;
-		
 		var publisherString = '<tbody>';
 		for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
 			var publisher = app.configuration.publishers[i];

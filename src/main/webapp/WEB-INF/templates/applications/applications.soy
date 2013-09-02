@@ -42,14 +42,17 @@
 					apps[apps.length-1].credentials.ipRanges.push('{$ip}');
 				{/foreach}
 				
-				{foreach $publisher in $app.configuration.publishers}
+				{foreach $publisherSection in $app.configuration.publishers}
+				{foreach $publisher in $publisherSection.publishers}
 					apps[apps.length-1].configuration.publishers.push({lb}
 						enabled: {$publisher.enabled},
 						title: '{$publisher.title}',
 						state: '{$publisher.state}',
 						key: '{$publisher.key}'
 					{rb});
+					{/foreach}
 				{/foreach}
+				
 			{/foreach}
 		{/if}
 		
@@ -72,13 +75,15 @@
 				app.credentials.ipRanges.push('{$ip}');
 			{/foreach}
 			
-			{foreach $publisher in $application.configuration.publishers}
+			{foreach $publisherSection in $application.configuration.publishers}
+			{foreach $publisher in $publisherSection.publishers}
 				app.configuration.publishers.push({lb}
 					enabled: {$publisher.enabled},
 					title: '{$publisher.title}',
 					state: '{$publisher.state}',
 					key: '{$publisher.key}'
 				{rb});
+				{/foreach}
 			{/foreach}
 		{/if}
 		
