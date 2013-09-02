@@ -134,8 +134,8 @@ public class ItvWhatsOnTranslatorTest {
         Version version = Iterables.getOnlyElement(episode.getVersions());
         Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
         Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
-        assertEquals(location.getUri(), "http://www.itv.com/itvplayer/video/?filter=1%2F7680%2F0029%23001");
-        assertEquals(location.getTransportType(), TransportType.LINK);
+        assertEquals("https://www.itv.com/itvplayer/video/?filter=1%2F7680%2F0029%23001", location.getUri());
+        assertEquals(TransportType.LINK, location.getTransportType());
         Policy policy = location.getPolicy();
         checkPolicy(policy);
     }
