@@ -13,6 +13,8 @@ import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.input.ModelReader;
+import org.atlasapi.input.ModelTransformer;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
@@ -20,6 +22,7 @@ import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.content.PeopleResolver;
+import org.atlasapi.persistence.content.people.PersonStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.junit.Before;
@@ -39,8 +42,14 @@ public class PeopleControllerTest {
     private final AdapterLog log = new NullAdapterLog();
     @SuppressWarnings("unchecked")
     private final AtlasModelWriter<Iterable<Person>> outputter = mock(AtlasModelWriter.class);
+    
+    private PersonStore store = mock(PersonStore.class);
+    private ModelReader reader = mock(ModelReader.class);
+    @SuppressWarnings("unchecked")
+    private ModelTransformer<org.atlasapi.media.entity.simple.Person, Person> transformer = mock(ModelTransformer.class);
+    private PeopleWriteController writeController = new PeopleWriteController(configFetcher, store, reader, transformer );
 
-    private final PeopleController peopleController = new PeopleController(resolver, configFetcher, log, outputter);
+    private final PeopleController peopleController = new PeopleController(resolver, configFetcher, log, outputter, writeController);
     private final SubstitutionTableNumberCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
 
     private StubHttpServletRequest request;

@@ -104,9 +104,6 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         if (annotations.contains(Annotation.KEY_PHRASES)) {
             simpleDescription.setKeyPhrases(simplifyPhrases(content));
         }
-        if (annotations.contains(Annotation.RELATED_LINKS)) {
-            simpleDescription.setRelatedLinks(simplifyRelatedLinks(content));
-        }
         if (annotations.contains(Annotation.PRODUCTS)) {
             simpleDescription.setProducts(resolveAndSimplifyProductsFor(content, annotations, config));
         }
@@ -197,27 +194,6 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     
     public void exposeIds(boolean expose) {
         this.exposeIds = expose;
-    }
-
-    public Iterable<RelatedLink> simplifyRelatedLinks(F content) {
-        return Iterables.transform(content.getRelatedLinks(), new Function<org.atlasapi.media.entity.RelatedLink, RelatedLink>() {
-
-            @Override
-            public RelatedLink apply(org.atlasapi.media.entity.RelatedLink rl) {
-                RelatedLink simpleLink = new RelatedLink();
-
-                simpleLink.setUrl(rl.getUrl());
-                simpleLink.setType(rl.getType().toString().toLowerCase());
-                simpleLink.setSourceId(rl.getSourceId());
-                simpleLink.setShortName(rl.getShortName());
-                simpleLink.setTitle(rl.getTitle());
-                simpleLink.setDescription(rl.getDescription());
-                simpleLink.setImage(rl.getImage());
-                simpleLink.setThumbnail(rl.getThumbnail());
-
-                return simpleLink;
-            }
-        });
     }
 
     private Iterable<Topic> res(Iterable<Long> topics, Set<Annotation> annotations) {

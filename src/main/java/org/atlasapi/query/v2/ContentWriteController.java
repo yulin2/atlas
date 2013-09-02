@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -132,6 +133,7 @@ public class ContentWriteController {
         existing.setThumbnail(update.getThumbnail());
         existing.setMediaType(update.getMediaType());
         existing.setSpecialization(update.getSpecialization());
+        existing.setRelatedLinks(merge ? merge(existing.getRelatedLinks(), update.getRelatedLinks()) : update.getRelatedLinks());
         existing.setTopicRefs(merge ? merge(existing.getTopicRefs(), update.getTopicRefs()) : update.getTopicRefs());
         existing.setPeople(merge ? merge(existing.people(), update.people()) : update.people());
         existing.setKeyPhrases(update.getKeyPhrases());
@@ -162,6 +164,10 @@ public class ContentWriteController {
         existing.setIsrc(update.getIsrc());
         existing.setDuration(update.getDuration());
         return existing;
+    }
+
+    private <T> Set<T> merge(Set<T> existing, Set<T> posted) {
+        return ImmutableSet.copyOf(Iterables.concat(posted, existing));
     }
 
     private <T> List<T> merge(List<T> existing, List<T> posted) {
