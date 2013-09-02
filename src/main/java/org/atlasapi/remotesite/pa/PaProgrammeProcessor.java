@@ -577,13 +577,24 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             broadcast.setLive(getBooleanValue(progData.getAttr().getLive()));
             broadcast.setSurround(getBooleanValue(progData.getAttr().getSurround()));
             broadcast.setPremiere(getBooleanValue(progData.getAttr().getPremiere()));
-            broadcast.setNewSeries(getBooleanValue(progData.getAttr().getNewSeries()));
-            broadcast.setNewEpisode(getBooleanValue(progData.getAttr().getNewEpisode()));
+            
+            Boolean newSeries = getBooleanValue(progData.getAttr().getNewSeries());
+            Boolean newEpisode = getBooleanValue(progData.getAttr().getNewEpisode());
+
+            broadcast.setNewSeries(newSeries);
+            broadcast.setNewEpisode(determineNewEpisodeStatus(newSeries, newEpisode));
         }
         broadcast.setLastUpdated(updateAt.toDateTimeUTC());
         return broadcast;
     }
  
+    private Boolean determineNewEpisodeStatus(Boolean newSeries, Boolean newEpisode) {
+        if (newSeries != null && newSeries && newEpisode != null) {
+            return newSeries;
+        }
+        return newEpisode;
+    }
+
     //If the repeat flag is "yes" it's definitely a repeat. If it's "no" 
     // then we can't be sure so ingest it as null.  
     private Boolean isRepeat(Channel channel, Attr attr) {
