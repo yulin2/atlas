@@ -29,7 +29,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -39,27 +38,19 @@ import com.metabroadcast.common.intl.Countries;
 
 public class FiveEpisodeProcessor {
 
-    private static final String FIVE = "https://pdb.five.tv/internal/channels/C5";
-    private static final String FIVER = "https://pdb.five.tv/internal/channels/C6";
-    private static final String FIVE_USA = "https://pdb.five.tv/internal/channels/C7";
-    
-    private static final Map<String, String> channelMap = ImmutableMap.<String, String>builder()
-        .put(FIVE, "http://www.five.tv")
-        .put(FIVER, "http://www.five.tv/channels/fiver")
-        .put(FIVE_USA, "http://www.five.tv/channels/five-usa")
-    .build();
 
     private final GenreMap genreMap = new FiveGenreMap();
     private final DateTimeFormatter dateParser = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZZ");
-    private final RemoteSiteClient<HttpResponse> httpClient;
-    private final Map<String, Series> seriesMap = Maps.newHashMap();
 
     private final String baseApiUrl;
+    private final RemoteSiteClient<HttpResponse> httpClient;
+    private final Map<String, Channel> channelMap;
+    private final Map<String, Series> seriesMap = Maps.newHashMap();
 
-    public FiveEpisodeProcessor(String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient) {
-        
+    public FiveEpisodeProcessor(String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Map<String, Channel> channelMap) {
         this.baseApiUrl = baseApiUrl;
         this.httpClient = httpClient;
+        this.channelMap = channelMap;
     }
     
     public Item processEpisode(Element element, Specialization specialization) throws Exception {
@@ -204,7 +195,7 @@ public class FiveEpisodeProcessor {
 
         String channelUri = element.getFirstChildElement("channel_link").getAttributeValue("href");
 
-        Broadcast broadcast = new Broadcast(channelMap.get(channelUri), dateParser.parseDateTime(childValue(element, "transmission_start")), dateParser.parseDateTime(childValue(element,
+        Broadcast broadcast = new Broadcast(channelMap.get(channelUri).getUri(), dateParser.parseDateTime(childValue(element, "transmission_start")), dateParser.parseDateTime(childValue(element,
                 "transmission_end")));
         
         return broadcast;
