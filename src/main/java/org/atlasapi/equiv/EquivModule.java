@@ -66,6 +66,7 @@ import org.atlasapi.equiv.results.filters.PublisherFilter;
 import org.atlasapi.equiv.results.filters.SpecializationFilter;
 import org.atlasapi.equiv.results.persistence.FileEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
+import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.scorers.BroadcastItemTitleScorer;
 import org.atlasapi.equiv.scorers.ContainerHierarchyMatchingScorer;
 import org.atlasapi.equiv.scorers.CrewMemberScorer;
@@ -201,12 +202,12 @@ public class EquivModule {
         updaters.register(RADIO_TIMES, Item.class, rtItemEquivalenceUpdater());
         
         Set<Publisher> youViewPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(YOUVIEW));
-        updaters.register(YOUVIEW, Item.class, broadcastItemEquivalenceUpdater(youViewPublishers));
+        updaters.register(YOUVIEW, Item.class, broadcastItemEquivalenceUpdater(youViewPublishers, Score.negativeOne()));
         updaters.register(YOUVIEW, Container.class, broadcastItemContainerEquivalenceUpdater(youViewPublishers));
 
         Set<Publisher> reduxPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX));
 
-        updaters.register(BBC_REDUX, Item.class, broadcastItemEquivalenceUpdater(reduxPublishers));
+        updaters.register(BBC_REDUX, Item.class, broadcastItemEquivalenceUpdater(reduxPublishers, Score.nullScore()));
         updaters.register(BBC_REDUX, Container.class, broadcastItemContainerEquivalenceUpdater(reduxPublishers));
         
         Set<Publisher> facebookAcceptablePublishers = Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK));
@@ -326,9 +327,9 @@ public class EquivModule {
             .build();
     }
 
-    private EquivalenceUpdater<Item> broadcastItemEquivalenceUpdater(Set<Publisher> reduxPublishers) {
+    private EquivalenceUpdater<Item> broadcastItemEquivalenceUpdater(Set<Publisher> reduxPublishers, Score itemTitleMismatchScore) {
         return standardItemUpdater(reduxPublishers, ImmutableSet.of(
-            new TitleMatchingItemScorer(), 
+            new TitleMatchingItemScorer(itemTitleMismatchScore), 
             new SequenceItemScorer(), 
             new BroadcastItemTitleScorer(contentResolver)
         ));
