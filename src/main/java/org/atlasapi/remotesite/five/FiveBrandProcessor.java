@@ -4,6 +4,7 @@ import static org.atlasapi.media.entity.Specialization.FILM;
 
 import java.io.StringReader;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +16,7 @@ import nu.xom.NodeFactory;
 import nu.xom.Nodes;
 
 import org.atlasapi.genres.GenreMap;
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
@@ -36,7 +38,7 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpResponse;
 
 public class FiveBrandProcessor {
-    
+
     private final static String WATCHABLES_URL_SUFFIX = "/watchables?expand=season%7Ctransmissions";
     private final ContentWriter writer;
     private final GenreMap genreMap = new FiveGenreMap();
@@ -45,12 +47,12 @@ public class FiveBrandProcessor {
     private final String baseApiUrl;
     private final RemoteSiteClient<HttpResponse> httpClient;
 
-    public FiveBrandProcessor(ContentWriter writer, AdapterLog log, String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient) {
+    public FiveBrandProcessor(ContentWriter writer, AdapterLog log, String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Map<String, Channel> channelMap) {
         this.writer = writer;
         this.log = log;
         this.baseApiUrl = baseApiUrl;
         this.httpClient = httpClient;
-        this.episodeProcessor = new FiveEpisodeProcessor(baseApiUrl, httpClient);
+        this.episodeProcessor = new FiveEpisodeProcessor(baseApiUrl, httpClient, channelMap);
     }
     
     public void processShow(Element element) {

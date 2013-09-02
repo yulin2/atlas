@@ -7,9 +7,9 @@ import static org.atlasapi.media.entity.Publisher.FIVE;
 import static org.atlasapi.media.entity.Publisher.ITUNES;
 import static org.atlasapi.media.entity.Publisher.ITV;
 import static org.atlasapi.media.entity.Publisher.LOVEFILM;
+import static org.atlasapi.media.entity.Publisher.NETFLIX;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
-import static org.atlasapi.media.entity.Publisher.NETFLIX;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 
 import java.util.Set;
@@ -27,6 +27,7 @@ import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.equiv.update.tasks.ContentEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.tasks.MongoScheduleTaskProgressStore;
 import org.atlasapi.equiv.update.tasks.ScheduleEquivalenceUpdateTask;
+import org.atlasapi.equiv.update.tasks.ScheduleEquivalenceUpdateTask.Builder;
 import org.atlasapi.equiv.update.www.ContentEquivalenceUpdateController;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -36,6 +37,11 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
+import org.atlasapi.remotesite.bbc.ion.BbcIonServices;
+import org.atlasapi.remotesite.channel4.C4AtomApi;
+import org.atlasapi.remotesite.five.FiveChannelMap;
+import org.atlasapi.remotesite.itv.whatson.ItvWhatsonChannelMap;
+import org.atlasapi.remotesite.redux.ReduxServices;
 import org.atlasapi.remotesite.youview.DefaultYouViewChannelResolver;
 import org.atlasapi.remotesite.youview.YouViewChannelResolver;
 import org.joda.time.Duration;
@@ -47,8 +53,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
@@ -62,6 +69,11 @@ public class EquivTaskModule {
     private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
     private static final RepetitionRule YOUVIEW_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(15, 00));
     private static final RepetitionRule YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(13, 00));
+    private static final RepetitionRule BBC_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
+    private static final RepetitionRule ITV_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(11, 00));
+    private static final RepetitionRule C4_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(15, 00));
+    private static final RepetitionRule FIVE_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(17, 00));
+    private static final RepetitionRule REDUX_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(7, 00));
     
     private @Value("${equiv.updater.enabled}") String updaterEnabled;
     
@@ -79,7 +91,6 @@ public class EquivTaskModule {
     @PostConstruct
     public void scheduleUpdater() {
         if(Boolean.parseBoolean(updaterEnabled)) {
-            taskScheduler.schedule(publisherUpdateTask(BBC, C4, ITV, FIVE, RADIO_TIMES, BBC_REDUX).withName("BBC/C4/ITV/Five/RT/Redux Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(PA).withName("PA Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(BBC).withName("BBC Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(C4).withName("C4 Equivalence Updater"), RepetitionRules.NEVER);
@@ -94,15 +105,47 @@ public class EquivTaskModule {
             
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_MUSIC).withName("Music Equivalence Updater"), RepetitionRules.every(Duration.standardHours(6)));
             
-            taskScheduler.schedule(scheduleEquivTask(
-                    Lists.newArrayList(YOUVIEW), 
-                    youViewChannelResolver().getAllChannels(),
-                    0,
-                    7
-                ).withName("YouView Schedule Equivalence (8 day) Updater"), YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
+            Builder taskBuilder = ScheduleEquivalenceUpdateTask.builder()
+                .withUpdater(equivUpdater)
+                .withScheduleResolver(scheduleResolver)
+                .withBack(0)
+                .withForward(7);
+            
+            taskScheduler.schedule(taskBuilder
+                    .withPublishers(YOUVIEW)
+                    .withChannels(youViewChannelResolver().getAllChannels())
+                    .build().withName("YouView Schedule Equivalence (8 day) Updater"), 
+                YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder
+                    .withPublishers(BBC)
+                    .withChannels(bbcChannels())
+                    .build().withName("BBC Schedule Equivalence (8 day) Updater"), 
+                BBC_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder
+                    .withPublishers(ITV)
+                    .withChannels(itvChannels())
+                    .build().withName("ITV Schedule Equivalence (8 day) Updater"), 
+                ITV_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder
+                    .withPublishers(C4)
+                    .withChannels(c4Channels())
+                    .build().withName("C4 Schedule Equivalence (8 day) Updater"), 
+                C4_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder
+                    .withPublishers(FIVE)
+                    .withChannels(fiveChannels())
+                    .build().withName("Five Schedule Equivalence (8 day) Updater"), 
+                FIVE_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder
+                    .withBack(7)
+                    .withForward(0)
+                    .withPublishers(BBC_REDUX)
+                    .withChannels(bbcReduxChannels())
+                    .build().withName("Redux Schedule Equivalence (8 day) Updater"), 
+                REDUX_SCHEDULE_EQUIVALENCE_REPETITION);
         }
     }
-    
+
     public @Bean MongoScheduleTaskProgressStore progressStore() {
         return new MongoScheduleTaskProgressStore(db);
     }
@@ -111,17 +154,6 @@ public class EquivTaskModule {
         return new ContentEquivalenceUpdateTask(contentLister, contentResolver, progressStore(), equivUpdater, ignored).forPublishers(publishers);
     }
     
-    private ScheduleEquivalenceUpdateTask scheduleEquivTask(Iterable<Publisher> publishers, Iterable<Channel> channels, int daysBack, int daysForward) {
-        return ScheduleEquivalenceUpdateTask.builder()
-            .withUpdater(equivUpdater)
-            .withScheduleResolver(scheduleResolver)
-            .withPublishers(publishers)
-            .withChannels(channels)
-            .withBack(daysBack)
-            .withForward(daysForward)
-            .build();
-    }
-
     //Controllers...
     public @Bean ContentEquivalenceUpdateController contentEquivalenceUpdateController() {
         return new ContentEquivalenceUpdateController(equivUpdater, contentResolver);
@@ -150,6 +182,33 @@ public class EquivTaskModule {
     
     private YouViewChannelResolver youViewChannelResolver() {
         return new DefaultYouViewChannelResolver(channelResolver);
+    }
+    
+    private Iterable<Channel> bbcChannels() {
+        return Iterables.transform(BbcIonServices.services.values(),
+            new Function<String, Channel>() {
+                @Override
+                public Channel apply(String input) {
+                    return channelResolver.fromUri(input).requireValue();
+                }
+            }
+        );
+    }
+
+    private Iterable<Channel> itvChannels() {
+        return new ItvWhatsonChannelMap(channelResolver).values();
+    }
+        
+    private Iterable<Channel> c4Channels() {
+        return new C4AtomApi(channelResolver).getChannelMap().values();
+    }
+    
+    private Iterable<Channel> fiveChannels() {
+        return new FiveChannelMap(channelResolver).values();
+    }
+
+    private Iterable<Channel> bbcReduxChannels() {
+        return new ReduxServices(channelResolver).channelMap().values();
     }
     
 }

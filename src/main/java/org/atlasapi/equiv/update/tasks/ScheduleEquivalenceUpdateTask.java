@@ -172,6 +172,10 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
             return this;
         }
 
+        public Builder withPublishers(Publisher... publishers) {
+            return withPublishers(ImmutableList.copyOf(publishers));
+        }
+
         public Builder withChannels(Iterable<Channel> channels) {
             this.channels = ImmutableList.copyOf(channels);
             return this;

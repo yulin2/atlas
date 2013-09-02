@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.itv.whatson;
 
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -19,8 +20,8 @@ public class ItvWhatsOnEntryProcessor {
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
   
-    public ItvWhatsOnEntryProcessor(ContentResolver contentResolver, ContentWriter contentWriter) {
-        this.translator = new ItvWhatsOnEntryExtractor();
+    public ItvWhatsOnEntryProcessor(ContentResolver contentResolver, ContentWriter contentWriter, ChannelResolver channelResolver) {
+        this.translator = new ItvWhatsOnEntryExtractor(new ItvWhatsonChannelMap(channelResolver));
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
     }

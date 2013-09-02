@@ -1,7 +1,10 @@
 package org.atlasapi.remotesite.itv.whatson;
 
 import java.util.List;
+
 import javax.annotation.PostConstruct;
+
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Every;
@@ -22,9 +26,11 @@ import com.metabroadcast.common.social.http.HttpClients;
 
 @Configuration
 public class ItvWhatsOnModule {
+    
     private @Autowired SimpleScheduler scheduler;
     private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
     private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
+    private @Autowired ChannelResolver channelResolver;
     private @Value("${itv.whatson.schedule.url}") String feedUrl;
     
     private static final Every EVERY_FIFTEEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(15));
@@ -51,7 +57,7 @@ public class ItvWhatsOnModule {
     
     @Bean
     public ItvWhatsOnEntryProcessor processor() {
-        return new ItvWhatsOnEntryProcessor(contentResolver, contentWriter);
+        return new ItvWhatsOnEntryProcessor(contentResolver, contentWriter, channelResolver);
     }
     
     @Bean

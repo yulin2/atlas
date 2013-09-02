@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.five;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import nu.xom.Builder;
@@ -9,6 +10,8 @@ import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
 
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -41,11 +44,18 @@ public class FiveUpdater extends ScheduledTask {
     private final Builder parser = new Builder();
     private SimpleHttpClient streamHttpClient;
 
-    public FiveUpdater(ContentWriter contentWriter, AdapterLog log, int socketTimeout) {
+    public FiveUpdater(ContentWriter contentWriter, ChannelResolver channelResolver, AdapterLog log, int socketTimeout) {
         this.log = log;
         this.socketTimeout = socketTimeout;
         this.streamHttpClient = buildFetcher(log);
-        this.processor = new FiveBrandProcessor(contentWriter, log, BASE_API_URL, new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(buildFetcher(log)), 4));
+        this.processor = new FiveBrandProcessor(contentWriter, log, BASE_API_URL, 
+            new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(buildFetcher(log)), 4), 
+            channelMap(channelResolver)
+        );
+    }
+
+    private Map<String, Channel>channelMap(ChannelResolver channelResolver) {
+        return new FiveChannelMap(channelResolver); 
     }
 
     private SimpleHttpClient buildFetcher(final AdapterLog log) {
