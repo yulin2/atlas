@@ -16,13 +16,17 @@ $(document).ready(function() {
 			data: $(this).serializeArray(),
 			success:function(responseData, textStatus, XMLHttpRequest) {
 				addApplication(slug, responseData);
-				$('.overlayBlocker').hide();
+				resetCreateForm();
 			},
 			error:function(textStatus) {
 				console.log("fail:", textStatus);
 			}
 		});	
 		return false;
+	});
+	
+	$("#btnAppCancel").click(function() {
+		resetCreateForm();
 	});
 	
 	if(app && app.configuration && app.configuration.precedence){
@@ -72,6 +76,12 @@ $(document).ready(function() {
 	
 	$(window).hashchange();*/
 });
+
+function resetCreateForm() {
+	$('.overlayBlocker').hide();
+	$('input:text[name="slug"]').val("");
+	$('input:text[name="title"]').val("");
+}
 
 //$("a.app-link").live('click', function(){
 //	var parts = $(this).attr('href').split('/');
