@@ -103,6 +103,7 @@ $("#sendPublisherRequest").live('click', function() {
 	var requestUrl = $('#publisherRequest').attr('action');
 	var data = {};
 	data.pubkey = $('[name=pubkey]').val();
+	data.usageType = $('[name=usageType]').val();
 	data.email = $('[name=email]').val();
 	data.reason = $('[name=reason]').val();
 	var index = $('[name=index]').val();

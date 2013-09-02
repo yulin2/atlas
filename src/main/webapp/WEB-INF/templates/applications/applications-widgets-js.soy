@@ -78,6 +78,20 @@
 		<a href="#" class="closeOverlay"></a>
 		<h2 class="mlm">Request access to publisher</h2>
 		<form id="publisherRequest" action="/admin/applications/{$application.slug}/publishers/requested" method="post" class="form cf">
+		
+		    <div class="grp">
+                <label for="usageType">
+                    Useage type
+                </label>
+                <div class="inputHolder">
+                    <select id="usageType" name="usageType">
+                        <option value="commercial">Commercial</option>
+                        <option value="noncommercial">Non commercial</option>
+                        <option value="personal">Personal</option>
+                    </select>
+                </div>
+            </div>
+            
 			<div class="grp">
 				<label for="email">
 					Your email address

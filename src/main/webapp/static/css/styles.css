@@ -42,7 +42,8 @@ table h1,table h2,table h3, table h4, table h5, table h6, table p, table ul, tab
 
 
 .form input[type="text"],
-.form .text{
+.form .text, select{
+	height: 30px;
 	margin: 0;
 	width: 100%;
 	padding: 0 10px;
