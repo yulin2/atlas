@@ -42,17 +42,27 @@
 					apps[apps.length-1].credentials.ipRanges.push('{$ip}');
 				{/foreach}
 				
-				{foreach $publisherSection in $app.configuration.publishers}
-				{foreach $publisher in $publisherSection.publishers}
-					apps[apps.length-1].configuration.publishers.push({lb}
-						enabled: {$publisher.enabled},
-						title: '{$publisher.title}',
-						state: '{$publisher.state}',
-						key: '{$publisher.key}'
-					{rb});
-					{/foreach}
-				{/foreach}
-				
+				{if $app.configuration.publishers[0].section_key}
+				    {foreach $publisherSection in $app.configuration.publishers}
+				        {foreach $publisher in $publisherSection.publishers}
+					        apps[apps.length-1].configuration.publishers.push({lb}
+						       enabled: {$publisher.enabled},
+						       title: '{$publisher.title}',
+						       state: '{$publisher.state}',
+						       key: '{$publisher.key}'
+					        {rb});
+					    {/foreach}
+				    {/foreach}
+				{else}
+				    {foreach $publisher in $app.configuration.publishers}
+                        apps[apps.length-1].configuration.publishers.push({lb}
+                            enabled: {$publisher.enabled},
+                            title: '{$publisher.title}',
+                            state: '{$publisher.state}',
+                            key: '{$publisher.key}'
+                        {rb});
+                    {/foreach}
+				{/if}
 			{/foreach}
 		{/if}
 		
@@ -75,16 +85,27 @@
 				app.credentials.ipRanges.push('{$ip}');
 			{/foreach}
 			
-			{foreach $publisherSection in $application.configuration.publishers}
-			{foreach $publisher in $publisherSection.publishers}
-				app.configuration.publishers.push({lb}
-					enabled: {$publisher.enabled},
-					title: '{$publisher.title}',
-					state: '{$publisher.state}',
-					key: '{$publisher.key}'
-				{rb});
-				{/foreach}
-			{/foreach}
+			{if $application.configuration.publishers[0].section_key}
+			    {foreach $publisherSection in $application.configuration.publishers}
+			        {foreach $publisher in $publisherSection.publishers}
+				         app.configuration.publishers.push({lb}
+					         enabled: {$publisher.enabled},
+					         title: '{$publisher.title}',
+					         state: '{$publisher.state}',
+					         key: '{$publisher.key}'
+				         {rb});
+				    {/foreach}
+			    {/foreach}
+			{else}
+			    {foreach $publisher in $application.configuration.publishers}
+                    app.configuration.publishers.push({lb}
+                        enabled: {$publisher.enabled},
+                        title: '{$publisher.title}',
+                        state: '{$publisher.state}',
+                        key: '{$publisher.key}'
+                    {rb});
+                {/foreach}
+			{/if}
 		{/if}
 		
 		{if $sources}
