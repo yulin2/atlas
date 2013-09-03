@@ -338,6 +338,7 @@
 {/template}
 
 /**
+ * @param page
  * @param source
  * @param source_requests
  */
@@ -347,7 +348,16 @@
     {param application: null /}
     {param sources: null /}
     {param showHeaderMenu: true /}
-{/call}
+{/call}    
+    <div class="form fr mrm">
+        <div class="grp">
+            <label for="search">Search</label>
+            <div class="inputHolder">
+                <input type="text" id="search" value="{$page.search}"/>
+                <span class="extra pos"><a href="#" class="icn tick" id="runSearch" title="Search">Search</a></span>
+            </div>
+        </div>
+    </div>
     <h1>{$source.title}</h1>
     <div class="subNav"><a href="/admin/sources/{$source.id}/applications">Applications</a><span class="subNavItem">Requests</span></div>
 
@@ -385,12 +395,29 @@
             </div>
         {/foreach}
     {else}
-        <div class="alert inf">There aren't any requests yet.</div>
+        {if $page.search == ''}
+            <div class="alert inf">There aren't any requests yet.</div>
+        {else}
+            <div class="alert inf">No results</div>
+        {/if}
     {/if}
+  <div>
+    {if $page.nextUrl}
+       <div class="prevNextBtn  fr">
+           <a href="{$page.nextUrl}" class="btn inf mlm">Next</a>
+       </div>
+    {/if}
+    {if $page.prevUrl}
+       <div class="prevNextBtn">
+           <a href="{$page.prevUrl}" class="btn inf mlm">Previous</a>
+       </div>
+    {/if}
+   </div>
 </body>
 {/template}
 
 /**
+ * @param page
  * @param source_requests
  */
 {template .allSourceRequests}
@@ -400,9 +427,19 @@
     {param sources: null /}
     {param showHeaderMenu: true /}
 {/call}
+    <div class="form fr mrm">
+        <div class="grp">
+            <label for="search">Search</label>
+            <div class="inputHolder">
+                <input type="text" id="search" value="{$page.search}"/>
+                <span class="extra pos"><a href="#" class="icn tick" id="runSearch" title="Search">Search</a></span>
+            </div>
+        </div>
+    </div>
+
     <h1>Source requests</h1>
     <div class="subNav"><a href="/admin/sources">Sources</a><span class="subNavItem">Requests</span></div>
-
+    
     {if length($source_requests) > 0}
         <div class="line">
             <div class="unit size1of5">
@@ -443,8 +480,24 @@
             </div>
         {/foreach}
     {else}
-        <div class="alert inf">There aren't any requests yet.</div>
+        {if $page.search == ''}
+            <div class="alert inf">There aren't any requests yet.</div>
+        {else}
+            <div class="alert inf">No results</div>
+        {/if}
     {/if}
+  <div>
+    {if $page.nextUrl}
+       <div class="prevNextBtn  fr">
+           <a href="{$page.nextUrl}" class="btn inf mlm">Next</a>
+       </div>
+    {/if}
+    {if $page.prevUrl}
+       <div class="prevNextBtn">
+           <a href="{$page.prevUrl}" class="btn inf mlm">Previous</a>
+       </div>
+    {/if}
+   </div>
 </body>
 {/template}
 
