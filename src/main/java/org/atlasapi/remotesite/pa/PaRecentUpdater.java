@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.pa;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
 
 import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.feeds.upload.FileUploadResult.FileUploadResultType;
@@ -20,8 +21,8 @@ public class PaRecentUpdater extends PaBaseProgrammeUpdater implements Runnable 
     private final PaProgrammeDataStore fileManager;
     private final FileUploadResultStore fileUploadResultStore;
     
-    public PaRecentUpdater(PaChannelProcessor channelProcessor, PaProgrammeDataStore fileManager, ChannelResolver channelResolver, FileUploadResultStore fileUploadResultStore, PaScheduleVersionStore paScheduleVersionStore) {
-        super(channelProcessor, fileManager, channelResolver, Optional.of(paScheduleVersionStore));
+    public PaRecentUpdater(ExecutorService executor, PaChannelProcessor channelProcessor, PaProgrammeDataStore fileManager, ChannelResolver channelResolver, FileUploadResultStore fileUploadResultStore, PaScheduleVersionStore paScheduleVersionStore) {
+        super(executor, channelProcessor, fileManager, channelResolver, Optional.of(paScheduleVersionStore));
         this.fileManager = fileManager;
         this.fileUploadResultStore = fileUploadResultStore;
     }
