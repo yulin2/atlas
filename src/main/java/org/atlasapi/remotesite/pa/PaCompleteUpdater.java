@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.pa;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
 
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
@@ -13,8 +14,8 @@ public class PaCompleteUpdater extends PaBaseProgrammeUpdater implements Runnabl
     
     private final PaProgrammeDataStore fileManager;
 
-    public PaCompleteUpdater(PaChannelProcessor processor, PaProgrammeDataStore fileManager, ChannelResolver channelResolver) {
-        super(processor, fileManager, channelResolver, Optional.<PaScheduleVersionStore>absent());
+    public PaCompleteUpdater(ExecutorService executor, PaChannelProcessor processor, PaProgrammeDataStore fileManager, ChannelResolver channelResolver) {
+        super(executor, processor, fileManager, channelResolver, Optional.<PaScheduleVersionStore>absent());
         this.fileManager = fileManager;
     }
     

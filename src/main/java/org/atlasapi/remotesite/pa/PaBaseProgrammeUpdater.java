@@ -8,7 +8,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -48,7 +47,6 @@ import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -84,11 +82,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         this.deltaFileHelper = new PaDeltaFileHelper();
         this.channelMap = new PaChannelMap(channelResolver);
     }
-    
-    public PaBaseProgrammeUpdater(PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver, Optional<PaScheduleVersionStore> paScheduleVersionStore) {
-        this(Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setNameFormat("pa-updater-%s").build()), processor, dataStore, channelResolver, paScheduleVersionStore);
-    }
-    
+
     public void supportChannels(Iterable<Channel> channels) {
         supportedChannels = ImmutableList.copyOf(channels);
     }
