@@ -1,10 +1,10 @@
-{namespace atlas.templates.applications.user.success.email}
+{namespace atlas.templates.applications.user.email}
 
 /**
  *
  */
 {template .subject}
-[Atlas] Request for access to a publisher approved
+[Atlas] Request for access to a publisher
 {/template}
 
 /**
@@ -19,8 +19,8 @@
 {template .body}
 <html>
 <body>
-<p>Your request to access <b>{$publisher_title}</b> has been approved and is now available for use under the application .</p>
-<p>Please log in to Atlas and add the source to your API key.</p>
+<p>Thank you for your request to access <b>{$publisher_title}</b>.</p>
+<p>Your request has been received and we will be in touch shortly.</p>
 <p>Details:<br/>
 Application: {$application_title} ({$slug})<br/>
 App/Website URL: {$appUrl}<br/>
