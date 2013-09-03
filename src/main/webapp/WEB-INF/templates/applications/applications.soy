@@ -251,6 +251,8 @@
     {param showHeaderMenu: true /}
 {/call}
     <h1>Sources</h1>
+    <div class="subNav"><span class="subNavItem">Sources</span><a href="/admin/requests">Requests</a></div>
+    
 	<div class="form fr mrm">
     	<div class="grp">
     		<label for="filter">Filter</label>
@@ -387,6 +389,65 @@
     {/if}
 </body>
 {/template}
+
+/**
+ * @param source_requests
+ */
+{template .allSourceRequests}
+{call atlas.templates.applications.head}
+    {param applications: null /}
+    {param application: null /}
+    {param sources: null /}
+    {param showHeaderMenu: true /}
+{/call}
+    <h1>Source requests</h1>
+    <div class="subNav"><a href="/admin/sources">Sources</a><span class="subNavItem">Requests</span></div>
+
+    {if length($source_requests) > 0}
+        <div class="line">
+            <div class="unit size1of5">
+                <span class="h3">Application</span>
+            </div>
+             <div class="unit size1of5">
+                <span class="h3">Publisher</span>
+            </div>
+            <div class="unit size1of5">
+                <span class="h3">Usage type</span>
+            </div>
+            <div class="unit size1of5">
+                <span class="h3">Reason</span>
+            </div>
+            <div class="unit size1of5 lastUnit">
+                <span class="h3">&nbsp;</span>
+            </div>
+        </div>
+        {foreach $sourceRequest in $source_requests}
+            <div class="line app-link" data-app="{$sourceRequest.application.slug}">
+                <div class="unit size1of5">
+                    {$sourceRequest.application.title}
+                </div>
+                <div class="unit size1of5">
+                    {$sourceRequest.publisher.title}
+                </div>
+                <div class="unit size1of5">
+                    {$sourceRequest.usage_type.title}
+                </div>
+                <div class="unit size1of5">
+                    {$sourceRequest.reason}
+                </div>
+                <div class="unit size1of5 lastUnit">
+                   {if not $sourceRequest.approved}
+                        <a class="approve-link" href="/admin/sources/{$sourceRequest.publisher.id}/applications/approved?application={$sourceRequest.application.slug}">Approve?</a>
+                    {/if}
+                </div>
+            </div>
+        {/foreach}
+    {else}
+        <div class="alert inf">There aren't any requests yet.</div>
+    {/if}
+</body>
+{/template}
+
 
 /**
  * 
