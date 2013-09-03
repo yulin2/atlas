@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.pa;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -48,6 +50,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
@@ -94,6 +97,7 @@ public class PaModule {
     private @Value("${s3.secret}") String s3secret;
     private @Value("${pa.s3.bucket}") String s3bucket;
     private @Value("${pa.people.enabled}") boolean peopleEnabled;
+    private @Value("${pa.content.updater.threads") int contentUpdaterThreadCount;
     
     @PostConstruct
     public void startBackgroundTasks() {
@@ -145,13 +149,15 @@ public class PaModule {
     @Bean PaCompleteUpdater paCompleteUpdater() {
         PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
         PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
-        PaCompleteUpdater updater = new PaCompleteUpdater(channelProcessor, paProgrammeDataStore(), channelResolver);
+        ExecutorService executor = Executors.newFixedThreadPool(contentUpdaterThreadCount, new ThreadFactoryBuilder().setNameFormat("pa-complete-updater-%s").build());
+        PaCompleteUpdater updater = new PaCompleteUpdater(executor, channelProcessor, paProgrammeDataStore(), channelResolver);
         return updater;
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
         PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
-        PaRecentUpdater updater = new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), channelResolver, fileUploadResultStore, paScheduleVersionStore());
+        ExecutorService executor = Executors.newFixedThreadPool(contentUpdaterThreadCount, new ThreadFactoryBuilder().setNameFormat("pa-recent-updater-%s").build());
+        PaRecentUpdater updater = new PaRecentUpdater(executor, channelProcessor, paProgrammeDataStore(), channelResolver, fileUploadResultStore, paScheduleVersionStore());
         return updater;
     }
     
@@ -165,7 +171,7 @@ public class PaModule {
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
         PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
-        return new PaSingleDateUpdatingController(channelProcessor, scheduleResolver, channelResolver, log, paProgrammeDataStore());
+        return new PaSingleDateUpdatingController(channelProcessor, scheduleResolver, channelResolver, paProgrammeDataStore());
     }
     
     public @Bean PaScheduleVersionStore paScheduleVersionStore() {
