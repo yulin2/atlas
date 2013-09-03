@@ -4,6 +4,7 @@
  * @param applications
  * @param application
  * @param sources
+ * @param showHeaderMenu
  */
 {template .head}
 <!DOCTYPE HTML>
@@ -106,7 +107,7 @@
 	<div class="page w960 mna tal pbl">
 		<div class="head cf">
 			<span class="adminLogo"></span>
-			{if $applications or $application or $sources}
+			{if $showHeaderMenu}
 				<nav><a href="/admin/sources">Sources</a><a href="/admin/applications">Applications</a><a href="/admin/users">Users</a><a href="/admin/logout">Logout</a></nav>
 			{/if}
 		</div>
@@ -135,6 +136,7 @@
 	{param applications: $applications /}
 	{param application: null /}
 	{param sources: null /}
+	{param showHeaderMenu: true /}
 {/call}
 	<h1>Applications</h1>
 	<div class="form fr mrm">
@@ -230,6 +232,7 @@
 	{param applications: null /}
 	{param application: $application /}
 	{param sources: null /}
+    {param showHeaderMenu: true /}
 {/call}
 	{call atlas.templates.applications.widgets.applicationContent}
 		{param application: $application /}
@@ -245,6 +248,7 @@
 	{param applications: null /}
 	{param application: null /}
 	{param sources: $sources /}
+    {param showHeaderMenu: true /}
 {/call}
     <h1>Sources</h1>
 	<div class="form fr mrm">
@@ -275,8 +279,11 @@
 	{param applications: $applications /}
     {param application: null /}
     {param sources: null /}
+    {param showHeaderMenu: true /}
 {/call}
     <h1>{$source.title}</h1>
+    <div class="subNav"><span class="subNavItem">Applications</span><a href="/admin/sources/{$source.id}/requests">Requests</a></div>
+    
     {if length($applications) > 0}
     	<div class="line">
     		<div class="unit size1of6">
@@ -329,6 +336,59 @@
 {/template}
 
 /**
+ * @param source
+ * @param source_requests
+ */
+{template .sourceRequests}
+{call atlas.templates.applications.head}
+    {param applications: null /}
+    {param application: null /}
+    {param sources: null /}
+    {param showHeaderMenu: true /}
+{/call}
+    <h1>{$source.title}</h1>
+    <div class="subNav"><a href="/admin/sources/{$source.id}/applications">Applications</a><span class="subNavItem">Requests</span></div>
+
+    {if length($source_requests) > 0}
+        <div class="line">
+            <div class="unit size1of4">
+                <span class="h3">Application</span>
+            </div>
+            <div class="unit size1of4">
+                <span class="h3">Usage type</span>
+            </div>
+            <div class="unit size1of4">
+                <span class="h3">Reason</span>
+            </div>
+            <div class="unit size1of4 lastUnit">
+                <span class="h3">&nbsp;</span>
+            </div>
+        </div>
+        {foreach $sourceRequest in $source_requests}
+            <div class="line app-link" data-app="{$sourceRequest.application.slug}">
+                <div class="unit size1of4">
+                    {$sourceRequest.application.title}
+                </div>
+                <div class="unit size1of4">
+                    {$sourceRequest.usage_type.title}
+                </div>
+                <div class="unit size1of4">
+                    {$sourceRequest.reason}
+                </div>
+                <div class="unit size1of4 lastUnit">
+                   {if not $sourceRequest.approved}
+                        <a class="approve-link" href="/admin/sources/{$source.id}/applications/approved?application={$sourceRequest.application.slug}">Approve?</a>
+                    {/if}
+                </div>
+            </div>
+        {/foreach}
+    {else}
+        <div class="alert inf">There aren't any requests yet.</div>
+    {/if}
+</body>
+{/template}
+
+/**
  * 
  */
 {template .login}
@@ -336,6 +396,7 @@
     {param applications: null /}
     {param application: null /}
     {param sources: null /}
+    {param showHeaderMenu: false /}
 {/call}
 			<div class="main pm">
 				<h1>Welcome to Atlas</h1>
