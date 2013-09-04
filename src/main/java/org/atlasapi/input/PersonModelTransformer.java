@@ -32,7 +32,9 @@ public class PersonModelTransformer extends DescribedModelTransformer<Person, or
         person.setGender(simple.getGender());
         person.setBirthDate(simple.getBirthDate());
         person.setBirthPlace(simple.getBirthPlace());
-        person.setQuotes(simple.getQuotes());
+        if (simple.getQuotes() != null) {
+            person.setQuotes(simple.getQuotes());
+        }
         
         return person;
     }
