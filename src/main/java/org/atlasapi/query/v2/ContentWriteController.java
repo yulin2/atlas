@@ -126,6 +126,7 @@ public class ContentWriteController {
     }
 
     private Content merge(Content existing, Content update, boolean merge) {
+        existing.setEquivalentTo(merge ? merge(existing.getEquivalentTo(), update.getEquivalentTo()) : update.getEquivalentTo());
         existing.setLastUpdated(update.getLastUpdated());
         existing.setTitle(update.getTitle());
         existing.setDescription(update.getDescription());

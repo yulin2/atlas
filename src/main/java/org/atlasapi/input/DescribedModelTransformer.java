@@ -18,25 +18,18 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
 
-public abstract class DescribedModelTransformer<F extends Description,T extends Described> implements ModelTransformer<F, T> {
-
-    private Clock clock;
+public abstract class DescribedModelTransformer<F extends Description,T extends Described> extends IdentifiedModelTransformer<F, T> {
 
     public DescribedModelTransformer(Clock clock) {
-        this.clock = clock;
+        super(clock);
     }
     
     @Override
-    public final T transform(F simple) {
-        DateTime now = clock.now();
-        T output = createDescribedOutput(simple, now);
-        output.setLastUpdated(now);
-        return setDescriptionFields(output, simple);
+    protected final T createIdentifiedOutput(F simple, DateTime now) {
+        return setDescriptionFields(createDescribedOutput(simple, now), simple);
     }
 
     private T setDescriptionFields(T result, F inputContent) {
-        result.setCanonicalUri(inputContent.getUri());
-        result.setCurie(inputContent.getCurie());
         Publisher publisher = getPublisher(inputContent.getPublisher());
         result.setPublisher(publisher);
         result.setTitle(inputContent.getTitle());

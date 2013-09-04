@@ -108,6 +108,7 @@ public class PeopleWriteController {
     }
 
     private Person merge(Person existing, Person update, boolean merge) {
+        existing.setEquivalentTo(merge ? merge(existing.getEquivalentTo(), update.getEquivalentTo()) : update.getEquivalentTo());
         existing.setLastUpdated(update.getLastUpdated());
         existing.setTitle(update.getTitle());
         existing.setDescription(update.getDescription());
