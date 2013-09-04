@@ -4,6 +4,7 @@
  * @param applications
  * @param application
  * @param sources
+ * @param showHeaderMenu
  */
 {template .head}
 <!DOCTYPE HTML>
@@ -132,7 +133,7 @@
 	<div class="page w960 mna tal pbl">
 		<div class="head cf">
 			<span class="adminLogo"></span>
-			{if $applications or $application or $sources}
+			{if $showHeaderMenu}
 				<nav><a href="/admin/sources">Sources</a><a href="/admin/applications">Applications</a><a href="/admin/users">Users</a><a href="/admin/logout">Logout</a></nav>
 			{/if}
 		</div>
@@ -161,6 +162,7 @@
 	{param applications: $applications /}
 	{param application: null /}
 	{param sources: null /}
+	{param showHeaderMenu: true /}
 {/call}
 	<h1>Applications</h1>
 	<div class="form fr mrm">
@@ -257,6 +259,7 @@
 	{param applications: null /}
 	{param application: $application /}
 	{param sources: null /}
+    {param showHeaderMenu: true /}
 {/call}
 	{call atlas.templates.applications.widgets.applicationContent}
 		{param application: $application /}
@@ -273,8 +276,11 @@
 	{param applications: null /}
 	{param application: null /}
 	{param sources: $sources /}
+    {param showHeaderMenu: true /}
 {/call}
     <h1>Sources</h1>
+    <div class="subNav"><span class="subNavItem">Sources</span><a href="/admin/requests">Requests</a></div>
+    
 	<div class="form fr mrm">
     	<div class="grp">
     		<label for="filter">Filter</label>
@@ -303,13 +309,15 @@
 	{param applications: $applications /}
     {param application: null /}
     {param sources: null /}
+    {param showHeaderMenu: true /}
 {/call}
     <div class="cf sub">
     <h1>{$source.title}</h1>
-    <nav class="sub">
+       <nav class="sub">
         <div>Readers</div>
         <a href="/admin/sources/{$source.id}/applications/writers">Writers</a>
-    </nav>
+        <a href="/admin/sources/{$source.id}/requests">Requests</a>
+      </nav>
     </div>
     {if length($applications) > 0}
     	<div class="line">
@@ -371,12 +379,14 @@
 	{param applications: $applications /}
     {param application: null /}
     {param sources: null /}
+    {param showHeaderMenu: true /}
 {/call}
     <div class="cf sub">
         <h1>{$source.title}</h1>
         <nav class="sub">
             <a href="/admin/sources/{$source.id}/applications">Readers</a>
             <div>Writers</div>
+            <a href="/admin/sources/{$source.id}/requests">Requests</a>
         </nav>
         <div class="fr">
 	       <a href="/admin/sources/{$source.id}/applications/writers/add" class="btn inf mlm">Add/Remove</a>
@@ -424,6 +434,90 @@
 /**
  * @param page
  * @param source
+ * @param source_requests
+ */
+{template .sourceRequests}
+{call atlas.templates.applications.head}
+    {param applications: null /}
+    {param application: null /}
+    {param sources: null /}
+    {param showHeaderMenu: true /}
+{/call}    
+    <div class="form fr mrm">
+        <div class="grp">
+            <label for="search">Search</label>
+            <div class="inputHolder">
+                <input type="text" id="search" value="{$page.search}"/>
+                <span class="extra pos"><a href="#" class="icn tick" id="runSearch" title="Search">Search</a></span>
+            </div>
+        </div>
+    </div>
+    <div class="cf sub">
+    <h1>{$source.title}</h1>
+    <nav class="sub">
+        <a href="/admin/sources/{$source.id}/applications">Readers</a>
+        <a href="/admin/sources/{$source.id}/applications/writers">Writers</a>
+        <div>Requests</div>
+     </nav> 
+     </div>
+    {if length($source_requests) > 0}
+        <div class="line">
+            <div class="unit size1of4">
+                <span class="h3">Application</span>
+            </div>
+            <div class="unit size1of4">
+                <span class="h3">Usage type</span>
+            </div>
+            <div class="unit size1of4">
+                <span class="h3">Reason</span>
+            </div>
+            <div class="unit size1of4 lastUnit">
+                <span class="h3">&nbsp;</span>
+            </div>
+        </div>
+        {foreach $sourceRequest in $source_requests}
+            <div class="line app-link" data-app="{$sourceRequest.application.slug}">
+                <div class="unit size1of4">
+                    {$sourceRequest.application.title}
+                </div>
+                <div class="unit size1of4">
+                    {$sourceRequest.usage_type.title}
+                </div>
+                <div class="unit size1of4">
+                    {$sourceRequest.reason}
+                </div>
+                <div class="unit size1of4 lastUnit">
+                   {if not $sourceRequest.approved}
+                        <a class="approve-link" href="/admin/sources/{$source.id}/applications/approved?application={$sourceRequest.application.slug}">Approve?</a>
+                    {/if}
+                </div>
+            </div>
+        {/foreach}
+    {else}
+        {if $page.search == ''}
+            <div class="alert inf">There aren't any requests yet.</div>
+        {else}
+            <div class="alert inf">No results</div>
+        {/if}
+    {/if}
+  <div>
+    {if $page.nextUrl}
+       <div class="prevNextBtn  fr">
+           <a href="{$page.nextUrl}" class="btn inf mlm">Next</a>
+       </div>
+    {/if}
+    {if $page.prevUrl}
+       <div class="prevNextBtn">
+           <a href="{$page.prevUrl}" class="btn inf mlm">Previous</a>
+       </div>
+    {/if}
+   </div>
+</body>
+{/template}
+
+/**
+ * @param page
+ * @param source
  * @param applications
  */
 {template .addRemoveWritables}
@@ -431,6 +525,7 @@
 	{param applications: $applications /}
 	{param application: null /}
     {param sources: null /}
+    {param showHeaderMenu: true /}
 {/call}
 	<h1><a href="/admin/sources/{$source.id}/applications">{$source.title}</a></h1>
 	
@@ -505,6 +600,91 @@
 {/template}
 
 /**
+ * @param page
+ * @param source_requests
+ */
+{template .allSourceRequests}
+{call atlas.templates.applications.head}
+    {param applications: null /}
+    {param application: null /}
+    {param sources: null /}
+    {param showHeaderMenu: true /}
+{/call}
+    <div class="form fr mrm">
+        <div class="grp">
+            <label for="search">Search</label>
+            <div class="inputHolder">
+                <input type="text" id="search" value="{$page.search}"/>
+                <span class="extra pos"><a href="#" class="icn tick" id="runSearch" title="Search">Search</a></span>
+            </div>
+        </div>
+    </div>
+
+    <h1>Source requests</h1>
+    <div class="subNav"><a href="/admin/sources">Sources</a><span class="subNavItem">Requests</span></div>
+    
+    {if length($source_requests) > 0}
+        <div class="line">
+            <div class="unit size1of5">
+                <span class="h3">Application</span>
+            </div>
+             <div class="unit size1of5">
+                <span class="h3">Publisher</span>
+            </div>
+            <div class="unit size1of5">
+                <span class="h3">Usage type</span>
+            </div>
+            <div class="unit size1of5">
+                <span class="h3">Reason</span>
+            </div>
+            <div class="unit size1of5 lastUnit">
+                <span class="h3">&nbsp;</span>
+            </div>
+        </div>
+        {foreach $sourceRequest in $source_requests}
+            <div class="line app-link" data-app="{$sourceRequest.application.slug}">
+                <div class="unit size1of5">
+                    {$sourceRequest.application.title}
+                </div>
+                <div class="unit size1of5">
+                    {$sourceRequest.publisher.title}
+                </div>
+                <div class="unit size1of5">
+                    {$sourceRequest.usage_type.title}
+                </div>
+                <div class="unit size1of5">
+                    {$sourceRequest.reason}
+                </div>
+                <div class="unit size1of5 lastUnit">
+                   {if not $sourceRequest.approved}
+                        <a class="approve-link" href="/admin/sources/{$sourceRequest.publisher.id}/applications/approved?application={$sourceRequest.application.slug}">Approve?</a>
+                    {/if}
+                </div>
+            </div>
+        {/foreach}
+    {else}
+        {if $page.search == ''}
+            <div class="alert inf">There aren't any requests yet.</div>
+        {else}
+            <div class="alert inf">No results</div>
+        {/if}
+    {/if}
+  <div>
+    {if $page.nextUrl}
+       <div class="prevNextBtn  fr">
+           <a href="{$page.nextUrl}" class="btn inf mlm">Next</a>
+       </div>
+    {/if}
+    {if $page.prevUrl}
+       <div class="prevNextBtn">
+           <a href="{$page.prevUrl}" class="btn inf mlm">Previous</a>
+       </div>
+    {/if}
+   </div>
+</body>
+{/template}
+
+/**
  * 
  */
 {template .login}
@@ -512,6 +692,7 @@
     {param applications: null /}
     {param application: null /}
     {param sources: null /}
+    {param showHeaderMenu: false /}
 {/call}
 			<div class="main pm">
 				<h1>Welcome to Atlas</h1>

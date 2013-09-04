@@ -1,19 +1,21 @@
-{namespace atlas.templates.applications.email}
+{namespace atlas.templates.applications.admin.email}
 
 /**
  *
  */
 {template .subject}
-Request for access to a publisher
+[Atlas] Request for access to a publisher
 {/template}
 
 /**
  * @param email
+ * @param appUrl
  * @param reason
  * @param publisher_key
  * @param publisher_title
  * @param slug
  * @param application_title
+ * @param usage_type
  */
 {template .body}
 <html>
@@ -21,9 +23,12 @@ Request for access to a publisher
 <p>A request has been made for access to a publisher.</p>
 <p>Details:<br/>
 Application: {$application_title} ({$slug})<br/>
+
 Email: {$email}<br/>
+App/Website URL: {$appUrl}<br/>
 Reason for request: {$reason}<br/>
-Publisher: {$publisher_title} ({$publisher_key})</p>
+Publisher: {$publisher_title} ({$publisher_key})<br/>
+Usage type: {$usage_type}</p>
 </body>
 </html>
 {/template}

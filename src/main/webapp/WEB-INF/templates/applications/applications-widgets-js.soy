@@ -98,21 +98,35 @@
 		<h2 class="mlm">Request access to publisher</h2>
 		<div class="mlm" id="termsAndConditions"></div>
 		<form id="publisherRequest" action="/admin/applications/{$application.slug}/publishers/requested" method="post" class="form cf">
-			<div class="grp">
-				<label for="email">
-					Your email address
-				</label>
-				<div class="inputHolder">
-					<input id="email" name="email" type="text" placeholder="me@example.com"  />
-				</div>
-			</div>
+		
+		    <div class="grp">
+                <label for="usageType">
+                    Useage type
+                </label>
+                <div class="inputHolder">
+                    <select id="usageType" name="usageType">
+                        <option value="commercial">Commercial</option>
+                        <option value="noncommercial">Non commercial</option>
+                        <option value="personal">Personal</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grp">
+                <label for="appUrl">
+                    App/Website URL
+                </label>
+                <div class="inputHolder">
+                    <input id="appUrl" name="appUrl" type="text" placeholder="http://example.com"  />
+                </div>
+            </div>
 			
 			<div class="grp">
 				<label for="reason">
 					Reason for request
 				</label>
-				<div class="inputHolder">
-					<input id="reason" name="reason" type="text" placeholder="Why you would like to access this publisher." />
+				<div>
+					<textarea id="reason" name="reason" placeholder="Why you would like to access this publisher." ></textarea>
 				</div>
 			</div>
 			<input type="hidden" name="pubkey" />
