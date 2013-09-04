@@ -22,6 +22,7 @@ import org.atlasapi.media.entity.TopicRef.Relationship;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Person;
 import org.atlasapi.media.entity.simple.PublisherDetails;
+import org.atlasapi.media.entity.simple.SameAs;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.topic.TopicStore;
@@ -59,13 +60,12 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
 
     private T setContentFields(T result, Description inputContent) {
         result.setPeople(transformPeople(inputContent.getPeople(), result.getPublisher()));
-        result.setEquivalentTo(resolveEquivalences(inputContent.getSameAs()));
         result.setTopicRefs(topicRefs(inputContent.getTopics()));
         result.setKeyPhrases(keyPhrases(inputContent.getKeyPhrases(), inputContent.getPublisher()));
         result.setGenres(inputContent.getGenres());
         return result;
     }
-    
+
     private Iterable<KeyPhrase> keyPhrases(Iterable<org.atlasapi.media.entity.simple.KeyPhrase> keyPhrases, final PublisherDetails contentPublisher) {
         return ImmutableList.copyOf(Iterables.transform(keyPhrases, new Function<org.atlasapi.media.entity.simple.KeyPhrase, KeyPhrase>() {
 
@@ -137,7 +137,22 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         }));
     }
 
-    private Set<LookupRef> resolveEquivalences(Set<String> sameAs) {
+    @Override
+    protected final Set<LookupRef> resolveEquivalents(Set<String> sameAs) {
+        return resolveEquivs(sameAs);
+    }
+    
+    @Override
+    protected Set<LookupRef> resolveSameAs(Set<SameAs> equivalents) {
+        return resolveEquivs(Iterables.transform(equivalents, new Function<SameAs, String>() {
+            @Override
+            public String apply(SameAs input) {
+                return input.getUri();
+            }
+        }));
+    }
+
+    private Set<LookupRef> resolveEquivs(Iterable<String> sameAs) {
         ResolvedContent resolvedContent = resolver.findByCanonicalUris(sameAs);
         List<Identified> identified = resolvedContent.getAllResolvedResults();
         Iterable<Described> described = Iterables.filter(identified,Described.class);
