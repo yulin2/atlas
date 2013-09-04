@@ -243,7 +243,7 @@ public class QueryWebModule {
     }
 
     private PeopleWriteController peopleWriteController() {
-        return new PeopleWriteController(configFetcher, personStore, new DefaultGsonModelReader(), new PersonModelTransformer(new SystemClock()));
+        return new PeopleWriteController(configFetcher, personStore, new DefaultGsonModelReader(), new PersonModelTransformer(new SystemClock(), personStore));
     }
 
     @Bean
