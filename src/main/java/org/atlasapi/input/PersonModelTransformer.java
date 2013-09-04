@@ -55,11 +55,10 @@ public class PersonModelTransformer extends DescribedModelTransformer<Person, or
                 new Function<SameAs, Optional<org.atlasapi.media.entity.Person>>() {
                     @Override
                     public Optional<org.atlasapi.media.entity.Person> apply(SameAs input) {
-                        return resolver.person(input.getId());
+                        return resolver.person(input.getUri());
                     }
                 })),
                 LookupRef.FROM_DESCRIBED));
     }
 
-    
 }
