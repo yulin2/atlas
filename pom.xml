@@ -468,11 +468,6 @@
             <version>${jetty.version}</version>
         </dependency>
         <dependency>
-           <groupId>org.eclipse.jetty</groupId>
-           <artifactId>jetty-servlets</artifactId>
-           <version>${jetty.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
             <version>1.9.5</version>
