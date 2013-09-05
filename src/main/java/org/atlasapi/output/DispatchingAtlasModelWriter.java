@@ -71,7 +71,11 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
         }
     }
 
-	private MappedWriter<T> findWriterFor(HttpServletRequest request) throws IOException {
+	private static void addCorsHeader(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+    }
+
+    private MappedWriter<T> findWriterFor(HttpServletRequest request) throws IOException {
 		return extensionMap.get(extensionFrom(request.getRequestURI()));
 	}
 
@@ -88,6 +92,7 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
         response.setStatus(HttpStatusCode.NOT_FOUND.code());
 		response.setCharacterEncoding(Charsets.UTF_8.toString());
 		response.setContentType(TEXT_PLAIN.toString());
+		addCorsHeader(response);
 		response.getOutputStream().print("Not found");
     }
 	
@@ -108,6 +113,7 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
             response.setStatus(HttpStatusCode.OK.code());
             response.setCharacterEncoding(Charsets.UTF_8.toString());
             response.setContentType(mimeType.toString());
+            addCorsHeader(response);
             writer.writeTo(request, response, graph, annotations, config);
         }
 
@@ -116,6 +122,7 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
 			response.setStatus(error.statusCode().code());
 			response.setCharacterEncoding(Charsets.UTF_8.toString());
 			response.setContentType(mimeType.toString());
+			addCorsHeader(response);
 			writer.writeError(request, response, error);
 		}
 
