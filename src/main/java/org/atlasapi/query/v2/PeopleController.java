@@ -68,8 +68,8 @@ public class PeopleController extends BaseController<Iterable<Person>> {
                 } else {
                     person = resolver.person(idCodec.decode(id).longValue(), config);
                 }
-                if(!config.isEnabled(person.get().getPublisher())) {
-                    errorViewFor(request, response, FORBIDDEN);
+                if(!person.isPresent()) {
+                    errorViewFor(request, response, NOT_FOUND);
                     return;
                 }
                 people = person.asSet();
@@ -104,5 +104,5 @@ public class PeopleController extends BaseController<Iterable<Person>> {
     public Void putContent(HttpServletRequest req, HttpServletResponse resp) {
         return personWriteController.putPerson(req, resp);
     }
-    
+
 }
