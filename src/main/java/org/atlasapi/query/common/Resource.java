@@ -7,7 +7,8 @@ public enum Resource {
     CONTENT("content", "content"),
     TOPIC("topic", "topics"),
     CHANNEL("channel", "channels"),
-    PERSON("person", "people")
+    PERSON("person", "people"),
+    APPLICATION("application", "applications")
     ;
     
     private final String singular;
