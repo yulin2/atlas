@@ -44,12 +44,14 @@ import org.atlasapi.persistence.content.people.PeopleResolver;
 import org.atlasapi.persistence.content.people.PersonWriter;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.persistence.media.TranslatorContentHasher;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -81,6 +83,10 @@ public class AtlasPersistenceModule {
     private final String esCluster = Configurer.get("elasticsearch.cluster").get();
     private final String esRequestTimeout = Configurer.get("elasticsearch.requestTimeout").get();
     private final Parameter processingConfig = Configurer.get("processing.config");
+    
+    private final String adminDbHost = Configurer.get("admin.db.host").get();
+    private final String adminDbPort = Configurer.get("admin.db.port").get();
+    private final String adminDbName = Configurer.get("admin.db.name").get();    
 
     @Resource(name = "contentChanges") private JmsTemplate contentChanges;
     @Resource(name = "topicChanges") private JmsTemplate topicChanges;
@@ -146,6 +152,21 @@ public class AtlasPersistenceModule {
             mongo.setReadPreference(ReadPreference.secondaryPreferred());
         }
         return mongo;
+    }
+    
+    @Bean
+    @Qualifier(value = "adminMongo")
+    public DatabasedMongo adminMongo() {
+        ServerAddress adminAddress = null;
+        try {
+            adminAddress = new ServerAddress(adminDbHost, Integer.parseInt(adminDbPort));
+            Mongo adminMongo = new Mongo(adminAddress);
+            adminMongo.setReadPreference(ReadPreference.primary());
+            return new DatabasedMongo(adminMongo, adminDbName);
+        } catch (UnknownHostException e) {
+            Preconditions.checkNotNull(adminAddress);
+            return null;
+        }
     }
     
     @Bean
