@@ -7,16 +7,16 @@ import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryResult;
-import org.atlasapi.application.persistence.ApplicationStore;
+import org.atlasapi.application.persistence.ApplicationStore2;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 
 import com.google.common.base.Optional;
 
 public class ApplicationQueryExecutor implements QueryExecutor<Application> {
 
-    private final ApplicationStore applicationStore;
+    private final ApplicationStore2 applicationStore;
     
-    public ApplicationQueryExecutor(ApplicationStore applicationStore) {
+    public ApplicationQueryExecutor(ApplicationStore2 applicationStore) {
         this.applicationStore = applicationStore;
     }
 

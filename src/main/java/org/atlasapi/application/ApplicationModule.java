@@ -16,6 +16,8 @@ import org.atlasapi.application.auth.AuthCallbackHandler;
 import org.atlasapi.application.auth.LoginController;
 import org.atlasapi.application.auth.TwitterAuthController;
 import org.atlasapi.application.auth.UserAuthCallbackHandler;
+import org.atlasapi.application.persistence.ApplicationStore2;
+import org.atlasapi.application.persistence.MongoApplicationStore2;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
 import org.atlasapi.application.users.MongoUserStore;
@@ -24,6 +26,7 @@ import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.www.ApplicationWebModule;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,7 +55,7 @@ import com.metabroadcast.common.social.user.TwitterOAuth1AccessTokenChecker;
 import com.metabroadcast.common.time.SystemClock;
 
 @Configuration
-@Import({ApplicationWebModule.class, NotifierModule.class})
+@Import({AdminModule.class, ApplicationWebModule.class, NotifierModule.class})
 @ImportResource("atlas-applications.xml")
 public class ApplicationModule {
     
@@ -135,5 +138,12 @@ public class ApplicationModule {
         authenticationInterceptor.setExceptions(exceptions);
         authenticationInterceptor.setUserStore(userStore());
         return authenticationInterceptor;
+    }
+    
+    
+    @Bean 
+    @Qualifier(value = "deerApplicationsStore")
+    protected ApplicationStore2 deerApplicationsStore() {
+        return new MongoApplicationStore2(adminMongo);
     }
 }

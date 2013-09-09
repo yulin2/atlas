@@ -17,6 +17,7 @@ import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.Resource;
 import org.atlasapi.query.common.StandardQueryParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,16 +28,15 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
-import org.atlasapi.application.persistence.ApplicationStore;
-import org.atlasapi.application.persistence.MongoApplicationStore;
+import org.atlasapi.application.persistence.ApplicationStore2;
+import org.atlasapi.application.persistence.MongoApplicationStore2;
 
 // TODO merge with ApplicationModule
 @Configuration
 public class AdminModule {
     
-    private @Autowired DatabasedMongo adminMongo;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
-    
+    private @Autowired ApplicationStore2 deerApplicationsStore;
     @Bean
     public ApplicationAdminController applicationAdminController() {
         return new ApplicationAdminController(
@@ -58,7 +58,7 @@ public class AdminModule {
     
     @Bean
     protected QueryExecutor<Application> applicationQueryExecutor() {
-        return new ApplicationQueryExecutor(applicationsStore());
+        return new ApplicationQueryExecutor(deerApplicationsStore);
     }
     
     @Bean SelectionBuilder  selectionBuilder() {
@@ -80,9 +80,6 @@ public class AdminModule {
             idCodec(), contextParser
         );
     }
-    
-    @Bean protected ApplicationStore applicationsStore() {
-        return new MongoApplicationStore(adminMongo);
-    }
+ 
     
 }

@@ -6,7 +6,7 @@ import org.atlasapi.media.common.Id;
 import com.google.common.base.Optional;
 
 
-public interface ApplicationStore {
+public interface ApplicationStore2 {
     public Iterable<Application> allApplications();
     public Optional<Application> applicationFor(Id id);
 
