@@ -40,8 +40,12 @@ public class MongoApplicationStore implements ApplicationStore {
 
     @Override
     public Optional<Application> applicationFor(Id id) {
-        // TODO Auto-generated method stub
-        return null;
+        System.out.println(applications.getDB().getName());
+        return Optional.fromNullable(translator.fromDBObject(
+                   applications.findOne(
+                           where().fieldEquals(MongoApplicationTranslator.DEER_ID_KEY, id.longValue()).build())
+                   )
+               );
     }
 
 }

@@ -9,6 +9,7 @@ import org.atlasapi.application.model.Application;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.query.common.Query;
+import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
@@ -56,6 +57,8 @@ public class ApplicationAdminController {
            Query<Application> applicationsQuery = requestParser.parse(request);
            QueryResult<Application> queryResult = queryExecutor.execute(applicationsQuery);
            resultWriter.write(queryResult, writer);
+        } catch (NotFoundException e) {
+            sendError(request, response, writer, e, 404);
         } catch (Exception e) {
             sendError(request, response, writer, e, 500);
         }

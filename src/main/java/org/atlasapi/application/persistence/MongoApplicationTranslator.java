@@ -2,6 +2,7 @@ package org.atlasapi.application.persistence;
 
 import org.atlasapi.application.ApplicationCredentialsTranslator;
 import org.atlasapi.application.model.Application;
+import org.atlasapi.media.common.Id;
 
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
@@ -10,11 +11,12 @@ import com.mongodb.DBObject;
 
 
 public class MongoApplicationTranslator {
-    public static final String APPLICATION_SLUG_KEY = MongoConstants.ID;
-    public static final String APPLICATION_TITLE_KEY = "title";
-    public static final String APPLICATION_CREATED_KEY = "created";
-    public static final String APPLICATION_CREDENTIALS_KEY = "credentials";
-    public static final String APPLICATION_CONFIG_KEY = "configuration";
+    public static final String SLUG_KEY = MongoConstants.ID;
+    public static final String DEER_ID_KEY = "deerId";
+    public static final String TITLE_KEY = "title";
+    public static final String CREATED_KEY = "created";
+    public static final String CREDENTIALS_KEY = "credentials";
+    public static final String CONFIG_KEY = "configuration";
     
     private final ApplicationCredentialsTranslator credentialsTranslator = new ApplicationCredentialsTranslator();
     private final ApplicationSourcesTranslator sourcesTranslator = new ApplicationSourcesTranslator();
@@ -30,17 +32,17 @@ public class MongoApplicationTranslator {
             return null;
         }
         
-        String applicationSlug = TranslatorUtils.toString(dbo, APPLICATION_SLUG_KEY);
-        if(applicationSlug == null){
+        Long applicationId = TranslatorUtils.toLong(dbo, DEER_ID_KEY);
+        if(DEER_ID_KEY == null){
             return null;
         }
         
         return Application.builder()
-                .withId(applicationSlug)
-                .withTitle(TranslatorUtils.toString(dbo, APPLICATION_TITLE_KEY))
-                .withCreated(TranslatorUtils.toDateTime(dbo, APPLICATION_CREATED_KEY))
-                .withCredentials(credentialsTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, APPLICATION_CREDENTIALS_KEY)))
-                .withSources(sourcesTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, APPLICATION_CONFIG_KEY)))
+                .withId(Id.valueOf(applicationId))
+                .withTitle(TranslatorUtils.toString(dbo, TITLE_KEY))
+                .withCreated(TranslatorUtils.toDateTime(dbo, CREATED_KEY))
+                .withCredentials(credentialsTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, CREDENTIALS_KEY)))
+                .withSources(sourcesTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, CONFIG_KEY)))
                 .build();
     }
 }

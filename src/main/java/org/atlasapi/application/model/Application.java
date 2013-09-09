@@ -1,11 +1,12 @@
 package org.atlasapi.application.model;
 
 import org.atlasapi.application.ApplicationCredentials;
+import org.atlasapi.media.common.Id;
 import org.joda.time.DateTime;
 
 
 public class Application {
-    private final String id;
+    private final Id id;
     private final String title;
     private final DateTime created;
     private final ApplicationCredentials credentials;
@@ -18,7 +19,7 @@ public class Application {
         this.credentials = builder.credentials;
         this.sources = builder.sources;
     }    
-    public String getId() {
+    public Id getId() {
         return id;
     }
     
@@ -43,7 +44,7 @@ public class Application {
     }
 
     public static class Builder {
-        private String id;
+        private Id id;
         private String title;
         private DateTime created;
         private ApplicationCredentials credentials;
@@ -53,7 +54,7 @@ public class Application {
             
         }
         
-        public Builder withId(String id) {
+        public Builder withId(Id id) {
             this.id = id;
             return this;
         }
