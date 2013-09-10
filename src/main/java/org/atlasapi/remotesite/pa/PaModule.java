@@ -97,7 +97,7 @@ public class PaModule {
     private @Value("${s3.secret}") String s3secret;
     private @Value("${pa.s3.bucket}") String s3bucket;
     private @Value("${pa.people.enabled}") boolean peopleEnabled;
-    private @Value("${pa.content.updater.threads") int contentUpdaterThreadCount;
+    private @Value("${pa.content.updater.threads}") int contentUpdaterThreadCount;
     
     @PostConstruct
     public void startBackgroundTasks() {

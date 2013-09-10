@@ -31,6 +31,7 @@ import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
 import static org.atlasapi.media.entity.Publisher.RDIO;
 import static org.atlasapi.media.entity.Publisher.SOUNDCLOUD;
 import static org.atlasapi.media.entity.Publisher.SPOTIFY;
+import static org.atlasapi.media.entity.Publisher.TALK_TALK;
 import static org.atlasapi.media.entity.Publisher.YOUTUBE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 
@@ -192,7 +193,7 @@ public class EquivModule {
             ImmutableSet.of(new TitleMatchingItemScorer(), new SequenceItemScorer()));
         EquivalenceUpdater<Container> standardContainerUpdater = standardContainerUpdater(acceptablePublishers);
 
-        Set<Publisher> nonStandardPublishers = Sets.union(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, YOUVIEW), musicPublishers);
+        Set<Publisher> nonStandardPublishers = Sets.union(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, YOUVIEW, TALK_TALK), musicPublishers);
         final EquivalenceUpdaters updaters = new EquivalenceUpdaters();
         for (Publisher publisher : Iterables.filter(Publisher.all(), not(in(nonStandardPublishers)))) {
             updaters.register(publisher, Item.class, standardItemUpdater);    
@@ -225,6 +226,9 @@ public class EquivModule {
         updaters.register(NETFLIX, Item.class, vodItemUpdater(netflixPublishers).build());
         updaters.register(NETFLIX, Container.class, vodContainerUpdater(netflixPublishers));
 
+        updaters.register(TALK_TALK, Item.class, vodItemUpdater(acceptablePublishers).build());
+        updaters.register(TALK_TALK, Container.class, vodContainerUpdater(acceptablePublishers));
+        
         Set<Publisher> itunesAndMusicPublishers = Sets.union(musicPublishers, ImmutableSet.of(ITUNES));
         ContentEquivalenceUpdater<Item> muiscPublisherUpdater = ContentEquivalenceUpdater.<Item>builder()
             .withGenerator(

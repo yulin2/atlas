@@ -82,9 +82,7 @@ public class PeopleControllerTest {
         String uri = "aUri";
         request.withParam("uri", uri);
         
-        Person person = new Person();
-        person.setPublisher(Publisher.PA);
-        when(resolver.person(uri, appConfig)).thenReturn(Optional.of(person));
+        when(resolver.person(uri, appConfig)).thenReturn(Optional.<Person>absent());
         
         peopleController.content(request, response);
         
