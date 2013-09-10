@@ -160,9 +160,10 @@ public class AtlasPersistenceModule {
         ServerAddress adminAddress = null;
         try {
             adminAddress = new ServerAddress(adminDbHost, Integer.parseInt(adminDbPort));
-            Mongo adminMongo = new Mongo(adminAddress);
-            adminMongo.setReadPreference(ReadPreference.primary());
-            return new DatabasedMongo(adminMongo, adminDbName);
+            Mongo adminMongoDb = new Mongo(adminAddress);
+            adminMongoDb.setReadPreference(ReadPreference.primary());
+            DatabasedMongo adminMongo = new DatabasedMongo(adminMongoDb, adminDbName);
+            return adminMongo;
         } catch (UnknownHostException e) {
             Preconditions.checkNotNull(adminAddress);
             return null;

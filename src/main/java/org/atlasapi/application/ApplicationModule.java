@@ -5,6 +5,7 @@ import static org.atlasapi.application.auth.TwitterAuthController.LOGIN_FAILED_U
 import static org.atlasapi.application.auth.TwitterAuthController.LOGIN_URL;
 import static org.atlasapi.application.auth.TwitterAuthController.LOGOUT;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import org.atlasapi.application.users.NewUserSupplier;
 import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.www.ApplicationWebModule;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +40,12 @@ import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMa
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.social.anonymous.AnonymousUserProvider;
 import com.metabroadcast.common.social.anonymous.CookieBasedAnonymousUserProvider;
@@ -63,14 +71,16 @@ public class ApplicationModule {
     private static final String APP_NAME = "atlas";
     private static final String COOKIE_NAME = "atlastw";
     
-    @Autowired DatabasedMongo adminMongo;
+    @Autowired @Qualifier(value = "adminMongo") DatabasedMongo adminMongo;
     @Autowired ViewResolver viewResolver;
     @Autowired RequestScopedAuthenticationProvider authProvider;
 	
 	@Value("${twitter.auth.consumerKey}") String consumerKey;
 	@Value("${twitter.auth.consumerSecret}") String consumerSecret;
 	@Value("${local.host.name}") String host;
-    
+	
+  
+	 
 	public @Bean ApplicationConfigurationFetcher configFetcher(){
 		return new IpCheckingApiKeyConfigurationFetcher(applicationStore());
 	}

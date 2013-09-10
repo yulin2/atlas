@@ -1,5 +1,6 @@
 package org.atlasapi.application.model;
 
+import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.application.SourceStatus;
@@ -10,7 +11,7 @@ import org.elasticsearch.common.collect.ImmutableList;
 public class ApplicationSources {
     private final boolean precedence;
     private final Map<Publisher, SourceStatus> reads;
-    private final Iterable<Publisher> writes;
+    private final List<Publisher> writes;
     
     private ApplicationSources(Builder builder) {
         this.precedence = builder.precedence;

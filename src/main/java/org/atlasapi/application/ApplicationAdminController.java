@@ -1,11 +1,16 @@
 package org.atlasapi.application;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.model.Application;
+import org.atlasapi.input.ModelReader;
+import org.atlasapi.input.ReadException;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.query.common.Query;
@@ -20,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 public class ApplicationAdminController {
@@ -28,13 +34,15 @@ public class ApplicationAdminController {
     private final QueryParser<Application> requestParser;
     private final QueryExecutor<Application> queryExecutor;
     private final QueryResultWriter<Application> resultWriter;
+    private final ModelReader reader;
     
     public ApplicationAdminController(QueryParser<Application> requestParser,
             QueryExecutor<Application> queryExecutor,
-            QueryResultWriter<Application> resultWriter) {
+            QueryResultWriter<Application> resultWriter, ModelReader reader) {
         this.requestParser = requestParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
+        this.reader = reader;
     }
     
     public void sendError(HttpServletRequest request, 
@@ -49,7 +57,7 @@ public class ApplicationAdminController {
     }
     
     @RequestMapping({ "/4.0/applications/{aid}.*", "/4.0/applications.*" })
-    public void writeAllApplications(HttpServletRequest request, HttpServletResponse response)
+    public void outputAllApplications(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
         ResponseWriter writer = null;
         try {
@@ -64,6 +72,14 @@ public class ApplicationAdminController {
         }
     }
     
+    @RequestMapping(value ="/4.0/applications/{aid}.*", method = RequestMethod.POST)
+    public void writeApplication(HttpServletRequest request, HttpServletResponse response) throws IOException, ReadException {
+        Application application = deserialize(new InputStreamReader(request.getInputStream()));
+        // TODO
+    }
     
+    private Application deserialize(Reader input) throws IOException, ReadException {
+        return reader.read(new BufferedReader(input), Application.class);
+    }
 
 }

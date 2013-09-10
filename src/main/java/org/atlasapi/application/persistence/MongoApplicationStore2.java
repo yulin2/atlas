@@ -40,7 +40,6 @@ public class MongoApplicationStore2 implements ApplicationStore2 {
 
     @Override
     public Optional<Application> applicationFor(Id id) {
-        System.out.println(applications.getDB().getName());
         return Optional.fromNullable(translator.fromDBObject(
                    applications.findOne(
                            where().fieldEquals(MongoApplicationTranslator.DEER_ID_KEY, id.longValue()).build())
