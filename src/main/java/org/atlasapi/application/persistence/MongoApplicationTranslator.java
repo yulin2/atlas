@@ -22,9 +22,14 @@ public class MongoApplicationTranslator {
     private final ApplicationSourcesTranslator sourcesTranslator = new ApplicationSourcesTranslator();
     
     public DBObject toDBObject(Application application) {
-        // TODO
         DBObject dbo = new BasicDBObject();
-        return null;
+        TranslatorUtils.from(dbo, DEER_ID_KEY, application.getId().longValue());
+        TranslatorUtils.from(dbo, SLUG_KEY, application.getSlug());
+        TranslatorUtils.from(dbo, TITLE_KEY, application.getTitle());
+        TranslatorUtils.fromDateTime(dbo, CREATED_KEY, application.getCreated());
+        TranslatorUtils.from(dbo, CREDENTIALS_KEY, credentialsTranslator.toDBObject(application.getCredentials()));
+        TranslatorUtils.from(dbo, CONFIG_KEY, sourcesTranslator.toDBObject(application.getSources()));
+        return dbo;
     }
     
     public Application fromDBObject(DBObject dbo) {
@@ -39,6 +44,7 @@ public class MongoApplicationTranslator {
         
         return Application.builder()
                 .withId(Id.valueOf(applicationId))
+                .withSlug(TranslatorUtils.toString(dbo, SLUG_KEY))
                 .withTitle(TranslatorUtils.toString(dbo, TITLE_KEY))
                 .withCreated(TranslatorUtils.toDateTime(dbo, CREATED_KEY))
                 .withCredentials(credentialsTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, CREDENTIALS_KEY)))

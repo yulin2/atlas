@@ -17,7 +17,9 @@ import org.atlasapi.application.auth.AuthCallbackHandler;
 import org.atlasapi.application.auth.LoginController;
 import org.atlasapi.application.auth.TwitterAuthController;
 import org.atlasapi.application.auth.UserAuthCallbackHandler;
+import org.atlasapi.application.persistence.ApplicationIdProvider;
 import org.atlasapi.application.persistence.ApplicationStore2;
+import org.atlasapi.application.persistence.MongoApplicationIdProvider;
 import org.atlasapi.application.persistence.MongoApplicationStore2;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
@@ -155,5 +157,10 @@ public class ApplicationModule {
     @Qualifier(value = "deerApplicationsStore")
     protected ApplicationStore2 deerApplicationsStore() {
         return new MongoApplicationStore2(adminMongo);
+    }
+    
+    @Bean
+    protected ApplicationIdProvider applicationIdProvider() {
+        return new MongoApplicationIdProvider(adminMongo);
     }
 }

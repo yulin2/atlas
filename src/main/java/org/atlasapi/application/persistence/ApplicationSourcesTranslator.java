@@ -2,6 +2,9 @@ package org.atlasapi.application.persistence;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.model.ApplicationSources;
@@ -9,8 +12,11 @@ import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -24,37 +30,42 @@ public class ApplicationSourcesTranslator {
 
 	public DBObject toDBObject(ApplicationSources configuration) {
 		BasicDBObject dbo = new BasicDBObject();
-//		
-//		TranslatorUtils.from(dbo, SOURCES_KEY, sourceStatusesToList(configuration.sourceStatuses()));
-//		
-//		if (configuration.precedenceEnabled()) { 
-//			TranslatorUtils.fromList(dbo, Lists.transform(configuration.precedence(), Publisher.TO_KEY), PRECEDENCE_KEY);
-//		} else {
-//			dbo.put(PRECEDENCE_KEY, null);
-//		}
-//		
-//		dbo.put(WRITABLE_KEY, Lists.transform(configuration.writableSources().asList(), Publisher.TO_KEY));
-//		
+		
+		TranslatorUtils.from(dbo, SOURCES_KEY, sourceStatusesToList(configuration.getReads()));
+		
+		if (configuration.isPrecedenceEnabled()) { 
+		    List<String> precedenceOrder = Lists.newLinkedList();
+		    for (Publisher source : configuration.getReads().keySet()) {
+		        precedenceOrder.add(source.key());
+		    }
+			TranslatorUtils.fromList(dbo, precedenceOrder, PRECEDENCE_KEY);
+		} else {
+			dbo.put(PRECEDENCE_KEY, null);
+		}
+		
+ 		dbo.put(WRITABLE_KEY, Iterables.transform(configuration.getWrites(), Publisher.TO_KEY));
+ 		
 		return dbo;
 	}
 	
-//	private BasicDBList sourceStatusesToList(Map<Publisher, SourceStatus> sourceStatuses) {
-//	    BasicDBList statuses = new BasicDBList();
-//	    for (Entry<Publisher, SourceStatus> sourceStatus : sourceStatuses.entrySet()) {
-//            statuses.add(new BasicDBObject(ImmutableMap.of(
-//                    PUBLISHER_KEY, sourceStatus.getKey().key(), 
-//                    STATE_KEY, sourceStatus.getValue().getState().toString().toLowerCase(),
-//                    "enabled", sourceStatus.getValue().isEnabled()
-//            )));
-//        }
-//        return statuses;
-//    }
+	private BasicDBList sourceStatusesToList(Map<Publisher, SourceStatus> sourceStatuses) {
+	    BasicDBList statuses = new BasicDBList();
+	    for (Entry<Publisher, SourceStatus> sourceStatus : sourceStatuses.entrySet()) {
+            statuses.add(new BasicDBObject(ImmutableMap.of(
+                    PUBLISHER_KEY, sourceStatus.getKey().key(), 
+                    STATE_KEY, sourceStatus.getValue().getState().toString().toLowerCase(),
+                    "enabled", sourceStatus.getValue().isEnabled()
+            )));
+        }
+        return statuses;
+    }
 	
 	public ApplicationSources fromDBObject(DBObject dbo) {
+
+        List<Publisher> precedence = sourcePrecedenceFrom(dbo);
 	    List<DBObject> statusDbos = TranslatorUtils.toDBObjectList(dbo, SOURCES_KEY);
-        Map<Publisher, SourceStatus> sourceStatuses = sourceStatusesFrom(statusDbos);
+        Map<Publisher, SourceStatus> sourceStatuses = sourceStatusesFrom(statusDbos, precedence);
 	
-		List<Publisher> precedence = sourcePrecedenceFrom(dbo);
 
 		List<String> writableKeys = TranslatorUtils.toList(dbo, WRITABLE_KEY);
         Iterable<Publisher> writableSources = Lists.transform(writableKeys, Publisher.FROM_KEY);
@@ -76,7 +87,7 @@ public class ApplicationSourcesTranslator {
         return Lists.transform(sourceKeys, Publisher.FROM_KEY);
     }
 	
-    private Map<Publisher, SourceStatus> sourceStatusesFrom(List<DBObject> list) {
+    private Map<Publisher, SourceStatus> sourceStatusesFrom(List<DBObject> list, List<Publisher> precedence) {
         Builder<Publisher, SourceStatus> builder = ImmutableMap.builder();
         for (DBObject dbo : list) {
             builder.put(
@@ -84,7 +95,17 @@ public class ApplicationSourcesTranslator {
                 sourceStatusFrom(dbo)
             );
         }
-        return builder.build();
+        Map<Publisher, SourceStatus> reads = builder.build();
+        if (precedence != null) {
+            // reorder if precedence enabled
+            builder = ImmutableMap.builder();
+            for (Publisher source : precedence) {
+                builder.put(source,
+                        reads.get(source));
+            }
+            reads = builder.build();
+        }
+        return reads;
     }
 
     private SourceStatus sourceStatusFrom(DBObject dbo) {

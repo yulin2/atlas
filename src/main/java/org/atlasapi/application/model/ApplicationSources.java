@@ -19,7 +19,7 @@ public class ApplicationSources {
         this.writes = ImmutableList.copyOf(builder.writes);
     }
     
-    public boolean getPrecedence() {
+    public boolean isPrecedenceEnabled() {
         return precedence;
     }
     

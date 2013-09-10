@@ -35,14 +35,18 @@ public class ApplicationAdminController {
     private final QueryExecutor<Application> queryExecutor;
     private final QueryResultWriter<Application> resultWriter;
     private final ModelReader reader;
+    private final ApplicationUpdater applicationUpdater;
     
     public ApplicationAdminController(QueryParser<Application> requestParser,
             QueryExecutor<Application> queryExecutor,
-            QueryResultWriter<Application> resultWriter, ModelReader reader) {
+            QueryResultWriter<Application> resultWriter, 
+            ModelReader reader,
+            ApplicationUpdater applicationUpdater) {
         this.requestParser = requestParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
         this.reader = reader;
+        this.applicationUpdater = applicationUpdater;
     }
     
     public void sendError(HttpServletRequest request, 
@@ -72,10 +76,10 @@ public class ApplicationAdminController {
         }
     }
     
-    @RequestMapping(value ="/4.0/applications/{aid}.*", method = RequestMethod.POST)
+    @RequestMapping(value ="/4.0/applications", method = RequestMethod.POST)
     public void writeApplication(HttpServletRequest request, HttpServletResponse response) throws IOException, ReadException {
         Application application = deserialize(new InputStreamReader(request.getInputStream()));
-        // TODO
+        applicationUpdater.createOrUpdate(application);
     }
     
     private Application deserialize(Reader input) throws IOException, ReadException {

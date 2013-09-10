@@ -7,6 +7,7 @@ import org.joda.time.DateTime;
 
 public class Application {
     private final Id id;
+    private final String slug; // Kept to enable creation of compatible entries for 3.0
     private final String title;
     private final DateTime created;
     private final ApplicationCredentials credentials;
@@ -14,6 +15,7 @@ public class Application {
     
     private Application(Builder builder) {
         this.id = builder.id;
+        this.slug = builder.slug;
         this.title = builder.title;
         this.created = builder.created;
         this.credentials = builder.credentials;
@@ -21,6 +23,10 @@ public class Application {
     }    
     public Id getId() {
         return id;
+    }
+    
+    public String getSlug() {
+        return slug;
     }
     
     public String getTitle() {
@@ -39,12 +45,23 @@ public class Application {
         return sources;
     }
     
+    public Builder copy() {
+        return builder()
+                .withId(this.getId())
+                .withSlug(this.getSlug())
+                .withTitle(this.getTitle())
+                .withCreated(this.getCreated())
+                .withCredentials(this.getCredentials())
+                .withSources(this.getSources());
+    }
+    
     public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
         private Id id;
+        private String slug;
         private String title;
         private DateTime created;
         private ApplicationCredentials credentials;
@@ -56,6 +73,11 @@ public class Application {
         
         public Builder withId(Id id) {
             this.id = id;
+            return this;
+        }
+        
+        public Builder withSlug(String slug) {
+            this.slug = slug;
             return this;
         }
         

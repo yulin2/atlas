@@ -17,7 +17,6 @@ import com.mongodb.ReadPreference;
 public class MongoApplicationStore2 implements ApplicationStore2 {
     public static final String APPLICATION_COLLECTION = "applications";
     private final DBCollection applications;
-    private final DatabasedMongo adminMongo;
     private final MongoApplicationTranslator translator = new MongoApplicationTranslator();
     
     private final Function<DBObject, Application> translatorFunction = new Function<DBObject, Application>(){
@@ -30,7 +29,6 @@ public class MongoApplicationStore2 implements ApplicationStore2 {
     public MongoApplicationStore2(DatabasedMongo adminMongo) {
         this.applications = adminMongo.collection(APPLICATION_COLLECTION);
         this.applications.setReadPreference(ReadPreference.primary());
-        this.adminMongo = adminMongo;
     }
 
     @Override
@@ -47,4 +45,8 @@ public class MongoApplicationStore2 implements ApplicationStore2 {
                );
     }
 
+    @Override
+    public void store(Application application) {
+       applications.save(translator.toDBObject(application));        
+    }
 }

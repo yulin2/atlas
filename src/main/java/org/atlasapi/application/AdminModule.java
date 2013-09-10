@@ -37,18 +37,14 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import com.google.gson.JsonDeserializer;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
+import org.atlasapi.application.persistence.ApplicationIdProvider;
 import org.atlasapi.application.persistence.ApplicationStore2;
-import org.atlasapi.application.persistence.MongoApplicationStore2;
 import org.joda.time.DateTime;
 
 // TODO merge with ApplicationModule
@@ -57,25 +53,24 @@ public class AdminModule {
     
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired ApplicationStore2 deerApplicationsStore;
+    private @Autowired ApplicationIdProvider applicationIdProvider;
     
-    private final Gson gson = new GsonBuilder().registerTypeAdapter(DateTime.class, new JsonDeserializer<DateTime>() {
-
+    private final JsonDeserializer<DateTime> DATE_TIME_DESERIALIZER = new JsonDeserializer<DateTime>() {
         @Override
         public DateTime deserialize(JsonElement json, Type typeOfT,
                 JsonDeserializationContext context) throws JsonParseException {
             return DateTime.parse(json.getAsJsonPrimitive().getAsString());
         }
-        
-    }).registerTypeAdapter(Id.class, new JsonDeserializer<Id>() {
-
+    };
+    private final JsonDeserializer<Id> ID_DESERIALIZER = new JsonDeserializer<Id>() {
         @Override
         public Id deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
             NumberToShortStringCodec idCodec = idCodec();
             return Id.valueOf(idCodec.decode(json.getAsJsonPrimitive().getAsString()));
         }
-       
-    }).registerTypeAdapter(Map.class, new JsonDeserializer<Map<Publisher, SourceStatus>>() {
+    };
+    private final JsonDeserializer<Map<Publisher, SourceStatus>> READS_DESERIALIZER = new JsonDeserializer<Map<Publisher, SourceStatus>>() {
         @Override
         public Map<Publisher, SourceStatus> deserialize(JsonElement json, Type typeOfT,
                 JsonDeserializationContext context) throws JsonParseException {
@@ -90,22 +85,34 @@ public class AdminModule {
             }
             return reads;
         }
-    }).registerTypeAdapter(Publisher.class, new JsonDeserializer<Publisher>() {
+    };
+    private final JsonDeserializer<Publisher> PUBLISHER_DESERIALIZER = new JsonDeserializer<Publisher>() {
         @Override
         public Publisher deserialize(JsonElement json, Type typeOfT,
                 JsonDeserializationContext context) throws JsonParseException {
             Optional<Publisher> publisher = Publisher.fromPossibleKey(json.getAsJsonPrimitive().getAsString());
             return publisher.get();
         }
-    }).create();
+    };
+    
+    
+    private final Gson gson = new GsonBuilder()
+                   .registerTypeAdapter(DateTime.class, DATE_TIME_DESERIALIZER)
+                   .registerTypeAdapter(Id.class, ID_DESERIALIZER)
+                   .registerTypeAdapter(Map.class, READS_DESERIALIZER)
+                   .registerTypeAdapter(Publisher.class, PUBLISHER_DESERIALIZER)
+                   .create();
  
     @Bean
     public ApplicationAdminController applicationAdminController() {
+        ApplicationUpdater applicationUpdater = new ApplicationUpdater(deerApplicationsStore, 
+            applicationIdProvider);
         return new ApplicationAdminController(
                 applicationQueryParser(),
                 applicationQueryExecutor(),
                 new ApplicationQueryResultWriter(applicationListWriter()),
-                gsonModelReader()
+                gsonModelReader(),
+                applicationUpdater
                );
     }
     
@@ -148,6 +155,8 @@ public class AdminModule {
             idCodec(), contextParser
         );
     }
- 
     
+    
+ 
+  
 }

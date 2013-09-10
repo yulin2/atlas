@@ -7,7 +7,7 @@ import com.google.common.base.Optional;
 
 
 public interface ApplicationStore2 {
-    public Iterable<Application> allApplications();
-    public Optional<Application> applicationFor(Id id);
-
+    Iterable<Application> allApplications();
+    Optional<Application> applicationFor(Id id);
+    void store(Application application);
 }
