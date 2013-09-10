@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.model.Application;
+import org.atlasapi.application.model.ApplicationSources;
 import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ReadException;
 import org.atlasapi.output.ErrorResultWriter;
@@ -19,6 +20,7 @@ import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
 import org.atlasapi.query.common.QueryExecutor;
+import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.QueryParser;
 import org.atlasapi.query.common.QueryResult;
 import org.slf4j.Logger;
@@ -82,8 +84,19 @@ public class ApplicationAdminController {
         applicationUpdater.createOrUpdate(application);
     }
     
+    @RequestMapping(value ="/4.0/applications/{aid}/sources", method = RequestMethod.POST)
+    public void writeApplicationSources(HttpServletRequest request, HttpServletResponse response) throws IOException, ReadException, NotFoundException, QueryParseException {
+        Query<Application> applicationsQuery = requestParser.parse(request);
+        ApplicationSources sources = deserializeSources(new InputStreamReader(request.getInputStream()));
+        applicationUpdater.updateSources(applicationsQuery.getOnlyId(), sources);
+    }
+    
     private Application deserialize(Reader input) throws IOException, ReadException {
         return reader.read(new BufferedReader(input), Application.class);
+    }
+    
+    private ApplicationSources deserializeSources(Reader input) throws IOException, ReadException {
+        return reader.read(new BufferedReader(input), ApplicationSources.class);
     }
 
 }

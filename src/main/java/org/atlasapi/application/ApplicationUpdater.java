@@ -1,8 +1,11 @@
 package org.atlasapi.application;
 
 import org.atlasapi.application.model.Application;
+import org.atlasapi.application.model.ApplicationSources;
 import org.atlasapi.application.persistence.ApplicationIdProvider;
 import org.atlasapi.application.persistence.ApplicationStore2;
+import org.atlasapi.media.common.Id;
+import org.atlasapi.output.NotFoundException;
 
 import com.google.common.base.Optional;
 public class ApplicationUpdater {
@@ -37,6 +40,17 @@ public class ApplicationUpdater {
         application = application.copy().withSlug(getSlug(application)).build();
         applicationStore.store(application);
         return application;
+    }
+
+    public void updateSources(Id id, ApplicationSources sources) throws NotFoundException {
+        Optional<Application> application = applicationStore.applicationFor(id);
+        if (application.isPresent()) {
+            Application modified = application.get().copy().withSources(sources).build();
+            applicationStore.store(modified);
+        } else {
+            throw new NotFoundException(id);
+        }
+        
     }
 
 }

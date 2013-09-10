@@ -115,7 +115,7 @@ public class AdminModule {
                 applicationUpdater
                );
     }
-    
+        
     @Bean 
     protected ModelReader gsonModelReader() {
         return new GsonModelReader(gson);
