@@ -14,13 +14,18 @@ public class Application {
     private final ApplicationCredentials credentials;
     private final ApplicationSources sources;
 
-    private Application(Builder builder) {
-        this.id = builder.id;
-        this.slug = builder.slug;
-        this.title = builder.title;
-        this.created = builder.created;
-        this.credentials = builder.credentials;
-        this.sources = builder.sources;
+    private Application(Id id, 
+            String slug, 
+            String title, 
+            DateTime created, 
+            ApplicationCredentials credentials, 
+            ApplicationSources sources) {
+        this.id = id;
+        this.slug = slug;
+        this.title = title;
+        this.created = created;
+        this.credentials = credentials;
+        this.sources = sources;
     }
 
     public Id getId() {
@@ -105,7 +110,7 @@ public class Application {
         }
 
         public Application build() {
-            return new Application(this);
+            return new Application(id, slug, title, created, credentials, sources);
         }
     }
 

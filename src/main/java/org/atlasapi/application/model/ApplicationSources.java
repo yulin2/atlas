@@ -1,22 +1,19 @@
 package org.atlasapi.application.model;
 
 import java.util.List;
-import java.util.Map;
-
-import org.atlasapi.application.SourceStatus;
 import org.atlasapi.media.entity.Publisher;
 import org.elasticsearch.common.collect.ImmutableList;
 
 public class ApplicationSources {
 
     private final boolean precedence;
-    private final Map<Publisher, SourceStatus> reads;
-    // TODO Add List for precedence order
+    private final List<SourceReadEntry> reads;
+    // TODO Add List for Publisher, SourceStatus then decompose into map
     private final List<Publisher> writes;
 
     private ApplicationSources(Builder builder) {
         this.precedence = builder.precedence;
-        this.reads = builder.reads;
+        this.reads = ImmutableList.copyOf(builder.reads);
         this.writes = ImmutableList.copyOf(builder.writes);
     }
 
@@ -24,7 +21,7 @@ public class ApplicationSources {
         return precedence;
     }
 
-    public Map<Publisher, SourceStatus> getReads() {
+    public List<SourceReadEntry> getReads() {
         return reads;
     }
 
@@ -46,7 +43,7 @@ public class ApplicationSources {
     public static class Builder {
 
         public boolean precedence;
-        private Map<Publisher, SourceStatus> reads;
+        private List<SourceReadEntry> reads;
         private List<Publisher> writes;
 
         public Builder withPrecedence(boolean precedence) {
@@ -54,7 +51,7 @@ public class ApplicationSources {
             return this;
         }
 
-        public Builder withReads(Map<Publisher, SourceStatus> reads) {
+        public Builder withReads(List<SourceReadEntry> reads) {
             this.reads = reads;
             return this;
         }

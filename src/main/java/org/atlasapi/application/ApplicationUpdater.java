@@ -1,19 +1,17 @@
 package org.atlasapi.application;
 
-import java.util.Map;
-
+import java.util.List;
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.ApplicationSources;
+import org.atlasapi.application.model.SourceReadEntry;
 import org.atlasapi.application.persistence.ApplicationIdProvider;
 import org.atlasapi.application.persistence.ApplicationStore;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
-
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.ImmutableList;
 
 public class ApplicationUpdater {
 
@@ -65,7 +63,7 @@ public class ApplicationUpdater {
             throws NotFoundException {
         Optional<Application> application = applicationStore.applicationFor(id);
         if (application.isPresent()) {
-            SourceStatus status = application.get().getSources().getReads().get(source);
+            SourceStatus status = findSourceStatusFor(source, application.get().getSources().getReads());
             status.copyWithState(sourceState);
 
             modifyReadPublisher(application.get(), source, status);
@@ -77,7 +75,7 @@ public class ApplicationUpdater {
     public void updateEnabled(Id id, Publisher source, boolean enabled) throws NotFoundException {
         Optional<Application> application = applicationStore.applicationFor(id);
         if (application.isPresent()) {
-            SourceStatus status = application.get().getSources().getReads().get(source);
+            SourceStatus status = findSourceStatusFor(source, application.get().getSources().getReads());
             if (enabled) {
                 status = status.enable();
             } else {
@@ -89,10 +87,19 @@ public class ApplicationUpdater {
             throw new NotFoundException(id);
         }
     }
+    
+    private SourceStatus findSourceStatusFor(Publisher source, List<SourceReadEntry> reads) {
+        for (SourceReadEntry status : reads) {
+            if (status.getPublisher().equals(source)) {
+                return status.getSourceStatus();
+            }
+        }
+        return null;
+    }
 
     private void modifyReadPublisher(Application application, Publisher source,
             SourceStatus status) {
-        Map<Publisher, SourceStatus> modifiedReads = changeReadsPreservingOrder(
+        List<SourceReadEntry> modifiedReads = changeReadsPreservingOrder(
                 application.getSources().getReads(), source, status);
         ApplicationSources modifiedSources = application.getSources().copy()
                 .withReads(modifiedReads).build();
@@ -100,19 +107,18 @@ public class ApplicationUpdater {
         applicationStore.store(modified);
     }
 
-    private Map<Publisher, SourceStatus> changeReadsPreservingOrder(
-            Map<Publisher, SourceStatus> original,
+    private List<SourceReadEntry> changeReadsPreservingOrder(
+            List<SourceReadEntry> original,
             Publisher sourceToChange,
             SourceStatus newSourceStatus) {
-        Builder<Publisher, SourceStatus> builder = ImmutableMap.builder();
-        for (Publisher source : original.keySet()) {
-            if (source.equals(sourceToChange)) {
-                builder.put(source, newSourceStatus);
+        ImmutableList.Builder<SourceReadEntry> builder = ImmutableList.builder();
+        for (SourceReadEntry source : original) {
+            if (source.getPublisher().equals(sourceToChange)) {
+                builder.add(new SourceReadEntry(source.getPublisher(), newSourceStatus));
             } else {
-                builder.put(source, original.get(source));
+                builder.add(source);
             }
         }
-
         return builder.build();
     }
 
