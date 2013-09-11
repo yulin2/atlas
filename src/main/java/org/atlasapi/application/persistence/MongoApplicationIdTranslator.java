@@ -7,14 +7,14 @@ import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-
 public class MongoApplicationIdTranslator {
+
     public DBObject toDBObject(Id id) {
         DBObject dbo = new BasicDBObject();
         TranslatorUtils.from(dbo, MongoConstants.ID, id.longValue());
         return dbo;
     }
-    
+
     public Id fromDBObject(DBObject dbo) {
         if (dbo == null) {
             return null;

@@ -15,7 +15,7 @@ import com.google.common.base.Optional;
 public class ApplicationQueryExecutor implements QueryExecutor<Application> {
 
     private final ApplicationStore applicationStore;
-    
+
     public ApplicationQueryExecutor(ApplicationStore applicationStore) {
         this.applicationStore = applicationStore;
     }
@@ -25,7 +25,7 @@ public class ApplicationQueryExecutor implements QueryExecutor<Application> {
             throws QueryExecutionException {
         return query.isListQuery() ? multipleQuery(query) : singleQuery(query);
     }
-    
+
     private QueryResult<Application> singleQuery(Query<Application> query) throws NotFoundException {
         Id id = query.getOnlyId();
         Optional<Application> application = applicationStore.applicationFor(id);
@@ -34,19 +34,19 @@ public class ApplicationQueryExecutor implements QueryExecutor<Application> {
         } else {
             throw new NotFoundException(id);
         }
-        
+
     }
-    
+
     private QueryResult<Application> multipleQuery(Query<Application> query) {
         AttributeQuerySet operands = query.getOperands();
         Iterable<Application> applications = applicationStore.allApplications();
-        
-//        Set<Application2> applications = Sets.newHashSet();
-//        Application2 application = Application2.builder()
-//                .withId("dfg")
-//                .withTitle("test result")
-//                .build();
-//        applications.add(application);
+
+        // Set<Application2> applications = Sets.newHashSet();
+        // Application2 application = Application2.builder()
+        // .withId("dfg")
+        // .withTitle("test result")
+        // .build();
+        // applications.add(application);
         return QueryResult.listResult(applications, query.getContext());
     }
 

@@ -13,19 +13,20 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.ReadPreference;
 
-
 public class MongoApplicationStore implements ApplicationStore {
+
     public static final String APPLICATION_COLLECTION = "applications";
     private final DBCollection applications;
     private final MongoApplicationTranslator translator = new MongoApplicationTranslator();
-    
-    private final Function<DBObject, Application> translatorFunction = new Function<DBObject, Application>(){
+
+    private final Function<DBObject, Application> translatorFunction = new Function<DBObject, Application>() {
+
         @Override
         public Application apply(DBObject dbo) {
             return translator.fromDBObject(dbo);
         }
     };
-    
+
     public MongoApplicationStore(DatabasedMongo adminMongo) {
         this.applications = adminMongo.collection(APPLICATION_COLLECTION);
         this.applications.setReadPreference(ReadPreference.primary());
@@ -39,14 +40,15 @@ public class MongoApplicationStore implements ApplicationStore {
     @Override
     public Optional<Application> applicationFor(Id id) {
         return Optional.fromNullable(translator.fromDBObject(
-                   applications.findOne(
-                           where().fieldEquals(MongoApplicationTranslator.DEER_ID_KEY, id.longValue()).build())
-                   )
-               );
+                applications.findOne(
+                        where().fieldEquals(MongoApplicationTranslator.DEER_ID_KEY, id.longValue())
+                                .build())
+                )
+                );
     }
 
     @Override
     public void store(Application application) {
-       applications.save(translator.toDBObject(application));        
+        applications.save(translator.toDBObject(application));
     }
 }

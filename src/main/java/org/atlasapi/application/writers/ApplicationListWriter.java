@@ -9,14 +9,15 @@ import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
 import org.atlasapi.query.common.Resource;
 
-
 public class ApplicationListWriter implements EntityListWriter<Application> {
+
     private final ApplicationCredentialsWriter credentialsWriter = new ApplicationCredentialsWriter();
     private final EntityListWriter<ApplicationSources> sourcesWriter = new ApplicationSourcesWriter();
+
     public ApplicationListWriter() {
-        
+
     }
-    
+
     @Override
     public void write(Application entity, FieldWriter writer, OutputContext ctxt)
             throws IOException {
@@ -27,7 +28,7 @@ public class ApplicationListWriter implements EntityListWriter<Application> {
         writer.writeObject(credentialsWriter, entity.getCredentials(), ctxt);
         writer.writeObject(sourcesWriter, entity.getSources(), ctxt);
         ctxt.endResource();
-        
+
     }
 
     @Override

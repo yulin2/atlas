@@ -8,7 +8,6 @@ import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
 
-
 public class ApplicationSourcesReadsWriter implements
         EntityListWriter<Entry<Publisher, SourceStatus>> {
 
@@ -17,10 +16,10 @@ public class ApplicationSourcesReadsWriter implements
             OutputContext ctxt) throws IOException {
         writer.writeField("key", entity.getKey().key());
         writer.writeField("title", entity.getKey().title());
-        //writer.writeField("restricted", entity.getValue().isRestricted());
+        // writer.writeField("restricted", entity.getValue().isRestricted());
         writer.writeField("state", entity.getValue().getState().toString().toLowerCase());
         writer.writeField("enabled", entity.getValue().isEnabled());
-        
+
     }
 
     @Override

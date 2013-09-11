@@ -12,21 +12,24 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.net.IpRange;
 
-
 public class ApplicationCredentialsWriter implements EntityListWriter<ApplicationCredentials> {
 
     @Override
     public void write(ApplicationCredentials entity, FieldWriter writer, OutputContext ctxt)
             throws IOException {
         writer.writeField("apiKey", entity.getApiKey());
-        writer.writeList("ipRanges", "ipRanges", ImmutableList.copyOf(Iterables.transform(entity.getIpAddressRanges(), new Function<IpRange, String>(){
+        writer.writeList("ipRanges",
+                "ipRanges",
+                ImmutableList.copyOf(Iterables.transform(entity.getIpAddressRanges(),
+                        new Function<IpRange, String>() {
 
-            @Override
-            public String apply(IpRange range) {
-                return range.toFriendlyString();
-            }
-            
-        })), ctxt);
+                            @Override
+                            public String apply(IpRange range) {
+                                return range.toFriendlyString();
+                            }
+
+                        })),
+                ctxt);
     }
 
     @Override

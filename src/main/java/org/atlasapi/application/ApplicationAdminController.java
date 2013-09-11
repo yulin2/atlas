@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
 public class ApplicationAdminController {
+
     private static Logger log = LoggerFactory.getLogger(ApplicationAdminController.class);
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
     private final QueryParser<Application> requestParser;
@@ -38,10 +39,10 @@ public class ApplicationAdminController {
     private final QueryResultWriter<Application> resultWriter;
     private final ModelReader reader;
     private final ApplicationUpdater applicationUpdater;
-    
+
     public ApplicationAdminController(QueryParser<Application> requestParser,
             QueryExecutor<Application> queryExecutor,
-            QueryResultWriter<Application> resultWriter, 
+            QueryResultWriter<Application> resultWriter,
             ModelReader reader,
             ApplicationUpdater applicationUpdater) {
         this.requestParser = requestParser;
@@ -50,51 +51,54 @@ public class ApplicationAdminController {
         this.reader = reader;
         this.applicationUpdater = applicationUpdater;
     }
-    
-    public void sendError(HttpServletRequest request, 
-            HttpServletResponse response, 
-            ResponseWriter writer, 
-            Exception e, 
+
+    public void sendError(HttpServletRequest request,
+            HttpServletResponse response,
+            ResponseWriter writer,
+            Exception e,
             int responseCode) throws IOException {
         response.setStatus(responseCode);
         log.error("Request exception " + request.getRequestURI(), e);
         ErrorSummary summary = ErrorSummary.forException(e);
         new ErrorResultWriter().write(summary, writer, request, response);
     }
-    
+
     @RequestMapping({ "/4.0/applications/{aid}.*", "/4.0/applications.*" })
     public void outputAllApplications(HttpServletRequest request, HttpServletResponse response)
-        throws IOException {
+            throws IOException {
         ResponseWriter writer = null;
         try {
-           writer = writerResolver.writerFor(request, response);
-           Query<Application> applicationsQuery = requestParser.parse(request);
-           QueryResult<Application> queryResult = queryExecutor.execute(applicationsQuery);
-           resultWriter.write(queryResult, writer);
+            writer = writerResolver.writerFor(request, response);
+            Query<Application> applicationsQuery = requestParser.parse(request);
+            QueryResult<Application> queryResult = queryExecutor.execute(applicationsQuery);
+            resultWriter.write(queryResult, writer);
         } catch (NotFoundException e) {
             sendError(request, response, writer, e, 404);
         } catch (Exception e) {
             sendError(request, response, writer, e, 500);
         }
     }
-    
-    @RequestMapping(value ="/4.0/applications", method = RequestMethod.POST)
-    public void writeApplication(HttpServletRequest request, HttpServletResponse response) throws IOException, ReadException {
+
+    @RequestMapping(value = "/4.0/applications", method = RequestMethod.POST)
+    public void writeApplication(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ReadException {
         Application application = deserialize(new InputStreamReader(request.getInputStream()));
         applicationUpdater.createOrUpdate(application);
     }
-    
-    @RequestMapping(value ="/4.0/applications/{aid}/sources", method = RequestMethod.POST)
-    public void writeApplicationSources(HttpServletRequest request, HttpServletResponse response) throws IOException, ReadException, NotFoundException, QueryParseException {
+
+    @RequestMapping(value = "/4.0/applications/{aid}/sources", method = RequestMethod.POST)
+    public void writeApplicationSources(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ReadException, NotFoundException, QueryParseException {
         Query<Application> applicationsQuery = requestParser.parse(request);
-        ApplicationSources sources = deserializeSources(new InputStreamReader(request.getInputStream()));
+        ApplicationSources sources = deserializeSources(new InputStreamReader(
+                request.getInputStream()));
         applicationUpdater.updateSources(applicationsQuery.getOnlyId(), sources);
     }
-    
+
     private Application deserialize(Reader input) throws IOException, ReadException {
         return reader.read(new BufferedReader(input), Application.class);
     }
-    
+
     private ApplicationSources deserializeSources(Reader input) throws IOException, ReadException {
         return reader.read(new BufferedReader(input), ApplicationSources.class);
     }

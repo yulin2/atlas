@@ -50,12 +50,13 @@ import org.joda.time.DateTime;
 // TODO merge with ApplicationModule
 @Configuration
 public class AdminModule {
-    
+
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired ApplicationStore deerApplicationsStore;
     private @Autowired ApplicationIdProvider applicationIdProvider;
-    
+
     private final JsonDeserializer<DateTime> DATE_TIME_DESERIALIZER = new JsonDeserializer<DateTime>() {
+
         @Override
         public DateTime deserialize(JsonElement json, Type typeOfT,
                 JsonDeserializationContext context) throws JsonParseException {
@@ -63,6 +64,7 @@ public class AdminModule {
         }
     };
     private final JsonDeserializer<Id> ID_DESERIALIZER = new JsonDeserializer<Id>() {
+
         @Override
         public Id deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
@@ -71,6 +73,7 @@ public class AdminModule {
         }
     };
     private final JsonDeserializer<Map<Publisher, SourceStatus>> READS_DESERIALIZER = new JsonDeserializer<Map<Publisher, SourceStatus>>() {
+
         @Override
         public Map<Publisher, SourceStatus> deserialize(JsonElement json, Type typeOfT,
                 JsonDeserializationContext context) throws JsonParseException {
@@ -78,85 +81,89 @@ public class AdminModule {
             JsonArray entries = json.getAsJsonArray();
             for (JsonElement entry : entries) {
                 JsonObject obj = entry.getAsJsonObject();
-                Optional<Publisher> publisher = Publisher.fromPossibleKey(obj.getAsJsonPrimitive("key").getAsString());
-                SourceStatus.SourceState sourceState = SourceStatus.SourceState.valueOf(obj.getAsJsonPrimitive("state").getAsString().toUpperCase());
-                SourceStatus sourceStatus = new SourceStatus(sourceState, obj.getAsJsonPrimitive("enabled").getAsBoolean());
+                Optional<Publisher> publisher = Publisher.fromPossibleKey(obj.getAsJsonPrimitive("key")
+                        .getAsString());
+                SourceStatus.SourceState sourceState = SourceStatus.SourceState.valueOf(obj.getAsJsonPrimitive("state")
+                        .getAsString()
+                        .toUpperCase());
+                SourceStatus sourceStatus = new SourceStatus(
+                        sourceState,
+                        obj.getAsJsonPrimitive("enabled").getAsBoolean());
                 reads.put(publisher.get(), sourceStatus);
             }
             return reads;
         }
     };
     private final JsonDeserializer<Publisher> PUBLISHER_DESERIALIZER = new JsonDeserializer<Publisher>() {
+
         @Override
         public Publisher deserialize(JsonElement json, Type typeOfT,
                 JsonDeserializationContext context) throws JsonParseException {
-            Optional<Publisher> publisher = Publisher.fromPossibleKey(json.getAsJsonPrimitive().getAsString());
+            Optional<Publisher> publisher = Publisher.fromPossibleKey(json.getAsJsonPrimitive()
+                    .getAsString());
             return publisher.get();
         }
     };
-    
-    
+
     private final Gson gson = new GsonBuilder()
-                   .registerTypeAdapter(DateTime.class, DATE_TIME_DESERIALIZER)
-                   .registerTypeAdapter(Id.class, ID_DESERIALIZER)
-                   .registerTypeAdapter(Map.class, READS_DESERIALIZER)
-                   .registerTypeAdapter(Publisher.class, PUBLISHER_DESERIALIZER)
-                   .create();
- 
+            .registerTypeAdapter(DateTime.class, DATE_TIME_DESERIALIZER)
+            .registerTypeAdapter(Id.class, ID_DESERIALIZER)
+            .registerTypeAdapter(Map.class, READS_DESERIALIZER)
+            .registerTypeAdapter(Publisher.class, PUBLISHER_DESERIALIZER)
+            .create();
+
     @Bean
     public ApplicationAdminController applicationAdminController() {
-        ApplicationUpdater applicationUpdater = new ApplicationUpdater(deerApplicationsStore, 
-            applicationIdProvider);
+        ApplicationUpdater applicationUpdater = new ApplicationUpdater(deerApplicationsStore,
+                applicationIdProvider);
         return new ApplicationAdminController(
                 applicationQueryParser(),
                 applicationQueryExecutor(),
                 new ApplicationQueryResultWriter(applicationListWriter()),
                 gsonModelReader(),
-                applicationUpdater
-               );
+                applicationUpdater);
     }
-        
-    @Bean 
+
+    @Bean
     protected ModelReader gsonModelReader() {
         return new GsonModelReader(gson);
     }
-    
+
     @Bean
     protected EntityListWriter<Application> applicationListWriter() {
         return new ApplicationListWriter();
     }
-    
+
     @Bean
     ResourceAnnotationIndex applicationAnnotationIndex() {
         return ResourceAnnotationIndex.builder(Resource.APPLICATION, Annotation.all()).build();
     }
-    
+
     @Bean
     protected QueryExecutor<Application> applicationQueryExecutor() {
         return new ApplicationQueryExecutor(deerApplicationsStore);
     }
-    
-    @Bean SelectionBuilder  selectionBuilder() {
+
+    @Bean
+    SelectionBuilder selectionBuilder() {
         return Selection.builder().withDefaultLimit(50).withMaxLimit(100);
     }
-    
-    @Bean NumberToShortStringCodec idCodec() {
+
+    @Bean
+    NumberToShortStringCodec idCodec() {
         return SubstitutionTableNumberCodec.lowerCaseOnly();
-    }   
-    
-    private StandardQueryParser<Application> applicationQueryParser() {
-        QueryContextParser contextParser = new QueryContextParser(configFetcher, 
-        new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
-        
-        return new StandardQueryParser<Application>(Resource.APPLICATION, 
-            new QueryAttributeParser(ImmutableList.of(
-                QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec()))
-            )),
-            idCodec(), contextParser
-        );
     }
-    
-    
- 
-  
+
+    private StandardQueryParser<Application> applicationQueryParser() {
+        QueryContextParser contextParser = new QueryContextParser(configFetcher,
+                new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
+
+        return new StandardQueryParser<Application>(Resource.APPLICATION,
+                new QueryAttributeParser(ImmutableList.of(
+                        QueryAtomParser.valueOf(Attributes.ID,
+                                AttributeCoercers.idCoercer(idCodec()))
+                        )),
+                idCodec(), contextParser);
+    }
+
 }

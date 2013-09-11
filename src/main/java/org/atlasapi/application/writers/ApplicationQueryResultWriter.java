@@ -12,10 +12,10 @@ import org.atlasapi.query.common.QueryResult;
 
 import com.google.common.collect.FluentIterable;
 
-
 public class ApplicationQueryResultWriter implements QueryResultWriter<Application> {
+
     private final EntityListWriter<Application> applicationListWriter;
-    
+
     public ApplicationQueryResultWriter(EntityListWriter<Application> applicationListWriter) {
         this.applicationListWriter = applicationListWriter;
     }
@@ -27,18 +27,18 @@ public class ApplicationQueryResultWriter implements QueryResultWriter<Applicati
         writeResult(result, responseWriter);
         responseWriter.finishResponse();
     }
-    
+
     private void writeResult(QueryResult<Application> result, ResponseWriter writer)
             throws IOException {
-         OutputContext ctxt = outputContext(result.getContext());
+        OutputContext ctxt = outputContext(result.getContext());
 
-         if (result.isListResult()) {
-             FluentIterable<Application> resources = result.getResources();
-             writer.writeList(applicationListWriter, resources, ctxt);
-         } else {
-             writer.writeObject(applicationListWriter, result.getOnlyResource(), ctxt);
-         }
-            
+        if (result.isListResult()) {
+            FluentIterable<Application> resources = result.getResources();
+            writer.writeList(applicationListWriter, resources, ctxt);
+        } else {
+            writer.writeObject(applicationListWriter, result.getOnlyResource(), ctxt);
+        }
+
     }
 
     private OutputContext outputContext(QueryContext queryContext) {

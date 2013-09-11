@@ -14,16 +14,18 @@ import org.atlasapi.output.NotFoundException;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+
 public class ApplicationUpdater {
+
     private final ApplicationStore applicationStore;
     private final ApplicationIdProvider idProvider;
 
-    public ApplicationUpdater(ApplicationStore applicationStore, 
+    public ApplicationUpdater(ApplicationStore applicationStore,
             ApplicationIdProvider idProvider) {
         this.applicationStore = applicationStore;
         this.idProvider = idProvider;
     }
-    
+
     // For compatibility with 3.0
     private String getSlug(Application application) {
         if (application.getSlug() != null && !application.getSlug().isEmpty()) {
@@ -32,7 +34,7 @@ public class ApplicationUpdater {
             return "app-" + String.valueOf(application.getId().longValue());
         }
     }
-    
+
     public Application createOrUpdate(Application application) {
         if (application.getId() != null) {
             Optional<Application> savedApplication = applicationStore.applicationFor(application.getId());
@@ -56,21 +58,22 @@ public class ApplicationUpdater {
         } else {
             throw new NotFoundException(id);
         }
-        
+
     }
-    
-    public void updateSourceState(Id id, Publisher source, SourceState sourceState) throws NotFoundException {
+
+    public void updateSourceState(Id id, Publisher source, SourceState sourceState)
+            throws NotFoundException {
         Optional<Application> application = applicationStore.applicationFor(id);
         if (application.isPresent()) {
             SourceStatus status = application.get().getSources().getReads().get(source);
             status.copyWithState(sourceState);
-            
+
             modifyReadPublisher(application.get(), source, status);
         } else {
             throw new NotFoundException(id);
         }
     }
-    
+
     public void updateEnabled(Id id, Publisher source, boolean enabled) throws NotFoundException {
         Optional<Application> application = applicationStore.applicationFor(id);
         if (application.isPresent()) {
@@ -81,13 +84,13 @@ public class ApplicationUpdater {
                 status = status.disable();
             }
             modifyReadPublisher(application.get(), source, status);
-          
+
         } else {
             throw new NotFoundException(id);
         }
     }
-    
-    private void modifyReadPublisher(Application application, Publisher source, 
+
+    private void modifyReadPublisher(Application application, Publisher source,
             SourceStatus status) {
         Map<Publisher, SourceStatus> modifiedReads = changeReadsPreservingOrder(
                 application.getSources().getReads(), source, status);
@@ -96,9 +99,10 @@ public class ApplicationUpdater {
         Application modified = application.copy().withSources(modifiedSources).build();
         applicationStore.store(modified);
     }
-    
-    private Map<Publisher, SourceStatus> changeReadsPreservingOrder(Map<Publisher, SourceStatus> original, 
-            Publisher sourceToChange, 
+
+    private Map<Publisher, SourceStatus> changeReadsPreservingOrder(
+            Map<Publisher, SourceStatus> original,
+            Publisher sourceToChange,
             SourceStatus newSourceStatus) {
         Builder<Publisher, SourceStatus> builder = ImmutableMap.builder();
         for (Publisher source : original.keySet()) {
@@ -108,7 +112,7 @@ public class ApplicationUpdater {
                 builder.put(source, original.get(source));
             }
         }
-        
+
         return builder.build();
     }
 
