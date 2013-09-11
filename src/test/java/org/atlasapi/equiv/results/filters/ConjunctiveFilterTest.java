@@ -15,12 +15,11 @@ import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.junit.Test;
 
 import com.google.common.base.Function;
-import com.google.common.collect.DiscreteDomains;
+import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import com.google.common.collect.Ranges;
 
 public class ConjunctiveFilterTest {
 
@@ -33,14 +32,14 @@ public class ConjunctiveFilterTest {
         ));
         
         DefaultDescription desc = new DefaultDescription();
-        Iterable<ScoredCandidate<Integer>> candidates = candidatesFor(Ranges.closed(0, 20));
+        Iterable<ScoredCandidate<Integer>> candidates = candidatesFor(Range.closed(0, 20));
         List<ScoredCandidate<Integer>> filtered = filter.apply(candidates, null, desc);
         
         assertThat(Lists.transform(filtered, ScoredCandidate.<Integer>toCandidate()), is(hasItems(6,12,18)));
     }
 
     private Iterable<ScoredCandidate<Integer>> candidatesFor(Range<Integer> range) {
-        return Iterables.transform(range.asSet(DiscreteDomains.integers()), new Function<Integer, ScoredCandidate<Integer>>() {
+        return Iterables.transform(range.asSet(DiscreteDomain.integers()), new Function<Integer, ScoredCandidate<Integer>>() {
             @Override
             public ScoredCandidate<Integer> apply(@Nullable Integer input) {
                 return ScoredCandidate.valueOf(input, Score.NULL_SCORE);
