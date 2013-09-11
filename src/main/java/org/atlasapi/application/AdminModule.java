@@ -114,14 +114,23 @@ public class AdminModule {
 
     @Bean
     public ApplicationAdminController applicationAdminController() {
-        ApplicationUpdater applicationUpdater = new ApplicationUpdater(deerApplicationsStore,
-                applicationIdProvider);
         return new ApplicationAdminController(
                 applicationQueryParser(),
                 applicationQueryExecutor(),
                 new ApplicationQueryResultWriter(applicationListWriter()),
                 gsonModelReader(),
-                applicationUpdater);
+                applicationUpdater());
+    }
+    
+    @Bean 
+    public SourcesController sourcesController() {
+        return new SourcesController(applicationUpdater());
+    }
+    
+    @Bean 
+    protected ApplicationUpdater applicationUpdater() {
+        return new ApplicationUpdater(deerApplicationsStore,
+                applicationIdProvider);
     }
 
     @Bean

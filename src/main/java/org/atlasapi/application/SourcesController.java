@@ -3,10 +3,18 @@ package org.atlasapi.application;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 public class SourcesController {
+    private final ApplicationUpdater applicationUpdater;
+    
+    
+    public SourcesController(ApplicationUpdater applicationUpdater) {
+        this.applicationUpdater = applicationUpdater;
+    }
 
     /**
      * POST /4.0/sources/:sourceId/applications Updates permission for a source.
@@ -16,8 +24,13 @@ public class SourcesController {
      * @param request
      * @param response
      */
-    @RequestMapping(value = "/4.0/sources/{sid}/applications", method = RequestMethod.POST)
-    public void writeSourceForApplication(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(value = "/4.0/sources/{sourceId}/applications", method = RequestMethod.POST)
+    public void writeSourceForApplication(HttpServletRequest request, 
+            HttpServletResponse response,
+            @PathVariable String sourceId,
+            @RequestParam String id,
+            @RequestParam String permission) {
+        
 
     }
 
@@ -27,7 +40,11 @@ public class SourcesController {
      * needed.
      */
     @RequestMapping(value = "/4.0/sources/{sid}/applications", method = RequestMethod.DELETE)
-    public void deleteSourceForApplication(HttpServletRequest request, HttpServletResponse response) {
+    public void deleteSourceForApplication(HttpServletRequest request, 
+            HttpServletResponse response,
+            @PathVariable String sourceId,
+            @RequestParam String id,
+            @RequestParam String permission) {
 
     }
 
@@ -37,7 +54,10 @@ public class SourcesController {
      * "available"
      */
     public void changeSourceStateForApplication(HttpServletRequest request,
-            HttpServletResponse response) {
+            HttpServletResponse response,
+            @PathVariable String sourceId,
+            @RequestParam String id,
+            @RequestParam String state) {
 
     }
 }
