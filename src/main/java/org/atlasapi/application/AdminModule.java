@@ -140,7 +140,7 @@ public class AdminModule {
 
     @Bean
     protected EntityListWriter<Application> applicationListWriter() {
-        return new ApplicationListWriter();
+        return new ApplicationListWriter(idCodec());
     }
 
     @Bean

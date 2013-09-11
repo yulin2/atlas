@@ -9,20 +9,23 @@ import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
 import org.atlasapi.query.common.Resource;
 
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+
 public class ApplicationListWriter implements EntityListWriter<Application> {
 
     private final ApplicationCredentialsWriter credentialsWriter = new ApplicationCredentialsWriter();
     private final EntityListWriter<ApplicationSources> sourcesWriter = new ApplicationSourcesWriter();
-
-    public ApplicationListWriter() {
-
+    private final NumberToShortStringCodec idCodec;
+    
+    public ApplicationListWriter(NumberToShortStringCodec idCodec) {
+        this.idCodec = idCodec;
     }
 
     @Override
     public void write(Application entity, FieldWriter writer, OutputContext ctxt)
             throws IOException {
         ctxt.startResource(Resource.APPLICATION);
-        writer.writeField("id", entity.getId());
+        writer.writeField("id", idCodec.encode(entity.getId().toBigInteger()));
         writer.writeField("title", entity.getTitle());
         writer.writeField("created", entity.getCreated());
         writer.writeObject(credentialsWriter, entity.getCredentials(), ctxt);
