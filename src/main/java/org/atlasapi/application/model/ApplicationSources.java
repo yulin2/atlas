@@ -11,6 +11,7 @@ public class ApplicationSources {
 
     private final boolean precedence;
     private final Map<Publisher, SourceStatus> reads;
+    // TODO Add List for precedence order
     private final List<Publisher> writes;
 
     private ApplicationSources(Builder builder) {
@@ -27,7 +28,7 @@ public class ApplicationSources {
         return reads;
     }
 
-    public Iterable<Publisher> getWrites() {
+    public List<Publisher> getWrites() {
         return writes;
     }
 
@@ -46,7 +47,7 @@ public class ApplicationSources {
 
         public boolean precedence;
         private Map<Publisher, SourceStatus> reads;
-        private Iterable<Publisher> writes;
+        private List<Publisher> writes;
 
         public Builder withPrecedence(boolean precedence) {
             this.precedence = precedence;
@@ -58,7 +59,7 @@ public class ApplicationSources {
             return this;
         }
 
-        public Builder withWrites(Iterable<Publisher> writes) {
+        public Builder withWrites(List<Publisher> writes) {
             this.writes = writes;
             return this;
         }

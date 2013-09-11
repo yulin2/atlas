@@ -65,7 +65,7 @@ public class ApplicationSourcesTranslator {
         Map<Publisher, SourceStatus> sourceStatuses = sourceStatusesFrom(statusDbos, precedence);
 
         List<String> writableKeys = TranslatorUtils.toList(dbo, WRITABLE_KEY);
-        Iterable<Publisher> writableSources = Lists.transform(writableKeys, Publisher.FROM_KEY);
+        List<Publisher> writableSources = Lists.transform(writableKeys, Publisher.FROM_KEY);
 
         boolean precedenceFlag = precedence != null && !precedence.isEmpty();
         return ApplicationSources.builder()
