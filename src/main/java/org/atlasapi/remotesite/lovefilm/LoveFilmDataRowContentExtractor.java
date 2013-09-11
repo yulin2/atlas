@@ -105,7 +105,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings().trimResults();
     private static final Splitter TITLE_SPLIT = Splitter.on(" - ").trimResults();
     private final DateTimeFormatter dateMonthYearFormat = DateTimeFormat.forPattern("dd/MM/YYYY").withZoneUTC();
-    private final DateTimeFormatter yearMonthDayFormat = ISODateTimeFormat.date().withZoneUTC();
+    private final DateTimeFormatter yearMonthDayFormat = ISODateTimeFormat.date().withZone(DateTimeZone.forID("Europe/London"));
     
     private static final EnglishLanguageCodeMap languageCodeMap = new EnglishLanguageCodeMap();
     private static final OptionalMap<String, Certificate> certificateMap = ImmutableOptionalMap.fromMap(
