@@ -14,7 +14,7 @@ import com.mongodb.DBObject;
 import com.mongodb.ReadPreference;
 
 
-public class MongoApplicationStore2 implements ApplicationStore2 {
+public class MongoApplicationStore implements ApplicationStore {
     public static final String APPLICATION_COLLECTION = "applications";
     private final DBCollection applications;
     private final MongoApplicationTranslator translator = new MongoApplicationTranslator();
@@ -26,7 +26,7 @@ public class MongoApplicationStore2 implements ApplicationStore2 {
         }
     };
     
-    public MongoApplicationStore2(DatabasedMongo adminMongo) {
+    public MongoApplicationStore(DatabasedMongo adminMongo) {
         this.applications = adminMongo.collection(APPLICATION_COLLECTION);
         this.applications.setReadPreference(ReadPreference.primary());
     }

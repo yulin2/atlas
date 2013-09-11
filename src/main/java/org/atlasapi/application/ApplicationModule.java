@@ -9,17 +9,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlas.application.notification.NotifierModule;
-import org.atlasapi.application.ApplicationStore;
-import org.atlasapi.application.MongoApplicationStore;
+import org.atlasapi.application.OldApplicationStore;
+import org.atlasapi.application.OldMongoApplicationStore;
 import org.atlasapi.application.auth.AdminAuthenticationInterceptor;
 import org.atlasapi.application.auth.AuthCallbackHandler;
 import org.atlasapi.application.auth.LoginController;
 import org.atlasapi.application.auth.TwitterAuthController;
 import org.atlasapi.application.auth.UserAuthCallbackHandler;
 import org.atlasapi.application.persistence.ApplicationIdProvider;
-import org.atlasapi.application.persistence.ApplicationStore2;
+import org.atlasapi.application.persistence.ApplicationStore;
 import org.atlasapi.application.persistence.MongoApplicationIdProvider;
-import org.atlasapi.application.persistence.MongoApplicationStore2;
+import org.atlasapi.application.persistence.MongoApplicationStore;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
 import org.atlasapi.application.users.MongoUserStore;
@@ -79,8 +79,8 @@ public class ApplicationModule {
 		return new IpCheckingApiKeyConfigurationFetcher(applicationStore());
 	}
 	
-	public @Bean ApplicationStore applicationStore(){
-		return new MongoApplicationStore(adminMongo);
+	public @Bean OldApplicationStore applicationStore(){
+		return new OldMongoApplicationStore(adminMongo);
 	}
 	
 	public @Bean UserStore userStore() {
@@ -147,8 +147,8 @@ public class ApplicationModule {
     
     @Bean 
     @Qualifier(value = "deerApplicationsStore")
-    protected ApplicationStore2 deerApplicationsStore() {
-        return new MongoApplicationStore2(adminMongo);
+    protected ApplicationStore deerApplicationsStore() {
+        return new MongoApplicationStore(adminMongo);
     }
     
     @Bean

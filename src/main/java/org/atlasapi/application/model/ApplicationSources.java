@@ -31,6 +31,13 @@ public class ApplicationSources {
         return writes;
     }
     
+    public Builder copy() {
+        return builder()
+                .withPrecedence(this.isPrecedenceEnabled())
+                .withReads(this.getReads())
+                .withWrites(this.getWrites());
+    }
+    
     public static Builder builder() {
         return new Builder();
     }

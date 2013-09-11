@@ -37,7 +37,7 @@ public class ApplicationListWriter implements EntityListWriter<Application> {
 
     @Override
     public String listName() {
-        return "application";
+        return "applications";
     }
 
 }

@@ -44,7 +44,7 @@ import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
 import org.atlasapi.application.persistence.ApplicationIdProvider;
-import org.atlasapi.application.persistence.ApplicationStore2;
+import org.atlasapi.application.persistence.ApplicationStore;
 import org.joda.time.DateTime;
 
 // TODO merge with ApplicationModule
@@ -52,7 +52,7 @@ import org.joda.time.DateTime;
 public class AdminModule {
     
     private @Autowired ApplicationConfigurationFetcher configFetcher;
-    private @Autowired ApplicationStore2 deerApplicationsStore;
+    private @Autowired ApplicationStore deerApplicationsStore;
     private @Autowired ApplicationIdProvider applicationIdProvider;
     
     private final JsonDeserializer<DateTime> DATE_TIME_DESERIALIZER = new JsonDeserializer<DateTime>() {
