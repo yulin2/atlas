@@ -5,23 +5,27 @@ import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.ApplicationSources;
 import org.atlasapi.application.model.SourceReadEntry;
-import org.atlasapi.application.persistence.ApplicationIdProvider;
 import org.atlasapi.application.persistence.ApplicationStore;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.ids.IdGenerator;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public class ApplicationUpdater {
 
     private final ApplicationStore applicationStore;
-    private final ApplicationIdProvider idProvider;
+    private final IdGenerator idGenerator;
+    private final NumberToShortStringCodec idCodec;
 
     public ApplicationUpdater(ApplicationStore applicationStore,
-            ApplicationIdProvider idProvider) {
+            IdGenerator idGenerator,
+            NumberToShortStringCodec idCodec) {
         this.applicationStore = applicationStore;
-        this.idProvider = idProvider;
+        this.idGenerator = idGenerator;
+        this.idCodec = idCodec;
     }
 
     // For compatibility with 3.0
@@ -29,7 +33,7 @@ public class ApplicationUpdater {
         if (application.getSlug() != null && !application.getSlug().isEmpty()) {
             return application.getSlug();
         } else {
-            return "app-" + String.valueOf(application.getId().longValue());
+            return "app-" + idCodec.encode(application.getId().toBigInteger());
         }
     }
 
@@ -41,7 +45,7 @@ public class ApplicationUpdater {
             }
         } else {
             // new application get an id
-            application = application.copy().withId(idProvider.issueNextId()).build();
+            application = application.copy().withId(Id.valueOf(idGenerator.generateRaw())).build();
         }
         application = application.copy().withSlug(getSlug(application)).build();
         applicationStore.store(application);

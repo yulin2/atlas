@@ -1,6 +1,5 @@
 package org.atlasapi;
 
-import org.atlasapi.application.AdminModule;
 import org.atlasapi.application.ApplicationModule;
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.EquivTaskModule;
@@ -80,8 +79,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             builder.add(
 //                AtlasFeedsModule.class,
                 QueryWebModule.class,
-                ApplicationModule.class,
-                AdminModule.class // TODO remove this once merged with ApplicationModule
+                ApplicationModule.class
             );
         }
     }
