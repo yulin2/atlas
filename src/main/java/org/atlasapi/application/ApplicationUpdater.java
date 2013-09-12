@@ -13,6 +13,8 @@ import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
+import org.elasticsearch.common.collect.Lists;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
@@ -96,8 +98,8 @@ public class ApplicationUpdater {
         Optional<Application> application = applicationStore.applicationFor(id);
         if (application.isPresent()) {
             SourceStatus status = findSourceStatusFor(source, application.get().getSources().getReads());
-            status.copyWithState(sourceState);
-            modifyReadPublisher(application.get(), source, status);
+            SourceStatus newStatus = status.copyWithState(sourceState);
+            modifyReadPublisher(application.get(), source, newStatus);
         } else {
             throw new NotFoundException(id);
         }
@@ -164,6 +166,36 @@ public class ApplicationUpdater {
     public Optional<Publisher> decodeSourceId(String encoded) {
         Maybe<Publisher> publisher = sourceIdCodec.decode(encoded);
         return Optional.fromNullable(publisher.valueOrNull());
+    }
+
+    public void addWrites(Id id, Publisher source) throws NotFoundException {
+        Optional<Application> application = applicationStore.applicationFor(id);
+        if (application.isPresent()) {
+            List<Publisher> writes = Lists.newArrayList(application.get().getSources().getWrites());
+            if (!writes.contains(source)) {
+                writes.add(source);
+            }
+            ApplicationSources modifiedSources = application.get()
+                    .getSources().copy().withWrites(writes).build();
+            Application modified = application.get().copy().withSources(modifiedSources).build();
+            applicationStore.store(modified);
+        } else {
+            throw new NotFoundException(id);
+        }
+    }
+
+    public void removeWrites(Id id, Publisher source) throws NotFoundException {
+        Optional<Application> application = applicationStore.applicationFor(id);
+        if (application.isPresent()) {
+            List<Publisher> writes = Lists.newArrayList(application.get().getSources().getWrites());
+            writes.remove(source);
+            ApplicationSources modifiedSources = application.get()
+                    .getSources().copy().withWrites(writes).build();
+            Application modified = application.get().copy().withSources(modifiedSources).build();
+            applicationStore.store(modified);
+        } else {
+            throw new NotFoundException(id);
+        }
     }
 
 }
