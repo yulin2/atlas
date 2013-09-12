@@ -1,9 +1,10 @@
 package org.atlasapi.application;
 
-import java.lang.reflect.Type;
-import java.util.Map;
-
 import org.atlasapi.application.model.Application;
+import org.atlasapi.application.model.SourceReadEntry;
+import org.atlasapi.application.model.deserialize.IdDeserializer;
+import org.atlasapi.application.model.deserialize.PublisherDeserializer;
+import org.atlasapi.application.model.deserialize.SourceReadEntryDeserializer;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.writers.ApplicationListWriter;
 import org.atlasapi.application.writers.ApplicationQueryResultWriter;
@@ -26,23 +27,15 @@ import org.atlasapi.query.common.StandardQueryParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonDeserializer;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
-
+import com.metabroadcast.common.webapp.serializers.JodaDateTimeSerializer;
 import org.atlasapi.application.persistence.ApplicationIdProvider;
 import org.atlasapi.application.persistence.ApplicationStore;
 import org.joda.time.DateTime;
@@ -54,61 +47,17 @@ public class AdminModule {
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired ApplicationStore deerApplicationsStore;
     private @Autowired ApplicationIdProvider applicationIdProvider;
-    private @Autowired NumberToShortStringCodec idCodec;
-
-    private final JsonDeserializer<DateTime> DATE_TIME_DESERIALIZER = new JsonDeserializer<DateTime>() {
-
-        @Override
-        public DateTime deserialize(JsonElement json, Type typeOfT,
-                JsonDeserializationContext context) throws JsonParseException {
-            return DateTime.parse(json.getAsJsonPrimitive().getAsString());
-        }
-    };
-    private final JsonDeserializer<Id> ID_DESERIALIZER = new JsonDeserializer<Id>() {
-
-        @Override
-        public Id deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
-            return Id.valueOf(idCodec.decode(json.getAsJsonPrimitive().getAsString()));
-        }
-    };
-    private final JsonDeserializer<Map<Publisher, SourceStatus>> READS_DESERIALIZER = new JsonDeserializer<Map<Publisher, SourceStatus>>() {
-
-        @Override
-        public Map<Publisher, SourceStatus> deserialize(JsonElement json, Type typeOfT,
-                JsonDeserializationContext context) throws JsonParseException {
-            Map<Publisher, SourceStatus> reads = Maps.newHashMap();
-            JsonArray entries = json.getAsJsonArray();
-            for (JsonElement entry : entries) {
-                JsonObject obj = entry.getAsJsonObject();
-                Optional<Publisher> publisher = Publisher.fromPossibleKey(obj.getAsJsonPrimitive("key")
-                        .getAsString());
-                SourceStatus.SourceState sourceState = SourceStatus.SourceState.valueOf(obj.getAsJsonPrimitive("state")
-                        .getAsString()
-                        .toUpperCase());
-                SourceStatus sourceStatus = new SourceStatus(
-                        sourceState,
-                        obj.getAsJsonPrimitive("enabled").getAsBoolean());
-                reads.put(publisher.get(), sourceStatus);
-            }
-            return reads;
-        }
-    };
-    private final JsonDeserializer<Publisher> PUBLISHER_DESERIALIZER = new JsonDeserializer<Publisher>() {
-
-        @Override
-        public Publisher deserialize(JsonElement json, Type typeOfT,
-                JsonDeserializationContext context) throws JsonParseException {
-            Optional<Publisher> publisher = Publisher.fromPossibleKey(json.getAsJsonPrimitive()
-                    .getAsString());
-            return publisher.get();
-        }
-    };
+    private final NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();;
+    
+    private final JsonDeserializer<Id> ID_DESERIALIZER = new IdDeserializer(idCodec);
+    private final JsonDeserializer<DateTime> DATETIME_DESERIALIZER = new JodaDateTimeSerializer();
+    private final JsonDeserializer<SourceReadEntry> READS_DESERIALIZER = new SourceReadEntryDeserializer();
+    private final JsonDeserializer<Publisher> PUBLISHER_DESERIALIZER = new PublisherDeserializer();
 
     private final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(DateTime.class, DATE_TIME_DESERIALIZER)
+            .registerTypeAdapter(DateTime.class, DATETIME_DESERIALIZER)
             .registerTypeAdapter(Id.class, ID_DESERIALIZER)
-            .registerTypeAdapter(Map.class, READS_DESERIALIZER)
+            .registerTypeAdapter(SourceReadEntry.class, READS_DESERIALIZER)
             .registerTypeAdapter(Publisher.class, PUBLISHER_DESERIALIZER)
             .create();
 

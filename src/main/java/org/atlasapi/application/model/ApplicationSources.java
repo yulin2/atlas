@@ -8,7 +8,6 @@ public class ApplicationSources {
 
     private final boolean precedence;
     private final List<SourceReadEntry> reads;
-    // TODO Add List for Publisher, SourceStatus then decompose into map
     private final List<Publisher> writes;
 
     private ApplicationSources(Builder builder) {
