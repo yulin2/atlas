@@ -1,6 +1,5 @@
 package org.atlasapi.application.persistence;
 
-import org.atlasapi.application.ApplicationCredentialsTranslator;
 import org.atlasapi.application.model.Application;
 import org.atlasapi.media.common.Id;
 

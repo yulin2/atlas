@@ -1,6 +1,5 @@
 package org.atlasapi.application.model;
 
-import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.media.common.Id;
 import org.joda.time.DateTime;
 

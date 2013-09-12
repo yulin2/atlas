@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.model.Application;
+import org.atlasapi.application.model.ApplicationCredentials;
 import org.atlasapi.application.model.ApplicationSources;
 import org.atlasapi.application.model.SourceReadEntry;
 import org.atlasapi.application.persistence.ApplicationStore;
@@ -54,7 +55,8 @@ public class ApplicationUpdater {
     private Application createApplication(Application application) {
         Id id = Id.valueOf(idGenerator.generateRaw());
         String apiKey = generateApiKey() ;
-        ApplicationCredentials credentials = application.getCredentials().copyWithApiKey(apiKey);
+        ApplicationCredentials credentials = application.getCredentials()
+                .copy().withApiKey(apiKey).build();
         Application modified = application.copy()
                 .withId(id)
                 .withCredentials(credentials)
