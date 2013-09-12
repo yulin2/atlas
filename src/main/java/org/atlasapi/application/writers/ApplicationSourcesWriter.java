@@ -3,17 +3,21 @@ package org.atlasapi.application.writers;
 import java.io.IOException;
 import org.atlasapi.application.model.ApplicationSources;
 import org.atlasapi.application.model.SourceReadEntry;
+import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
-import org.atlasapi.output.writers.SourceWriter;
 
 public class ApplicationSourcesWriter implements EntityListWriter<ApplicationSources> {
-
-    private final EntityListWriter<SourceReadEntry> readsWriter = new ApplicationSourcesReadsWriter();
-    private final EntityListWriter<Publisher> writesWriter = SourceWriter.sourceListWriter("writes");
-
+    private final EntityListWriter<SourceReadEntry> readsWriter;
+    private final EntityListWriter<Publisher> writesWriter; 
+    
+    public ApplicationSourcesWriter(SourceIdCodec sourceIdCodec) {
+        readsWriter = new ApplicationSourcesReadsWriter(sourceIdCodec);
+        writesWriter = new ApplicationSourcesWritesWriter(sourceIdCodec);
+    }
+    
     @Override
     public void write(ApplicationSources entity, FieldWriter writer, OutputContext ctxt)
             throws IOException {

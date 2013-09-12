@@ -25,6 +25,7 @@ import org.atlasapi.application.persistence.ApplicationStore;
 import org.atlasapi.application.persistence.MongoApplicationStore;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
+import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.application.users.MongoUserStore;
 import org.atlasapi.application.users.NewUserSupplier;
 import org.atlasapi.application.users.UserStore;
@@ -97,6 +98,7 @@ public class ApplicationModule {
     private static final String COOKIE_NAME = "atlastw";
     
     private final NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();;
+    private final SourceIdCodec sourceIdCodec = new SourceIdCodec(idCodec);
     private final JsonDeserializer<Id> idDeserializer = new IdDeserializer(idCodec);
     private final JsonDeserializer<DateTime> datetimeDeserializer = new JodaDateTimeSerializer();
     private final JsonDeserializer<SourceReadEntry> readsDeserializer = new SourceReadEntryDeserializer();
@@ -227,7 +229,7 @@ public class ApplicationModule {
     protected ApplicationUpdater applicationUpdater() {
         IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "application");
         return new ApplicationUpdater(deerApplicationsStore(),
-                idGenerator, idCodec);
+                idGenerator, idCodec, sourceIdCodec);
     }
     
     private StandardQueryParser<Application> applicationQueryParser() {
@@ -266,7 +268,7 @@ public class ApplicationModule {
 
     @Bean
     protected EntityListWriter<Application> applicationListWriter() {
-        return new ApplicationListWriter(idCodec);
+        return new ApplicationListWriter(idCodec, sourceIdCodec);
     }
 
     @Bean

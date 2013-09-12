@@ -9,11 +9,13 @@ import org.atlasapi.application.model.ApplicationCredentials;
 import org.atlasapi.application.model.ApplicationSources;
 import org.atlasapi.application.model.SourceReadEntry;
 import org.atlasapi.application.persistence.ApplicationStore;
+import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.IdGenerator;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
@@ -22,13 +24,16 @@ public class ApplicationUpdater {
     private final ApplicationStore applicationStore;
     private final IdGenerator idGenerator;
     private final NumberToShortStringCodec idCodec;
+    private final SourceIdCodec sourceIdCodec;
 
     public ApplicationUpdater(ApplicationStore applicationStore,
             IdGenerator idGenerator,
-            NumberToShortStringCodec idCodec) {
+            NumberToShortStringCodec idCodec,
+            SourceIdCodec sourceIdCodec) {
         this.applicationStore = applicationStore;
         this.idGenerator = idGenerator;
         this.idCodec = idCodec;
+        this.sourceIdCodec = sourceIdCodec;
     }
     
     // For compatibility with 3.0
@@ -92,7 +97,6 @@ public class ApplicationUpdater {
         if (application.isPresent()) {
             SourceStatus status = findSourceStatusFor(source, application.get().getSources().getReads());
             status.copyWithState(sourceState);
-
             modifyReadPublisher(application.get(), source, status);
         } else {
             throw new NotFoundException(id);
@@ -151,6 +155,15 @@ public class ApplicationUpdater {
     
     public String generateApiKey() {
         return UUID.randomUUID().toString().replaceAll("-", "");
+    }
+    
+    public Id decode(String encoded) {
+        return Id.valueOf(idCodec.decode(encoded));
+    }
+    
+    public Optional<Publisher> decodeSourceId(String encoded) {
+        Maybe<Publisher> publisher = sourceIdCodec.decode(encoded);
+        return Optional.fromNullable(publisher.valueOrNull());
     }
 
 }
