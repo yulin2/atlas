@@ -81,7 +81,7 @@ public class ApplicationAdminController {
 
     @RequestMapping(value = "/4.0/applications", method = RequestMethod.POST)
     public void writeApplication(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ReadException {
+            throws IOException, ReadException, NotFoundException {
         Application application = deserialize(new InputStreamReader(request.getInputStream()));
         applicationUpdater.createOrUpdate(application);
     }

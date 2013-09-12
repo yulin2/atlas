@@ -1,6 +1,8 @@
 package org.atlasapi.application;
 
 import java.util.List;
+import java.util.UUID;
+
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.ApplicationSources;
@@ -27,29 +29,48 @@ public class ApplicationUpdater {
         this.idGenerator = idGenerator;
         this.idCodec = idCodec;
     }
-
+    
     // For compatibility with 3.0
-    private String getSlug(Application application) {
-        if (application.getSlug() != null && !application.getSlug().isEmpty()) {
-            return application.getSlug();
-        } else {
-            return "app-" + idCodec.encode(application.getId().toBigInteger());
-        }
+    private String generateSlug(Id id) {
+        return "app-" + idCodec.encode(id.toBigInteger());
     }
 
-    public Application createOrUpdate(Application application) {
+    public Application createOrUpdate(Application application) throws NotFoundException {
+        Application modified = null;
         if (application.getId() != null) {
             Optional<Application> savedApplication = applicationStore.applicationFor(application.getId());
             if (savedApplication.isPresent()) {
-                application = application.copy().withSlug(savedApplication.get().getSlug()).build();
+                modified = updateApplication(application, savedApplication.get().getSlug());
+            } else {
+                throw new NotFoundException(application.getId());
             }
         } else {
-            // new application get an id
-            application = application.copy().withId(Id.valueOf(idGenerator.generateRaw())).build();
+            modified = createApplication(application);
         }
-        application = application.copy().withSlug(getSlug(application)).build();
-        applicationStore.store(application);
+        applicationStore.store(modified);
         return application;
+    }
+    
+    private Application createApplication(Application application) {
+        Id id = Id.valueOf(idGenerator.generateRaw());
+        String apiKey = generateApiKey() ;
+        ApplicationCredentials credentials = application.getCredentials().copyWithApiKey(apiKey);
+        Application modified = application.copy()
+                .withId(id)
+                .withCredentials(credentials)
+                .withSlug(generateSlug(id))
+                .build();
+        return modified;
+    }
+    
+    private Application updateApplication(Application application, String slug) {
+        if (slug == null) {
+            slug = generateSlug(application.getId());
+        }
+        Application modified = application.copy()
+                .withSlug(slug)
+                .build();
+        return modified;
     }
 
     public void updateSources(Id id, ApplicationSources sources) throws NotFoundException {
@@ -124,6 +145,10 @@ public class ApplicationUpdater {
             }
         }
         return builder.build();
+    }
+    
+    public String generateApiKey() {
+        return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
 }

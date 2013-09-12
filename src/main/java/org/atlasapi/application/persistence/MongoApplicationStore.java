@@ -4,6 +4,7 @@ import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 
 import org.atlasapi.application.model.Application;
 import org.atlasapi.media.common.Id;
+import org.elasticsearch.common.Preconditions;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -49,6 +50,7 @@ public class MongoApplicationStore implements ApplicationStore {
 
     @Override
     public void store(Application application) {
+        Preconditions.checkNotNull(application);
         applications.save(translator.toDBObject(application));
     }
 }
