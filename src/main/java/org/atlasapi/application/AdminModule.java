@@ -54,6 +54,7 @@ public class AdminModule {
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired ApplicationStore deerApplicationsStore;
     private @Autowired ApplicationIdProvider applicationIdProvider;
+    private @Autowired NumberToShortStringCodec idCodec;
 
     private final JsonDeserializer<DateTime> DATE_TIME_DESERIALIZER = new JsonDeserializer<DateTime>() {
 
@@ -68,7 +69,6 @@ public class AdminModule {
         @Override
         public Id deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            NumberToShortStringCodec idCodec = idCodec();
             return Id.valueOf(idCodec.decode(json.getAsJsonPrimitive().getAsString()));
         }
     };
@@ -140,7 +140,7 @@ public class AdminModule {
 
     @Bean
     protected EntityListWriter<Application> applicationListWriter() {
-        return new ApplicationListWriter(idCodec());
+        return new ApplicationListWriter(idCodec);
     }
 
     @Bean
@@ -158,11 +158,6 @@ public class AdminModule {
         return Selection.builder().withDefaultLimit(50).withMaxLimit(100);
     }
 
-    @Bean
-    NumberToShortStringCodec idCodec() {
-        return SubstitutionTableNumberCodec.lowerCaseOnly();
-    }
-
     private StandardQueryParser<Application> applicationQueryParser() {
         QueryContextParser contextParser = new QueryContextParser(configFetcher,
                 new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
@@ -170,9 +165,9 @@ public class AdminModule {
         return new StandardQueryParser<Application>(Resource.APPLICATION,
                 new QueryAttributeParser(ImmutableList.of(
                         QueryAtomParser.valueOf(Attributes.ID,
-                                AttributeCoercers.idCoercer(idCodec()))
+                                AttributeCoercers.idCoercer(idCodec))
                         )),
-                idCodec(), contextParser);
+                idCodec, contextParser);
     }
 
 }
