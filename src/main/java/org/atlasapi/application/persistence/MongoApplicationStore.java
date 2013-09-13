@@ -1,7 +1,6 @@
 package org.atlasapi.application.persistence;
 
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
-
 import org.atlasapi.application.model.Application;
 import org.atlasapi.media.common.Id;
 import org.elasticsearch.common.Preconditions;
@@ -27,6 +26,14 @@ public class MongoApplicationStore implements ApplicationStore {
             return translator.fromDBObject(dbo);
         }
     };
+    
+    private final Function<Id, Long> idToLongTransformer = new Function<Id, Long>() {
+
+        @Override
+        public Long apply(Id input) {
+            // TODO Auto-generated method stub
+            return input.longValue();
+        }};
 
     public MongoApplicationStore(DatabasedMongo adminMongo) {
         this.applications = adminMongo.collection(APPLICATION_COLLECTION);
@@ -52,5 +59,12 @@ public class MongoApplicationStore implements ApplicationStore {
     public void store(Application application) {
         Preconditions.checkNotNull(application);
         applications.save(translator.toDBObject(application));
+    }
+
+    @Override
+    public Iterable<Application> applicationsFor(Iterable<Id> ids) {
+        Iterable<Long> idLongs = Iterables.transform(ids, idToLongTransformer);
+        return Iterables.transform(applications.find(where()
+                .longFieldIn(MongoApplicationTranslator.DEER_ID_KEY,idLongs).build()), translatorFunction);
     }
 }

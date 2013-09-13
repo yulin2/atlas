@@ -12,4 +12,6 @@ public interface ApplicationStore {
     Optional<Application> applicationFor(Id id);
 
     void store(Application application);
+
+    Iterable<Application> applicationsFor(Iterable<Id> ids);
 }
