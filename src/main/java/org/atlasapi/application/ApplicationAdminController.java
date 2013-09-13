@@ -4,14 +4,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.ApplicationSources;
+import org.atlasapi.application.model.PrecedenceOrdering;
 import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ReadException;
+import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.query.common.Query;
@@ -26,8 +30,10 @@ import org.atlasapi.query.common.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ApplicationAdminController {
@@ -82,25 +88,38 @@ public class ApplicationAdminController {
     @RequestMapping(value = "/4.0/applications", method = RequestMethod.POST)
     public void writeApplication(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ReadException, NotFoundException {
-        Application application = deserialize(new InputStreamReader(request.getInputStream()));
+        Application application = deserialize(new InputStreamReader(request.getInputStream()), Application.class);
         applicationUpdater.createOrUpdate(application);
     }
 
     @RequestMapping(value = "/4.0/applications/{aid}/sources", method = RequestMethod.POST)
-    public void writeApplicationSources(HttpServletRequest request, HttpServletResponse response)
+    public void writeApplicationSources(HttpServletRequest request, 
+            HttpServletResponse response,
+            @PathVariable String aid)
             throws IOException, ReadException, NotFoundException, QueryParseException {
+        Id applicationId = applicationUpdater.decode(aid);
+        ApplicationSources sources = deserialize(new InputStreamReader(
+                request.getInputStream()), ApplicationSources.class);
+        applicationUpdater.updateSources(applicationId, sources);
+    }
+    
+    @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.POST)
+    public void setPrecedenceOrder(HttpServletRequest request, 
+            HttpServletResponse response,
+            @PathVariable String aid) throws Exception {
+        Id applicationId = applicationUpdater.decode(aid);
+        PrecedenceOrdering ordering = deserialize(new InputStreamReader(request.getInputStream()), PrecedenceOrdering.class);
+        List<Publisher> sourceOrder = applicationUpdater.getSourcesFrom(ordering);
+        applicationUpdater.setPrecendenceOrder(applicationId, sourceOrder);
+    }
+    
+    @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.DELETE)
+    public void disablePrecedence(HttpServletRequest request, HttpServletResponse response) throws QueryParseException, NotFoundException {
         Query<Application> applicationsQuery = requestParser.parse(request);
-        ApplicationSources sources = deserializeSources(new InputStreamReader(
-                request.getInputStream()));
-        applicationUpdater.updateSources(applicationsQuery.getOnlyId(), sources);
+        applicationUpdater.disablePrecendence(applicationsQuery.getOnlyId());
     }
 
-    private Application deserialize(Reader input) throws IOException, ReadException {
-        return reader.read(new BufferedReader(input), Application.class);
+    private <T> T deserialize(Reader input, Class<T> cls) throws IOException, ReadException {
+        return reader.read(new BufferedReader(input), cls);
     }
-
-    private ApplicationSources deserializeSources(Reader input) throws IOException, ReadException {
-        return reader.read(new BufferedReader(input), ApplicationSources.class);
-    }
-
 }

@@ -1,12 +1,14 @@
 package org.atlasapi.application;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.ApplicationCredentials;
 import org.atlasapi.application.model.ApplicationSources;
+import org.atlasapi.application.model.PrecedenceOrdering;
 import org.atlasapi.application.model.SourceReadEntry;
 import org.atlasapi.application.persistence.ApplicationStore;
 import org.atlasapi.application.sources.SourceIdCodec;
@@ -17,6 +19,8 @@ import org.elasticsearch.common.collect.Lists;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.IdGenerator;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -196,6 +200,70 @@ public class ApplicationUpdater {
         } else {
             throw new NotFoundException(id);
         }
+    }
+    
+    public void disablePrecendence(Id id) throws NotFoundException {
+        Optional<Application> application = applicationStore.applicationFor(id);
+        if (application.isPresent()) {
+            ApplicationSources modifiedSources = application.get()
+                    .getSources().copy().withPrecedence(false).build();
+            Application modified = application.get().copy().withSources(modifiedSources).build();
+            applicationStore.store(modified);
+        } else {
+            throw new NotFoundException(id);
+        }
+    }
+
+    public void setPrecendenceOrder(Id id, List<Publisher> ordering) throws NotFoundException {
+        Optional<Application> application = applicationStore.applicationFor(id);
+        if (application.isPresent()) {
+            Map<Publisher, SourceReadEntry> sourceMap = convertToKeyedMap(application.get()
+                .getSources().getReads());
+            List<Publisher> seen = Lists.newArrayList();
+            List<SourceReadEntry> readsWithNewOrder = Lists.newArrayList();
+            for (Publisher source : ordering) {
+                readsWithNewOrder.add(sourceMap.get(source));
+                seen.add(source);
+            }
+            // add sources omitted from ordering
+            for (Publisher source: sourceMap.keySet()) {
+                if (!seen.contains(source)) {
+                    readsWithNewOrder.add(sourceMap.get(source));
+                }
+            }
+            
+            ApplicationSources modifiedSources = application.get()
+                    .getSources().copy()
+                    .withPrecedence(true)
+                    .withReads(readsWithNewOrder)
+                    .build();
+            
+            Application modified = application.get().copy().withSources(modifiedSources).build();
+            applicationStore.store(modified);
+        } else {
+            throw new NotFoundException(id);
+        }
+    }
+    
+    private Map<Publisher, SourceReadEntry> convertToKeyedMap(List<SourceReadEntry> reads) {
+        Builder<Publisher, SourceReadEntry> sourceMap =ImmutableMap.builder();
+        for (SourceReadEntry read : reads) {
+            sourceMap.put(read.getPublisher(), read);
+        }
+        return sourceMap.build();
+    }
+    
+    public List<Publisher> getSourcesFrom(PrecedenceOrdering ordering) throws Exception {
+        ImmutableList.Builder<Publisher> sources =ImmutableList.builder();
+        for (String sourceId : ordering.getOrdering()) {
+            Maybe<Publisher> source = sourceIdCodec.decode(sourceId);
+            if (source.hasValue()) {
+                sources.add(source.requireValue());
+            } else {
+                throw new Exception("No publisher by id " + sourceId);
+            }
+        }
+        return sources.build();
     }
 
 }
