@@ -229,7 +229,11 @@ public class ApplicationModule {
     protected ApplicationUpdater applicationUpdater() {
         IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "application");
         return new ApplicationUpdater(deerApplicationsStore(),
-                idGenerator, idCodec, sourceIdCodec);
+                idGenerator, adminHelper());
+    }
+    
+    @Bean AdminHelper adminHelper() {
+        return new AdminHelper(idCodec, sourceIdCodec);
     }
     
     private StandardQueryParser<Application> applicationQueryParser() {
@@ -251,12 +255,13 @@ public class ApplicationModule {
                 applicationQueryExecutor(),
                 new ApplicationQueryResultWriter(applicationListWriter()),
                 gsonModelReader(),
-                applicationUpdater());
+                applicationUpdater(),
+                adminHelper());
     }
     
     @Bean 
     public SourcesController sourcesController() {
-        return new SourcesController(applicationUpdater());
+        return new SourcesController(applicationUpdater(), adminHelper());
     }
     
   

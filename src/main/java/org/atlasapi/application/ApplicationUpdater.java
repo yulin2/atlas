@@ -8,10 +8,8 @@ import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.ApplicationCredentials;
 import org.atlasapi.application.model.ApplicationSources;
-import org.atlasapi.application.model.PrecedenceOrdering;
 import org.atlasapi.application.model.SourceReadEntry;
 import org.atlasapi.application.persistence.ApplicationStore;
-import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
@@ -21,30 +19,20 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.IdGenerator;
-import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public class ApplicationUpdater {
 
     private final ApplicationStore applicationStore;
     private final IdGenerator idGenerator;
-    private final NumberToShortStringCodec idCodec;
-    private final SourceIdCodec sourceIdCodec;
+    private final AdminHelper adminHelper;
 
     public ApplicationUpdater(ApplicationStore applicationStore,
             IdGenerator idGenerator,
-            NumberToShortStringCodec idCodec,
-            SourceIdCodec sourceIdCodec) {
+            AdminHelper adminHelper) {
         this.applicationStore = applicationStore;
         this.idGenerator = idGenerator;
-        this.idCodec = idCodec;
-        this.sourceIdCodec = sourceIdCodec;
-    }
-    
-    // For compatibility with 3.0
-    private String generateSlug(Id id) {
-        return "app-" + idCodec.encode(id.toBigInteger());
+        this.adminHelper = adminHelper;
     }
 
     public Application createOrUpdate(Application application) throws NotFoundException {
@@ -71,14 +59,14 @@ public class ApplicationUpdater {
         Application modified = application.copy()
                 .withId(id)
                 .withCredentials(credentials)
-                .withSlug(generateSlug(id))
+                .withSlug(adminHelper.generateSlug(id))
                 .build();
         return modified;
     }
     
     private Application updateApplication(Application application, String slug) {
         if (slug == null) {
-            slug = generateSlug(application.getId());
+            slug = adminHelper.generateSlug(application.getId());
         }
         Application modified = application.copy()
                 .withSlug(slug)
@@ -94,7 +82,6 @@ public class ApplicationUpdater {
         } else {
             throw new NotFoundException(id);
         }
-
     }
 
     public void updateSourceState(Id id, Publisher source, SourceState sourceState)
@@ -161,15 +148,6 @@ public class ApplicationUpdater {
     
     public String generateApiKey() {
         return UUID.randomUUID().toString().replaceAll("-", "");
-    }
-    
-    public Id decode(String encoded) {
-        return Id.valueOf(idCodec.decode(encoded));
-    }
-    
-    public Optional<Publisher> decodeSourceId(String encoded) {
-        Maybe<Publisher> publisher = sourceIdCodec.decode(encoded);
-        return Optional.fromNullable(publisher.valueOrNull());
     }
 
     public void addWrites(Id id, Publisher source) throws NotFoundException {
@@ -252,18 +230,4 @@ public class ApplicationUpdater {
         }
         return sourceMap.build();
     }
-    
-    public List<Publisher> getSourcesFrom(PrecedenceOrdering ordering) throws Exception {
-        ImmutableList.Builder<Publisher> sources =ImmutableList.builder();
-        for (String sourceId : ordering.getOrdering()) {
-            Maybe<Publisher> source = sourceIdCodec.decode(sourceId);
-            if (source.hasValue()) {
-                sources.add(source.requireValue());
-            } else {
-                throw new Exception("No publisher by id " + sourceId);
-            }
-        }
-        return sources.build();
-    }
-
 }

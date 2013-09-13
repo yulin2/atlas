@@ -19,10 +19,11 @@ import com.google.common.base.Optional;
 @Controller
 public class SourcesController {
     private final ApplicationUpdater applicationUpdater;
+    private final AdminHelper adminHelper;
     
-    
-    public SourcesController(ApplicationUpdater applicationUpdater) {
+    public SourcesController(ApplicationUpdater applicationUpdater, AdminHelper adminHelper) {
         this.applicationUpdater = applicationUpdater;
+        this.adminHelper = adminHelper;
     }
 
     /**
@@ -37,9 +38,9 @@ public class SourcesController {
             @PathVariable String sourceId,
             @RequestParam String id,
             @RequestParam String permission) throws NotFoundException {
-        Optional<Publisher> source = applicationUpdater.decodeSourceId(sourceId);
+        Optional<Publisher> source = adminHelper.decodeSourceId(sourceId);
         if (source.isPresent()) {
-            Id applicationId = applicationUpdater.decode(id);
+            Id applicationId = adminHelper.decode(id);
             Permission permissionType = Permission.valueOf(permission.toUpperCase());
             if (permissionType.equals(Permission.READ)) {
                 applicationUpdater.updateEnabled(applicationId, source.get(), true);
@@ -63,9 +64,9 @@ public class SourcesController {
             @PathVariable String sourceId,
             @RequestParam String id,
             @RequestParam String permission) throws NotFoundException {
-        Optional<Publisher> source = applicationUpdater.decodeSourceId(sourceId);
+        Optional<Publisher> source = adminHelper.decodeSourceId(sourceId);
         if (source.isPresent()) {
-            Id applicationId = applicationUpdater.decode(id);
+            Id applicationId = adminHelper.decode(id);
             Permission permissionType = Permission.valueOf(permission.toUpperCase());
             if (permissionType.equals(Permission.READ)) {
                 applicationUpdater.updateEnabled(applicationId, source.get(), false);
@@ -75,7 +76,6 @@ public class SourcesController {
         } else {
             throw new NotFoundException(null);
         }
-
     }
 
     /**
@@ -91,9 +91,9 @@ public class SourcesController {
             @PathVariable String id,
             @RequestParam String state) throws Exception {
         
-        Optional<Publisher> source = applicationUpdater.decodeSourceId(sourceId);
+        Optional<Publisher> source = adminHelper.decodeSourceId(sourceId);
         if (source.isPresent()) {
-            Id applicationId = applicationUpdater.decode(id);
+            Id applicationId = adminHelper.decode(id);
             SourceState requestedState = SourceState.valueOf(state.toUpperCase());
             applicationUpdater.updateSourceState(applicationId, source.get(), requestedState);
         } else {

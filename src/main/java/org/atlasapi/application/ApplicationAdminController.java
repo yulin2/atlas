@@ -33,7 +33,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ApplicationAdminController {
@@ -45,17 +44,20 @@ public class ApplicationAdminController {
     private final QueryResultWriter<Application> resultWriter;
     private final ModelReader reader;
     private final ApplicationUpdater applicationUpdater;
+    private final AdminHelper adminHelper;
 
     public ApplicationAdminController(QueryParser<Application> requestParser,
             QueryExecutor<Application> queryExecutor,
             QueryResultWriter<Application> resultWriter,
             ModelReader reader,
-            ApplicationUpdater applicationUpdater) {
+            ApplicationUpdater applicationUpdater,
+            AdminHelper adminHelper) {
         this.requestParser = requestParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
         this.reader = reader;
         this.applicationUpdater = applicationUpdater;
+        this.adminHelper = adminHelper;
     }
 
     public void sendError(HttpServletRequest request,
@@ -97,7 +99,7 @@ public class ApplicationAdminController {
             HttpServletResponse response,
             @PathVariable String aid)
             throws IOException, ReadException, NotFoundException, QueryParseException {
-        Id applicationId = applicationUpdater.decode(aid);
+        Id applicationId = adminHelper.decode(aid);
         ApplicationSources sources = deserialize(new InputStreamReader(
                 request.getInputStream()), ApplicationSources.class);
         applicationUpdater.updateSources(applicationId, sources);
@@ -107,9 +109,9 @@ public class ApplicationAdminController {
     public void setPrecedenceOrder(HttpServletRequest request, 
             HttpServletResponse response,
             @PathVariable String aid) throws Exception {
-        Id applicationId = applicationUpdater.decode(aid);
+        Id applicationId = adminHelper.decode(aid);
         PrecedenceOrdering ordering = deserialize(new InputStreamReader(request.getInputStream()), PrecedenceOrdering.class);
-        List<Publisher> sourceOrder = applicationUpdater.getSourcesFrom(ordering);
+        List<Publisher> sourceOrder = adminHelper.getSourcesFrom(ordering);
         applicationUpdater.setPrecendenceOrder(applicationId, sourceOrder);
     }
     
