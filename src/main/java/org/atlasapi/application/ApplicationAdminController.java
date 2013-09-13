@@ -23,6 +23,7 @@ import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
+import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.QueryParser;
@@ -91,7 +92,19 @@ public class ApplicationAdminController {
     public void writeApplication(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ReadException, NotFoundException {
         Application application = deserialize(new InputStreamReader(request.getInputStream()), Application.class);
-        applicationUpdater.createOrUpdate(application);
+        if (application.getId() != null) {
+            Application existing = applicationUpdater.applicationFor(application.getId());
+            application = application.copy().withSlug(existing.getSlug()).build();
+        } else {
+            // New application
+            application = applicationUpdater.addIdAndApiKey(application);
+        }
+        // Ensure slug is present for compatibility with 3.0
+        if (application.getSlug() == null || application.getSlug().isEmpty()) {
+            application = application.copy()
+                    .withSlug(adminHelper.generateSlug(application.getId())).build();
+        }
+        applicationUpdater.storeApplication(application);
     }
 
     @RequestMapping(value = "/4.0/applications/{aid}/sources", method = RequestMethod.POST)
@@ -102,23 +115,27 @@ public class ApplicationAdminController {
         Id applicationId = adminHelper.decode(aid);
         ApplicationSources sources = deserialize(new InputStreamReader(
                 request.getInputStream()), ApplicationSources.class);
-        applicationUpdater.updateSources(applicationId, sources);
+        Application existing = applicationUpdater.applicationFor(applicationId);
+        Application modified = applicationUpdater.replaceSources(existing, sources);
+        applicationUpdater.storeApplication(modified);
     }
     
     @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.POST)
     public void setPrecedenceOrder(HttpServletRequest request, 
             HttpServletResponse response,
-            @PathVariable String aid) throws Exception {
+            @PathVariable String aid) throws NotFoundException, IOException, ReadException, QueryExecutionException  {
         Id applicationId = adminHelper.decode(aid);
         PrecedenceOrdering ordering = deserialize(new InputStreamReader(request.getInputStream()), PrecedenceOrdering.class);
         List<Publisher> sourceOrder = adminHelper.getSourcesFrom(ordering);
-        applicationUpdater.setPrecendenceOrder(applicationId, sourceOrder);
+        Application existing = applicationUpdater.applicationFor(applicationId);
+        applicationUpdater.storeApplication(applicationUpdater.setPrecendenceOrder(existing, sourceOrder));
     }
     
     @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.DELETE)
     public void disablePrecedence(HttpServletRequest request, HttpServletResponse response) throws QueryParseException, NotFoundException {
         Query<Application> applicationsQuery = requestParser.parse(request);
-        applicationUpdater.disablePrecendence(applicationsQuery.getOnlyId());
+        Application existing = applicationUpdater.applicationFor(applicationsQuery.getOnlyId());
+        applicationUpdater.storeApplication(applicationUpdater.disablePrecendence(existing));
     }
 
     private <T> T deserialize(Reader input, Class<T> cls) throws IOException, ReadException {

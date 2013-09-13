@@ -1,11 +1,13 @@
 package org.atlasapi.application;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.atlasapi.application.model.PrecedenceOrdering;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.query.common.QueryExecutionException;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -36,14 +38,14 @@ public class AdminHelper {
         return Optional.fromNullable(publisher.valueOrNull());
     }
     
-    public List<Publisher> getSourcesFrom(PrecedenceOrdering ordering) throws Exception {
+    public List<Publisher> getSourcesFrom(PrecedenceOrdering ordering) throws QueryExecutionException {
         ImmutableList.Builder<Publisher> sources =ImmutableList.builder();
         for (String sourceId : ordering.getOrdering()) {
             Maybe<Publisher> source = sourceIdCodec.decode(sourceId);
             if (source.hasValue()) {
                 sources.add(source.requireValue());
             } else {
-                throw new Exception("No publisher by id " + sourceId);
+                throw new QueryExecutionException("No publisher by id " + sourceId);
             }
         }
         return sources.build();
@@ -52,5 +54,9 @@ public class AdminHelper {
     // For compatibility with 3.0
     public String generateSlug(Id id) {
         return "app-" + idCodec.encode(id.toBigInteger());
+    }
+    
+    public String generateApiKey() {
+        return UUID.randomUUID().toString().replaceAll("-", "");
     }
 }

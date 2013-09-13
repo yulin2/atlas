@@ -4,10 +4,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.SourceStatus.SourceState;
+import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.Permission;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
+import org.atlasapi.query.common.QueryExecutionException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,10 +44,15 @@ public class SourcesController {
         if (source.isPresent()) {
             Id applicationId = adminHelper.decode(id);
             Permission permissionType = Permission.valueOf(permission.toUpperCase());
+            Application existing = applicationUpdater.applicationFor(applicationId);
+            Application modified = null;
             if (permissionType.equals(Permission.READ)) {
-                applicationUpdater.updateEnabled(applicationId, source.get(), true);
+                modified = applicationUpdater.enableSource(existing, source.get());
             } else if (permissionType.equals(Permission.WRITE)) {
-                applicationUpdater.addWrites(applicationId, source.get());
+                modified = applicationUpdater.addWrites(existing, source.get());
+            }
+            if (modified != null) {
+                applicationUpdater.storeApplication(modified);
             }
         } else {
             throw new NotFoundException(null);
@@ -56,25 +63,30 @@ public class SourcesController {
      * DELETE /4.0/sources/:sourceId/applications Removes a permission
      * (read/write) from an app on a source. Post with app id and permission
      * needed.
-     * @throws NotFoundException 
+     * @throws QueryExecutionException 
      */
     @RequestMapping(value = "/4.0/sources/{sourceId}/applications", method = RequestMethod.DELETE)
     public void deleteSourceForApplication(HttpServletRequest request, 
             HttpServletResponse response,
             @PathVariable String sourceId,
             @RequestParam String id,
-            @RequestParam String permission) throws NotFoundException {
+            @RequestParam String permission) throws QueryExecutionException {
         Optional<Publisher> source = adminHelper.decodeSourceId(sourceId);
         if (source.isPresent()) {
             Id applicationId = adminHelper.decode(id);
             Permission permissionType = Permission.valueOf(permission.toUpperCase());
+            Application existing = applicationUpdater.applicationFor(applicationId);
+            Application modified = null;
             if (permissionType.equals(Permission.READ)) {
-                applicationUpdater.updateEnabled(applicationId, source.get(), false);
+                modified = applicationUpdater.disableSource(existing, source.get());
             } else if (permissionType.equals(Permission.WRITE)) {
-                applicationUpdater.removeWrites(applicationId, source.get());
+                modified = applicationUpdater.removeWrites(existing, source.get());
+            }
+            if (modified != null) {
+                applicationUpdater.storeApplication(modified);
             }
         } else {
-            throw new NotFoundException(null);
+            throw new QueryExecutionException("No source with id " + sourceId);
         }
     }
 
@@ -89,15 +101,17 @@ public class SourcesController {
             HttpServletResponse response,
             @PathVariable String sourceId,
             @PathVariable String id,
-            @RequestParam String state) throws Exception {
+            @RequestParam String state) throws QueryExecutionException {
         
         Optional<Publisher> source = adminHelper.decodeSourceId(sourceId);
         if (source.isPresent()) {
             Id applicationId = adminHelper.decode(id);
             SourceState requestedState = SourceState.valueOf(state.toUpperCase());
-            applicationUpdater.updateSourceState(applicationId, source.get(), requestedState);
+            Application existing = applicationUpdater.applicationFor(applicationId);
+            applicationUpdater.storeApplication(
+                    applicationUpdater.changeReadSourceState(existing, source.get(), requestedState));
         } else {
-            throw new NotFoundException(null);
+            throw new QueryExecutionException("No source with id " + sourceId);
         }
     }
 }

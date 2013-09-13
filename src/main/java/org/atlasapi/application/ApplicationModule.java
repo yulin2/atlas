@@ -263,8 +263,6 @@ public class ApplicationModule {
     public SourcesController sourcesController() {
         return new SourcesController(applicationUpdater(), adminHelper());
     }
-    
-  
 
     @Bean
     protected ModelReader gsonModelReader() {

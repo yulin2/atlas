@@ -2,7 +2,6 @@ package org.atlasapi.application;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.model.Application;
@@ -34,26 +33,23 @@ public class ApplicationUpdater {
         this.idGenerator = idGenerator;
         this.adminHelper = adminHelper;
     }
-
-    public Application createOrUpdate(Application application) throws NotFoundException {
-        Application modified = null;
-        if (application.getId() != null) {
-            Optional<Application> savedApplication = applicationStore.applicationFor(application.getId());
-            if (savedApplication.isPresent()) {
-                modified = updateApplication(application, savedApplication.get().getSlug());
-            } else {
-                throw new NotFoundException(application.getId());
-            }
+    
+    public Application applicationFor(Id id) throws NotFoundException {
+        Optional<Application> application = applicationStore.applicationFor(id);
+        if (application.isPresent()) {
+            return application.get();
         } else {
-            modified = createApplication(application);
+            throw new NotFoundException(id);
         }
-        applicationStore.store(modified);
-        return application;
     }
     
-    private Application createApplication(Application application) {
+    public void storeApplication(Application application) {
+        applicationStore.store(application);
+    }
+    
+    public Application addIdAndApiKey(Application application) {
         Id id = Id.valueOf(idGenerator.generateRaw());
-        String apiKey = generateApiKey() ;
+        String apiKey = adminHelper.generateApiKey() ;
         ApplicationCredentials credentials = application.getCredentials()
                 .copy().withApiKey(apiKey).build();
         Application modified = application.copy()
@@ -63,53 +59,28 @@ public class ApplicationUpdater {
                 .build();
         return modified;
     }
-    
-    private Application updateApplication(Application application, String slug) {
-        if (slug == null) {
-            slug = adminHelper.generateSlug(application.getId());
-        }
-        Application modified = application.copy()
-                .withSlug(slug)
-                .build();
-        return modified;
+
+    public Application replaceSources(Application application, ApplicationSources sources) throws NotFoundException {
+        return application.copy().withSources(sources).build();
     }
 
-    public void updateSources(Id id, ApplicationSources sources) throws NotFoundException {
-        Optional<Application> application = applicationStore.applicationFor(id);
-        if (application.isPresent()) {
-            Application modified = application.get().copy().withSources(sources).build();
-            applicationStore.store(modified);
-        } else {
-            throw new NotFoundException(id);
-        }
-    }
-
-    public void updateSourceState(Id id, Publisher source, SourceState sourceState)
+    public Application changeReadSourceState(Application application, Publisher source, SourceState sourceState)
             throws NotFoundException {
-        Optional<Application> application = applicationStore.applicationFor(id);
-        if (application.isPresent()) {
-            SourceStatus status = findSourceStatusFor(source, application.get().getSources().getReads());
-            SourceStatus newStatus = status.copyWithState(sourceState);
-            modifyReadPublisher(application.get(), source, newStatus);
-        } else {
-            throw new NotFoundException(id);
-        }
+        SourceStatus status = findSourceStatusFor(source, application.getSources().getReads());
+        SourceStatus newStatus = status.copyWithState(sourceState);
+        return modifyReadSourceStatus(application, source, newStatus);
     }
 
-    public void updateEnabled(Id id, Publisher source, boolean enabled) throws NotFoundException {
-        Optional<Application> application = applicationStore.applicationFor(id);
-        if (application.isPresent()) {
-            SourceStatus status = findSourceStatusFor(source, application.get().getSources().getReads());
-            if (enabled) {
-                status = status.enable();
-            } else {
-                status = status.disable();
-            }
-            modifyReadPublisher(application.get(), source, status);
-
-        } else {
-            throw new NotFoundException(id);
-        }
+    public Application enableSource(Application application, Publisher source) {
+        SourceStatus status = findSourceStatusFor(source, application.getSources().getReads());
+        status = status.enable();
+        return modifyReadSourceStatus(application, source, status);
+    }
+    
+    public Application disableSource(Application application, Publisher source) {
+        SourceStatus status = findSourceStatusFor(source, application.getSources().getReads());
+        status = status.disable();
+        return modifyReadSourceStatus(application, source, status);
     }
     
     private SourceStatus findSourceStatusFor(Publisher source, List<SourceReadEntry> reads) {
@@ -121,14 +92,13 @@ public class ApplicationUpdater {
         return null;
     }
 
-    private void modifyReadPublisher(Application application, Publisher source,
+    private Application modifyReadSourceStatus(Application application, Publisher source,
             SourceStatus status) {
         List<SourceReadEntry> modifiedReads = changeReadsPreservingOrder(
                 application.getSources().getReads(), source, status);
         ApplicationSources modifiedSources = application.getSources().copy()
                 .withReads(modifiedReads).build();
-        Application modified = application.copy().withSources(modifiedSources).build();
-        applicationStore.store(modified);
+        return application.copy().withSources(modifiedSources).build();
     }
 
     private List<SourceReadEntry> changeReadsPreservingOrder(
@@ -146,81 +116,54 @@ public class ApplicationUpdater {
         return builder.build();
     }
     
-    public String generateApiKey() {
-        return UUID.randomUUID().toString().replaceAll("-", "");
+   
+
+    public Application addWrites(Application application, Publisher source) {
+        List<Publisher> writes = Lists.newArrayList(application.getSources().getWrites());
+        if (!writes.contains(source)) {
+            writes.add(source);
+        }
+        ApplicationSources modifiedSources = application
+                    .getSources().copy().withWrites(writes).build();
+        return application.copy().withSources(modifiedSources).build();
     }
 
-    public void addWrites(Id id, Publisher source) throws NotFoundException {
-        Optional<Application> application = applicationStore.applicationFor(id);
-        if (application.isPresent()) {
-            List<Publisher> writes = Lists.newArrayList(application.get().getSources().getWrites());
-            if (!writes.contains(source)) {
-                writes.add(source);
-            }
-            ApplicationSources modifiedSources = application.get()
+    public Application removeWrites(Application application, Publisher source) {
+        List<Publisher> writes = Lists.newArrayList(application.getSources().getWrites());
+        writes.remove(source);
+        ApplicationSources modifiedSources = application
                     .getSources().copy().withWrites(writes).build();
-            Application modified = application.get().copy().withSources(modifiedSources).build();
-            applicationStore.store(modified);
-        } else {
-            throw new NotFoundException(id);
-        }
-    }
-
-    public void removeWrites(Id id, Publisher source) throws NotFoundException {
-        Optional<Application> application = applicationStore.applicationFor(id);
-        if (application.isPresent()) {
-            List<Publisher> writes = Lists.newArrayList(application.get().getSources().getWrites());
-            writes.remove(source);
-            ApplicationSources modifiedSources = application.get()
-                    .getSources().copy().withWrites(writes).build();
-            Application modified = application.get().copy().withSources(modifiedSources).build();
-            applicationStore.store(modified);
-        } else {
-            throw new NotFoundException(id);
-        }
+        return application.copy().withSources(modifiedSources).build();
     }
     
-    public void disablePrecendence(Id id) throws NotFoundException {
-        Optional<Application> application = applicationStore.applicationFor(id);
-        if (application.isPresent()) {
-            ApplicationSources modifiedSources = application.get()
-                    .getSources().copy().withPrecedence(false).build();
-            Application modified = application.get().copy().withSources(modifiedSources).build();
-            applicationStore.store(modified);
-        } else {
-            throw new NotFoundException(id);
-        }
+    public Application disablePrecendence(Application application) throws NotFoundException {
+        ApplicationSources modifiedSources = application
+               .getSources().copy().withPrecedence(false).build();
+        return application.copy().withSources(modifiedSources).build();
     }
 
-    public void setPrecendenceOrder(Id id, List<Publisher> ordering) throws NotFoundException {
-        Optional<Application> application = applicationStore.applicationFor(id);
-        if (application.isPresent()) {
-            Map<Publisher, SourceReadEntry> sourceMap = convertToKeyedMap(application.get()
+    public Application setPrecendenceOrder(Application application, List<Publisher> ordering) throws NotFoundException {
+        Map<Publisher, SourceReadEntry> sourceMap = convertToKeyedMap(application
                 .getSources().getReads());
-            List<Publisher> seen = Lists.newArrayList();
-            List<SourceReadEntry> readsWithNewOrder = Lists.newArrayList();
-            for (Publisher source : ordering) {
-                readsWithNewOrder.add(sourceMap.get(source));
-                seen.add(source);
+        List<Publisher> seen = Lists.newArrayList();
+        List<SourceReadEntry> readsWithNewOrder = Lists.newArrayList();
+        for (Publisher source : ordering) {
+            readsWithNewOrder.add(sourceMap.get(source));
+            seen.add(source);
+        }
+        // add sources omitted from ordering
+        for (Publisher source: sourceMap.keySet()) {
+            if (!seen.contains(source)) {
+               readsWithNewOrder.add(sourceMap.get(source));
             }
-            // add sources omitted from ordering
-            for (Publisher source: sourceMap.keySet()) {
-                if (!seen.contains(source)) {
-                    readsWithNewOrder.add(sourceMap.get(source));
-                }
-            }
-            
-            ApplicationSources modifiedSources = application.get()
+        }
+        ApplicationSources modifiedSources = application
                     .getSources().copy()
                     .withPrecedence(true)
                     .withReads(readsWithNewOrder)
                     .build();
             
-            Application modified = application.get().copy().withSources(modifiedSources).build();
-            applicationStore.store(modified);
-        } else {
-            throw new NotFoundException(id);
-        }
+        return application.copy().withSources(modifiedSources).build();
     }
     
     private Map<Publisher, SourceReadEntry> convertToKeyedMap(List<SourceReadEntry> reads) {
