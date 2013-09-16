@@ -60,12 +60,12 @@ public class ApplicationUpdater {
         return modified;
     }
 
-    public Application replaceSources(Application application, ApplicationSources sources) throws NotFoundException {
+    public Application replaceSources(Application application, ApplicationSources sources) {
         return application.copy().withSources(sources).build();
     }
 
-    public Application changeReadSourceState(Application application, Publisher source, SourceState sourceState)
-            throws NotFoundException {
+    public Application changeReadSourceState(Application application, 
+            Publisher source, SourceState sourceState) {
         SourceStatus status = findSourceStatusFor(source, application.getSources().getReads());
         SourceStatus newStatus = status.copyWithState(sourceState);
         return modifyReadSourceStatus(application, source, newStatus);
@@ -136,13 +136,13 @@ public class ApplicationUpdater {
         return application.copy().withSources(modifiedSources).build();
     }
     
-    public Application disablePrecendence(Application application) throws NotFoundException {
+    public Application disablePrecendence(Application application) {
         ApplicationSources modifiedSources = application
                .getSources().copy().withPrecedence(false).build();
         return application.copy().withSources(modifiedSources).build();
     }
 
-    public Application setPrecendenceOrder(Application application, List<Publisher> ordering) throws NotFoundException {
+    public Application setPrecendenceOrder(Application application, List<Publisher> ordering) {
         Map<Publisher, SourceReadEntry> sourceMap = convertToKeyedMap(application
                 .getSources().getReads());
         List<Publisher> seen = Lists.newArrayList();
@@ -155,6 +155,7 @@ public class ApplicationUpdater {
         for (Publisher source: sourceMap.keySet()) {
             if (!seen.contains(source)) {
                readsWithNewOrder.add(sourceMap.get(source));
+               System.out.println("Not seen: " + source);
             }
         }
         ApplicationSources modifiedSources = application

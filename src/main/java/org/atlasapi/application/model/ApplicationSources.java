@@ -4,6 +4,8 @@ import java.util.List;
 import org.atlasapi.media.entity.Publisher;
 import org.elasticsearch.common.collect.ImmutableList;
 
+import com.google.common.base.Preconditions;
+
 public class ApplicationSources {
 
     private final boolean precedence;

@@ -97,7 +97,7 @@ public class ApplicationModule {
     private static final String APP_NAME = "atlas";
     private static final String COOKIE_NAME = "atlastw";
     
-    private final NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();;
+    private final NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
     private final SourceIdCodec sourceIdCodec = new SourceIdCodec(idCodec);
     private final JsonDeserializer<Id> idDeserializer = new IdDeserializer(idCodec);
     private final JsonDeserializer<DateTime> datetimeDeserializer = new JodaDateTimeSerializer();
