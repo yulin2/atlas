@@ -9,7 +9,8 @@ public enum Resource {
     CHANNEL("channel", "channels"),
     PERSON("person", "people"),
     APPLICATION("application", "applications"),
-    SOURCE("source", "sources")
+    SOURCE("source", "sources"),
+    SOURCE_REQUEST("source_request", "source_requests")
     ;
     
     private final String singular;

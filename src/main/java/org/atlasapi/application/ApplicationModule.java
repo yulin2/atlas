@@ -18,11 +18,14 @@ import org.atlasapi.application.auth.TwitterAuthController;
 import org.atlasapi.application.auth.UserAuthCallbackHandler;
 import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.SourceReadEntry;
+import org.atlasapi.application.model.SourceRequest;
 import org.atlasapi.application.model.deserialize.IdDeserializer;
 import org.atlasapi.application.model.deserialize.PublisherDeserializer;
 import org.atlasapi.application.model.deserialize.SourceReadEntryDeserializer;
 import org.atlasapi.application.persistence.ApplicationStore;
 import org.atlasapi.application.persistence.MongoApplicationStore;
+import org.atlasapi.application.persistence.MongoSourceRequestStore;
+import org.atlasapi.application.persistence.SourceRequestStore;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
@@ -31,6 +34,8 @@ import org.atlasapi.application.users.NewUserSupplier;
 import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.writers.ApplicationListWriter;
 import org.atlasapi.application.writers.ApplicationQueryResultWriter;
+import org.atlasapi.application.writers.SourceRequestListWriter;
+import org.atlasapi.application.writers.SourceRequestsQueryResultsWriter;
 import org.atlasapi.application.writers.SourceWithIdWriter;
 import org.atlasapi.application.writers.SourcesQueryResultWriter;
 import org.atlasapi.application.www.ApplicationWebModule;
@@ -41,6 +46,7 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.EntityListWriter;
+import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.query.annotation.ResourceAnnotationIndex;
 import org.atlasapi.query.common.AttributeCoercers;
@@ -227,6 +233,11 @@ public class ApplicationModule {
         return new MongoApplicationStore(adminMongo);
     }
     
+    @Bean
+    protected SourceRequestStore sourceRequestStore() {
+        return new MongoSourceRequestStore(adminMongo);
+    }
+    
     @Bean 
     protected ApplicationUpdater applicationUpdater() {
         IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "application");
@@ -247,6 +258,18 @@ public class ApplicationModule {
                     QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec)),
                     QueryAtomParser.valueOf(Attributes.SOURCE_READS, AttributeCoercers.sourceIdCoercer(sourceIdCodec)),
                     QueryAtomParser.valueOf(Attributes.SOURCE_WRITES, AttributeCoercers.sourceIdCoercer(sourceIdCodec))
+                    )),
+                idCodec, contextParser);
+    }
+    
+    private StandardQueryParser<SourceRequest> sourceRequestsQueryParser() {
+        QueryContextParser contextParser = new QueryContextParser(configFetcher(),
+                new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
+
+        return new StandardQueryParser<SourceRequest>(Resource.APPLICATION,
+                new QueryAttributeParser(ImmutableList.of(
+                    QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec)),
+                    QueryAtomParser.valueOf(Attributes.SOURCE_READS, AttributeCoercers.sourceIdCoercer(sourceIdCodec))
                     )),
                 idCodec, contextParser);
     }
@@ -281,6 +304,13 @@ public class ApplicationModule {
                 new SourcesQueryResultWriter(new SourceWithIdWriter(sourceIdCodec, "source", "sources")),
                 applicationUpdater(), 
                 adminHelper());
+    }
+    
+    @Bean
+    public SourceRequestsController sourceRequestsController() {
+        return new SourceRequestsController(sourceRequestsQueryParser(),
+                new SourceRequestQueryExecutor(sourceRequestStore()),
+                new SourceRequestsQueryResultsWriter(new SourceRequestListWriter(sourceIdCodec)));
     }
 
     @Bean
