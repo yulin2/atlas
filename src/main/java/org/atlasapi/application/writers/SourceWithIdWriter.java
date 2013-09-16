@@ -4,14 +4,19 @@ import java.io.IOException;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.EntityListWriter;
+import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
+import org.atlasapi.output.writers.CountryWriter;
 
-public class ApplicationSourcesWritesWriter implements
+import com.metabroadcast.common.intl.Country;
+
+public class SourceWithIdWriter implements
         EntityListWriter<Publisher> {
     private final SourceIdCodec sourceIdCodec;
+    private final EntityWriter<Country> countryWriter = new CountryWriter();
 
-    public ApplicationSourcesWritesWriter(SourceIdCodec sourceIdCodec) {
+    public SourceWithIdWriter(SourceIdCodec sourceIdCodec) {
         this.sourceIdCodec = sourceIdCodec;
     }
 
@@ -21,7 +26,7 @@ public class ApplicationSourcesWritesWriter implements
         writer.writeField("id", sourceIdCodec.encode(entity));
         writer.writeField("key", entity.key());
         writer.writeField("name", entity.title());
-        writer.writeField("country", entity.country());
+        writer.writeObject(countryWriter, entity.country(), ctxt);
     }
 
     @Override

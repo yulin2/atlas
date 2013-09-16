@@ -15,7 +15,7 @@ public class ApplicationSourcesWriter implements EntityListWriter<ApplicationSou
     
     public ApplicationSourcesWriter(SourceIdCodec sourceIdCodec) {
         readsWriter = new ApplicationSourcesReadsWriter(sourceIdCodec);
-        writesWriter = new ApplicationSourcesWritesWriter(sourceIdCodec);
+        writesWriter = new SourceWithIdWriter(sourceIdCodec);
     }
     
     @Override

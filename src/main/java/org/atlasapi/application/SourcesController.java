@@ -1,5 +1,7 @@
 package org.atlasapi.application;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -8,8 +10,18 @@ import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.Permission;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.output.NotAcceptableException;
 import org.atlasapi.output.NotFoundException;
+import org.atlasapi.output.QueryResultWriter;
+import org.atlasapi.output.ResponseWriter;
+import org.atlasapi.output.ResponseWriterFactory;
+import org.atlasapi.output.UnsupportedFormatException;
+import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryExecutionException;
+import org.atlasapi.query.common.QueryExecutor;
+import org.atlasapi.query.common.QueryParseException;
+import org.atlasapi.query.common.QueryResult;
+import org.atlasapi.query.common.StandardQueryParser;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,8 +34,19 @@ import com.google.common.base.Optional;
 public class SourcesController {
     private final ApplicationUpdater applicationUpdater;
     private final AdminHelper adminHelper;
+    private final StandardQueryParser<Publisher> queryParser;
+    private final QueryExecutor<Publisher> queryExecutor;
+    private final QueryResultWriter<Publisher> resultWriter;
+    private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
     
-    public SourcesController(ApplicationUpdater applicationUpdater, AdminHelper adminHelper) {
+    public SourcesController(StandardQueryParser<Publisher> queryParser,
+            QueryExecutor<Publisher> queryExecutor,
+            QueryResultWriter<Publisher> resultWriter,
+            ApplicationUpdater applicationUpdater, 
+            AdminHelper adminHelper) {
+        this.queryParser = queryParser;
+        this.queryExecutor = queryExecutor;
+        this.resultWriter = resultWriter;
         this.applicationUpdater = applicationUpdater;
         this.adminHelper = adminHelper;
     }
@@ -113,5 +136,28 @@ public class SourcesController {
         } else {
             throw new QueryExecutionException("No source with id " + sourceId);
         }
+    }
+    
+    @RequestMapping(value = "/4.0/sources.*", method = RequestMethod.GET)
+    public void listSources(HttpServletRequest request,
+            HttpServletResponse response) throws QueryParseException, QueryExecutionException {
+        ResponseWriter writer = null;
+        try {
+            writer = writerResolver.writerFor(request, response);
+            Query<Publisher> sourcesQuery = queryParser.parse(request);
+            QueryResult<Publisher> queryResult = queryExecutor.execute(sourcesQuery);
+            resultWriter.write(queryResult, writer);
+            
+        } catch (UnsupportedFormatException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NotAcceptableException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
     }
 }

@@ -31,6 +31,9 @@ import org.atlasapi.application.users.NewUserSupplier;
 import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.writers.ApplicationListWriter;
 import org.atlasapi.application.writers.ApplicationQueryResultWriter;
+import org.atlasapi.application.writers.ApplicationSourcesWriter;
+import org.atlasapi.application.writers.SourceWithIdWriter;
+import org.atlasapi.application.writers.SourcesQueryResultWriter;
 import org.atlasapi.application.www.ApplicationWebModule;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.input.GsonModelReader;
@@ -248,6 +251,18 @@ public class ApplicationModule {
                 idCodec, contextParser);
     }
     
+    private StandardQueryParser<Publisher> sourcesQueryParser() {
+        QueryContextParser contextParser = new QueryContextParser(configFetcher(),
+                new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
+
+        return new StandardQueryParser<Publisher>(Resource.SOURCE,
+                new QueryAttributeParser(ImmutableList.of(
+                        QueryAtomParser.valueOf(Attributes.ID,
+                                AttributeCoercers.idCoercer(idCodec))
+                        )),
+                idCodec, contextParser);
+    }
+    
     @Bean
     public ApplicationAdminController applicationAdminController() {
         return new ApplicationAdminController(
@@ -261,7 +276,11 @@ public class ApplicationModule {
     
     @Bean 
     public SourcesController sourcesController() {
-        return new SourcesController(applicationUpdater(), adminHelper());
+        return new SourcesController(sourcesQueryParser(), 
+                soucesQueryExecutor(),
+                new SourcesQueryResultWriter( new SourceWithIdWriter(sourceIdCodec)),
+                applicationUpdater(), 
+                adminHelper());
     }
 
     @Bean
@@ -282,6 +301,11 @@ public class ApplicationModule {
     @Bean
     protected QueryExecutor<Application> applicationQueryExecutor() {
         return new ApplicationQueryExecutor(deerApplicationsStore());
+    }
+    
+    @Bean
+    protected QueryExecutor<Publisher> soucesQueryExecutor() {
+        return new SourcesQueryExecutor();
     }
 
     @Bean
