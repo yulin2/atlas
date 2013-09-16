@@ -2,7 +2,6 @@ package org.atlasapi.application.persistence;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.SourceStatus.SourceState;
@@ -12,7 +11,6 @@ import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

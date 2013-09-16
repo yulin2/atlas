@@ -244,9 +244,10 @@ public class ApplicationModule {
 
         return new StandardQueryParser<Application>(Resource.APPLICATION,
                 new QueryAttributeParser(ImmutableList.of(
-                        QueryAtomParser.valueOf(Attributes.ID,
-                                AttributeCoercers.idCoercer(idCodec))
-                        )),
+                    QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec)),
+                    QueryAtomParser.valueOf(Attributes.SOURCE_READS, AttributeCoercers.sourceIdCoercer(sourceIdCodec)),
+                    QueryAtomParser.valueOf(Attributes.SOURCE_WRITES, AttributeCoercers.sourceIdCoercer(sourceIdCodec))
+                    )),
                 idCodec, contextParser);
     }
     

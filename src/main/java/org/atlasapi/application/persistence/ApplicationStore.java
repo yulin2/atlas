@@ -2,6 +2,7 @@ package org.atlasapi.application.persistence;
 
 import org.atlasapi.application.model.Application;
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Optional;
 
@@ -14,4 +15,8 @@ public interface ApplicationStore {
     void store(Application application);
 
     Iterable<Application> applicationsFor(Iterable<Id> ids);
+    
+    Iterable<Application> readersFor(Publisher source);
+    
+    Iterable<Application> writersFor(Publisher source);
 }

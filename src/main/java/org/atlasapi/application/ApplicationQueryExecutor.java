@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.atlasapi.application.model.Application;
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryExecutionException;
@@ -13,6 +14,8 @@ import org.atlasapi.application.persistence.ApplicationStore;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.content.criteria.IdAttributeQuery;
+import org.atlasapi.content.criteria.attribute.Attributes;
+import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.collect.Lists;
 
 import com.google.common.base.Optional;
@@ -44,21 +47,45 @@ public class ApplicationQueryExecutor implements QueryExecutor<Application> {
 
     private QueryResult<Application> multipleQuery(Query<Application> query) {
         AttributeQuerySet operands = query.getOperands();
+
         List<Id> ids = Lists.newLinkedList();
+        Publisher reads = null;
+        Publisher writes = null;
+       
         for (AttributeQuery<?> operand : operands) {
-            if (operand instanceof org.atlasapi.content.criteria.IdAttributeQuery) {
+            if (operand.getAttributeName().equals(Attributes.ID.externalName())) {
                 IdAttributeQuery idQuery = (IdAttributeQuery) operand;
                 ids.addAll(idQuery.getValue());
+            } else if (operand.getAttributeName().equals(Attributes.SOURCE_READS.externalName())) {
+                reads = (Publisher) Iterables.getOnlyElement(operand.getValue());
+            } else if (operand.getAttributeName().equals(Attributes.SOURCE_WRITES.externalName())) {
+                writes = (Publisher) Iterables.getOnlyElement(operand.getValue());
             }
         }
-        
-        Iterable<Application> applications = null;
-        if (ids.isEmpty()) {
-            applications = applicationStore.allApplications();
+        if (!ids.isEmpty()) {
+            return applicationsQueryForIds(query, ids);
+        } else if (reads != null) {
+            return applicationsReading(query, reads);
+        } else if (writes != null) {
+            return applicationsWriting(query, writes);
         } else {
-            applications = applicationStore.applicationsFor(ids);
+            return allApplicationsQuery(query);
         }
-        return QueryResult.listResult(applications, query.getContext());
     }
-
+    
+    private QueryResult<Application> applicationsQueryForIds(Query<Application> query, Iterable<Id> ids) {
+        return QueryResult.listResult(applicationStore.applicationsFor(ids), query.getContext());
+    }
+    
+    private QueryResult<Application> allApplicationsQuery(Query<Application> query) {
+        return QueryResult.listResult(applicationStore.allApplications(), query.getContext());
+    }
+    
+    private QueryResult<Application> applicationsReading(Query<Application> query, Publisher source) {
+        return QueryResult.listResult(applicationStore.readersFor(source), query.getContext());
+    }
+    
+    private QueryResult<Application> applicationsWriting(Query<Application> query, Publisher source) {
+        return QueryResult.listResult(applicationStore.writersFor(source), query.getContext());
+    }
 }

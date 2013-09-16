@@ -8,7 +8,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
@@ -18,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.text.MoreStrings;
 
@@ -28,6 +31,10 @@ public final class AttributeCoercers {
     
     public static final AttributeCoercer<String, Id> idCoercer(NumberToShortStringCodec idCodec) {
         return new IdStringCoercer(idCodec);
+    }
+    
+    public static final AttributeCoercer<String, Publisher> sourceIdCoercer(SourceIdCodec sourceIdCodec) {
+        return new SourceIdStringCoercer(sourceIdCodec);
     }
     
     private static class IdStringCoercer extends AbstractAttributeCoercer<String, Id> {
@@ -43,6 +50,25 @@ public final class AttributeCoercers {
             return Id.valueOf(idCodec.decode(input));
         }
 
+    }
+    
+    private static class SourceIdStringCoercer extends AbstractAttributeCoercer<String, Publisher> {
+        private final SourceIdCodec sourceIdCodec;
+        
+        public SourceIdStringCoercer(SourceIdCodec sourceIdCodec) {
+            this.sourceIdCodec = sourceIdCodec;
+        }
+
+        @Override
+        protected Publisher coerce(String input) {
+            Maybe<Publisher> publisher = sourceIdCodec.decode(input);
+            if (publisher.hasValue()) {
+                return publisher.requireValue();
+            } else {
+                return null;
+            }
+        }
+        
     }
 
     public static final AttributeCoercer<String, String> stringCoercer() {
