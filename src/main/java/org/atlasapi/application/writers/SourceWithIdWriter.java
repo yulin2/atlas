@@ -14,10 +14,14 @@ import com.metabroadcast.common.intl.Country;
 public class SourceWithIdWriter implements
         EntityListWriter<Publisher> {
     private final SourceIdCodec sourceIdCodec;
+    private final String fieldName;
+    private final String listName;
     private final EntityWriter<Country> countryWriter = new CountryWriter();
 
-    public SourceWithIdWriter(SourceIdCodec sourceIdCodec) {
+    public SourceWithIdWriter(SourceIdCodec sourceIdCodec, String fieldName, String listName) {
         this.sourceIdCodec = sourceIdCodec;
+        this.fieldName = fieldName;
+        this.listName = listName;
     }
 
     @Override
@@ -31,12 +35,12 @@ public class SourceWithIdWriter implements
 
     @Override
     public String fieldName(Publisher entity) {
-        return "writes";
+        return fieldName;
     }
 
     @Override
     public String listName() {
-        return "writes";
+        return listName;
     }
 
 }

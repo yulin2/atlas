@@ -31,7 +31,6 @@ import org.atlasapi.application.users.NewUserSupplier;
 import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.writers.ApplicationListWriter;
 import org.atlasapi.application.writers.ApplicationQueryResultWriter;
-import org.atlasapi.application.writers.ApplicationSourcesWriter;
 import org.atlasapi.application.writers.SourceWithIdWriter;
 import org.atlasapi.application.writers.SourcesQueryResultWriter;
 import org.atlasapi.application.www.ApplicationWebModule;
@@ -278,7 +277,7 @@ public class ApplicationModule {
     public SourcesController sourcesController() {
         return new SourcesController(sourcesQueryParser(), 
                 soucesQueryExecutor(),
-                new SourcesQueryResultWriter( new SourceWithIdWriter(sourceIdCodec)),
+                new SourcesQueryResultWriter(new SourceWithIdWriter(sourceIdCodec, "source", "sources")),
                 applicationUpdater(), 
                 adminHelper());
     }
@@ -305,7 +304,7 @@ public class ApplicationModule {
     
     @Bean
     protected QueryExecutor<Publisher> soucesQueryExecutor() {
-        return new SourcesQueryExecutor();
+        return new SourcesQueryExecutor(sourceIdCodec);
     }
 
     @Bean

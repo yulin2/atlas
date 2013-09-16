@@ -138,7 +138,7 @@ public class SourcesController {
         }
     }
     
-    @RequestMapping(value = "/4.0/sources.*", method = RequestMethod.GET)
+    @RequestMapping({"/4.0/sources/{sid}.*", "/4.0/sources.*"})
     public void listSources(HttpServletRequest request,
             HttpServletResponse response) throws QueryParseException, QueryExecutionException {
         ResponseWriter writer = null;
