@@ -9,8 +9,6 @@ import org.atlasapi.application.model.SourceRequest;
 import org.atlasapi.application.model.UsageType;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.output.ErrorResultWriter;
-import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.NotAcceptableException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
@@ -22,8 +20,6 @@ import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.QueryResult;
 import org.atlasapi.query.common.StandardQueryParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,8 +30,6 @@ import com.google.common.base.Optional;
 
 @Controller
 public class SourceRequestsController {
-
-    private static Logger log = LoggerFactory.getLogger(SourceRequestsController.class);
     private final StandardQueryParser<SourceRequest> queryParser;
     private final QueryExecutor<SourceRequest> queryExecutor;
     private final QueryResultWriter<SourceRequest> resultWriter;
@@ -55,7 +49,7 @@ public class SourceRequestsController {
         this.adminHelper = adminHelper;
     }
     
-    @RequestMapping(value = {"/4.0/sources/requests.*", "/4.0/sources/{sid}/requests.*"}, method = RequestMethod.GET)
+    @RequestMapping(value = {"/4.0/requests.*", "/4.0/requests/{id}.*"}, method = RequestMethod.GET)
     public void listSourceRequests(HttpServletRequest request, 
             HttpServletResponse response) throws IOException, QueryParseException, QueryExecutionException {
         ResponseWriter writer = null;
@@ -64,7 +58,7 @@ public class SourceRequestsController {
         QueryResult<SourceRequest> queryResult = queryExecutor.execute(sourcesQuery);
         resultWriter.write(queryResult, writer);
     }
-    
+  
     @RequestMapping(value = "/4.0/sources/{sid}/requests", method = RequestMethod.POST)
     public void storeSourceRequest(HttpServletRequest request, 
             HttpServletResponse response,

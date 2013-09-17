@@ -264,10 +264,10 @@ public class ApplicationModule {
         QueryContextParser contextParser = new QueryContextParser(configFetcher(),
                 new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
 
-        return new StandardQueryParser<SourceRequest>(Resource.APPLICATION,
+        return new StandardQueryParser<SourceRequest>(Resource.SOURCE_REQUEST,
                 new QueryAttributeParser(ImmutableList.of(
-                    QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec)),
-                    QueryAtomParser.valueOf(Attributes.SOURCE_READS, AttributeCoercers.sourceIdCoercer(sourceIdCodec))
+                        QueryAtomParser.valueOf(Attributes.SOURCE_REQUEST_SOURCE,
+                                AttributeCoercers.sourceIdCoercer(sourceIdCodec))
                     )),
                 idCodec, contextParser);
     }
