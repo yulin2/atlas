@@ -5,7 +5,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.equiv.MergingEquivalentsResolver;
 import org.atlasapi.equiv.ResolvedEquivalents;
 import org.atlasapi.media.common.Id;
@@ -106,7 +106,7 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
 
     private ListenableFuture<ResolvedEquivalents<Content>> resolveContent(
             ListenableFuture<FluentIterable<Id>> queryHits, 
-            final ApplicationConfiguration config, final Set<Annotation> annotations) {
+            final OldApplicationConfiguration config, final Set<Annotation> annotations) {
         return Futures.transform(queryHits,
                 new AsyncFunction<FluentIterable<Id>, ResolvedEquivalents<Content>>() {
                     @Override

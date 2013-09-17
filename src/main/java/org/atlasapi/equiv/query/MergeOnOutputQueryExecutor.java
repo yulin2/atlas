@@ -3,7 +3,7 @@ package org.atlasapi.equiv.query;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.equiv.OutputContentMerger;
 import org.atlasapi.equiv.SeriesOrder;
@@ -49,7 +49,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     private Map<Id, List<Identified>> mergeResults(final ContentQuery query, Map<Id, List<Identified>> unmergedResult) {
-        final ApplicationConfiguration config = query.getConfiguration();
+        final OldApplicationConfiguration config = query.getConfiguration();
         if (!config.precedenceEnabled()) {
             return unmergedResult;
         }

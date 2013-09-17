@@ -1,7 +1,8 @@
 package org.atlasapi.application.persistence;
 
 import java.util.Set;
-import org.atlasapi.application.model.SourceRequest;
+
+import org.atlasapi.application.SourceRequest;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import com.google.common.base.Optional;

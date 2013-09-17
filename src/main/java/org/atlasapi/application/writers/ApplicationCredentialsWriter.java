@@ -2,7 +2,7 @@ package org.atlasapi.application.writers;
 
 import java.io.IOException;
 
-import org.atlasapi.application.model.ApplicationCredentials;
+import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;

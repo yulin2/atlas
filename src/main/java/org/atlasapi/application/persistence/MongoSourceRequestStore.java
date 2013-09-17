@@ -3,7 +3,8 @@ package org.atlasapi.application.persistence;
 import static org.atlasapi.application.persistence.SourceRequestTranslator.SOURCE_KEY;
 import static org.atlasapi.application.persistence.SourceRequestTranslator.APPID_KEY;
 import java.util.Set;
-import org.atlasapi.application.model.SourceRequest;
+
+import org.atlasapi.application.SourceRequest;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import com.google.common.base.Function;

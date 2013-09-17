@@ -6,8 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.SourceStatus.SourceState;
-import org.atlasapi.application.model.Application;
-import org.atlasapi.application.model.Permission;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotAcceptableException;

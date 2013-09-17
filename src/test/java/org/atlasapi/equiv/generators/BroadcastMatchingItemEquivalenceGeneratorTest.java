@@ -11,7 +11,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -83,7 +83,7 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
                 new ChannelSchedule(BBC_ONE, interval, ImmutableList.of(item2AndBroadcast))),
                 interval);
         context.checking(new Expectations(){{
-            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC), Optional.<ApplicationConfiguration>absent());
+            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC), Optional.<OldApplicationConfiguration>absent());
                 will(returnValue(schedule));
         }});
         

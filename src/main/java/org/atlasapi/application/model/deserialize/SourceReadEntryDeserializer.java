@@ -2,8 +2,8 @@ package org.atlasapi.application.model.deserialize;
 
 import java.lang.reflect.Type;
 
+import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceStatus;
-import org.atlasapi.application.model.SourceReadEntry;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Optional;

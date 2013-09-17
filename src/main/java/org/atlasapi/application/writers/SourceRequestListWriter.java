@@ -1,8 +1,9 @@
 package org.atlasapi.application.writers;
 
 import java.io.IOException;
-import org.atlasapi.application.model.SourceRequest;
-import org.atlasapi.application.model.UsageType;
+
+import org.atlasapi.application.SourceRequest;
+import org.atlasapi.application.UsageType;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.EntityListWriter;

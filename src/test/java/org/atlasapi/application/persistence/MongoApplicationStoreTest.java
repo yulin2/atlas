@@ -7,10 +7,10 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
-import org.atlasapi.application.model.Application;
-import org.atlasapi.application.model.ApplicationCredentials;
-import org.atlasapi.application.model.ApplicationSources;
-import org.atlasapi.application.model.SourceReadEntry;
+import org.atlasapi.application.Application;
+import org.atlasapi.application.ApplicationCredentials;
+import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;

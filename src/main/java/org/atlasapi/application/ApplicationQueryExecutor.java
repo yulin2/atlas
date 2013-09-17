@@ -2,7 +2,6 @@ package org.atlasapi.application;
 
 import java.util.List;
 
-import org.atlasapi.application.model.Application;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;

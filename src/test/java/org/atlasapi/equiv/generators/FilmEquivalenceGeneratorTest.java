@@ -8,7 +8,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -61,7 +61,7 @@ public class FilmEquivalenceGeneratorTest extends TestCase {
 
     private void checkScore(final Film anotherFilm, Score score) {
         context.checking(new Expectations(){{
-            oneOf(resolver).search(with(searchQueryFor(subjectFilm.getTitle())), with(any(ApplicationConfiguration.class)));
+            oneOf(resolver).search(with(searchQueryFor(subjectFilm.getTitle())), with(any(OldApplicationConfiguration.class)));
                 will(returnValue(ImmutableList.<Identified> of(anotherFilm)));
         }});
         

@@ -1,6 +1,5 @@
 package org.atlasapi.application;
 
-import org.atlasapi.application.model.SourceRequest;
 import org.atlasapi.application.persistence.SourceRequestStore;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.AttributeQuerySet;

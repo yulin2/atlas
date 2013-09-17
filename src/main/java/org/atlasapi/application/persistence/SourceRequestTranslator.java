@@ -1,8 +1,8 @@
 package org.atlasapi.application.persistence;
 
 
-import org.atlasapi.application.model.SourceRequest;
-import org.atlasapi.application.model.UsageType;
+import org.atlasapi.application.SourceRequest;
+import org.atlasapi.application.UsageType;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import com.metabroadcast.common.persistence.mongo.MongoConstants;

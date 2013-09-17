@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.pa;
 
 import java.util.List;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.content.schedule.ScheduleHierarchy;
 import org.atlasapi.media.entity.Item;
@@ -43,7 +43,7 @@ public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
         DateTime transmissionTime = PaProgrammeProcessor.getTransmissionTime(progData.getDate(), progData.getTime(), zone);
         DateTime transmissionEndTime = transmissionTime.plus(duration);
         
-        Schedule schedule = scheduleResolver.schedule(transmissionTime, transmissionEndTime, ImmutableSet.of(channel), ImmutableSet.of(Publisher.PA), Optional.<ApplicationConfiguration>absent());
+        Schedule schedule = scheduleResolver.schedule(transmissionTime, transmissionEndTime, ImmutableSet.of(channel), ImmutableSet.of(Publisher.PA), Optional.<OldApplicationConfiguration>absent());
         if (schedule.channelSchedules().isEmpty()) {
             return true;
         }

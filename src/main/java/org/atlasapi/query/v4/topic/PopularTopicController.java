@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.topic.PopularTopicIndex;
@@ -65,7 +65,7 @@ public class PopularTopicController {
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
-            ApplicationConfiguration configuration = configurationFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.defaultConfiguration());
+            OldApplicationConfiguration configuration = configurationFetcher.configurationFor(request).valueOrDefault(OldApplicationConfiguration.defaultConfiguration());
             Interval interval = new Interval(dateTimeInQueryParser.parse(from), dateTimeInQueryParser.parse(to));
             ListenableFuture<FluentIterable<Id>> topicIds = index.popularTopics(interval, selection);
             resultWriter.write(QueryResult.listResult(resolve(topicIds), new QueryContext(configuration, ActiveAnnotations.standard())), writer);

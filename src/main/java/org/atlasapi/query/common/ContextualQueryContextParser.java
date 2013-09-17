@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
@@ -28,7 +28,7 @@ public class ContextualQueryContextParser implements ParameterNameProvider {
 
     public QueryContext parseContext(HttpServletRequest request) throws QueryParseException {
         return new QueryContext(
-            configFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.defaultConfiguration()),
+            configFetcher.configurationFor(request).valueOrDefault(OldApplicationConfiguration.defaultConfiguration()),
             annotationExtractor.extractFromRequest(request),
             selectionBuilder.build(request)
         );

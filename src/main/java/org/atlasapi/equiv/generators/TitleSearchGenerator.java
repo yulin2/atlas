@@ -1,12 +1,12 @@
 package org.atlasapi.equiv.generators;
 
-import static org.atlasapi.application.ApplicationConfiguration.defaultConfiguration;
+import static org.atlasapi.application.OldApplicationConfiguration.defaultConfiguration;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -61,7 +61,7 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
 
     private Iterable<? extends T> searchForCandidates(T content, ResultDescription desc) {
         Set<Publisher> publishers = Sets.difference(searchPublishers, ImmutableSet.of(content.getPublisher()));
-        ApplicationConfiguration appConfig = defaultConfiguration().withSources(enabledPublishers(publishers));
+        OldApplicationConfiguration appConfig = defaultConfiguration().withSources(enabledPublishers(publishers));
 
         String title = titleTransform.apply(content.getTitle());
         SearchQuery.Builder query = SearchQuery.builder(title)

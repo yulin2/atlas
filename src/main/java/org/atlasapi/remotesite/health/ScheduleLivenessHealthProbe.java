@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.content.schedule.ScheduleRef;

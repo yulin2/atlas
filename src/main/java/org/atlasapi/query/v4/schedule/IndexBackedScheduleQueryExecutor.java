@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.common.Id;
@@ -193,7 +193,7 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor {
      * referenced broadcast in the content (broadcasts on other versions are 
      * removed.) Yum. 
      */
-    private ApplicationConfiguration ensureRequestedPublisherIsPrecedent(ScheduleQuery query, ApplicationConfiguration appConfig) {
+    private OldApplicationConfiguration ensureRequestedPublisherIsPrecedent(ScheduleQuery query, OldApplicationConfiguration appConfig) {
         if (!appConfig.precedenceEnabled()) {
             return appConfig;
         }

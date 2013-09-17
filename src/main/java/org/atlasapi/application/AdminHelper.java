@@ -3,7 +3,6 @@ package org.atlasapi.application;
 import java.util.List;
 import java.util.UUID;
 
-import org.atlasapi.application.model.PrecedenceOrdering;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;

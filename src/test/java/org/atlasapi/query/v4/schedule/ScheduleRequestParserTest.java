@@ -1,6 +1,6 @@
 package org.atlasapi.query.v4.schedule;
 
-import static org.atlasapi.application.ApplicationConfiguration.defaultConfiguration;
+import static org.atlasapi.application.OldApplicationConfiguration.defaultConfiguration;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.hamcrest.Matchers.is;

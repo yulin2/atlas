@@ -2,7 +2,7 @@ package org.atlasapi.query.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.query.annotation.ActiveAnnotations;
 
 import com.google.common.base.Objects;
@@ -12,7 +12,7 @@ import com.metabroadcast.common.query.Selection;
 public class QueryContext {
 
     private static final QueryContext STANDARD = new QueryContext(
-            ApplicationConfiguration.defaultConfiguration(), 
+            OldApplicationConfiguration.defaultConfiguration(), 
             ActiveAnnotations.standard()    
     );
     
@@ -20,22 +20,22 @@ public class QueryContext {
         return STANDARD;
     }
     
-    private final ApplicationConfiguration appConfig;
+    private final OldApplicationConfiguration appConfig;
     private final ActiveAnnotations annotations;
     private final Optional<Selection> selection;
 
-    public QueryContext(ApplicationConfiguration appConfig, ActiveAnnotations annotations) {
+    public QueryContext(OldApplicationConfiguration appConfig, ActiveAnnotations annotations) {
         this(appConfig, annotations, null);
     }
     
-    public QueryContext(ApplicationConfiguration appConfig, ActiveAnnotations annotations,
+    public QueryContext(OldApplicationConfiguration appConfig, ActiveAnnotations annotations,
         Selection selection) {
         this.appConfig = checkNotNull(appConfig);
         this.annotations = checkNotNull(annotations);
         this.selection = Optional.fromNullable(selection);
     }
 
-    public ApplicationConfiguration getApplicationConfiguration() {
+    public OldApplicationConfiguration getApplicationConfiguration() {
         return this.appConfig;
     }
 

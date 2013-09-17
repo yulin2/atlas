@@ -8,8 +8,8 @@ import static org.atlasapi.application.persistence.ApplicationSourcesTranslator.
 import static org.atlasapi.application.persistence.ApplicationSourcesTranslator.SOURCES_KEY;
 import static org.atlasapi.application.persistence.ApplicationSourcesTranslator.WRITABLE_KEY;
 
+import org.atlasapi.application.Application;
 import org.atlasapi.application.SourceStatus.SourceState;
-import org.atlasapi.application.model.Application;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.elasticsearch.common.Preconditions;

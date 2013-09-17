@@ -9,9 +9,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.model.Application;
-import org.atlasapi.application.model.ApplicationSources;
-import org.atlasapi.application.model.PrecedenceOrdering;
 import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ReadException;
 import org.atlasapi.media.common.Id;

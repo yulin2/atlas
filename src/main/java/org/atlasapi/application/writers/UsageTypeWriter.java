@@ -1,7 +1,8 @@
 package org.atlasapi.application.writers;
 
 import java.io.IOException;
-import org.atlasapi.application.model.UsageType;
+
+import org.atlasapi.application.UsageType;
 import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;

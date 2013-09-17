@@ -1,6 +1,7 @@
 package org.atlasapi.application.persistence;
 
-import org.atlasapi.application.model.ApplicationCredentials;
+import org.atlasapi.application.ApplicationCredentials;
+
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;

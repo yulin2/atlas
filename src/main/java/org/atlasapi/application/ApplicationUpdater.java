@@ -4,10 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.application.SourceStatus.SourceState;
-import org.atlasapi.application.model.Application;
-import org.atlasapi.application.model.ApplicationCredentials;
-import org.atlasapi.application.model.ApplicationSources;
-import org.atlasapi.application.model.SourceReadEntry;
 import org.atlasapi.application.persistence.ApplicationStore;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;

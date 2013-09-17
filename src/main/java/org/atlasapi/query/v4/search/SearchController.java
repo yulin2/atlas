@@ -7,7 +7,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
 import org.atlasapi.media.content.Content;
@@ -123,7 +123,7 @@ public class SearchController {
             float catchupWeighting = getFloatParam(catchupWeightingParam, DEFAULT_CATCHUP_WEIGHTING);
             float priorityChannelWeighting = getFloatParam(priorityChannelWeightingParam, DEFAULT_PRIORITY_CHANNEL_WEIGHTING);
 
-            ApplicationConfiguration appConfig = configFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.defaultConfiguration());
+            OldApplicationConfiguration appConfig = configFetcher.configurationFor(request).valueOrDefault(OldApplicationConfiguration.defaultConfiguration());
             Set<Specialization> specializations = specializations(specialization);
             Set<Publisher> publishers = publishers(publisher, appConfig);
             List<Identified> content = searcher.search(SearchQuery.builder(q)
@@ -146,7 +146,7 @@ public class SearchController {
         }
     }
 
-    private Set<Publisher> publishers(String publisher, ApplicationConfiguration appConfig) {
+    private Set<Publisher> publishers(String publisher, OldApplicationConfiguration appConfig) {
         return Sets.intersection(ImmutableSet.copyOf(Publisher.fromCsv(publisher)), appConfig.getEnabledSources());
     }
 

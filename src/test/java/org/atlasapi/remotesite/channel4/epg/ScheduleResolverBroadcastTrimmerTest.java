@@ -6,7 +6,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
@@ -54,7 +54,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
         ContentResolver resolver = new StubContentResolver().respondTo(item.getItem());
         
         context.checking(new Expectations(){{
-            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<ApplicationConfiguration>absent())); will(returnValue(schedule));
+            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<OldApplicationConfiguration>absent())); will(returnValue(schedule));
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});
         
@@ -92,7 +92,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
         ContentResolver resolver = new StubContentResolver().respondTo(item1).respondTo(item2);
 
         context.checking(new Expectations() {{
-            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<ApplicationConfiguration>absent()));
+            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<OldApplicationConfiguration>absent()));
             will(returnValue(schedule));
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});

@@ -3,10 +3,10 @@ package org.atlasapi.application.persistence;
 import java.util.List;
 import java.util.Map;
 
+import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.SourceStatus.SourceState;
-import org.atlasapi.application.model.ApplicationSources;
-import org.atlasapi.application.model.SourceReadEntry;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableList;

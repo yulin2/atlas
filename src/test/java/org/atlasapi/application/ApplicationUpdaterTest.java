@@ -9,10 +9,6 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 
 import org.atlasapi.application.SourceStatus.SourceState;
-import org.atlasapi.application.model.Application;
-import org.atlasapi.application.model.ApplicationCredentials;
-import org.atlasapi.application.model.ApplicationSources;
-import org.atlasapi.application.model.SourceReadEntry;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
