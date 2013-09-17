@@ -1,0 +1,61 @@
+package org.atlasapi.remotesite.bbc.nitro.extract;
+
+import java.math.BigInteger;
+
+import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.remotesite.bbc.BbcFeeds;
+
+import com.metabroadcast.atlas.glycerin.model.Image;
+import com.metabroadcast.atlas.glycerin.model.Series;
+import com.metabroadcast.atlas.glycerin.model.Synopses;
+
+/**
+ * A {@link NitroContentExtractor} for extracting
+ * {org.atlasapi.media.entity.Series Atlas Series} from {@link Series Nitro
+ * Series}.
+ * 
+ */
+public class NitroSeriesExtractor
+        extends NitroContentExtractor<Series, org.atlasapi.media.entity.Series> {
+
+    @Override
+    protected org.atlasapi.media.entity.Series createContent(Series source) {
+        return new org.atlasapi.media.entity.Series();
+    }
+
+    @Override
+    protected String extractPid(Series source) {
+        return source.getPid();
+    }
+
+    @Override
+    protected String extractTitle(Series source) {
+        return source.getTitle();
+    }
+
+    @Override
+    protected Synopses extractSynopses(Series source) {
+        return source.getSynopses();
+    }
+
+    @Override
+    protected Image extractImage(Series source) {
+        return source.getImage();
+    }
+
+    @Override
+    protected void extractAdditionalFields(Series source, org.atlasapi.media.entity.Series content) {
+        if (source.getSeriesOf() != null) {
+            BigInteger position = source.getSeriesOf().getPosition();
+            if (position != null) {
+                content.withSeriesNumber(position.intValue());
+            }
+            content.setParentRef(new ParentRef(BbcFeeds.nitroUriForPid(source.getSeriesOf().getPid())));
+        }
+        BigInteger expectedChildCount = source.getExpectedChildCount();
+        if (expectedChildCount != null) {
+            content.setTotalEpisodes(expectedChildCount.intValue());
+        }
+    }
+    
+}
