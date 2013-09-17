@@ -14,6 +14,8 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite;
 
+
+//TODO: when we rename Publisher to Source we'll need to rename SOURCE. DATA?
 public interface ContentExtractor<SOURCE, CONTENT> {
 
 	CONTENT extract(SOURCE source);

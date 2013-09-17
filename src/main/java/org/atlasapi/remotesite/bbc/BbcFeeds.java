@@ -8,6 +8,7 @@ public class BbcFeeds {
     private static final String PID_PATTERN = "[bp]\\d\\d[a-z0-9]+";
     
     private static final String SLASH_PROGRAMMES_BASE = "http://www.bbc.co.uk/programmes/";
+    private static final String NITRO_BASE = "http://nitro.bbc.co.uk/programmes/";
     
     public static final Pattern SLASH_PROGRAMMES_URL_PATTERN = Pattern.compile(Pattern.quote(SLASH_PROGRAMMES_BASE) + PID_PATTERN);
 	
@@ -22,12 +23,20 @@ public class BbcFeeds {
 	}
 
 	public static String slashProgrammesUriForPid(String pid) {
-	    if (!isBbcPid(pid)) {
-	        throw new IllegalArgumentException("PID " + pid + " did not match the BBC PID pattern " + PID_FINDER);
-	    }
-		return SLASH_PROGRAMMES_BASE + pid;
+	    return slashProgrammesUri(SLASH_PROGRAMMES_BASE, pid);
 	}
 
+	public static String nitroUriForPid(String pid) {
+	    return slashProgrammesUri(NITRO_BASE, pid);
+	}
+
+    private static String slashProgrammesUri(String base, String pid) {
+        if (!isBbcPid(pid)) {
+	        throw new IllegalArgumentException("PID " + pid + " did not match the BBC PID pattern " + PID_FINDER);
+	    }
+        return base + pid;
+    }
+	
     public static boolean isBbcPid(String pid) {
         return PID_FINDER.matcher(pid).matches();
     }

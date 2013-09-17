@@ -19,6 +19,7 @@ import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.query.SearchModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
+import org.atlasapi.remotesite.bbc.nitro.BbcNitroModule;
 import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
@@ -70,7 +71,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 ManualScheduleRebuildModule.class, 
                 InterlinkingDeltaModule.class,
                 EquivTaskModule.class,
-                OddJobRandomTaskModule.class
+                OddJobRandomTaskModule.class,
+                BbcNitroModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(
