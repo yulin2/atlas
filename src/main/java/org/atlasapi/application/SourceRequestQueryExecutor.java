@@ -18,7 +18,11 @@ public class SourceRequestQueryExecutor implements QueryExecutor<SourceRequest> 
     @Override
     public QueryResult<SourceRequest> execute(Query<SourceRequest> query)
             throws QueryExecutionException {
+        System.out.println(query.getOperands());
         // TODO Auto-generated method stub
+        
+        // TODO add filter per source and/or or app
+        
         return QueryResult.listResult(requestStore.all(), query.getContext());
     }
 

@@ -46,7 +46,6 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.EntityListWriter;
-import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.query.annotation.ResourceAnnotationIndex;
 import org.atlasapi.query.common.AttributeCoercers;
@@ -67,7 +66,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -308,9 +306,13 @@ public class ApplicationModule {
     
     @Bean
     public SourceRequestsController sourceRequestsController() {
+        IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "sourceRequest");
+        SourceRequestManager manager = new SourceRequestManager(sourceRequestStore(), idGenerator);
         return new SourceRequestsController(sourceRequestsQueryParser(),
                 new SourceRequestQueryExecutor(sourceRequestStore()),
-                new SourceRequestsQueryResultsWriter(new SourceRequestListWriter(sourceIdCodec)));
+                new SourceRequestsQueryResultsWriter(new SourceRequestListWriter(sourceIdCodec, idCodec)),
+                manager,
+                adminHelper());
     }
 
     @Bean

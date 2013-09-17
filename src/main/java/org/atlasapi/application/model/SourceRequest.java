@@ -1,9 +1,11 @@
 package org.atlasapi.application.model;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 
 public class SourceRequest {
-    private final String appSlug;
+    private final Id id;
+    private final Id appId;
     private final Publisher source;
     private final UsageType usageType;
     private final String email;
@@ -11,9 +13,10 @@ public class SourceRequest {
     private final String reason;
     private final boolean approved;
     
-    private SourceRequest(String appSlug, Publisher source, UsageType usageType,
+    private SourceRequest(Id id, Id appId, Publisher source, UsageType usageType,
             String email, String appUrl, String reason, boolean approved) {
-        this.appSlug = appSlug;
+        this.id = id;
+        this.appId = appId;
         this.source = source;
         this.usageType = usageType;
         this.email = email;
@@ -22,8 +25,12 @@ public class SourceRequest {
         this.approved = approved;
     }
     
-    public String getAppSlug() {
-        return appSlug;
+    public Id getId() {
+        return this.id;
+    }
+    
+    public Id getAppId() {
+        return appId;
     }
     
     public Publisher getSource() {
@@ -56,7 +63,8 @@ public class SourceRequest {
     
     public Builder copy() {
         return new Builder()
-            .withAppSlug(appSlug)
+            .withId(id)
+            .withAppId(appId)
             .withSource(source)
             .withUsageType(usageType)
             .withEmail(email)
@@ -66,7 +74,8 @@ public class SourceRequest {
     }
     
     public static class Builder {
-        private String appSlug;
+        private Id id;
+        private Id appId;
         private Publisher source;
         private UsageType usageType;
         private String email;
@@ -77,8 +86,13 @@ public class SourceRequest {
         public Builder() {
         }
         
-        public Builder withAppSlug(String appSlug) {
-            this.appSlug = appSlug;
+        public Builder withId(Id id) {
+            this.id = id;
+            return this;
+        }
+        
+        public Builder withAppId(Id appId) {
+            this.appId = appId;
             return this;
         }
         
@@ -113,7 +127,7 @@ public class SourceRequest {
         }
         
         public SourceRequest build() {
-            return new SourceRequest(appSlug, source, usageType,
+            return new SourceRequest(id, appId, source, usageType,
                     email, appUrl, reason, approved);
         }
     }

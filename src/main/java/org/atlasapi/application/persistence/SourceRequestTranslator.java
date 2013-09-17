@@ -1,11 +1,10 @@
 package org.atlasapi.application.persistence;
 
 
-import org.atlasapi.application.model.Application;
 import org.atlasapi.application.model.SourceRequest;
 import org.atlasapi.application.model.UsageType;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
-
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.mongodb.BasicDBObject;
@@ -13,7 +12,7 @@ import com.mongodb.DBObject;
 
 
 public class SourceRequestTranslator {
-    public static final String APPSLUG_KEY = "appSlug";
+    public static final String APPID_KEY = "appId";
     public static final String SOURCE_KEY = "publisher";
     public static final String USAGE_TYPE_KEY = "usageType";
     public static final String EMAIL_KEY = "email";
@@ -21,18 +20,11 @@ public class SourceRequestTranslator {
     public static final String REASON_KEY = "reason";
     public static final String APPROVED_KEY = "approved";
     
-    public String createKey(SourceRequest sourceRequest) {
-        return String.format("%s|%s", sourceRequest.getAppSlug(), sourceRequest.getSource().key());
-    }
-    
-    public String createKey(Application application, Publisher source) {
-        return String.format("%s|%s", application.getSlug(), source.key());
-    }
     
     public DBObject toDBObject(SourceRequest sourceRequest) {
         DBObject dbo = new BasicDBObject();
-        TranslatorUtils.from(dbo, MongoConstants.ID, createKey(sourceRequest));
-        TranslatorUtils.from(dbo, APPSLUG_KEY, sourceRequest.getAppSlug());
+        TranslatorUtils.from(dbo, MongoConstants.ID, sourceRequest.getId().longValue());
+        TranslatorUtils.from(dbo, APPID_KEY, sourceRequest.getAppId().longValue());
         TranslatorUtils.from(dbo, SOURCE_KEY, sourceRequest.getSource().key());
         TranslatorUtils.from(dbo, USAGE_TYPE_KEY, sourceRequest.getUsageType().toString());
         TranslatorUtils.from(dbo, EMAIL_KEY, sourceRequest.getEmail());
@@ -47,8 +39,9 @@ public class SourceRequestTranslator {
             return null;
         }
         return SourceRequest.builder()
-                .withAppSlug(TranslatorUtils.toString(dbo, APPSLUG_KEY))
-                .withSource(Publisher.fromKey(TranslatorUtils.toString(dbo, SOURCE_KEY)).requireValue())
+                .withId(Id.valueOf(TranslatorUtils.toLong(dbo, MongoConstants.ID)))                
+                .withAppId(Id.valueOf(TranslatorUtils.toLong(dbo, APPID_KEY)))
+                .withSource(Publisher.fromPossibleKey(TranslatorUtils.toString(dbo, SOURCE_KEY)).get())
                 .withUsageType(UsageType.valueOf(TranslatorUtils.toString(dbo, USAGE_TYPE_KEY)))
                 .withEmail(TranslatorUtils.toString(dbo, EMAIL_KEY))
                 .withAppUrl(TranslatorUtils.toString(dbo, APPURL_KEY))

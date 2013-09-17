@@ -1,9 +1,6 @@
 package org.atlasapi.application.writers;
 
 import java.io.IOException;
-
-import javax.annotation.Nonnull;
-
 import org.atlasapi.application.model.SourceRequest;
 import org.atlasapi.application.model.UsageType;
 import org.atlasapi.application.sources.SourceIdCodec;
@@ -13,26 +10,30 @@ import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
 
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+
 
 public class SourceRequestListWriter implements EntityListWriter<SourceRequest> {
     private final EntityListWriter<Publisher> sourcesWriter; 
     private final EntityWriter<UsageType> usageTypeWriter;
+    private final NumberToShortStringCodec idCodec;
     
-    public SourceRequestListWriter(SourceIdCodec sourceIdCodec) {
-        sourcesWriter = new SourceWithIdWriter(sourceIdCodec, "source", "sources");
-        usageTypeWriter = new UsageTypeWriter();
+    public SourceRequestListWriter(SourceIdCodec sourceIdCodec, NumberToShortStringCodec idCodec) {
+        this.sourcesWriter = new SourceWithIdWriter(sourceIdCodec, "source", "sources");
+        this.usageTypeWriter = new UsageTypeWriter();
+        this.idCodec = idCodec;
     }
     
     @Override
     public void write(SourceRequest entity, FieldWriter writer, OutputContext ctxt)
             throws IOException {
-        // TODO output application id
-        writer.writeField("application", entity.getAppSlug());
+        writer.writeField("id", idCodec.encode(entity.getId().toBigInteger()));
+        writer.writeField("application_id", idCodec.encode(entity.getAppId().toBigInteger()));
         writer.writeField("app_url", entity.getAppUrl());
         writer.writeField("email", entity.getEmail());
         writer.writeObject(sourcesWriter, entity.getSource(), ctxt);
         writer.writeField("reason", entity.getReason());
-        writer.writeField("usage_type", entity.getUsageType());
+        writer.writeObject(usageTypeWriter, entity.getUsageType(), ctxt);
         writer.writeField("approved",entity.isApproved());
     }
 
