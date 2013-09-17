@@ -1,8 +1,9 @@
 package org.atlasapi.application;
 
-import org.atlasapi.application.persistence.SourceRequestStore;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.application.SourceRequestStore;
+
 import com.google.common.base.Optional;
 import com.metabroadcast.common.ids.IdGenerator;
 

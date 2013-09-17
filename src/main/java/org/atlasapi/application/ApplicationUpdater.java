@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.application.SourceStatus.SourceState;
-import org.atlasapi.application.persistence.ApplicationStore;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
+import org.atlasapi.persistence.application.ApplicationStore;
 import org.elasticsearch.common.collect.Lists;
 
 import com.google.common.base.Optional;

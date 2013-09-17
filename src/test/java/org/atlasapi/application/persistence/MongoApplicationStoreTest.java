@@ -13,6 +13,8 @@ import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.application.ApplicationStore;
+import org.atlasapi.persistence.application.MongoApplicationStore;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
