@@ -5,8 +5,9 @@ import java.io.InputStreamReader;
 import java.util.Set;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.DiscreteDomains;
-import com.google.common.collect.Ranges;
+import com.google.common.collect.ContiguousSet;
+import com.google.common.collect.DiscreteDomain;
+import com.google.common.collect.Range;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpResponseTransformer;
@@ -28,7 +29,7 @@ public abstract class AbstractHttpResponseTransformer<T> implements HttpResponse
     }
 
     protected Set<Integer> acceptableResponseCodes() {
-        return Ranges.closedOpen(200, 400).asSet(DiscreteDomains.integers());
+        return ContiguousSet.create(Range.closedOpen(200, 400), DiscreteDomain.integers());
     }
     
 }
