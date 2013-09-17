@@ -47,11 +47,12 @@ public class BbcNitroModule {
     
     @PostConstruct
     public void configure() {
-        scheduler.schedule(nitroScheduleUpdateTask(7, 7).withName("Nitro 15 day updater"),
-                RepetitionRules.every(Duration.standardHours(2)));
-        scheduler.schedule(nitroScheduleUpdateTask(0, 0).withName("Nitro today updater"),
-                RepetitionRules.every(Duration.standardHours(2)));
-        System.out.println(BbcIonServices.services.values().size());
+        if (tasksEnabled) {
+            scheduler.schedule(nitroScheduleUpdateTask(7, 7).withName("Nitro 15 day updater"),
+                    RepetitionRules.every(Duration.standardHours(2)));
+            scheduler.schedule(nitroScheduleUpdateTask(0, 0).withName("Nitro today updater"),
+                    RepetitionRules.every(Duration.standardHours(2)));
+        }
     }
 
     private ScheduledTask nitroScheduleUpdateTask(int back, int forward) {
