@@ -22,18 +22,17 @@ public class TalkTalkItemDetailContainerExtractor {
 
     //Should match e.g: No Ordinary Family S1
     private static final Pattern NUMBERED_SERIES_TITLE = Pattern.compile("^(.*)\\s*S(\\d+)\\s*$");
-    private final String BRAND_URI_PATTERN = "http://talktalk.net/brands/%s";
-    private final String SERIES_URI_PATTERN = "http://talktalk.net/series/%s";
     
     private static final TalkTalkDescriptionExtractor descriptionExtractor = new TalkTalkDescriptionExtractor();
     private static final TalkTalkImagesExtractor imagesExtractor = new TalkTalkImagesExtractor();
     private static final TalkTalkGenresExtractor genresExtractor = new TalkTalkGenresExtractor();
+    private static final TalkTalkUriCompiler uriCompiler = new TalkTalkUriCompiler();
     
     public Brand extractBrand(ItemDetailType detail) {
         checkArgument(ItemTypeType.BRAND.equals(detail.getItemType()), 
                 "Can't extract Brand from non-BRAND Item type");
         Brand brand = new Brand();
-        brand.setCanonicalUri(String.format(BRAND_URI_PATTERN, detail.getId()));
+        brand.setCanonicalUri(uriCompiler.uriFor(detail));
         brand.setTitle(detail.getTitle());
         return setCommonContainerFields(detail, brand);
     }
@@ -51,7 +50,7 @@ public class TalkTalkItemDetailContainerExtractor {
         checkArgument(ItemTypeType.SERIES.equals(detail.getItemType()), 
                 "Can't extract Series from non-SERIES Item type");
         Series series = new Series();
-        series.setCanonicalUri(String.format(SERIES_URI_PATTERN, detail.getId()));
+        series.setCanonicalUri(uriCompiler.uriFor(detail));
         if (brand.isPresent()) {
             series.setParent(brand.get());
         }

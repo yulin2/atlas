@@ -58,7 +58,7 @@ public class TalkTalkModule {
     @Bean
     public ScheduledTask talkTalkVodPicksUpdater() {
         return new TalkTalkVodContentListUpdateTask(talkTalkClient(),
-                contentGroupResolver, contentGroupWriter, talkTalkContentEntityProcessor(),
+                contentGroupResolver, contentGroupWriter, contentResolver,
                 GroupType.IMAGE, "COMPAPP2");
     }
 
@@ -74,9 +74,7 @@ public class TalkTalkModule {
 
     @Bean
     public ContentUpdatingTalkTalkVodEntityProcessor talkTalkContentEntityProcessor() {
-        ContentUpdatingTalkTalkVodEntityProcessor vodEntityProcessor
-            = new ContentUpdatingTalkTalkVodEntityProcessor(talkTalkClient(), contentResolver, contentWriter);
-        return vodEntityProcessor;
+        return new ContentUpdatingTalkTalkVodEntityProcessor(talkTalkClient(), contentResolver, contentWriter);
     }
 
     @Bean

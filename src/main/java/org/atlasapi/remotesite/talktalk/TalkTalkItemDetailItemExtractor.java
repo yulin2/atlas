@@ -47,7 +47,6 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class TalkTalkItemDetailItemExtractor {
 
     private static final Pattern NUMBERED_EPISODE_TITLE = Pattern.compile("^Ep\\s*(\\d+)\\s*:\\s*(.*)");
-    private static final String CANONICAL_URI_PATTERN = "http://talktalk.net/episodes/%s";
     
     private static final Map<ProductTypeType, RevenueContract> revenueContractLookup =  ImmutableMap.of(
             ProductTypeType.FREE, RevenueContract.FREE_TO_VIEW, 
@@ -67,6 +66,7 @@ public class TalkTalkItemDetailItemExtractor {
     private static final TalkTalkDescriptionExtractor descriptionExtractor = new TalkTalkDescriptionExtractor();
     private static final TalkTalkGenresExtractor genresExtractor = new TalkTalkGenresExtractor();
     private static final TalkTalkImagesExtractor imagesExtractor = new TalkTalkImagesExtractor();
+    private static final TalkTalkUriCompiler uriCompiler = new TalkTalkUriCompiler();
 
     public Item extract(ItemDetailType detail, Optional<Brand> brand, Optional<Series> series) {
         checkArgument(ItemTypeType.EPISODE.equals(detail.getItemType()), 
@@ -108,7 +108,7 @@ public class TalkTalkItemDetailItemExtractor {
     }
 
     private <I extends Item> I setCommonItemFields(I item, ItemDetailType detail) {
-        item.setCanonicalUri(String.format(CANONICAL_URI_PATTERN, detail.getId()));
+        item.setCanonicalUri(uriCompiler.uriFor(detail));
         item.setPublisher(Publisher.TALK_TALK);
         item.setTitle(removeNumberPrefix(detail.getTitle()));
         item = descriptionExtractor.extractDescriptions(item, detail.getSynopsisList());
