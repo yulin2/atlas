@@ -16,11 +16,14 @@ import javax.xml.validation.SchemaFactory;
 import org.atlasapi.remotesite.talktalk.vod.bindings.TVDataInterfaceResponse;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.io.Resources;
 
+@RunWith(MockitoJUnitRunner.class)
 public class JaxbTalkTalkTvDataInterfaceResponseParserTest {
     
     private JaxbTalkTalkTvDataInterfaceResponseParser parser;
@@ -58,6 +61,13 @@ public class JaxbTalkTalkTvDataInterfaceResponseParserTest {
         parser.parse(Resources.newReaderSupplier(structure, Charsets.UTF_8).getInput(), listener);
         
         verify(listener).afterUnmarshal(argThat(is(TVDataInterfaceResponse.class)), any());
+    }
+
+    @Test(expected=TalkTalkException.class)
+    public void testGetErrorResponse() throws Exception {
+        URL structure = Resources.getResource(getClass(),"error.xml");
+        Unmarshaller.Listener listener = mock(Unmarshaller.Listener.class);
+        parser.parse(Resources.newReaderSupplier(structure, Charsets.UTF_8).getInput(), listener);
     }
     
 }

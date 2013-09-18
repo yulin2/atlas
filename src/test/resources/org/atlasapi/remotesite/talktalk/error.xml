@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TVDataInterfaceResponse xmlns="http://www.example.org/TVDataInterfaceModel">
+    <Result>-720</Result>
+    <ErrorMessage>TVgetAssociatedAsset transaction failed with database
+        error: [-720 : ]</ErrorMessage>
+</TVDataInterfaceResponse>
