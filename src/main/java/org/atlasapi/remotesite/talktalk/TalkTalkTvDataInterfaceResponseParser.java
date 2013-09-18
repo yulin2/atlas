@@ -7,10 +7,10 @@ import javax.xml.bind.Unmarshaller.Listener;
 import org.atlasapi.remotesite.talktalk.vod.bindings.TVDataInterfaceResponse;
 
 /**
- * Can parse XML data read from TalkTalk into a {@link TvDataInterfaceResponse}. 
+ * Parses {@link TVDataInterfaceResponse}s. 
  */
 public interface TalkTalkTvDataInterfaceResponseParser {
 
-    TVDataInterfaceResponse parse(Reader reader, Listener listener) throws Exception;
+    void parse(Reader reader, Listener listener) throws Exception;
     
 }
