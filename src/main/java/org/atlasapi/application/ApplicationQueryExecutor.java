@@ -13,9 +13,9 @@ import org.atlasapi.query.common.QueryResult;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.content.criteria.IdAttributeQuery;
+import org.atlasapi.content.criteria.QueryVisitorAdapter;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.elasticsearch.common.collect.Iterables;
-import org.elasticsearch.common.collect.Lists;
 
 import com.google.common.base.Optional;
 
@@ -47,21 +47,23 @@ public class ApplicationQueryExecutor implements QueryExecutor<Application> {
     private QueryResult<Application> multipleQuery(Query<Application> query) {
         AttributeQuerySet operands = query.getOperands();
 
-        List<Id> ids = Lists.newLinkedList();
+        Iterable<Id> ids = Iterables.concat(operands.accept(new QueryVisitorAdapter<List<Id>>() {
+           @Override
+            public List<Id> visit(IdAttributeQuery query) {
+                return query.getValue();
+            }}));
         Publisher reads = null;
+            
         Publisher writes = null;
-       
+     
         for (AttributeQuery<?> operand : operands) {
-            if (operand.getAttributeName().equals(Attributes.ID.externalName())) {
-                IdAttributeQuery idQuery = (IdAttributeQuery) operand;
-                ids.addAll(idQuery.getValue());
-            } else if (operand.getAttributeName().equals(Attributes.SOURCE_READS.externalName())) {
+             if (operand.getAttributeName().equals(Attributes.SOURCE_READS.externalName())) {
                 reads = (Publisher) Iterables.getOnlyElement(operand.getValue());
             } else if (operand.getAttributeName().equals(Attributes.SOURCE_WRITES.externalName())) {
                 writes = (Publisher) Iterables.getOnlyElement(operand.getValue());
             }
         }
-        if (!ids.isEmpty()) {
+        if (!Iterables.isEmpty(ids)) {
             return applicationsQueryForIds(query, ids);
         } else if (reads != null) {
             return applicationsReading(query, reads);
