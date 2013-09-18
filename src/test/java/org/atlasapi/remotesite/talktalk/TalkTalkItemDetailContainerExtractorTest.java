@@ -15,7 +15,7 @@ import org.junit.Test;
 import com.google.common.base.Optional;
 
 
-public class TalkTalkVodEntityContainerExtractorTest {
+public class TalkTalkItemDetailContainerExtractorTest {
     
     private final TalkTalkItemDetailContainerExtractor extractor
         = new TalkTalkItemDetailContainerExtractor();
@@ -75,6 +75,7 @@ public class TalkTalkVodEntityContainerExtractorTest {
         Series series = extractor.extractSeries(detail, Optional.<Brand>absent());
         
         assertThat(series.getSeriesNumber(), is(101));
+        assertThat(series.getTitle(), is("No Ordinary Family"));
         
     }
     

@@ -100,6 +100,20 @@ public class TalkTalkItemDetailItemExtractorTest {
         
         assertThat(extracted.getTitle(), is("title"));
     }
+
+    @Test
+    public void testTitleWithEpisodeNumberIsExtractedWithoutEpisodeNumber() {
+        ItemDetailType detail = detail();
+        detail.setTitle("Ep2: title");
+        
+        Brand brand = new Brand("brand", "brand", Publisher.TALK_TALK);
+        Optional<Brand> extractedBrand = Optional.of(brand); 
+        Item extracted = extractor.extract(detail, extractedBrand, Optional.<Series>absent());
+        Episode episode = (Episode) extracted;
+        
+        assertThat(episode.getTitle(), is("title"));
+        assertThat(episode.getEpisodeNumber(), is(2));
+    }
     
     @Test
     public void testSynopsesAreExtractedAsDescriptions() {
