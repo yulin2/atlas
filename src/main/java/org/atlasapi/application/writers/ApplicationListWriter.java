@@ -5,9 +5,12 @@ import java.io.IOException;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.application.sources.SourceIdCodec;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.EntityListWriter;
+import org.atlasapi.output.EntityWriter;
 import org.atlasapi.output.FieldWriter;
 import org.atlasapi.output.OutputContext;
+import org.atlasapi.output.writers.SourceWriter;
 import org.atlasapi.query.common.Resource;
 
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -16,6 +19,7 @@ public class ApplicationListWriter implements EntityListWriter<Application> {
 
     private final ApplicationCredentialsWriter credentialsWriter;
     private final EntityListWriter<ApplicationSources> sourcesWriter;
+    private final EntityWriter<Publisher> publisherWriter = SourceWriter.sourceWriter("publisher");
     private final NumberToShortStringCodec idCodec;
     
     public ApplicationListWriter(NumberToShortStringCodec idCodec,
@@ -34,6 +38,7 @@ public class ApplicationListWriter implements EntityListWriter<Application> {
         writer.writeField("created", entity.getCreated());
         writer.writeObject(credentialsWriter, entity.getCredentials(), ctxt);
         writer.writeObject(sourcesWriter, entity.getSources(), ctxt);
+        writer.writeObject(publisherWriter, entity.getPublisher(), ctxt);
         ctxt.endResource();
 
     }
