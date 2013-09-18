@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.text.MoreStrings;
 
@@ -61,9 +60,9 @@ public final class AttributeCoercers {
 
         @Override
         protected Publisher coerce(String input) {
-            Maybe<Publisher> publisher = sourceIdCodec.decode(input);
-            if (publisher.hasValue()) {
-                return publisher.requireValue();
+            Optional<Publisher> publisher = sourceIdCodec.decode(input);
+            if (publisher.isPresent()) {
+                return publisher.get();
             } else {
                 return null;
             }

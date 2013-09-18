@@ -1,10 +1,8 @@
 package org.atlasapi.application.www;
 
-import org.atlasapi.application.AdminHelper;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationAdminController;
 import org.atlasapi.application.ApplicationQueryExecutor;
-import org.atlasapi.application.ApplicationUpdater;
 import org.atlasapi.application.OldApplicationStore;
 import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceRequest;
@@ -103,8 +101,9 @@ public class ApplicationWebModule {
                 applicationQueryExecutor(),
                 new ApplicationQueryResultWriter(applicationListWriter()),
                 gsonModelReader(),
-                applicationUpdater(),
-                adminHelper());
+                idCodec,
+                sourceIdCodec,
+                deerApplicationsStore);
     }
     
     @Bean 
@@ -112,8 +111,9 @@ public class ApplicationWebModule {
         return new SourcesController(sourcesQueryParser(), 
                 soucesQueryExecutor(),
                 new SourcesQueryResultWriter(new SourceWithIdWriter(sourceIdCodec, "source", "sources")),
-                applicationUpdater(), 
-                adminHelper());
+                idCodec,
+                sourceIdCodec,
+                deerApplicationsStore);
     }
     
     @Bean
@@ -124,7 +124,8 @@ public class ApplicationWebModule {
                 new SourceRequestQueryExecutor(sourceRequestStore),
                 new SourceRequestsQueryResultsWriter(new SourceRequestListWriter(sourceIdCodec, idCodec)),
                 manager,
-                adminHelper());
+                idCodec,
+                sourceIdCodec);
     }
     
     private StandardQueryParser<Application> applicationQueryParser() {
@@ -148,17 +149,6 @@ public class ApplicationWebModule {
     @Bean
     protected EntityListWriter<Application> applicationListWriter() {
         return new ApplicationListWriter(idCodec, sourceIdCodec);
-    }
-    
-    @Bean 
-    protected ApplicationUpdater applicationUpdater() {
-        IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "application");
-        return new ApplicationUpdater(deerApplicationsStore,
-                idGenerator, adminHelper());
-    }
-    
-    @Bean AdminHelper adminHelper() {
-        return new AdminHelper(idCodec, sourceIdCodec);
     }
     
     public @Bean
@@ -194,5 +184,7 @@ public class ApplicationWebModule {
                     )),
                 idCodec, contextParser);
     }
+    
+   
 
 }

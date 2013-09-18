@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.util.List;
-
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationCredentials;
 import org.atlasapi.application.ApplicationSources;
@@ -22,18 +22,25 @@ import org.junit.Test;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.ids.IdGenerator;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class MongoApplicationStoreTest {
+    private final NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
     private DatabasedMongo adminMongo;
     private ApplicationStore store;
     
     @Before
     public void setup() {
+
+        IdGenerator idGenerator = mock(IdGenerator.class);
+        when(idGenerator.generateRaw()).thenReturn(5004L);
         adminMongo = MongoTestHelper.anEmptyTestDatabase();
-        store = new MongoApplicationStore(adminMongo);
+        store = new MongoApplicationStore(idGenerator, idCodec, adminMongo);
     }
     
     @Test
@@ -67,7 +74,7 @@ public class MongoApplicationStoreTest {
                 .withSources(sources)
                 .build();
         
-        store.store(application);
+        store.updateApplication(application);
         Optional<Application> retrieved = store.applicationFor(applicationId);
         if (!retrieved.isPresent()) {
             fail("No application");
@@ -93,6 +100,42 @@ public class MongoApplicationStoreTest {
         assertTrue(retrieved.get().getSources().getWrites().contains(Publisher.KANDL_TOPICS));
         assertTrue(retrieved.get().getSources().getWrites().contains(Publisher.DBPEDIA));
         assertFalse(retrieved.get().getSources().getWrites().contains(Publisher.BBC));
+    }
+    
+    @Test
+    public void testAddIdAndApiKey() {
+        final String title = "test application for api key";
+        final DateTime created = new DateTime(DateTimeZones.UTC)
+               .withDate(2013, 9, 13)
+               .withTime(15, 13, 0, 0);
+        final SourceReadEntry testEntry1 = new SourceReadEntry(Publisher.BBC, Publisher.BBC.getDefaultSourceStatus());
+        final SourceReadEntry testEntry2 = new SourceReadEntry(Publisher.NETFLIX, Publisher.NETFLIX.getDefaultSourceStatus());
+        List<SourceReadEntry> reads = ImmutableList.of(testEntry1, testEntry2);
+        List<Publisher> writes = ImmutableList.of(Publisher.KANDL_TOPICS, Publisher.DBPEDIA);
+        ApplicationSources sources = ApplicationSources.builder()
+                .withPrecedence(true)
+                .withReads(reads)
+                .withWrites(writes)
+                .build();
+        ApplicationCredentials credentials = ApplicationCredentials.builder()
+                .withApiKey("").build();
+        
+        Application application = Application.builder()
+                .withTitle(title)
+                .withCreated(created)
+                .withCredentials(credentials)
+                .withSources(sources)
+                .build();
+        store.createApplication(application);
+        //retrieve
+        Optional<Application> retrieved = store.applicationFor(Id.valueOf(5004));
+        if (!retrieved.isPresent()) {
+            fail("No application");
+            return;
+        }
+        assertEquals(Id.valueOf(5004), retrieved.get().getId());
+        assertEquals(title, retrieved.get().getTitle());
+        assertFalse(retrieved.get().getCredentials().getApiKey().isEmpty());
     }
     
     @After

@@ -6,14 +6,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.SourceStatus.SourceState;
+import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.output.NotAcceptableException;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
-import org.atlasapi.output.UnsupportedFormatException;
+import org.atlasapi.persistence.application.ApplicationStore;
 import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.QueryExecutor;
@@ -27,26 +27,30 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Optional;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 @Controller
 public class SourcesController {
-    private final ApplicationUpdater applicationUpdater;
-    private final AdminHelper adminHelper;
     private final StandardQueryParser<Publisher> queryParser;
     private final QueryExecutor<Publisher> queryExecutor;
     private final QueryResultWriter<Publisher> resultWriter;
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
+    private final NumberToShortStringCodec idCodec;
+    private final SourceIdCodec sourceIdCodec;
+    private final ApplicationStore applicationStore;
     
     public SourcesController(StandardQueryParser<Publisher> queryParser,
             QueryExecutor<Publisher> queryExecutor,
             QueryResultWriter<Publisher> resultWriter,
-            ApplicationUpdater applicationUpdater, 
-            AdminHelper adminHelper) {
+            NumberToShortStringCodec idCodec,
+            SourceIdCodec sourceIdCodec,
+            ApplicationStore applicationStore) {
         this.queryParser = queryParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
-        this.applicationUpdater = applicationUpdater;
-        this.adminHelper = adminHelper;
+        this.idCodec = idCodec;
+        this.sourceIdCodec = sourceIdCodec;
+        this.applicationStore = applicationStore;
     }
 
     /**
@@ -61,19 +65,19 @@ public class SourcesController {
             @PathVariable String sourceId,
             @RequestParam String id,
             @RequestParam String permission) throws NotFoundException {
-        Optional<Publisher> source = adminHelper.decodeSourceId(sourceId);
+        Optional<Publisher> source = sourceIdCodec.decode(sourceId);
         if (source.isPresent()) {
-            Id applicationId = adminHelper.decode(id);
+            Id applicationId = Id.valueOf(idCodec.decode(id));
             Permission permissionType = Permission.valueOf(permission.toUpperCase());
-            Application existing = applicationUpdater.applicationFor(applicationId);
+            Application existing = applicationStore.applicationFor(applicationId).get();
             Application modified = null;
             if (permissionType.equals(Permission.READ)) {
-                modified = applicationUpdater.enableSource(existing, source.get());
+                modified = existing.enableSource(source.get());
             } else if (permissionType.equals(Permission.WRITE)) {
-                modified = applicationUpdater.addWrites(existing, source.get());
+                modified = existing.addWrites(source.get());
             }
             if (modified != null) {
-                applicationUpdater.storeApplication(modified);
+                applicationStore.updateApplication(modified);
             }
         } else {
             throw new NotFoundException(null);
@@ -92,19 +96,19 @@ public class SourcesController {
             @PathVariable String sourceId,
             @RequestParam String id,
             @RequestParam String permission) throws QueryExecutionException {
-        Optional<Publisher> source = adminHelper.decodeSourceId(sourceId);
+        Optional<Publisher> source = sourceIdCodec.decode(sourceId);
         if (source.isPresent()) {
-            Id applicationId = adminHelper.decode(id);
+            Id applicationId = Id.valueOf(idCodec.decode(id));
             Permission permissionType = Permission.valueOf(permission.toUpperCase());
-            Application existing = applicationUpdater.applicationFor(applicationId);
+            Application existing = applicationStore.applicationFor(applicationId).get();
             Application modified = null;
             if (permissionType.equals(Permission.READ)) {
-                modified = applicationUpdater.disableSource(existing, source.get());
+                modified = existing.disableSource(source.get());
             } else if (permissionType.equals(Permission.WRITE)) {
-                modified = applicationUpdater.removeWrites(existing, source.get());
+                modified = existing.removeWrites(source.get());
             }
             if (modified != null) {
-                applicationUpdater.storeApplication(modified);
+                applicationStore.updateApplication(modified);
             }
         } else {
             throw new QueryExecutionException("No source with id " + sourceId);
@@ -124,13 +128,13 @@ public class SourcesController {
             @PathVariable String id,
             @RequestParam String state) throws QueryExecutionException {
         
-        Optional<Publisher> source = adminHelper.decodeSourceId(sourceId);
+        Optional<Publisher> source = sourceIdCodec.decode(sourceId);
         if (source.isPresent()) {
-            Id applicationId = adminHelper.decode(id);
+            Id applicationId = Id.valueOf(idCodec.decode(id));
             SourceState requestedState = SourceState.valueOf(state.toUpperCase());
-            Application existing = applicationUpdater.applicationFor(applicationId);
-            applicationUpdater.storeApplication(
-                    applicationUpdater.changeReadSourceState(existing, source.get(), requestedState));
+            Application existing = applicationStore.applicationFor(applicationId).get();
+            applicationStore.updateApplication(
+                    existing.changeReadSourceState(source.get(), requestedState));
         } else {
             throw new QueryExecutionException("No source with id " + sourceId);
         }
@@ -138,24 +142,10 @@ public class SourcesController {
     
     @RequestMapping({"/4.0/sources/{sid}.*", "/4.0/sources.*"})
     public void listSources(HttpServletRequest request,
-            HttpServletResponse response) throws QueryParseException, QueryExecutionException {
-        ResponseWriter writer = null;
-        try {
-            writer = writerResolver.writerFor(request, response);
-            Query<Publisher> sourcesQuery = queryParser.parse(request);
-            QueryResult<Publisher> queryResult = queryExecutor.execute(sourcesQuery);
-            resultWriter.write(queryResult, writer);
-            
-        } catch (UnsupportedFormatException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NotAcceptableException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
+            HttpServletResponse response) throws QueryParseException, QueryExecutionException, IOException {
+        ResponseWriter writer = writerResolver.writerFor(request, response);
+        Query<Publisher> sourcesQuery = queryParser.parse(request);
+        QueryResult<Publisher> queryResult = queryExecutor.execute(sourcesQuery);
+        resultWriter.write(queryResult, writer);
     }
 }
