@@ -7,6 +7,7 @@ import java.util.List;
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
+import org.elasticsearch.common.collect.Iterables;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import com.google.common.collect.ImmutableList;
@@ -157,6 +158,28 @@ public class ApplicationModificationTest {
               .build();
       Application modified = application.removeWrites(Publisher.KANDL_TOPICS);
       assertFalse(modified.getSources().getWrites().contains(Publisher.KANDL_TOPICS));
+  }
+  
+  @Test
+  public void testPrecedence() {
+      ApplicationCredentials credentials = ApplicationCredentials.builder()
+              .withApiKey("abc123").build();
+      List<SourceReadEntry> reads = ImmutableList.of(testEntry1, testEntry2);
+      List<Publisher> writes = ImmutableList.of(Publisher.KANDL_TOPICS, Publisher.DBPEDIA);
+      ApplicationSources sources = ApplicationSources.builder()
+              .withPrecedence(true)
+              .withReads(reads)
+              .withWrites(writes)
+              .build();
+      Application application = Application.builder()
+              .withId(Id.valueOf(5000))
+              .withSlug(slug)
+              .withTitle(title)
+              .withCreated(created)
+              .withCredentials(credentials)
+              .withSources(sources)
+              .build();
+      assertEquals(1, application.getSources().publisherPrecedenceOrdering().compare(Publisher.NETFLIX, Publisher.BBC));
   }
   
   @Test
