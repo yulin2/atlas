@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.talktalk;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
@@ -11,6 +12,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkVodListCallback;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
@@ -35,22 +37,25 @@ public class TalkTalkVodContentListUpdateTask extends ScheduledTask {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final TalkTalkClient client;
-    private final ContentGroupWriter writer;
-    private final ContentGroupResolver resolver;
-    private final TalkTalkVodEntityProcessor<List<Content>> processor;
+    private final ContentGroupWriter groupWriter;
+    private final ContentGroupResolver groupResolver;
+    private final ContentResolver contentResolver;
 
-    private GroupType type;
-    private String identifier;
+    private final GroupType type;
+    private final String identifier;
 
+    private final TalkTalkUriCompiler uriCompiler = new TalkTalkUriCompiler();
+    private final AtomicReference<UpdateProgress> progress
+        = new AtomicReference<UpdateProgress>();
 
     public TalkTalkVodContentListUpdateTask(TalkTalkClient talkTalkClient,
             ContentGroupResolver resolver, ContentGroupWriter writer,
-            TalkTalkVodEntityProcessor<List<Content>> entityProcessor,
+            ContentResolver contentResolver,
             GroupType type, String identifier) {
         this.client = checkNotNull(talkTalkClient);
-        this.resolver = checkNotNull(resolver);
-        this.writer = checkNotNull(writer);
-        this.processor = checkNotNull(entityProcessor);
+        this.groupResolver = checkNotNull(resolver);
+        this.groupWriter = checkNotNull(writer);
+        this.contentResolver = checkNotNull(contentResolver);
         this.type = type;
         this.identifier = identifier;
     }
@@ -59,10 +64,10 @@ public class TalkTalkVodContentListUpdateTask extends ScheduledTask {
     protected void runTask() {
         try {
             
+            progress.set(UpdateProgress.START);
             ContentGroup group = resolveOrCreateContentGroup();
             List<ChildRef> refs = client.processVodList(type, identifier, new TalkTalkVodListCallback<List<ChildRef>>() {
 
-                private UpdateProgress progress = UpdateProgress.START;
                 private ImmutableList.Builder<ChildRef> refs = ImmutableList.builder();
 
                 @Override
@@ -73,34 +78,42 @@ public class TalkTalkVodContentListUpdateTask extends ScheduledTask {
                 @Override
                 public void process(VODEntityType entity) {
                     log.debug("processing entity {}", entity.getId());
-                    List<Content> contentList = processor.processEntity(entity);
-                    if (!contentList.isEmpty()) {
-                        // This is pretty grim as it gives semantics to
-                        // the first element of the list extracted,
-                        // hence a ContentHierarchy is a better result TODO
-                        Content content = contentList.get(0);
+                    String uri = uriCompiler.uriFor(entity);
+                    Content content = resolve(uri);
+                    if (content != null) {
                         refs.add(content.childRef());
-                        progress = progress.reduce(UpdateProgress.SUCCESS);
+                        progress.set(progress.get().reduce(UpdateProgress.SUCCESS));
                     } else {
-                        progress = progress.reduce(UpdateProgress.FAILURE);
+                        progress.set(progress.get().reduce(UpdateProgress.FAILURE));
                     }
                     reportStatus(progress.toString());
                 }
             });
             
             group.setContents(refs);
-            writer.createOrUpdate(group);
-            
+            groupWriter.createOrUpdate(group);
+            if (progress.get().hasFailures()) {
+                throw new RuntimeException(progress.get().toString());
+            }
         } catch (TalkTalkException tte) {
             log.error("content update failed", tte);
             // ensure task is marked failed
             throw new RuntimeException(tte);
         }
     }
+    
+    private Content resolve(String uri) {
+        ResolvedContent resolved = contentResolver.findByCanonicalUris(ImmutableList.of(uri));
+        Maybe<Identified> possibleContent = resolved.get(uri);
+        if (possibleContent.hasValue() && possibleContent.requireValue() instanceof Content) {
+            return (Content) possibleContent.requireValue();
+        }
+        return null;
+    }
 
     private ContentGroup resolveOrCreateContentGroup() {
         String uri = String.format("%s/%s/%s", TALK_TALK_URI_PART, type.toString().toLowerCase(), identifier);
-        ResolvedContent resolvedContent = resolver.findByCanonicalUris(ImmutableList.of(uri));
+        ResolvedContent resolvedContent = groupResolver.findByCanonicalUris(ImmutableList.of(uri));
         Maybe<Identified> possibleGroup = resolvedContent.get(uri);
         return possibleGroup.hasValue() ? (ContentGroup) resolvedContent.get(uri).requireValue() 
                                         : new ContentGroup(uri, Publisher.TALK_TALK);

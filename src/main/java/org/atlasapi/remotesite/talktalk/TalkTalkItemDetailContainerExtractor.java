@@ -13,30 +13,32 @@ import org.atlasapi.remotesite.talktalk.vod.bindings.ItemDetailType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 
 /**
  * Creates {@link Container}s from {@link ItemDetailType}s.
  */
 public class TalkTalkItemDetailContainerExtractor {
 
-    private final String BRAND_URI_PATTERN = "http://talktalk.net/brands/%s";
-    private final String SERIES_URI_PATTERN = "http://talktalk.net/series/%s";
+    //Should match e.g: No Ordinary Family S1
+    private static final Pattern NUMBERED_SERIES_TITLE = Pattern.compile("^(.*)\\s*S(\\d+)\\s*$");
     
     private static final TalkTalkDescriptionExtractor descriptionExtractor = new TalkTalkDescriptionExtractor();
     private static final TalkTalkImagesExtractor imagesExtractor = new TalkTalkImagesExtractor();
     private static final TalkTalkGenresExtractor genresExtractor = new TalkTalkGenresExtractor();
+    private static final TalkTalkUriCompiler uriCompiler = new TalkTalkUriCompiler();
     
     public Brand extractBrand(ItemDetailType detail) {
         checkArgument(ItemTypeType.BRAND.equals(detail.getItemType()), 
                 "Can't extract Brand from non-BRAND Item type");
         Brand brand = new Brand();
-        brand.setCanonicalUri(String.format(BRAND_URI_PATTERN, detail.getId()));
+        brand.setCanonicalUri(uriCompiler.uriFor(detail));
+        brand.setTitle(detail.getTitle());
         return setCommonContainerFields(detail, brand);
     }
 
     private <C extends Container> C setCommonContainerFields(ItemDetailType detail, C container) {
         container.setPublisher(Publisher.TALK_TALK);
-        container.setTitle(detail.getTitle());
         
         container = descriptionExtractor.extractDescriptions(container, detail.getSynopsisList());
         container.setImages(imagesExtractor.extract(detail));
@@ -48,23 +50,34 @@ public class TalkTalkItemDetailContainerExtractor {
         checkArgument(ItemTypeType.SERIES.equals(detail.getItemType()), 
                 "Can't extract Series from non-SERIES Item type");
         Series series = new Series();
-        series.setCanonicalUri(String.format(SERIES_URI_PATTERN, detail.getId()));
+        series.setCanonicalUri(uriCompiler.uriFor(detail));
         if (brand.isPresent()) {
             series.setParent(brand.get());
         }
+
+        series.setTitle(removeNumberSuffix(detail.getTitle()));
         return setCommonContainerFields(detail, series)
                 .withSeriesNumber(extractSeriesNumber(detail));
+    }
+
+    private String removeNumberSuffix(String title) {
+        if (Strings.isNullOrEmpty(title)) {
+            return title;
+        }
+        Matcher matcher = NUMBERED_SERIES_TITLE.matcher(title);
+        if (matcher.matches()) {
+            return matcher.group(1).trim();
+        }
+        return title;
     }
 
     private Integer extractSeriesNumber(ItemDetailType entity) {
         if (entity.getTitle() == null) {
             return null;
         }
-        //Should match e.g: No Ordinary Family S1
-        Pattern seriesNumberPattern = Pattern.compile(".*S(\\d+)$");
-        Matcher matcher = seriesNumberPattern.matcher(entity.getTitle());
+        Matcher matcher = NUMBERED_SERIES_TITLE.matcher(entity.getTitle());
         if (matcher.matches()) {
-            return Integer.parseInt(matcher.group(1));
+            return Integer.parseInt(matcher.group(2));
         }
         return null;
     }
