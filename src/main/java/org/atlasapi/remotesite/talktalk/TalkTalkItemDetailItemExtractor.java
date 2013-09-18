@@ -157,8 +157,11 @@ public class TalkTalkItemDetailItemExtractor {
         return policy;
     }
 
-    private DateTime toDateTime(XMLGregorianCalendar start) {
-        return new DateTime(start.toGregorianCalendar(), ISOChronology.getInstance())
+    private DateTime toDateTime(XMLGregorianCalendar xmlGc) {
+        if (xmlGc == null) {
+            return null;
+        }
+        return new DateTime(xmlGc.toGregorianCalendar(), ISOChronology.getInstance())
             .toDateTime(DateTimeZones.UTC);
     }
 
