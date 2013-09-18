@@ -32,6 +32,7 @@ import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.intl.Countries;
@@ -45,6 +46,7 @@ import com.metabroadcast.common.time.DateTimeZones;
  */
 public class TalkTalkItemDetailItemExtractor {
 
+    private static final Pattern NUMBERED_EPISODE_TITLE = Pattern.compile("^Ep\\s*(\\d+)\\s*:\\s*(.*)");
     private static final String CANONICAL_URI_PATTERN = "http://talktalk.net/episodes/%s";
     
     private static final Map<ProductTypeType, RevenueContract> revenueContractLookup =  ImmutableMap.of(
@@ -94,8 +96,7 @@ public class TalkTalkItemDetailItemExtractor {
         if (title == null) {
             return null;
         }
-        Pattern titleEpisodeNumber = Pattern.compile("^Ep(\\d+):.*");
-        Matcher matcher = titleEpisodeNumber.matcher(title);
+        Matcher matcher = NUMBERED_EPISODE_TITLE.matcher(title);
         if (matcher.matches()) {
             return Integer.parseInt(matcher.group(1));
         }
@@ -109,13 +110,24 @@ public class TalkTalkItemDetailItemExtractor {
     private <I extends Item> I setCommonItemFields(I item, ItemDetailType detail) {
         item.setCanonicalUri(String.format(CANONICAL_URI_PATTERN, detail.getId()));
         item.setPublisher(Publisher.TALK_TALK);
-        item.setTitle(detail.getTitle());
+        item.setTitle(removeNumberPrefix(detail.getTitle()));
         item = descriptionExtractor.extractDescriptions(item, detail.getSynopsisList());
         item.setCertificates(extractCertificates(detail));
         item.setGenres(genresExtractor.extract(detail));
         item.setImages(imagesExtractor.extract(detail));
         item.setVersions(extractVersions(detail));
         return item;
+    }
+
+    private String removeNumberPrefix(String title) {
+        if (Strings.isNullOrEmpty(title)) {
+            return title;
+        }
+        Matcher matcher = NUMBERED_EPISODE_TITLE.matcher(title);
+        if (matcher.matches()) {
+            return matcher.group(2).trim();
+        }
+        return title;
     }
 
     private Set<Version> extractVersions(ItemDetailType detail) {
