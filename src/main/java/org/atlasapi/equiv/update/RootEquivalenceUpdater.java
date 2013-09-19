@@ -4,9 +4,12 @@ import static org.atlasapi.media.entity.ChildRef.TO_URI;
 
 import java.util.List;
 
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.SeriesRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.slf4j.Logger;
@@ -46,12 +49,24 @@ public class RootEquivalenceUpdater implements EquivalenceUpdater<Content> {
         for (Item child : childrenOf(container)) {
             updateContentEquivalence(child);
         }
+        if (container instanceof Brand) {
+            for (Series series : seriesOf((Brand) container)) {
+                updateContentEquivalence(series);
+            }
+        }
         updateContentEquivalence(container);
     }
 
-    protected Iterable<Item> childrenOf(Container content) {
+    private Iterable<Series> seriesOf(Brand brand) {
+        List<String> childUris = Lists.transform(brand.getSeriesRefs(), SeriesRef.TO_URI);
+        ResolvedContent children = contentResolver.findByCanonicalUris(childUris);
+        return Iterables.filter(children.getAllResolvedResults(), Series.class);
+    }
+
+    private Iterable<Item> childrenOf(Container content) {
         List<String> childUris = Lists.transform(content.getChildRefs(), TO_URI);
         ResolvedContent children = contentResolver.findByCanonicalUris(childUris);
         return Iterables.filter(children.getAllResolvedResults(), Item.class);
     }
+    
 }
