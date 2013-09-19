@@ -2,6 +2,7 @@ package org.atlasapi.output.simple;
 
 import static com.metabroadcast.common.base.MorePredicates.transformingPredicate;
 
+import java.math.BigInteger;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
@@ -10,14 +11,18 @@ import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.SeriesRef;
+import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
+import org.atlasapi.media.entity.simple.Identified;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.entity.simple.ContentIdentifier.SeriesIdentifier;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.AvailableItemsResolver;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingItemsResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
@@ -38,6 +43,7 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     private final AvailableItemsResolver availableItemsResolver;
     private final UpcomingItemsResolver upcomingItemsResolver;
     private final RecentlyBroadcastChildrenResolver recentlyBroadcastResolver;
+    private final ContainerSummaryResolver containerSummaryResolver;
     private final Function<ChildRef, ContentIdentifier> toContentIdentifier = new Function<ChildRef, ContentIdentifier>() {
 
         @Override
@@ -57,12 +63,13 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, String localHostName, 
             ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, AvailableItemsResolver availableResovler, 
             UpcomingItemsResolver upcomingResolver, ProductResolver productResolver, RecentlyBroadcastChildrenResolver recentChildren,
-            ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver) {
+            ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver, ContainerSummaryResolver containerSummaryResolver) {
         super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, peopleResolver, upcomingResolver, availableResovler);
         this.itemSimplifier = itemSimplifier;
         this.availableItemsResolver = availableResovler;
         this.upcomingItemsResolver = upcomingResolver;
         this.recentlyBroadcastResolver = recentChildren;
+        this.containerSummaryResolver = containerSummaryResolver;
     }
 
     @Override
@@ -103,10 +110,31 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         if (annotations.contains(Annotation.RECENTLY_BROADCAST)) {
             simplePlaylist.setRecentContent(filterAndTransformChildRefs(fullPlayList, recentlyBroadcastFilter(fullPlayList)));
         }
-
+        
+        if (fullPlayList instanceof Series) {
+            Series series = (Series) fullPlayList;
+            if (series.getParent() != null) {
+                simplePlaylist.setBrandSummary(summaryFromResolved(series.getParent(), annotations));
+            }
+        }
+        
         return simplePlaylist;
     }
+    
+    private BrandSummary summaryFromResolved(ParentRef container, Set<Annotation> annotations) {
+        BrandSummary baseSummary = new BrandSummary();
+        setIdAndUriFromParentRef(container, baseSummary);
 
+        return annotations.contains(Annotation.BRAND_SUMMARY) ? containerSummaryResolver.summarizeTopLevelContainer(container).or(baseSummary)
+                                                              : baseSummary;
+    }
+
+    private void setIdAndUriFromParentRef(ParentRef parentRef, Identified summary) {
+        summary.setUri(parentRef.getUri());
+        Long id = parentRef.getId();
+        summary.setId(id != null ? idCodec.encode(BigInteger.valueOf(id)) : null);
+    }
+    
     private Iterable<ContentIdentifier> filterAndTransformChildRefs(Container fullPlayList, Predicate<ChildRef> filter) {
         return Iterables.transform(Iterables.filter(fullPlayList.getChildRefs(), filter), toContentIdentifier);
     }

@@ -276,7 +276,9 @@ public class QueryWebModule {
     @Bean
     ContainerModelSimplifier containerSimplifier() {
         RecentlyBroadcastChildrenResolver recentChildren = new MongoRecentlyBroadcastChildrenResolver(mongo);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableItemsResolver(), upcomingItemsResolver(), productResolver, recentChildren, imageSimplifier(),peopleQueryResolver);
+        NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
+        ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo, idCodec);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableItemsResolver(), upcomingItemsResolver(), productResolver, recentChildren, imageSimplifier(),peopleQueryResolver,containerSummary);
         containerSimplier.exposeIds(Boolean.valueOf(exposeIds));
         return containerSimplier;
     }
