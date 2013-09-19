@@ -38,7 +38,8 @@ public class ContentModelSimplifierTest {
         Mockito.mock(ProductResolver.class), 
         Mockito.mock(RecentlyBroadcastChildrenResolver.class), 
         Mockito.mock(ImageSimplifier.class),
-        Mockito.mock(PeopleQueryResolver.class)
+        Mockito.mock(PeopleQueryResolver.class),
+        Mockito.mock(ContainerSummaryResolver.class)
     );
     
     private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(

@@ -92,7 +92,8 @@ public class FullToSimpleModelTranslatorTest {
                     productResolver, 
                     recentChildren, 
                     imageSimplifier,
-                    peopleResolver
+                    peopleResolver,
+                    containerSummaryResolver
             ), 
             topicSimplifier, 
             productSimplifier, 
