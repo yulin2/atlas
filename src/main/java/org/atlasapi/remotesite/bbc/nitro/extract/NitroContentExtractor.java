@@ -98,7 +98,7 @@ public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
      * 
      * @param source
      *            - the source data
-     * @return - the image of the source data, or {@code null} if t
+     * @return - the image of the source data, or {@code null} if there is none.
      */
     protected abstract @Nullable com.metabroadcast.atlas.glycerin.model.Image extractImage(SOURCE source);
     
