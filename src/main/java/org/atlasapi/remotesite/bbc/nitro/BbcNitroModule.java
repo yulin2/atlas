@@ -30,6 +30,7 @@ import com.metabroadcast.atlas.glycerin.XmlGlycerin;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.time.SystemClock;
 
 @Configuration
 public class BbcNitroModule {
@@ -66,7 +67,8 @@ public class BbcNitroModule {
 
     @Bean
     ChannelDayProcessor nitroChannelDayProcessor() {
-        return new NitroScheduleDayUpdater(scheduleWriter, new ScheduleResolverBroadcastTrimmer(Publisher.BBC_NITRO, scheduleResolver, contentResolver, contentWriter), nitroBroadcastHandler(), glycerin());
+        ScheduleResolverBroadcastTrimmer scheduleTrimmer = new ScheduleResolverBroadcastTrimmer(Publisher.BBC_NITRO, scheduleResolver, contentResolver, contentWriter);
+        return new NitroScheduleDayUpdater(scheduleWriter, scheduleTrimmer, nitroBroadcastHandler(), glycerin());
     }
 
     @Bean
@@ -83,7 +85,7 @@ public class BbcNitroModule {
     @Bean
     NitroBroadcastHandler<ItemRefAndBroadcast> nitroBroadcastHandler() {
         return new ContentUpdatingNitroBroadcastHandler(contentResolver, contentWriter, 
-                new GlycerinNitroContentAdapter(glycerin()));
+                new GlycerinNitroContentAdapter(glycerin()), new SystemClock());
     }
 
     private Supplier<Range<LocalDate>> dayRangeSupplier(int back, int forward) {
