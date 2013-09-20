@@ -53,7 +53,6 @@ public class C4Module {
 	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
 	private @Value("${c4.lakeviewavailability.key}") String lakeviewAvailabilityFeedKey;
-	private @Value("${c4.lakeviewavailability.apiroot}") String lakeviewApiRoot;
 
 	private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
 	private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
@@ -93,7 +92,7 @@ public class C4Module {
 	}
     
     @Bean C4LakeviewOnDemandFetcher c4LakeviewOnDemandFetcher() {
-    	return new C4LakeviewOnDemandFetcher(c4XBoxAtomFetcher(), lakeviewApiRoot, log); 
+    	return new C4LakeviewOnDemandFetcher(c4XBoxAtomFetcher(), lakeviewAvailabilityFeedKey, log); 
     }
 
 	protected @Bean RemoteSiteClient<Feed> c4AtomFetcher() {
@@ -119,7 +118,6 @@ public class C4Module {
         .withConnectionTimeout(10, TimeUnit.SECONDS)
         .withAcceptHeader(MimeType.TEXT_HTML)
         .withRetries(3)
-        .withHeader("X-C4-API-Key", lakeviewAvailabilityFeedKey)
     .build(), 4);
 	}
 	
