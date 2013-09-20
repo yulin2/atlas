@@ -26,11 +26,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.collect.OptionalMap;
 
-public class CandidateContainerEquivalenceGenerator implements EquivalenceGenerator<Item> {
+/**
+ * Generates equivalences for an Item based on the children of the equivalence
+ * candidates of the Item's container.
+ */
+public class ContainerCandidatesItemEquivalenceGenerator implements EquivalenceGenerator<Item> {
 
     private final ContentResolver contentResolver;
     private final EquivalenceSummaryStore equivSummaryStore;
-    private final Function<Container, Iterable<Item>> TO_CHILD_REFS = new Function<Container, Iterable<Item>>() {
+    private final Function<Container, Iterable<Item>> TO_ITEMS = new Function<Container, Iterable<Item>>() {
         @Override
         public Iterable<Item> apply(@Nullable Container input) {
             Iterable<String> childUris = Iterables.transform(input.getChildRefs(), ChildRef.TO_URI);
@@ -39,7 +43,7 @@ public class CandidateContainerEquivalenceGenerator implements EquivalenceGenera
         }
     };
 
-    public CandidateContainerEquivalenceGenerator(ContentResolver contentResolver, EquivalenceSummaryStore equivSummaryStore) {
+    public ContainerCandidatesItemEquivalenceGenerator(ContentResolver contentResolver, EquivalenceSummaryStore equivSummaryStore) {
         this.contentResolver = contentResolver;
         this.equivSummaryStore = equivSummaryStore;
     }
@@ -55,7 +59,7 @@ public class CandidateContainerEquivalenceGenerator implements EquivalenceGenera
             Optional<EquivalenceSummary> optional = containerSummary.get(parentUri);
             if (optional.isPresent()) {
                 EquivalenceSummary summary = optional.get();
-                for (Item child : childrenOf(summary.getCandidates(), result)) {
+                for (Item child : childrenOf(summary.getCandidates())) {
                     result.addEquivalent(child, Score.NULL_SCORE);
                 }
             }
@@ -64,14 +68,18 @@ public class CandidateContainerEquivalenceGenerator implements EquivalenceGenera
         return result.build();
     }
 
-    private Iterable<Item> childrenOf(ImmutableList<String> candidates, Builder<Item> result) {
+    private Iterable<Item> childrenOf(ImmutableList<String> candidates) {
         List<Identified> resolvedContent = contentResolver.findByCanonicalUris(candidates).getAllResolvedResults();
         Iterable<Container> resolvedContainers = Iterables.filter(resolvedContent, Container.class);
-        return Iterables.concat(Iterables.transform(resolvedContainers, TO_CHILD_REFS));
+        return Iterables.concat(Iterables.transform(resolvedContainers, TO_ITEMS));
     }
 
     private OptionalMap<String, EquivalenceSummary> parentSummary(String parentUri) {
         return equivSummaryStore.summariesForUris(ImmutableSet.of(parentUri));
     }
-
+    
+    @Override
+    public String toString() {
+        return "Container's candidates generator";
+    }
 }

@@ -17,7 +17,13 @@ public abstract class Score {
     
     public abstract Score add(Score other);
     
+    @Deprecated //use nullScore();
     public static final Score NULL_SCORE = new NullScore();
+    
+    public static final Score nullScore() {
+        return NULL_SCORE;
+    }
+    
     public static final Score ONE = Score.valueOf(1.0);
     public static final Score ZERO = Score.valueOf(0.0);
     
