@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.channel4;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,29 +18,28 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.jdom.Element;
 
-import com.google.common.base.Function;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import com.google.common.collect.MapMaker;
 import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
-import java.util.concurrent.ExecutionException;
 
 public class C4LakeviewOnDemandFetcher {
 
+    private static final String API_ROOT = "http://api.channel4.com/pmlsd/";
+    private static final String PLATFORM = "p06";
     private static final String DC_RELATED_ENTRY_ID = "dc:relation.RelatedEntryId";
     private static final Pattern RELATED_ENTRY_PATTERN = Pattern.compile("^tag:.*(channel4.com,2009:)(.*)");
     private static final Pattern BRAND_PATTERN = Pattern.compile("^http://www.channel4.com/programmes/(.*?)/episode-guide.*");
     private RemoteSiteClient<Feed> atomClient;
     private final AdapterLog log;
     private LoadingCache<String, Map<String, Location>> locations;
-    private String apiRoot;
+    private final String apiKey;
 
     /**
      * Caching lakeview ondemand fetcher
@@ -49,10 +49,10 @@ public class C4LakeviewOnDemandFetcher {
      * include trailing forwardslash.
      * @param log
      */
-    public C4LakeviewOnDemandFetcher(RemoteSiteClient<Feed> atomClient, String apiRoot, AdapterLog log) {
+    public C4LakeviewOnDemandFetcher(RemoteSiteClient<Feed> atomClient, String apiKey, AdapterLog log) {
         this.atomClient = atomClient;
+        this.apiKey = apiKey;
         this.log = log;
-        this.apiRoot = apiRoot;
         this.locations = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).build(new CacheLoader<String, Map<String, Location>>() {
 
             @Override
@@ -78,10 +78,11 @@ public class C4LakeviewOnDemandFetcher {
 
     private Map<String, Location> getBrandLocations(String brandName) {
         try {
-            String uri = String.format("%s%s/4od.atom", apiRoot, brandName);
+            String uri = String.format("%s%s/4od.atom?platform=%s&apiKey=%s", API_ROOT, brandName, 
+                    PLATFORM, apiKey);
             return extractLocations(atomClient.get(uri));
         } catch (HttpStatusCodeException e) {
-            if (HttpServletResponse.SC_NOT_FOUND == e.getStatusCode()) {
+            if (e.getStatusCode() == HttpServletResponse.SC_NOT_FOUND) {
                 return ImmutableMap.<String, Location>builder().build();
             } else {
                 throw new RuntimeException(e);
