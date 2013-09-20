@@ -62,6 +62,7 @@ import org.atlasapi.equiv.results.extractors.MusicEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
 import org.atlasapi.equiv.results.filters.AlwaysTrueFilter;
 import org.atlasapi.equiv.results.filters.ConjunctiveFilter;
+import org.atlasapi.equiv.results.filters.ContainerHierarchyFilter;
 import org.atlasapi.equiv.results.filters.EquivalenceFilter;
 import org.atlasapi.equiv.results.filters.MediaTypeFilter;
 import org.atlasapi.equiv.results.filters.MinimumScoreFilter;
@@ -130,12 +131,16 @@ public class EquivModule {
     }
     
     private <T extends Content> EquivalenceFilter<T> standardFilter() {
-        return ConjunctiveFilter.valueOf(ImmutableList.of(
+        return standardFilter(ImmutableList.<EquivalenceFilter<T>>of());
+    }
+
+    private <T extends Content> EquivalenceFilter<T> standardFilter(Iterable<EquivalenceFilter<T>> additional) {
+        return ConjunctiveFilter.valueOf(Iterables.concat(ImmutableList.of(
             new MinimumScoreFilter<T>(0.2),
             new MediaTypeFilter<T>(),
             new SpecializationFilter<T>(),
             new PublisherFilter<T>()
-        ));
+        ), additional));
     }
     
     private EquivalenceUpdater<Item> standardItemUpdater(Set<Publisher> acceptablePublishers) {
@@ -263,7 +268,9 @@ public class EquivModule {
                     .withGenerator(new ContainerCandidatesContainerEquivalenceGenerator(contentResolver, equivSummaryStore))
                     .withScorer(new SequenceContainerScorer())
                     .withCombiner(new NullScoreAwareAveragingCombiner<Container>())
-                    .withFilter(this.<Container>standardFilter())
+                    .withFilter(this.<Container>standardFilter(ImmutableList.<EquivalenceFilter<Container>>of(
+                        new ContainerHierarchyFilter()
+                    )))
                     .withExtractor(PercentThresholdEquivalenceExtractor.<Container> moreThanPercent(90))
                     .withHandler(new BroadcastingEquivalenceResultHandler<Container>(ImmutableList.of(
                         new LookupWritingEquivalenceHandler<Container>(generatedTransitiveLookupWriter(lookupStore), acceptablePublishers),
