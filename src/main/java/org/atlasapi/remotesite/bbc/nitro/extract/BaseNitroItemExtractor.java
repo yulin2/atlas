@@ -23,10 +23,10 @@ import com.metabroadcast.atlas.glycerin.model.Programme;
  * {@link NitroItemSource}.
  * 
  * @param <SOURCE> - the type of {@link Programme}.
- * @param <CONTENT> - the {@link Item} type extracted.
+ * @param <ITEM> - the {@link Item} type extracted.
  */
-public abstract class BaseNitroItemExtractor<SOURCE, CONTENT extends Item>
-    extends NitroContentExtractor<NitroItemSource<SOURCE>, CONTENT> {
+public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
+    extends NitroContentExtractor<NitroItemSource<SOURCE>, ITEM> {
 
     private final NitroBroadcastExtractor broadcastExtractor
         = new NitroBroadcastExtractor();
@@ -34,7 +34,7 @@ public abstract class BaseNitroItemExtractor<SOURCE, CONTENT extends Item>
         = new NitroAvailabilityExtractor();
     
     @Override
-    protected void extractAdditionalFields(NitroItemSource<SOURCE> source, CONTENT content) {
+    protected final void extractAdditionalFields(NitroItemSource<SOURCE> source, ITEM item) {
         ImmutableSetMultimap<String, Broadcast> broadcasts = extractBroadcasts(source.getBroadcasts());
         ImmutableSetMultimap<String, Encoding> encodings = extractEncodings(source.getAvailabilities());
         
@@ -45,7 +45,19 @@ public abstract class BaseNitroItemExtractor<SOURCE, CONTENT extends Item>
             version.setBroadcasts(broadcasts.get(versionPid));
             version.setManifestedAs(encodings.get(versionPid));
         }
-        content.setVersions(versions.build());
+        item.setVersions(versions.build());
+        extractAdditionalItemFields(source, item);
+    }
+
+    /**
+     * Concrete implementations can override this method to perform additional
+     * configuration of the extracted content from the source.
+     * 
+     * @param source - the source data.
+     * @param item - the extracted item.
+     */
+    protected void extractAdditionalItemFields(NitroItemSource<SOURCE> source, ITEM item) {
+        
     }
 
     private ImmutableSetMultimap<String, Encoding> extractEncodings(List<Availability> availabilities) {
