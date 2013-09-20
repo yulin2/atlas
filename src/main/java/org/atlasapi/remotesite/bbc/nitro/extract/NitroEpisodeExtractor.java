@@ -56,7 +56,7 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
     }
 
     @Override
-    protected void extractAdditionalFields(NitroItemSource<Episode> source, Item content) {
+    protected void extractAdditionalItemFields(NitroItemSource<Episode> source, Item content) {
         Episode episode = source.getProgramme();
         if (content.getTitle() == null) {
             content.setTitle(episode.getPresentationTitle());
