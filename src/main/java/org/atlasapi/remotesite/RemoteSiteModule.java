@@ -38,13 +38,13 @@ import org.springframework.context.annotation.Import;
 import com.google.common.collect.Lists;
 
 @Configuration
-@Import({HuluAdapterModule.class, ArchiveOrgAdapterModule.class, FacebookAdapterModule.class, YouTubeAdapterModule.class})
+@Import({HuluAdapterModule.class, ArchiveOrgAdapterModule.class, FacebookAdapterModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
 	
 	private @Autowired Collection<SiteSpecificAdapter<? extends Identified>> remoteAdapters;
-	private @Autowired YouTubeAdapterModule youTubeAdapterModule;
+//	private @Autowired YouTubeAdapterModule youTubeAdapterModule;
 
 	public @Bean Fetcher<Identified> remoteFetcher() {
 		
@@ -57,7 +57,7 @@ public class RemoteSiteModule {
 		 adapters.add(new TedTalkAdapter());
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
-         adapters.add(youTubeAdapterModule.youTubeAdapter());
+//         adapters.add(youTubeAdapterModule.youTubeAdapter());
 
 		 
 		 adapters.add(new VimeoAdapter());

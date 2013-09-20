@@ -31,13 +31,12 @@ import org.atlasapi.remotesite.bbc.BbcUriCanonicaliser;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
 import org.atlasapi.remotesite.facebook.FacebookCanonicaliser;
-import org.atlasapi.remotesite.hulu.WritingHuluBrandAdapter;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter;
+import org.atlasapi.remotesite.hulu.WritingHuluBrandAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.tinyurl.SavingShortUrlCanonicaliser;
 import org.atlasapi.remotesite.tinyurl.ShortenedUrlCanonicaliser;
 import org.atlasapi.remotesite.youtube.YouTubeFeedCanonicaliser;
-import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -88,7 +87,7 @@ public class AtlasFetchModule {
 		public @Bean List<Canonicaliser> canonicalisers() {
 			List<Canonicaliser> canonicalisers = Lists.newArrayList();
 			canonicalisers.add(new BbcUriCanonicaliser());
-			canonicalisers.add(new YoutubeUriCanonicaliser());
+			//canonicalisers.add(new YoutubeUriCanonicaliser());
 			canonicalisers.add(new YouTubeFeedCanonicaliser());
 			canonicalisers.add(new FacebookCanonicaliser());
 			canonicalisers.add(new TedTalkAdapter.TedTalkCanonicaliser());
