@@ -11,6 +11,7 @@ import org.atlasapi.persistence.system.AToZUriSource;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
@@ -94,7 +95,8 @@ public class C4AtoZAtomContentLoader implements Runnable {
 	}
 
 	private void loadAtoZ() {
-		for (String letter : new AToZUriSource("", "", true)) {
+		ImmutableList<String> aToZ = ImmutableList.copyOf(new AToZUriSource("", "", true));
+        for (String letter : aToZ.reverse()) {
 			try {
 				loadAndSaveByLetter(letter);
 			} catch (Exception e) {
