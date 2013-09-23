@@ -40,7 +40,9 @@ import com.metabroadcast.common.time.DayRangeGenerator;
 @Configuration
 public class C4Module {
     
+
     private static final String ATOZ_BASE = "https://pmlsc.channel4.com/pmlsd/";
+    private static final String P06_PLATFORM = "p06";
 
 	private final static RepetitionRule BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
 	private final static RepetitionRule XBOX_UPDATE_TIME = RepetitionRules.daily(new LocalTime(1, 0, 0));
@@ -76,15 +78,15 @@ public class C4Module {
 	@Bean public C4EpgChannelDayUpdater c4EpgChannelDayUpdater() {
 	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
 	    return new C4EpgChannelDayUpdater(new C4EpgClient(httpsClient()), lastUpdatedSettingContentWriter(),
-                contentResolver, c4BrandFetcher(Optional.<Platform>absent()), trimmer, log);
+                contentResolver, c4BrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()), trimmer, log);
 	}
 	
 	@Bean protected C4AtoZAtomContentUpdateTask pcC4AtozUpdater() {
-		return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.<Platform>absent()));
+		return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()));
 	}
 	
 	@Bean protected C4AtoZAtomContentUpdateTask xboxC4AtozUpdater() {
-	    return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, Optional.of(Platform.XBOX), c4BrandFetcher(Optional.of(Platform.XBOX)));
+	    return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, Optional.of(Platform.XBOX), c4BrandFetcher(Optional.of(Platform.XBOX),Optional.of(P06_PLATFORM)));
 	}
 	
     @Bean protected SimpleHttpClient httpsClient() {
@@ -96,15 +98,15 @@ public class C4Module {
         }
 	}
 	
-	protected C4AtomBackedBrandUpdater c4BrandFetcher(Optional<Platform> platform) {
-	    Optional<String> platformParam = platform.isPresent() ? Optional.of(platform.get().toString().toLowerCase()) : Optional.<String>absent();
+	protected C4AtomBackedBrandUpdater c4BrandFetcher(Optional<Platform> platform, Optional<String> platformParam) {
 	    C4AtomApiClient client = new C4AtomApiClient(httpsClient(), ATOZ_BASE, platformParam);
 	    C4BrandExtractor extractor = new C4BrandExtractor(client, platform, channelResolver);
 		return new C4AtomBackedBrandUpdater(client, platform, contentResolver, lastUpdatedSettingContentWriter(), extractor);
 	}
 	
 	@Bean protected C4BrandUpdateController c4BrandUpdateController() {
-	    return new C4BrandUpdateController(c4BrandFetcher(Optional.<Platform>absent()), ImmutableMap.of(Platform.XBOX, c4BrandFetcher(Optional.of(Platform.XBOX))));
+	    return new C4BrandUpdateController(c4BrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()), 
+	            ImmutableMap.of(Platform.XBOX, c4BrandFetcher(Optional.of(Platform.XBOX),Optional.of(P06_PLATFORM))));
 	}
 	
 	@Bean protected C4EpgChannelDayUpdateController c4EpgChannelDayUpdateController() {
