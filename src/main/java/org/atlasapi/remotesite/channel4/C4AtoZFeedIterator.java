@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.slf4j.Logger;
@@ -27,12 +26,12 @@ public class C4AtoZFeedIterator extends AbstractIterator<Optional<Feed>> {
 
     private final AtomClient client;
     private final String uriBase;
-    private final Optional<Platform> platform;
+    private final Optional<String> platform;
     private final Iterator<String> letterIterator;
     
     private String nextPageUri = null;
 
-    public C4AtoZFeedIterator(SimpleHttpClient client, String uriBase, Optional<Platform> platform) {
+    public C4AtoZFeedIterator(SimpleHttpClient client, String uriBase, Optional<String> platform) {
         this.client = new AtomClient(client);
         this.uriBase = uriBase;
         this.platform = platform;
@@ -66,7 +65,7 @@ public class C4AtoZFeedIterator extends AbstractIterator<Optional<Feed>> {
     }
     
     private String appendPlatform(String url) {
-        return Urls.appendParameters(url, "platform", platform.get().key());
+        return Urls.appendParameters(url, "platform", platform.get());
     }
 
     private String nextUri() {
