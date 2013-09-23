@@ -60,7 +60,7 @@ public class C4AtoZAtomContentUpdateTaskTest extends TestCase {
     @Test
     public void testRequestsFeedsAndPassesExtractedUrisToAdapterWithPlatform() throws Exception {
         
-        C4AtoZAtomContentUpdateTask adapter = new C4AtoZAtomContentUpdateTask(client, apiBase, Optional.of(Platform.XBOX), brandAdapter);
+        C4AtoZAtomContentUpdateTask adapter = new C4AtoZAtomContentUpdateTask(client, apiBase, Optional.of(Platform.XBOX.key().toLowerCase()), brandAdapter);
     
         when(client.get(requestFor("http://pmlsc.channel4.com/pmlsd/atoz/a.atom?platform=xbox"))).thenReturn(ps3atoza.build());
         when(brandAdapter.canFetch(anyString())).thenReturn(true);
