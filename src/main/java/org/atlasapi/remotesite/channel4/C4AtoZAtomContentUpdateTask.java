@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.channel4;
 import java.util.Iterator;
 import java.util.List;
 
-import org.atlasapi.media.entity.Policy.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,15 +24,15 @@ public class C4AtoZAtomContentUpdateTask extends ScheduledTask {
 	private final C4LinkBrandNameExtractor linkExtractor = new C4LinkBrandNameExtractor();
 
 	public C4AtoZAtomContentUpdateTask(SimpleHttpClient client, String apiBaseUrl, C4BrandUpdater brandUpdater) {
-	    this(client, apiBaseUrl, Optional.<Platform>absent(), brandUpdater);
+	    this(client, apiBaseUrl, Optional.<String>absent(), brandUpdater);
 	}
 	
-    public C4AtoZAtomContentUpdateTask(SimpleHttpClient client, String apiBaseUrl, Optional<Platform> platform, C4BrandUpdater brandUpdater) {
+    public C4AtoZAtomContentUpdateTask(SimpleHttpClient client, String apiBaseUrl, Optional<String> platform, C4BrandUpdater brandUpdater) {
         this.brandUpdater = brandUpdater;
 		this.atozFeeds = feedSource(client, apiBaseUrl, platform);
     }
 
-    private Iterable<Optional<Feed>> feedSource(final SimpleHttpClient client, final String apiBaseUrl, final Optional<Platform> platform) {
+    private Iterable<Optional<Feed>> feedSource(final SimpleHttpClient client, final String apiBaseUrl, final Optional<String> platform) {
         return new Iterable<Optional<Feed>>() {
             @Override
             public Iterator<Optional<Feed>> iterator() {
