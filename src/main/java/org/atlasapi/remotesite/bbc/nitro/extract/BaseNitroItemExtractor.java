@@ -2,7 +2,9 @@ package org.atlasapi.remotesite.bbc.nitro.extract;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
@@ -10,9 +12,13 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSetMultimap.Builder;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.metabroadcast.atlas.glycerin.model.Availability;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
@@ -36,14 +42,17 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
     @Override
     protected final void extractAdditionalFields(NitroItemSource<SOURCE> source, ITEM item) {
         ImmutableSetMultimap<String, Broadcast> broadcasts = extractBroadcasts(source.getBroadcasts());
-        ImmutableSetMultimap<String, Encoding> encodings = extractEncodings(source.getAvailabilities());
+        Map<String, Optional<Encoding>> encodings = extractEncodings(source.getAvailabilities());
         
         ImmutableSet.Builder<Version> versions = ImmutableSet.builder();
         for (String versionPid : Sets.union(broadcasts.keySet(), encodings.keySet())) {
             Version version = new Version();
             version.setCanonicalUri(BbcFeeds.nitroUriForPid(versionPid));
             version.setBroadcasts(broadcasts.get(versionPid));
-            version.setManifestedAs(encodings.get(versionPid));
+            Optional<Encoding> versionEncoding = encodings.get(versionPid);
+            if (versionEncoding.isPresent()) {
+                version.setManifestedAs(ImmutableSet.of(versionEncoding.get()));
+            }
             versions.add(version);
         }
         item.setVersions(versions.build());
@@ -61,12 +70,19 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         
     }
 
-    private ImmutableSetMultimap<String, Encoding> extractEncodings(List<Availability> availabilities) {
-        Builder<String, Encoding> encodings = ImmutableSetMultimap.builder();
+    private Map<String,Optional<Encoding>> extractEncodings(List<Availability> availabilities) {
+        ImmutableSetMultimap.Builder<String, Availability> availabilitiesByVersion
+            = ImmutableSetMultimap.builder();
         for (Availability availability : availabilities) {
-            encodings.put(checkNotNull(NitroUtil.versionPid(availability)), availabilityExtractor.extract(availability));
+            availabilitiesByVersion.put(checkNotNull(NitroUtil.versionPid(availability)), availability);
         }
-        return encodings.build();
+        return ImmutableMap.copyOf(Maps.transformValues(availabilitiesByVersion.build().asMap(),
+                new Function<Collection<Availability>, Optional<Encoding>>() {
+                    @Override
+                    public Optional<Encoding> apply(Collection<Availability> input) {
+                        return availabilityExtractor.extract(input);
+                    }
+                }));
     }
 
     private ImmutableSetMultimap<String, Broadcast> extractBroadcasts(
