@@ -11,7 +11,7 @@ import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryResult;
-import org.elasticsearch.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 
 
 public class SourceRequestQueryExecutor implements QueryExecutor<SourceRequest> {

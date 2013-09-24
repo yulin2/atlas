@@ -15,9 +15,9 @@ import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.content.criteria.IdAttributeQuery;
 import org.atlasapi.content.criteria.QueryVisitorAdapter;
 import org.atlasapi.content.criteria.attribute.Attributes;
-import org.elasticsearch.common.collect.Iterables;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 
 public class ApplicationQueryExecutor implements QueryExecutor<Application> {
 
