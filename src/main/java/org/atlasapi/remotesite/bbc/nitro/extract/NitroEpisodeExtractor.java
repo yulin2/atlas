@@ -84,7 +84,10 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
                 item.setParentRef(new ParentRef(brandUri));
             }
         }
-        item.setMediaType(MediaType.fromKey(source.getProgramme().getMediaType()).orNull());
+        String mediaType = source.getProgramme().getMediaType();
+        if (mediaType != null) {
+            item.setMediaType(MediaType.fromKey(mediaType.toLowerCase()).orNull());
+        }
         if (MediaType.VIDEO.equals(item.getMediaType())) {
             item.setSpecialization(Specialization.TV);
         } else if (MediaType.AUDIO.equals(item.getMediaType())) {
