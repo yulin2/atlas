@@ -68,7 +68,7 @@ public class LocalOrRemoteNitroFetcher {
         if (local.isPresent() && remote != null) {
             return ContentMerger.merge(local.get(), remote);
         } else {
-            return Objects.firstNonNull(remote, local.get());
+            return Objects.firstNonNull(local.orNull(), remote);
         }
         
     }
