@@ -90,7 +90,10 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             List<com.metabroadcast.atlas.glycerin.model.Broadcast> nitroBroadcasts) {
         Builder<String, Broadcast> broadcasts = ImmutableSetMultimap.builder();
         for (com.metabroadcast.atlas.glycerin.model.Broadcast broadcast : nitroBroadcasts) {
-            broadcasts.put(versionPid(broadcast), broadcastExtractor.extract(broadcast));
+            Optional<Broadcast> extractedBroadcast = broadcastExtractor.extract(broadcast);
+            if (extractedBroadcast.isPresent()) {
+                broadcasts.put(versionPid(broadcast), extractedBroadcast.get());
+            }
         }
         return broadcasts.build();
     }
