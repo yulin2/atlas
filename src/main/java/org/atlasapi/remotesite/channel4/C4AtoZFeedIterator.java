@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.url.Urls;
@@ -35,7 +36,7 @@ public class C4AtoZFeedIterator extends AbstractIterator<Optional<Feed>> {
         this.client = new AtomClient(client);
         this.uriBase = uriBase;
         this.platform = platform;
-        this.letterIterator = new AToZUriSource("", "", true).iterator();
+        this.letterIterator = ImmutableList.copyOf(new AToZUriSource("", "", true)).reverse().iterator();
     }
     
     @Override
