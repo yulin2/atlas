@@ -78,7 +78,7 @@ public class LocalOrRemoteNitroFetcher {
     
     protected boolean fullFetchPermitted(Broadcast broadcast) {
         LocalDate today = clock.now().toLocalDate();
-        LocalDate broadcastDay = NitroUtil.toDateTime(broadcast.getTxTime().getStart()).toLocalDate();
+        LocalDate broadcastDay = NitroUtil.toDateTime(broadcast.getPublishedTime().getStart()).toLocalDate();
         
         Maybe<MediaType> mediaType = BbcIonMediaTypeMapping.mediaTypeForService(broadcast.getService().getSid());
         
