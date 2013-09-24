@@ -3,7 +3,9 @@ package org.atlasapi.remotesite.bbc.nitro.extract;
 import java.math.BigInteger;
 
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
@@ -56,21 +58,21 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
     }
 
     @Override
-    protected void extractAdditionalItemFields(NitroItemSource<Episode> source, Item content) {
+    protected void extractAdditionalItemFields(NitroItemSource<Episode> source, Item item) {
         Episode episode = source.getProgramme();
-        if (content.getTitle() == null) {
-            content.setTitle(episode.getPresentationTitle());
+        if (item.getTitle() == null) {
+            item.setTitle(episode.getPresentationTitle());
         }
         if (episode.getEpisodeOf() != null) {
             BigInteger position = episode.getEpisodeOf().getPosition();
-            org.atlasapi.media.entity.Episode episodeContent = (org.atlasapi.media.entity.Episode) content;
+            org.atlasapi.media.entity.Episode episodeContent = (org.atlasapi.media.entity.Episode) item;
             if (position != null) {
                 episodeContent.setEpisodeNumber(position.intValue());
             }
             if ("series".equals(episode.getEpisodeOf().getResultType())) {
                 ParentRef parent = new ParentRef(
-                        BbcFeeds.nitroUriForPid(episode.getEpisodeOf().getPid())
-                        );
+                    BbcFeeds.nitroUriForPid(episode.getEpisodeOf().getPid())
+                );
                 episodeContent.setSeriesRef(parent);
                 episodeContent.setParentRef(parent);
             }
@@ -79,8 +81,14 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
             AncestorsTitles ancestors = episode.getAncestorsTitles();
             if (ancestors.getBrand() != null) {
                 String brandUri = BbcFeeds.nitroUriForPid(ancestors.getBrand().getPid());
-                content.setParentRef(new ParentRef(brandUri));
+                item.setParentRef(new ParentRef(brandUri));
             }
         }
+        item.setMediaType(MediaType.fromKey(source.getProgramme().getMediaType()).orNull());
+        if (MediaType.VIDEO.equals(item.getMediaType())) {
+            item.setSpecialization(Specialization.TV);
+        } else if (MediaType.AUDIO.equals(item.getMediaType())) {
+            item.setSpecialization(Specialization.RADIO);
+        } 
     }
 }
