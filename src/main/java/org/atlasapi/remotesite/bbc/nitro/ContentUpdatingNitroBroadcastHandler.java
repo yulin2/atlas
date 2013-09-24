@@ -16,6 +16,8 @@ import org.atlasapi.remotesite.bbc.nitro.extract.NitroUtil;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.common.time.Clock;
 
@@ -58,7 +60,7 @@ public class ContentUpdatingNitroBroadcastHandler implements NitroBroadcastHandl
 
     private void addBroadcast(Item item, String versionUri, Broadcast broadcast) {
         Version version = Objects.firstNonNull(getVersion(item, versionUri), newVersion(versionUri));
-        version.addBroadcast(broadcast);
+        version.setBroadcasts(Sets.union(ImmutableSet.of(broadcast), version.getBroadcasts()));
         item.addVersion(version);
     }
 
