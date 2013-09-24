@@ -14,7 +14,6 @@ import org.atlasapi.remotesite.bbc.BbcFeeds;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSetMultimap.Builder;
@@ -23,6 +22,8 @@ import com.google.common.collect.Sets;
 import com.metabroadcast.atlas.glycerin.model.Availability;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.atlas.glycerin.model.Programme;
+import com.metabroadcast.common.collect.ImmutableOptionalMap;
+import com.metabroadcast.common.collect.OptionalMap;
 
 /**
  * Base extractor for extracting common properties of {@link Item}s from a
@@ -70,13 +71,13 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         
     }
 
-    private Map<String,Optional<Encoding>> extractEncodings(List<Availability> availabilities) {
+    private OptionalMap<String,Encoding> extractEncodings(List<Availability> availabilities) {
         ImmutableSetMultimap.Builder<String, Availability> availabilitiesByVersion
             = ImmutableSetMultimap.builder();
         for (Availability availability : availabilities) {
             availabilitiesByVersion.put(checkNotNull(NitroUtil.versionPid(availability)), availability);
         }
-        return ImmutableMap.copyOf(Maps.transformValues(availabilitiesByVersion.build().asMap(),
+        return ImmutableOptionalMap.copyOf(Maps.transformValues(availabilitiesByVersion.build().asMap(),
                 new Function<Collection<Availability>, Optional<Encoding>>() {
                     @Override
                     public Optional<Encoding> apply(Collection<Availability> input) {
