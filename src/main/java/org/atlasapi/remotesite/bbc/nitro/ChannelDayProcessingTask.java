@@ -43,12 +43,11 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
         while(channels.hasNext() && shouldContinue()) {
             reportStatus(progress.toString());
             Channel channel = channels.next();
-            progress = progress.reduce(processRangeForChannel(range, channel));
+            progress = progress.reduce(processRangeForChannel(range, channel, progress));
         }
     }
 
-    private UpdateProgress processRangeForChannel(Range<LocalDate> range, Channel channel) {
-        UpdateProgress progress = UpdateProgress.START; 
+    private UpdateProgress processRangeForChannel(Range<LocalDate> range, Channel channel, UpdateProgress progress) {
         Iterator<LocalDate> days = daysIn(range);
         while(days.hasNext() && shouldContinue()) {
             LocalDate day = days.next();
