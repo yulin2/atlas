@@ -16,6 +16,7 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.atlas.glycerin.model.Availability;
@@ -24,9 +25,10 @@ import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.DateTimeZones;
 
 /**
- * Extracts {@link Encoding}s and {@link Location}s from {@link Availability}s.
+ * Possibly extracts an {@link Encoding} and {@link Location}s for it from some
+ * {@link Availability}s.
  */
-public class NitroAvailabilityExtractor implements ContentExtractor<Availability, Encoding> {
+public class NitroAvailabilityExtractor implements ContentExtractor<Iterable<Availability>, Optional<Encoding>> {
 
     private static final String IPLAYER_URL_BASE = "http://www.bbc.co.uk/iplayer/episode/";
     private static final String APPLE_IPHONE4_IPAD_HLS_3G = "apple-iphone4-ipad-hls-3g";
@@ -44,17 +46,24 @@ public class NitroAvailabilityExtractor implements ContentExtractor<Availability
     );
     
     @Override
-    public Encoding extract(Availability source) {
-        Encoding encoding = new Encoding();
+    public Optional<Encoding> extract(Iterable<Availability> availabilities) {
         ImmutableSet.Builder<Location> locations = ImmutableSet.builder();
-        for (String mediaSet : source.getMediaSet()) {
-            Platform platform = mediaSetPlatform.get(mediaSet);
-            if (platform != null) {
-                locations.add(newLocation(source, platform, mediaSetNetwork.get(mediaSet)));
+        for (Availability availability : availabilities) {
+            for (String mediaSet : availability.getMediaSet()) {
+                Platform platform = mediaSetPlatform.get(mediaSet);
+                if (platform != null) {
+                    locations.add(newLocation(availability, platform, mediaSetNetwork.get(mediaSet)));
+                }
             }
         }
-        encoding.setAvailableAt(locations.build());
-        return encoding;
+        ImmutableSet<Location> encodingLocations = locations.build();
+        if (encodingLocations.isEmpty()) {
+            return Optional.absent();
+        }
+        
+        Encoding encoding = new Encoding();
+        encoding.setAvailableAt(encodingLocations);
+        return Optional.of(encoding);
     }
 
     private Location newLocation(Availability source, Platform platform, Network network) {
