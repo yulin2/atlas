@@ -45,8 +45,12 @@ public class ContentUpdatingNitroBroadcastHandler implements NitroBroadcastHandl
         Optional<Series> series = localOrRemoteFetcher.resolveOrFetchSeries(item);
         Optional<Brand> brand = localOrRemoteFetcher.resolveOrFetchBrand(item);
         
-        Broadcast broadcast = broadcastExtractor.extract(nitroBroadcast);
-        addBroadcast(item, versionUri(nitroBroadcast), broadcast);
+        Optional<Broadcast> broadcast = broadcastExtractor.extract(nitroBroadcast);
+        if (!broadcast.isPresent()) {
+            throw new NitroException("couldn't extract broadcast: " + nitroBroadcast.getPid());
+        }
+            
+        addBroadcast(item, versionUri(nitroBroadcast), broadcast.get());
         if (brand.isPresent()) {
             writer.createOrUpdate(brand.get());
         } 
@@ -55,7 +59,7 @@ public class ContentUpdatingNitroBroadcastHandler implements NitroBroadcastHandl
         }
         writer.createOrUpdate(item);
         
-        return new ItemRefAndBroadcast(item, broadcast);
+        return new ItemRefAndBroadcast(item, broadcast.get());
     }
 
     private void addBroadcast(Item item, String versionUri, Broadcast broadcast) {
