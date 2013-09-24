@@ -16,9 +16,7 @@ import org.atlasapi.remotesite.ContentMerger;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.BbcIonMediaTypeMapping;
-import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.nitro.extract.NitroUtil;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +29,6 @@ import com.metabroadcast.atlas.glycerin.model.Broadcast;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
-import com.metabroadcast.common.time.DateTimeZones;
 
 
 public class LocalOrRemoteNitroFetcher {

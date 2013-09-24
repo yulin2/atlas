@@ -44,6 +44,7 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             version.setCanonicalUri(BbcFeeds.nitroUriForPid(versionPid));
             version.setBroadcasts(broadcasts.get(versionPid));
             version.setManifestedAs(encodings.get(versionPid));
+            versions.add(version);
         }
         item.setVersions(versions.build());
         extractAdditionalItemFields(source, item);
