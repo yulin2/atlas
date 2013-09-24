@@ -43,7 +43,7 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
         while(channels.hasNext() && shouldContinue()) {
             reportStatus(progress.toString());
             Channel channel = channels.next();
-            progress = progress.reduce(processRangeForChannel(range, channel, progress));
+            progress = processRangeForChannel(range, channel, progress);
         }
     }
 
