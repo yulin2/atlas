@@ -13,6 +13,7 @@ import org.atlasapi.remotesite.bbc.nitro.extract.NitroBroadcastExtractor;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import com.google.common.base.Optional;
 import com.metabroadcast.atlas.glycerin.model.BroadcastTime;
 import com.metabroadcast.atlas.glycerin.model.ServiceReference;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -44,7 +45,8 @@ public class NitroBroadcastExtractorTest {
         nitro.setIsRepeat(true);
         nitro.setIsAudioDescribed(true);
         
-        Broadcast atlas = extractor.extract(nitro);
+        Optional<Broadcast> extracted = extractor.extract(nitro);
+        Broadcast atlas = extracted.get();
         
         assertThat(atlas.getBroadcastOn(), is("http://www.bbc.co.uk/services/bbcone/london"));
         assertThat(atlas.getTransmissionTime(), is(new DateTime("2013-09-11T05:00:00Z", DateTimeZones.UTC)));
