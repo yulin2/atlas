@@ -85,7 +85,7 @@ public class BbcNitroModule {
     }
 
     @Bean
-    private NitroClient nitroClient() {
+    NitroClient nitroClient() {
         if (!tasksEnabled && Strings.isNullOrEmpty(nitroHost) 
                 || Strings.isNullOrEmpty(nitroHost)) {
             return UnconfiguredNitroClient.get();
