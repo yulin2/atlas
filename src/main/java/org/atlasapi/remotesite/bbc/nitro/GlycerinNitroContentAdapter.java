@@ -14,6 +14,9 @@ import org.atlasapi.remotesite.bbc.nitro.extract.NitroBrandExtractor;
 import org.atlasapi.remotesite.bbc.nitro.extract.NitroEpisodeExtractor;
 import org.atlasapi.remotesite.bbc.nitro.extract.NitroItemSource;
 import org.atlasapi.remotesite.bbc.nitro.extract.NitroSeriesExtractor;
+import org.atlasapi.remotesite.bbc.nitro.v1.NitroClient;
+import org.atlasapi.remotesite.bbc.nitro.v1.NitroFormat;
+import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
 
 import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.Glycerin;
@@ -35,6 +38,7 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
 
     private final Glycerin glycerin;
     private final GlycerinNitroClipsAdapter clipsAdapter;
+    private final NitroClient nitroClient;
 
     private final NitroBrandExtractor brandExtractor 
         = new NitroBrandExtractor();
@@ -42,8 +46,9 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
         = new NitroSeriesExtractor();
     private final NitroEpisodeExtractor itemExtractor
         = new NitroEpisodeExtractor();
-
-    public GlycerinNitroContentAdapter(Glycerin glycerin) {
+    
+    public GlycerinNitroContentAdapter(Glycerin glycerin, NitroClient nitroClient) {
+        this.nitroClient = nitroClient;
         this.glycerin = checkNotNull(glycerin);
         this.clipsAdapter = new GlycerinNitroClipsAdapter(glycerin);
     }
@@ -93,16 +98,27 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
             checkRefType(ref, "episode");
             Programme programme = fetchProgramme(ref.getPid());
             checkState(programme.isEpisode(), "fetched programme {} not episode", ref.getPid());
+            Episode episode = programme.getAsEpisode();
             NitroItemSource<Episode> source = NitroItemSource.valueOf(
-                    programme.getAsEpisode(),
-                    availabilities(programme.getAsEpisode()),
-                    broadcasts(programme.getAsEpisode()));
+                    episode,
+                    availabilities(episode),
+                    broadcasts(episode),
+                    genres(episode),
+                    formats(episode));
             Item item = itemExtractor.extract(source);
             item.setClips(clipsAdapter.clipsFor(ref));
             return item;
         } catch (GlycerinException e) {
             throw new NitroException(ref.getPid(), e);
         }
+    }
+
+    private List<NitroFormat> formats(Episode episode) throws NitroException {
+        return nitroClient.formats(episode.getPid());
+    }
+
+    private List<NitroGenreGroup> genres(Episode episode) throws NitroException {
+        return nitroClient.genres(episode.getPid());
     }
 
     private List<Broadcast> broadcasts(Episode episode) throws GlycerinException {
