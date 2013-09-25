@@ -1,12 +1,18 @@
 package org.atlasapi.remotesite.bbc.nitro.extract;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Set;
 
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.nitro.v1.NitroFormat;
+import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
 
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
 import com.metabroadcast.atlas.glycerin.model.Episode;
@@ -29,12 +35,28 @@ import com.metabroadcast.atlas.glycerin.model.Synopses;
  */
 public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode, Item> {
 
+    private static final String FILM_FORMAT_ID = "PT007";
+    private final ContentExtractor<List<NitroGenreGroup>, Set<String>> genresExtractor
+        = new NitroGenresExtractor();
+
     @Override
     protected Item createContent(NitroItemSource<Episode> source) {
+        if (isFilmFormat(source)) {
+            return new Film();
+        }
         if (source.getProgramme().getEpisodeOf() == null) {
             return new Item();
         }
         return new org.atlasapi.media.entity.Episode();
+    }
+
+    private boolean isFilmFormat(NitroItemSource<Episode> source) {
+        for (NitroFormat format : source.getFormats()) {
+            if (FILM_FORMAT_ID.equals(format.getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -92,6 +114,7 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
             item.setSpecialization(Specialization.TV);
         } else if (MediaType.AUDIO.equals(item.getMediaType())) {
             item.setSpecialization(Specialization.RADIO);
-        } 
+        }
+        item.setGenres(genresExtractor.extract(source.getGenres()));
     }
 }

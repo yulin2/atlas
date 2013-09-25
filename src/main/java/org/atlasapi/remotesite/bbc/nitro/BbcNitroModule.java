@@ -11,6 +11,8 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonServices;
+import org.atlasapi.remotesite.bbc.nitro.v1.HttpNitroClient;
+import org.atlasapi.remotesite.bbc.nitro.v1.NitroClient;
 import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -83,9 +85,18 @@ public class BbcNitroModule {
     }
 
     @Bean
+    private NitroClient nitroClient() {
+        if (!tasksEnabled && Strings.isNullOrEmpty(nitroHost) 
+                || Strings.isNullOrEmpty(nitroHost)) {
+            return UnconfiguredNitroClient.get();
+        }
+        return new HttpNitroClient(HostSpecifier.fromValid(nitroHost), nitroApiKey);
+    }
+
+    @Bean
     NitroBroadcastHandler<ItemRefAndBroadcast> nitroBroadcastHandler() {
         return new ContentUpdatingNitroBroadcastHandler(contentResolver, contentWriter, 
-                new GlycerinNitroContentAdapter(glycerin()), new SystemClock());
+                new GlycerinNitroContentAdapter(glycerin(), nitroClient()), new SystemClock());
     }
 
     private Supplier<Range<LocalDate>> dayRangeSupplier(int back, int forward) {
