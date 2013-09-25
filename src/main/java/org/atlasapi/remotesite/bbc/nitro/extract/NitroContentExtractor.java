@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.bbc.nitro.extract;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Publisher;
@@ -26,15 +27,23 @@ import com.metabroadcast.atlas.glycerin.model.Synopses;
 public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
     implements ContentExtractor<SOURCE, CONTENT> {
 
+    private static final String PID_NAMESPACE = "gb:bbc:pid";
+    private static final String URI_NAMESPACE = "uri";
+    
     private final NitroImageExtractor imageExtractor
         = new NitroImageExtractor("1024x576");
     
     @Override
     public final CONTENT extract(SOURCE source) {
         CONTENT content = createContent(source);
-        content.setCanonicalUri(BbcFeeds.nitroUriForPid(extractPid(source)));
+        String pid = extractPid(source);
+        content.setCanonicalUri(BbcFeeds.nitroUriForPid(pid));
         content.setPublisher(Publisher.BBC_NITRO);
         content.setTitle(extractTitle(source));
+        content.setAliases(ImmutableSet.of(
+            new Alias(PID_NAMESPACE, pid),
+            new Alias(URI_NAMESPACE, content.getCanonicalUri())
+        ));
         Synopses synposes = extractSynopses(source);
         if (synposes != null) {
             content.setDescription(longestSynopsis(synposes));
