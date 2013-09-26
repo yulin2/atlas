@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.bbc.nitro.extract;
 import com.metabroadcast.atlas.glycerin.model.Clip;
 import com.metabroadcast.atlas.glycerin.model.Image;
 import com.metabroadcast.atlas.glycerin.model.Synopses;
+import com.metabroadcast.common.time.Clock;
 
 
 /**
@@ -15,6 +16,10 @@ import com.metabroadcast.atlas.glycerin.model.Synopses;
  */
 public class NitroClipExtractor
     extends BaseNitroItemExtractor<Clip, org.atlasapi.media.entity.Clip> {
+
+    public NitroClipExtractor(Clock clock) {
+        super(clock);
+    }
 
     @Override
     protected org.atlasapi.media.entity.Clip createContent(NitroItemSource<Clip> source) {

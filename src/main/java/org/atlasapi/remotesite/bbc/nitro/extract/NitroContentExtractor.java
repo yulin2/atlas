@@ -9,11 +9,13 @@ import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.joda.time.DateTime;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.atlas.glycerin.model.Synopses;
+import com.metabroadcast.common.time.Clock;
 
 /**
  * Template extractor for extracting {@link Content} from Nitro sources.
@@ -30,12 +32,19 @@ public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
     private static final String PID_NAMESPACE = "gb:bbc:pid";
     private static final String URI_NAMESPACE = "uri";
     
+    private final Clock clock;
     private final NitroImageExtractor imageExtractor
         = new NitroImageExtractor("1024x576");
     
+    public NitroContentExtractor(Clock clock) {
+        this.clock = clock;
+    }
+    
     @Override
     public final CONTENT extract(SOURCE source) {
+        DateTime now = clock.now();
         CONTENT content = createContent(source);
+        content.setLastUpdated(now);
         String pid = extractPid(source);
         content.setCanonicalUri(BbcFeeds.nitroUriForPid(pid));
         content.setPublisher(Publisher.BBC_NITRO);
@@ -59,7 +68,7 @@ public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
         }
         //TODO: brand.setPresentationChannel(BbcIonServices.get(source.getMasterBrand()));
         //TODO: genres
-        extractAdditionalFields(source, content);
+        extractAdditionalFields(source, content, now);
         return content;
     }
 
@@ -117,8 +126,9 @@ public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
      * 
      * @param source - the source data.
      * @param content - the extracted content.
+     * @param now - the current time.
      */
-    protected void extractAdditionalFields(SOURCE source, CONTENT content) {
+    protected void extractAdditionalFields(SOURCE source, CONTENT content, DateTime now) {
         
     }
 

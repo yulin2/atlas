@@ -4,10 +4,12 @@ import java.math.BigInteger;
 
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.joda.time.DateTime;
 
 import com.metabroadcast.atlas.glycerin.model.Image;
 import com.metabroadcast.atlas.glycerin.model.Series;
 import com.metabroadcast.atlas.glycerin.model.Synopses;
+import com.metabroadcast.common.time.Clock;
 
 /**
  * A {@link NitroContentExtractor} for extracting
@@ -17,6 +19,10 @@ import com.metabroadcast.atlas.glycerin.model.Synopses;
  */
 public class NitroSeriesExtractor
         extends NitroContentExtractor<Series, org.atlasapi.media.entity.Series> {
+    
+    public NitroSeriesExtractor(Clock clock) {
+        super(clock);
+    }
 
     @Override
     protected org.atlasapi.media.entity.Series createContent(Series source) {
@@ -44,7 +50,7 @@ public class NitroSeriesExtractor
     }
 
     @Override
-    protected void extractAdditionalFields(Series source, org.atlasapi.media.entity.Series content) {
+    protected void extractAdditionalFields(Series source, org.atlasapi.media.entity.Series content, DateTime now) {
         if (source.getSeriesOf() != null) {
             BigInteger position = source.getSeriesOf().getPosition();
             if (position != null) {
