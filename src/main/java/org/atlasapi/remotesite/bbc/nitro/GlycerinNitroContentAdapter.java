@@ -29,6 +29,7 @@ import com.metabroadcast.atlas.glycerin.model.Programme;
 import com.metabroadcast.atlas.glycerin.queries.AvailabilityQuery;
 import com.metabroadcast.atlas.glycerin.queries.BroadcastsQuery;
 import com.metabroadcast.atlas.glycerin.queries.ProgrammesQuery;
+import com.metabroadcast.common.time.Clock;
 
 /** 
  * A {@link NitroContentAdapter} based on a {@link Glycerin}. 
@@ -40,17 +41,17 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
     private final GlycerinNitroClipsAdapter clipsAdapter;
     private final NitroClient nitroClient;
 
-    private final NitroBrandExtractor brandExtractor 
-        = new NitroBrandExtractor();
-    private final NitroSeriesExtractor seriesExtractor 
-        = new NitroSeriesExtractor();
-    private final NitroEpisodeExtractor itemExtractor
-        = new NitroEpisodeExtractor();
+    private final NitroBrandExtractor brandExtractor;
+    private final NitroSeriesExtractor seriesExtractor;
+    private final NitroEpisodeExtractor itemExtractor;
     
-    public GlycerinNitroContentAdapter(Glycerin glycerin, NitroClient nitroClient) {
-        this.nitroClient = nitroClient;
+    public GlycerinNitroContentAdapter(Glycerin glycerin, NitroClient nitroClient, Clock clock) {
         this.glycerin = checkNotNull(glycerin);
-        this.clipsAdapter = new GlycerinNitroClipsAdapter(glycerin);
+        this.nitroClient = checkNotNull(nitroClient);
+        this.clipsAdapter = new GlycerinNitroClipsAdapter(glycerin, clock);
+        this.brandExtractor = new NitroBrandExtractor(clock);
+        this.seriesExtractor = new NitroSeriesExtractor(clock);
+        this.itemExtractor = new NitroEpisodeExtractor(clock);
     }
     
     @Override

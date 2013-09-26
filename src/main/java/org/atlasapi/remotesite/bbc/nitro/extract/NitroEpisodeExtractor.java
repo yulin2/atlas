@@ -13,11 +13,13 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroFormat;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
+import org.joda.time.DateTime;
 
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
 import com.metabroadcast.atlas.glycerin.model.Episode;
 import com.metabroadcast.atlas.glycerin.model.Image;
 import com.metabroadcast.atlas.glycerin.model.Synopses;
+import com.metabroadcast.common.time.Clock;
 
 /**
  * <p>
@@ -38,6 +40,10 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
     private static final String FILM_FORMAT_ID = "PT007";
     private final ContentExtractor<List<NitroGenreGroup>, Set<String>> genresExtractor
         = new NitroGenresExtractor();
+
+    public NitroEpisodeExtractor(Clock clock) {
+        super(clock);
+    }
 
     @Override
     protected Item createContent(NitroItemSource<Episode> source) {
@@ -80,7 +86,7 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
     }
 
     @Override
-    protected void extractAdditionalItemFields(NitroItemSource<Episode> source, Item item) {
+    protected void extractAdditionalItemFields(NitroItemSource<Episode> source, Item item, DateTime now) {
         Episode episode = source.getProgramme();
         if (item.getTitle() == null) {
             item.setTitle(episode.getPresentationTitle());

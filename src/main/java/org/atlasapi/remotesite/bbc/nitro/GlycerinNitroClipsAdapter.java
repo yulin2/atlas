@@ -25,6 +25,7 @@ import com.metabroadcast.atlas.glycerin.model.Programme;
 import com.metabroadcast.atlas.glycerin.queries.AvailabilityQuery;
 import com.metabroadcast.atlas.glycerin.queries.EntityTypeOption;
 import com.metabroadcast.atlas.glycerin.queries.ProgrammesQuery;
+import com.metabroadcast.common.time.Clock;
 
 /**
  * Adapter to fetch and extract {@link org.atlasapi.media.entity.Clip Clip}s for
@@ -50,10 +51,11 @@ public class GlycerinNitroClipsAdapter {
         };
 
     private final Glycerin glycerin;
-    private final NitroClipExtractor clipExtractor = new NitroClipExtractor();
+    private final NitroClipExtractor clipExtractor;
 
-    public GlycerinNitroClipsAdapter(Glycerin glycerin) {
+    public GlycerinNitroClipsAdapter(Glycerin glycerin, Clock clock) {
         this.glycerin = glycerin;
+        this.clipExtractor = new NitroClipExtractor(clock);
     }
     
     public List<org.atlasapi.media.entity.Clip> clipsFor(PidReference ref) throws NitroException {
