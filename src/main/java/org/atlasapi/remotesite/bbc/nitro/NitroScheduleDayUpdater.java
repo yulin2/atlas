@@ -79,7 +79,11 @@ public class NitroScheduleDayUpdater implements ChannelDayProcessor {
     private ImmutableList<ItemRefAndBroadcast> processBroadcasts(ImmutableList<Broadcast> broadcasts) throws NitroException {
         Builder<ItemRefAndBroadcast> results = ImmutableList.builder();
         for (Broadcast broadcast : broadcasts) {
-            results.add(broadcastHandler.handle(broadcast));
+            try {
+                results.add(broadcastHandler.handle(broadcast));
+            } catch (Exception e) {
+                log.error(String.format("%s %s", broadcast.getPid(), broadcast.getPublishedTime().getStart()), e);
+            }
         }
         ImmutableList<ItemRefAndBroadcast> processed = results.build();
         return processed;
