@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.bbc.nitro.extract;
 import com.metabroadcast.atlas.glycerin.model.Image;
 import com.metabroadcast.atlas.glycerin.model.Synopses;
 import com.metabroadcast.atlas.glycerin.model.Brand;
+import com.metabroadcast.common.time.Clock;
 
 /**
  * Extracts a {@link org.atlasapi.media.entity.Brand Atlas Brand} from a
@@ -12,6 +13,10 @@ import com.metabroadcast.atlas.glycerin.model.Brand;
  */
 public class NitroBrandExtractor
         extends NitroContentExtractor<Brand, org.atlasapi.media.entity.Brand> {
+
+    public NitroBrandExtractor(Clock clock) {
+        super(clock);
+    }
 
     @Override
     protected org.atlasapi.media.entity.Brand createContent(Brand source) {

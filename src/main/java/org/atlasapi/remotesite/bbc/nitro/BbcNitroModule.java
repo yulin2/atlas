@@ -95,8 +95,9 @@ public class BbcNitroModule {
 
     @Bean
     NitroBroadcastHandler<ItemRefAndBroadcast> nitroBroadcastHandler() {
+        SystemClock clock = new SystemClock();
         return new ContentUpdatingNitroBroadcastHandler(contentResolver, contentWriter, 
-                new GlycerinNitroContentAdapter(glycerin(), nitroClient()), new SystemClock());
+                new GlycerinNitroContentAdapter(glycerin(), nitroClient(), clock), clock);
     }
 
     private Supplier<Range<LocalDate>> dayRangeSupplier(int back, int forward) {
