@@ -54,6 +54,7 @@ public class ContentMerger {
         current.setMediaType(extracted.getMediaType());
         current.setSpecialization(extracted.getSpecialization());
         current.setLastUpdated(extracted.getLastUpdated());
+        current.setClips(extracted.getClips());
         return current;
     }
 
