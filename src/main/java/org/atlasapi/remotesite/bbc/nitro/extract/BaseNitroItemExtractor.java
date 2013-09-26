@@ -55,6 +55,7 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         ImmutableSet.Builder<Version> versions = ImmutableSet.builder();
         for (String versionPid : Sets.union(broadcasts.keySet(), encodings.keySet())) {
             Version version = new Version();
+            version.setLastUpdated(now);
             version.setCanonicalUri(BbcFeeds.nitroUriForPid(versionPid));
             version.setBroadcasts(broadcasts.get(versionPid));
             Optional<Encoding> versionEncoding = encodings.get(versionPid);
