@@ -32,6 +32,8 @@ import com.metabroadcast.atlas.glycerin.queries.ProgrammesQuery;
  */
 public class GlycerinNitroClipsAdapter {
 
+    private static final int BATCH_SIZE = 10;
+    
     private static final Predicate<Programme> isClip
         = new Predicate<Programme>() {
             @Override
@@ -58,7 +60,7 @@ public class GlycerinNitroClipsAdapter {
         try {
             Iterable<com.metabroadcast.atlas.glycerin.model.Clip> nitroClips
                 = Iterables.transform(Iterables.filter(getNitroClips(ref), isClip), toClip);
-            Iterable<List<Clip>> clipParts = Iterables.partition(nitroClips, 10);
+            Iterable<List<Clip>> clipParts = Iterables.partition(nitroClips, BATCH_SIZE);
             ImmutableList.Builder<org.atlasapi.media.entity.Clip> clips = ImmutableList.builder();
             for (List<Clip> clipPart : clipParts) {
                 clips.addAll(extractClips(clipPart));
