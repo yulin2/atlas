@@ -18,7 +18,7 @@ import org.atlasapi.remotesite.bbc.nitro.v1.NitroClient;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroFormat;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
 
-import com.google.common.collect.Iterables;
+import com.google.common.collect.ImmutableList;
 import com.metabroadcast.atlas.glycerin.Glycerin;
 import com.metabroadcast.atlas.glycerin.GlycerinException;
 import com.metabroadcast.atlas.glycerin.model.Availability;
@@ -68,10 +68,18 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
     }
 
     private Programme fetchProgramme(String pid) throws GlycerinException {
-        return Iterables.getOnlyElement(glycerin.execute(ProgrammesQuery.builder()
+        ProgrammesQuery query = ProgrammesQuery.builder()
                 .withPid(pid)
                 .withMixins(TITLES)
-                .build()).getResults());
+                .build();
+        ImmutableList<Programme> results = glycerin.execute(query).getResults();
+        if (results.isEmpty()) {
+            throw new GlycerinException("Failed to fetch: " + query);
+        }
+        if (results.size() > 1) {
+            throw new GlycerinException("More than 1 result: " + query);
+        }
+        return results.get(0);
     }
 
     private void checkRefType(PidReference ref, String type) {
