@@ -2,6 +2,11 @@ package org.atlasapi.equiv.scorers;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -20,12 +25,10 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.SeriesRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -34,11 +37,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.time.DateTimeZones;
 
-@RunWith(JMock.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ContainerHierarchyMatchingScorerTest {
 
-    private final Mockery context = new Mockery();
-    private final ContentResolver contentResolver = context.mock(ContentResolver.class);
+    private final ContentResolver contentResolver = mock(ContentResolver.class);
     
     private final ContainerHierarchyMatchingScorer scorer = new ContainerHierarchyMatchingScorer(contentResolver);
     
@@ -46,26 +48,20 @@ public class ContainerHierarchyMatchingScorerTest {
     @SuppressWarnings("unchecked")
     public void testScoresNullWhenFlatContainerWithChildCountsOutOfRange() {
         
-        context.checking(new Expectations(){{
-            never(contentResolver).findByCanonicalUris((Iterable<String>) with(anything()));
-        }});
-
-        ScoredCandidates<Container> score = scorer.score(brandWithChildren(5), ImmutableSet.<Container>of(brandWithChildren(7)), new DefaultDescription());
+        ScoredCandidates<Container> score = scorer.score(brandWithChildren(5), ImmutableSet.<Container>of(brandWithChildren(7)), desc());
         
-        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.NULL_SCORE));
+        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.nullScore()));
+        verify(contentResolver, never()).findByCanonicalUris((Iterable<String>)any());
     }
     
     @Test
     @SuppressWarnings("unchecked")
     public void testScores1WhenFlatContainerWithChildCountsInRange() {
         
-        context.checking(new Expectations(){{
-            never(contentResolver).findByCanonicalUris((Iterable<String>) with(anything()));
-        }});
-
-        ScoredCandidates<Container> score = scorer.score(brandWithChildren(7), ImmutableSet.<Container>of(brandWithChildren(7)), new DefaultDescription());
+        ScoredCandidates<Container> score = scorer.score(brandWithChildren(7), ImmutableSet.<Container>of(brandWithChildren(7)), desc());
         
         assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.ONE));
+        verify(contentResolver, never()).findByCanonicalUris((Iterable<String>)any());
     }
     
     @Test
@@ -73,30 +69,26 @@ public class ContainerHierarchyMatchingScorerTest {
         
         final Brand subject = brandWithSeries(5);
 
-        context.checking(new Expectations(){{
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),SeriesRef.TO_URI))));
-                will(returnValue(ResolvedContent.builder().putAll(series(5)).build()));
-        }});
+        when(contentResolver.findByCanonicalUris(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),SeriesRef.TO_URI))))
+            .thenReturn(ResolvedContent.builder().putAll(series(5)).build());
 
-        ScoredCandidates<Container> score = scorer.score(subject, ImmutableSet.<Container>of(brandWithSeries(7)), new DefaultDescription());
+        ScoredCandidates<Container> score = scorer.score(subject, ImmutableSet.<Container>of(brandWithSeries(7)), desc());
         
-        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.NULL_SCORE));
+        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.nullScore()));
     }
     
     @Test
     public void testScoresOneWhenSeriesContainerWithSeriesAndEpisodeCountsInRange() {
         
         final Brand subject = brandWithSeries(5);
-        final Brand suggestion = brandWithSeries(6);
+        final Brand candidate = brandWithSeries(6);
 
-        context.checking(new Expectations(){{
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),SeriesRef.TO_URI))));
-                will(returnValue(ResolvedContent.builder().putAll(series(5)).build()));
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(suggestion.getSeriesRefs(),SeriesRef.TO_URI))));
-                will(returnValue(ResolvedContent.builder().putAll(series(6)).build()));
-        }});
+        when(contentResolver.findByCanonicalUris(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),SeriesRef.TO_URI))))
+            .thenReturn(ResolvedContent.builder().putAll(series(5)).build());
+        when(contentResolver.findByCanonicalUris(ImmutableList.copyOf(Iterables.transform(candidate.getSeriesRefs(),SeriesRef.TO_URI))))
+            .thenReturn(ResolvedContent.builder().putAll(series(6)).build());
 
-        ScoredCandidates<Container> score = scorer.score(subject, ImmutableSet.<Container>of(suggestion), new DefaultDescription());
+        ScoredCandidates<Container> score = scorer.score(subject, ImmutableSet.<Container>of(candidate), desc());
         
         assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.ONE));
     }
@@ -104,25 +96,88 @@ public class ContainerHierarchyMatchingScorerTest {
     @Test
     public void testScoreSeriesEpisodeCounts() {
         
-        ResultDescription desc = new DefaultDescription();
-        assertThat(scorer.scoreSortedSeriesSizes(list(1,2,3,4), list(1,2,3,4), "suggestion", desc), is(Score.ONE));
-        assertThat(scorer.scoreSortedSeriesSizes(list(1,2,3,4,5), list(1,2,3,4), "suggestion", desc), is(Score.ONE));
-        assertThat(scorer.scoreSortedSeriesSizes(list(1,2,3,4), list(1,3,4), "suggestion", desc), is(Score.ONE));
-        assertThat(scorer.scoreSortedSeriesSizes(list(1,2,3,6), list(1,3,5), "suggestion", desc), is(Score.ONE));
+        ResultDescription desc = desc();
+        assertThat(scorer.scoreSortedSeriesSizes(list(1,2,3,4), list(1,2,3,4), "candidate", desc), is(Score.ONE));
+        assertThat(scorer.scoreSortedSeriesSizes(list(1,2,3,4,5), list(1,2,3,4), "candidate", desc), is(Score.ONE));
+        assertThat(scorer.scoreSortedSeriesSizes(list(1,2,3,4), list(1,3,4), "candidate", desc), is(Score.ONE));
+        assertThat(scorer.scoreSortedSeriesSizes(list(1,2,3,6), list(1,3,5), "candidate", desc), is(Score.ONE));
         
-        assertThat(scorer.scoreSortedSeriesSizes(list(6,6), list(24,24), "suggestion", desc), is(Score.NULL_SCORE));
-        assertThat(scorer.scoreSortedSeriesSizes(list(6,6), list(6,24,24), "suggestion", desc), is(Score.NULL_SCORE));
-        assertThat(scorer.scoreSortedSeriesSizes(list(2,3,4), list(3,4,6,7), "suggestion", desc), is(Score.NULL_SCORE));
+        assertThat(scorer.scoreSortedSeriesSizes(list(6,6), list(24,24), "candidate", desc), is(Score.nullScore()));
+        assertThat(scorer.scoreSortedSeriesSizes(list(6,6), list(6,24,24), "candidate", desc), is(Score.nullScore()));
+        assertThat(scorer.scoreSortedSeriesSizes(list(2,3,4), list(3,4,6,7), "candidate", desc), is(Score.nullScore()));
         
+    }
+    
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testScoresNullWhenCandidateHasNoSeries() {
+        
+        Brand subject = brandWithSeries(1);
+        Brand candidate = brandWithSeries(0);
+        
+        when(contentResolver.findByCanonicalUris(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),SeriesRef.TO_URI))))
+            .thenReturn(ResolvedContent.builder().putAll(series(1)).build());
+        
+        ScoredCandidates<Container> score = scorer.score(subject, ImmutableSet.of(candidate), desc());
+        
+        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.nullScore()));
+        verify(contentResolver).findByCanonicalUris((Iterable<String>)any());
+        
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testScoresNullWhenSubjectHasNoSeries() {
+        
+        Brand subject = brandWithSeries(0);
+        Brand candidate = brandWithSeries(1);
+
+        ScoredCandidates<Container> score = scorer.score(subject, ImmutableSet.of(candidate), desc());
+        
+        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.nullScore()));
+        verify(contentResolver, never()).findByCanonicalUris((Iterable<String>)any());
+        
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testScoresNullWhenFlatCandidateHasNoEpisodes() {
+        
+        Brand subject = brandWithChildren(1);
+        Brand candidate = brandWithChildren(0);
+
+        ScoredCandidates<Container> score = scorer.score(subject, ImmutableSet.of(candidate), desc());
+        
+        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.nullScore()));
+        verify(contentResolver, never()).findByCanonicalUris((Iterable<String>)any());
+        
+    }
+    
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testScoresNullWhenFlatSubjectHasNoEpisodes() {
+        
+        Brand subject = brandWithChildren(0);
+        Brand candidate = brandWithChildren(1);
+        
+        ScoredCandidates<Container> score = scorer.score(subject, ImmutableSet.of(candidate), desc());
+        
+        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.nullScore()));
+        verify(contentResolver, never()).findByCanonicalUris((Iterable<String>)any());
+        
+    }
+
+    private DefaultDescription desc() {
+        return new DefaultDescription();
     }
 
     private List<Integer> list(Integer...is) {
         return ImmutableList.copyOf(is);
     }
 
-    private Map<String, ? extends Identified> series(int i) {
+    private Map<String, ? extends Identified> series(int seriesCount) {
         Builder<String, Series> builder = ImmutableMap.builder();
-        for (int j = 0; j < i; j++) {
+        for (int j = 0; j < seriesCount; j++) {
             Series series = new Series("uri"+j, "curie", Publisher.BBC);
             builder.put(series.getCanonicalUri(), series);
         };
