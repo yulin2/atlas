@@ -46,4 +46,9 @@ public class NitroClipExtractor
         return source.getProgramme().getImage();
     }
 
+    @Override
+    protected String extractMediaType(NitroItemSource<Clip> source) {
+        return source.getProgramme().getMediaType();
+    }
+    
 }
