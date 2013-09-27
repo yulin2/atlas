@@ -420,6 +420,10 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
                 existing.setGenres(fetched.getGenres());
                 copyLastUpdated(fetched, existing);
             }
+            if (!Objects.equal(existing.getPresentationChannel(), fetched.getPresentationChannel())) {
+                existing.setPresentationChannel(fetched.getPresentationChannel());
+                copyLastUpdated(fetched, existing);
+            }
         }
         return existing;
     }
