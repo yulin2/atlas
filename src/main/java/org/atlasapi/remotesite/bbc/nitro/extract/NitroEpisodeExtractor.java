@@ -6,9 +6,7 @@ import java.util.Set;
 
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
-import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroFormat;
@@ -112,15 +110,12 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
                 item.setParentRef(new ParentRef(brandUri));
             }
         }
-        String mediaType = source.getProgramme().getMediaType();
-        if (mediaType != null) {
-            item.setMediaType(MediaType.fromKey(mediaType.toLowerCase()).orNull());
-        }
-        if (MediaType.VIDEO.equals(item.getMediaType())) {
-            item.setSpecialization(Specialization.TV);
-        } else if (MediaType.AUDIO.equals(item.getMediaType())) {
-            item.setSpecialization(Specialization.RADIO);
-        }
         item.setGenres(genresExtractor.extract(source.getGenres()));
     }
+    
+    @Override
+    protected String extractMediaType(NitroItemSource<Episode> source) {
+        return source.getProgramme().getMediaType();
+    }
+    
 }

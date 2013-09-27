@@ -11,6 +11,8 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.joda.time.DateTime;
@@ -65,8 +67,24 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             versions.add(version);
         }
         item.setVersions(versions.build());
+        String mediaType = extractMediaType(source);
+        if (mediaType != null) {
+            item.setMediaType(MediaType.fromKey(mediaType.toLowerCase()).orNull());
+        }
+        if (MediaType.VIDEO.equals(item.getMediaType())) {
+            item.setSpecialization(Specialization.TV);
+        } else if (MediaType.AUDIO.equals(item.getMediaType())) {
+            item.setSpecialization(Specialization.RADIO);
+        }
         extractAdditionalItemFields(source, item, now);
     }
+
+    /**
+     * Extract the media type of the source.
+     * @param source
+     * @return the media type of the source, or null if not present.
+     */
+    protected abstract String extractMediaType(NitroItemSource<SOURCE> source);
 
     /**
      * Concrete implementations can override this method to perform additional
