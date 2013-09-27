@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
@@ -67,6 +68,16 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             versions.add(version);
         }
         item.setVersions(versions.build());
+        if (item instanceof Film) {
+            item.setMediaType(MediaType.VIDEO);
+            item.setSpecialization(Specialization.FILM);
+        } else {
+            extractMediaTypeAndSpecialization(source, item);
+        }
+        extractAdditionalItemFields(source, item, now);
+    }
+
+    private void extractMediaTypeAndSpecialization(NitroItemSource<SOURCE> source, ITEM item) {
         String mediaType = extractMediaType(source);
         if (mediaType != null) {
             item.setMediaType(MediaType.fromKey(mediaType.toLowerCase()).orNull());
@@ -76,7 +87,6 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         } else if (MediaType.AUDIO.equals(item.getMediaType())) {
             item.setSpecialization(Specialization.RADIO);
         }
-        extractAdditionalItemFields(source, item, now);
     }
 
     /**
