@@ -9,7 +9,6 @@ import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Series;
@@ -36,85 +35,95 @@ public class ContainerHierarchyMatchingScorer implements EquivalenceScorer<Conta
     }
     
     @Override
-    public ScoredCandidates<Container> score(Container content, Set<? extends Container> suggestions, ResultDescription desc) {
+    public ScoredCandidates<Container> score(Container subj, Set<? extends Container> candidates, ResultDescription desc) {
         Builder<Container> results = DefaultScoredCandidates.fromSource("Hierarchy");
 
         // Brands can have full Series hierarchy so compare its Series' hierarchies if present. 
-        // If there are no Series treat it as a flat container
-        if (content instanceof Brand) {
-            Brand brand = (Brand) content;
-            if (!brand.getSeriesRefs().isEmpty()) {
-                List<Integer> subjectSortedSeriesSizes = sortedSeriesSizes(seriesFor(brand));
-                desc.appendText("Subject %s, %s series: %s", brand, subjectSortedSeriesSizes.size(), subjectSortedSeriesSizes).startStage("matches:");
-                for (Container suggestion : suggestions) {
-                    results.addEquivalent(suggestion, score(subjectSortedSeriesSizes, suggestion, desc));
+        // If there are no Series treat it as a flat Container
+        if (subj instanceof Brand && !((Brand)subj).getSeriesRefs().isEmpty()) {
+            List<Integer> subjSeriesSizes = sortedSeriesSizes(seriesFor((Brand)subj));
+            desc.appendText("Subject %s, %s series: %s", subj, subjSeriesSizes.size(), subjSeriesSizes)
+                .startStage("matches:");
+            for (Container cand : candidates) {
+                results.addEquivalent(cand, score(subjSeriesSizes, cand, desc));
+            }
+        } else {
+            desc.appendText("Subject %s, no series:", subj)
+                .startStage("matches:");
+            if (subj.getChildRefs().isEmpty()) {
+                desc.appendText("Subject has no episodes: all score null");
+                for (Container candidate : candidates) {
+                    results.addEquivalent(candidate, Score.nullScore());
                 }
-                desc.finishStage().finishStage();
-                return results.build();
+            } else {
+                for (Container candidate : candidates) {
+                    results.addEquivalent(candidate, score(subj, candidate, desc));
+                }
             }
         }
         
-        desc.appendText("Subject %s, no series:", content).startStage("matches:");
-        for (Container suggestion : suggestions) {
-            results.addEquivalent(suggestion, score(content, suggestion, desc));
-        }
-        
+        desc.finishStage();
         return results.build();
     }
 
-    private Score score(List<Integer> subjectSortedSeriesSizes, Container suggestion, ResultDescription desc) {
-        if (!(suggestion instanceof Brand)) {
-            desc.appendText("%s: not Brand -> none", suggestion);
-            return Score.NULL_SCORE;
+    private Score score(List<Integer> subjSeriesSizes, Container cand, ResultDescription desc) {
+        if (!(cand instanceof Brand)) {
+            desc.appendText("%s: not Brand -> none", cand);
+            return Score.nullScore();
         }
-        return score(subjectSortedSeriesSizes, (Brand)suggestion, desc);
+        return score(subjSeriesSizes, (Brand)cand, desc);
     }
     
-    private Score score(List<Integer> subjectSortedSeriesSizes, Brand suggestion, ResultDescription desc) {
+    private Score score(List<Integer> subjSeriesSizes, Brand cand, ResultDescription desc) {
         
-        if (Math.abs(subjectSortedSeriesSizes.size() - suggestion.getSeriesRefs().size()) > MAX_SERIES_DIFFERENCE) {
-            desc.appendText("%s: series count |%s-%s| > %s -> none", suggestion, subjectSortedSeriesSizes.size(), suggestion.getSeriesRefs().size(), MAX_SERIES_DIFFERENCE);
-            return Score.NULL_SCORE;
+        if (cand.getSeriesRefs().isEmpty()) {
+            desc.appendText("%s: series count 0 -> none", cand);
+            return Score.nullScore();
         }
         
-        return scoreSortedSeriesSizes(subjectSortedSeriesSizes, sortedSeriesSizes(seriesFor(suggestion)), suggestion.getCanonicalUri(), desc);
+        if (Math.abs(subjSeriesSizes.size() - cand.getSeriesRefs().size()) > MAX_SERIES_DIFFERENCE) {
+            desc.appendText("%s: series count |%s-%s| > %s -> none", cand, subjSeriesSizes.size(), cand.getSeriesRefs().size(), MAX_SERIES_DIFFERENCE);
+            return Score.nullScore();
+        }
+        
+        return scoreSortedSeriesSizes(subjSeriesSizes, sortedSeriesSizes(seriesFor(cand)), cand.getCanonicalUri(), desc);
     }
 
     @VisibleForTesting //TODO: extract into helper
-    public Score scoreSortedSeriesSizes(List<Integer> subjectSortedSeriesSizes, List<Integer> suggestionSortedSeriesSizes, String suggestionUri, ResultDescription desc) {
-        PeekingIterator<Integer> subjectAllocation = Iterators.peekingIterator(subjectSortedSeriesSizes.iterator());
-        PeekingIterator<Integer> suggestionAllocation = Iterators.peekingIterator(suggestionSortedSeriesSizes.iterator());
+    public Score scoreSortedSeriesSizes(List<Integer> subjSeriesSizes, List<Integer> candSeriesSizes, String candUri, ResultDescription desc) {
+        PeekingIterator<Integer> subjAllocation = Iterators.peekingIterator(subjSeriesSizes.iterator());
+        PeekingIterator<Integer> candAllocation = Iterators.peekingIterator(candSeriesSizes.iterator());
        
         boolean dropped = false;
-        int sub = 0;
-        int sug = 0;
+        int subj = 0;
+        int cand = 0;
         
-        while(subjectAllocation.hasNext() && suggestionAllocation.hasNext()) {
+        while(subjAllocation.hasNext() && candAllocation.hasNext()) {
             
-            sub = subjectAllocation.next();
-            sug = suggestionAllocation.next();
+            subj = subjAllocation.next();
+            cand = candAllocation.next();
             
-            if (!acceptable(sub,sug)) {
+            if (!acceptable(subj,cand)) {
                 if (dropped) {
-                    desc.appendText("%s: series episode counts %s -> none", suggestionUri, suggestionSortedSeriesSizes);
-                    return Score.NULL_SCORE;
+                    desc.appendText("%s: series episode counts %s -> none", candUri, candSeriesSizes);
+                    return Score.nullScore();
                 }
                 dropped = true;
-                if (suggestionAllocation.hasNext() && acceptable(sub, suggestionAllocation.peek())) {
-                    sug = suggestionAllocation.next();
-                } else if (subjectAllocation.hasNext() && acceptable(subjectAllocation.peek(), sug)) {
-                    sub = subjectAllocation.next();
+                if (candAllocation.hasNext() && acceptable(subj, candAllocation.peek())) {
+                    cand = candAllocation.next();
+                } else if (subjAllocation.hasNext() && acceptable(subjAllocation.peek(), cand)) {
+                    subj = subjAllocation.next();
                 } 
             }
             
         }
 
-        if (dropped && (suggestionAllocation.hasNext() || subjectAllocation.hasNext())) {
-            desc.appendText("%s: series episode counts %s -> none", suggestionUri, suggestionSortedSeriesSizes);
-            return Score.NULL_SCORE;
+        if (dropped && (candAllocation.hasNext() || subjAllocation.hasNext())) {
+            desc.appendText("%s: series episode counts %s -> none", candUri, candSeriesSizes);
+            return Score.nullScore();
         }
         
-        desc.appendText("%s: series episode counts %s -> 1", suggestionUri, subjectSortedSeriesSizes, suggestionSortedSeriesSizes);
+        desc.appendText("%s: series episode counts %s -> 1", candUri, subjSeriesSizes, candSeriesSizes);
         return Score.ONE;
     }
     
@@ -132,20 +141,23 @@ public class ContainerHierarchyMatchingScorer implements EquivalenceScorer<Conta
     }
 
     //Simple case were container heirarchy is flat: compare episode counts.
-    private Score score(Container subject, Container suggestion, ResultDescription desc) {
-        if (suggestion instanceof Brand && !((Brand)suggestion).getSeriesRefs().isEmpty()) {
-            return Score.NULL_SCORE;
+    private Score score(Container subj, Container cand, ResultDescription desc) {
+        if (cand instanceof Brand && !((Brand)cand).getSeriesRefs().isEmpty()) {
+            return Score.nullScore();
         }
         
-        int subjectChildren = subject.getChildRefs().size();
-        int suggestionChildren = suggestion.getChildRefs().size();
+        int subjChildren = subj.getChildRefs().size();
+        int candChildren = cand.getChildRefs().size();
         
-        if (acceptable(subjectChildren, suggestionChildren)) {
-            desc.appendText("%s scores 1 (|%s-%s| <= %s)", suggestion, subjectChildren, suggestionChildren, MAX_EPISODE_DIFFERENCE);
+        if (candChildren == 0) {
+            desc.appendText("%s scores none (0 episodes)", cand);
+            return Score.nullScore();
+        } else if (acceptable(subjChildren, candChildren)) {
+            desc.appendText("%s scores 1 (|%s-%s| <= %s)", cand, subjChildren, candChildren, MAX_EPISODE_DIFFERENCE);
             return Score.ONE;
         } else {
-            desc.appendText("%s scores none (|%s-%s| > %s)", suggestion, subjectChildren, suggestionChildren, MAX_EPISODE_DIFFERENCE);
-            return Score.NULL_SCORE;
+            desc.appendText("%s scores none (|%s-%s| > %s)", cand, subjChildren, candChildren, MAX_EPISODE_DIFFERENCE);
+            return Score.nullScore();
         }
     }
 
