@@ -80,7 +80,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private static final String YES = "yes";
     private static final String CLOSED_BRAND = "http://pressassociation.com/brands/8267";
     private static final String CLOSED_EPISODE = "http://pressassociation.com/episodes/closed";
-    private static final String CLOSED_CURIE = "pa:closed";
+    private static final String CLOSED_CURIE = "pa:closed";    
+    
     private static final List<String> IGNORED_BRANDS = ImmutableList.of("70214", "84575");    // 70214 is 'TBA' brand, 84575 is 'Film TBA'
     
     private final ContentWriter contentWriter;
@@ -161,7 +162,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         summaryBrand.setPublisher(Publisher.PA_SERIES_SUMMARIES);
         summaryBrand.setLongDescription(progData.getSeriesSummary());
         summaryBrand.setLastUpdated(updatedAt.toDateTimeUTC());
-
         return summaryBrand;
     }
 
@@ -380,7 +380,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private Maybe<ItemAndBroadcast> getFilm(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
-        String filmUri = PaHelper.getFilmUri(programmeId(progData));
+        String filmUri = PaHelper.getFilmUri(identifierFor(progData));
         Maybe<Identified> possiblePreviousData = contentResolver.findByCanonicalUris(ImmutableList.of(filmUri)).getFirstValue();
         
         Film film;
@@ -396,7 +396,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         } else {
             film = getBasicFilm(progData);
         }
-        film.addAlias(PaHelper.getFilmAlias(programmeId(progData)));
+        film.addAlias(PaHelper.getFilmAlias(identifierFor(progData)));
+        film.setAliasUrls(ImmutableSet.of(PaHelper.getAlias(progData.getProgId())));
         
         Broadcast broadcast = setCommonDetails(progData, channel, zone, film, updatedAt);
         
@@ -408,7 +409,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private Broadcast setCommonDetails(ProgData progData, Channel channel, DateTimeZone zone, Item episode, Timestamp updatedAt) {
-        
+                
         //currently Welsh channels have Welsh titles/descriptions 
         // which flip the English ones, resulting in many writes. We'll only take the Welsh title if we don't
     	// already have a title from another channel
@@ -456,7 +457,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         selectImages(progData.getPictures(), episode, PA_PICTURE_TYPE_EPISODE, PA_PICTURE_TYPE_SERIES, Maybe.just(PA_PICTURE_TYPE_BRAND));
         
         episode.setPeople(people(progData));
-
+        
         Version version = findBestVersion(episode.getVersions());
         version.set3d(getBooleanValue(progData.getAttr().getThreeD()));
         Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
@@ -491,7 +492,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
     private Maybe<ItemAndBroadcast> getEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode, Timestamp updatedAt) {
         
-        String episodeUri = PaHelper.getEpisodeUri(programmeId(progData));
+        String episodeUri = PaHelper.getEpisodeUri(identifierFor(progData));
         Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(episodeUri)).getFirstValue();
 
         Item item;
@@ -507,7 +508,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             item = getBasicEpisode(progData, isEpisode);
         }
         
-        item.addAlias(PaHelper.getEpisodeAlias(programmeId(progData)));
+        item.addAlias(PaHelper.getEpisodeAlias(identifierFor(progData)));
         
         Broadcast broadcast = setCommonDetails(progData, channel, zone, item, updatedAt);
         
@@ -665,7 +666,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private Film getBasicFilm(ProgData progData) {
-        Film film = new Film(PaHelper.getFilmUri(programmeId(progData)), PaHelper.getFilmCurie(programmeId(progData)), Publisher.PA);
+        Film film = new Film(PaHelper.getFilmUri(identifierFor(progData)), PaHelper.getFilmCurie(identifierFor(progData)), Publisher.PA);
         
         setBasicDetails(progData, film);
         
@@ -674,8 +675,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
     private Item getBasicEpisode(ProgData progData, boolean isEpisode) {
         Item item = isEpisode ? new Episode() : new Item();
-        item.setCanonicalUri(PaHelper.getEpisodeUri(programmeId(progData)));
-        item.setCurie("pa:e-" + programmeId(progData));
+        item.setCanonicalUri(PaHelper.getEpisodeUri(identifierFor(progData)));
+        item.setCurie("pa:e-" + identifierFor(progData));
         item.setPublisher(Publisher.PA);
         setBasicDetails(progData, item);
         return item;
@@ -706,7 +707,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return DateTimeFormat.forPattern("dd/MM/yyyy-HH:mm").withZone(zone).parseDateTime(dateString);
     }
     
-    protected static String programmeId(ProgData progData) {
+    protected static String identifierFor(ProgData progData) {
         return ! Strings.isNullOrEmpty(progData.getRtFilmnumber()) ? progData.getRtFilmnumber() : progData.getProgId();
     }
     
