@@ -35,6 +35,7 @@ public class ApplicationListWriter implements EntityListWriter<Application> {
         ctxt.startResource(Resource.APPLICATION);
         writer.writeField("id", idCodec.encode(entity.getId().toBigInteger()));
         writer.writeField("title", entity.getTitle());
+        writer.writeField("description", entity.getDescription());
         writer.writeField("created", entity.getCreated());
         writer.writeObject(credentialsWriter, entity.getCredentials(), ctxt);
         writer.writeObject(sourcesWriter, entity.getSources(), ctxt);
