@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Broadcast;
@@ -19,6 +20,9 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Interval;
+import org.mortbay.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -27,6 +31,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
 public class PaFeaturesProcessor {
+    
+    private static final Logger log = LoggerFactory.getLogger(PaFeaturesProcessor.class);
     
     private static final String TODAY_CONTENT_GROUP_URI = "http://pressassocation.com/features/tvpicks";
     private static final String ALL_CONTENT_GROUP_URI = "http://pressassocation.com/features/tvpicks/all";
@@ -64,12 +70,22 @@ public class PaFeaturesProcessor {
     }
     
     public void process(String programmeId) {
-        Map<String, Identified> resolvedContent = contentResolver.findByCanonicalUris(
-                ImmutableSet.of(PaHelper.getFilmUri(programmeId), PaHelper.getEpisodeUri(programmeId),
-                        PaHelper.getAlias(programmeId))).asResolvedMap();
+        Set<String> candidateUris = ImmutableSet.of(PaHelper.getFilmUri(programmeId), 
+                PaHelper.getEpisodeUri(programmeId), PaHelper.getAlias(programmeId));
+        log.trace("Looking up URIs {}", candidateUris);
+        
+        Map<String, Identified> resolvedContent = contentResolver.findByCanonicalUris(candidateUris).asResolvedMap();
         ArrayList<Identified> resolved = Lists.newArrayList(resolvedContent.values());
+        
         Collections.sort(resolved, new PaIdentifiedComparator());
         Item item = (Item) Iterables.getFirst(resolved, null);
+        
+        if (item == null) {
+            log.error("Could not resolve item " + programmeId);
+            return;
+        }
+        
+        log.trace("Resolved and chose item {}", item.getCanonicalUri());
         
         Broadcast broadcast = BY_BROADCAST_DATE.min(Iterables.concat(Iterables.transform(item.getVersions(), Version.TO_BROADCASTS)));
         if (upcomingPickInterval.contains(broadcast.getTransmissionTime())) {
