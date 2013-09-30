@@ -1,6 +1,10 @@
 package org.atlasapi.remotesite.pa.features;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChildRef;
@@ -19,6 +23,7 @@ import org.joda.time.Interval;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
 public class PaFeaturesProcessor {
@@ -60,8 +65,13 @@ public class PaFeaturesProcessor {
     }
     
     public void process(String programmeId) {
-        Map<String, Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableSet.of(PaHelper.getFilmUri(programmeId), PaHelper.getEpisodeUri(programmeId))).asResolvedMap();
-        Item item = (Item) Iterables.getOnlyElement(resolvedContent.values());
+        Map<String, Identified> resolvedContent = contentResolver.findByCanonicalUris(
+                ImmutableSet.of(PaHelper.getFilmUri(programmeId), PaHelper.getEpisodeUri(programmeId),
+                        PaHelper.getAlias(programmeId))).asResolvedMap();
+        ArrayList<Identified> resolved = Lists.newArrayList(resolvedContent.values());
+        Collections.sort(resolved, new PaIdentifiedComparator());
+        Item item = (Item) Iterables.getFirst(resolved, null);
+        
         Broadcast broadcast = BY_BROADCAST_DATE.min(Iterables.concat(Iterables.transform(item.getVersions(), Version.TO_BROADCASTS)));
         if (featureDate.contains(broadcast.getTransmissionTime())) {
             todayContentGroup.addContent(item.childRef()); 
