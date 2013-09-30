@@ -65,6 +65,7 @@ public class SourcesController {
             @PathVariable String sourceId,
             @RequestParam String id,
             @RequestParam String permission) throws NotFoundException {
+        response.addHeader("Access-Control-Allow-Origin", "*");
         Optional<Publisher> source = sourceIdCodec.decode(sourceId);
         if (source.isPresent()) {
             Id applicationId = Id.valueOf(idCodec.decode(id));
@@ -96,6 +97,7 @@ public class SourcesController {
             @PathVariable String sourceId,
             @RequestParam String id,
             @RequestParam String permission) throws QueryExecutionException {
+        response.addHeader("Access-Control-Allow-Origin", "*");
         Optional<Publisher> source = sourceIdCodec.decode(sourceId);
         if (source.isPresent()) {
             Id applicationId = Id.valueOf(idCodec.decode(id));
@@ -127,7 +129,7 @@ public class SourcesController {
             @PathVariable String sourceId,
             @PathVariable String id,
             @RequestParam String state) throws QueryExecutionException {
-        
+        response.addHeader("Access-Control-Allow-Origin", "*");
         Optional<Publisher> source = sourceIdCodec.decode(sourceId);
         if (source.isPresent()) {
             Id applicationId = Id.valueOf(idCodec.decode(id));

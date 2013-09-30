@@ -55,7 +55,7 @@ public class ApplicationQueryExecutor implements QueryExecutor<Application> {
         Publisher reads = null;
             
         Publisher writes = null;
-     
+
         for (AttributeQuery<?> operand : operands) {
              if (operand.getAttributeName().equals(Attributes.SOURCE_READS.externalName())) {
                 reads = (Publisher) Iterables.getOnlyElement(operand.getValue());

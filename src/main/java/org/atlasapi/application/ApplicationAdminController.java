@@ -97,6 +97,7 @@ public class ApplicationAdminController {
     @RequestMapping(value = "/4.0/applications", method = RequestMethod.POST)
     public void writeApplication(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ReadException, NotFoundException {
+        
         Application application = deserialize(new InputStreamReader(request.getInputStream()), Application.class);
         if (application.getId() != null) {
             Optional<Application> existing = applicationStore.applicationFor(application.getId());
