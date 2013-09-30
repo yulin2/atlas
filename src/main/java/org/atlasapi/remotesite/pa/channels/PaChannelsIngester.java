@@ -148,7 +148,10 @@ public class PaChannelsIngester {
         
         if (paChannel.getProviderChannelIds() != null) {
             for (ProviderChannelId providerChannelId : paChannel.getProviderChannelIds().getProviderChannelId()) {
-                channel.addAliasUrl(lookupAlias(providerChannelId, serviceProviders));                
+                String alias = lookupAlias(providerChannelId, serviceProviders);
+                if (alias != null) {
+                    channel.addAliasUrl(alias);
+                }
             }
         }
         
@@ -216,7 +219,8 @@ public class PaChannelsIngester {
             return youViewAlias(providerChannelId.getvalue());
         }
         
-        throw new RuntimeException("service provider name " + serviceProviderName + " not recognised. Unable to process providerChannelId " + providerChannelId);
+        log.warn("service provider name " + serviceProviderName + " not recognised. Unable to process providerChannelId " + providerChannelId);
+        return null;
     }
 
     private String youViewAlias(String youViewChannelId) {
