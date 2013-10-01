@@ -17,7 +17,6 @@ import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.EquivalentContentResolver;
 import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
@@ -86,7 +85,6 @@ public class PaModule {
     private @Autowired ChannelWriter channelWriter;
     private @Autowired FileUploadResultStore fileUploadResultStore;
     private @Autowired DatabasedMongo mongo;
-    private @Autowired EquivalentContentResolver equivalentContentResolver;
     // to ensure the complete and daily people ingest jobs are not run simultaneously 
     private final Lock peopleLock = new ReentrantLock();
     
@@ -132,7 +130,7 @@ public class PaModule {
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {
-        return new PaFeaturesUpdater(paProgrammeDataStore(), fileUploadResultStore, new PaFeaturesProcessor(equivalentContentResolver, contentGroupResolver, contentGroupWriter));
+        return new PaFeaturesUpdater(paProgrammeDataStore(), fileUploadResultStore, new PaFeaturesProcessor(contentResolver, contentGroupResolver, contentGroupWriter));
     }
 
     @Bean PaFtpFileUpdater ftpFileUpdater() {
