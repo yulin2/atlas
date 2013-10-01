@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.bbc.nitro;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import org.atlasapi.media.channel.Channel;
@@ -24,11 +25,11 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     private final Supplier<Range<LocalDate>> dayGenerator;
-    private final Supplier<Iterable<Channel>> channelSupplier;
+    private final Supplier<? extends Collection<Channel>> channelSupplier;
     private final ChannelDayProcessor processor;
     private final boolean abortOnFailure;
 
-    public ChannelDayProcessingTask(Supplier<Iterable<Channel>> channelSupplier, Supplier<Range<LocalDate>> daySupplier, ChannelDayProcessor processor, boolean abortOnFailure) {
+    public ChannelDayProcessingTask(Supplier<? extends Collection<Channel>> channelSupplier, Supplier<Range<LocalDate>> daySupplier, ChannelDayProcessor processor, boolean abortOnFailure) {
         this.channelSupplier = channelSupplier;
         this.dayGenerator = daySupplier;
         this.processor = processor;
@@ -39,20 +40,22 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
     protected void runTask() {
         UpdateProgress progress = UpdateProgress.START;
         Range<LocalDate> range = dayGenerator.get();
-        Iterator<Channel> channels = channelSupplier.get().iterator();
-        while(channels.hasNext() && shouldContinue()) {
-            reportStatus(progress.toString());
-            Channel channel = channels.next();
-            progress = processRangeForChannel(range, channel, progress);
+        Collection<Channel> channels = channelSupplier.get();
+        int channelCount = channels.size();
+        Iterator<Channel> channelsIter = channels.iterator();
+        for(int i = 1; channelsIter.hasNext() && shouldContinue(); i++) {
+            reportStatus(String.format("%s/%s %s", i, channelCount, progress.toString()));
+            Channel channel = channelsIter.next();
+            progress = processRangeForChannel(range, channel, progress, i, channelCount);
         }
     }
 
-    private UpdateProgress processRangeForChannel(Range<LocalDate> range, Channel channel, UpdateProgress progress) {
+    private UpdateProgress processRangeForChannel(Range<LocalDate> range, Channel channel, UpdateProgress progress,  int i, int size) {
         Iterator<LocalDate> days = daysIn(range);
         while(days.hasNext() && shouldContinue()) {
             LocalDate day = days.next();
             progress = progress.reduce(processChannelDay(channel, day));
-            reportStatus(progress.toString());
+            reportStatus(String.format("%s/%s %s", i, size, progress.toString()));
         }
         return progress;
     }
