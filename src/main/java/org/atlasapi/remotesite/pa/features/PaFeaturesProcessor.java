@@ -74,7 +74,7 @@ public class PaFeaturesProcessor {
                 PaHelper.getEpisodeUri(programmeId), PaHelper.getAlias(programmeId));
         log.trace("Looking up URIs {}", candidateUris);
         
-        Map<String, Identified> resolvedContent = contentResolver.findByCanonicalUris(candidateUris).asResolvedMap();
+        Map<String, Identified> resolvedContent = contentResolver.findByUris(candidateUris).asResolvedMap();
         ArrayList<Identified> resolved = Lists.newArrayList(resolvedContent.values());
         
         log.trace("Resolved {}", Iterables.transform(resolved, Identified.TO_URI));
