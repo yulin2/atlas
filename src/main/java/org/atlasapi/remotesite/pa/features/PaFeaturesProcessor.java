@@ -1,7 +1,10 @@
 package org.atlasapi.remotesite.pa.features;
 
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChildRef;
@@ -12,9 +15,11 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Interval;
+import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +37,7 @@ public class PaFeaturesProcessor {
     private static final String ALL_CONTENT_GROUP_URI = "http://pressassocation.com/features/tvpicks/all";
     private static final Ordering<Broadcast> BY_BROADCAST_DATE = Ordering.natural().onResultOf(Broadcast.TO_TRANSMISSION_TIME);
     
-    private final EquivalentContentResolver contentResolver;
+    private final ContentResolver contentResolver;
     private final ContentGroupWriter contentGroupWriter;
     private final ContentGroupResolver contentGroupResolver;
 
@@ -40,7 +45,7 @@ public class PaFeaturesProcessor {
     private ContentGroup todayContentGroup;
     private ContentGroup allFeaturedContentEverContentGroup;
     
-    public PaFeaturesProcessor(EquivalentContentResolver contentResolver, ContentGroupResolver contentGroupResolver, ContentGroupWriter contentGroupWriter) {
+    public PaFeaturesProcessor(ContentResolver contentResolver, ContentGroupResolver contentGroupResolver, ContentGroupWriter contentGroupWriter) {
         this.contentResolver = contentResolver;
         this.contentGroupWriter = contentGroupWriter;
         this.contentGroupResolver = contentGroupResolver;
@@ -68,8 +73,8 @@ public class PaFeaturesProcessor {
                 PaHelper.getEpisodeUri(programmeId), PaHelper.getAlias(programmeId));
         log.trace("Looking up URIs {}", candidateUris);
         
-        ArrayList<Content> resolved = Lists.newArrayList(contentResolver.resolveUris(candidateUris, 
-                ImmutableSet.of(Publisher.PA), ImmutableSet.<Annotation>of(), true).values());
+        Map<String, Identified> resolvedContent = contentResolver.findByCanonicalUris(candidateUris).asResolvedMap();
+        ArrayList<Identified> resolved = Lists.newArrayList(resolvedContent.values());
         
         log.trace("Resolved {}", Iterables.transform(resolved, Identified.TO_URI));
         
