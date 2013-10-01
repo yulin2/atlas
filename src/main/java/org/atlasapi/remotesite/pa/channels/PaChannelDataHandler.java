@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
@@ -17,12 +18,20 @@ import org.atlasapi.remotesite.pa.channels.bindings.Station;
 import org.atlasapi.remotesite.pa.channels.bindings.TvChannelData;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets.SetView;
 import com.metabroadcast.common.base.Maybe;
 
 public class PaChannelDataHandler {
     
-    private static final String PRESS_ASSOCIATION_URL = "http://pressassociation.com"; 
+    private static final String PRESS_ASSOCIATION_URL = "http://pressassociation.com";
+    private static final Set<String> KNOWN_ALIAS_PREFIXES = ImmutableSet.of(
+            "http://pressassociation.com/",
+            "http://youview.com/service/"
+    );
 
     private final PaChannelsIngester channelsIngester;
     private final PaChannelGroupsIngester channelGroupsIngester;
@@ -108,7 +117,7 @@ public class PaChannelDataHandler {
             existingChannel.setStartDate(newChannel.getStartDate());
             existingChannel.setEndDate(newChannel.getEndDate());
             existingChannel.setRelatedLinks(newChannel.getRelatedLinks());
-            existingChannel.addAliasUrls(newChannel.getAliasUrls());
+            existingChannel.setAliasUrls(mergeChannelAliasUrls(existingChannel.getAliasUrls(), newChannel.getAliasUrls()));
             existingChannel.setParent(newChannel.getParent());
             existingChannel.setMediaType(newChannel.getMediaType());
             existingChannel.setHighDefinition(newChannel.getHighDefinition());
@@ -122,6 +131,35 @@ public class PaChannelDataHandler {
         }
     }
     
+    /**
+     * <p>
+     * Merges the existing alias urls with the newly ingested aliases, replacing those with known prefixes
+     *  with newer versions if appropriate.
+     * </p>
+     * <p>
+     * The channels adapter writes certain aliases on channels explicitly, all others it passes through.
+     * It maintains a list of prefixes for those known aliases, and removes those from the existing aliases before
+     * adding the newly ingested aliases, thus ensuring that if a known alias is updated, that change is 
+     * reflected in the set of aliases written.
+     * </p>
+     * @param existingAliases - the aliases on any existing channel
+     * @param newAliases - the set of newly ingested alias
+     * @return - the combined set of aliases to write 
+     */
+    private Set<String> mergeChannelAliasUrls(Set<String> existingAliases, Set<String> newAliases) {
+        Builder<String> combined = ImmutableSet.<String>builder();
+        for (String knownAliasPrefix : KNOWN_ALIAS_PREFIXES) {
+            for (String existing : existingAliases) {
+                if (!existing.startsWith(knownAliasPrefix)) {
+                    combined.add(existing);
+                }
+            }
+        }
+        combined.addAll(newAliases);
+        
+        return combined.build();
+    }
+
     private ChannelGroup createOrMerge(ChannelGroup channelGroup) {
         String alias = null;
         for (String newAlias : channelGroup.getAliasUrls()) {
