@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
@@ -73,6 +74,8 @@ public class PaFeaturesProcessor {
         
         ArrayList<Content> resolved = Lists.newArrayList(contentResolver.resolveUris(candidateUris, 
                 ImmutableSet.of(Publisher.PA), ImmutableSet.<Annotation>of(), true).values());
+        
+        log.trace("Resolved {}", Iterables.transform(resolved, Identified.TO_URI));
         
         Collections.sort(resolved, new PaIdentifiedComparator());
         Item item = (Item) Iterables.getFirst(resolved, null);
