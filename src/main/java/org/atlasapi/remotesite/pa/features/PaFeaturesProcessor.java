@@ -1,10 +1,9 @@
 package org.atlasapi.remotesite.pa.features;
 
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChildRef;
@@ -19,7 +18,6 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Interval;
-import org.mortbay.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +72,7 @@ public class PaFeaturesProcessor {
         log.trace("Looking up URIs {}", candidateUris);
         
         Map<String, Identified> resolvedContent = contentResolver.findByUris(candidateUris).asResolvedMap();
-        ArrayList<Identified> resolved = Lists.newArrayList(resolvedContent.values());
+        List<Identified> resolved = Lists.newArrayList(resolvedContent.values());
         
         log.trace("Resolved {}", Iterables.transform(resolved, Identified.TO_URI));
         
