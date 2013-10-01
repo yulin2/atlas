@@ -3,6 +3,7 @@ package org.atlasapi.application;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.application.SourceRequestStore;
+import org.elasticsearch.common.Preconditions;
 
 import com.google.common.base.Optional;
 import com.metabroadcast.common.ids.IdGenerator;
@@ -21,6 +22,9 @@ public class SourceRequestManager {
     public SourceRequest createOrUpdateRequest(Publisher source, UsageType usageType,
             Id applicationId, String applicationUrl, String email, String reason) {
         Optional<SourceRequest> existing = sourceRequestStore.getBy(applicationId, source);
+        Preconditions.checkNotNull(source);
+        Preconditions.checkNotNull(applicationId);
+        Preconditions.checkNotNull(usageType);
         if (existing.isPresent()) {
             return updateSourceRequest(existing.get(), usageType,
                     applicationUrl, email, reason);

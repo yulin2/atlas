@@ -19,6 +19,7 @@ import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.QueryResult;
 import org.atlasapi.query.common.StandardQueryParser;
+import org.elasticsearch.common.Preconditions;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

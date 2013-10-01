@@ -119,7 +119,7 @@ public class ApplicationAdminController {
         ApplicationSources sources = deserialize(new InputStreamReader(
                 request.getInputStream()), ApplicationSources.class);
         Application existing = applicationStore.applicationFor(applicationId).get();
-        Application modified = existing.replaceSources(sources);
+        Application modified = existing.copyWithSources(sources);
         applicationStore.updateApplication(modified);
     }
     
@@ -131,14 +131,14 @@ public class ApplicationAdminController {
         PrecedenceOrdering ordering = deserialize(new InputStreamReader(request.getInputStream()), PrecedenceOrdering.class);
         List<Publisher> sourceOrder = getSourcesFrom(ordering);
         Application existing = applicationStore.applicationFor(applicationId).get();
-        applicationStore.updateApplication(existing.setPrecendenceOrder(sourceOrder));
+        applicationStore.updateApplication(existing.copyWithReadSourceOrder(sourceOrder));
     }
     
     @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.DELETE)
     public void disablePrecedence(HttpServletRequest request, HttpServletResponse response) throws QueryParseException, NotFoundException {
         Query<Application> applicationsQuery = requestParser.parse(request);
         Application existing = applicationStore.applicationFor(applicationsQuery.getOnlyId()).get();
-        applicationStore.updateApplication(existing.disablePrecendence());
+        applicationStore.updateApplication(existing.copyWithPrecedenceDisabled());
     }
 
     private <T> T deserialize(Reader input, Class<T> cls) throws IOException, ReadException {

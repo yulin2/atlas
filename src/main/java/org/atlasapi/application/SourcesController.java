@@ -73,9 +73,9 @@ public class SourcesController {
             Application existing = applicationStore.applicationFor(applicationId).get();
             Application modified = null;
             if (permissionType.equals(Permission.READ)) {
-                modified = existing.enableSource(source.get());
+                modified = existing.copyWithSourceEnabled(source.get());
             } else if (permissionType.equals(Permission.WRITE)) {
-                modified = existing.addWrites(source.get());
+                modified = existing.copyWithAddedWritingSource(source.get());
             }
             if (modified != null) {
                 applicationStore.updateApplication(modified);
@@ -105,9 +105,9 @@ public class SourcesController {
             Application existing = applicationStore.applicationFor(applicationId).get();
             Application modified = null;
             if (permissionType.equals(Permission.READ)) {
-                modified = existing.disableSource(source.get());
+                modified = existing.copyWithSourceDisabled(source.get());
             } else if (permissionType.equals(Permission.WRITE)) {
-                modified = existing.removeWrites(source.get());
+                modified = existing.copyWithRemovedWritingSource(source.get());
             }
             if (modified != null) {
                 applicationStore.updateApplication(modified);
@@ -136,7 +136,7 @@ public class SourcesController {
             SourceState requestedState = SourceState.valueOf(state.toUpperCase());
             Application existing = applicationStore.applicationFor(applicationId).get();
             applicationStore.updateApplication(
-                    existing.changeReadSourceState(source.get(), requestedState));
+                    existing.copyWithReadSourceState(source.get(), requestedState));
         } else {
             throw new QueryExecutionException("No source with id " + sourceId);
         }
