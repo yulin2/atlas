@@ -17,12 +17,14 @@ import org.atlasapi.media.channel.Region;
 import org.atlasapi.remotesite.pa.channels.bindings.Station;
 import org.atlasapi.remotesite.pa.channels.bindings.TvChannelData;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet.Builder;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets.SetView;
 import com.metabroadcast.common.base.Maybe;
 
 public class PaChannelDataHandler {
@@ -32,6 +34,17 @@ public class PaChannelDataHandler {
             "http://pressassociation.com/",
             "http://youview.com/service/"
     );
+    private static final Predicate<String> IS_KNOWN_ALIAS = new Predicate<String>() {
+        @Override
+        public boolean apply(String input) {
+            for (String prefix : KNOWN_ALIAS_PREFIXES) {
+                if (input.startsWith(prefix)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
 
     private final PaChannelsIngester channelsIngester;
     private final PaChannelGroupsIngester channelGroupsIngester;
@@ -148,13 +161,15 @@ public class PaChannelDataHandler {
      */
     private Set<String> mergeChannelAliasUrls(Set<String> existingAliases, Set<String> newAliases) {
         Builder<String> combined = ImmutableSet.<String>builder();
-        for (String knownAliasPrefix : KNOWN_ALIAS_PREFIXES) {
-            for (String existing : existingAliases) {
-                if (!existing.startsWith(knownAliasPrefix)) {
-                    combined.add(existing);
-                }
-            }
+               
+        combined.addAll(Iterables.filter(existingAliases, Predicates.not(IS_KNOWN_ALIAS)));
+
+        if (Iterables.isEmpty(Iterables.filter(newAliases, IS_KNOWN_ALIAS))) {
+            Joiner joinOnComma = Joiner.on(',');
+            throw new RuntimeException("One of the aliases ingested (" + joinOnComma.join(newAliases) 
+                    + ")does not have a recognised prefix. Known prefixes: " + joinOnComma.join(KNOWN_ALIAS_PREFIXES));
         }
+        
         combined.addAll(newAliases);
         
         return combined.build();
