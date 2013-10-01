@@ -26,6 +26,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import com.google.common.net.HostSpecifier;
@@ -115,18 +116,19 @@ public class BbcNitroModule {
                 .build();
     }
 
-    private Supplier<Iterable<Channel>> bbcChannelSupplier() {
-        return new Supplier<Iterable<Channel>>() {
+    private Supplier<ImmutableSet<Channel>> bbcChannelSupplier() {
+        return new Supplier<ImmutableSet<Channel>>() {
             //TODO: really need that alias for bbc services...
             @Override
-            public Iterable<Channel> get() {
-                return Iterables.transform(BbcIonServices.services.values(),
-                        new Function<String, Channel>() {
-                            @Override
-                            public Channel apply(String input) {
-                                return channelResolver.fromUri(input).requireValue();
-                            }
-                        });
+            public ImmutableSet<Channel> get() {
+                return ImmutableSet.copyOf(Iterables.transform(BbcIonServices.services.values(),
+                    new Function<String, Channel>() {
+                        @Override
+                        public Channel apply(String input) {
+                            return channelResolver.fromUri(input).requireValue();
+                        }
+                    }
+                ));
             }
             
         };

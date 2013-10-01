@@ -65,12 +65,12 @@ public class ContentUpdatingNitroBroadcastHandler implements NitroBroadcastHandl
         for (com.metabroadcast.atlas.glycerin.model.Broadcast nitroBroadcast : nitroBroadcasts) {
             try {
                 Optional<Broadcast> broadcast = broadcastExtractor.extract(nitroBroadcast);
-                checkState(broadcast.isPresent(), "couldn't extract broadcast: {}", nitroBroadcast.getPid());
+                checkState(broadcast.isPresent(), "couldn't extract broadcast: %s", nitroBroadcast.getPid());
                 
                 String itemPid = NitroUtil.programmePid(nitroBroadcast).getPid();
                 String itemUri = BbcFeeds.nitroUriForPid(itemPid);
                 Item item = items.get(itemUri);
-                checkNotNull(item, "No item for broadcast {}: {}", nitroBroadcast.getPid(), itemPid);
+                checkNotNull(item, "No item for broadcast %s: %s", nitroBroadcast.getPid(), itemPid);
                 
                 addBroadcast(item, versionUri(nitroBroadcast), broadcast.get());
                 
