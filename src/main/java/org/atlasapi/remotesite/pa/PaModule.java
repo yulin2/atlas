@@ -17,16 +17,15 @@ import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.EquivalentContentResolver;
 import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.content.people.PersonWriter;
-import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.query.QueryModule;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.atlasapi.remotesite.pa.channels.PaChannelDataHandler;
@@ -60,7 +59,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.security.UsernameAndPassword;
 
 @Configuration
-@Import({ RtFilmModule.class, QueryModule.class })
+@Import(RtFilmModule.class)
 public class PaModule {
     private final static RepetitionRule PEOPLE_COMPLETE_INGEST = RepetitionRules.NEVER;
     private final static RepetitionRule PEOPLE_INGEST = RepetitionRules.daily(LocalTime.MIDNIGHT);
@@ -87,7 +86,7 @@ public class PaModule {
     private @Autowired ChannelWriter channelWriter;
     private @Autowired FileUploadResultStore fileUploadResultStore;
     private @Autowired DatabasedMongo mongo;
-    private @Autowired KnownTypeQueryExecutor queryExecutor;
+    private @Autowired EquivalentContentResolver equivalentContentResolver;
     // to ensure the complete and daily people ingest jobs are not run simultaneously 
     private final Lock peopleLock = new ReentrantLock();
     
@@ -133,7 +132,7 @@ public class PaModule {
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {
-        return new PaFeaturesUpdater(paProgrammeDataStore(), fileUploadResultStore, new PaFeaturesProcessor(queryExecutor, contentGroupResolver, contentGroupWriter));
+        return new PaFeaturesUpdater(paProgrammeDataStore(), fileUploadResultStore, new PaFeaturesProcessor(equivalentContentResolver, contentGroupResolver, contentGroupWriter));
     }
 
     @Bean PaFtpFileUpdater ftpFileUpdater() {
