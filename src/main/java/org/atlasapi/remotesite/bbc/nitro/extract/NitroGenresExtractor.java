@@ -26,8 +26,8 @@ public class NitroGenresExtractor implements ContentExtractor<List<NitroGenreGro
 
     private Iterable<String> extractGenres(ImmutableSet.Builder<String> genres, NitroGenreGroup genreGroup) {
         String parent = null; 
-        List<NitroGenre> nitroGenres = genreGroup.getGenres();
-        for (NitroGenre nitroGenre : nitroGenres.subList(0, Math.min(nitroGenres.size(), 2))) {
+        List<NitroGenre> groupGenres = genreGroup.getGenres();
+        for (NitroGenre nitroGenre : groupGenres.subList(0, Math.min(groupGenres.size(), 2))) {
             parent = extractGenre(nitroGenre, parent);
             genres.add(PREFIX + parent);
         }

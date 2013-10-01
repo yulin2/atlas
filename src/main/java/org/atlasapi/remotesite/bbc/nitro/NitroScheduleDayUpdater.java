@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.bbc.nitro;
 
+import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
@@ -14,9 +15,10 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.Glycerin;
 import com.metabroadcast.atlas.glycerin.GlycerinException;
 import com.metabroadcast.atlas.glycerin.model.Broadcast;
@@ -43,11 +45,11 @@ public class NitroScheduleDayUpdater implements ChannelDayProcessor {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final Glycerin glycerin;
-    private final NitroBroadcastHandler<ItemRefAndBroadcast> broadcastHandler;
+    private final NitroBroadcastHandler<? extends List<Optional<ItemRefAndBroadcast>>> broadcastHandler;
     private final BroadcastTrimmer trimmer;
     private final ScheduleWriter scheduleWriter;
 
-    public NitroScheduleDayUpdater(ScheduleWriter scheduleWriter, BroadcastTrimmer trimmer, NitroBroadcastHandler<ItemRefAndBroadcast> handler, Glycerin glycerin) {
+    public NitroScheduleDayUpdater(ScheduleWriter scheduleWriter, BroadcastTrimmer trimmer, NitroBroadcastHandler<? extends List<Optional<ItemRefAndBroadcast>>> handler, Glycerin glycerin) {
         this.scheduleWriter = scheduleWriter;
         this.trimmer = trimmer;
         this.broadcastHandler = handler;
@@ -63,34 +65,31 @@ public class NitroScheduleDayUpdater implements ChannelDayProcessor {
         log.debug("updating {}: {} -> {}", new Object[]{serviceId, from, to});
         
         ImmutableList<Broadcast> broadcasts = getBroadcasts(serviceId, from, to);
-        ImmutableList<ItemRefAndBroadcast> processed = processBroadcasts(broadcasts);
-        updateSchedule(channel, from, to, processed);
+        ImmutableList<Optional<ItemRefAndBroadcast>> processingResults = processBroadcasts(broadcasts);
+        updateSchedule(channel, from, to, Optional.presentInstances(processingResults));
+        
+        int processedCount = Iterables.size(Optional.presentInstances(processingResults));
+        int failedCount = processingResults.size() - processedCount;
 
-        log.debug("updated {}: {} -> {}: {} broadcasts", new Object[]{serviceId, from, to, processed.size()});
-        return new UpdateProgress(processed.size(), 0);
+        log.debug("updated {}: {} -> {}: {} broadcasts ({} failed)", new Object[]{serviceId, from, to, processedCount, failedCount});
+        return new UpdateProgress(processedCount, failedCount);
     }
 
     private void updateSchedule(Channel channel, DateTime from, DateTime to, 
-            ImmutableList<ItemRefAndBroadcast> processed) {
+            Iterable<ItemRefAndBroadcast> processed) {
+        if (Iterables.isEmpty(processed)) {
+            return;
+        }
         trimmer.trimBroadcasts(new Interval(from, to), channel, acceptableIds(processed));
         scheduleWriter.replaceScheduleBlock(Publisher.BBC_NITRO, channel, processed);
     }
 
-    private ImmutableList<ItemRefAndBroadcast> processBroadcasts(ImmutableList<Broadcast> broadcasts) throws NitroException {
-        Builder<ItemRefAndBroadcast> results = ImmutableList.builder();
-        for (Broadcast broadcast : broadcasts) {
-            try {
-                results.add(broadcastHandler.handle(broadcast));
-            } catch (Exception e) {
-                log.error(String.format("%s %s", broadcast.getPid(), broadcast.getPublishedTime().getStart()), e);
-            }
-        }
-        ImmutableList<ItemRefAndBroadcast> processed = results.build();
-        return processed;
+    private ImmutableList<Optional<ItemRefAndBroadcast>> processBroadcasts(ImmutableList<Broadcast> broadcasts) throws NitroException {
+        return ImmutableList.copyOf(broadcastHandler.handle(broadcasts));
     }
 
     
-    private Map<String, String> acceptableIds(ImmutableList<ItemRefAndBroadcast> processed) {
+    private Map<String, String> acceptableIds(Iterable<ItemRefAndBroadcast> processed) {
         ImmutableMap.Builder<String, String> ids = ImmutableMap.builder();
         for (ItemRefAndBroadcast itemRefAndBroadcast : processed) {
             ids.put(itemRefAndBroadcast.getBroadcast().getSourceId(),

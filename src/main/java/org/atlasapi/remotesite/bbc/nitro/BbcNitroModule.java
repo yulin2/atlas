@@ -23,12 +23,16 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.api.client.util.Strings;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import com.google.common.net.HostSpecifier;
+import com.google.common.util.concurrent.RateLimiter;
 import com.metabroadcast.atlas.glycerin.Glycerin;
 import com.metabroadcast.atlas.glycerin.XmlGlycerin;
+import com.metabroadcast.atlas.glycerin.XmlGlycerin.Builder;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -40,6 +44,7 @@ public class BbcNitroModule {
     private @Value("${updaters.bbcnitro.enabled}") Boolean tasksEnabled;
     private @Value("${bbc.nitro.host}") String nitroHost;
     private @Value("${bbc.nitro.apiKey}") String nitroApiKey;
+    private @Value("${bbc.nitro.requestsPerSecond}") Integer nitroRateLimit;
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
@@ -79,9 +84,12 @@ public class BbcNitroModule {
                 || Strings.isNullOrEmpty(nitroHost)) {
             return UnconfiguredGlycerin.get();
         }
-        return XmlGlycerin.builder(nitroApiKey)
-                .withHost(HostSpecifier.fromValid(nitroHost))
-                .build();
+        Builder glycerin = XmlGlycerin.builder(nitroApiKey)
+                .withHost(HostSpecifier.fromValid(nitroHost));
+        if (nitroRateLimit != null) {
+            glycerin.withLimiter(RateLimiter.create(nitroRateLimit));
+        }
+        return glycerin.build();
     }
 
     @Bean
@@ -94,7 +102,7 @@ public class BbcNitroModule {
     }
 
     @Bean
-    NitroBroadcastHandler<ItemRefAndBroadcast> nitroBroadcastHandler() {
+    NitroBroadcastHandler<ImmutableList<Optional<ItemRefAndBroadcast>>> nitroBroadcastHandler() {
         SystemClock clock = new SystemClock();
         return new ContentUpdatingNitroBroadcastHandler(contentResolver, contentWriter, 
                 new GlycerinNitroContentAdapter(glycerin(), nitroClient(), clock), clock);
