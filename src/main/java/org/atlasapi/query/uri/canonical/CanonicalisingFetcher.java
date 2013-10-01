@@ -102,4 +102,9 @@ public class CanonicalisingFetcher implements Fetcher<Identified>, ContentResolv
         }
 		return builder.build();
 	}
+	
+	@Override
+	public ResolvedContent findByUris(Iterable<String> uris) {
+	    throw new UnsupportedOperationException();
+	}
 }
