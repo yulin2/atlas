@@ -50,6 +50,13 @@ public class ApplicationAdminController {
     private final NumberToShortStringCodec idCodec;
     private final SourceIdCodec sourceIdCodec;
     private final ApplicationStore applicationStore;
+    
+    private static class PrecedenceOrdering {
+        private List<String> ordering;
+        public List<String> getOrdering() {
+            return ordering;
+        }
+    }
 
     public ApplicationAdminController(QueryParser<Application> requestParser,
             QueryExecutor<Application> queryExecutor,
