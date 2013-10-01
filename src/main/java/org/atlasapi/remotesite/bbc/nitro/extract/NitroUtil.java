@@ -9,7 +9,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.model.Availability;
 import com.metabroadcast.atlas.glycerin.model.AvailabilityOf;
 import com.metabroadcast.atlas.glycerin.model.Broadcast;
@@ -109,6 +111,16 @@ public final class NitroUtil {
         checkNotNull(cal, "null calendar");
         return new DateTime(cal.toGregorianCalendar(), ISOChronology.getInstance())
             .toDateTime(DateTimeZones.UTC);
+    }
+    
+    
+    public static Iterable<String> toPids(Iterable<PidReference> refs) {
+        return Iterables.transform(refs, new Function<PidReference, String>() {
+            @Override
+            public String apply(PidReference input) {
+                return input.getPid();
+            }
+        });
     }
     
 }

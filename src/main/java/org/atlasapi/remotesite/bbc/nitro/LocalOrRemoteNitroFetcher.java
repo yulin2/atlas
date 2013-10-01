@@ -1,10 +1,11 @@
 package org.atlasapi.remotesite.bbc.nitro;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -12,8 +13,8 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.ContentMerger;
-import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.BbcIonMediaTypeMapping;
 import org.atlasapi.remotesite.bbc.nitro.extract.NitroUtil;
@@ -21,10 +22,14 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-import com.google.common.base.Supplier;
+import com.google.common.base.Function;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.metabroadcast.atlas.glycerin.model.Broadcast;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.common.base.Maybe;
@@ -45,34 +50,75 @@ public class LocalOrRemoteNitroFetcher {
         this.clock = clock;
     }
     
-    public Item resolveOrFetchItem(Broadcast broadcast) throws NitroException {
-
-        final PidReference pidRef = NitroUtil.programmePid(broadcast);
-        checkArgument(pidRef != null, "Broadcast %s has no episode ref", broadcast.getPid());
-        
-        Optional<Item> local = resolveLocally(BbcFeeds.nitroUriForPid(pidRef.getPid()), Item.class);
-        
-        Item remote = null;
-        if (fullFetchPermitted(broadcast) || !local.isPresent()) {
-            try {
-                remote = contentAdapter.fetchEpisode(pidRef);
-            } catch (NitroException e) {
-                log.warn("Failed to fetch " + pidRef.getPid(), e);
-            }
+    public ResolveOrFetchResult<Item> resolveOrFetchItem(Iterable<Broadcast> broadcasts) throws NitroException {
+        if (Iterables.isEmpty(broadcasts)) {
+            return ResolveOrFetchResult.empty();
         }
-        
-        if (!local.isPresent() && remote == null) {
-            throw new NitroException("Failed to resolve or fetch " + pidRef.getPid());
-        } 
-
-        if (local.isPresent() && remote != null) {
-            return ContentMerger.merge(local.get(), remote);
+        Iterable<PidReference> episodeRefs = toEpisodeRefs(broadcasts);
+        ImmutableSet<String> itemUris = toItemUris(episodeRefs);
+        ImmutableSet<Item> resolved = resolve(itemUris);
+        if (fullFetchPermitted(broadcasts.iterator().next())) {
+            ImmutableSet<Item> fetched = contentAdapter.fetchEpisodes(episodeRefs);
+            return mergeWithExisting(fetched, resolved);
         } else {
-            return Objects.firstNonNull(local.orNull(), remote);
+            ImmutableSet<Item> fetched = contentAdapter.fetchEpisodes(unresolved(broadcasts, resolved));
+            return new ResolveOrFetchResult<Item>(resolved, fetched);
         }
-        
     }
     
+    private ResolveOrFetchResult<Item> mergeWithExisting(ImmutableSet<Item> fetchedItems,
+            Set<Item> existingItems) {
+        Map<String, Item> fetchedIndex = Maps.newHashMap(Maps.uniqueIndex(fetchedItems, Identified.TO_URI));
+        ImmutableSet.Builder<Item> resolved = ImmutableSet.builder();
+        for (Item existing : existingItems) {
+            Item fetched = fetchedIndex.remove(existing.getCanonicalUri());
+            if (fetched != null) {
+                existing = ContentMerger.merge(existing, fetched);
+            }
+            resolved.add(existing);
+        }
+        return new ResolveOrFetchResult<Item>(resolved.build(), fetchedIndex.values());
+    }
+
+    private Iterable<PidReference> unresolved(Iterable<Broadcast> broadcasts, ImmutableSet<Item> resolved) {
+        Collection<String> resolvedUris = Collections2.transform(resolved, Identified.TO_URI);
+        ImmutableList.Builder<PidReference> unresolvedBroadcasts = ImmutableList.builder();
+        for (PidReference epRef : toEpisodeRefs(broadcasts)) {
+            if (!resolvedUris.contains(BbcFeeds.nitroUriForPid(epRef.getPid()))) {
+                unresolvedBroadcasts.add(epRef);
+            }
+        }
+        return unresolvedBroadcasts.build();
+    }
+
+    private ImmutableSet<Item> resolve(Iterable<String> itemUris) {
+        ResolvedContent resolved = resolver.findByCanonicalUris(itemUris);
+        return ImmutableSet.copyOf(Iterables.filter(resolved.getAllResolvedResults(), Item.class));
+    }
+
+    private ImmutableSet<String> toItemUris(Iterable<PidReference> pidRefs) {
+        return ImmutableSet.copyOf(Iterables.transform(pidRefs, new Function<PidReference, String>() {
+            @Override
+            public String apply(PidReference input) {
+                return BbcFeeds.nitroUriForPid(input.getPid());
+            }
+        }));
+    }
+
+    private Iterable<PidReference> toEpisodeRefs(Iterable<Broadcast> broadcasts) {
+        return Iterables.filter(Iterables.transform(broadcasts, new Function<Broadcast, PidReference>() {
+            @Override
+            public PidReference apply(Broadcast input) {
+                final PidReference pidRef = NitroUtil.programmePid(input);
+                if (pidRef == null) {
+                    log.warn("No programme pid for broadcast {}", input.getPid());
+                    return null;
+                }
+                return pidRef;
+            }
+        }), Predicates.notNull());
+    }
+
     protected boolean fullFetchPermitted(Broadcast broadcast) {
         LocalDate today = clock.now().toLocalDate();
         LocalDate broadcastDay = NitroUtil.toDateTime(broadcast.getPublishedTime().getStart()).toLocalDate();
@@ -91,50 +137,84 @@ public class LocalOrRemoteNitroFetcher {
     }
     
     
-    public Optional<Series> resolveOrFetchSeries(Item item) {
-        if (item instanceof Episode) {
-            ParentRef seriesRef = ((Episode)item).getSeriesRef();
-            if (seriesRef != null) {
-                final String seriesUri = seriesRef.getUri();
-                return Optional.of(resolveLocally(seriesUri, Series.class).or(new Supplier<Series>() {
-                    @Override
-                    public Series get() {
-                        PidReference pidRef = new PidReference();
-                        pidRef.setPid(BbcFeeds.pidFrom(seriesUri));
-                        pidRef.setResultType("series");
-                        try {
-                            return contentAdapter.fetchSeries(pidRef);
-                        } catch (NitroException e) {
-                            throw new FetchException(pidRef.getPid(), e);
-                        }
-                    }
-                }));
+    public ImmutableSet<Series> resolveOrFetchSeries(Iterable<Item> items) throws NitroException {
+        if (Iterables.isEmpty(items)) {
+            return ImmutableSet.of();
+        }
+        Iterable<Episode> episodes = Iterables.filter(items, Episode.class);
+        Iterable<ParentRef> seriesRefs = getSeriesRefs(episodes);
+        List<String> seriesUris = Lists.newArrayList(toUris(seriesRefs));
+        ResolvedContent resolved = resolver.findByCanonicalUris(seriesUris);
+        ImmutableSet<Series> fetched = contentAdapter.fetchSeries(asSeriesPidRefs(resolved.getUnresolved()));
+        return ImmutableSet.<Series>builder()
+                .addAll(Iterables.filter(resolved.getAllResolvedResults(), Series.class))
+                .addAll(fetched)
+                .build();
+    }
+
+    private Iterable<PidReference> asSeriesPidRefs(List<String> pids) {
+        return asTypePidsRefs(pids, "series");
+    }
+
+    private Iterable<PidReference> asTypePidsRefs(List<String> pids, final String type) {
+        return Iterables.transform(pids, new Function<String, PidReference>(){
+            @Override
+            public PidReference apply(String input) {
+                PidReference pidRef = new PidReference();
+                pidRef.setPid(BbcFeeds.pidFrom(input));
+                pidRef.setResultType(type);
+                return pidRef;
+            }});
+    }
+
+    private ImmutableSet<String> toUris(Iterable<ParentRef> seriesRefs) {
+        return ImmutableSet.copyOf(Iterables.transform(seriesRefs, new Function<ParentRef, String>() {
+            @Override
+            public String apply(ParentRef input) {
+                return input.getUri();
             }
-        }
-        return Optional.absent();
+        }));
     }
     
-    public Optional<Brand> resolveOrFetchBrand(Item item) {
-        ParentRef containerRef = item.getContainer();
-        if (containerRef != null && !inTopLevelSeries(item)) {
-            final String containerUri = containerRef.getUri();
-            return Optional.of(resolveLocally(containerUri, Brand.class).or(new Supplier<Brand>() {
-                @Override
-                public Brand get() {
-                    PidReference pidRef = new PidReference();
-                    pidRef.setPid(BbcFeeds.pidFrom(containerUri));
-                    pidRef.setResultType("brand");
-                    try {
-                        return contentAdapter.fetchBrand(pidRef);
-                    } catch (NitroException e) {
-                        throw new FetchException(pidRef.getPid(), e);
-                    }
+    private Iterable<ParentRef> getSeriesRefs(Iterable<Episode> episodes) {
+        return Iterables.filter(Iterables.transform(episodes, new Function<Episode, ParentRef>() {
+            @Override
+            public ParentRef apply(Episode input) {
+                return input.getSeriesRef();
+            }
+        }), Predicates.notNull());
+    }
+
+    public ImmutableSet<Brand> resolveOrFetchBrand(Iterable<Item> items) throws NitroException {
+        if (Iterables.isEmpty(items)) {
+            return ImmutableSet.of();
+        }
+        Iterable<ParentRef> containerRefs = containerRefs(items);
+        Iterable<String> containerUris = toUris(containerRefs);
+        ResolvedContent resolved = resolver.findByCanonicalUris(containerUris);
+        ImmutableSet<Brand> fetched = contentAdapter.fetchBrands(asBrandPidRefs(resolved.getUnresolved()));
+        return ImmutableSet.<Brand>builder()
+                .addAll(Iterables.filter(resolved.getAllResolvedResults(), Brand.class))
+                .addAll(fetched)
+                .build();
+    }
+    
+    private Iterable<PidReference> asBrandPidRefs(List<String> pids) {
+        return asTypePidsRefs(pids, "brand");
+    }
+
+    private Iterable<ParentRef> containerRefs(Iterable<Item> items) {
+        return Iterables.filter(Iterables.transform(items, new Function<Item, ParentRef>() {
+            @Override
+            public ParentRef apply(Item input) {
+                if (!inTopLevelSeries(input)) {
+                    return input.getContainer();
                 }
-            }));
-        }
-        return Optional.absent();
+                return null;
+            }
+        }), Predicates.notNull());
     }
-    
+
     private boolean inTopLevelSeries(Item item) {
         if (item instanceof Episode) {
             Episode ep = (Episode)item;
@@ -142,17 +222,6 @@ public class LocalOrRemoteNitroFetcher {
                 && ep.getContainer().equals(ep.getSeriesRef());
         }
         return false;
-    }
-    
-    private <T extends Content> Optional<T> resolveLocally(String uri, Class<T> expectedType) {
-        Maybe<Identified> possible = resolver.findByCanonicalUris(ImmutableList.of(uri)).get(uri);
-        if (possible.hasValue()) {
-            Identified ided = possible.requireValue();
-            checkState(expectedType.isAssignableFrom(ided.getClass()),  "%s %s not %s", 
-                    ided.getClass().getSimpleName(), uri, expectedType.getSimpleName());
-            return Optional.of(expectedType.cast(ided));
-        }
-        return Optional.absent();
     }
     
 }
