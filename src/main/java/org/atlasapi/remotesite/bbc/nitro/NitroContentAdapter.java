@@ -4,6 +4,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 
 /**
@@ -16,39 +17,40 @@ public interface NitroContentAdapter {
      * Fetch and transform data for the given ref into a {@link Brand}.
      * 
      * @param ref
-     *            - the PID reference, must have result type "brand".
-     * @return - a {@link Brand} representing the fetched data.
+     *            - the brand PID references, must have result type "brand".
+     * @return - a set of {@link Brand}s representing the fetched data.
      * @throws NitroException
      *             - if there was an error fetching data from Nitro.
      * @throws IllegalArgumentException
-     *             - if the {@link PidReference} is not for a brand.
+     *             - if any of the {@code refs} is not for a brand.
      */
-    Brand fetchBrand(PidReference ref) throws NitroException;
+    ImmutableSet<Brand> fetchBrands(Iterable<PidReference> ref) throws NitroException;
 
     /**
      * Fetch and transform data for the given ref into a {@link Series}.
      * 
      * @param ref
-     *            - the PID reference, must have result type "series".
-     * @return - a {@link Series} representing the fetched data.
+     *            - the series PID references, must have result type "series".
+     * @return - a set of {@link Series} representing the fetched data.
      * @throws NitroException
      *             - if there was an error fetching data from Nitro.
      * @throws IllegalArgumentException
-     *             - if the {@link PidReference} is not for a series.
+     *             - if any of the {@code refs} is not for a series.
      */
-    Series fetchSeries(PidReference ref) throws NitroException;
+    ImmutableSet<Series> fetchSeries(Iterable<PidReference> refs) throws NitroException;
 
     /**
      * Fetch and transform data for the given ref into a {@link Item}.
      * 
-     * @param ref
-     *            - the PID reference, must have result type "episode".
-     * @return - a {@link Item} representing the fetched data.
+     * @param refs
+     *            - the PID references of the episode to be fetched, must have
+     *            result type "episode".
+     * @return - a set of {@link Item}s representing the fetched data.
      * @throws NitroException
      *             - if there was an error fetching data from Nitro.
      * @throws IllegalArgumentException
-     *             - if the {@link PidReference} is not for an episode.
+     *             - if any of the {@code refs} is not for an episode.
      */
-    Item fetchEpisode(PidReference ref) throws NitroException;
+    ImmutableSet<Item> fetchEpisodes(Iterable<PidReference> refs) throws NitroException;
 
 }

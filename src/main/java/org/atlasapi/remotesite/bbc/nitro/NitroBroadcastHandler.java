@@ -17,6 +17,6 @@ public interface NitroBroadcastHandler<T> {
      * @param broadcast - the {@code Broadcast} to be processed.
      * @return - the result of processing the {@code broadcast}
      */
-    T handle(Broadcast broadcast) throws NitroException;
+    T handle(Iterable<Broadcast> broadcast) throws NitroException;
 
 }
