@@ -2,8 +2,10 @@ package org.atlasapi.remotesite.pa.features;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
+import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
@@ -17,6 +19,7 @@ import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.EquivalentContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -36,7 +39,7 @@ public class PaFeaturesProcessor {
     private static final String ALL_CONTENT_GROUP_URI = "http://pressassocation.com/features/tvpicks/all";
     private static final Ordering<Broadcast> BY_BROADCAST_DATE = Ordering.natural().onResultOf(Broadcast.TO_TRANSMISSION_TIME);
     
-    private final EquivalentContentResolver contentResolver;
+    private final KnownTypeQueryExecutor queryExecutor;
     private final ContentGroupWriter contentGroupWriter;
     private final ContentGroupResolver contentGroupResolver;
 
@@ -44,8 +47,8 @@ public class PaFeaturesProcessor {
     private ContentGroup todayContentGroup;
     private ContentGroup allFeaturedContentEverContentGroup;
     
-    public PaFeaturesProcessor(EquivalentContentResolver contentResolver, ContentGroupResolver contentGroupResolver, ContentGroupWriter contentGroupWriter) {
-        this.contentResolver = contentResolver;
+    public PaFeaturesProcessor(KnownTypeQueryExecutor queryExecutor, ContentGroupResolver contentGroupResolver, ContentGroupWriter contentGroupWriter) {
+        this.queryExecutor = queryExecutor;
         this.contentGroupWriter = contentGroupWriter;
         this.contentGroupResolver = contentGroupResolver;
     }
@@ -71,10 +74,7 @@ public class PaFeaturesProcessor {
         Set<String> candidateUris = ImmutableSet.of(PaHelper.getFilmUri(programmeId), 
                 PaHelper.getEpisodeUri(programmeId), PaHelper.getAlias(programmeId));
         log.trace("Looking up URIs {}", candidateUris);
-        
-        ArrayList<Content> resolved = Lists.newArrayList(contentResolver.resolveUris(candidateUris, 
-                ImmutableSet.of(Publisher.PA), ImmutableSet.<Annotation>of(), true).values());
-        
+        List<Identified> resolved = Lists.newArrayList(Iterables.concat(queryExecutor.executeUriQuery(candidateUris, ContentQuery.MATCHES_EVERYTHING).values()));
         log.trace("Resolved {}", Iterables.transform(resolved, Identified.TO_URI));
         
         Collections.sort(resolved, new PaIdentifiedComparator());
