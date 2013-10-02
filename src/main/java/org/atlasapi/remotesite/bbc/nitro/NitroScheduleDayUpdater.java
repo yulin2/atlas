@@ -17,10 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.Glycerin;
 import com.metabroadcast.atlas.glycerin.GlycerinException;
+import com.metabroadcast.atlas.glycerin.GlycerinResponse;
 import com.metabroadcast.atlas.glycerin.model.Broadcast;
 import com.metabroadcast.atlas.glycerin.queries.BroadcastsQuery;
 import com.metabroadcast.common.scheduling.UpdateProgress;
@@ -98,8 +100,6 @@ public class NitroScheduleDayUpdater implements ChannelDayProcessor {
         return ids.build();
     }
 
-    // TODO: at the moment we're avoiding pagination by gambling there won't
-    // be more than 300 broadcasts in one day. In future it may be necessary.
     private ImmutableList<Broadcast> getBroadcasts(String serviceId, DateTime from, DateTime to)
             throws GlycerinException {
         BroadcastsQuery query = BroadcastsQuery.builder()
@@ -108,7 +108,20 @@ public class NitroScheduleDayUpdater implements ChannelDayProcessor {
                 .withStartTo(to)
                 .withPageSize(MAX_PAGE_SIZE)
                 .build();
-        return glycerin.execute(query).getResults();
+        
+        GlycerinResponse<Broadcast> resp = glycerin.execute(query);
+        if (!resp.hasNext()) {
+            return resp.getResults();
+        } else {
+            ImmutableList.Builder<Broadcast> broadcasts = ImmutableList.builder();
+            broadcasts.addAll(resp.getResults());
+            while (resp.hasNext()) {
+                resp = resp.getNext();
+                broadcasts.addAll(resp.getResults());
+            }
+            return broadcasts.build();
+        }
+        
     }
 
 }
