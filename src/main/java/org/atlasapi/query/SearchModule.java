@@ -2,6 +2,7 @@ package org.atlasapi.query;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
@@ -22,11 +23,15 @@ public class SearchModule {
     
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     
+    private @Autowired PeopleQueryResolver peopleQueryResolver;
+    
     @PostConstruct
     public void setExecutor() {
         SearchResolver searchResolver = searchResolver();
         if (searchResolver instanceof ContentResolvingSearcher) {
-            ((ContentResolvingSearcher)searchResolver).setExecutor(queryExecutor);
+            ContentResolvingSearcher resolver = (ContentResolvingSearcher) searchResolver;
+            resolver.setExecutor(queryExecutor);
+            resolver.setPeopleQueryResolver(peopleQueryResolver);
         }
     }
     
@@ -34,7 +39,7 @@ public class SearchModule {
     SearchResolver searchResolver() {
         if (!Strings.isNullOrEmpty(searchHost)) {
             ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
-            return new ContentResolvingSearcher(titleSearcher, null);
+            return new ContentResolvingSearcher(titleSearcher, null, null);
         }
 
         return new DummySearcher();
