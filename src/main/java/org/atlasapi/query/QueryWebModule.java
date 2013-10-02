@@ -56,6 +56,7 @@ import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
+import org.atlasapi.output.simple.PersonModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.PublisherSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
@@ -267,10 +268,10 @@ public class QueryWebModule {
     }
 
     @Bean
-    AtlasModelWriter<QueryResult<Content, ? extends Identified>> contentModelOutputter() {
-        return this.<QueryResult<Content, ? extends Identified>>standardWriter(
-                new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier()),
-                new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier()));
+    AtlasModelWriter<QueryResult<Identified, ? extends Identified>> contentModelOutputter() {
+        return this.<QueryResult<Identified, ? extends Identified>>standardWriter(
+                new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier(), personSimplifier()),
+                new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier(), personSimplifier()));
     }
 
     @Bean
@@ -283,6 +284,11 @@ public class QueryWebModule {
         return containerSimplier;
     }
 
+    @Bean
+    PersonModelSimplifier personSimplifier() {
+        return new PersonModelSimplifier(imageSimplifier(), upcomingItemsResolver(), availableItemsResolver());
+    }
+    
     @Bean
     MongoUpcomingItemsResolver upcomingItemsResolver() {
         return new MongoUpcomingItemsResolver(mongo);

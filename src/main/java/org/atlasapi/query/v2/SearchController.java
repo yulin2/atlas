@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.AtlasErrorSummary;
@@ -26,13 +25,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.text.MoreStrings;
 import org.atlasapi.media.entity.Specialization;
 
 @Controller
-public class SearchController extends BaseController<QueryResult<Content,?extends Identified>> {
+public class SearchController extends BaseController<QueryResult<Identified,?extends Identified>> {
 
     private static final String QUERY_PARAM = "q";
     private static final String SPECIALIZATION_PARAM = "specialization";
@@ -69,7 +67,7 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
         CURRENT_BROADCASTS_ONLY,
         PRIORITY_CHANNEL_WEIGHTING
     ));
-    public SearchController(SearchResolver searcher, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content,?extends Identified>> outputter) {
+    public SearchController(SearchResolver searcher, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Identified,?extends Identified>> outputter) {
         super(configFetcher, log, outputter);
         this.searcher = searcher;
     }
@@ -110,7 +108,7 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
                     .withTitleWeighting(titleWeighting).withBroadcastWeighting(broadcastWeighting).withCatchupWeighting(catchupWeighting).build();
             List<Identified> content = searcher.search(searchQuery, appConfig);
 
-            modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)), appConfig);
+            modelAndViewFor(request, response, QueryResult.of(content), appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
