@@ -134,7 +134,7 @@ public class PaModule {
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {
-        return new PaFeaturesUpdater(paProgrammeDataStore(), fileUploadResultStore, new PaFeaturesProcessor(contentResolver, contentGroupResolver, contentGroupWriter));
+        return new PaFeaturesUpdater(paProgrammeDataStore(), fileUploadResultStore(), new PaFeaturesProcessor(contentResolver, contentGroupResolver, contentGroupWriter));
     }
 
     @Bean PaFtpFileUpdater ftpFileUpdater() {
