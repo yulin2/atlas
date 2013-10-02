@@ -12,6 +12,8 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.simple.ContentIdentifier;
+import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.query.content.search.ContentResolvingSearcher;
 import org.atlasapi.search.ContentSearcher;
@@ -35,6 +37,7 @@ public class ContentResolvingSearchTest extends TestCase {
     private final Mockery context = new Mockery();
     private final ContentSearcher fuzzySearcher = context.mock(ContentSearcher.class);
     private final KnownTypeQueryExecutor contentResolver = context.mock(KnownTypeQueryExecutor.class);
+    private final PeopleQueryResolver peopleResolver = context.mock(PeopleQueryResolver.class);
     
     private final Brand brand = new Brand("brand", "brand", Publisher.BBC);
     private final Episode item = new Episode("item", "item", Publisher.BBC);
@@ -47,7 +50,7 @@ public class ContentResolvingSearchTest extends TestCase {
     @Before
     public void setUp() throws Exception {
         brand.setChildRefs(ImmutableList.of(item.childRef()));
-        searcher = new ContentResolvingSearcher(fuzzySearcher, contentResolver);
+        searcher = new ContentResolvingSearcher(fuzzySearcher, contentResolver, peopleResolver);
     }
 
     @Test
@@ -57,7 +60,7 @@ public class ContentResolvingSearchTest extends TestCase {
         final SearchQuery query = new SearchQuery(searchQuery, selection, publishers, 1.0f, 0.0f, 0.0f);
         
         context.checking(new Expectations() {{ 
-            one(fuzzySearcher).search(query); will(returnValue(new SearchResults(ImmutableList.of(brand.getCanonicalUri()))));
+            one(fuzzySearcher).search(query); will(returnValue(new SearchResults(ImmutableList.of(ContentIdentifier.identifierFrom("abc", brand.getCanonicalUri(), "brand")))));
             one(contentResolver).executeUriQuery(ImmutableList.of(brand.getCanonicalUri()), contentQuery); will(returnValue(ImmutableMap.of(brand.getCanonicalUri(), ImmutableList.of(brand))));
         }});
             
