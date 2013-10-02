@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.AtlasErrorSummary;
@@ -105,7 +105,7 @@ public class ProductController extends BaseController<Iterable<Product>> {
         
         try {
             Selection selection = query.getSelection();
-            QueryResult<Content, Product> result = QueryResult.of(Iterables.filter(Iterables.concat(queryExecutor.executeUriQuery(product.getContent(), query).values()),Content.class), product);
+            QueryResult<Identified, Product> result = QueryResult.of(Iterables.filter(Iterables.concat(queryExecutor.executeUriQuery(product.getContent(), query).values()),Identified.class), product);
             queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));

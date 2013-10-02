@@ -5,13 +5,11 @@ import com.google.common.base.Predicate;
 
 import java.io.IOException;
 
-import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.QueryResult;
@@ -28,6 +26,7 @@ import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.query.Selection;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 
@@ -106,11 +105,11 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
         
         try {
             Selection selection = query.getSelection();
-            QueryResult<Content, ContentGroup> result = QueryResult.of(
+            QueryResult<Identified, ContentGroup> result = QueryResult.of(
                     Iterables.filter(
                     Iterables.concat(
                     queryExecutor.executeUriQuery(Iterables.transform(contentGroup.getContents(), CHILD_REF_TO_URI_FN), query).values()),
-                    Content.class),
+                    Identified.class),
                     contentGroup);
             queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
