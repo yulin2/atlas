@@ -104,7 +104,7 @@ public class ApplicationAdminController {
     @RequestMapping(value = "/4.0/applications", method = RequestMethod.POST)
     public void writeApplication(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ReadException, NotFoundException {
-        
+        response.addHeader("Access-Control-Allow-Origin", "*");
         Application application = deserialize(new InputStreamReader(request.getInputStream()), Application.class);
         if (application.getId() != null) {
             Optional<Application> existing = applicationStore.applicationFor(application.getId());
@@ -122,6 +122,7 @@ public class ApplicationAdminController {
             HttpServletResponse response,
             @PathVariable String aid)
             throws IOException, ReadException, NotFoundException, QueryParseException {
+        response.addHeader("Access-Control-Allow-Origin", "*");
         Id applicationId = Id.valueOf(idCodec.decode(aid));
         ApplicationSources sources = deserialize(new InputStreamReader(
                 request.getInputStream()), ApplicationSources.class);
@@ -134,6 +135,7 @@ public class ApplicationAdminController {
     public void setPrecedenceOrder(HttpServletRequest request, 
             HttpServletResponse response,
             @PathVariable String aid) throws NotFoundException, IOException, ReadException, QueryExecutionException  {
+        response.addHeader("Access-Control-Allow-Origin", "*");
         Id applicationId = Id.valueOf(idCodec.decode(aid));
         PrecedenceOrdering ordering = deserialize(new InputStreamReader(request.getInputStream()), PrecedenceOrdering.class);
         List<Publisher> sourceOrder = getSourcesFrom(ordering);
@@ -142,9 +144,12 @@ public class ApplicationAdminController {
     }
     
     @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.DELETE)
-    public void disablePrecedence(HttpServletRequest request, HttpServletResponse response) throws QueryParseException, NotFoundException {
-        Query<Application> applicationsQuery = requestParser.parse(request);
-        Application existing = applicationStore.applicationFor(applicationsQuery.getOnlyId()).get();
+    public void disablePrecedence(HttpServletRequest request, 
+            HttpServletResponse response,
+            @PathVariable String aid) throws QueryParseException, NotFoundException {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        Id applicationId = Id.valueOf(idCodec.decode(aid));
+        Application existing = applicationStore.applicationFor(applicationId).get();
         applicationStore.updateApplication(existing.copyWithPrecedenceDisabled());
     }
 
