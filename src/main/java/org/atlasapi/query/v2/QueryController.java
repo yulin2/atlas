@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
@@ -42,7 +41,7 @@ import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 @Controller
-public class QueryController extends BaseController<QueryResult<Content, ? extends Identified>> {
+public class QueryController extends BaseController<QueryResult<Identified, ? extends Identified>> {
 	
 	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
@@ -50,7 +49,7 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
 
     private final ContentWriteController contentWriteController;
 	
-    public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content, ? extends Identified>> outputter, ContentWriteController contentWriteController) {
+    public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Identified, ? extends Identified>> outputter, ContentWriteController contentWriteController) {
 	    super(configFetcher, log, outputter, SubstitutionTableNumberCodec.lowerCaseOnly());
         this.executor = executor;
         this.contentWriteController = contentWriteController;
@@ -78,16 +77,16 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
 			
 			List<String> uris = getUriList(request);
 			if(!uris.isEmpty()) {
-			    modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()),Content.class)),filter.getConfiguration());
+			    modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()),Identified.class)),filter.getConfiguration());
 			} else {
 			    List<String> ids = getIdList(request);
 			    if(!ids.isEmpty()) {
-			        modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeIdQuery(decode(ids), filter).values()),Content.class)),filter.getConfiguration());
+			        modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeIdQuery(decode(ids), filter).values()),Identified.class)),filter.getConfiguration());
 			    } else {
 			        List<String> values = getAliasValueList(request);
 			        if (values != null) {
 			            String namespace = getAliasNamespace(request);
-			            modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeAliasQuery(Optional.fromNullable(namespace), values, filter).values()),Content.class)),filter.getConfiguration());
+			            modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeAliasQuery(Optional.fromNullable(namespace), values, filter).values()),Identified.class)),filter.getConfiguration());
 			        } else {
 			            throw new IllegalArgumentException("Must specify content uri(s) or id(s) or alias(es)");
 			        }

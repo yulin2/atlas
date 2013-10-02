@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Item;
+import org.atlasapi.media.entity.simple.Person;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
@@ -171,8 +172,12 @@ public class JsonTranslator<T> implements AtlasModelWriter<T> {
 			JsonElement element = null;
 			if (description instanceof Item) {
 				element = context.serialize(description, Item.class);
-			} else {
+			} else if (description instanceof Person ) {
+			    element = context.serialize(description, Person.class);
+			} else if (description instanceof Playlist ) {
 				element = context.serialize(description, Playlist.class);
+			} else {
+			    throw new IllegalArgumentException("Cannot serialise subclass of Description of type " + description.getClass().getName());
 			}
 			return element;
 		}

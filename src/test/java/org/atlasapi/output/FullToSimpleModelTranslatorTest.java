@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.product.ProductResolver;
@@ -18,6 +18,7 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
+import org.atlasapi.output.simple.PersonModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentGroupResolver;
@@ -63,6 +64,7 @@ public class FullToSimpleModelTranslatorTest {
     private ProductResolver productResolver = mock(ProductResolver.class); 
     private final UpcomingItemsResolver upcomingResolver = mock(UpcomingItemsResolver.class);
     private final AvailableItemsResolver availableResolver = mock(AvailableItemsResolver.class);
+    private final PersonModelSimplifier personSimplifier = mock(PersonModelSimplifier.class);
 
     private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(
             "localhostName", 
@@ -97,7 +99,8 @@ public class FullToSimpleModelTranslatorTest {
             ), 
             topicSimplifier, 
             productSimplifier, 
-            imageSimplifier
+            imageSimplifier,
+            personSimplifier
     );
     
 	private StubHttpServletRequest request;
@@ -112,7 +115,7 @@ public class FullToSimpleModelTranslatorTest {
 	@Test
 	public void testTranslatesItemsInFullModel() throws Exception {
 		
-		Set<Content> graph = Sets.newHashSet();
+		Set<Identified> graph = Sets.newHashSet();
 		graph.add(new Episode());
 		
         translator.writeTo(request, response, QueryResult.of(graph), ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
