@@ -46,6 +46,7 @@ import com.metabroadcast.common.time.Clock;
  */
 public class GlycerinNitroContentAdapter implements NitroContentAdapter {
 
+    private static final int MAX_PAGE_SIZE = 300;
     private final Glycerin glycerin;
     private final GlycerinNitroClipsAdapter clipsAdapter;
     private final NitroClient nitroClient;
@@ -171,7 +172,7 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
         ProgrammesQuery query = ProgrammesQuery.builder()
                 .withPid(toStrings(refs))
                 .withMixins(TITLES)
-                .withPageSize(300)
+                .withPageSize(MAX_PAGE_SIZE)
                 .build();
         return exhaust(glycerin.execute(query));
     }
@@ -206,7 +207,7 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
     private ListMultimap<String, Broadcast> broadcasts(ImmutableList<Episode> episodes) throws GlycerinException {
         BroadcastsQuery query = BroadcastsQuery.builder()
                 .withDescendantsOf(toPids(episodes))
-                .withPageSize(300)
+                .withPageSize(MAX_PAGE_SIZE)
                 .build();
         return Multimaps.index(exhaust(glycerin.execute(query)), new Function<Broadcast, String>() {
             @Override
@@ -219,7 +220,7 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
     private ListMultimap<String, Availability> availabilities(ImmutableList<Episode> episodes) throws GlycerinException {
         AvailabilityQuery query = AvailabilityQuery.builder()
                 .withDescendantsOf(toPids(episodes))
-                .withPageSize(300)
+                .withPageSize(MAX_PAGE_SIZE)
                 .build();
         return Multimaps.index(exhaust(glycerin.execute(query)),
                 new Function<Availability, String>() {
