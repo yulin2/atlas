@@ -119,7 +119,9 @@ public class ApplicationWebModule {
     @Bean
     public SourceRequestsController sourceRequestsController() {
         IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "sourceRequest");
-        SourceRequestManager manager = new SourceRequestManager(sourceRequestStore, idGenerator);
+        SourceRequestManager manager = new SourceRequestManager(sourceRequestStore, 
+                deerApplicationsStore, 
+                idGenerator);
         return new SourceRequestsController(sourceRequestsQueryParser(),
                 new SourceRequestQueryExecutor(sourceRequestStore),
                 new SourceRequestsQueryResultsWriter(new SourceRequestListWriter(sourceIdCodec, idCodec)),
