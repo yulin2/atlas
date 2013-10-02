@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.common.Id;
@@ -73,7 +73,7 @@ class ScheduleRequestParser {
         Publisher publisher = extractPublisher(request);
         Interval queryInterval = extractInterval(request);
         
-        ApplicationConfiguration appConfig = getConfiguration(request);
+        OldApplicationConfiguration appConfig = getConfiguration(request);
         appConfig = appConfigForValidPublisher(publisher, appConfig, queryInterval);
         checkArgument(appConfig != null, "Source %s not enabled", publisher);
         
@@ -82,8 +82,8 @@ class ScheduleRequestParser {
         return new ScheduleQuery(publisher, channel, queryInterval, new QueryContext(appConfig, annotations));
     }
 
-    private ApplicationConfiguration appConfigForValidPublisher(Publisher publisher,
-                                                                ApplicationConfiguration appConfig,
+    private OldApplicationConfiguration appConfigForValidPublisher(Publisher publisher,
+                                                                OldApplicationConfiguration appConfig,
                                                                 Interval interval) {
         if (appConfig.isEnabled(publisher)) {
             return appConfig;
@@ -137,15 +137,15 @@ class ScheduleRequestParser {
         return publisher.get();
     }
 
-    private ApplicationConfiguration getConfiguration(HttpServletRequest request) {
-        Maybe<ApplicationConfiguration> config = applicationStore.configurationFor(request);
+    private OldApplicationConfiguration getConfiguration(HttpServletRequest request) {
+        Maybe<OldApplicationConfiguration> config = applicationStore.configurationFor(request);
         if (config.hasValue()) {
             return config.requireValue();
         }
         String apiKeyParam = request.getParameter("apiKey");
         // request doesn't specify apiKey so use default configuration.
         if (apiKeyParam == null) {
-            return ApplicationConfiguration.defaultConfiguration();
+            return OldApplicationConfiguration.defaultConfiguration();
         }
         // the request has an apiKey param but no config is found.
         throw new IllegalArgumentException("Unknown API key " + apiKeyParam);

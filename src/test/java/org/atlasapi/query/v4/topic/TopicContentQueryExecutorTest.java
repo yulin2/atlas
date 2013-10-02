@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.equiv.EquivalentsResolver;
@@ -106,7 +106,7 @@ public class TopicContentQueryExecutorTest {
             executor.execute(ContextualQuery.valueOf(contextQuery, resourceQuery, context));
         } catch (QueryExecutionException qee) {
             verify(contentIndex, never()).query(argThat(isA(AttributeQuerySet.class)), argThat(isA(Iterable.class)), argThat(isA(Selection.class)));
-            verify(equivalentsResolver, never()).resolveIds(argThat(isA(Iterable.class)), argThat(isA(ApplicationConfiguration.class)), argThat(isA(Set.class)));
+            verify(equivalentsResolver, never()).resolveIds(argThat(isA(Iterable.class)), argThat(isA(OldApplicationConfiguration.class)), argThat(isA(Set.class)));
             throw qee.getCause();
         }
         
@@ -131,7 +131,7 @@ public class TopicContentQueryExecutorTest {
             executor.execute(ContextualQuery.valueOf(contextQuery, resourceQuery, context));
         } catch (QueryExecutionException qee) {
             verify(contentIndex, never()).query(argThat(isA(AttributeQuerySet.class)), argThat(isA(Iterable.class)), argThat(isA(Selection.class)));
-            verify(equivalentsResolver, never()).resolveIds(argThat(isA(Iterable.class)), argThat(isA(ApplicationConfiguration.class)), argThat(isA(Set.class)));
+            verify(equivalentsResolver, never()).resolveIds(argThat(isA(Iterable.class)), argThat(isA(OldApplicationConfiguration.class)), argThat(isA(Set.class)));
             throw qee.getCause();
         }
         

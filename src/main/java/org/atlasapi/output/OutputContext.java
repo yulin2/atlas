@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.output.annotation.OutputAnnotation;
 import org.atlasapi.query.annotation.ActiveAnnotations;
 import org.atlasapi.query.common.QueryContext;
@@ -25,11 +25,11 @@ public class OutputContext {
     }
     
     private final ActiveAnnotations annotations;
-    private final ApplicationConfiguration applicationConfiguration;
+    private final OldApplicationConfiguration applicationConfiguration;
     private final List<Resource> resources;
 
     public OutputContext(ActiveAnnotations activeAnnotations,
-        ApplicationConfiguration applicationConfiguration) {
+        OldApplicationConfiguration applicationConfiguration) {
         this.annotations = checkNotNull(activeAnnotations);
         this.applicationConfiguration = checkNotNull(applicationConfiguration);
         this.resources = Lists.newLinkedList();
@@ -53,7 +53,7 @@ public class OutputContext {
         return registry.activeAnnotations(active);
     }
     
-    public ApplicationConfiguration getApplicationConfiguration() {
+    public OldApplicationConfiguration getApplicationConfiguration() {
         return this.applicationConfiguration;
     }
 

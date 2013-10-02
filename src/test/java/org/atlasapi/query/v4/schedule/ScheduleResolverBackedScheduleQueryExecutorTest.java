@@ -15,7 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.equiv.MergingEquivalentsResolver;
 import org.atlasapi.equiv.ResolvedEquivalents;
 import org.atlasapi.media.channel.Channel;
@@ -101,7 +101,7 @@ public class ScheduleResolverBackedScheduleQueryExecutorTest {
         channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
         
-        ApplicationConfiguration appConfig = ApplicationConfiguration.defaultConfiguration()
+        OldApplicationConfiguration appConfig = OldApplicationConfiguration.defaultConfiguration()
                 .copyWithPrecedence(Publisher.all().asList());
         QueryContext context = new QueryContext(appConfig, ActiveAnnotations.standard());
         

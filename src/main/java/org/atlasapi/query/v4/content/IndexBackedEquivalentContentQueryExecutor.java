@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.equiv.MergingEquivalentsResolver;
 import org.atlasapi.equiv.ResolvedEquivalents;
 import org.atlasapi.media.common.Id;
@@ -118,7 +118,7 @@ public class IndexBackedEquivalentContentQueryExecutor implements QueryExecutor<
         return ImmutableSet.copyOf(query.getContext().getAnnotations().values());
     }
     
-    private ApplicationConfiguration config(Query<Content> query) {
+    private OldApplicationConfiguration config(Query<Content> query) {
         return query.getContext().getApplicationConfiguration();
     }
 

@@ -8,7 +8,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
@@ -30,6 +32,10 @@ public final class AttributeCoercers {
         return new IdStringCoercer(idCodec);
     }
     
+    public static final AttributeCoercer<String, Publisher> sourceIdCoercer(SourceIdCodec sourceIdCodec) {
+        return new SourceIdStringCoercer(sourceIdCodec);
+    }
+    
     private static class IdStringCoercer extends AbstractAttributeCoercer<String, Id> {
 
         private final NumberToShortStringCodec idCodec;
@@ -43,6 +49,25 @@ public final class AttributeCoercers {
             return Id.valueOf(idCodec.decode(input));
         }
 
+    }
+    
+    private static class SourceIdStringCoercer extends AbstractAttributeCoercer<String, Publisher> {
+        private final SourceIdCodec sourceIdCodec;
+        
+        public SourceIdStringCoercer(SourceIdCodec sourceIdCodec) {
+            this.sourceIdCodec = sourceIdCodec;
+        }
+
+        @Override
+        protected Publisher coerce(String input) {
+            Optional<Publisher> publisher = sourceIdCodec.decode(input);
+            if (publisher.isPresent()) {
+                return publisher.get();
+            } else {
+                return null;
+            }
+        }
+        
     }
 
     public static final AttributeCoercer<String, String> stringCoercer() {

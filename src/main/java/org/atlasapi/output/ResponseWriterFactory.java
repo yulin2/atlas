@@ -18,6 +18,9 @@ public class ResponseWriterFactory {
 
     public ResponseWriter writerFor(HttpServletRequest request, HttpServletResponse response) throws IOException, UnsupportedFormatException, NotAcceptableException {
         ResponseWriter writerFromExtension = writerFromExtension(request, response);
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        
+        
         if (writerFromExtension != null) {
             return writerFromExtension;
         }

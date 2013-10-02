@@ -6,7 +6,7 @@ import static org.atlasapi.feeds.utils.UpdateProgress.SUCCESS;
 import java.util.Iterator;
 import java.util.List;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.feeds.utils.UpdateProgress;
 import org.atlasapi.media.channel.Channel;
@@ -87,7 +87,7 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
                         end.toDateTimeAtStartOfDay(),
                         ImmutableList.of(channel),
                         ImmutableList.of(publisher),
-                        Optional.<ApplicationConfiguration>absent());
+                        Optional.<OldApplicationConfiguration>absent());
                 
                 Iterator<ChannelSchedule> channelItr = schedule.channelSchedules().iterator();
                 if (!channelItr.hasNext()) {
