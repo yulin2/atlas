@@ -17,11 +17,14 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.query.common.Query;
+import org.atlasapi.output.NotAcceptableException;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
+import org.atlasapi.output.UnsupportedFormatException;
 import org.atlasapi.persistence.application.ApplicationStore;
+import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryParseException;
@@ -36,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.net.HttpHeaders;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 @Controller
@@ -101,20 +105,22 @@ public class ApplicationAdminController {
         }
     }
 
-    @RequestMapping(value = "/4.0/applications", method = RequestMethod.POST)
+    @RequestMapping(value = "/4.0/applications.*", method = RequestMethod.POST)
     public void writeApplication(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ReadException, NotFoundException {
-        response.addHeader("Access-Control-Allow-Origin", "*");
+            throws IOException, ReadException, NotFoundException, UnsupportedFormatException, NotAcceptableException {
+        ResponseWriter writer = writerResolver.writerFor(request, response);
         Application application = deserialize(new InputStreamReader(request.getInputStream()), Application.class);
         if (application.getId() != null) {
             Optional<Application> existing = applicationStore.applicationFor(application.getId());
             application = application.copy().withSlug(existing.get().getSlug()).build();
-            applicationStore.updateApplication(application);
+            application = applicationStore.updateApplication(application);
         } else {
             // New application
-            applicationStore.createApplication(application);
+            application = applicationStore.createApplication(application);
         }
-        
+        QueryResult<Application> queryResult = QueryResult.singleResult(application, QueryContext.standard());
+
+        resultWriter.write(queryResult, writer);
     }
 
     @RequestMapping(value = "/4.0/applications/{aid}/sources", method = RequestMethod.POST)
