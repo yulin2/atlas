@@ -17,6 +17,7 @@ import org.atlasapi.media.channel.Region;
 import org.atlasapi.remotesite.pa.channels.bindings.Station;
 import org.atlasapi.remotesite.pa.channels.bindings.TvChannelData;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -105,11 +106,47 @@ public class PaChannelDataHandler {
                 }
                 channelGroupsIngester.addChannelNumberings(paPlatform.getEpg().getEpgContent(), writtenRegions, channelMap);
             }
+            
+            removeExpiredRegionsFromPlatform(channelGroupTree, platform);
         }
         
-        // write channels
+        // write channels 
+        // TODO should this be multi-threaded? is slowest part by far...
         for (Channel child : channelMap.values()) {
             createOrMerge(child);
+        }
+    }
+
+    private void removeExpiredRegionsFromPlatform(ChannelGroupTree channelGroupTree, Platform platform) {
+        Set<Long> regionIds = platform.getRegions();
+        Map<String, Long> previousRegionUris = Maps.newHashMap();
+        for (Long regionId : regionIds) {
+            Optional<ChannelGroup> group = channelGroupResolver.channelGroupFor(regionId);
+            if (group.isPresent()) {
+                previousRegionUris.put(group.get().getCanonicalUri(), regionId);
+            }
+        }
+        Set<String> newRegionUris = ImmutableSet.copyOf(Iterables.transform(
+                channelGroupTree.getRegions().values(), 
+                new Function<Region, String> () {
+                    @Override
+                    public String apply(Region input) {
+                        return input.getCanonicalUri();
+                    }
+                }
+        ));
+        
+        Set<String> nonRedundantPrevious = Sets.newHashSet(Sets.intersection(previousRegionUris.keySet(), newRegionUris));
+        for (String nonRedundantRegion : nonRedundantPrevious) {
+            previousRegionUris.remove(nonRedundantRegion);
+        }
+        
+        if (!previousRegionUris.isEmpty()) {
+            platform = (Platform) channelGroupResolver.channelGroupFor(platform.getId()).get();
+            Set<Long> regions = Sets.newHashSet(platform.getRegions());
+            regions.removeAll(previousRegionUris.values());
+            platform.setRegionIds(regions);
+            channelGroupWriter.createOrUpdate(platform);
         }
     }
     
