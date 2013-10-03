@@ -62,7 +62,7 @@ public class ScheduleDayUpdateController {
         }
         
         try {
-            UpdateProgress progress = processor.process(possibleChannel.requireValue(), day);
+            UpdateProgress progress = processor.process(new ChannelDay(possibleChannel.requireValue(), day));
             resp.setStatus(HttpStatusCode.OK.code());
             String progressMsg = progress.toString();
             resp.setContentLength(progressMsg.length());

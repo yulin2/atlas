@@ -11,13 +11,11 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonServices;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.Glycerin;
@@ -59,16 +57,16 @@ public class NitroScheduleDayUpdater implements ChannelDayProcessor {
     }
     
     @Override
-    public UpdateProgress process(Channel channel, LocalDate date) throws Exception {
+    public UpdateProgress process(ChannelDay channelDay) throws Exception {
         
-        String serviceId = BbcIonServices.services.inverse().get(channel.getUri());
-        DateTime from = date.toDateTimeAtStartOfDay(DateTimeZones.UTC);
+        String serviceId = BbcIonServices.services.inverse().get(channelDay.getChannel().getUri());
+        DateTime from = channelDay.getDay().toDateTimeAtStartOfDay(DateTimeZones.UTC);
         DateTime to = from.plusDays(1);
         log.debug("updating {}: {} -> {}", new Object[]{serviceId, from, to});
         
         ImmutableList<Broadcast> broadcasts = getBroadcasts(serviceId, from, to);
         ImmutableList<Optional<ItemRefAndBroadcast>> processingResults = processBroadcasts(broadcasts);
-        updateSchedule(channel, from, to, Optional.presentInstances(processingResults));
+        updateSchedule(channelDay.getChannel(), from, to, Optional.presentInstances(processingResults));
         
         int processedCount = Iterables.size(Optional.presentInstances(processingResults));
         int failedCount = processingResults.size() - processedCount;

@@ -2,17 +2,26 @@ package org.atlasapi.remotesite.bbc.nitro;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.atlasapi.media.channel.Channel;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
-import com.google.common.base.Throwables;
-import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.Range;
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
@@ -24,74 +33,115 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     
-    private final Supplier<Range<LocalDate>> dayGenerator;
-    private final Supplier<? extends Collection<Channel>> channelSupplier;
+    private final ListeningExecutorService executor;
+    private final Supplier<? extends Collection<ChannelDay>> channelDays;
     private final ChannelDayProcessor processor;
-    private final boolean abortOnFailure;
 
-    public ChannelDayProcessingTask(Supplier<? extends Collection<Channel>> channelSupplier, Supplier<Range<LocalDate>> daySupplier, ChannelDayProcessor processor, boolean abortOnFailure) {
-        this.channelSupplier = channelSupplier;
-        this.dayGenerator = daySupplier;
+    private AtomicInteger processed;
+    private int tasks;
+    private AtomicReference<UpdateProgress> progress;
+
+    public ChannelDayProcessingTask(ExecutorService executor, Supplier<? extends Collection<ChannelDay>> channelDays, ChannelDayProcessor processor) {
+        this.executor = MoreExecutors.listeningDecorator(executor);
+        this.channelDays = channelDays;
         this.processor = processor;
-        this.abortOnFailure = abortOnFailure;
+    }
+
+    private void updateStatus() {
+        reportStatus(String.format("%s/%s %s", processed, tasks, progress));
     }
     
     @Override
     protected void runTask() {
-        UpdateProgress progress = UpdateProgress.START;
-        Range<LocalDate> range = dayGenerator.get();
-        Collection<Channel> channels = channelSupplier.get();
-        int channelCount = channels.size();
-        Iterator<Channel> channelsIter = channels.iterator();
-        for(int i = 1; channelsIter.hasNext() && shouldContinue(); i++) {
-            reportStatus(String.format("%s/%s %s", i, channelCount, progress.toString()));
-            Channel channel = channelsIter.next();
-            progress = processRangeForChannel(range, channel, progress, i, channelCount);
+        
+        Collection<ChannelDay> channels = channelDays.get();
+        Iterator<ChannelDay> channelsIter = channels.iterator();
+
+        processed = new AtomicInteger();
+        tasks = channels.size();
+        progress = new AtomicReference<UpdateProgress>(UpdateProgress.START);
+        
+        ImmutableList.Builder<ListenableFuture<UpdateProgress>> results
+            = ImmutableList.builder();
+        while(channelsIter.hasNext() && shouldContinue()) {
+            results.add(submitTask(channelsIter.next()));
+            updateStatus();
         }
+        
+        waitForFinish(results.build());
     }
 
-    private UpdateProgress processRangeForChannel(Range<LocalDate> range, Channel channel, UpdateProgress progress,  int i, int size) {
-        Iterator<LocalDate> days = daysIn(range);
-        while(days.hasNext() && shouldContinue()) {
-            LocalDate day = days.next();
-            progress = progress.reduce(processChannelDay(channel, day));
-            reportStatus(String.format("%s/%s %s", i, size, progress.toString()));
-        }
-        return progress;
-    }
+    private void waitForFinish(ImmutableList<ListenableFuture<UpdateProgress>> taskResults) {
+        final CountDownLatch cdl = new CountDownLatch(1);
+        ListenableFuture<List<UpdateProgress>> results = Futures.successfulAsList(taskResults);
+        Futures.addCallback(results, new FutureCallback<List<UpdateProgress>>() {
+            @Override
+            public void onSuccess(List<UpdateProgress> result) {
+                cdl.countDown();
+            }
 
-    private UpdateProgress processChannelDay(Channel channel, LocalDate day) {
+            @Override
+            public void onFailure(Throwable t) {
+                cdl.countDown();
+            }
+        });
         try {
-            return processor.process(channel, day);
-        } catch (Exception e) {
-            if (abortOnFailure) {
-                throw Throwables.propagate(e);
-            } else {
-                log.error(String.format("%s %s", channel, day), e);
+            while (shouldContinue() && !cdl.await(5, TimeUnit.SECONDS)) {}
+        } catch (InterruptedException ie) {
+            return;
+        }
+        if (!results.isDone() && !shouldContinue()) {
+            results.cancel(true);
+        }
+    }
+
+    private ListenableFuture<UpdateProgress> submitTask(final ChannelDay cd) {
+        log.debug("submit: {}", cd);
+        ListenableFuture<UpdateProgress> taskResult = executor.submit(new ChannelDayProcessTask(cd));
+        Futures.addCallback(taskResult, new ProgressUpdatingCallback());
+        return taskResult;
+    }
+
+    private final class ProgressUpdatingCallback implements FutureCallback<UpdateProgress> {
+
+        @Override
+        public void onSuccess(UpdateProgress result) {
+            UpdateProgress cur = progress.get();
+            while(!progress.compareAndSet(cur, cur.reduce(result))) {
+                cur = progress.get();
+            }
+            processed.incrementAndGet();
+            updateStatus();
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+            log.error(t.getMessage(),t);
+            updateStatus();
+        }
+    }
+
+    private final class ChannelDayProcessTask implements Callable<UpdateProgress> {
+
+        private final ChannelDay cd;
+
+        private ChannelDayProcessTask(ChannelDay cd) {
+            this.cd = cd;
+        }
+
+        @Override
+        public UpdateProgress call() throws Exception {
+            System.out.println(Thread.currentThread().getName());
+            if (!shouldContinue()) {
+                return UpdateProgress.START;
+            }
+            try {
+                return processor.process(cd);
+            } catch (Exception e) {
+                log.error(cd.toString(), e);
                 return UpdateProgress.FAILURE;
             }
         }
     }
 
-    private Iterator<LocalDate> daysIn(final Range<LocalDate> range) {
-        Preconditions.checkArgument(range.hasLowerBound()&&range.hasUpperBound(), 
-                "Range must be bounded");
-        //TODO: investigate a DiscreteDomain<LocalDate> and then use ContiguousSet
-        return new AbstractIterator<LocalDate>() {
-
-            private LocalDate cur = range.lowerEndpoint();
-            @Override
-            protected LocalDate computeNext() {
-                LocalDate val = cur;
-                if (!range.contains(cur)) {
-                    return endOfData();
-                } else {
-                    val = cur;
-                }
-                cur = cur.plusDays(1);
-                return val;
-            }
-        };
-    }
-    
 }

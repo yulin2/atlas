@@ -1,15 +1,12 @@
 package org.atlasapi.remotesite.bbc.nitro;
 
-import org.atlasapi.media.channel.Channel;
-import org.joda.time.LocalDate;
-
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
 /**
- * Performs an action for the given {@link Channel} and {@link LocalDate} day.
+ * Performs an action for the given {@link ChannelDay}.
  */
 public interface ChannelDayProcessor {
 
-    UpdateProgress process(Channel channel, LocalDate date) throws Exception;
+    UpdateProgress process(ChannelDay channelDay) throws Exception;
 
 }
