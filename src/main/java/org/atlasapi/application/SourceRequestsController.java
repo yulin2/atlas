@@ -9,6 +9,7 @@ import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotAcceptableException;
+import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
@@ -19,7 +20,6 @@ import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.QueryResult;
 import org.atlasapi.query.common.StandardQueryParser;
-import org.elasticsearch.common.Preconditions;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,6 +73,7 @@ public class SourceRequestsController {
             @RequestParam String reason,
             @RequestParam String usageType) throws UnsupportedFormatException, NotAcceptableException, IOException {
 
+        response.addHeader("Access-Control-Allow-Origin", "*");
         Optional<Publisher> source =sourceIdCodec.decode(sid);
         if (source.isPresent()) {
             Id applicationId = Id.valueOf(idCodec.decode(appId));
@@ -82,6 +83,19 @@ public class SourceRequestsController {
         } else {
             sendError(request, response,  404);
         }      
+    }
+    
+    @RequestMapping(value = "/4.0/requests/{rid}/approve", method = RequestMethod.POST)
+    public void storeSourceRequest(HttpServletRequest request, 
+            HttpServletResponse response,
+            @PathVariable String rid) throws IOException {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        Id requestId = Id.valueOf(idCodec.decode(rid));
+        try {
+            sourceRequestManager.approveSourceRequest(requestId);
+        } catch (NotFoundException e) {
+            sendError(request, response,  404);
+        }
     }
     
     public void sendError(HttpServletRequest request,
