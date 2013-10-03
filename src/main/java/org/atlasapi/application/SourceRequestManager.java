@@ -75,14 +75,13 @@ public class SourceRequestManager {
      */
     public void approveSourceRequest(Id id) throws NotFoundException {
         Optional<SourceRequest> sourceRequest = sourceRequestStore.sourceRequestFor(id);
-        if (sourceRequest.isPresent()) {
-            Application existing = applicationStore.applicationFor(sourceRequest.get().getAppId()).get();
-            applicationStore.updateApplication(
-                    existing.copyWithReadSourceState(sourceRequest.get().getSource(), SourceState.AVAILABLE));
-            SourceRequest approved = sourceRequest.get().copy().withApproved(true).build();
-            sourceRequestStore.store(approved);
-        } else {
+        if (!sourceRequest.isPresent()) {
             throw new NotFoundException(id);
         }
+        Application existing = applicationStore.applicationFor(sourceRequest.get().getAppId()).get();
+        applicationStore.updateApplication(
+                    existing.copyWithReadSourceState(sourceRequest.get().getSource(), SourceState.AVAILABLE));
+        SourceRequest approved = sourceRequest.get().copy().withApproved(true).build();
+        sourceRequestStore.store(approved);
     }
 }
