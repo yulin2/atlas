@@ -11,7 +11,6 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonServices;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.Glycerin;
 import com.metabroadcast.atlas.glycerin.GlycerinException;
+import com.metabroadcast.atlas.glycerin.GlycerinResponse;
 import com.metabroadcast.atlas.glycerin.model.Broadcast;
 import com.metabroadcast.atlas.glycerin.queries.BroadcastsQuery;
 import com.metabroadcast.common.scheduling.UpdateProgress;
@@ -57,16 +57,16 @@ public class NitroScheduleDayUpdater implements ChannelDayProcessor {
     }
     
     @Override
-    public UpdateProgress process(Channel channel, LocalDate date) throws Exception {
+    public UpdateProgress process(ChannelDay channelDay) throws Exception {
         
-        String serviceId = BbcIonServices.services.inverse().get(channel.getUri());
-        DateTime from = date.toDateTimeAtStartOfDay(DateTimeZones.UTC);
+        String serviceId = BbcIonServices.services.inverse().get(channelDay.getChannel().getUri());
+        DateTime from = channelDay.getDay().toDateTimeAtStartOfDay(DateTimeZones.UTC);
         DateTime to = from.plusDays(1);
         log.debug("updating {}: {} -> {}", new Object[]{serviceId, from, to});
         
         ImmutableList<Broadcast> broadcasts = getBroadcasts(serviceId, from, to);
         ImmutableList<Optional<ItemRefAndBroadcast>> processingResults = processBroadcasts(broadcasts);
-        updateSchedule(channel, from, to, Optional.presentInstances(processingResults));
+        updateSchedule(channelDay.getChannel(), from, to, Optional.presentInstances(processingResults));
         
         int processedCount = Iterables.size(Optional.presentInstances(processingResults));
         int failedCount = processingResults.size() - processedCount;
@@ -98,8 +98,6 @@ public class NitroScheduleDayUpdater implements ChannelDayProcessor {
         return ids.build();
     }
 
-    // TODO: at the moment we're avoiding pagination by gambling there won't
-    // be more than 300 broadcasts in one day. In future it may be necessary.
     private ImmutableList<Broadcast> getBroadcasts(String serviceId, DateTime from, DateTime to)
             throws GlycerinException {
         BroadcastsQuery query = BroadcastsQuery.builder()
@@ -108,7 +106,20 @@ public class NitroScheduleDayUpdater implements ChannelDayProcessor {
                 .withStartTo(to)
                 .withPageSize(MAX_PAGE_SIZE)
                 .build();
-        return glycerin.execute(query).getResults();
+        
+        GlycerinResponse<Broadcast> resp = glycerin.execute(query);
+        if (!resp.hasNext()) {
+            return resp.getResults();
+        } else {
+            ImmutableList.Builder<Broadcast> broadcasts = ImmutableList.builder();
+            broadcasts.addAll(resp.getResults());
+            while (resp.hasNext()) {
+                resp = resp.getNext();
+                broadcasts.addAll(resp.getResults());
+            }
+            return broadcasts.build();
+        }
+        
     }
 
 }

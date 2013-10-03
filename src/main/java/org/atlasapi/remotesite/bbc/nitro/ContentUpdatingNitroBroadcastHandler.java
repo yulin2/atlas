@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import java.util.Set;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
@@ -18,14 +20,18 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.nitro.extract.NitroBroadcastExtractor;
 import org.atlasapi.remotesite.bbc.nitro.extract.NitroUtil;
+import org.atlasapi.util.GroupLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
@@ -41,22 +47,74 @@ public class ContentUpdatingNitroBroadcastHandler implements NitroBroadcastHandl
     
     private final ContentWriter writer;
     private final LocalOrRemoteNitroFetcher localOrRemoteFetcher;
+    private final GroupLock<String> lock;
     
     private final NitroBroadcastExtractor broadcastExtractor
         = new NitroBroadcastExtractor();
 
-    public ContentUpdatingNitroBroadcastHandler(ContentResolver resolver, ContentWriter writer, NitroContentAdapter contentAdapter, Clock clock) {
+
+    public ContentUpdatingNitroBroadcastHandler(ContentResolver resolver, ContentWriter writer, NitroContentAdapter contentAdapter, Clock clock, GroupLock<String> lock) {
         this.writer = writer;
         this.localOrRemoteFetcher = new LocalOrRemoteNitroFetcher(resolver, contentAdapter, clock);
+        this.lock = lock;
     }
     
     @Override
     public ImmutableList<Optional<ItemRefAndBroadcast>> handle(Iterable<com.metabroadcast.atlas.glycerin.model.Broadcast> nitroBroadcasts) throws NitroException {
         
-        ResolveOrFetchResult<Item> items = localOrRemoteFetcher.resolveOrFetchItem(nitroBroadcasts);
-        ImmutableSet<Series> series = localOrRemoteFetcher.resolveOrFetchSeries(items.getFetched().values());
-        ImmutableSet<Brand> brands = localOrRemoteFetcher.resolveOrFetchBrand(items.getFetched().values());
+        Set<String> itemIds = itemIds(nitroBroadcasts);
+        Set<String> containerIds = ImmutableSet.of();
         
+        try {
+            lock.lock(itemIds);
+            ResolveOrFetchResult<Item> items = localOrRemoteFetcher.resolveOrFetchItem(nitroBroadcasts);
+            
+            containerIds = topLevelContainerIds(items.getAll());
+            lock.lock(containerIds);
+            
+            ImmutableSet<Series> series = localOrRemoteFetcher.resolveOrFetchSeries(items.getFetched().values());
+            ImmutableSet<Brand> brands = localOrRemoteFetcher.resolveOrFetchBrand(items.getFetched().values());
+            
+            return writeContent(nitroBroadcasts, items, series, brands);
+        } catch (InterruptedException ie) {
+            return ImmutableList.of();
+        } finally {
+            lock.unlock(itemIds);
+            lock.unlock(containerIds);
+        }
+    }
+
+    private Set<String> itemIds(
+            Iterable<com.metabroadcast.atlas.glycerin.model.Broadcast> nitroBroadcasts) {
+        return ImmutableSet.copyOf(Iterables.transform(nitroBroadcasts,
+            new Function<com.metabroadcast.atlas.glycerin.model.Broadcast, String>() {
+                @Override
+                public String apply(com.metabroadcast.atlas.glycerin.model.Broadcast input) {
+                    return NitroUtil.programmePid(input).getPid();
+                }
+            }
+        ));
+    }
+
+    private Set<String> topLevelContainerIds(ImmutableSet<Item> items) {
+        return ImmutableSet.copyOf(Iterables.filter(Iterables.transform(items,
+            new Function<Item, String>() {
+                @Override
+                public String apply(Item input) {
+                    if (input.getContainer() != null) {
+                        return input.getContainer().getUri();
+                    }
+                    return null;
+                }
+            }
+        ), Predicates.notNull()));
+    }
+
+
+    private ImmutableList<Optional<ItemRefAndBroadcast>> writeContent(
+            Iterable<com.metabroadcast.atlas.glycerin.model.Broadcast> nitroBroadcasts,
+            ResolveOrFetchResult<Item> items, ImmutableSet<Series> series,
+            ImmutableSet<Brand> brands) {
         ImmutableMap<String, Series> seriesIndex = Maps.uniqueIndex(series, Identified.TO_URI);
         ImmutableMap<String, Brand> brandIndex = Maps.uniqueIndex(brands, Identified.TO_URI);
         

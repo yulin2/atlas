@@ -5,6 +5,8 @@ import org.atlasapi.media.entity.Identified;
 import com.google.api.client.repackaged.com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
 
@@ -20,10 +22,12 @@ public class ResolveOrFetchResult<I extends Identified> {
 
     private final ImmutableMap<String, I> resolved;
     private final ImmutableMap<String, I> fetched;
+    private final ImmutableSet<I> all;
 
     public ResolveOrFetchResult(Iterable<I> resolved, Iterable<I> fetched) {
         this.resolved = Maps.uniqueIndex(resolved, Identified.TO_URI);
         this.fetched = Maps.uniqueIndex(fetched, Identified.TO_URI);
+        this.all = ImmutableSet.copyOf(Iterables.concat(resolved, fetched));
     }
 
     
@@ -51,5 +55,9 @@ public class ResolveOrFetchResult<I extends Identified> {
             item = fetched.get(itemUri);
         }
         return item;
+    }
+
+    public ImmutableSet<I> getAll() {
+        return all;
     }
 }

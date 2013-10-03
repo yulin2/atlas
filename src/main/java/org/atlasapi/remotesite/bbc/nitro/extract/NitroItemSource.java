@@ -28,7 +28,7 @@ public class NitroItemSource<T> {
      */
     public static <T> NitroItemSource<T> valueOf(T programme, Iterable<Availability> availabilities) {
         return new NitroItemSource<T>(programme, 
-            ImmutableList.copyOf(availabilities), 
+            availabilities, 
             ImmutableList.<Broadcast>of(),
             ImmutableList.<NitroGenreGroup>of(),
             ImmutableList.<NitroFormat>of()
@@ -44,10 +44,10 @@ public class NitroItemSource<T> {
      */
     public static <T> NitroItemSource<T> valueOf(T programme, List<Availability> availabilities, List<Broadcast> broadcasts, List<NitroGenreGroup> genres, List<NitroFormat> formats) {
         return new NitroItemSource<T>(programme, 
-            ImmutableList.copyOf(availabilities), 
-            ImmutableList.copyOf(broadcasts),
-            ImmutableList.copyOf(genres),
-            ImmutableList.copyOf(formats)
+            availabilities, 
+            broadcasts,
+            genres,
+            formats
         );
     }
 
@@ -57,15 +57,15 @@ public class NitroItemSource<T> {
     private final ImmutableList<NitroGenreGroup> genres;
     private final ImmutableList<NitroFormat> formats;
 
-    private NitroItemSource(T programme, ImmutableList<Availability> availabilities,
-            ImmutableList<Broadcast> broadcasts,
-            ImmutableList<NitroGenreGroup> genres, 
-            ImmutableList<NitroFormat> formats) {
+    private NitroItemSource(T programme, Iterable<Availability> availabilities,
+            Iterable<Broadcast> broadcasts,
+            Iterable<NitroGenreGroup> genres, 
+            Iterable<NitroFormat> formats) {
         this.programme = checkNotNull(programme);
-        this.availabilities = availabilities;
-        this.broadcasts = broadcasts;
-        this.genres = genres;
-        this.formats = formats;
+        this.availabilities = ImmutableList.copyOf(availabilities);
+        this.broadcasts = ImmutableList.copyOf(broadcasts);
+        this.genres = ImmutableList.copyOf(genres);
+        this.formats = ImmutableList.copyOf(formats);
     }
     
     /**
