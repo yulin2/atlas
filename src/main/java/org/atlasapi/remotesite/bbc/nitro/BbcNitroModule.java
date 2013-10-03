@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.bbc.nitro;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.PostConstruct;
 
@@ -51,6 +52,7 @@ public class BbcNitroModule {
     private @Value("${bbc.nitro.host}") String nitroHost;
     private @Value("${bbc.nitro.apiKey}") String nitroApiKey;
     private @Value("${bbc.nitro.requestsPerSecond}") Integer nitroRateLimit;
+    private @Value("${bbc.nitro.threadCount}") Integer nitroThreadCount;
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
@@ -58,6 +60,9 @@ public class BbcNitroModule {
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired ScheduleWriter scheduleWriter;
     private @Autowired ChannelResolver channelResolver;
+    
+    private final ThreadFactory nitroThreadFactory
+        = new ThreadFactoryBuilder().setNameFormat("nitro %s").build();
     
     @PostConstruct
     public void configure() {
@@ -71,7 +76,7 @@ public class BbcNitroModule {
 
     private ScheduledTask nitroScheduleUpdateTask(int back, int forward) {
         DayRangeChannelDaySupplier drcds = new DayRangeChannelDaySupplier(bbcChannelSupplier(), dayRangeSupplier(back, forward));
-        ExecutorService executor = Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setNameFormat("nitro %s").build());
+        ExecutorService executor = Executors.newFixedThreadPool(nitroThreadCount, nitroThreadFactory);
         return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor());
     }
     
