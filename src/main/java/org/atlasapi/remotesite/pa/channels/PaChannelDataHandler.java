@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.pa.channels;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -17,16 +18,16 @@ import org.atlasapi.media.channel.Region;
 import org.atlasapi.remotesite.pa.channels.bindings.Station;
 import org.atlasapi.remotesite.pa.channels.bindings.TvChannelData;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableSet.Builder;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets.SetView;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 
 public class PaChannelDataHandler {
@@ -45,6 +46,12 @@ public class PaChannelDataHandler {
                 }
             }
             return false;
+        }
+    };
+    private static final Function<Region, String> REGION_TO_URI = new Function<Region, String> () {
+        @Override
+        public String apply(Region input) {
+            return input.getCanonicalUri();
         }
     };
 
@@ -105,11 +112,42 @@ public class PaChannelDataHandler {
                 }
                 channelGroupsIngester.addChannelNumberings(paPlatform.getEpg().getEpgContent(), writtenRegions, channelMap);
             }
+            
+            removeExpiredRegionsFromPlatform(
+                    ImmutableSet.copyOf(Iterables.transform(
+                            channelGroupTree.getRegions().values(), 
+                            REGION_TO_URI
+                    )), 
+                    platform
+            );
         }
         
-        // write channels
+        // write channels 
+        // TODO should this be multi-threaded? is slowest part by far...
         for (Channel child : channelMap.values()) {
             createOrMerge(child);
+        }
+    }
+
+    private void removeExpiredRegionsFromPlatform(Set<String> newRegionUris, Platform platform) {
+        Set<Long> regionIds = platform.getRegions();
+        Map<String, Long> previousRegionUris = Maps.newHashMap();
+        for (Long regionId : regionIds) {
+            Optional<ChannelGroup> group = channelGroupResolver.channelGroupFor(regionId);
+            previousRegionUris.put(group.get().getCanonicalUri(), regionId);
+        }
+
+        Collection<Long> redundantRegionIds = Maps.filterKeys(
+                previousRegionUris, 
+                Predicates.in(Sets.difference(previousRegionUris.keySet(), newRegionUris))
+            ).values();
+        
+        if (!redundantRegionIds.isEmpty()) {
+            platform = (Platform) channelGroupResolver.channelGroupFor(platform.getId()).get();
+            Set<Long> regions = Sets.newHashSet(platform.getRegions());
+            regions.removeAll(redundantRegionIds);
+            platform.setRegionIds(regions);
+            channelGroupWriter.createOrUpdate(platform);
         }
     }
     
