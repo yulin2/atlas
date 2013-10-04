@@ -105,7 +105,11 @@ public class ProductController extends BaseController<Iterable<Product>> {
         
         try {
             Selection selection = query.getSelection();
-            QueryResult<Identified, Product> result = QueryResult.of(Iterables.filter(Iterables.concat(queryExecutor.executeUriQuery(product.getContent(), query).values()),Identified.class), product);
+            QueryResult<Identified, Product> result = QueryResult.of(
+                    Iterables.filter(
+                            queryExecutor.executeUriQuery(query.getSelection().apply(product.getContent()), query).values(),
+                            Identified.class
+                    ), product);
             queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
