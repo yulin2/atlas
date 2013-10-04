@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.MoreMaps;
 import com.metabroadcast.common.collect.DedupingIterator;
 
@@ -76,7 +77,7 @@ public class ContentResolvingSearcher implements SearchResolver {
         List<String> people = ImmutableList.copyOf(Iterables.transform(Iterables.filter(ids, PEOPLE), ContentIdentifier.TO_URI));
         
         if (!people.isEmpty()) {
-            return MoreMaps.mapWithValues(DedupingIterator.dedupeIterable(peopleQueryResolver.people(people, appConfig)), TO_URI);
+            return Maps.uniqueIndex(DedupingIterator.dedupeIterable(peopleQueryResolver.people(people, appConfig)), TO_URI);
         } else {
             return ImmutableMap.of();
         }
