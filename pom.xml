@@ -503,6 +503,21 @@
 		  <artifactId>commons-compress</artifactId>
 		  <version>1.0</version>
 	   </dependency>
+       <dependency>
+          <groupId>com.metabroadcast.atlas.glycerin</groupId>
+          <artifactId>glycerin</artifactId>
+          <version>0.1.4</version>
+       </dependency>
+       <dependency>
+           <groupId>com.google.http-client</groupId>
+           <artifactId>google-http-client</artifactId>
+           <version>1.17.0-rc</version>
+       </dependency>
+       <dependency>
+           <groupId>com.google.http-client</groupId>
+           <artifactId>google-http-client-jackson</artifactId>
+           <version>1.17.0-rc</version>
+       </dependency>
     </dependencies>
     <properties>
         <atlas.version>${project.version}</atlas.version>

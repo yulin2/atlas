@@ -30,7 +30,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
-import com.google.common.collect.Ranges;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -40,7 +39,7 @@ import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 @Controller
 public class ScheduleController extends BaseController<Iterable<ScheduleChannel>> {
     
-    private static final Range<Integer> COUNT_RANGE = Ranges.closed(1, 10);
+    private static final Range<Integer> COUNT_RANGE = Range.closed(1, 10);
     
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final ScheduleResolver scheduleResolver;

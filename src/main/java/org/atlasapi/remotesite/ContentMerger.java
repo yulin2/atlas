@@ -45,6 +45,9 @@ public class ContentMerger {
         current.setAliases(extracted.getAliases());
         current.setTitle(extracted.getTitle());
         current.setDescription(extracted.getDescription());
+        current.setShortDescription(extracted.getShortDescription());
+        current.setMediumDescription(extracted.getMediumDescription());
+        current.setLongDescription(current.getLongDescription());
         current.setImage(extracted.getImage());
         current.setYear(extracted.getYear());
         current.setGenres(extracted.getGenres());
@@ -54,6 +57,7 @@ public class ContentMerger {
         current.setMediaType(extracted.getMediaType());
         current.setSpecialization(extracted.getSpecialization());
         current.setLastUpdated(extracted.getLastUpdated());
+        current.setClips(extracted.getClips());
         return current;
     }
 

@@ -1,6 +1,6 @@
 package org.atlasapi.equiv.scorers;
 
-import static com.google.common.collect.DiscreteDomains.integers;
+import static com.google.common.collect.DiscreteDomain.integers;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -16,11 +16,12 @@ import org.atlasapi.media.entity.Item;
 import org.junit.Test;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Ranges;
+import com.google.common.collect.Range;
 
 public class CrewMemberScorerTest {
 
@@ -58,7 +59,7 @@ public class CrewMemberScorerTest {
     }
 
     private ImmutableList<Integer> namesIn(char start, char end) {
-        return Ranges.closed((int)start, (int)end).asSet(integers()).asList();
+        return ContiguousSet.create(Range.closed((int)start, (int)end), integers()).asList();
     }
 
     private List<CrewMember> toCrew(List<Integer> numbers) {
