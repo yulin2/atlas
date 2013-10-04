@@ -36,8 +36,6 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException()).withErrorCode("CONTENT_GROUP_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
     private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException()).withErrorCode("CONTENT_GROUP_UNAVAILABLE").withStatusCode(HttpStatusCode.FORBIDDEN);
     
-    private static final Function<ChildRef, String> CHILD_REF_TO_URI_FN = new ChildRefToUri();
-    //
     private final ContentGroupResolver contentGroupResolver;
     private final QueryController queryController;
     private final KnownTypeQueryExecutor queryExecutor;
@@ -108,20 +106,12 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
             QueryResult<Identified, ContentGroup> result = QueryResult.of(
                     Iterables.filter(
                     Iterables.concat(
-                    queryExecutor.executeUriQuery(Iterables.transform(contentGroup.getContents(), CHILD_REF_TO_URI_FN), query).values()),
+                    queryExecutor.executeUriQuery(Iterables.transform(query.getSelection().apply(contentGroup.getContents()), ChildRef.TO_URI), query).values()),
                     Identified.class),
                     contentGroup);
             queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
-        }
-    }
-
-    private static class ChildRefToUri implements Function<ChildRef, String> {
-
-        @Override
-        public String apply(ChildRef input) {
-            return input.getUri();
         }
     }
     
