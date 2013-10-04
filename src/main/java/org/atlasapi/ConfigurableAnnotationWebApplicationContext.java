@@ -1,13 +1,6 @@
 package org.atlasapi;
 
 import org.atlasapi.application.ApplicationModule;
-import org.atlasapi.application.OldApplicationModule;
-import org.atlasapi.equiv.EquivModule;
-import org.atlasapi.equiv.EquivTaskModule;
-import org.atlasapi.feeds.AtlasFeedsModule;
-import org.atlasapi.feeds.interlinking.delta.InterlinkingDeltaModule;
-import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
-import org.atlasapi.feeds.xmltv.XmlTvModule;
 import org.atlasapi.feeds.youview.YouViewUploadModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.messaging.AtlasMessagingModule;
@@ -15,14 +8,12 @@ import org.atlasapi.messaging.WorkersModule;
 import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.QueryWebModule;
-import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
 import org.atlasapi.system.BootstrapModule;
 import org.atlasapi.system.DebugModule;
 import org.atlasapi.system.SystemModule;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -80,7 +71,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             builder.add(
 //                AtlasFeedsModule.class,
                 QueryWebModule.class,
-                OldApplicationModule.class,
                 ApplicationModule.class
             );
         }
