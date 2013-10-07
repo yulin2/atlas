@@ -54,6 +54,7 @@ public class BbcNitroModule {
     private @Value("${bbc.nitro.requestsPerSecond}") Integer nitroRateLimit;
     private @Value("${bbc.nitro.threadCount.today}") Integer nitroTodayThreadCount;
     private @Value("${bbc.nitro.threadCount.fortnight}") Integer nitroFortnightThreadCount;
+    private @Value("${bbc.nitro.requestPageSize}") Integer nitroRequestPageSize;
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
@@ -117,9 +118,13 @@ public class BbcNitroModule {
 
     @Bean
     NitroBroadcastHandler<ImmutableList<Optional<ItemRefAndBroadcast>>> nitroBroadcastHandler() {
-        SystemClock clock = new SystemClock();
         return new ContentUpdatingNitroBroadcastHandler(contentResolver, contentWriter, 
-                new GlycerinNitroContentAdapter(glycerin(), nitroClient(), clock), clock, GroupLock.<String>natural());
+                nitroContentAdapter(), new SystemClock(), GroupLock.<String>natural());
+    }
+
+    @Bean
+    GlycerinNitroContentAdapter nitroContentAdapter() {
+        return new GlycerinNitroContentAdapter(glycerin(), nitroClient(), new SystemClock(), nitroRequestPageSize);
     }
 
     private Supplier<Range<LocalDate>> dayRangeSupplier(int back, int forward) {
