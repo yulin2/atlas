@@ -3,12 +3,14 @@ package org.atlasapi.query.v4.schedule;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.metabroadcast.common.webapp.query.DateTimeInQueryParser.queryDateTimeParser;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.query.ApplicationSourcesFetcher;
 import org.atlasapi.media.common.Id;
@@ -19,6 +21,7 @@ import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.SetBasedRequestParameterValidator;
+import org.elasticsearch.common.collect.ImmutableList;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -26,7 +29,6 @@ import org.joda.time.Interval;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.time.Clock;
@@ -83,14 +85,17 @@ class ScheduleRequestParser {
     }
 
     private ApplicationSources appConfigForValidPublisher(Publisher publisher,
-                                                                ApplicationSources appConfig,
+                                                                ApplicationSources appSources,
                                                                 Interval interval) {
-        if (appConfig.isEnabled(publisher)) {
-            return appConfig;
+        if (appSources.isReadEnabled(publisher)) {
+            return appSources;
         }
         if (Publisher.PA.equals(publisher) && overlapsOpenInterval(interval)) {
-            appConfig = appConfig.withSource(Publisher.PA, SourceStatus.AVAILABLE_ENABLED);
-            return appConfig;
+            List<SourceReadEntry> reads = ImmutableList.<SourceReadEntry>builder().addAll(appSources.getReads())
+                    .add(new SourceReadEntry(Publisher.PA, SourceStatus.AVAILABLE_ENABLED))
+                    .build();
+            appSources = appSources.copy().withReads(reads).build();
+            return appSources;
         }
         return null;
     }

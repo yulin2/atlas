@@ -5,7 +5,10 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.SourceReadEntry;
+import org.atlasapi.application.SourceStatus;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
@@ -80,13 +83,22 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 	public void testMergingEpisodes() throws Exception {
 		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
 
-		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(OldApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)));
+		ContentQuery query = ContentQuery.MATCHES_EVERYTHING
+		        .copyWithApplicationSources(ApplicationSources.EMPTY_SOURCES
+		                .copy()
+		                .withPrecedence(true)
+		                .withReads(ImmutableList.of(
+		                     new SourceReadEntry(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED),
+		                     new SourceReadEntry(Publisher.YOUTUBE, SourceStatus.AVAILABLE_ENABLED)
+		                        ))
+		                .build());
 		Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
 		
 		assertEquals(ImmutableList.of(item1), merged.get(item1.getId()));
 		assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getId()))).getClips());
 	}
 	
+	// TODO IMPLEMENT THIS 
 	public void testMergingWithExplicitPrecidenceMissingNewPublisher() throws Exception {
 	    MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
 
@@ -100,8 +112,15 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 	
     public void testMergingPeople() throws Exception {
         MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(film1, film2));
-
-        ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(OldApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.PA, Publisher.RADIO_TIMES)));
+        ContentQuery query = ContentQuery.MATCHES_EVERYTHING
+                .copyWithApplicationSources(ApplicationSources.EMPTY_SOURCES
+                        .copy()
+                        .withPrecedence(true)
+                        .withReads(ImmutableList.of(
+                             new SourceReadEntry(Publisher.PA, SourceStatus.AVAILABLE_ENABLED),
+                             new SourceReadEntry(Publisher.RADIO_TIMES, SourceStatus.AVAILABLE_ENABLED)
+                                ))
+                        .build());
         Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(film1.getCanonicalUri()), query));
         
         assertEquals(ImmutableList.of(film1), merged.get(film1.getId()));

@@ -15,7 +15,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.SourceReadEntry;
+import org.atlasapi.application.SourceStatus;
 import org.atlasapi.equiv.MergingEquivalentsResolver;
 import org.atlasapi.equiv.ResolvedEquivalents;
 import org.atlasapi.media.channel.Channel;
@@ -39,7 +45,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.Futures;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -100,10 +108,17 @@ public class ScheduleResolverBackedScheduleQueryExecutorTest {
         channel.setId(1);
         channel.setCanonicalUri("one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
+        List<SourceReadEntry> reads = ImmutableList.copyOf(Iterables.transform(Publisher.all(), new Function<Publisher, SourceReadEntry>() {
+           @Override
+            public SourceReadEntry apply(@Nullable Publisher input) {
+                return new SourceReadEntry(input, SourceStatus.AVAILABLE_ENABLED);
+            }}));
         
-        OldApplicationConfiguration appConfig = OldApplicationConfiguration.defaultConfiguration()
-                .copyWithPrecedence(Publisher.all().asList());
-        QueryContext context = new QueryContext(appConfig, ActiveAnnotations.standard());
+        ApplicationSources appSources = ApplicationSources.EMPTY_SOURCES.copy()
+                .withPrecedence(true)
+                .withReads(reads)
+                .build();
+        QueryContext context = new QueryContext(appSources, ActiveAnnotations.standard());
         
         Id itemId = Id.valueOf(1);
         ChannelSchedule channelSchedule = new ChannelSchedule(channel, interval, ImmutableList.<ItemAndBroadcast>of(
@@ -120,13 +135,13 @@ public class ScheduleResolverBackedScheduleQueryExecutorTest {
             .thenReturn(Maybe.just(channel));
         when(scheduleResolver.resolve(argThat(hasItems(channel)), eq(interval), eq(query.getSource())))
             .thenReturn(Futures.immediateFuture(new Schedule(ImmutableList.of(channelSchedule), interval)));
-        when(equivalentContentResolver.resolveIds(ImmutableList.of(itemId), appConfig, ActiveAnnotations.standard().all()))
+        when(equivalentContentResolver.resolveIds(ImmutableList.of(itemId), appSources, ActiveAnnotations.standard().all()))
             .thenReturn(Futures.immediateFuture(ResolvedEquivalents.<Content>builder().putEquivalents(itemId, ImmutableList.of(equivalentItem)).build()));
         
         QueryResult<ChannelSchedule> result = executor.execute(query);
         
         assertThat(result.getOnlyResource().getEntries().get(0).getItem(), sameInstance(equivalentItem));
-        verify(equivalentContentResolver).resolveIds(ImmutableList.of(itemId), appConfig, ActiveAnnotations.standard().all());
+        verify(equivalentContentResolver).resolveIds(ImmutableList.of(itemId), appSources, ActiveAnnotations.standard().all());
         
     }
     

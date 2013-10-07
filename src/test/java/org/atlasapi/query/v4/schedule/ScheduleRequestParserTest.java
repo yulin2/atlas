@@ -1,6 +1,5 @@
 package org.atlasapi.query.v4.schedule;
 
-import static org.atlasapi.application.OldApplicationConfiguration.defaultConfiguration;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.hamcrest.Matchers.is;
@@ -13,6 +12,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.application.query.ApplicationSourcesFetcher;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
@@ -29,9 +29,9 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
@@ -58,8 +58,8 @@ public class ScheduleRequestParserTest {
         channel.setId(1234L);
         when(annotationsExtractor.extractFromRequest(any(HttpServletRequest.class)))
             .thenReturn(ActiveAnnotations.standard());
-        when(applicationFetcher.configurationFor(any(HttpServletRequest.class)))
-            .thenReturn(Maybe.just(defaultConfiguration()));
+        when(applicationFetcher.sourcesFor(any(HttpServletRequest.class)))
+            .thenReturn(Optional.of(ApplicationSources.EMPTY_SOURCES));
     }
     
     @Test
@@ -81,7 +81,7 @@ public class ScheduleRequestParserTest {
         assertThat(query.getInterval(), is(intvl));
         assertThat(query.getSource(), is(BBC));
         assertThat(query.getContext().getAnnotations().forPath(ImmutableList.of(Resource.CONTENT)), is(Annotation.standard()));
-        assertThat(query.getContext().getApplicationConfiguration(), is(defaultConfiguration()));
+        assertThat(query.getContext().getApplicationSources(), is(ApplicationSources.EMPTY_SOURCES));
     }
     
     @Test
@@ -103,7 +103,7 @@ public class ScheduleRequestParserTest {
         assertThat(query.getInterval(), is(intvl));
         assertThat(query.getSource(), is(BBC));
         assertThat(query.getContext().getAnnotations().forPath(ImmutableList.of(Resource.CONTENT)), is(Annotation.standard()));
-        assertThat(query.getContext().getApplicationConfiguration(), is(defaultConfiguration()));
+        assertThat(query.getContext().getApplicationSources(), is(ApplicationSources.EMPTY_SOURCES));
     }
     
     @Test(expected=IllegalArgumentException.class)

@@ -60,7 +60,7 @@ public class ScheduleResolverBackedScheduleQueryExecutor implements ScheduleQuer
 
     private ChannelSchedule channelSchedule(ListenableFuture<Schedule> schedule, ScheduleQuery query) throws ScheduleQueryExecutionException {
         
-        if (query.getContext().getApplicationConfiguration().precedenceEnabled()) {
+        if (query.getContext().getApplicationSources().isPrecedenceEnabled()) {
             schedule = Futures.transform(schedule, toEquivalentEntries(query));
         }
         
@@ -90,7 +90,7 @@ public class ScheduleResolverBackedScheduleQueryExecutor implements ScheduleQuer
     
     private ListenableFuture<List<ItemAndBroadcast>> resolveEquivalents(ChannelSchedule schedule,
             QueryContext context) {
-        return replaceItems(schedule.getEntries(), mergingContentResolver.resolveIds(idsFrom(schedule), context.getApplicationConfiguration(), context.getAnnotations().all()));
+        return replaceItems(schedule.getEntries(), mergingContentResolver.resolveIds(idsFrom(schedule), context.getApplicationSources(), context.getAnnotations().all()));
     }
 
     private ListenableFuture<List<ItemAndBroadcast>> replaceItems(final List<ItemAndBroadcast> entries,

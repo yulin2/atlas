@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationSources;
-import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.equiv.EquivalentsResolver;
@@ -79,9 +78,9 @@ public class TopicContentQueryExecutorTest {
         
         when(topicResolver.resolveIds(argThat(hasItems(topic.getId()))))
             .thenReturn(Futures.immediateFuture(Resolved.valueOf(ImmutableSet.of(topic))));
-        when(contentIndex.query(emptyAttributeQuerySet, context.getApplicationConfiguration().getEnabledSources(), Selection.all()))
+        when(contentIndex.query(emptyAttributeQuerySet, context.getApplicationSources().getEnabledReadSources(), Selection.all()))
             .thenReturn(Futures.immediateFuture(FluentIterable.from(ImmutableSet.of(content.getId()))));
-        when(equivalentsResolver.resolveIds(argThat(hasItems(content.getId())), argThat(is(context.getApplicationConfiguration())), argThat(is(context.getAnnotations().all()))))
+        when(equivalentsResolver.resolveIds(argThat(hasItems(content.getId())), argThat(is(context.getApplicationSources())), argThat(is(context.getAnnotations().all()))))
             .thenReturn(Futures.immediateFuture(ResolvedEquivalents.<Content>builder().putEquivalents(Id.valueOf(1235), ImmutableSet.of(content)).build()));
         
         ContextualQueryResult<Topic,Content> result
