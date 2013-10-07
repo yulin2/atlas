@@ -32,6 +32,7 @@ import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 import com.metabroadcast.common.webapp.properties.ContextConfigurer;
 import com.mongodb.Mongo;
+import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
 
 @Configuration
@@ -48,7 +49,7 @@ public class AtlasModule {
     public @Bean Mongo mongo() {
         Mongo mongo = new Mongo(mongoHosts());
         if(processingConfig == null || !processingConfig.toBoolean()) {
-            mongo.slaveOk();
+            mongo.setReadPreference(ReadPreference.secondaryPreferred());
         }
         return mongo;
     }

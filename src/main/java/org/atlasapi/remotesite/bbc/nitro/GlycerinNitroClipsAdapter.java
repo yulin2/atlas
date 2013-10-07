@@ -36,7 +36,6 @@ import com.metabroadcast.common.time.Clock;
  */
 public class GlycerinNitroClipsAdapter {
 
-    private static final int MAX_PAGE_SIZE = 300;
     private static final int BATCH_SIZE = 100;
     
     private static final Predicate<Programme> isClip
@@ -56,10 +55,12 @@ public class GlycerinNitroClipsAdapter {
 
     private final Glycerin glycerin;
     private final NitroClipExtractor clipExtractor;
+    private final int pageSize;
 
-    public GlycerinNitroClipsAdapter(Glycerin glycerin, Clock clock) {
+    public GlycerinNitroClipsAdapter(Glycerin glycerin, Clock clock, int pageSize) {
         this.glycerin = glycerin;
         this.clipExtractor = new NitroClipExtractor(clock);
+        this.pageSize = pageSize;
     }
     
     public Multimap<String, org.atlasapi.media.entity.Clip> clipsFor(Iterable<PidReference> refs) throws NitroException {
@@ -94,7 +95,7 @@ public class GlycerinNitroClipsAdapter {
     private ListMultimap<String, Availability> getNitroAvailabilities(List<Clip> clipPart) throws GlycerinException {
         AvailabilityQuery query = AvailabilityQuery.builder()
                 .withDescendantsOf(toPid(clipPart))
-                .withPageSize(MAX_PAGE_SIZE)
+                .withPageSize(pageSize)
                 .build();
         GlycerinResponse<Availability> availabilities = glycerin.execute(query);
         return Multimaps.index(availabilities.getResults(), new Function<Availability, String>() {
@@ -118,7 +119,7 @@ public class GlycerinNitroClipsAdapter {
         return glycerin.execute(ProgrammesQuery.builder()
                 .withEntityType(EntityTypeOption.CLIP)
                 .withChildrenOf(NitroUtil.toPids(refs))
-                .withPageSize(MAX_PAGE_SIZE)
+                .withPageSize(pageSize)
                 .build()).getResults();
     }
     
