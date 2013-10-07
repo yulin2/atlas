@@ -6,8 +6,8 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.OldApplicationConfiguration;
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.query.ApplicationSourcesFetcher;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.topic.PopularTopicIndex;
 import org.atlasapi.media.topic.Topic;
@@ -45,15 +45,15 @@ public class PopularTopicController {
     private final TopicResolver resolver;
     private final PopularTopicIndex index;
     private final QueryResultWriter<Topic> resultWriter;
-    private final ApplicationConfigurationFetcher configurationFetcher;
+    private final ApplicationSourcesFetcher sourcesFetcher;
 
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
 
-    public PopularTopicController(TopicResolver resolver, PopularTopicIndex index, QueryResultWriter<Topic> resultWriter, ApplicationConfigurationFetcher configurationFetcher) {
+    public PopularTopicController(TopicResolver resolver, PopularTopicIndex index, QueryResultWriter<Topic> resultWriter, ApplicationSourcesFetcher configurationFetcher) {
         this.resolver = resolver;
         this.index = index;
         this.resultWriter = resultWriter;
-        this.configurationFetcher = configurationFetcher;
+        this.sourcesFetcher = configurationFetcher;
     }
 
     @RequestMapping({"/4.0/topics/popular.*", "/4.0/topics/popular"})
@@ -65,10 +65,10 @@ public class PopularTopicController {
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
-            OldApplicationConfiguration configuration = configurationFetcher.configurationFor(request).valueOrDefault(OldApplicationConfiguration.defaultConfiguration());
+            ApplicationSources sources = sourcesFetcher.sourcesFor(request).or(ApplicationSources.EMPTY_SOURCES);
             Interval interval = new Interval(dateTimeInQueryParser.parse(from), dateTimeInQueryParser.parse(to));
             ListenableFuture<FluentIterable<Id>> topicIds = index.popularTopics(interval, selection);
-            resultWriter.write(QueryResult.listResult(resolve(topicIds), new QueryContext(configuration, ActiveAnnotations.standard())), writer);
+            resultWriter.write(QueryResult.listResult(resolve(topicIds), new QueryContext(sources, ActiveAnnotations.standard())), writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
             ErrorSummary summary = ErrorSummary.forException(e);

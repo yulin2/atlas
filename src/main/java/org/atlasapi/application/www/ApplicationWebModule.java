@@ -3,7 +3,6 @@ package org.atlasapi.application.www;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationAdminController;
 import org.atlasapi.application.ApplicationQueryExecutor;
-import org.atlasapi.application.OldApplicationStore;
 import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceRequest;
 import org.atlasapi.application.SourceRequestManager;
@@ -14,8 +13,8 @@ import org.atlasapi.application.SourcesQueryExecutor;
 import org.atlasapi.application.model.deserialize.IdDeserializer;
 import org.atlasapi.application.model.deserialize.PublisherDeserializer;
 import org.atlasapi.application.model.deserialize.SourceReadEntryDeserializer;
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
+import org.atlasapi.application.query.ApplicationSourcesFetcher;
+import org.atlasapi.application.query.ApiKeyConfigurationFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.application.writers.ApplicationListWriter;
 import org.atlasapi.application.writers.ApplicationQueryResultWriter;
@@ -71,7 +70,7 @@ public class ApplicationWebModule {
     private @Autowired @Qualifier(value = "deerApplicationsStore") ApplicationStore deerApplicationsStore;
     private @Autowired @Qualifier(value = "adminMongo") DatabasedMongo adminMongo;
     private @Autowired SourceRequestStore sourceRequestStore;
-    private @Autowired OldApplicationStore applicationStore;
+    private @Autowired ApplicationStore applicationStore;
     
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(DateTime.class, datetimeDeserializer)
@@ -154,8 +153,8 @@ public class ApplicationWebModule {
     }
     
     public @Bean
-    ApplicationConfigurationFetcher configFetcher() {
-        return new IpCheckingApiKeyConfigurationFetcher(applicationStore);
+    ApplicationSourcesFetcher configFetcher() {
+        return new ApiKeyConfigurationFetcher(applicationStore);
     }
     
     private StandardQueryParser<Publisher> sourcesQueryParser() {

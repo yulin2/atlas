@@ -66,7 +66,7 @@ public class IndexBackedTopicQueryExecutor implements QueryExecutor<Topic> {
             throws QueryExecutionException {
         return index.query(
             query.getOperands(), 
-            query.getContext().getApplicationConfiguration().getEnabledSources(), 
+            query.getContext().getApplicationSources().getEnabledReadSources(), 
             query.getContext().getSelection().or(Selection.ALL)
         );
     }

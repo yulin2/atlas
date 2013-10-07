@@ -62,7 +62,7 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 	}
 
 	private AtomicQuery mergeAttribute(Attribute<Publisher> attr, ContentQuery query){
-		Set<Publisher> configPublishers = query.getConfiguration().getEnabledSources();
+		Set<Publisher> configPublishers = query.getSources().getEnabledReadSources();
 		ImmutableSet<Publisher> requestedPublishers = query.includedPublishers();
 		
 		Set<Publisher> values;

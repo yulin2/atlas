@@ -13,7 +13,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.ApplicationSourcesFetcher;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
@@ -41,7 +41,7 @@ import com.metabroadcast.common.time.TimeMachine;
 @RunWith(MockitoJUnitRunner.class)
 public class ScheduleRequestParserTest {
 
-    private final ApplicationConfigurationFetcher applicationFetcher = mock(ApplicationConfigurationFetcher.class);
+    private final ApplicationSourcesFetcher applicationFetcher = mock(ApplicationSourcesFetcher.class);
     private final DateTime time = new DateTime(2012, 12, 14, 10,00,00,000, DateTimeZones.UTC);
     private final ContextualAnnotationsExtractor annotationsExtractor = mock(ContextualAnnotationsExtractor.class);
     private final ScheduleRequestParser builder = new ScheduleRequestParser(

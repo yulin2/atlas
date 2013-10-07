@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.ApplicationSourcesFetcher;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
@@ -45,7 +45,7 @@ public class ScheduleIndexDebugController {
 
     private final ChannelResolver channelResolver;
 
-    public ScheduleIndexDebugController(ScheduleIndex index, ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher) {
+    public ScheduleIndexDebugController(ScheduleIndex index, ChannelResolver channelResolver, ApplicationSourcesFetcher appFetcher) {
         this.index = index;
         this.channelResolver = channelResolver;
         this.requestParser = new ScheduleRequestParser(

@@ -2,7 +2,7 @@ package org.atlasapi.query.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.query.annotation.ActiveAnnotations;
 
 import com.google.common.base.Objects;
@@ -12,7 +12,7 @@ import com.metabroadcast.common.query.Selection;
 public class QueryContext {
 
     private static final QueryContext STANDARD = new QueryContext(
-            OldApplicationConfiguration.defaultConfiguration(), 
+            ApplicationSources.EMPTY_SOURCES, 
             ActiveAnnotations.standard()    
     );
     
@@ -20,23 +20,23 @@ public class QueryContext {
         return STANDARD;
     }
     
-    private final OldApplicationConfiguration appConfig;
+    private final ApplicationSources appSources;
     private final ActiveAnnotations annotations;
     private final Optional<Selection> selection;
 
-    public QueryContext(OldApplicationConfiguration appConfig, ActiveAnnotations annotations) {
-        this(appConfig, annotations, null);
+    public QueryContext(ApplicationSources appSources, ActiveAnnotations annotations) {
+        this(appSources, annotations, null);
     }
     
-    public QueryContext(OldApplicationConfiguration appConfig, ActiveAnnotations annotations,
+    public QueryContext(ApplicationSources appSources, ActiveAnnotations annotations,
         Selection selection) {
-        this.appConfig = checkNotNull(appConfig);
+        this.appSources = checkNotNull(appSources);
         this.annotations = checkNotNull(annotations);
         this.selection = Optional.fromNullable(selection);
     }
 
-    public OldApplicationConfiguration getApplicationConfiguration() {
-        return this.appConfig;
+    public ApplicationSources getApplicationSources() {
+        return this.appSources;
     }
 
     public ActiveAnnotations getAnnotations() {
@@ -54,7 +54,7 @@ public class QueryContext {
         }
         if (that instanceof QueryContext) {
             QueryContext other = (QueryContext) that;
-            return appConfig.equals(other.appConfig)
+            return appSources.equals(other.appSources)
                 && annotations.equals(other.annotations)
                 && selection.equals(other.selection);
         }
@@ -63,13 +63,13 @@ public class QueryContext {
 
     @Override
     public int hashCode() {
-        return appConfig.hashCode() ^ annotations.hashCode() ^ selection.hashCode();
+        return appSources.hashCode() ^ annotations.hashCode() ^ selection.hashCode();
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-            .add("config", appConfig)
+            .add("config", appSources)
             .add("annotations", annotations)
             .add("selection", selection)
             .toString();

@@ -7,9 +7,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.OldApplicationConfiguration;
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
+import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.query.ApplicationSourcesFetcher;
+import org.atlasapi.application.query.ApiKeyConfigurationFetcher;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -64,12 +64,12 @@ public class SearchController {
     private static final float DEFAULT_CATCHUP_WEIGHTING = 0.15f;
     
     private final SearchResolver searcher;
-    private final ApplicationConfigurationFetcher configFetcher;
+    private final ApplicationSourcesFetcher sourcesFetcher;
     private final QueryResultWriter<Content> resultWriter;
 
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
     
-    private final ParameterChecker paramChecker = new ParameterChecker(ImmutableSet.of(      IpCheckingApiKeyConfigurationFetcher.API_KEY_QUERY_PARAMETER,
+    private final ParameterChecker paramChecker = new ParameterChecker(ImmutableSet.of(      ApiKeyConfigurationFetcher.API_KEY_QUERY_PARAMETER,
             Selection.LIMIT_REQUEST_PARAM,
             Selection.START_INDEX_REQUEST_PARAM,
             QUERY_PARAM,
@@ -86,9 +86,9 @@ public class SearchController {
             PRIORITY_CHANNEL_WEIGHTING
     ));
 
-    public SearchController(SearchResolver searcher, ApplicationConfigurationFetcher configFetcher, QueryResultWriter<Content> resultWriter) {
+    public SearchController(SearchResolver searcher, ApplicationSourcesFetcher configFetcher, QueryResultWriter<Content> resultWriter) {
         this.searcher = searcher;
-        this.configFetcher = configFetcher;
+        this.sourcesFetcher = configFetcher;
         this.resultWriter = resultWriter;
     }
 
@@ -123,9 +123,9 @@ public class SearchController {
             float catchupWeighting = getFloatParam(catchupWeightingParam, DEFAULT_CATCHUP_WEIGHTING);
             float priorityChannelWeighting = getFloatParam(priorityChannelWeightingParam, DEFAULT_PRIORITY_CHANNEL_WEIGHTING);
 
-            OldApplicationConfiguration appConfig = configFetcher.configurationFor(request).valueOrDefault(OldApplicationConfiguration.defaultConfiguration());
+            ApplicationSources appSources = sourcesFetcher.sourcesFor(request).or(ApplicationSources.EMPTY_SOURCES);
             Set<Specialization> specializations = specializations(specialization);
-            Set<Publisher> publishers = publishers(publisher, appConfig);
+            Set<Publisher> publishers = publishers(publisher, appSources);
             List<Identified> content = searcher.search(SearchQuery.builder(q)
                     .withSelection(selection)
                     .withSpecializations(specializations)
@@ -137,7 +137,7 @@ public class SearchController {
                     .withType(type)
                     .isTopLevelOnly(!Strings.isNullOrEmpty(topLevel) ? Boolean.valueOf(topLevel) : null)
                     .withCurrentBroadcastsOnly(!Strings.isNullOrEmpty(currentBroadcastsOnly) ? Boolean.valueOf(currentBroadcastsOnly) : null)
-                    .build(), appConfig);
+                    .build(), appSources);
             resultWriter.write(QueryResult.listResult(Iterables.filter(content, Content.class), QueryContext.standard()), writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
@@ -146,8 +146,8 @@ public class SearchController {
         }
     }
 
-    private Set<Publisher> publishers(String publisher, OldApplicationConfiguration appConfig) {
-        return Sets.intersection(ImmutableSet.copyOf(Publisher.fromCsv(publisher)), appConfig.getEnabledSources());
+    private Set<Publisher> publishers(String publisher, ApplicationSources appSources) {
+        return Sets.intersection(ImmutableSet.copyOf(Publisher.fromCsv(publisher)), appSources.getEnabledReadSources());
     }
 
     private float getFloatParam(String stringValue, float defaultValue) {
