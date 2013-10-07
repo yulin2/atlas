@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.atlasapi.remotesite.bbc.nitro.NitroException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpBackOffIOExceptionHandler;
@@ -24,6 +26,8 @@ import com.google.common.reflect.TypeToken;
 
 
 public class HttpNitroClient implements NitroClient {
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final String FORMATS_RESOURCE = "formats";
     private static final String GENRE_GROUPS_RESOURCE = "genre_groups";
@@ -77,6 +81,7 @@ public class HttpNitroClient implements NitroClient {
     private <T> List<T> getUrl(GenericUrl url, TypeToken<NitroResponse<T>> resultType) 
             throws NitroException {
         try {
+            log.debug("{}", url);
             HttpRequest req = requestFactory.buildGetRequest(url);
             Object parsed = req.execute().parseAs(resultType.getType());
             return ((NitroResponse<T>) parsed).getNitro().getResults().getItems();
