@@ -32,10 +32,12 @@ public class AtlasMain implements Runnable {
 
     public void start() throws Exception {
         WebAppContext apiContext = createWebApp(warBase() + "/WEB-INF/web.xml", createApiServer());
-        WebAppContext monitoringContext = createWebApp(warBase() + "/WEB-INF/web-monitoring.xml",
-                createMonitoringServer());
-        monitoringContext.setAttribute(CONTEXT_ATTRIBUTE, this);
         apiContext.setAttribute(CONTEXT_ATTRIBUTE, this);
+        if (!IS_PROCESSING) {
+            WebAppContext monitoringContext = createWebApp(warBase() + "/WEB-INF/web-monitoring.xml",
+                    createMonitoringServer());
+            monitoringContext.setAttribute(CONTEXT_ATTRIBUTE, this);
+        }
 
         CONNECTOR_RESET_THREAD_SERVICE.scheduleAtFixedRate(this, 1, 1, TimeUnit.MINUTES);
     }
