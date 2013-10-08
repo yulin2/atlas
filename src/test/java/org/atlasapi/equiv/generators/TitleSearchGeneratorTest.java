@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.content.Container;
@@ -30,10 +30,10 @@ public class TitleSearchGeneratorTest {
 
         SearchResolver searchResolver = new SearchResolver() {
             @Override
-            public List<Identified> search(SearchQuery query, OldApplicationConfiguration appConfig) {
+            public List<Identified> search(SearchQuery query, ApplicationSources appSources) {
                 
                 assertFalse(query.getIncludedPublishers().contains(subjectPublisher));
-                assertFalse(appConfig.getEnabledSources().contains(subjectPublisher));
+                assertFalse(appSources.getEnabledReadSources().contains(subjectPublisher));
                 
                 assertTrue(query.getTerm().equals(title));
                 
