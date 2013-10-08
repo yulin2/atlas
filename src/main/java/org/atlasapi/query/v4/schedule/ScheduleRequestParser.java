@@ -150,7 +150,7 @@ class ScheduleRequestParser {
         String apiKeyParam = request.getParameter("apiKey");
         // request doesn't specify apiKey so use default configuration.
         if (apiKeyParam == null) {
-            return ApplicationSources.EMPTY_SOURCES;
+            return ApplicationSources.DEFAULT_SOURCES;
         }
         // the request has an apiKey param but no config is found.
         throw new IllegalArgumentException("Unknown API key " + apiKeyParam);

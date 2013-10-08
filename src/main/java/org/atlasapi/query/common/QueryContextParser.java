@@ -28,7 +28,7 @@ public class QueryContextParser implements ParameterNameProvider {
     
     public QueryContext parseSingleContext(HttpServletRequest request) throws QueryParseException {
         return new QueryContext(
-                configFetcher.sourcesFor(request).or(ApplicationSources.EMPTY_SOURCES),
+                configFetcher.sourcesFor(request).or(ApplicationSources.DEFAULT_SOURCES),
                 annotationExtractor.extractFromSingleRequest(request),
                 selectionBuilder.build(request)
                 );
@@ -36,7 +36,7 @@ public class QueryContextParser implements ParameterNameProvider {
 
     public QueryContext parseListContext(HttpServletRequest request) throws QueryParseException {
         return new QueryContext(
-                configFetcher.sourcesFor(request).or(ApplicationSources.EMPTY_SOURCES),
+                configFetcher.sourcesFor(request).or(ApplicationSources.DEFAULT_SOURCES),
             annotationExtractor.extractFromListRequest(request),
             selectionBuilder.build(request)
         );

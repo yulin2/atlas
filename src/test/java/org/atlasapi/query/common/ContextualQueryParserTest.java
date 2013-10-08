@@ -55,7 +55,7 @@ public class ContextualQueryParserTest {
         when(attributeParser.parse(req))
             .thenReturn(new AttributeQuerySet(ImmutableSet.<AttributeQuery<?>>of()));
         when(queryContextParser.parseContext(req))
-            .thenReturn(new QueryContext(ApplicationSources.EMPTY_SOURCES, ActiveAnnotations.standard()));
+            .thenReturn(new QueryContext(ApplicationSources.DEFAULT_SOURCES, ActiveAnnotations.standard()));
         
         ContextualQuery<Topic,Content> query = parser.parse(req);
         

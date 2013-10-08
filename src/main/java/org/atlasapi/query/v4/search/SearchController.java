@@ -123,7 +123,7 @@ public class SearchController {
             float catchupWeighting = getFloatParam(catchupWeightingParam, DEFAULT_CATCHUP_WEIGHTING);
             float priorityChannelWeighting = getFloatParam(priorityChannelWeightingParam, DEFAULT_PRIORITY_CHANNEL_WEIGHTING);
 
-            ApplicationSources appSources = sourcesFetcher.sourcesFor(request).or(ApplicationSources.EMPTY_SOURCES);
+            ApplicationSources appSources = sourcesFetcher.sourcesFor(request).or(ApplicationSources.DEFAULT_SOURCES);
             Set<Specialization> specializations = specializations(specialization);
             Set<Publisher> publishers = publishers(publisher, appSources);
             List<Identified> content = searcher.search(SearchQuery.builder(q)
