@@ -98,16 +98,22 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getId()))).getClips());
 	}
 	
-	// TODO IMPLEMENT THIS 
 	public void testMergingWithExplicitPrecidenceMissingNewPublisher() throws Exception {
-//	    MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
-//
-//	    // Let's not specify a precedence for YouTube, but content will be returned for YouTube
-//        ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(OldApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.BBC /*, Publisher.YOUTUBE */)));
-//        Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
-//        
-//        assertEquals(ImmutableList.of(item1), merged.get(item1.getId()));
-//        assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getId()))).getClips());
+	    MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
+
+	    // Let's not specify a precedence for YouTube, but content will be returned for YouTube
+        ApplicationSources appSources = ApplicationSources.EMPTY_SOURCES.copy()
+                .withPrecedence(true)
+                .withReads(ImmutableList.of(
+                        new SourceReadEntry(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED)                        
+                        ))
+                .build();
+	    
+	    ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationSources(appSources);
+        Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
+        
+        assertEquals(ImmutableList.of(item1), merged.get(item1.getId()));
+        assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getId()))).getClips());
 	}
 	
     public void testMergingPeople() throws Exception {

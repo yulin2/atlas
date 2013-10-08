@@ -6,7 +6,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationSources;
-import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.equiv.MergingEquivalentsResolver;
 import org.atlasapi.equiv.ResolvedEquivalents;
 import org.atlasapi.media.common.Id;
