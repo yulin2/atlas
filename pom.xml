@@ -506,7 +506,7 @@
        <dependency>
           <groupId>com.metabroadcast.atlas.glycerin</groupId>
           <artifactId>glycerin</artifactId>
-          <version>0.1.4</version>
+          <version>0.1.6</version>
        </dependency>
        <dependency>
            <groupId>com.google.http-client</groupId>
