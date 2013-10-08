@@ -96,14 +96,18 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         for (Entry<Series, Collection<Episode>> seriesAndEpisodes : brandHierarchy.getSeriesAndEpisodes().asMap().entrySet()) {
             if (seriesAndEpisodes.getKey().getCanonicalUri() != null) {
                 Series series = resolveAndUpdate(seriesAndEpisodes.getKey());
-                series.setParent(brandHierarchy.getBrand());
+                if (series.getParent() == null) {
+                    series.setParent(brandHierarchy.getBrand());
+                }
                 writer.createOrUpdate(series);
             }
             
             for (Episode episode : seriesAndEpisodes.getValue()) {
                 try {
                     episode = resolveAndUpdate(episode);
-                    episode.setContainer(brandHierarchy.getBrand());
+                    if (episode.getContainer() == null) {
+                        episode.setContainer(brandHierarchy.getBrand());
+                    }
                     writer.createOrUpdate(episode);
                 } catch (NoHierarchyUriException nhue) {
                     log.warn(String.format("%s (%s)", nhue, brandHierarchy.getBrand().getTitle()));
