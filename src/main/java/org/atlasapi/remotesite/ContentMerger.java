@@ -9,6 +9,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.joda.time.Duration;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -71,6 +72,9 @@ public class ContentMerger {
             if (mergedVersions.containsKey(version.getCanonicalUri())) {
                 Version mergedVersion = mergedVersions.get(version.getCanonicalUri());
                 mergedVersion.setBroadcasts(Sets.union(version.getBroadcasts(), mergedVersion.getBroadcasts()));
+                if (version.getDuration() != null) {
+                    mergedVersion.setDuration(Duration.standardSeconds(version.getDuration()));
+                }
                 mergedVersion.setManifestedAs(version.getManifestedAs());
                 mergedVersions.put(version.getCanonicalUri(), mergedVersion);
             } else {
