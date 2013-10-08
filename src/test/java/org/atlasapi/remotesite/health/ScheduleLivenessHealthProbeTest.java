@@ -13,7 +13,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.content.schedule.ScheduleRef;
@@ -158,7 +158,7 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 
 		@Override
 		public Schedule schedule(DateTime from, DateTime to,
-				Iterable<Channel> channels, Iterable<Publisher> publisher, Optional<OldApplicationConfiguration> mergeConfig) {
+				Iterable<Channel> channels, Iterable<Publisher> publisher, Optional<ApplicationSources> mergeConfig) {
 			
 			this.requestedStartTime = from;
 			this.requestedEndTime = to;

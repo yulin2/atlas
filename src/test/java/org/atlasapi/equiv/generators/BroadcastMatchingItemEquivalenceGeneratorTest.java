@@ -6,12 +6,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.joda.time.Duration.standardMinutes;
 
-import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -38,7 +37,6 @@ import org.junit.runner.RunWith;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -83,7 +81,7 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
                 new ChannelSchedule(BBC_ONE, interval, ImmutableList.of(item2AndBroadcast))),
                 interval);
         context.checking(new Expectations(){{
-            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC), Optional.<OldApplicationConfiguration>absent());
+            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC), Optional.<ApplicationSources>absent());
                 will(returnValue(schedule));
         }});
         

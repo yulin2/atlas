@@ -4,10 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
-
-import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.common.Id;
@@ -20,7 +17,6 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.media.util.Resolved;
@@ -35,7 +31,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
@@ -187,23 +182,4 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor {
     private boolean matchingChannel(Broadcast broadcast, ScheduleRefEntry entry) {
         return broadcast.getBroadcastOn().equals(entry.getChannelId());
     }
-
-    /* Because of the way that equivalence merging currently works we have to 
-     * make sure that the requested publisher is precedent to get the 
-     * referenced broadcast in the content (broadcasts on other versions are 
-     * removed.) Yum. 
-     */
-    private OldApplicationConfiguration ensureRequestedPublisherIsPrecedent(ScheduleQuery query, OldApplicationConfiguration appConfig) {
-        if (!appConfig.precedenceEnabled()) {
-            return appConfig;
-        }
-        List<Publisher> publishers = Lists.newArrayList(query.getSource());
-        for (Publisher publisher : appConfig.orderdPublishers()) {
-            if (!publisher.equals(query.getSource())) {
-                publishers.add(publisher);
-            }
-        }
-        return appConfig.copyWithPrecedence(publishers);
-    }
-
 }

@@ -2,8 +2,7 @@ package org.atlasapi.equiv.update.tasks;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.content.Content;
@@ -39,7 +38,7 @@ public class ScheduleEquivalenceUpdateTaskTest {
             
             @Override
             public Schedule schedule(DateTime from, DateTime to, Iterable<Channel> channels,
-                    Iterable<Publisher> publisher, Optional<OldApplicationConfiguration> mergeConfig) {
+                    Iterable<Publisher> publisher, Optional<ApplicationSources> mergeConfig) {
                 return schedule;
             }
         };
