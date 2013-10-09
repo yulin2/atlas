@@ -4,16 +4,15 @@ import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LastUpdatedCheckingContentWriter implements ContentWriter {
 
-    private final AdapterLog log;
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final ContentWriter contentWriter;
     
-    public LastUpdatedCheckingContentWriter(AdapterLog log, ContentWriter contentWriter) {
-        this.log = log;
+    public LastUpdatedCheckingContentWriter(ContentWriter contentWriter) {
         this.contentWriter = contentWriter;
     }
 
@@ -29,7 +28,7 @@ public class LastUpdatedCheckingContentWriter implements ContentWriter {
 
     private <T extends Content> T checkLastUpdated(T content) {
         if(content.getLastUpdated() == null) {
-            log.record(AdapterLogEntry.warnEntry().withDescription("%s has null lastUpdated", content).withSource(getClass()));
+            log.info("{} has null lastUpdated", content);
         }
         return content;
     }
