@@ -39,6 +39,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.sun.syndication.feed.atom.Feed;
 
@@ -79,9 +80,10 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 			
 			if (source.isPresent()) {
 			    BrandSeriesAndEpisodes brandHierarchy = extractor.extract(source.get());
-			    writer.createOrUpdate(resolveAndUpdate(brandHierarchy.getBrand()));
+			    Brand brand = resolveAndUpdate(brandHierarchy.getBrand());
+                writer.createOrUpdate(brand);
 			    
-			    writeSeriesAndEpisodes(brandHierarchy);
+			    write(brandHierarchy.getSeriesAndEpisodes(), brand);
 			    
 			    return brandHierarchy.getBrand();
 			}
@@ -92,25 +94,25 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 		}
 	}
 
-    private void writeSeriesAndEpisodes(BrandSeriesAndEpisodes brandHierarchy) {
-        for (Entry<Series, Collection<Episode>> seriesAndEpisodes : brandHierarchy.getSeriesAndEpisodes().asMap().entrySet()) {
-            if (seriesAndEpisodes.getKey().getCanonicalUri() != null) {
-                Series series = resolveAndUpdate(seriesAndEpisodes.getKey());
-                if (series.getParent() == null) {
-                    series.setParent(brandHierarchy.getBrand());
-                }
+    private void write(SetMultimap<Series, Episode> seriesAndEpisodes, Brand brand) {
+        for (Entry<Series, Collection<Episode>> seryAndEpisodes : seriesAndEpisodes.asMap().entrySet()) {
+            Series series = null;
+            if (seryAndEpisodes.getKey().getCanonicalUri() != null) {
+                series = resolveAndUpdate(seryAndEpisodes.getKey());
+                series.setParent(brand);
                 writer.createOrUpdate(series);
             }
             
-            for (Episode episode : seriesAndEpisodes.getValue()) {
+            for (Episode episode : seryAndEpisodes.getValue()) {
                 try {
                     episode = resolveAndUpdate(episode);
-                    if (episode.getContainer() == null) {
-                        episode.setContainer(brandHierarchy.getBrand());
+                    episode.setContainer(brand);
+                    if (series != null) {
+                        episode.setSeries(series);
                     }
                     writer.createOrUpdate(episode);
                 } catch (NoHierarchyUriException nhue) {
-                    log.warn(String.format("%s (%s)", nhue, brandHierarchy.getBrand().getTitle()));
+                    log.warn(String.format("%s (%s)", nhue, brand.getTitle()));
                 } catch (Exception e) {
                     log.warn("Failed to write " + episode.getCanonicalUri(), e);
                 }

@@ -1,81 +1,47 @@
 package org.atlasapi.remotesite.channel4;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
-import org.jdom.Attribute;
-import org.jdom.Element;
 
-import com.google.common.base.Strings;
 import com.metabroadcast.common.time.Clock;
-import com.sun.syndication.feed.atom.Content;
 import com.sun.syndication.feed.atom.Entry;
 
-public abstract class BaseC4EpisodeExtractor {
 
-    private final Log log = LogFactory.getLog(getClass());
-    
-    protected static final String DC_EPISODE_NUMBER = "dc:relation.EpisodeNumber";
-    protected static final String DC_SERIES_NUMBER = "dc:relation.SeriesNumber";
-    protected static final String DC_PROGRAMME_ID = "dc:relation.programmeId";
-    protected final Clock clock;
+public abstract class BaseC4EpisodeExtractor extends BaseC4ItemExtractor<Episode> {
+
+    private static final String DC_EPISODE_NUMBER = "dc:relation.EpisodeNumber";
+    private static final String DC_SERIES_NUMBER = "dc:relation.SeriesNumber";
+    private static final String DC_PROGRAMME_ID = "dc:relation.programmeId";
     
     public BaseC4EpisodeExtractor(Clock clock) {
-        this.clock = clock;
+        super(clock);
     }
 
-    protected Episode createBasicEpisode(Entry source, Map<String, String> lookup) {
-        String episodeUri = extractEpisodeUri(source, lookup);
-        
-        if (episodeUri == null) {
-            throw new IllegalArgumentException(String.format("Could not extract episode URI from provided entry: %s", source.getId()));
-        }
-        
-        Episode episode = new Episode(episodeUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(episodeUri), Publisher.C4);
-        
-        episode.setLastUpdated(clock.now());
-        
-        episode.setEpisodeNumber(C4AtomApi.readAsNumber(lookup, DC_EPISODE_NUMBER));
-        episode.setSeriesNumber(C4AtomApi.readAsNumber(lookup, DC_SERIES_NUMBER));
-        
-        episode.setTitle(source.getTitle());
-        Content summary = source.getSummary();
-        if (summary != null) {
-            episode.setDescription(Strings.emptyToNull(summary.getValue()));
-        }
-        addImages(source, episode);
-        
-        episode.setIsLongForm(true);
-        return episode;
+    @Override
+    protected final Episode createItem(Entry entry, Map<String, String> lookup) {
+        return new Episode();
     }
 
-    protected String extractEpisodeUri(Entry source, Map<String, String> lookup) {
+    @Override
+    protected String getUri(Entry entry, Map<String, String> lookup) {
         String progId = lookup.get(DC_PROGRAMME_ID);
-        if (progId == null) {
-            return null;
-        }
+        checkNotNull(progId, "No programmeId in entry: %s", entry.getId());
         return C4AtomApi.PROGRAMMES_BASE + progId;
     }
 
-    protected void addImages(Entry source, Item item) {
-        Element mediaGroup = getMedia(source);
-        
-        if (mediaGroup != null) {
-            Element thumbnail = mediaGroup.getChild("thumbnail", C4AtomApi.NS_MEDIA_RSS);
-            if (thumbnail != null) {
-                Attribute thumbnailUri = thumbnail.getAttribute("url");
-                C4AtomApi.addImages(item, thumbnailUri.getValue());
-            }
-        }
+    @Override
+    protected final Episode setAdditionalItemFields(Entry entry, Map<String, String> lookup, Episode episode) {
+        episode.setCurie(PerPublisherCurieExpander.CurieAlgorithm.C4.compact(episode.getCanonicalUri()));
+        episode.setEpisodeNumber(C4AtomApi.readAsNumber(lookup, DC_EPISODE_NUMBER));
+        episode.setSeriesNumber(C4AtomApi.readAsNumber(lookup, DC_SERIES_NUMBER));
+        episode.setIsLongForm(true);
+        return setAdditionalEpisodeFields(entry, lookup, episode);
     }
 
-    protected Element getMedia(Entry source) {
-        return null;
-    }
+    protected abstract Episode setAdditionalEpisodeFields(Entry entry, Map<String, String> lookup, Episode episode);
 
 }

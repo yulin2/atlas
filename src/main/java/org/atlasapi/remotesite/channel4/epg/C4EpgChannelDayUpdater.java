@@ -1,9 +1,5 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
-
 import java.util.List;
 import java.util.Map;
 
@@ -11,10 +7,6 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.SystemOutAdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.channel4.C4BrandUpdater;
 import org.atlasapi.remotesite.channel4.epg.model.C4EpgEntry;
@@ -22,6 +14,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -36,25 +30,23 @@ public class C4EpgChannelDayUpdater {
     private final ContentWriter writer;
     private final C4EpgEntryContentExtractor epgEntryContentExtractor;
     private final BroadcastTrimmer trimmer;
-    private final AdapterLog log = new SystemOutAdapterLog();
+    private final Logger log = LoggerFactory.getLogger(getClass());
     
-    public C4EpgChannelDayUpdater(RemoteSiteClient<List<C4EpgEntry>> scheduleClient, ContentWriter writer, ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer, AdapterLog log) {
+    public C4EpgChannelDayUpdater(RemoteSiteClient<List<C4EpgEntry>> scheduleClient, ContentWriter writer, ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer) {
         this.scheduleClient = scheduleClient;
         this.writer = writer;
         this.epgEntryContentExtractor = new C4EpgEntryContentExtractor(resolver, brandUpdater);
         this.trimmer = trimmer;
-        //this.log = log;
     }
     
     public UpdateProgress update(String channelUriKey, Channel channel, LocalDate scheduleDay) {
         String uri = uriFor(channelUriKey, scheduleDay);
-        log.record(new AdapterLogEntry(Severity.DEBUG).withDescription("Updating from " + uri).withSource(getClass()));
-        
+        log.debug("Updating from {}", uri);
 
         try {
             List<C4EpgEntry> entries = getSchedule(uri);
             if(entries == null || entries.isEmpty()) {
-                log.record(new AdapterLogEntry(ERROR).withSource(getClass()).withDescription("Empty or null schedule at:" + uri));
+                log.warn("Empty or null schedule at: {}", uri);
                 return UpdateProgress.FAILURE;
             }
             
@@ -62,7 +54,7 @@ public class C4EpgChannelDayUpdater {
             trim(scheduleDay, channel, processedItems);
             return new UpdateProgress(processedItems.size(), 0);
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(ERROR).withCause(e).withSource(getClass()).withDescription("Exception updating from " + uri));
+            log.error(uri, e);
             return UpdateProgress.FAILURE;
         }
     }
@@ -75,7 +67,7 @@ public class C4EpgChannelDayUpdater {
         try {
             return scheduleClient.get(uri);
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(WARN).withCause(e).withSource(getClass()).withDescription("Exception fetching feed at " + uri));
+            log.error("fetching " + uri, e);
             return null;
         }
     }
@@ -118,7 +110,7 @@ public class C4EpgChannelDayUpdater {
             writer.createOrUpdate(extractedContent.getItem());
             itemAndBroadcast = new ItemRefAndBroadcast(extractedContent.getItem(), extractedContent.getBroadcast());
         } catch (Exception e) {
-            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing entry %s", entry.id()));
+            log.error(entry.id(), e);
         }
         return itemAndBroadcast;
     }

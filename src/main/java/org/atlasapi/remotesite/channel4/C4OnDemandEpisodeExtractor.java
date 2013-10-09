@@ -7,7 +7,6 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.ContentExtractor;
 import org.jdom.Element;
 import org.joda.time.DateTime;
 
@@ -15,8 +14,7 @@ import com.google.common.base.Optional;
 import com.metabroadcast.common.time.Clock;
 import com.sun.syndication.feed.atom.Entry;
 
-final class C4OnDemandEpisodeExtractor extends BaseC4EpisodeExtractor implements
-        ContentExtractor<Entry, Episode> {
+final class C4OnDemandEpisodeExtractor extends BaseC4EpisodeExtractor {
 
     private final C4AtomEntryVersionExtractor versionExtractor;
 
@@ -26,20 +24,17 @@ final class C4OnDemandEpisodeExtractor extends BaseC4EpisodeExtractor implements
     }
 
     @Override
-    public Episode extract(Entry source) {
-        Map<String, String> foreignElements = C4AtomApi.foreignElementLookup(source);
-        Episode episode = createBasicEpisode(source, foreignElements);
-        
-        String fourOdUri = C4AtomApi.fourOdUri(source);
+    protected Episode setAdditionalEpisodeFields(Entry entry, Map<String, String> lookup,
+            Episode episode) {
+        String fourOdUri = C4AtomApi.fourOdUri(entry);
         if (fourOdUri != null) {
             episode.addAliasUrl(fourOdUri);
         }
-        String seriesEpisodeUri = C4AtomApi.canonicalUri(source);
+        String seriesEpisodeUri = C4AtomApi.canonicalUri(entry);
         if(seriesEpisodeUri != null) {
             episode.addAliasUrl(seriesEpisodeUri);
         }
-        episode.addVersion(setLastUpdated(versionExtractor.extract(source), episode.getLastUpdated()));
-        
+        episode.addVersion(setLastUpdated(versionExtractor.extract(entry), episode.getLastUpdated()));
         return episode;
     }
     
