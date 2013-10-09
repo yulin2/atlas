@@ -14,10 +14,12 @@ import com.metabroadcast.common.ids.IdGenerator;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.properties.Configurer;
 
 @Configuration
 public class ApplicationPersistenceModule {
     
+    private int cacheMinutes = Integer.parseInt(Configurer.get("application.cache.minutes").get());
     private @Autowired @Qualifier(value = "adminMongo") DatabasedMongo adminMongo; 
     private final NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
 
@@ -25,7 +27,7 @@ public class ApplicationPersistenceModule {
     @Bean
     protected ApplicationStore applicationsStore() {
         IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "application");
-        return new MongoApplicationStore(idGenerator, idCodec, adminMongo);
+        return new CacheBackedApplicationStore(new MongoApplicationStore(idGenerator, idCodec, adminMongo), cacheMinutes);
     }
     
     @Bean
