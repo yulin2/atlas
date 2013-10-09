@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.scheduling.RepetitionRule;
@@ -56,15 +56,34 @@ public class C4Module {
 	private @Autowired ScheduleResolver scheduleResolver;
 	private @Autowired ChannelResolver channelResolver;
 	
+	private @Value("${updaters.c4.enabled}") Boolean tasksEnabled;
 	private @Value("${c4.keystore.path}") String keyStorePath;
 	private @Value("${c4.keystore.password}") String keyStorePass;
 	
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(c4EpgUpdater(), TWO_HOURS);
-        scheduler.schedule(pcC4AtozUpdater().withName("C4 4OD PC Updater"), BRAND_UPDATE_TIME);
-        scheduler.schedule(xboxC4AtozUpdater().withName("C4 4OD XBox Updater"), XBOX_UPDATE_TIME);
-        log.record(new AdapterLogEntry(Severity.INFO).withDescription("C4 update scheduled tasks installed").withSource(getClass()));
+        if (tasksEnabled) {
+            scheduler.schedule(c4EpgUpdater(), TWO_HOURS);
+            scheduler.schedule(pcC4AtozUpdater().withName("C4 4OD PC Updater"), BRAND_UPDATE_TIME);
+            scheduler.schedule(xboxC4AtozUpdater().withName("C4 4OD XBox Updater"), XBOX_UPDATE_TIME);
+            log.record(new AdapterLogEntry(Severity.INFO).withDescription("C4 update scheduled tasks installed").withSource(getClass()));
+        }
+    }
+    
+    @Bean protected SimpleHttpClient c4HttpsClient() {
+        if (Strings.isNullOrEmpty(keyStorePass) || Strings.isNullOrEmpty(keyStorePath)) {
+            if (tasksEnabled) {
+                throw new RuntimeException("Check c4.keystore.path or c4.keystore.password");
+            } else {
+                return UnconfiguredSimpleHttpClient.get();
+            }
+        }
+        try {
+            URL jksFile = new File(keyStorePath).toURI().toURL();
+            return HttpClients.httpsClient(jksFile, keyStorePass);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Bean C4AtomApi atomApi() {
@@ -77,29 +96,20 @@ public class C4Module {
 	
 	@Bean public C4EpgChannelDayUpdater c4EpgChannelDayUpdater() {
 	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
-	    return new C4EpgChannelDayUpdater(new C4EpgClient(httpsClient()), lastUpdatedSettingContentWriter(),
+	    return new C4EpgChannelDayUpdater(new C4EpgClient(c4HttpsClient()), lastUpdatedSettingContentWriter(),
                 contentResolver, c4BrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()), trimmer, log);
 	}
 	
 	@Bean protected C4AtoZAtomContentUpdateTask pcC4AtozUpdater() {
-		return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()));
+		return new C4AtoZAtomContentUpdateTask(c4HttpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()));
 	}
 	
 	@Bean protected C4AtoZAtomContentUpdateTask xboxC4AtozUpdater() {
-	    return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, Optional.of(P06_PLATFORM), c4BrandFetcher(Optional.of(Platform.XBOX),Optional.of(P06_PLATFORM)));
-	}
-	
-    @Bean protected SimpleHttpClient httpsClient() {
-	    try {
-	        URL jksFile = new File(keyStorePath).toURI().toURL();
-            return HttpClients.httpsClient(jksFile, keyStorePass);
-        } catch (Exception e) {
-            throw Throwables.propagate(e);
-        }
+	    return new C4AtoZAtomContentUpdateTask(c4HttpsClient(), ATOZ_BASE, Optional.of(P06_PLATFORM), c4BrandFetcher(Optional.of(Platform.XBOX),Optional.of(P06_PLATFORM)));
 	}
 	
 	protected C4AtomBackedBrandUpdater c4BrandFetcher(Optional<Platform> platform, Optional<String> platformParam) {
-	    C4AtomApiClient client = new C4AtomApiClient(httpsClient(), ATOZ_BASE, platformParam);
+	    C4AtomApiClient client = new C4AtomApiClient(c4HttpsClient(), ATOZ_BASE, platformParam);
 	    C4BrandExtractor extractor = new C4BrandExtractor(client, platform, channelResolver);
 		return new C4AtomBackedBrandUpdater(client, platform, contentResolver, lastUpdatedSettingContentWriter(), extractor);
 	}
