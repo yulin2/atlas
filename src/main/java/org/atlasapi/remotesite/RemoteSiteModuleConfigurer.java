@@ -11,7 +11,6 @@ import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
 import org.atlasapi.remotesite.btfeatured.BtFeaturedContentModule;
-import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.five.FiveModule;
 import org.atlasapi.remotesite.hulu.HuluModule;
 import org.atlasapi.remotesite.itunes.ItunesModule;
@@ -45,7 +44,6 @@ public class RemoteSiteModuleConfigurer {
     private Map<String, Class<?>> moduleMap = ImmutableMap.<String, Class<?>>builder()
         .put("bbc",     BbcModule.class)
         .put("itv",     ItvModule.class)
-        .put("c4",      C4Module.class)
         .put("five",    FiveModule.class)
  //       .put("ict",     ICTomorrowModule.class)
         .put("aorg",    ArchiveOrgModule.class)
