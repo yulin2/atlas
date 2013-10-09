@@ -1,9 +1,7 @@
 package org.atlasapi.remotesite.channel4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -18,7 +16,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
@@ -28,7 +25,6 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
@@ -51,7 +47,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 

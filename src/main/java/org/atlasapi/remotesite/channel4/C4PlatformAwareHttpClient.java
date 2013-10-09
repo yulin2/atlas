@@ -64,7 +64,7 @@ public class C4PlatformAwareHttpClient implements SimpleHttpClient {
     private String optionallyAppendPlatform(String url) {
         return platform.isPresent() ? appendPlatform(url) : url;
     }
-    
+
     @Override
     public HttpResponse delete(String string) throws HttpException {
         throw new UnsupportedOperationException();

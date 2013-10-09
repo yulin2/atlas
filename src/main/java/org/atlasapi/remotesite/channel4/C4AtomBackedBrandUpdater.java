@@ -96,14 +96,18 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         for (Entry<Series, Collection<Episode>> seriesAndEpisodes : brandHierarchy.getSeriesAndEpisodes().asMap().entrySet()) {
             if (seriesAndEpisodes.getKey().getCanonicalUri() != null) {
                 Series series = resolveAndUpdate(seriesAndEpisodes.getKey());
-                series.setParent(brandHierarchy.getBrand());
+                if (series.getParent() == null) {
+                    series.setParent(brandHierarchy.getBrand());
+                }
                 writer.createOrUpdate(series);
             }
             
             for (Episode episode : seriesAndEpisodes.getValue()) {
                 try {
                     episode = resolveAndUpdate(episode);
-                    episode.setContainer(brandHierarchy.getBrand());
+                    if (episode.getContainer() == null) {
+                        episode.setContainer(brandHierarchy.getBrand());
+                    }
                     writer.createOrUpdate(episode);
                 } catch (NoHierarchyUriException nhue) {
                     log.warn(String.format("%s (%s)", nhue, brandHierarchy.getBrand().getTitle()));
@@ -119,9 +123,31 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         if (!existingEpisode.isPresent()) {
             return episode;
         }
-        return updateItem(ensureEpisode(existingEpisode.get()), episode);
+        return updateEpisode(ensureEpisode(existingEpisode.get()), episode);
     }
-
+    
+    private <E extends Episode> E updateEpisode(E existing, E fetched) {
+        updateItem(existing, fetched);
+        copyLastUpdated(fetched, existing);
+        
+        existing.setEpisodeNumber(fetched.getEpisodeNumber());
+        existing.setSeriesNumber(fetched.getSeriesNumber());
+        
+        Set<String> allAliases = Sets.newHashSet(fetched.getAliasUrls());
+        boolean hasHierarchyUri = (hierarchyUri(fetched) != null);
+        for (String alias : existing.getAliasUrls()) {
+            if (!(C4AtomApi.isACanonicalEpisodeUri(alias) && hasHierarchyUri)) {
+                allAliases.add(alias);
+            }
+        }
+        
+        allAliases.add(fetched.getCanonicalUri());
+        allAliases.remove(existing.getCanonicalUri());
+        existing.setAliasUrls(allAliases);
+        
+        return existing;
+    }
+    
     private Episode ensureEpisode(Item item) {
         if (item instanceof Episode) {
             return (Episode) item;
@@ -244,22 +270,6 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         Version fetchedVersion = Iterables.getOnlyElement(fetchedClip.getVersions(), null);
         if(existingVersion != null || fetchedVersion != null) {
             versions.add(updateVersion(existingClip, existingVersion, fetchedVersion));
-        }
-        
-        if(existingClip instanceof Episode) {
-            Episode existingEpisode = (Episode) existingClip;
-            Episode fetchedEpisode = (Episode) fetchedClip;
-            if(existingEpisode.getEpisodeNumber() == null) {
-                existingEpisode.setEpisodeNumber(fetchedEpisode.getEpisodeNumber());
-            }
-            if(existingEpisode.getSeriesNumber() == null) {
-                existingEpisode.setSeriesNumber(fetchedEpisode.getSeriesNumber());
-            }
-            
-            Set<String> allAliases = Sets.newHashSet(Sets.union(existingEpisode.getAliasUrls(),fetchedEpisode.getAliasUrls()));
-            allAliases.add(fetchedEpisode.getCanonicalUri());
-            allAliases.remove(existingEpisode.getCanonicalUri());
-            existingEpisode.setAliasUrls(allAliases);
         }
         
         existingClip.setVersions(versions);
