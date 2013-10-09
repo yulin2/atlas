@@ -58,9 +58,12 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
         int totalBroadcasts = 0;
 
         for (Version version : content.getVersions()) {
+            int broadcastCount = version.getBroadcasts().size();
             for (Broadcast broadcast : version.getBroadcasts()) {
                 totalBroadcasts++;
-                if (broadcast.isActivelyPublished() && !onIgnoredChannel(broadcast) && isWithinWeek(broadcast)) {
+                if (broadcast.isActivelyPublished() 
+                        && (!onIgnoredChannel(broadcast) || broadcastCount == 1) 
+                        && isWithinWeek(broadcast)) {
                     processedBroadcasts++;
                     findMatchesForBroadcast(scores, broadcast, validPublishers);
                 }

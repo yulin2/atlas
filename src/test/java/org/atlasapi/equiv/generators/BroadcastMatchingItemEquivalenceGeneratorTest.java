@@ -86,6 +86,31 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
         assertThat(scoreMap.get(item2).asDouble(), is(equalTo(1.0)));
     }
 
+    /**
+     * If the only broadcast is one on an ignored channel, then we shouldn't ignore it; otherwise
+     * we'll not compute equivalence for broadcast-based publishers (redux, youview) on ignored
+     * channels, since they'll not be computed from other broadcasts of the item.
+     */
+    @Test
+    public void testGenerateEquivalenceForRegionalVariantWhenOnlyBroadcast() {
+        final Item item1 = episodeWithBroadcasts("subjectItem", Publisher.PA, 
+                new Broadcast(BBC_ONE_CAMBRIDGE.getUri(), utcTime(100000), utcTime(200000)));//not ignored
+        
+        final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(BBC_ONE_CAMBRIDGE.getUri(), utcTime(100000), utcTime(200000)));
+        
+        context.checking(new Expectations(){{
+            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE_CAMBRIDGE), ImmutableSet.of(BBC), Optional.<ApplicationConfiguration>absent());
+                will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE_CAMBRIDGE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
+        }});
+        
+        ScoredCandidates<Item> equivalents = generator.generate(item1, new DefaultDescription());
+        
+        Map<Item, Score> scoreMap = equivalents.candidates();
+        
+        assertThat(scoreMap.size(), is(1));
+        assertThat(scoreMap.get(item2).asDouble(), is(equalTo(1.0)));
+    }
+    
     private Interval interval(long startMillis, long endMillis) {
         return new Interval(startMillis, endMillis, DateTimeZones.UTC);
     }
