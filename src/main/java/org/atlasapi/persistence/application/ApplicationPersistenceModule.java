@@ -23,8 +23,7 @@ public class ApplicationPersistenceModule {
 
 
     @Bean
-    @Qualifier(value = "deerApplicationsStore")
-    protected ApplicationStore deerApplicationsStore() {
+    protected ApplicationStore applicationsStore() {
         IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "application");
         return new MongoApplicationStore(idGenerator, idCodec, adminMongo);
     }

@@ -67,7 +67,6 @@ public class ApplicationWebModule {
     private final JsonDeserializer<DateTime> datetimeDeserializer = new JodaDateTimeSerializer();
     private final JsonDeserializer<SourceReadEntry> readsDeserializer = new SourceReadEntryDeserializer();
     private final JsonDeserializer<Publisher> publisherDeserializer = new PublisherDeserializer();
-    private @Autowired @Qualifier(value = "deerApplicationsStore") ApplicationStore deerApplicationsStore;
     private @Autowired @Qualifier(value = "adminMongo") DatabasedMongo adminMongo;
     private @Autowired SourceRequestStore sourceRequestStore;
     private @Autowired ApplicationStore applicationStore;
@@ -102,7 +101,7 @@ public class ApplicationWebModule {
                 gsonModelReader(),
                 idCodec,
                 sourceIdCodec,
-                deerApplicationsStore);
+                applicationStore);
     }
     
     @Bean 
@@ -112,14 +111,14 @@ public class ApplicationWebModule {
                 new SourcesQueryResultWriter(new SourceWithIdWriter(sourceIdCodec, "source", "sources")),
                 idCodec,
                 sourceIdCodec,
-                deerApplicationsStore);
+                applicationStore);
     }
     
     @Bean
     public SourceRequestsController sourceRequestsController() {
         IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "sourceRequest");
         SourceRequestManager manager = new SourceRequestManager(sourceRequestStore, 
-                deerApplicationsStore, 
+                applicationStore, 
                 idGenerator);
         return new SourceRequestsController(sourceRequestsQueryParser(),
                 new SourceRequestQueryExecutor(sourceRequestStore),
@@ -144,7 +143,7 @@ public class ApplicationWebModule {
     
     @Bean
     protected QueryExecutor<Application> applicationQueryExecutor() {
-        return new ApplicationQueryExecutor(deerApplicationsStore);
+        return new ApplicationQueryExecutor(applicationStore);
     }
     
     @Bean

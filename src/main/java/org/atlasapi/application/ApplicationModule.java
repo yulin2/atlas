@@ -1,7 +1,5 @@
 package org.atlasapi.application;
 
-import org.atlasapi.application.OldApplicationStore;
-import org.atlasapi.application.OldMongoApplicationStore;
 import org.atlasapi.application.users.MongoUserStore;
 import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.www.ApplicationWebModule;
@@ -24,13 +22,7 @@ public class ApplicationModule {
   
     private @Autowired @Qualifier(value = "adminMongo") DatabasedMongo adminMongo;
     //private @Autowired ViewResolver viewResolver;
-    private @Autowired @Qualifier(value = "deerApplicationsStore") ApplicationStore deerApplicationsStore;
     private @Autowired SourceRequestStore sourceRequestStore;
-    
-    public @Bean
-    OldApplicationStore applicationStore() {
-        return new OldMongoApplicationStore(adminMongo);
-    }
 
     public @Bean
     UserStore userStore() {
