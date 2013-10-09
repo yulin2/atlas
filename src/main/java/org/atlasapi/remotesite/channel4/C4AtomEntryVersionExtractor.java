@@ -11,6 +11,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.Platform;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -130,7 +131,8 @@ public class C4AtomEntryVersionExtractor implements ContentExtractor<Entry, Vers
             String txDate = lookup.get(C4AtomApi.DC_TX_DATE);
             Policy policy = new Policy()
                 .withAvailabilityStart(new DateTime(Strings.isNullOrEmpty(txDate) ? matcher.group(1) : txDate))
-                .withAvailabilityEnd(new DateTime(matcher.group(2)));
+                .withAvailabilityEnd(new DateTime(matcher.group(2)))
+                .withRevenueContract(RevenueContract.FREE_TO_VIEW);
                 
             if (availableCountries != null) {
                 policy.setAvailableCountries(availableCountries);
