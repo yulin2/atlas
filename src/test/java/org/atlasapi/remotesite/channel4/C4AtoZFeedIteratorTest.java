@@ -32,17 +32,17 @@ public class C4AtoZFeedIteratorTest {
         Optional<String> platform = Optional.absent();
         C4AtoZFeedIterator iterator = new C4AtoZFeedIterator(client, base, platform);
         
-        String next = "http://asdf.channel4.com/zxcv/atoz/z/page-1.atom";
-        when(client.get(requestFor("base/atoz/z.atom"))).thenReturn(feedWithNextLink(next));
-        when(client.get(requestFor("base/atoz/z/page-1.atom"))).thenReturn(new Feed());
+        String next = "http://asdf.channel4.com/zxcv/atoz/0-9/page-1.atom";
+        when(client.get(requestFor("base/atoz/0-9.atom"))).thenReturn(feedWithNextLink(next));
+        when(client.get(requestFor("base/atoz/0-9/page-1.atom"))).thenReturn(new Feed());
         
         iterator.next();
         iterator.next();
         iterator.next();
         
-        verify(client).get(requestFor("base/atoz/z.atom"));
-        verify(client).get(requestFor("base/atoz/z/page-1.atom"));
-        verify(client).get(requestFor("base/atoz/y.atom"));
+        verify(client).get(requestFor("base/atoz/0-9.atom"));
+        verify(client).get(requestFor("base/atoz/0-9/page-1.atom"));
+        verify(client).get(requestFor("base/atoz/a.atom"));
     }
     
     @Test
@@ -52,17 +52,17 @@ public class C4AtoZFeedIteratorTest {
         Optional<String> platform = Optional.of(Platform.IOS.key().toLowerCase());
         C4AtoZFeedIterator iterator = new C4AtoZFeedIterator(client, base, platform);
         
-        String next = "http://ps3.channel4.com/zxcv/atoz/z/page-1.atom?platform=ios";
-        when(client.get(requestFor("base/atoz/z.atom?platform=ios"))).thenReturn(feedWithNextLink(next));
-        when(client.get(requestFor("base/atoz/z/page-1.atom?platform=ios"))).thenReturn(new Feed());
+        String next = "http://ps3.channel4.com/zxcv/atoz/0-9/page-1.atom?platform=ios";
+        when(client.get(requestFor("base/atoz/0-9.atom?platform=ios"))).thenReturn(feedWithNextLink(next));
+        when(client.get(requestFor("base/atoz/0-9/page-1.atom?platform=ios"))).thenReturn(new Feed());
         
         iterator.next();
         iterator.next();
         iterator.next();
         
-        verify(client).get(requestFor("base/atoz/z.atom?platform=ios"));
-        verify(client).get(requestFor("base/atoz/z/page-1.atom?platform=ios"));
-        verify(client).get(requestFor("base/atoz/y.atom?platform=ios"));
+        verify(client).get(requestFor("base/atoz/0-9.atom?platform=ios"));
+        verify(client).get(requestFor("base/atoz/0-9/page-1.atom?platform=ios"));
+        verify(client).get(requestFor("base/atoz/a.atom?platform=ios"));
     }
     
     private Feed feedWithNextLink(String uri) {
