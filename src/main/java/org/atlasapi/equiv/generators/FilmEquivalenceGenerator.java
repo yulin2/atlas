@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.atlasapi.application.ApplicationSources;
-import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
@@ -31,12 +30,8 @@ public class FilmEquivalenceGenerator implements EquivalenceGenerator<Item> {
     
     private static final Pattern IMDB_REF = Pattern.compile("http://imdb.com/title/[\\d\\w]+");
 
-    private static final ApplicationSources appSources = ApplicationSources.builder()
-            .withReads(
-                    ImmutableList.of(
-                            new SourceReadEntry(Publisher.PREVIEW_NETWORKS,
-                                    SourceStatus.AVAILABLE_ENABLED))
-                    ).build();
+    private static final ApplicationSources appSources = ApplicationSources.defaults()
+            .copyWithChangedReadableSourceStatus(Publisher.PREVIEW_NETWORKS, SourceStatus.AVAILABLE_ENABLED);
     private static final float TITLE_WEIGHTING = 1.0f;
     private static final float BROADCAST_WEIGHTING = 0.0f;
     private static final float CATCHUP_WEIGHTING = 0.0f;

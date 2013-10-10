@@ -94,7 +94,7 @@ class ScheduleRequestParser {
             List<SourceReadEntry> reads = ImmutableList.<SourceReadEntry>builder().addAll(appSources.getReads())
                     .add(new SourceReadEntry(Publisher.PA, SourceStatus.AVAILABLE_ENABLED))
                     .build();
-            appSources = appSources.copy().withReads(reads).build();
+            appSources = appSources.copy().withReadableSources(reads).build();
             return appSources;
         }
         return null;

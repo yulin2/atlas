@@ -116,7 +116,7 @@ public class ScheduleResolverBackedScheduleQueryExecutorTest {
         
         ApplicationSources appSources = ApplicationSources.defaults().copy()
                 .withPrecedence(true)
-                .withReads(reads)
+                .withReadableSources(reads)
                 .build();
         QueryContext context = new QueryContext(appSources, ActiveAnnotations.standard());
         

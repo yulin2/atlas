@@ -86,7 +86,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		        .copyWithApplicationSources(ApplicationSources.defaults()
 		                .copy()
 		                .withPrecedence(true)
-		                .withReads(ImmutableList.of(
+		                .withReadableSources(ImmutableList.of(
 		                     new SourceReadEntry(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED),
 		                     new SourceReadEntry(Publisher.YOUTUBE, SourceStatus.AVAILABLE_ENABLED)
 		                        ))
@@ -103,10 +103,8 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 	    // Let's not specify a precedence for YouTube, but content will be returned for YouTube
         ApplicationSources appSources = ApplicationSources.defaults().copy()
                 .withPrecedence(true)
-                .withReads(ImmutableList.of(
-                        new SourceReadEntry(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED)                        
-                        ))
-                .build();
+                .build()
+                .copyWithChangedReadableSourceStatus(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED);
 	    
 	    ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationSources(appSources);
         Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
@@ -121,7 +119,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
                 .copyWithApplicationSources(ApplicationSources.defaults()
                         .copy()
                         .withPrecedence(true)
-                        .withReads(ImmutableList.of(
+                        .withReadableSources(ImmutableList.of(
                              new SourceReadEntry(Publisher.PA, SourceStatus.AVAILABLE_ENABLED),
                              new SourceReadEntry(Publisher.RADIO_TIMES, SourceStatus.AVAILABLE_ENABLED)
                                 ))

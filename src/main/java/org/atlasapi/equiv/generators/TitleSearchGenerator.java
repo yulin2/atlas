@@ -58,7 +58,7 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
     private Iterable<? extends T> searchForCandidates(T content, ResultDescription desc) {
         Set<Publisher> publishers = Sets.difference(searchPublishers, ImmutableSet.of(content.getPublisher()));
         ApplicationSources appSources = ApplicationSources.defaults().copy()
-               .withReads(enabledReadSources(publishers)).build();
+               .withReadableSources(enabledReadSources(publishers)).build();
         String title = titleTransform.apply(content.getTitle());
         SearchQuery.Builder query = SearchQuery.builder(title)
                 .withSelection(new Selection(0, searchLimit))
