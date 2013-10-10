@@ -54,9 +54,9 @@ public class C4EpgEntryContentExtractor implements
             brand = fetchBrand(source).or(createBrandFrom(source));
         }
         Optional<Series> series = resolveSeries(source).or(createSeriesFrom(source));
-        Item item = resolveItem(source, brand).or(createItem(source, brand, series, now));
+        Item item = resolveItem(source, brand).or(createItem(source, brand, series));
         
-        ensureAliases(source.getEpgEntry(), item, brand);
+        ensureAliases(source.getEpgEntry(), item);
 
         Broadcast broadcast = broadcastExtractor.extract(source);
         broadcast.setLastUpdated(now);
@@ -80,12 +80,12 @@ public class C4EpgEntryContentExtractor implements
         }
     }
 
-    private void ensureAliases(C4EpgEntry epgEntry, Item item, Optional<Brand> brand) {
+    private void ensureAliases(C4EpgEntry epgEntry, Item item) {
         String idUri = uriExtractor.uriForItemId(epgEntry);
         if (!idUri.equals(item.getCanonicalUri())) {
             item.addAliasUrl(idUri);
         }
-        Optional<String> hierarchyUri = uriExtractor.uriForItemHierarchy(epgEntry, brand);
+        Optional<String> hierarchyUri = uriExtractor.uriForItemHierarchy(epgEntry);
         if (hierarchyUri.isPresent() && !hierarchyUri.get().equals(item.getCanonicalUri())) {
             item.addAliasUrl(hierarchyUri.get());
         }
@@ -119,7 +119,7 @@ public class C4EpgEntryContentExtractor implements
         return null;
     }
 
-    private Item createItem(C4EpgChannelEntry source, Optional<Brand> brand, Optional<Series> series, DateTime now) {
+    private Item createItem(C4EpgChannelEntry source, Optional<Brand> brand, Optional<Series> series) {
         return itemExtractor.extract(new C4EpgEntryItemSource(source, brand, series));
     }
 

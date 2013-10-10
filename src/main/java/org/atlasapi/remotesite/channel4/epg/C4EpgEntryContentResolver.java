@@ -32,7 +32,7 @@ public class C4EpgEntryContentResolver {
 
     public Optional<Item> itemFor(C4EpgEntry entry, Optional<Brand> brand) {
         String idBasedUri = uriExtractor.uriForItemId(entry);
-        Optional<String> hierarchyUri = uriExtractor.uriForItemHierarchy(entry, brand);
+        Optional<String> hierarchyUri = uriExtractor.uriForItemHierarchy(entry);
         Optional<String> synthUri = uriExtractor.uriForItemSynthesized(entry, brand);
         
         return resolver.itemFor(idBasedUri, hierarchyUri, synthUri);
