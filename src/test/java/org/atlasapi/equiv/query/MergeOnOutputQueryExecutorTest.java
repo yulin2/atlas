@@ -6,7 +6,6 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.atlasapi.application.ApplicationSources;
-import org.atlasapi.application.OldApplicationConfiguration;
 import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.content.criteria.ContentQuery;
