@@ -4,11 +4,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.remotesite.channel4.C4AtomApi;
 import org.atlasapi.remotesite.channel4.C4BrandUpdater;
+import org.atlasapi.remotesite.channel4.NoHierarchyUriException;
 import org.atlasapi.remotesite.channel4.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -17,8 +21,10 @@ import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 import com.metabroadcast.common.time.DateTimeZones;
 
@@ -101,6 +107,9 @@ public class C4EpgChannelDayUpdater {
         ItemRefAndBroadcast itemAndBroadcast = null;
         try {
             ContentHierarchyAndBroadcast extractedContent = epgEntryContentExtractor.extract(new C4EpgChannelEntry(entry, channel));
+            if (!hasHierarchyUri(extractedContent.getItem())) {
+                throw new NoHierarchyUriException((Episode)extractedContent.getItem());
+            }
             if (extractedContent.getBrand().isPresent()) {
                 writer.createOrUpdate(extractedContent.getBrand().get());
             }
@@ -113,6 +122,15 @@ public class C4EpgChannelDayUpdater {
             log.error(entry.id(), e);
         }
         return itemAndBroadcast;
+    }
+
+    private boolean hasHierarchyUri(Item item) {
+        return C4AtomApi.isACanonicalEpisodeUri(item.getCanonicalUri()) ||
+            Iterables.any(item.getAliasUrls(), new Predicate<String>(){
+                @Override
+                public boolean apply(String input) {
+                    return C4AtomApi.isACanonicalEpisodeUri(input);
+                }});
     }
 
 }

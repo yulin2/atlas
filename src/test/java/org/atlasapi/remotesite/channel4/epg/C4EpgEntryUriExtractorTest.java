@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.channel4.epg;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
 import org.atlasapi.media.entity.Brand;
@@ -52,7 +53,7 @@ public class C4EpgEntryUriExtractorTest {
     
     @Test
     public void testDoesntResolveSeriesFromBrandOnlyAtomUriWhenSeriesNumberIsAbsent() {
-        assertThat(extractor.uriForSeries(entryWithRelatedLink("http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")), is(Optional.<String>absent()));
+        assertFalse(extractor.uriForSeries(entryWithRelatedLink("http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")).isPresent());
     }
     
     @Test
@@ -99,19 +100,18 @@ public class C4EpgEntryUriExtractorTest {
             "http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1/episode-3.atom")
                 .withProgrammeId("40635/014")
                 .withTitle("This Title Is Ignored");
-        assertThat(extractor.uriForItemHierarchy(entry, Optional.of(hoobsBrand())).get(),
+        assertThat(extractor.uriForItemHierarchy(entry).get(),
             is("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-3"));
     }
     
     @Test
-    public void testExtractsItemHierarchyUriWhenSeriesRelatedLinkAndEpisodeNumberPresent() {
+    public void testDoesntExtractItemHierarchyUriWhenSeriesRelatedLinkAndEpisodeNumberPresent() {
         C4EpgEntry entry = entryWithIdAndRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438", 
                 "http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1.atom")
                 .withProgrammeId("40635/014")
                 .withTitle("This Title Is Ignored")
                 .withEpisodeNumber(3);
-        assertThat(extractor.uriForItemHierarchy(entry, Optional.of(hoobsBrand())).get(),
-            is("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-3"));
+        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
     }
     
     @Test
@@ -120,20 +120,18 @@ public class C4EpgEntryUriExtractorTest {
                 "http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1.atom")
                 .withProgrammeId("40635/014")
                 .withTitle("This Title Is Ignored");
-        assertThat(extractor.uriForItemHierarchy(entry, Optional.of(hoobsBrand())),
-            is(Optional.<String>absent()));
+        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
     }
     
     @Test
-    public void testExtractsItemHierarchyUriWhenBrandRelatedLinkAndSeriesAndEpisodeNumberPresent() {
+    public void testDoesntExtractItemHierarchyUriWhenBrandRelatedLinkAndSeriesAndEpisodeNumberPresent() {
         C4EpgEntry entry = entryWithIdAndRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438", 
                 "http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")
                 .withProgrammeId("40635/014")
                 .withTitle("This Title Is Ignored")
                 .withSeriesNumber(1)
                 .withEpisodeNumber(3);
-        assertThat(extractor.uriForItemHierarchy(entry, Optional.of(hoobsBrand())).get(),
-            is("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-3"));
+        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
     }
 
     @Test
@@ -142,8 +140,7 @@ public class C4EpgEntryUriExtractorTest {
                 "http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")
                 .withProgrammeId("40635/014")
                 .withTitle("This Title Is Ignored");
-        assertThat(extractor.uriForItemHierarchy(entry, Optional.of(hoobsBrand())),
-            is(Optional.<String>absent()));
+        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
     }
 
     @Test
@@ -153,8 +150,7 @@ public class C4EpgEntryUriExtractorTest {
                 .withProgrammeId("40635/014")
                 .withTitle("This Title Is Ignored")
                 .withSeriesNumber(1);
-        assertThat(extractor.uriForItemHierarchy(entry, Optional.of(hoobsBrand())),
-            is(Optional.<String>absent()));
+        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
     }
     
     @Test
@@ -164,12 +160,7 @@ public class C4EpgEntryUriExtractorTest {
                 .withProgrammeId("40635/014")
                 .withTitle("This Title Is Ignored")
                 .withEpisodeNumber(3);
-        assertThat(extractor.uriForItemHierarchy(entry, Optional.of(hoobsBrand())),
-            is(Optional.<String>absent()));
-    }
-
-    private Brand hoobsBrand() {
-        return new Brand("http://www.channel4.com/programmes/the-hoobs", "c4:hoobs", Publisher.C4);
+        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
     }
 
     private C4EpgEntry entryWithRelatedLink(String uri) {
@@ -179,7 +170,6 @@ public class C4EpgEntryUriExtractorTest {
     private C4EpgEntry entryWithIdAndRelatedLink(String id, String uri) {
         return new C4EpgEntry(id).withLinks(ImmutableList.of(new TypedLink(uri, "related")));
     }
-    
 
     private C4EpgEntry entryWithoutRelatedLink(String id) {
         return new C4EpgEntry(id);
