@@ -114,7 +114,7 @@ public class ScheduleResolverBackedScheduleQueryExecutorTest {
                 return new SourceReadEntry(input, SourceStatus.AVAILABLE_ENABLED);
             }}));
         
-        ApplicationSources appSources = ApplicationSources.DEFAULT_SOURCES.copy()
+        ApplicationSources appSources = ApplicationSources.defaults().copy()
                 .withPrecedence(true)
                 .withReads(reads)
                 .build();

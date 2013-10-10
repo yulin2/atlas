@@ -83,7 +83,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
 
 		ContentQuery query = ContentQuery.MATCHES_EVERYTHING
-		        .copyWithApplicationSources(ApplicationSources.DEFAULT_SOURCES
+		        .copyWithApplicationSources(ApplicationSources.defaults()
 		                .copy()
 		                .withPrecedence(true)
 		                .withReads(ImmutableList.of(
@@ -101,7 +101,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 	    MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
 
 	    // Let's not specify a precedence for YouTube, but content will be returned for YouTube
-        ApplicationSources appSources = ApplicationSources.DEFAULT_SOURCES.copy()
+        ApplicationSources appSources = ApplicationSources.defaults().copy()
                 .withPrecedence(true)
                 .withReads(ImmutableList.of(
                         new SourceReadEntry(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED)                        
@@ -118,7 +118,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
     public void testMergingPeople() throws Exception {
         MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(film1, film2));
         ContentQuery query = ContentQuery.MATCHES_EVERYTHING
-                .copyWithApplicationSources(ApplicationSources.DEFAULT_SOURCES
+                .copyWithApplicationSources(ApplicationSources.defaults()
                         .copy()
                         .withPrecedence(true)
                         .withReads(ImmutableList.of(

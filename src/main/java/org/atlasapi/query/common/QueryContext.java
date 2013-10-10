@@ -12,7 +12,7 @@ import com.metabroadcast.common.query.Selection;
 public class QueryContext {
 
     private static final QueryContext STANDARD = new QueryContext(
-            ApplicationSources.DEFAULT_SOURCES, 
+            ApplicationSources.defaults(), 
             ActiveAnnotations.standard()    
     );
     

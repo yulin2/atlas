@@ -65,7 +65,7 @@ public class PopularTopicController {
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
-            ApplicationSources sources = sourcesFetcher.sourcesFor(request).or(ApplicationSources.DEFAULT_SOURCES);
+            ApplicationSources sources = sourcesFetcher.sourcesFor(request).or(ApplicationSources.defaults());
             Interval interval = new Interval(dateTimeInQueryParser.parse(from), dateTimeInQueryParser.parse(to));
             ListenableFuture<FluentIterable<Id>> topicIds = index.popularTopics(interval, selection);
             resultWriter.write(QueryResult.listResult(resolve(topicIds), new QueryContext(sources, ActiveAnnotations.standard())), writer);

@@ -59,7 +59,7 @@ public class ScheduleRequestParserTest {
         when(annotationsExtractor.extractFromRequest(any(HttpServletRequest.class)))
             .thenReturn(ActiveAnnotations.standard());
         when(applicationFetcher.sourcesFor(any(HttpServletRequest.class)))
-            .thenReturn(Optional.of(ApplicationSources.DEFAULT_SOURCES));
+            .thenReturn(Optional.of(ApplicationSources.defaults()));
     }
     
     @Test
@@ -81,7 +81,7 @@ public class ScheduleRequestParserTest {
         assertThat(query.getInterval(), is(intvl));
         assertThat(query.getSource(), is(BBC));
         assertThat(query.getContext().getAnnotations().forPath(ImmutableList.of(Resource.CONTENT)), is(Annotation.standard()));
-        assertThat(query.getContext().getApplicationSources(), is(ApplicationSources.DEFAULT_SOURCES));
+        assertThat(query.getContext().getApplicationSources(), is(ApplicationSources.defaults()));
     }
     
     @Test
@@ -103,7 +103,7 @@ public class ScheduleRequestParserTest {
         assertThat(query.getInterval(), is(intvl));
         assertThat(query.getSource(), is(BBC));
         assertThat(query.getContext().getAnnotations().forPath(ImmutableList.of(Resource.CONTENT)), is(Annotation.standard()));
-        assertThat(query.getContext().getApplicationSources(), is(ApplicationSources.DEFAULT_SOURCES));
+        assertThat(query.getContext().getApplicationSources(), is(ApplicationSources.defaults()));
     }
     
     @Test(expected=IllegalArgumentException.class)

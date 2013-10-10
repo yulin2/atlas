@@ -28,7 +28,7 @@ public class ContextualQueryContextParser implements ParameterNameProvider {
 
     public QueryContext parseContext(HttpServletRequest request) throws QueryParseException {
         return new QueryContext(
-            configFetcher.sourcesFor(request).or(ApplicationSources.DEFAULT_SOURCES),
+            configFetcher.sourcesFor(request).or(ApplicationSources.defaults()),
             annotationExtractor.extractFromRequest(request),
             selectionBuilder.build(request)
         );
