@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.OldApplicationConfiguration;
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.ApplicationSourcesFetcher;
 import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
 
@@ -16,11 +16,11 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
 public class ContextualQueryContextParser implements ParameterNameProvider {
     
-    private final ApplicationConfigurationFetcher configFetcher;
+    private final ApplicationSourcesFetcher configFetcher;
     private final ContextualAnnotationsExtractor annotationExtractor;
     private final SelectionBuilder selectionBuilder;
 
-    public ContextualQueryContextParser(ApplicationConfigurationFetcher configFetcher, ContextualAnnotationsExtractor annotationsParser, Selection.SelectionBuilder selectionBuilder) {
+    public ContextualQueryContextParser(ApplicationSourcesFetcher configFetcher, ContextualAnnotationsExtractor annotationsParser, Selection.SelectionBuilder selectionBuilder) {
         this.configFetcher = checkNotNull(configFetcher);
         this.annotationExtractor = checkNotNull(annotationsParser);
         this.selectionBuilder = checkNotNull(selectionBuilder);
@@ -28,7 +28,7 @@ public class ContextualQueryContextParser implements ParameterNameProvider {
 
     public QueryContext parseContext(HttpServletRequest request) throws QueryParseException {
         return new QueryContext(
-            configFetcher.configurationFor(request).valueOrDefault(OldApplicationConfiguration.defaultConfiguration()),
+            configFetcher.sourcesFor(request).or(ApplicationSources.defaults()),
             annotationExtractor.extractFromRequest(request),
             selectionBuilder.build(request)
         );

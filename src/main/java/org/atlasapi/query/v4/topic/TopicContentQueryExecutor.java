@@ -5,7 +5,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.Set;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.equiv.MergingEquivalentsResolver;
 import org.atlasapi.equiv.ResolvedEquivalents;
 import org.atlasapi.media.common.Id;
@@ -74,7 +74,7 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
                     final Topic topic = possibleTopic.get();
             
                     final QueryContext context = query.getContext();
-                    if (!context.getApplicationConfiguration().isEnabled(topic.getPublisher())) {
+                    if (!context.getApplicationSources().isReadEnabled(topic.getPublisher())) {
                         throw new ForbiddenException(topic.getId());
                     }
         
@@ -101,18 +101,18 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
 
     private ListenableFuture<ResolvedEquivalents<Content>> resolveContent(
             ListenableFuture<FluentIterable<Id>> queryIndex, QueryContext context) {
-        return resolveContent(queryIndex, context.getApplicationConfiguration(), context.getAnnotations().all());
+        return resolveContent(queryIndex, context.getApplicationSources(), context.getAnnotations().all());
     }
 
     private ListenableFuture<ResolvedEquivalents<Content>> resolveContent(
             ListenableFuture<FluentIterable<Id>> queryHits, 
-            final OldApplicationConfiguration config, final Set<Annotation> annotations) {
+            final ApplicationSources sources, final Set<Annotation> annotations) {
         return Futures.transform(queryHits,
                 new AsyncFunction<FluentIterable<Id>, ResolvedEquivalents<Content>>() {
                     @Override
                     public ListenableFuture<ResolvedEquivalents<Content>> apply(FluentIterable<Id> ids)
                             throws Exception {
-                        return contentResolver.resolveIds(ids, config, annotations);
+                        return contentResolver.resolveIds(ids, sources, annotations);
                     }
                 });
     }
@@ -124,7 +124,7 @@ public class TopicContentQueryExecutor implements ContextualQueryExecutor<Topic,
     private ListenableFuture<FluentIterable<Id>> queryIndex(Query<Content> query) throws QueryExecutionException {
         return index.query(
             query.getOperands(), 
-            query.getContext().getApplicationConfiguration().getEnabledSources(), 
+            query.getContext().getApplicationSources().getEnabledReadSources(), 
             query.getContext().getSelection().or(Selection.all())
         );
     }

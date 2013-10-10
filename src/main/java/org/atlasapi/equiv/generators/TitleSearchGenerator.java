@@ -1,12 +1,9 @@
 package org.atlasapi.equiv.generators;
 
-import static org.atlasapi.application.OldApplicationConfiguration.defaultConfiguration;
-
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -15,10 +12,9 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
-
+import org.elasticsearch.common.collect.ImmutableList;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -61,8 +57,8 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
 
     private Iterable<? extends T> searchForCandidates(T content, ResultDescription desc) {
         Set<Publisher> publishers = Sets.difference(searchPublishers, ImmutableSet.of(content.getPublisher()));
-        OldApplicationConfiguration appConfig = defaultConfiguration().withSources(enabledPublishers(publishers));
-
+        ApplicationSources appSources = ApplicationSources.defaults().copy()
+               .withReadableSources(enabledReadSources(publishers)).build();
         String title = titleTransform.apply(content.getTitle());
         SearchQuery.Builder query = SearchQuery.builder(title)
                 .withSelection(new Selection(0, searchLimit))
@@ -73,21 +69,23 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
         }
         
         desc.appendText("query: %s, specialization: %s, publishers: %s", title, content.getSpecialization(), publishers);
-        List<Identified> search = searchResolver.search(query.build(), appConfig);
+        List<Identified> search = searchResolver.search(query.build(), appSources);
         return Iterables.filter(search, cls);
     }
-
-    private Map<Publisher, SourceStatus> enabledPublishers(Set<Publisher> enabledSources) {
-        ImmutableMap.Builder<Publisher, SourceStatus> builder = ImmutableMap.builder();
+    
+    private List<SourceReadEntry> enabledReadSources(Set<Publisher> enabledSources) {
+        ImmutableList.Builder<SourceReadEntry> builder = ImmutableList.builder();
         for (Publisher publisher : Publisher.values()) {
             if (enabledSources.contains(publisher)) {
-                builder.put(publisher, SourceStatus.AVAILABLE_ENABLED);
+               builder.add(new SourceReadEntry(publisher, SourceStatus.AVAILABLE_ENABLED));
             } else {
-                builder.put(publisher, SourceStatus.AVAILABLE_DISABLED);
+               builder.add(new SourceReadEntry(publisher, SourceStatus.AVAILABLE_DISABLED));
             }
         }
         return builder.build();
     }
+    
+    
     
     @Override
     public String toString() {

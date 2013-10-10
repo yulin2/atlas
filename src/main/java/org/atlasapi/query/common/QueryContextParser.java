@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.OldApplicationConfiguration;
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.ApplicationSourcesFetcher;
 import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.query.annotation.AnnotationsExtractor;
 
@@ -16,11 +16,11 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
 public class QueryContextParser implements ParameterNameProvider {
     
-    private final ApplicationConfigurationFetcher configFetcher;
+    private final ApplicationSourcesFetcher configFetcher;
     private final AnnotationsExtractor annotationExtractor;
     private final SelectionBuilder selectionBuilder;
 
-    public QueryContextParser(ApplicationConfigurationFetcher configFetcher, AnnotationsExtractor annotationsParser, Selection.SelectionBuilder selectionBuilder) {
+    public QueryContextParser(ApplicationSourcesFetcher configFetcher, AnnotationsExtractor annotationsParser, Selection.SelectionBuilder selectionBuilder) {
         this.configFetcher = checkNotNull(configFetcher);
         this.annotationExtractor = checkNotNull(annotationsParser);
         this.selectionBuilder = checkNotNull(selectionBuilder);
@@ -28,7 +28,7 @@ public class QueryContextParser implements ParameterNameProvider {
     
     public QueryContext parseSingleContext(HttpServletRequest request) throws QueryParseException {
         return new QueryContext(
-                configFetcher.configurationFor(request).valueOrDefault(OldApplicationConfiguration.defaultConfiguration()),
+                configFetcher.sourcesFor(request).or(ApplicationSources.defaults()),
                 annotationExtractor.extractFromSingleRequest(request),
                 selectionBuilder.build(request)
                 );
@@ -36,7 +36,7 @@ public class QueryContextParser implements ParameterNameProvider {
 
     public QueryContext parseListContext(HttpServletRequest request) throws QueryParseException {
         return new QueryContext(
-            configFetcher.configurationFor(request).valueOrDefault(OldApplicationConfiguration.defaultConfiguration()),
+                configFetcher.sourcesFor(request).or(ApplicationSources.defaults()),
             annotationExtractor.extractFromListRequest(request),
             selectionBuilder.build(request)
         );

@@ -3,7 +3,7 @@ package org.atlasapi.output.annotation;
 
 import java.io.IOException;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductResolver;
@@ -45,16 +45,16 @@ public class ProductsAnnotation extends OutputAnnotation<Content> {
         }, resolveProductsFor(entity, null), ctxt);
     }
     
-    private Iterable<Product> resolveProductsFor(Content content, final OldApplicationConfiguration config) {
-        return filter(productResolver.productsForContent(content.getCanonicalUri()), config);
+    private Iterable<Product> resolveProductsFor(Content content, final ApplicationSources appSources) {
+        return filter(productResolver.productsForContent(content.getCanonicalUri()), appSources);
     }
 
-    private Iterable<Product> filter(Iterable<Product> productsForContent, final OldApplicationConfiguration config) {
+    private Iterable<Product> filter(Iterable<Product> productsForContent, final ApplicationSources appSources) {
         return Iterables.filter(productsForContent, new Predicate<Product>() {
 
             @Override
             public boolean apply(Product input) {
-                return config.isEnabled(input.getPublisher());
+                return appSources.isReadEnabled(input.getPublisher());
             }
         });
     }

@@ -45,7 +45,7 @@ public class TopicContentResultWriter implements ContextualResultWriter<Topic, C
     private OutputContext outputContext(QueryContext queryContext) {
         return new OutputContext(
             queryContext.getAnnotations(),
-            queryContext.getApplicationConfiguration());
+            queryContext.getApplicationSources());
     }
 
 }

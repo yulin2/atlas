@@ -2,12 +2,11 @@ package org.atlasapi.query.v4.content;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.equiv.MergingEquivalentsResolver;
 import org.atlasapi.equiv.ResolvedEquivalents;
 import org.atlasapi.media.common.Id;
@@ -26,7 +25,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -76,7 +74,7 @@ public class IndexBackedEquivalentContentQueryExecutor implements QueryExecutor<
     }
 
     private ListenableFuture<ResolvedEquivalents<Content>> resolve(Query<Content> query, Id id) {
-        return resolver.resolveIds(ImmutableSet.of(id), config(query), annotations(query));
+        return resolver.resolveIds(ImmutableSet.of(id), applicationSources(query), annotations(query));
     }
 
     private ListenableFuture<QueryResult<Content>> executeListQuery(final Query<Content> query) {
@@ -91,7 +89,7 @@ public class IndexBackedEquivalentContentQueryExecutor implements QueryExecutor<
             @Override
             public ListenableFuture<ResolvedEquivalents<Content>> apply(FluentIterable<Id> input)
                     throws Exception {
-                return resolver.resolveIds(input, config(query), annotations(query));
+                return resolver.resolveIds(input, applicationSources(query), annotations(query));
             }
         };
     }
@@ -111,15 +109,15 @@ public class IndexBackedEquivalentContentQueryExecutor implements QueryExecutor<
     }
 
     private ImmutableSet<Publisher> sources(Query<Content> query) {
-        return config(query).getEnabledSources();
+        return applicationSources(query).getEnabledReadSources();
     }
     
     private Set<Annotation> annotations(Query<Content> query) {
         return ImmutableSet.copyOf(query.getContext().getAnnotations().values());
     }
     
-    private OldApplicationConfiguration config(Query<Content> query) {
-        return query.getContext().getApplicationConfiguration();
+    private ApplicationSources applicationSources(Query<Content> query) {
+        return query.getContext().getApplicationSources();
     }
 
 }

@@ -28,7 +28,7 @@ import static org.atlasapi.output.Annotation.SUB_ITEMS;
 import static org.atlasapi.output.Annotation.TOPICS;
 import static org.atlasapi.output.Annotation.UPCOMING;
 
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.ApplicationSourcesFetcher;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -133,7 +133,7 @@ public class QueryWebModule {
 //    private @Autowired ProductResolver productResolver;
     private @Autowired ScheduleIndex scheduleIndex;
 
-    private @Autowired ApplicationConfigurationFetcher configFetcher;
+    private @Autowired ApplicationSourcesFetcher configFetcher;
 
     @Bean NumberToShortStringCodec idCodec() {
         return SubstitutionTableNumberCodec.lowerCaseOnly();

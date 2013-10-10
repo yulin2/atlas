@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import java.util.Map;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Identified;
@@ -43,7 +43,7 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
     public void trimBroadcasts(Interval scheduleInterval, Channel channel, Map<String, String> acceptableIds) {
         try {
             //Get items currently broadcast in the interval
-            Schedule schedule = scheduleResolver.schedule(scheduleInterval.getStart(), scheduleInterval.getEnd(), ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<OldApplicationConfiguration>absent());
+            Schedule schedule = scheduleResolver.schedule(scheduleInterval.getStart(), scheduleInterval.getEnd(), ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<ApplicationSources>absent());
 
             //For each item, check that it's broadcasts are in correct in the acceptable set, set actively published false if not.
             for (ItemAndBroadcast itemEmbeddedInSchedule : Iterables.getOnlyElement(schedule.channelSchedules()).getEntries()) {

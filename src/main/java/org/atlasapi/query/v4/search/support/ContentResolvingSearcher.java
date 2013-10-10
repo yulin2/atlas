@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.content.ContentSearcher;
@@ -34,7 +34,7 @@ public class ContentResolvingSearcher implements SearchResolver {
     }
 
     @Override
-    public List<Identified> search(SearchQuery query, OldApplicationConfiguration appConfig) {
+    public List<Identified> search(SearchQuery query, ApplicationSources sources) {
         try {
             
             return Futures.transform(Futures.transform(searcher.search(query), 

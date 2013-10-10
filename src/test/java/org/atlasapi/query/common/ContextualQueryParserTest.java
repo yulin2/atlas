@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.content.criteria.attribute.Attributes;
@@ -55,7 +55,7 @@ public class ContextualQueryParserTest {
         when(attributeParser.parse(req))
             .thenReturn(new AttributeQuerySet(ImmutableSet.<AttributeQuery<?>>of()));
         when(queryContextParser.parseContext(req))
-            .thenReturn(new QueryContext(OldApplicationConfiguration.defaultConfiguration(), ActiveAnnotations.standard()));
+            .thenReturn(new QueryContext(ApplicationSources.defaults(), ActiveAnnotations.standard()));
         
         ContextualQuery<Topic,Content> query = parser.parse(req);
         

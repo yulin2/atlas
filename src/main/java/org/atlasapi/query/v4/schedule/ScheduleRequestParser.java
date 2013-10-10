@@ -3,14 +3,16 @@ package org.atlasapi.query.v4.schedule;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.metabroadcast.common.webapp.query.DateTimeInQueryParser.queryDateTimeParser;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.OldApplicationConfiguration;
+import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.ApplicationSourcesFetcher;
+import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceStatus;
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
@@ -19,6 +21,7 @@ import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.SetBasedRequestParameterValidator;
+import org.elasticsearch.common.collect.ImmutableList;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -26,7 +29,6 @@ import org.joda.time.Interval;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.time.Clock;
@@ -38,7 +40,7 @@ class ScheduleRequestParser {
         ".*schedules/([^.]+)(.[\\w\\d.]+)?$"
     );
     
-    private final ApplicationConfigurationFetcher applicationStore;
+    private final ApplicationSourcesFetcher applicationStore;
 
     private final SetBasedRequestParameterValidator validator = SetBasedRequestParameterValidator.builder()
         .withRequiredParameters("from","to","source")
@@ -51,7 +53,7 @@ class ScheduleRequestParser {
     private final Duration maxQueryDuration;
     private final Clock clock;
 
-    public ScheduleRequestParser(ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration, Clock clock, ContextualAnnotationsExtractor annotationsExtractor) {
+    public ScheduleRequestParser(ApplicationSourcesFetcher appFetcher, Duration maxQueryDuration, Clock clock, ContextualAnnotationsExtractor annotationsExtractor) {
         this.applicationStore = appFetcher;
         this.maxQueryDuration = maxQueryDuration;
         this.idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
@@ -73,24 +75,27 @@ class ScheduleRequestParser {
         Publisher publisher = extractPublisher(request);
         Interval queryInterval = extractInterval(request);
         
-        OldApplicationConfiguration appConfig = getConfiguration(request);
-        appConfig = appConfigForValidPublisher(publisher, appConfig, queryInterval);
-        checkArgument(appConfig != null, "Source %s not enabled", publisher);
+        ApplicationSources appSources = getConfiguration(request);
+        appSources = appConfigForValidPublisher(publisher, appSources, queryInterval);
+        checkArgument(appSources != null, "Source %s not enabled", publisher);
         
         ActiveAnnotations annotations = annotationExtractor.extractFromRequest(request);
 
-        return new ScheduleQuery(publisher, channel, queryInterval, new QueryContext(appConfig, annotations));
+        return new ScheduleQuery(publisher, channel, queryInterval, new QueryContext(appSources, annotations));
     }
 
-    private OldApplicationConfiguration appConfigForValidPublisher(Publisher publisher,
-                                                                OldApplicationConfiguration appConfig,
+    private ApplicationSources appConfigForValidPublisher(Publisher publisher,
+                                                                ApplicationSources appSources,
                                                                 Interval interval) {
-        if (appConfig.isEnabled(publisher)) {
-            return appConfig;
+        if (appSources.isReadEnabled(publisher)) {
+            return appSources;
         }
         if (Publisher.PA.equals(publisher) && overlapsOpenInterval(interval)) {
-            appConfig = appConfig.withSource(Publisher.PA, SourceStatus.AVAILABLE_ENABLED);
-            return appConfig;
+            List<SourceReadEntry> reads = ImmutableList.<SourceReadEntry>builder().addAll(appSources.getReads())
+                    .add(new SourceReadEntry(Publisher.PA, SourceStatus.AVAILABLE_ENABLED))
+                    .build();
+            appSources = appSources.copy().withReadableSources(reads).build();
+            return appSources;
         }
         return null;
     }
@@ -137,15 +142,15 @@ class ScheduleRequestParser {
         return publisher.get();
     }
 
-    private OldApplicationConfiguration getConfiguration(HttpServletRequest request) {
-        Maybe<OldApplicationConfiguration> config = applicationStore.configurationFor(request);
-        if (config.hasValue()) {
-            return config.requireValue();
+    private ApplicationSources getConfiguration(HttpServletRequest request) {
+        Optional<ApplicationSources> config = applicationStore.sourcesFor(request);
+        if (config.isPresent()) {
+            return config.get();
         }
         String apiKeyParam = request.getParameter("apiKey");
         // request doesn't specify apiKey so use default configuration.
         if (apiKeyParam == null) {
-            return OldApplicationConfiguration.defaultConfiguration();
+            return ApplicationSources.defaults();
         }
         // the request has an apiKey param but no config is found.
         throw new IllegalArgumentException("Unknown API key " + apiKeyParam);

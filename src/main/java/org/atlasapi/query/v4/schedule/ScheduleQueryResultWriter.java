@@ -59,7 +59,7 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ChannelSched
     private OutputContext outputContext(QueryContext queryContext) {
         return new OutputContext(
             queryContext.getAnnotations(),
-            queryContext.getApplicationConfiguration()
+            queryContext.getApplicationSources()
         );
     }
 
