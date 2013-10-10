@@ -1,8 +1,10 @@
 package org.atlasapi.application.www;
 
+import org.atlasapi.application.ApiKeySourcesFetcher;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationAdminController;
 import org.atlasapi.application.ApplicationQueryExecutor;
+import org.atlasapi.application.ApplicationSourcesFetcher;
 import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceRequest;
 import org.atlasapi.application.SourceRequestManager;
@@ -13,8 +15,6 @@ import org.atlasapi.application.SourcesQueryExecutor;
 import org.atlasapi.application.model.deserialize.IdDeserializer;
 import org.atlasapi.application.model.deserialize.PublisherDeserializer;
 import org.atlasapi.application.model.deserialize.SourceReadEntryDeserializer;
-import org.atlasapi.application.query.ApplicationSourcesFetcher;
-import org.atlasapi.application.query.ApiKeyConfigurationFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.application.writers.ApplicationListWriter;
 import org.atlasapi.application.writers.ApplicationQueryResultWriter;
@@ -153,7 +153,7 @@ public class ApplicationWebModule {
     
     public @Bean
     ApplicationSourcesFetcher configFetcher() {
-        return new ApiKeyConfigurationFetcher(applicationStore);
+        return new ApiKeySourcesFetcher(applicationStore);
     }
     
     private StandardQueryParser<Publisher> sourcesQueryParser() {

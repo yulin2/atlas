@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.net.HttpHeaders;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 @Controller

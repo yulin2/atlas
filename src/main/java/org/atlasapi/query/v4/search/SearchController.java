@@ -7,9 +7,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApiKeySourcesFetcher;
 import org.atlasapi.application.ApplicationSources;
-import org.atlasapi.application.query.ApplicationSourcesFetcher;
-import org.atlasapi.application.query.ApiKeyConfigurationFetcher;
+import org.atlasapi.application.ApplicationSourcesFetcher;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -69,7 +69,7 @@ public class SearchController {
 
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
     
-    private final ParameterChecker paramChecker = new ParameterChecker(ImmutableSet.of(      ApiKeyConfigurationFetcher.API_KEY_QUERY_PARAMETER,
+    private final ParameterChecker paramChecker = new ParameterChecker(ImmutableSet.of(      ApiKeySourcesFetcher.API_KEY_QUERY_PARAMETER,
             Selection.LIMIT_REQUEST_PARAM,
             Selection.START_INDEX_REQUEST_PARAM,
             QUERY_PARAM,
