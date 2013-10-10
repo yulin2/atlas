@@ -57,10 +57,7 @@ public class C4EpgEntryUriExtractor {
     }
     
     
-    public Optional<String> uriForItemHierarchy(C4EpgEntry entry, Optional<Brand> brand){
-        if (brand.isPresent() && entry.seriesNumber() != null && entry.episodeNumber() != null) {
-            return Optional.of(brand.get().getCanonicalUri() + seriesUriInfix + entry.seriesNumber() + episodeUriInfix + entry.episodeNumber());
-        }
+    public Optional<String> uriForItemHierarchy(C4EpgEntry entry){
         return extractHeirarchyUriFrom(entry);
     }
 
@@ -75,18 +72,6 @@ public class C4EpgEntryUriExtractor {
                 PROGRAMMES_BASE + matcher.group(brandNameGroup) + 
                 seriesUriInfix + matcher.group(seriesNumberGroup) + 
                 episodeUriInfix + matcher.group(episodeNumberGroup)
-            );
-        } else if (matcher.matches() && matcher.group(seriesNumberGroup) != null && entry.episodeNumber() != null) {
-            return Optional.of(
-                PROGRAMMES_BASE + matcher.group(brandNameGroup) + 
-                seriesUriInfix + matcher.group(seriesNumberGroup) + 
-                episodeUriInfix + entry.episodeNumber()
-            );
-        } else if (matcher.matches() && entry.seriesNumber() != null && entry.episodeNumber() != null) {
-            return Optional.of(
-                PROGRAMMES_BASE + matcher.group(brandNameGroup) + 
-                seriesUriInfix + entry.seriesNumber() + 
-                episodeUriInfix + entry.episodeNumber()
             );
         }
         return Optional.absent();

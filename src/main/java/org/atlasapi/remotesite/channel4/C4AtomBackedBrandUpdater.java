@@ -192,26 +192,6 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         return resolved;
     }
     
-    private static class NoHierarchyUriException extends Exception {
-
-        private Episode episode;
-
-        public NoHierarchyUriException(Episode episode) {
-            this.episode = episode;
-        }
-
-        @Override
-        public String getMessage() {
-            return episode.getCanonicalUri();
-        }
-        
-        @Override
-        public String toString() {
-            return String.format("no hierarchy uri %s", getMessage());
-        }
-        
-    }
-
     private String hierarchyUri(Episode episode) {
         for (String alias : episode.getAliasUrls()) {
             if (C4AtomApi.isACanonicalEpisodeUri(alias)) {

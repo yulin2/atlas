@@ -143,7 +143,7 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
         if (source.getSeries().isPresent() && source.getSeries().get().getSeriesNumber() != null) {
             return source.getSeries().get().getSeriesNumber();
         }
-        return extractSeriesNumber(uriExtractor.uriForItemHierarchy(epgEntry, source.getBrand()));
+        return extractSeriesNumber(uriExtractor.uriForItemHierarchy(epgEntry));
     }
 
     private Integer extractSeriesNumber(Optional<String> hierarchyUri) {
@@ -162,7 +162,7 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
         if (epgEntry.seriesNumber() != null) {
             return epgEntry.episodeNumber();
         }
-        return extractEpisodeNumber(uriExtractor.uriForItemHierarchy(epgEntry, source.getBrand()));
+        return extractEpisodeNumber(uriExtractor.uriForItemHierarchy(epgEntry));
     }
 
     private Integer extractEpisodeNumber(Optional<String> hierarchyUri) {
