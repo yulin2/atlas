@@ -34,7 +34,7 @@ public class C4AtoZAtomContentUpdateTaskTest extends TestCase {
 	Brand brand202 = brand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2");
 
     private Brand brand(String uri) {
-        Brand brand = C4Module.contentFactory().createBrand();
+        Brand brand = C4PmlsdModule.contentFactory().createBrand();
         brand.setCanonicalUri(uri);
         return brand;
     }

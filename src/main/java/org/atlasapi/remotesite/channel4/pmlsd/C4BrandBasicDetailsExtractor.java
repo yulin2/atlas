@@ -46,7 +46,7 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 		
 		Preconditions.checkArgument(brandUri != null && C4AtomApi.isACanonicalBrandUri(brandUri), "URI of feed is not a canonical Brand URI, got: " + brandUri);
 
-		Brand brand = C4Module.contentFactory().createBrand();
+		Brand brand = C4PmlsdModule.contentFactory().createBrand();
 		brand.setCanonicalUri(brandUri);
 		brand.setLastUpdated(clock.now());
 

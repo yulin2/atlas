@@ -36,7 +36,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.time.DayRangeGenerator;
 
 @Configuration
-public class C4Module {
+public class C4PmlsdModule {
     
     static final Publisher SOURCE = Publisher.C4_PMLSD;
     
@@ -47,7 +47,7 @@ public class C4Module {
         return contentFactory;
     }
     
-    private static final Logger log = LoggerFactory.getLogger(C4Module.class);
+    private static final Logger log = LoggerFactory.getLogger(C4PmlsdModule.class);
 
     private static final String ATOZ_BASE = "https://pmlsc.channel4.com/pmlsd/";
     private static final String P06_PLATFORM = "p06";

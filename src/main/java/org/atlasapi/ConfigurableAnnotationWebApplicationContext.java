@@ -20,7 +20,7 @@ import org.atlasapi.query.SearchModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.atlasapi.remotesite.bbc.nitro.BbcNitroModule;
-import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
+import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
 import org.atlasapi.remotesite.metabroadcast.picks.PicksModule;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -74,7 +74,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 InterlinkingDeltaModule.class,
                 EquivTaskModule.class,
                 OddJobRandomTaskModule.class,
-                C4Module.class,
+                C4PmlsdModule.class,
                 BbcNitroModule.class,
                 PicksModule.class
             );

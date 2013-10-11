@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
+import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.C4EpgEntryUriExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.TypedLink;
@@ -90,7 +90,7 @@ public class C4EpgEntryUriExtractorTest {
         C4EpgEntry entry = entryWithoutRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438")
                 .withProgrammeId("40635/014")
                 .withTitle("This Title Is Ignored");
-        Brand brand = C4Module.contentFactory().createBrand();
+        Brand brand = C4PmlsdModule.contentFactory().createBrand();
         brand.setCanonicalUri("http://www.channel4.com/programmes/the-treacle-people");
         assertThat(extractor.uriForItemSynthesized(entry, Optional.of(brand)).get(),
             is("http://www.channel4.com/programmes/synthesized/the-treacle-people/26424438"));

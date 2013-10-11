@@ -16,7 +16,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
-import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
+import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
 
@@ -42,12 +42,12 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
 
         Item item;
         if (source.getBrand().isPresent()) {
-            Episode episode = C4Module.contentFactory().createEpisode();
+            Episode episode = C4PmlsdModule.contentFactory().createEpisode();
             episode.setEpisodeNumber(episodeNumberFrom(source));
             episode.setSeriesNumber(seriesNumberFrom(source));
             item = episode;
         } else {
-            item = C4Module.contentFactory().createItem();
+            item = C4PmlsdModule.contentFactory().createItem();
         }
         
         DateTime now = clock.now();

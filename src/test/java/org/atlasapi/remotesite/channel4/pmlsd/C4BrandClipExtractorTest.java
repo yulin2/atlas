@@ -8,7 +8,7 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandClipExtractor;
-import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
+import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
@@ -31,7 +31,7 @@ public class C4BrandClipExtractorTest {
         Clip clip = clipExtractor.extract((Entry)feed.build().getEntries().get(0));
         
         assertThat(clip.getCanonicalUri(), is("http://www.channel4.com/programmes/green-wing/video/series-1/episode-7/guyball"));
-        assertThat(clip.getPublisher(), is(C4Module.SOURCE));
+        assertThat(clip.getPublisher(), is(C4PmlsdModule.SOURCE));
         assertThat(clip.getLastUpdated(), is(clock.now()));
         assertThat(clip.getIsLongForm(), is(false));
         assertThat(clip.getMediaType(), is(MediaType.VIDEO));

@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.channel4.pmlsd.epg;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
+import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 
 import com.google.common.base.Optional;
@@ -24,7 +24,7 @@ public class C4EpgEntryBrandExtractor implements ContentExtractor<C4EpgEntry, Op
         
         String brandUri = possibleBrandUri.get();
         
-        Brand brand = C4Module.contentFactory().createBrand();
+        Brand brand = C4PmlsdModule.contentFactory().createBrand();
         brand.setCanonicalUri(brandUri);
         
         if (source.brandTitle() != null) {

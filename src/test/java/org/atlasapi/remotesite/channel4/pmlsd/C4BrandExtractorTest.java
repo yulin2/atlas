@@ -178,7 +178,7 @@ public class C4BrandExtractorTest extends TestCase {
 	public void testOldEpisodeWithBroadcast() throws Exception {
         when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
 		
-	    Episode episode = C4Module.contentFactory().createEpisode();
+	    Episode episode = C4PmlsdModule.contentFactory().createEpisode();
 	    episode.setCanonicalUri("http://www.channel4.com/programmes/43065/005");
 	    Version version = new Version();
 	    episode.addVersion(version);

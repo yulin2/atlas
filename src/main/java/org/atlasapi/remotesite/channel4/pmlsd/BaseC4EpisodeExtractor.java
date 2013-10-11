@@ -23,7 +23,7 @@ public abstract class BaseC4EpisodeExtractor extends BaseC4ItemExtractor<Episode
 
     @Override
     protected final Episode createItem(Entry entry, Map<String, String> lookup) {
-        return C4Module.contentFactory().createEpisode();
+        return C4PmlsdModule.contentFactory().createEpisode();
     }
 
     @Override

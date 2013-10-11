@@ -23,7 +23,7 @@ import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApiClient;
-import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
+import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.atlasapi.remotesite.channel4.pmlsd.C4OdEpisodesAdapter;
 import org.joda.time.DateTime;
 
@@ -73,7 +73,7 @@ public class C4FourOdEpisodesExtractorTest extends TestCase {
 		
 		assertThat(firstEpisode.getCurie(), is("c4:36423-001"));
 		assertThat(firstEpisode.getTitle(), is("Ramsay's Kitchen Nightmares"));
-		assertThat(firstEpisode.getPublisher(), is(C4Module.SOURCE));
+		assertThat(firstEpisode.getPublisher(), is(C4PmlsdModule.SOURCE));
 		assertThat(firstEpisode.getSeriesNumber(), is(1));
 		assertThat(firstEpisode.getEpisodeNumber(), is(1));
 		assertThat(firstEpisode.getDescription(), startsWith("Gordon Ramsay visits Bonapartes in Silsden, West Yorkshire."));
