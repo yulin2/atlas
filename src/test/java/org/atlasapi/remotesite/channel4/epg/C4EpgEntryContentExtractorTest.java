@@ -20,6 +20,7 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.channel4.C4BrandUpdater;
+import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.channel4.epg.model.C4EpgEntry;
 import org.atlasapi.remotesite.channel4.epg.model.C4EpgMedia;
 import org.atlasapi.remotesite.channel4.epg.model.TypedLink;
@@ -52,7 +53,7 @@ public class C4EpgEntryContentExtractorTest {
     
     private final C4EpgEntryContentExtractor extractor = new C4EpgEntryContentExtractor(resolver, brandUpdater, clock );
     
-    private final Channel channel = new Channel(Publisher.C4, "Channel 4", "key", false, MediaType.VIDEO, "http://www.channel4.com");
+    private final Channel channel = new Channel(Publisher.METABROADCAST, "Channel 4", "key", false, MediaType.VIDEO, "http://www.channel4.com");
     
     @Test
     public void testCreatesBrandSeriesItemAndBroadcastForRelatedLinkEntryWhenNothingResolved() {
@@ -179,9 +180,9 @@ public class C4EpgEntryContentExtractorTest {
     private Item testItem(String uri) {
         Item item = new Item();
         item.setCanonicalUri(uri);
-        item.setPublisher(Publisher.C4);
+        item.setPublisher(C4Module.SOURCE);
         Version version = new Version();
-        version.setProvider(Publisher.C4);
+        version.setProvider(C4Module.SOURCE);
         item.addVersion(version);
         return item;
     }

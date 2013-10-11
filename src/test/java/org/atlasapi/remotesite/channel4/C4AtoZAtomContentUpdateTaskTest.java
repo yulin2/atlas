@@ -31,8 +31,8 @@ public class C4AtoZAtomContentUpdateTaskTest extends TestCase {
 	private C4BrandUpdater brandAdapter = mock(C4BrandUpdater.class);
 	private SimpleHttpClient client = mock(SimpleHttpClient.class);
 	
-	Brand brand101 = new Brand("http://www.channel4.com/programmes/a-bipolar-expedition", "curie:101", Publisher.C4);
-	Brand brand202 = new Brand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2", "curie:202", Publisher.C4);
+	Brand brand101 = new Brand("http://www.channel4.com/programmes/a-bipolar-expedition", "curie:101", C4Module.SOURCE);
+	Brand brand202 = new Brand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2", "curie:202", C4Module.SOURCE);
 	
 	private final AtomFeedBuilder atoza = new AtomFeedBuilder(Resources.getResource(getClass(), "a.atom"));
 	private final AtomFeedBuilder atoza2 = new AtomFeedBuilder(Resources.getResource(getClass(), "a2.atom"));

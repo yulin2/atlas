@@ -9,7 +9,6 @@ import junit.framework.TestCase;
 
 import org.atlasapi.genres.AtlasGenre;
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +47,7 @@ public class C4BrandBasicDetailsExtractorTest extends TestCase {
 		assertThat(brand.getCurie(), is("c4:ramsays-kitchen-nightmares"));
 		assertThat(brand.getTitle(), is("Ramsay's Kitchen Nightmares"));
 		assertThat(brand.getLastUpdated(), is(clock.now()));
-		assertThat(brand.getPublisher(), is(Publisher.C4));
+		assertThat(brand.getPublisher(), is(C4Module.SOURCE));
 		assertThat(brand.getDescription(), startsWith("Gordon Ramsay attempts to transform struggling restaurants with his"));
 		assertThat(brand.getThumbnail(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_200x113.jpg"));
 		assertThat(brand.getImage(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_625x352.jpg"));
@@ -71,7 +70,7 @@ public class C4BrandBasicDetailsExtractorTest extends TestCase {
         assertThat(brand.getCurie(), is("c4:brass-eye"));
         assertThat(brand.getTitle(), is("Brass Eye"));
         assertThat(brand.getLastUpdated(), is(clock.now()));
-        assertThat(brand.getPublisher(), is(Publisher.C4));
+        assertThat(brand.getPublisher(), is(C4Module.SOURCE));
         assertThat(brand.getDescription(), startsWith("Anarchic spoof news comedy, fronted by Chris Morris"));
         assertThat(brand.getThumbnail(), is("http://www.channel4.com/assets/programmes/images/brass-eye/brass-eye_200x113.jpg"));
         assertThat(brand.getImage(), is("http://www.channel4.com/assets/programmes/images/brass-eye/brass-eye_625x352.jpg"));

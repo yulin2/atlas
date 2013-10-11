@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.channel4;
 
-import static org.atlasapi.media.entity.Publisher.C4;
-
 import java.io.File;
 import java.net.URL;
 
@@ -9,6 +7,7 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Policy.Platform;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
@@ -38,6 +37,8 @@ import com.metabroadcast.common.time.DayRangeGenerator;
 
 @Configuration
 public class C4Module {
+    
+    public static final Publisher SOURCE = Publisher.C4_PMLSD;
     
     private static final Logger log = LoggerFactory.getLogger(C4Module.class);
 
@@ -94,7 +95,7 @@ public class C4Module {
     }
 	
 	@Bean public C4EpgChannelDayUpdater c4EpgChannelDayUpdater() {
-	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
+	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(SOURCE, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
 	    return new C4EpgChannelDayUpdater(new C4EpgClient(c4HttpsClient()), lastUpdatedSettingContentWriter(),
                 contentResolver, c4BrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()), trimmer);
 	}

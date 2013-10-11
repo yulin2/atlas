@@ -27,7 +27,7 @@ public class C4EpgEntryBroadcastExtractorTest {
 
     private final C4EpgEntryBroadcastExtractor extractor = new C4EpgEntryBroadcastExtractor();
 
-    private final Channel channel = new Channel(Publisher.C4, "Channel 4", "key", false, MediaType.VIDEO, "http://www.channel4.com");
+    private final Channel channel = new Channel(Publisher.METABROADCAST, "Channel 4", "key", false, MediaType.VIDEO, "http://www.channel4.com");
     
     @Test
     public void testExtractsBroadcastsFromLinkedEntry() {

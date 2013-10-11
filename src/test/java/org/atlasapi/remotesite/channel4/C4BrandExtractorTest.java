@@ -1,9 +1,7 @@
 package org.atlasapi.remotesite.channel4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -18,7 +16,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
@@ -28,18 +25,12 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy.Platform;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.testing.StubContentResolver;
-import com.metabroadcast.common.http.FixedResponseHttpClient;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +46,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
-import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -180,7 +171,7 @@ public class C4BrandExtractorTest extends TestCase {
 	public void testOldEpisodeWithBroadcast() throws Exception {
         when(resolver.findByCanonicalUris((Iterable<String>)any())).thenReturn(ResolvedContent.builder().build());
 		
-	    Episode episode = new Episode("http://www.channel4.com/programmes/43065/005", "c4:ramsays-kitchen-nightmares_series-4_episode-5", Publisher.C4);
+	    Episode episode = new Episode("http://www.channel4.com/programmes/43065/005", "c4:ramsays-kitchen-nightmares_series-4_episode-5", C4Module.SOURCE);
 	    Version version = new Version();
 	    episode.addVersion(version);
 	    Broadcast oldBroadcast = new Broadcast("some channel", new DateTime(), new DateTime());

@@ -44,7 +44,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
     private final ContentWriter contentWriter = context.mock(ContentWriter.class);
     
     private final Set<Channel> channels = ImmutableSet.of(CHANNEL4);
-    private final Set<Publisher> publishers = ImmutableSet.of(Publisher.C4);
+    private final Set<Publisher> publishers = ImmutableSet.of(Publisher.C4_PMLSD);
 
     private Item item = buildItem();
 
@@ -59,7 +59,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});
         
-        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter);
+        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4_PMLSD, scheduleResolver, resolver, contentWriter);
         
         Interval scheduleInterval = new Interval(100, 200);
         trimmer.trimBroadcasts(scheduleInterval, CHANNEL4, ImmutableMap.of("c4:1234", item.getCanonicalUri()));
@@ -68,14 +68,14 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
 
     @Test
     public void testTrimsBroadcastsOfWrongItems() {
-        Item item1 = new Item("testUri1", "testCurie", Publisher.C4);
+        Item item1 = new Item("testUri1", "testCurie", Publisher.C4_PMLSD);
         Version version = new Version();
         Broadcast remove = new Broadcast(CHANNEL4.getUri(), new DateTime(50), new DateTime(103)).withId("c4:2234");
         remove.setIsActivelyPublished(true);
         version.setBroadcasts(ImmutableSet.of(remove));
         item1.addVersion(version);
         
-        Item item2 = new Item("testUri2", "testCurie", Publisher.C4);
+        Item item2 = new Item("testUri2", "testCurie", Publisher.C4_PMLSD);
         version = new Version();
         Broadcast keep = new Broadcast(CHANNEL4.getUri(), new DateTime(150), new DateTime(153)).withId("c4:1234");
         remove.setIsActivelyPublished(true);
@@ -94,7 +94,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});
         
-        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter);
+        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4_PMLSD, scheduleResolver, resolver, contentWriter);
         
         Interval scheduleInterval = new Interval(50, 200);
         trimmer.trimBroadcasts(scheduleInterval, CHANNEL4, ImmutableMap.of("c4:1234", item2.getCanonicalUri()));
@@ -130,7 +130,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
     }
 
 	private static Item buildItem() {
-		Item item = new Item("testUri", "testCurie", Publisher.C4);
+		Item item = new Item("testUri", "testCurie", Publisher.C4_PMLSD);
         Version version = new Version();
         
         Broadcast ignore = new Broadcast(CHANNEL4.getUri(), new DateTime(50), new DateTime(103)).withId("c4:0234");

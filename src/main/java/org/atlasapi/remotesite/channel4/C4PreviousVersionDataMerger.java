@@ -41,7 +41,7 @@ class C4PreviousVersionDataMerger {
             return;
         }
         
-		if (!Publisher.C4.equals(oldItem.getPublisher())) {
+		if (!C4Module.SOURCE.equals(oldItem.getPublisher())) {
 			// sanity check, if the item we got back was not in the C4 namespace
 			// then we shouldn't do anything
 			return;

@@ -20,12 +20,8 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.Platform;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
-
-import com.metabroadcast.common.http.FixedResponseHttpClient;
-
 import org.joda.time.DateTime;
 
 import com.google.common.base.Charsets;
@@ -37,6 +33,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;
@@ -73,7 +70,7 @@ public class C4FourOdEpisodesExtractorTest extends TestCase {
 		
 		assertThat(firstEpisode.getCurie(), is("c4:36423-001"));
 		assertThat(firstEpisode.getTitle(), is("Ramsay's Kitchen Nightmares"));
-		assertThat(firstEpisode.getPublisher(), is(Publisher.C4));
+		assertThat(firstEpisode.getPublisher(), is(C4Module.SOURCE));
 		assertThat(firstEpisode.getSeriesNumber(), is(1));
 		assertThat(firstEpisode.getEpisodeNumber(), is(1));
 		assertThat(firstEpisode.getDescription(), startsWith("Gordon Ramsay visits Bonapartes in Silsden, West Yorkshire."));
