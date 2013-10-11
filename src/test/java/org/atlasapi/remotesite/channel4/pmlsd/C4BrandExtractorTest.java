@@ -32,10 +32,6 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.testing.StubContentResolver;
 import org.atlasapi.remotesite.channel4.RecordingContentWriter;
-import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApiClient;
-import org.atlasapi.remotesite.channel4.pmlsd.C4AtomBackedBrandUpdater;
-import org.atlasapi.remotesite.channel4.pmlsd.C4BrandExtractor;
-import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -176,7 +172,8 @@ public class C4BrandExtractorTest extends TestCase {
 	public void testOldEpisodeWithBroadcast() throws Exception {
         when(resolver.findByCanonicalUris((Iterable<String>)any())).thenReturn(ResolvedContent.builder().build());
 		
-	    Episode episode = new Episode("http://www.channel4.com/programmes/43065/005", "c4:ramsays-kitchen-nightmares_series-4_episode-5", C4Module.SOURCE);
+	    Episode episode = C4Module.contentFactory().createEpisode();
+	    episode.setCanonicalUri("http://www.channel4.com/programmes/43065/005");
 	    Version version = new Version();
 	    episode.addVersion(version);
 	    Broadcast oldBroadcast = new Broadcast("some channel", new DateTime(), new DateTime());
@@ -436,7 +433,7 @@ public class C4BrandExtractorTest extends TestCase {
         assertTrue(foundXboxLocation);
       
     }
-    
+
     @Test 
     /**
      * The description may differ on a platform-by-platform basis. Therefore 

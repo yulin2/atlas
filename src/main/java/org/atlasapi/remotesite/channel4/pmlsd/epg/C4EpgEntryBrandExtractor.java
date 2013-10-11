@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.channel4.pmlsd.epg;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
@@ -24,9 +23,9 @@ public class C4EpgEntryBrandExtractor implements ContentExtractor<C4EpgEntry, Op
         }
         
         String brandUri = possibleBrandUri.get();
-        String curie = PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri);
         
-        Brand brand = new Brand(brandUri, curie, C4Module.SOURCE);
+        Brand brand = C4Module.contentFactory().createBrand();
+        brand.setCanonicalUri(brandUri);
         
         if (source.brandTitle() != null) {
             brand.setTitle(source.brandTitle());

@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.jdom.Attribute;
@@ -28,7 +27,6 @@ public abstract class BaseC4ItemExtractor<I extends Item> implements ContentExtr
         Map<String, String> lookup = C4AtomApi.foreignElementLookup(entry);
         I item = createItem(entry, lookup);
         item.setCanonicalUri(getUri(entry, lookup));
-        item.setPublisher(C4Module.SOURCE);
         item.setLastUpdated(clock.now());
         item.setTitle(entry.getTitle());
         Content summary = entry.getSummary();

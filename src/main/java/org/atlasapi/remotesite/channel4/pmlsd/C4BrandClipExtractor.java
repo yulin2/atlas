@@ -22,7 +22,7 @@ public class C4BrandClipExtractor extends BaseC4ItemExtractor<Clip> {
 
     @Override
     protected Clip createItem(Entry entry, Map<String, String> lookup) {
-        return new Clip();
+        return C4Module.contentFactory().createClip();
     }
     
     @Override

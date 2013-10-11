@@ -38,7 +38,14 @@ import com.metabroadcast.common.time.DayRangeGenerator;
 @Configuration
 public class C4Module {
     
-    public static final Publisher SOURCE = Publisher.C4_PMLSD;
+    static final Publisher SOURCE = Publisher.C4_PMLSD;
+    
+    private static final SourceSpecificContentFactory contentFactory =
+        new SourceSpecificContentFactory(SOURCE);
+    
+    public static final SourceSpecificContentFactory contentFactory() {
+        return contentFactory;
+    }
     
     private static final Logger log = LoggerFactory.getLogger(C4Module.class);
 

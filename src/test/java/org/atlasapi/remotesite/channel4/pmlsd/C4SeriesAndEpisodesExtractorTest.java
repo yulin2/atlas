@@ -31,7 +31,6 @@ public class C4SeriesAndEpisodesExtractorTest extends TestCase {
 		Series series = Iterables.getOnlyElement(seriesAndEpisodes.keySet());
 		
 		assertThat(series.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3"));
-		assertThat(series.getCurie(), is("c4:ramsays-kitchen-nightmares-series-3"));
 		// TODO new alias
 		assertThat(series.getAliasUrls(), is((Set<String>) ImmutableSet.of("tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/episode-guide/series-3")));
 

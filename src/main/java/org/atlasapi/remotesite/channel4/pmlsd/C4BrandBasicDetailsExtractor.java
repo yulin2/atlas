@@ -6,9 +6,7 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.jdom.Element;
 
@@ -48,7 +46,8 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 		
 		Preconditions.checkArgument(brandUri != null && C4AtomApi.isACanonicalBrandUri(brandUri), "URI of feed is not a canonical Brand URI, got: " + brandUri);
 
-		Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri), C4Module.SOURCE);
+		Brand brand = C4Module.contentFactory().createBrand();
+		brand.setCanonicalUri(brandUri);
 		brand.setLastUpdated(clock.now());
 
 		// TODO new alias

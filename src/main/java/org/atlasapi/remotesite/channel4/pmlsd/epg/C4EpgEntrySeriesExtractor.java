@@ -4,7 +4,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Series;
-import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
@@ -21,8 +20,8 @@ public class C4EpgEntrySeriesExtractor implements ContentExtractor<C4EpgEntry, O
         if (possibleSeriesUri.isPresent()) {
             
             String seriesUri = possibleSeriesUri.get();
-            String curie = PerPublisherCurieExpander.CurieAlgorithm.C4.compact(seriesUri);
-            Series series = new Series(seriesUri, curie, C4Module.SOURCE);
+            Series series = C4Module.contentFactory().createSeries();
+            series.setCanonicalUri(seriesUri);
             
             if (source.seriesNumber() != null) {
                 series.withSeriesNumber(source.seriesNumber());

@@ -11,10 +11,9 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
@@ -43,12 +42,12 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
 
         Item item;
         if (source.getBrand().isPresent()) {
-            Episode episode = new Episode();
+            Episode episode = C4Module.contentFactory().createEpisode();
             episode.setEpisodeNumber(episodeNumberFrom(source));
             episode.setSeriesNumber(seriesNumberFrom(source));
             item = episode;
         } else {
-            item = new Item();
+            item = C4Module.contentFactory().createItem();
         }
         
         DateTime now = clock.now();
@@ -57,7 +56,6 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
         
         item.setCanonicalUri(uriExtractor.uriForItemId(entry));
         item.setCurie(C4AtomApi.PROGRAMMES_BASE + entry.programmeId());
-        item.setPublisher(C4Module.SOURCE);
         
         item.setTitle(entry.title());
         item.setDescription(entry.summary());
@@ -78,7 +76,6 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
         version.setLastUpdated(now);
         
         version.setDuration(entry.getEpgEntry().duration());
-        version.setProvider(C4Module.SOURCE);
         
         Broadcast broadcast = broadcastExtractor.extract(entry);
         broadcast.setLastUpdated(now);
@@ -105,13 +102,13 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
         location.setLastUpdated(now);
         location.setUri(entry.media().player());
         location.setTransportType(TransportType.LINK);
-        location.setPolicy(policyFrom(entry, now));
+        location.setPolicy(policyFrom(entry));
         return location;
     }
 
     private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
 
-    private Policy policyFrom(C4EpgEntry entry, DateTime now) {
+    private Policy policyFrom(C4EpgEntry entry) {
         Policy policy = new Policy();
         policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
         

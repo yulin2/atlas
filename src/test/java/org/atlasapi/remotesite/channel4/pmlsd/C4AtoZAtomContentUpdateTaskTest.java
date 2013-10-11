@@ -7,11 +7,7 @@ import static org.mockito.Mockito.when;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Policy.Platform;
-import org.atlasapi.remotesite.channel4.pmlsd.C4AtoZAtomContentUpdateTask;
-import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
-import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Test;
@@ -34,8 +30,14 @@ public class C4AtoZAtomContentUpdateTaskTest extends TestCase {
 	private C4BrandUpdater brandAdapter = mock(C4BrandUpdater.class);
 	private SimpleHttpClient client = mock(SimpleHttpClient.class);
 	
-	Brand brand101 = new Brand("http://www.channel4.com/programmes/a-bipolar-expedition", "curie:101", C4Module.SOURCE);
-	Brand brand202 = new Brand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2", "curie:202", C4Module.SOURCE);
+	Brand brand101 = brand("http://www.channel4.com/programmes/a-bipolar-expedition");
+	Brand brand202 = brand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2");
+
+    private Brand brand(String uri) {
+        Brand brand = C4Module.contentFactory().createBrand();
+        brand.setCanonicalUri(uri);
+        return brand;
+    }
 	
 	private final AtomFeedBuilder atoza = new AtomFeedBuilder(Resources.getResource(getClass(), "a.atom"));
 	private final AtomFeedBuilder atoza2 = new AtomFeedBuilder(Resources.getResource(getClass(), "a2.atom"));

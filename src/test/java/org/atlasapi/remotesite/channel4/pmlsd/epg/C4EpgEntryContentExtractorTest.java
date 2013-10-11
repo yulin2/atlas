@@ -21,9 +21,6 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
 import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
-import org.atlasapi.remotesite.channel4.pmlsd.epg.C4EpgChannelEntry;
-import org.atlasapi.remotesite.channel4.pmlsd.epg.C4EpgEntryContentExtractor;
-import org.atlasapi.remotesite.channel4.pmlsd.epg.ContentHierarchyAndBroadcast;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgMedia;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.TypedLink;
@@ -181,11 +178,9 @@ public class C4EpgEntryContentExtractorTest {
     }
     
     private Item testItem(String uri) {
-        Item item = new Item();
+        Item item = C4Module.contentFactory().createEpisode();
         item.setCanonicalUri(uri);
-        item.setPublisher(C4Module.SOURCE);
         Version version = new Version();
-        version.setProvider(C4Module.SOURCE);
         item.addVersion(version);
         return item;
     }

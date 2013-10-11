@@ -5,10 +5,8 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 
 import com.google.common.collect.ImmutableSetMultimap;
@@ -51,7 +49,8 @@ public class C4SeriesAndEpisodesExtractor implements ContentExtractor<Feed, SetM
     }
 
     private Series createSeriesFromFeed(String uri, Feed source) {
-        Series series = new Series(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri), C4Module.SOURCE);
+        Series series = C4Module.contentFactory().createSeries();
+        series.setCanonicalUri(uri);
         series.addAliasUrl(C4AtomApi.canonicalizeSeriesFeedId(source));
 
         series.setLastUpdated(clock.now());
