@@ -1,10 +1,8 @@
 package org.atlasapi.application.www;
 
-import org.atlasapi.application.ApiKeySourcesFetcher;
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationAdminController;
 import org.atlasapi.application.ApplicationQueryExecutor;
-import org.atlasapi.application.ApplicationSourcesFetcher;
 import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceRequest;
 import org.atlasapi.application.SourceRequestManager;
@@ -12,6 +10,8 @@ import org.atlasapi.application.SourceRequestQueryExecutor;
 import org.atlasapi.application.SourceRequestsController;
 import org.atlasapi.application.SourcesController;
 import org.atlasapi.application.SourcesQueryExecutor;
+import org.atlasapi.application.auth.ApiKeySourcesFetcher;
+import org.atlasapi.application.auth.ApplicationSourcesFetcher;
 import org.atlasapi.application.model.deserialize.IdDeserializer;
 import org.atlasapi.application.model.deserialize.PublisherDeserializer;
 import org.atlasapi.application.model.deserialize.SourceReadEntryDeserializer;

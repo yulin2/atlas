@@ -7,9 +7,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.ApiKeySourcesFetcher;
 import org.atlasapi.application.ApplicationSources;
-import org.atlasapi.application.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.ApiKeySourcesFetcher;
+import org.atlasapi.application.auth.ApplicationSourcesFetcher;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;

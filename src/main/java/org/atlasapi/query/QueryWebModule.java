@@ -28,7 +28,7 @@ import static org.atlasapi.output.Annotation.SUB_ITEMS;
 import static org.atlasapi.output.Annotation.TOPICS;
 import static org.atlasapi.output.Annotation.UPCOMING;
 
-import org.atlasapi.application.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.ApplicationSourcesFetcher;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
