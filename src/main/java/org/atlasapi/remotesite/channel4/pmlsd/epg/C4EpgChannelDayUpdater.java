@@ -4,16 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
-import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
-import org.atlasapi.remotesite.channel4.pmlsd.NoHierarchyUriException;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -22,7 +18,7 @@ import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Predicate;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -57,9 +53,11 @@ public class C4EpgChannelDayUpdater {
                 return UpdateProgress.FAILURE;
             }
             
-            List<ItemRefAndBroadcast> processedItems = process(entries, channel);
-            trim(scheduleDay, channel, processedItems);
-            return new UpdateProgress(processedItems.size(), 0);
+            List<Optional<ItemRefAndBroadcast>> processedItems = process(entries, channel);
+            Iterable<ItemRefAndBroadcast> successfullyProcessed = Optional.presentInstances(processedItems);
+            trim(scheduleDay, channel, successfullyProcessed);
+            int successfullyProcessedCount = Iterables.size(successfullyProcessed);
+            return new UpdateProgress(successfullyProcessedCount, processedItems.size()-successfullyProcessedCount);
         } catch (Exception e) {
             log.error(uri, e);
             return UpdateProgress.FAILURE;
@@ -79,13 +77,13 @@ public class C4EpgChannelDayUpdater {
         }
     }
 
-    private void trim(LocalDate scheduleDay, Channel channel, List<ItemRefAndBroadcast> processedItems) {
+    private void trim(LocalDate scheduleDay, Channel channel, Iterable<ItemRefAndBroadcast> processedItems) {
         DateTime scheduleStart = scheduleDay.toDateTime(new LocalTime(6,0,0), DateTimeZones.LONDON);
         Interval scheduleInterval = new Interval(scheduleStart, scheduleStart.plusDays(1));
         trimmer.trimBroadcasts(scheduleInterval, channel, broacastIdsFrom(processedItems));
     }
 
-    private Map<String, String> broacastIdsFrom(List<ItemRefAndBroadcast> processedItems) {
+    private Map<String, String> broacastIdsFrom(Iterable<ItemRefAndBroadcast> processedItems) {
         ImmutableMap.Builder<String, String> broadcastIdItemIdMap = ImmutableMap.builder();
         for (ItemRefAndBroadcast itemRefAndBroadcast : processedItems) {
             broadcastIdItemIdMap.put(itemRefAndBroadcast.getBroadcast().getSourceId(), itemRefAndBroadcast.getItemUri());
@@ -93,10 +91,10 @@ public class C4EpgChannelDayUpdater {
         return broadcastIdItemIdMap.build();
     }
 
-    private List<ItemRefAndBroadcast> process(Iterable<C4EpgEntry> entries, Channel channel) {
-        ImmutableList.Builder<ItemRefAndBroadcast> episodes = ImmutableList.builder();
+    private List<Optional<ItemRefAndBroadcast>> process(Iterable<C4EpgEntry> entries, Channel channel) {
+        ImmutableList.Builder<Optional<ItemRefAndBroadcast>> episodes = ImmutableList.builder();
         for (C4EpgEntry entry : entries) {
-            ItemRefAndBroadcast itemAndBroadcast = processEntry(channel, entry);
+            Optional<ItemRefAndBroadcast> itemAndBroadcast = processEntry(channel, entry);
             if (itemAndBroadcast != null) {
                 episodes.add(itemAndBroadcast);
             }
@@ -104,13 +102,10 @@ public class C4EpgChannelDayUpdater {
         return episodes.build();
     }
 
-    private ItemRefAndBroadcast processEntry(Channel channel, C4EpgEntry entry) {
+    private Optional<ItemRefAndBroadcast> processEntry(Channel channel, C4EpgEntry entry) {
         ItemRefAndBroadcast itemAndBroadcast = null;
         try {
             ContentHierarchyAndBroadcast extractedContent = epgEntryContentExtractor.extract(new C4EpgChannelEntry(entry, channel));
-            if (!hasHierarchyUri(extractedContent.getItem())) {
-                throw new NoHierarchyUriException((Episode)extractedContent.getItem());
-            }
             if (extractedContent.getBrand().isPresent()) {
                 writer.createOrUpdate(extractedContent.getBrand().get());
             }
@@ -122,16 +117,7 @@ public class C4EpgChannelDayUpdater {
         } catch (Exception e) {
             log.error(entry.id(), e);
         }
-        return itemAndBroadcast;
-    }
-
-    private boolean hasHierarchyUri(Item item) {
-        return C4AtomApi.isACanonicalEpisodeUri(item.getCanonicalUri()) ||
-            Iterables.any(item.getAliasUrls(), new Predicate<String>(){
-                @Override
-                public boolean apply(String input) {
-                    return C4AtomApi.isACanonicalEpisodeUri(input);
-                }});
+        return Optional.fromNullable(itemAndBroadcast);
     }
 
 }

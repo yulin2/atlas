@@ -35,7 +35,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -111,8 +110,6 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
                         episode.setSeries(series);
                     }
                     writer.createOrUpdate(episode);
-                } catch (NoHierarchyUriException nhue) {
-                    log.warn(String.format("%s (%s)", nhue, brand.getTitle()));
                 } catch (Exception e) {
                     log.warn("Failed to write " + episode.getCanonicalUri(), e);
                 }
@@ -120,7 +117,7 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         }
     }
 
-    private Episode resolveAndUpdate(Episode episode) throws NoHierarchyUriException {
+    private Episode resolveAndUpdate(Episode episode) {
         Optional<Item> existingEpisode = resolve(episode);
         if (!existingEpisode.isPresent()) {
             return episode;
@@ -184,13 +181,8 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         return episode;
     }
 
-    private Optional<Item> resolve(Episode episode) throws NoHierarchyUriException {
-        String hierarchyUri = hierarchyUri(episode);
-        Optional<Item> resolved = resolver.itemFor(episode.getCanonicalUri(), Optional.fromNullable(hierarchyUri), Optional.<String>absent());
-        if(Strings.isNullOrEmpty(hierarchyUri) && !resolved.isPresent()) {
-            throw new NoHierarchyUriException(episode);
-        }
-        return resolved;
+    private Optional<Item> resolve(Episode episode) {
+        return resolver.itemFor(episode.getCanonicalUri());
     }
     
     private String hierarchyUri(Episode episode) {

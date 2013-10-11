@@ -7,11 +7,13 @@ import java.util.Map;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 
+import com.google.common.base.Strings;
+import com.google.common.primitives.Ints;
 import com.metabroadcast.common.time.Clock;
 import com.sun.syndication.feed.atom.Entry;
 
 
-public abstract class BaseC4EpisodeExtractor extends BaseC4ItemExtractor<Episode> {
+public abstract class BaseC4EpisodeExtractor extends C4MediaItemExtractor<Episode> {
 
     private static final String DC_EPISODE_NUMBER = "dc:relation.EpisodeNumber";
     private static final String DC_SERIES_NUMBER = "dc:relation.SeriesNumber";
@@ -36,8 +38,8 @@ public abstract class BaseC4EpisodeExtractor extends BaseC4ItemExtractor<Episode
     @Override
     protected final Episode setAdditionalItemFields(Entry entry, Map<String, String> lookup, Episode episode) {
         episode.setCurie(PerPublisherCurieExpander.CurieAlgorithm.C4.compact(episode.getCanonicalUri()));
-        episode.setEpisodeNumber(C4AtomApi.readAsNumber(lookup, DC_EPISODE_NUMBER));
-        episode.setSeriesNumber(C4AtomApi.readAsNumber(lookup, DC_SERIES_NUMBER));
+        episode.setEpisodeNumber(Ints.tryParse(Strings.nullToEmpty(lookup.get(DC_EPISODE_NUMBER))));
+        episode.setSeriesNumber(Ints.tryParse(Strings.nullToEmpty(lookup.get(DC_SERIES_NUMBER))));
         episode.setIsLongForm(true);
         return setAdditionalEpisodeFields(entry, lookup, episode);
     }

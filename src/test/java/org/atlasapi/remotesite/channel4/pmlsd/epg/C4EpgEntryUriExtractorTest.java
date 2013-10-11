@@ -4,9 +4,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
-import org.atlasapi.remotesite.channel4.pmlsd.epg.C4EpgEntryUriExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.TypedLink;
 import org.junit.Test;
@@ -74,95 +71,6 @@ public class C4EpgEntryUriExtractorTest {
                 .withProgrammeId("40635/014")
                 .withTitle("The Treacle People");
         assertThat(extractor.uriForItemId(entry), is("http://www.channel4.com/programmes/40635/014"));
-    }
-
-    @Test
-    public void testExtractsItemSynthUriWithNoRelatedLink() {
-        C4EpgEntry entry = entryWithoutRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438")
-                .withProgrammeId("40635/014")
-                .withTitle("The Treacle People");
-        assertThat(extractor.uriForItemSynthesized(entry, Optional.<Brand>absent()).get(), 
-            is("http://www.channel4.com/programmes/synthesized/the-treacle-people/26424438"));
-    }
-
-    @Test
-    public void testExtractsItemSynthUriWhenNoRelatedLinkUsingPresentBrandUri() {
-        C4EpgEntry entry = entryWithoutRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438")
-                .withProgrammeId("40635/014")
-                .withTitle("This Title Is Ignored");
-        Brand brand = C4PmlsdModule.contentFactory().createBrand();
-        brand.setCanonicalUri("http://www.channel4.com/programmes/the-treacle-people");
-        assertThat(extractor.uriForItemSynthesized(entry, Optional.of(brand)).get(),
-            is("http://www.channel4.com/programmes/synthesized/the-treacle-people/26424438"));
-    }
-    
-    @Test
-    public void testExtractsItemHierarchyUriWhenFullRelatedLinkPresent() {
-        C4EpgEntry entry = entryWithIdAndRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438", 
-            "http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1/episode-3.atom")
-                .withProgrammeId("40635/014")
-                .withTitle("This Title Is Ignored");
-        assertThat(extractor.uriForItemHierarchy(entry).get(),
-            is("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-3"));
-    }
-    
-    @Test
-    public void testDoesntExtractItemHierarchyUriWhenSeriesRelatedLinkAndEpisodeNumberPresent() {
-        C4EpgEntry entry = entryWithIdAndRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438", 
-                "http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1.atom")
-                .withProgrammeId("40635/014")
-                .withTitle("This Title Is Ignored")
-                .withEpisodeNumber(3);
-        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
-    }
-    
-    @Test
-    public void testDoesntExtractItemHierarchyUriWhenSeriesRelatedLinkAndNoEpisodeNumberPresent(){
-        C4EpgEntry entry = entryWithIdAndRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438", 
-                "http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1.atom")
-                .withProgrammeId("40635/014")
-                .withTitle("This Title Is Ignored");
-        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
-    }
-    
-    @Test
-    public void testDoesntExtractItemHierarchyUriWhenBrandRelatedLinkAndSeriesAndEpisodeNumberPresent() {
-        C4EpgEntry entry = entryWithIdAndRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438", 
-                "http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")
-                .withProgrammeId("40635/014")
-                .withTitle("This Title Is Ignored")
-                .withSeriesNumber(1)
-                .withEpisodeNumber(3);
-        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
-    }
-
-    @Test
-    public void testDoesntExtractItemHierarchyUriWhenBrandRelatedLinkAndNoSeriesOrEpisodeNumberPresent(){
-        C4EpgEntry entry = entryWithIdAndRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438", 
-                "http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")
-                .withProgrammeId("40635/014")
-                .withTitle("This Title Is Ignored");
-        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
-    }
-
-    @Test
-    public void testDoesntExtractItemHierarchyUriWhenBrandRelatedLinkAndOnlySeriesNumberPresent(){
-        C4EpgEntry entry = entryWithIdAndRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438", 
-                "http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")
-                .withProgrammeId("40635/014")
-                .withTitle("This Title Is Ignored")
-                .withSeriesNumber(1);
-        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
-    }
-    
-    @Test
-    public void testDoesntExtractItemHierarchyUriWhenBrandRelatedLinkAndOnlyEpisodeNumberPresent(){
-        C4EpgEntry entry = entryWithIdAndRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438", 
-                "http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")
-                .withProgrammeId("40635/014")
-                .withTitle("This Title Is Ignored")
-                .withEpisodeNumber(3);
-        assertFalse(extractor.uriForItemHierarchy(entry).isPresent());
     }
 
     private C4EpgEntry entryWithRelatedLink(String uri) {

@@ -19,9 +19,6 @@ public class C4BrandEpgExtractorTest extends TestCase {
     private final AtomFeedBuilder gleeAtom = new AtomFeedBuilder(Resources.getResource(getClass(), "glee-epg.atom"));
     private final Feed gleeFeed = gleeAtom.build();
     
-    private final AtomFeedBuilder xmenAtom = new AtomFeedBuilder(Resources.getResource(getClass(), "x-men-the-last-stand-epg.atom"));
-    private final Feed xmenFeed = xmenAtom.build();
-    
     private final C4EpgEpisodeExtractor extractor = new C4EpgEpisodeExtractor(new C4AtomApi(new C4DummyChannelResolver()), new SystemClock());
     
     @Test
@@ -45,12 +42,5 @@ public class C4BrandEpgExtractorTest extends TestCase {
         assertTrue(broadcast.getAliasUrls().contains("tag:www.channel4.com,2009:slot/E439861"));
         assertEquals(Integer.valueOf(55*60), broadcast.getBroadcastDuration());
     }
-    
-    @Test
-    public void testShouldConstructHeirarchicalUri() {
-        
-        Episode episode = extractor.extract((Entry)xmenFeed.getEntries().get(0));
-        
-        assertEquals("http://www.channel4.com/programmes/x-men-the-last-stand/episode-guide/series-1/episode-1", episode.getCanonicalUri());
-    }
+
 }

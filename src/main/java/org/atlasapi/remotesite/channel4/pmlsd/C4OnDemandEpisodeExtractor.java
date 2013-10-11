@@ -1,13 +1,11 @@
 package org.atlasapi.remotesite.channel4.pmlsd;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Map;
 
-import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy.Platform;
-import org.atlasapi.media.entity.Version;
-import org.jdom.Element;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Optional;
@@ -20,7 +18,7 @@ final class C4OnDemandEpisodeExtractor extends BaseC4EpisodeExtractor {
 
     public C4OnDemandEpisodeExtractor(Optional<Platform> platform, Clock clock) {
         super(clock);
-        versionExtractor = new C4AtomEntryVersionExtractor(platform, clock);
+        versionExtractor = new C4AtomEntryVersionExtractor(platform);
     }
 
     @Override
@@ -34,24 +32,14 @@ final class C4OnDemandEpisodeExtractor extends BaseC4EpisodeExtractor {
         if(seriesEpisodeUri != null) {
             episode.addAliasUrl(seriesEpisodeUri);
         }
-        episode.addVersion(setLastUpdated(versionExtractor.extract(entry), episode.getLastUpdated()));
+        episode.addVersion(versionExtractor.extract(data(entry, fourOdUri, lookup, episode.getLastUpdated())));
         return episode;
     }
     
-    private Version setLastUpdated(Version version, DateTime lastUpdated) {
-        version.setLastUpdated(lastUpdated);
-        for (Encoding encoding : version.getManifestedAs()) {
-            encoding.setLastUpdated(lastUpdated);
-            for (Location location : encoding.getAvailableAt()) {
-                location.setLastUpdated(lastUpdated);
-            }
-        }
-        return version;
+    private C4VersionData data(Entry entry, String fourOdUri, Map<String, String> lookup, DateTime lastUpdated) {
+        String uri = fourOdUri != null ? fourOdUri : C4AtomApi.clipUri(entry);
+        checkNotNull(uri, "No version URI extracted for %s", entry.getId());
+        return new C4VersionData(entry.getId(), uri, getMedia(entry), lookup, lastUpdated);
     }
 
-    @Override
-    protected Element getMedia(Entry source) {
-        return C4AtomApi.mediaGroup(source);
-    }
-    
 }

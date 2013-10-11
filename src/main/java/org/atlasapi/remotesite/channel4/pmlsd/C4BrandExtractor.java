@@ -50,10 +50,10 @@ public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEp
         seriesAndEpisodes.putAll(episodeGuideAdapter.fetch(brand.getCanonicalUri()));
 
         List<Episode> fourOdContent = fourOditemAdapter.fetch(brand.getCanonicalUri());
-        seriesAndEpisodes = linker.link4odToEpg(seriesAndEpisodes, fourOdContent, brand);
+        seriesAndEpisodes = linker.link4odToEpg(seriesAndEpisodes, fourOdContent);
         
         List<Episode> epgContent = brandEpgAdatper.fetch(brand.getCanonicalUri());
-        seriesAndEpisodes = linker.populateBroadcasts(seriesAndEpisodes, epgContent, brand);
+        seriesAndEpisodes = linker.populateBroadcasts(seriesAndEpisodes, epgContent);
         
         List<Clip> clips = clipAdapter.fetch(brand.getCanonicalUri());
         seriesAndEpisodes = linker.linkClipsToContent(seriesAndEpisodes, clips, brand);

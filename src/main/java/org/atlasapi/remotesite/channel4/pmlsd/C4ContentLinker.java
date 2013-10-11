@@ -5,6 +5,7 @@ import static org.atlasapi.media.entity.Identified.TO_URI;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
@@ -24,7 +25,7 @@ class C4ContentLinker {
     
     private static final Series PLACEHOLDER = new Series();
 
-    public SetMultimap<Series, Episode> link4odToEpg(SetMultimap<Series, Episode> epiosodeGuide, List<Episode> fourOd, Brand brand) {
+    public SetMultimap<Series, Episode> link4odToEpg(SetMultimap<Series, Episode> epiosodeGuide, List<Episode> fourOd) {
 
         Map<String, Episode> odIndex = Maps.newHashMap(Maps.uniqueIndex(fourOd, Identified.TO_URI));
 
@@ -43,7 +44,7 @@ class C4ContentLinker {
         return epiosodeGuide;
     }
 
-    public SetMultimap<Series, Episode> populateBroadcasts(SetMultimap<Series, Episode> episodeGuideContent, List<Episode> epgContent, Brand brand) {
+    public SetMultimap<Series, Episode> populateBroadcasts(SetMultimap<Series, Episode> episodeGuideContent, List<Episode> epgContent) {
 
         Multimap<String, Episode> indexedEpg = Multimaps.index(epgContent, TO_URI);
 
@@ -110,8 +111,10 @@ class C4ContentLinker {
         return content;
     }
 
+    public static final Pattern SERIES_AND_EPISODE_NUMBER_IN_ANY_URI = Pattern.compile("series-(\\d+)/episode-(\\d+)");
+    
     private Episode findEpisode(Map<String, Episode> lookup, Clip clip) {
-        Matcher matcher = C4AtomApi.SERIES_AND_EPISODE_NUMBER_IN_ANY_URI.matcher(clip.getCanonicalUri());
+        Matcher matcher = SERIES_AND_EPISODE_NUMBER_IN_ANY_URI.matcher(clip.getCanonicalUri());
         if (matcher.find()) {
             Integer series = Integer.valueOf(matcher.group(1));
             Integer episodeNumber = Integer.valueOf(matcher.group(2));
@@ -120,7 +123,7 @@ class C4ContentLinker {
         return null;
     }
 
-    private static Map<String, Episode> toEpisodeLookup(Iterable<Episode> contents) {
+    private Map<String, Episode> toEpisodeLookup(Iterable<Episode> contents) {
         Map<String, Episode> lookup = Maps.newHashMap();
         for (Episode episode : contents) {
             if (episode.getSeriesNumber() != null && episode.getEpisodeNumber() != null) {
@@ -130,11 +133,11 @@ class C4ContentLinker {
         return lookup;
     }
 
-    private static String concatSeriesAndEpNum(Episode episode) {
+    private String concatSeriesAndEpNum(Episode episode) {
         return concatSeriesAndEpNum(episode.getSeriesNumber(), episode.getEpisodeNumber());
     }
 
-    private static String concatSeriesAndEpNum(int seriesNumber, int episodeNumber) {
+    private String concatSeriesAndEpNum(int seriesNumber, int episodeNumber) {
         return seriesNumber + "-" + episodeNumber;
 
     }

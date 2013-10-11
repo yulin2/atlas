@@ -11,7 +11,6 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
-import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
@@ -29,7 +28,6 @@ public class C4EpgEntryContentExtractor implements
     private final Clock clock;
 
     private final C4EpgEntryBroadcastExtractor broadcastExtractor = new C4EpgEntryBroadcastExtractor();
-    private final C4EpgEntryUriExtractor uriExtractor = new C4EpgEntryUriExtractor();
     private final C4EpgEntryBrandExtractor brandExtractor = new C4EpgEntryBrandExtractor();
     private final C4EpgEntrySeriesExtractor seriesExtractor = new C4EpgEntrySeriesExtractor();
     private final C4EpgEntryItemExtractor itemExtractor;
@@ -54,10 +52,8 @@ public class C4EpgEntryContentExtractor implements
             brand = fetchBrand(source).or(createBrandFrom(source));
         }
         Optional<Series> series = resolveSeries(source).or(createSeriesFrom(source));
-        Item item = resolveItem(source, brand).or(createItem(source, brand, series));
+        Item item = resolveItem(source).or(createItem(source, brand, series));
         
-        ensureAliases(source.getEpgEntry(), item);
-
         Broadcast broadcast = broadcastExtractor.extract(source);
         broadcast.setLastUpdated(now);
         
@@ -77,17 +73,6 @@ public class C4EpgEntryContentExtractor implements
                     ((Episode) item).setSeries(series.get());
                 }
             }
-        }
-    }
-
-    private void ensureAliases(C4EpgEntry epgEntry, Item item) {
-        String idUri = uriExtractor.uriForItemId(epgEntry);
-        if (!idUri.equals(item.getCanonicalUri())) {
-            item.addAliasUrl(idUri);
-        }
-        Optional<String> hierarchyUri = uriExtractor.uriForItemHierarchy(epgEntry);
-        if (hierarchyUri.isPresent() && !hierarchyUri.get().equals(item.getCanonicalUri())) {
-            item.addAliasUrl(hierarchyUri.get());
         }
     }
 
@@ -123,8 +108,8 @@ public class C4EpgEntryContentExtractor implements
         return itemExtractor.extract(new C4EpgEntryItemSource(source, brand, series));
     }
 
-    private Optional<Item> resolveItem(C4EpgChannelEntry source, Optional<Brand> brand) {
-        return resolver.itemFor(source.getEpgEntry(), brand);
+    private Optional<Item> resolveItem(C4EpgChannelEntry source) {
+        return resolver.itemFor(source.getEpgEntry());
     }
 
     private Optional<Series> createSeriesFrom(C4EpgChannelEntry source) {

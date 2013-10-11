@@ -1,23 +1,25 @@
 package org.atlasapi.remotesite.channel4.pmlsd;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Map;
 
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Policy.Platform;
-import org.jdom.Element;
+import org.joda.time.DateTime;
 
 import com.google.common.base.Optional;
 import com.metabroadcast.common.time.Clock;
 import com.sun.syndication.feed.atom.Entry;
 
-public class C4BrandClipExtractor extends BaseC4ItemExtractor<Clip> {
+public class C4BrandClipExtractor extends C4MediaItemExtractor<Clip> {
 
     private final C4AtomEntryVersionExtractor versionExtractor;
 
     public C4BrandClipExtractor(Clock clock) {
         super(clock);
         // TODO: Do we have platform-specific clips?
-        versionExtractor = new C4AtomEntryVersionExtractor(Optional.<Platform>absent(), clock);
+        versionExtractor = new C4AtomEntryVersionExtractor(Optional.<Platform>absent());
     }
 
     @Override
@@ -37,13 +39,14 @@ public class C4BrandClipExtractor extends BaseC4ItemExtractor<Clip> {
             clip.addAliasUrl(fourOdUri);
         }
         clip.setIsLongForm(false);
-        clip.addVersion(versionExtractor.extract(entry));
+        clip.addVersion(versionExtractor.extract(data(entry, fourOdUri, lookup, clip.getLastUpdated())));
         return clip;
     }
-    
-    @Override
-    protected Element getMedia(Entry source) {
-        return C4AtomApi.mediaGroup(source);
-    }
 
+    private C4VersionData data(Entry entry, String fourOdUri, Map<String, String> lookup, DateTime lastUpdated) {
+        String uri = fourOdUri != null ? fourOdUri : C4AtomApi.clipUri(entry);
+        checkNotNull(uri, "No version URI extracted for %s", entry.getId());
+        return new C4VersionData(entry.getId(), uri, getMedia(entry), lookup, lastUpdated);
+    }
+    
 }

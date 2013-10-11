@@ -79,8 +79,10 @@ public class C4BroadcastBuilder {
         return tagPrefix + CHANNEL_MAP.get(channelUri) + id.substring(slashIndex);
     }
     
+    private static final Pattern SLOT_PATTERN = Pattern.compile("tag:.*,\\d{4}:slot/(\\d+)");
+    
     public static String idFrom(String channelUri, String atomId) {
-        Matcher matcher = C4AtomApi.SLOT_PATTERN.matcher(atomId);
+        Matcher matcher = SLOT_PATTERN.matcher(atomId);
         if(matcher.matches()) {
             return CHANNEL_MAP.get(channelUri).toLowerCase() + ":" + matcher.group(1);
         }

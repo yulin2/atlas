@@ -27,7 +27,8 @@ public class C4SeriesAndEpisodesExtractorTest extends TestCase {
 	
 	public void testParsingASeries() throws Exception {
 		
-		SetMultimap<Series, Episode> seriesAndEpisodes = new C4SeriesAndEpisodesExtractor(new SystemClock()).extract(seriesFeed.build());
+		SetMultimap<Series, Episode> seriesAndEpisodes = new C4SeriesAndEpisodesExtractor(new SystemClock())
+		    .extract(seriesFeed.build());
 		Series series = Iterables.getOnlyElement(seriesAndEpisodes.keySet());
 		
 		assertThat(series.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3"));

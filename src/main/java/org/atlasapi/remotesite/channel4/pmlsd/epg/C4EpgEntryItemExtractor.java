@@ -21,7 +21,6 @@ import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.metabroadcast.common.time.Clock;
 
@@ -29,7 +28,6 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
 
     private final C4EpgEntryUriExtractor uriExtractor = new C4EpgEntryUriExtractor();
     private final C4EpgEntryBroadcastExtractor broadcastExtractor = new C4EpgEntryBroadcastExtractor();
-    private final Pattern seriesEpisodeNumberPattern = Pattern.compile("/episode-guide/series-(\\d+)/episode-(\\d+)");
     private final Clock clock;
     
     public C4EpgEntryItemExtractor(Clock clock) {
@@ -141,37 +139,12 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
         if (source.getSeries().isPresent() && source.getSeries().get().getSeriesNumber() != null) {
             return source.getSeries().get().getSeriesNumber();
         }
-        return extractSeriesNumber(uriExtractor.uriForItemHierarchy(epgEntry));
-    }
-
-    private Integer extractSeriesNumber(Optional<String> hierarchyUri) {
-        if (!hierarchyUri.isPresent()) {
-            return null;
-        }
-        Matcher matcher = seriesEpisodeNumberPattern.matcher(hierarchyUri.get());
-        if (matcher.matches()) {
-            return Integer.parseInt(matcher.group(1));
-        }
         return null;
     }
 
     private Integer episodeNumberFrom(C4EpgEntryItemSource source) {
         C4EpgEntry epgEntry = source.getEntry().getEpgEntry();
-        if (epgEntry.seriesNumber() != null) {
-            return epgEntry.episodeNumber();
-        }
-        return extractEpisodeNumber(uriExtractor.uriForItemHierarchy(epgEntry));
-    }
-
-    private Integer extractEpisodeNumber(Optional<String> hierarchyUri) {
-        if (!hierarchyUri.isPresent()) {
-            return null;
-        }
-        Matcher matcher = seriesEpisodeNumberPattern.matcher(hierarchyUri.get());
-        if (matcher.matches()) {
-            return Integer.parseInt(matcher.group(2));
-        }
-        return null;
+        return epgEntry.episodeNumber();
     }
 
 }

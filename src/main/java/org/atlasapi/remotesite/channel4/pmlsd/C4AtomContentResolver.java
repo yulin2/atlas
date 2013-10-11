@@ -23,15 +23,8 @@ public class C4AtomContentResolver {
         this.resolver = resolver;
     }
     
-    public Optional<Item> itemFor(String id, Optional<String> canonicalUri, Optional<String> slotIdUri) {
-        List<String> ids = Lists.newArrayList(id);
-        if (canonicalUri.isPresent()) {
-            ids.add(canonicalUri.get());
-        }
-        if (slotIdUri.isPresent()) {
-            ids.add(slotIdUri.get());
-        }
-        List<Identified> results = resolver.findByCanonicalUris(ids).getAllResolvedResults();
+    public Optional<Item> itemFor(String id) {
+        List<Identified> results = resolver.findByCanonicalUris(Lists.newArrayList(id)).getAllResolvedResults();
         Iterable<Item> itemFilteredResults = ImmutableSet.copyOf(Iterables.filter(results, Item.class));
         return Optional.fromNullable(Iterables.getOnlyElement(itemFilteredResults,null));
     }
