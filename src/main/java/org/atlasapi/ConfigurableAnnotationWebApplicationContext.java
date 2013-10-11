@@ -20,7 +20,7 @@ import org.atlasapi.query.SearchModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.atlasapi.remotesite.bbc.nitro.BbcNitroModule;
-import org.atlasapi.remotesite.channel4.C4Module;
+import org.atlasapi.remotesite.channel4.pmlsd.C4Module;
 import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
 import org.atlasapi.remotesite.metabroadcast.picks.PicksModule;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
