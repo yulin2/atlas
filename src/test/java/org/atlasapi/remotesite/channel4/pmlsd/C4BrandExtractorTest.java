@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -99,7 +100,7 @@ public class C4BrandExtractorTest extends TestCase {
     @Test
 	public void testExtractingABrand() throws Exception {
         
-        when(resolver.findByCanonicalUris((Iterable<String>)any())).thenReturn(ResolvedContent.builder().build());
+        when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
 		
 		pcUpdater.createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 
@@ -141,7 +142,7 @@ public class C4BrandExtractorTest extends TestCase {
 
     @Test
 	public void testThatBroadcastIsExtractedFromEpg() throws Exception {
-        when(resolver.findByCanonicalUris((Iterable<String>)any())).thenReturn(ResolvedContent.builder().build());
+        when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
 		
 		pcUpdater.createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 	    
@@ -168,9 +169,14 @@ public class C4BrandExtractorTest extends TestCase {
 	    assertTrue(found);
 	}
 
+    @SuppressWarnings("unchecked")
+    private Iterable<String> anyUris() {
+        return (Iterable<String>)any();
+    }
+
     @Test
 	public void testOldEpisodeWithBroadcast() throws Exception {
-        when(resolver.findByCanonicalUris((Iterable<String>)any())).thenReturn(ResolvedContent.builder().build());
+        when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
 		
 	    Episode episode = C4Module.contentFactory().createEpisode();
 	    episode.setCanonicalUri("http://www.channel4.com/programmes/43065/005");
@@ -305,7 +311,7 @@ public class C4BrandExtractorTest extends TestCase {
 	
     @Test
 	public void testFlattenedBrandsItemsAreNotPutIntoSeries() throws Exception {
-        when(resolver.findByCanonicalUris((Iterable<String>)any())).thenReturn(ResolvedContent.builder().build());
+        when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
 
         pcUpdater.createOrUpdateBrand("http://www.channel4.com/programmes/dispatches");
 
@@ -321,7 +327,7 @@ public class C4BrandExtractorTest extends TestCase {
  
     @Test
 	public void testThatClipsAreAddedToBrands() throws Exception {
-        when(resolver.findByCanonicalUris((Iterable<String>)any())).thenReturn(ResolvedContent.builder().build());
+        when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
 
         C4AtomApiClient apiClient = new C4AtomApiClient(httpClient, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
         
@@ -343,7 +349,7 @@ public class C4BrandExtractorTest extends TestCase {
     
     @Test
     public void testPlatformLocation() {
-        when(resolver.findByCanonicalUris((Iterable<String>)any())).thenReturn(ResolvedContent.builder().build());
+        when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
         
         SimpleHttpClient client = new FixedResponseHttpClient(
             ImmutableMap.<String, String>builder()  
@@ -361,7 +367,7 @@ public class C4BrandExtractorTest extends TestCase {
         C4BrandExtractor extractor = new C4BrandExtractor(apiClient, Optional.of(Platform.XBOX), channelResolver);
         new C4AtomBackedBrandUpdater(apiClient, Optional.of(Platform.XBOX), resolver, recordingWriter, extractor).createOrUpdateBrand("http://www.channel4.com/programmes/jamie-does");
         
-        Item item = find("http://www.channel4.com/programmes/48367/006", recordingWriter.updatedItems);
+        Item item = findLast("http://www.channel4.com/programmes/48367/006", recordingWriter.updatedItems);
         Episode episode = (Episode) item;
         
         Version version = Iterables.getOnlyElement(episode.getVersions());
@@ -397,15 +403,17 @@ public class C4BrandExtractorTest extends TestCase {
         RecordingContentWriter recordingWriter = new RecordingContentWriter();
         C4BrandExtractor extractor = new C4BrandExtractor(xboxApiClient, Optional.of(Platform.XBOX), channelResolver);
         StubContentResolver stubResolver = new StubContentResolver();
-        new C4AtomBackedBrandUpdater(xboxApiClient, Optional.of(Platform.XBOX), stubResolver, recordingWriter, extractor).createOrUpdateBrand("http://www.channel4.com/programmes/jamie-does");
+        new C4AtomBackedBrandUpdater(xboxApiClient, Optional.of(Platform.XBOX), stubResolver, recordingWriter, extractor)
+            .createOrUpdateBrand("http://www.channel4.com/programmes/jamie-does");
         
-        stubResolver.respondTo(find("http://www.channel4.com/programmes/48367/006", recordingWriter.updatedItems));
+        stubResolver.respondTo(findLast("http://www.channel4.com/programmes/48367/006", recordingWriter.updatedItems));
         
         extractor = new C4BrandExtractor(apiClient, Optional.<Platform>absent(), channelResolver);
-        new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), stubResolver, recordingWriter, extractor).createOrUpdateBrand("http://www.channel4.com/programmes/jamie-does");
+        new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), stubResolver, recordingWriter, extractor)
+            .createOrUpdateBrand("http://www.channel4.com/programmes/jamie-does");
         
         
-        Item item = find("http://www.channel4.com/programmes/48367/006", recordingWriter.updatedItems);
+        Item item = findLast("http://www.channel4.com/programmes/48367/006", recordingWriter.updatedItems);
         Episode episode = (Episode) item;
         
         Version version = Iterables.getOnlyElement(episode.getVersions());
@@ -467,23 +475,24 @@ public class C4BrandExtractorTest extends TestCase {
         StubContentResolver stubResolver = new StubContentResolver();
         new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), stubResolver, recordingWriter, extractor).createOrUpdateBrand("http://www.channel4.com/programmes/jamie-does");
 
-        stubResolver.respondTo(find("http://www.channel4.com/programmes/48367/001", recordingWriter.updatedItems));
+        stubResolver.respondTo(findLast("http://www.channel4.com/programmes/48367/001", recordingWriter.updatedItems));
 
         extractor = new C4BrandExtractor(xboxApiClient, Optional.of(Platform.XBOX), channelResolver);
         new C4AtomBackedBrandUpdater(xboxApiClient, Optional.of(Platform.XBOX), stubResolver, recordingWriter, extractor).createOrUpdateBrand("http://www.channel4.com/programmes/jamie-does");
         
-        Item item = find("http://www.channel4.com/programmes/48367/001", recordingWriter.updatedItems);
+        Item item = findLast("http://www.channel4.com/programmes/48367/001", recordingWriter.updatedItems);
         Episode episode = (Episode) item;
          
         assertThat(episode.getDescription(), is("Jamie's in Morocco, dodging snake charmers to try out the street food of Marrakesh, like slow-roasted lamb in cumin, and almond and rose water cakes. Later he joins a family for some Moroccan home cooking, and makes his own versions of chicken and lemon tagine, Moroccan roast lamb, and a `snakey cake' made of filo pastry, almonds and rose petals."));
     }
 	
-	private final <T extends Content> T find(String uri, Iterable<T> episodes) {
-		for (T episode : episodes) {
-			if (episode.getCanonicalUri().equals(uri)) {
-				return episode;
-			}
-		}
-		throw new IllegalStateException("Not found");
-	}
+    private <C extends Content> C findLast(String uri, List<C> content) {
+        for(int i = content.size()-1; i >= 0; i--) {
+            C c = content.get(i);
+            if (c.getCanonicalUri().equals(uri)) {
+                return c;
+            }
+        }
+        throw new IllegalStateException("Not found");
+    }
 }
