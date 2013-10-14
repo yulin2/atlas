@@ -148,6 +148,12 @@ public class PaChannelDataHandler {
             regions.removeAll(redundantRegionIds);
             platform.setRegionIds(regions);
             channelGroupWriter.createOrUpdate(platform);
+            
+            for (Long redundantRegionId : redundantRegionIds) {
+                Region region = (Region) channelGroupResolver.channelGroupFor(redundantRegionId).get();
+                region.setPlatform((Long) null);
+                channelGroupWriter.createOrUpdate(region);
+            }
         }
     }
     
