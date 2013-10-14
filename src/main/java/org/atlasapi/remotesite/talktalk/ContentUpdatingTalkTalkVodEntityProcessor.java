@@ -191,11 +191,13 @@ public class ContentUpdatingTalkTalkVodEntityProcessor implements
     }
 
     private Item mergeWithExisting(Item extracted, Optional<Identified> existing) {
-        if (existing.isPresent()) {
+        if (existing.isPresent() 
+                && existing.get().getClass().getName().equals(extracted.getClass().getName())) {
             Identified identifiedExisting = existing.get();
             checkState(identifiedExisting instanceof Item, "%s not Item", existing);
             extracted = ContentMerger.merge((Item) existing.get(), extracted);
         }
+        // If the type has changed, we will just bail rather than attempt a merge
         return extracted;
     }
 
