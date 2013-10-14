@@ -10,6 +10,7 @@ import javax.xml.datatype.DatatypeFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
@@ -19,6 +20,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.talktalk.vod.bindings.AvailabilityType;
+import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.GenreListType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.GenreType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ImageListType;
@@ -55,6 +57,7 @@ public class TalkTalkItemDetailItemExtractorTest {
         detail.setItemType(ItemTypeType.EPISODE);
         return detail;
     }
+    
 
     @Test
     public void testEpisodeIsExtractedWhenBrandIsPresent() {
@@ -75,6 +78,23 @@ public class TalkTalkItemDetailItemExtractorTest {
         assertThat(((Episode)extracted).getSeriesRef(), is(ParentRef.parentRefFrom(series)));
     }
  
+    @Test
+    public void testFilmIsExtractedWhenFilmChannelGenreIsPresent() {
+        ItemDetailType detail = detail();
+        
+        ChannelType channel = new ChannelType();
+        GenreType genre = new GenreType();
+        genre.setGenreCode("CHMOVIES");
+        GenreListType genreList = new GenreListType();
+        genreList.getGenre().add(genre);
+        channel.setChannelGenreList(genreList);
+        
+        detail.setChannel(channel);
+        
+        Item extracted = extractor.extract(detail, Optional.<Brand>absent(), Optional.<Series>absent());
+        assertThat(extracted, is(instanceOf(Film.class)));
+    }
+    
     @Test
     public void testCanonicalUriIsExtracted() {
         ItemDetailType detail = detail();
