@@ -17,6 +17,7 @@ import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
@@ -112,8 +113,10 @@ public class TalkTalkItemDetailItemExtractor {
         Item item;
         if (isFilm(detail)) {
             item = new Film();
+            item.setSpecialization(Specialization.FILM);
         } else {
             item = new Item();
+            item.setSpecialization(Specialization.TV);
         }
         return setCommonItemFields(item, detail);
     }
