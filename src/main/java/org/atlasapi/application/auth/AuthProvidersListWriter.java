@@ -1,0 +1,32 @@
+package org.atlasapi.application.auth;
+
+import java.io.IOException;
+
+import org.atlasapi.application.model.auth.OAuthProvider;
+import org.atlasapi.output.EntityListWriter;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
+
+
+public class AuthProvidersListWriter implements EntityListWriter<OAuthProvider> {
+    @Override
+    public void write(OAuthProvider entity, FieldWriter writer, OutputContext ctxt)
+            throws IOException {
+        writer.writeField("name", entity.name().toLowerCase());
+        writer.writeField("title", entity.getTitle());
+        writer.writeField("prompt", entity.getPrompt());
+        writer.writeField("authRequestUrl", entity.getAuthRequestUrl());
+        writer.writeField("image", entity.getImage());
+    }
+
+    @Override
+    public String fieldName(OAuthProvider entity) {
+        return "auth_provider";
+    }
+
+    @Override
+    public String listName() {
+        return "auth_providers";
+    }
+}
+
