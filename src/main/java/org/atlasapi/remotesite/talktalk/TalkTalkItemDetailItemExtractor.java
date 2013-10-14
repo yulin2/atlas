@@ -13,6 +13,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
@@ -22,6 +23,9 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.talktalk.vod.bindings.AvailabilityType;
+import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
+import org.atlasapi.remotesite.talktalk.vod.bindings.GenreListType;
+import org.atlasapi.remotesite.talktalk.vod.bindings.GenreType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemDetailType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ProductTypeType;
@@ -47,6 +51,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class TalkTalkItemDetailItemExtractor {
 
     private static final Pattern NUMBERED_EPISODE_TITLE = Pattern.compile("^Ep\\s*(\\d+)\\s*:\\s*(.*)");
+    private static final String MOVIE_CHANNEL_GENRE_CODE = "CHMOVIES";
     
     private static final Map<ProductTypeType, RevenueContract> revenueContractLookup =  ImmutableMap.of(
             ProductTypeType.FREE, RevenueContract.FREE_TO_VIEW, 
@@ -104,7 +109,13 @@ public class TalkTalkItemDetailItemExtractor {
     }
 
     private Item extractItem(ItemDetailType detail) {
-        return setCommonItemFields(new Item(), detail);
+        Item item;
+        if (isFilm(detail)) {
+            item = new Film();
+        } else {
+            item = new Item();
+        }
+        return setCommonItemFields(item, detail);
     }
 
     private <I extends Item> I setCommonItemFields(I item, ItemDetailType detail) {
@@ -185,4 +196,18 @@ public class TalkTalkItemDetailItemExtractor {
         return ImmutableSet.of();
     }
 
+    private boolean isFilm(ItemDetailType detail) {
+        ChannelType channel = detail.getChannel();
+        if (channel != null) {
+            GenreListType channelGenreList = channel.getChannelGenreList();
+            if (channelGenreList != null) {
+                for (GenreType genre : channelGenreList.getGenre()) {
+                    if (MOVIE_CHANNEL_GENRE_CODE.equals(genre.getGenreCode())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }
