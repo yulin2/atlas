@@ -19,10 +19,12 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 
+import com.google.common.base.Functions;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.query.Selection;
 
@@ -30,23 +32,30 @@ public class FilmEquivalenceGenerator implements EquivalenceGenerator<Item> {
     
     private static final Pattern IMDB_REF = Pattern.compile("http://imdb.com/title/[\\d\\w]+");
 
-    private static final ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSource(Publisher.PREVIEW_NETWORKS,SourceStatus.AVAILABLE_ENABLED);
     private static final float TITLE_WEIGHTING = 1.0f;
     private static final float BROADCAST_WEIGHTING = 0.0f;
     private static final float CATCHUP_WEIGHTING = 0.0f;
 
     private final SearchResolver searchResolver;
+    private final ApplicationConfiguration searchConfig;
     private final FilmTitleMatcher titleMatcher;
     private final boolean acceptNullYears;
 
     private final List<Publisher> publishers;
 
+
     public FilmEquivalenceGenerator(SearchResolver searchResolver, Iterable<Publisher> publishers, 
             boolean acceptNullYears) {
         this.searchResolver = searchResolver;
+        this.searchConfig = defaultConfigWithSourcesEnabled(publishers);
         this.publishers = ImmutableList.copyOf(publishers);
         this.acceptNullYears = acceptNullYears;
         this.titleMatcher = new FilmTitleMatcher();
+    }
+
+    private ApplicationConfiguration defaultConfigWithSourcesEnabled(Iterable<Publisher> publishers) {
+        return ApplicationConfiguration.defaultConfiguration()
+                .withSources(Maps.toMap(publishers, Functions.constant(SourceStatus.AVAILABLE_ENABLED)));
     }
 
     @Override
@@ -76,7 +85,7 @@ public class FilmEquivalenceGenerator implements EquivalenceGenerator<Item> {
             desc.appendText("Using IMDB ref %s", imdbRef.requireValue());
         }
 
-        List<Identified> possibleEquivalentFilms = searchResolver.search(searchQueryFor(film), config);
+        List<Identified> possibleEquivalentFilms = searchResolver.search(searchQueryFor(film), searchConfig);
 
         Iterable<Film> foundFilms = filter(possibleEquivalentFilms, Film.class);
         desc.appendText("Found %s films through title search", Iterables.size(foundFilms));
