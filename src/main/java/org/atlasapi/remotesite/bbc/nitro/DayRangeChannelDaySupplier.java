@@ -7,6 +7,7 @@ import org.joda.time.LocalDate;
 
 import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
+import com.google.common.collect.BoundType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 
@@ -43,6 +44,7 @@ public class DayRangeChannelDaySupplier implements Supplier<ImmutableList<Channe
             
             while (dayRange.contains(day)) {
                 channelDays.add(new ChannelDay(channel, day));
+                day = day.plusDays(1);
             }
         }
         return channelDays.build();
