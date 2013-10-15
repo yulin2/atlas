@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bbc.nitro;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -36,15 +38,22 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
     private final ListeningExecutorService executor;
     private final Supplier<? extends Collection<ChannelDay>> channelDays;
     private final ChannelDayProcessor processor;
+    private final ChannelDayProcessingTaskListener listener;
 
     private AtomicInteger processed;
     private int tasks;
     private AtomicReference<UpdateProgress> progress;
 
     public ChannelDayProcessingTask(ExecutorService executor, Supplier<? extends Collection<ChannelDay>> channelDays, ChannelDayProcessor processor) {
+        this(executor, channelDays, processor, null);
+    }
+    
+    public ChannelDayProcessingTask(ExecutorService executor, Supplier<? extends Collection<ChannelDay>> channelDays, ChannelDayProcessor processor,
+            ChannelDayProcessingTaskListener listener) {
+        this.listener = listener;
         this.executor = MoreExecutors.listeningDecorator(executor);
-        this.channelDays = channelDays;
-        this.processor = processor;
+        this.channelDays = checkNotNull(channelDays);
+        this.processor = checkNotNull(processor);
     }
 
     private void updateStatus() {
@@ -69,6 +78,10 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
         }
         
         waitForFinish(results.build());
+        
+        if (listener != null) {
+            listener.completed(progress.get());
+        }
     }
 
     private void waitForFinish(ImmutableList<ListenableFuture<UpdateProgress>> taskResults) {
@@ -97,7 +110,7 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
 
     private ListenableFuture<UpdateProgress> submitTask(final ChannelDay cd) {
         log.debug("submit: {}", cd);
-        ListenableFuture<UpdateProgress> taskResult = executor.submit(new ChannelDayProcessTask(cd));
+        ListenableFuture<UpdateProgress> taskResult = executor.submit(new ChannelDayProcessTask(cd, listener));
         Futures.addCallback(taskResult, new ProgressUpdatingCallback());
         return taskResult;
     }
@@ -124,9 +137,11 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
     private final class ChannelDayProcessTask implements Callable<UpdateProgress> {
 
         private final ChannelDay cd;
+        private final ChannelDayProcessingTaskListener listener;
 
-        private ChannelDayProcessTask(ChannelDay cd) {
+        private ChannelDayProcessTask(ChannelDay cd, ChannelDayProcessingTaskListener listener) {
             this.cd = cd;
+            this.listener = listener;
         }
 
         @Override
@@ -136,7 +151,12 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
                 return UpdateProgress.START;
             }
             try {
-                return processor.process(cd);
+                UpdateProgress progress = processor.process(cd);
+                
+                if (listener != null) {
+                    listener.channelDayCompleted(cd, progress);
+                }
+                return progress;
             } catch (Exception e) {
                 log.error(cd.toString(), e);
                 return UpdateProgress.FAILURE;

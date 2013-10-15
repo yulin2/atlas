@@ -22,6 +22,7 @@ import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.atlasapi.remotesite.bbc.nitro.BbcNitroModule;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
+import org.atlasapi.remotesite.metabroadcast.picks.PicksModule;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import com.google.common.base.Function;
@@ -74,7 +75,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 EquivTaskModule.class,
                 OddJobRandomTaskModule.class,
                 C4Module.class,
-                BbcNitroModule.class
+                BbcNitroModule.class,
+                PicksModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(
