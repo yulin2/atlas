@@ -83,16 +83,13 @@ public class FilmEquivalenceGenerator implements EquivalenceGenerator<Item> {
             if(imdbRef.hasValue() && equivImdbRef.hasValue() && Objects.equal(imdbRef.requireValue(), equivImdbRef.requireValue())) {
                 desc.appendText("%s (%s) scored 1.0 (IMDB match)", equivFilm.getTitle(), equivFilm.getCanonicalUri());
                 scores.addEquivalent(equivFilm, Score.valueOf(1.0));
-                
-            } else if (film.getYear() != null) { 
-                if (sameYear(film, equivFilm)) {
-                    Score score = Score.valueOf(titleMatcher.titleMatch(film, equivFilm));
-                    desc.appendText("%s (%s) scored %s", equivFilm.getTitle(), equivFilm.getCanonicalUri(), score);
-                    scores.addEquivalent(equivFilm, score);
-                } else {
-                    desc.appendText("%s (%s) ignored. Wrong year %s", equivFilm.getTitle(), equivFilm.getCanonicalUri(), equivFilm.getYear());
-                    scores.addEquivalent(equivFilm, Score.valueOf(0.0));
-                }
+            } else if ((film.getYear() != null && sameYear(film, equivFilm)) || acceptNullYears) { 
+                Score score = Score.valueOf(titleMatcher.titleMatch(film, equivFilm));
+                desc.appendText("%s (%s) scored %s", equivFilm.getTitle(), equivFilm.getCanonicalUri(), score);
+                scores.addEquivalent(equivFilm, score);
+            } else {
+                desc.appendText("%s (%s) ignored. Wrong year %s", equivFilm.getTitle(), equivFilm.getCanonicalUri(), equivFilm.getYear());
+                scores.addEquivalent(equivFilm, Score.valueOf(0.0));
             }
         }
         
