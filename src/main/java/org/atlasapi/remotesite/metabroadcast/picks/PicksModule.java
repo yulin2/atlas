@@ -50,7 +50,7 @@ public class PicksModule {
     @Bean
     public ChannelDayProcessingTask picksScheduledTask() {
         return new ChannelDayProcessingTask(Executors.newSingleThreadExecutor(), 
-                picksDayRangeChannelDaySupplier(), picksDayUpdater());
+                picksDayRangeChannelDaySupplier(), picksDayUpdater(), picksScheduledTaskListener());
     }
     
     @Bean
