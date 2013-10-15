@@ -35,7 +35,7 @@ public class FilmEquivalenceGeneratorTest extends TestCase {
 
     private final Mockery context = new Mockery();
     private final SearchResolver resolver = context.mock(SearchResolver.class);
-    private final FilmEquivalenceGenerator generator = new FilmEquivalenceGenerator(resolver);
+    private final FilmEquivalenceGenerator generator = new FilmEquivalenceGenerator(resolver, false);
     
     private final Film subjectFilm = aFilm(Publisher.PA, "Test Film Title", 2000, "http://imdb.com/title/tt0409345");
 
