@@ -32,7 +32,10 @@ public class PickPredicate implements Predicate<Item>{
         Broadcast broadcast = Iterables.getOnlyElement(item.flattenBroadcasts());
         return channelUris.contains(broadcast.getBroadcastOn()) 
                 && isPrimetime(broadcast.getTransmissionTime())
-                && ( broadcast.getPremiere() || broadcast.getNewEpisode() || broadcast.getNewSeries() ); 
+                && ( Boolean.TRUE.equals(broadcast.getPremiere()) 
+                        || Boolean.TRUE.equals(broadcast.getNewEpisode()) 
+                        || Boolean.TRUE.equals(broadcast.getNewSeries()) 
+                   ); 
     }
 
     /**
