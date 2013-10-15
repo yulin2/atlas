@@ -347,9 +347,10 @@ public class EquivModule {
 
     private ContentEquivalenceUpdater.Builder<Item> vodItemUpdater(Set<Publisher> acceptablePublishers) {
         return ContentEquivalenceUpdater.<Item> builder()
-            .withGenerator(
-                new ContainerCandidatesItemEquivalenceGenerator(contentResolver, equivSummaryStore)
-            )
+            .withGenerators(ImmutableSet.of(
+                new ContainerCandidatesItemEquivalenceGenerator(contentResolver, equivSummaryStore),
+                new FilmEquivalenceGenerator(searchResolver)
+            ))
             .withScorers(ImmutableSet.of(
                 new TitleMatchingItemScorer(),
                 new SequenceItemScorer()
