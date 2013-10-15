@@ -35,7 +35,13 @@ public class DayRangeChannelDaySupplier implements Supplier<ImmutableList<Channe
         ImmutableList.Builder<ChannelDay> channelDays = ImmutableList.builder();
         while (channels.hasNext())  {
             Channel channel = channels.next();
-            for (LocalDate day = dayRange.lowerEndpoint(); dayRange.contains(day); day = day.plusDays(1)) {
+            
+            LocalDate day = dayRange.lowerEndpoint();
+            if (BoundType.OPEN.equals(dayRange.lowerBoundType())) {
+                day = day.plusDays(1);
+            }
+            
+            while (dayRange.contains(day)) {
                 channelDays.add(new ChannelDay(channel, day));
             }
         }
