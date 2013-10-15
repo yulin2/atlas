@@ -5,11 +5,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.atlasapi.application.Application;
 import org.atlasapi.application.model.auth.OAuthProvider;
 import org.atlasapi.application.model.auth.OAuthRequest;
 import org.atlasapi.application.model.auth.OAuthResult;
+import org.atlasapi.application.users.NewUserSupplier;
+import org.atlasapi.application.users.User;
+import org.atlasapi.application.users.UserStore;
 import org.atlasapi.output.NotAcceptableException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
@@ -24,7 +25,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.social.auth.credentials.AuthToken;
+import com.metabroadcast.common.social.model.UserRef;
+import com.metabroadcast.common.social.model.UserRef.UserNamespace;
 import com.metabroadcast.common.social.twitter.TwitterApplication;
+import com.metabroadcast.common.social.user.AccessTokenProcessor;
 import com.metabroadcast.common.url.UrlEncoding;
 
 import twitter4j.Twitter;
@@ -37,29 +43,34 @@ import twitter4j.conf.ConfigurationBuilder;
 @Controller
 public class TwitterAuthController {
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
-    private final String host;
     private final TwitterFactory twitterFactory;
+    private UserStore userStore; 
+    private NewUserSupplier userSupplier;
     private QueryResultWriter<OAuthRequest> oauthRequestResultWriter;
     private QueryResultWriter<OAuthResult> oauthResultResultWriter;
+    private AccessTokenProcessor accessTokenProcessor;
+    
     private Map<String, String> tokenRequestSecrets;
-    private Map<String, String> accessTokenSecrets;
     
     public TwitterAuthController(TwitterApplication twitterApplication, 
-            String host,
+            AccessTokenProcessor accessTokenProcessor,
+            UserStore userStore, 
+            NewUserSupplier userSupplier,
             QueryResultWriter<OAuthRequest> oauthRequestResultWriter,
             QueryResultWriter<OAuthResult> oauthResultResultWriter) {
         super();
-        this.host = host;
+        this.accessTokenProcessor = accessTokenProcessor;
         this.twitterFactory = new TwitterFactory(
             new ConfigurationBuilder()
                 .setOAuthConsumerKey(twitterApplication.getConsumerKey())
                 .setOAuthConsumerSecret(twitterApplication.getConsumerSecret())
             .build()
         );
+        this.userStore = userStore;
+        this.userSupplier = userSupplier;
         this.oauthRequestResultWriter = oauthRequestResultWriter;
         this.oauthResultResultWriter = oauthResultResultWriter;
         this.tokenRequestSecrets = Maps.newHashMap();
-        this.accessTokenSecrets = Maps.newHashMap();
     }
 
     // TODO restrict callback URLs?
@@ -105,17 +116,38 @@ public class TwitterAuthController {
         tokenRequestSecrets.remove(requestToken.getToken());
         try {
             AccessToken token = twitter.getOAuthAccessToken(requestToken, oauthVerifier);
-            accessTokenSecrets.put(token.getToken(), token.getTokenSecret());
-            OAuthResult oauthResult = OAuthResult.builder()
-                    .withSuccess(true)
-                    .withProvider(OAuthProvider.TWITTER)
-                    .withToken(token.getToken())
-                    .build();
+            Maybe<UserRef> userRef = accessTokenProcessor.process(new AuthToken(token.getToken(), token.getTokenSecret(), UserNamespace.TWITTER, null));
+            OAuthResult oauthResult;
+            if (userRef.hasValue()) {
+                // TODO pass some user info back?
+                User user = getUser(userRef.requireValue());
+                oauthResult = OAuthResult.builder()
+                        .withSuccess(true)
+                        .withProvider(OAuthProvider.TWITTER)
+                        .withToken(token.getToken())
+                        .build();
+            } else {
+                oauthResult = OAuthResult.builder()
+                        .withSuccess(false)
+                        .withProvider(OAuthProvider.TWITTER)
+                        .withToken("")
+                        .build();
+            }
+            
             QueryResult<OAuthResult> queryResult = QueryResult.singleResult(oauthResult, QueryContext.standard());
             oauthResultResultWriter.write(queryResult, responseWriter);
         } catch (TwitterException e) {
             throw new RuntimeException(e);
         } 
+    }
+    
+    private User getUser(UserRef userRef) {
+        User user = userStore.userForRef(userRef).or(userSupplier);
+        if (user.getUserRef() == null) {
+            user.setUserRef(userRef);
+            userStore.store(user);
+        }
+        return user;
     }
 
 }
