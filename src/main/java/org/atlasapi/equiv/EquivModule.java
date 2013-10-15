@@ -349,7 +349,7 @@ public class EquivModule {
         return ContentEquivalenceUpdater.<Item> builder()
             .withGenerators(ImmutableSet.of(
                 new ContainerCandidatesItemEquivalenceGenerator(contentResolver, equivSummaryStore),
-                new FilmEquivalenceGenerator(searchResolver, true)
+                new FilmEquivalenceGenerator(searchResolver, acceptablePublishers, true)
             ))
             .withScorers(ImmutableSet.of(
                 new TitleMatchingItemScorer(),
@@ -396,7 +396,7 @@ public class EquivModule {
         return ContentEquivalenceUpdater.<Item> builder()
             .withGenerators(ImmutableSet.of(
                 new RadioTimesFilmEquivalenceGenerator(contentResolver),
-                new FilmEquivalenceGenerator(searchResolver, false)
+                new FilmEquivalenceGenerator(searchResolver, ImmutableSet.of(Publisher.PREVIEW_NETWORKS), false)
             ))
             .withScorers(ImmutableSet.<EquivalenceScorer<Item>> of())
             .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
