@@ -60,8 +60,8 @@ public class FilmEquivalenceGenerator implements EquivalenceGenerator<Item> {
             return scores.build();
         }
         
-        if (film.getYear() == null || Strings.isNullOrEmpty(film.getTitle())) {
-            desc.appendText("Can't continue: year '%s', title '%s'", film.getYear(), film.getTitle()).finishStage();
+        if (Strings.isNullOrEmpty(film.getTitle())) {
+            desc.appendText("Can't continue: title '%s'", film.getTitle()).finishStage();
             return scores.build();
         } else {
             desc.appendText("Using year %s, title %s", film.getYear(), film.getTitle());
