@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.channel4.pmlsd;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Map;
 
 import org.atlasapi.media.entity.Item;
@@ -26,7 +28,7 @@ public abstract class BaseC4ItemExtractor<I extends Item> implements ContentExtr
     public final I extract(Entry entry) {
         Map<String, String> lookup = C4AtomApi.foreignElementLookup(entry);
         I item = createItem(entry, lookup);
-        item.setCanonicalUri(getUri(entry, lookup));
+        item.setCanonicalUri(checkNotNull(getUri(entry, lookup), entry.getId()));
         item.setLastUpdated(clock.now());
         item.setTitle(entry.getTitle());
         Content summary = entry.getSummary();

@@ -11,7 +11,7 @@ class C4LinkBrandNameExtractor {
         "https?://.+\\.channel4\\.com/[^/]+/([^./]+).*"
     );
     
-    private static final String PROGRAMMES_BASE = "http://www.channel4.com/programmes/";
+    private static final String PROGRAMMES_BASE = C4AtomApi.PROGRAMMES_BASE;
     
     public Optional<String> brandNameFrom(String url) {
        Matcher matcher = channel4Link.matcher(url);

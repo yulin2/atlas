@@ -37,7 +37,6 @@ public abstract class BaseC4EpisodeExtractor extends C4MediaItemExtractor<Episod
 
     @Override
     protected final Episode setAdditionalItemFields(Entry entry, Map<String, String> lookup, Episode episode) {
-        episode.setCurie(PerPublisherCurieExpander.CurieAlgorithm.C4.compact(episode.getCanonicalUri()));
         episode.setEpisodeNumber(Ints.tryParse(Strings.nullToEmpty(lookup.get(DC_EPISODE_NUMBER))));
         episode.setSeriesNumber(Ints.tryParse(Strings.nullToEmpty(lookup.get(DC_SERIES_NUMBER))));
         episode.setIsLongForm(true);

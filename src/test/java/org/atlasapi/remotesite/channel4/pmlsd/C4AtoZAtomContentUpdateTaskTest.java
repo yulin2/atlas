@@ -55,10 +55,10 @@ public class C4AtoZAtomContentUpdateTaskTest extends TestCase {
 
 		adapter.run();
 
-		verify(brandAdapter).canFetch("http://www.channel4.com/programmes/a-bipolar-expedition");
-		verify(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition");
-		verify(brandAdapter).canFetch("http://www.channel4.com/programmes/a-bipolar-expedition-part-2");
-		verify(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2");
+		verify(brandAdapter).canFetch("http://pmlsc.channel4.com/pmlsd/a-bipolar-expedition");
+		verify(brandAdapter).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/a-bipolar-expedition");
+		verify(brandAdapter).canFetch("http://pmlsc.channel4.com/pmlsd/a-bipolar-expedition-part-2");
+		verify(brandAdapter).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/a-bipolar-expedition-part-2");
 	
     }
     
@@ -72,10 +72,10 @@ public class C4AtoZAtomContentUpdateTaskTest extends TestCase {
 
         adapter.run();
 
-        verify(brandAdapter).canFetch("http://www.channel4.com/programmes/a-place-by-the-sea");
-        verify(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-place-by-the-sea");
-        verify(brandAdapter).canFetch("http://www.channel4.com/programmes/a-place-in-the-sun-home-or-away");
-        verify(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-place-in-the-sun-home-or-away");
+        verify(brandAdapter).canFetch("http://pmlsc.channel4.com/pmlsd/a-place-by-the-sea");
+        verify(brandAdapter).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/a-place-by-the-sea");
+        verify(brandAdapter).canFetch("http://pmlsc.channel4.com/pmlsd/a-place-in-the-sun-home-or-away");
+        verify(brandAdapter).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/a-place-in-the-sun-home-or-away");
     
     }
     

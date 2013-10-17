@@ -43,10 +43,9 @@ public class C4BrandBasicDetailsExtractorTest extends TestCase {
 		
 		Brand brand = extractor.extract(brandFeed.build());
 		
-		assertThat(brand.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares"));
+		assertThat(brand.getCanonicalUri(), is("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares"));
 		// TODO new alias
-		assertThat(brand.getAliasUrls(), hasItem("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od"));
-		assertThat(brand.getAliasUrls(), hasItem("tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares"));
+		assertThat(brand.getAliasUrls(), hasItem("tag:pmlsc.channel4.com,2009:/programmes/ramsays-kitchen-nightmares"));
 		assertThat(brand.getTitle(), is("Ramsay's Kitchen Nightmares"));
 		assertThat(brand.getLastUpdated(), is(clock.now()));
 		assertThat(brand.getPublisher(), is(C4PmlsdModule.SOURCE));
@@ -66,9 +65,8 @@ public class C4BrandBasicDetailsExtractorTest extends TestCase {
         
         Brand brand = extractor.extract(brandFeed.build());
         
-        assertThat(brand.getCanonicalUri(), is("http://www.channel4.com/programmes/brass-eye"));
-        assertThat(brand.getAliasUrls(), hasItem("http://www.channel4.com/programmes/brass-eye/4od"));
-        assertThat(brand.getAliasUrls(), hasItem("tag:www.channel4.com,2009:/programmes/brass-eye"));
+        assertThat(brand.getCanonicalUri(), is("http://pmlsc.channel4.com/pmlsd/brass-eye"));
+        assertThat(brand.getAliasUrls(), hasItem("tag:pmlsc.channel4.com,2009:/programmes/brass-eye"));
         assertThat(brand.getTitle(), is("Brass Eye"));
         assertThat(brand.getLastUpdated(), is(clock.now()));
         assertThat(brand.getPublisher(), is(C4PmlsdModule.SOURCE));

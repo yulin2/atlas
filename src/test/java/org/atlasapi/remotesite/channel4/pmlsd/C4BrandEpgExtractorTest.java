@@ -26,7 +26,7 @@ public class C4BrandEpgExtractorTest extends TestCase {
 
         Episode episode = extractor.extract((Entry)gleeFeed.getEntries().get(0));
         
-        assertEquals("http://www.channel4.com/programmes/glee/episode-guide/series-1/episode-5", episode.getCanonicalUri());
+        assertEquals("http://pmlsc.channel4.com/pmlsd/glee/episode-guide/series-1/episode-5", episode.getCanonicalUri());
         assertEquals(Integer.valueOf(1), episode.getSeriesNumber());
         assertEquals(Integer.valueOf(5), episode.getEpisodeNumber());
         

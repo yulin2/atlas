@@ -9,10 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.remotesite.channel4.pmlsd.epg.C4EpgChannelEntry;
-import org.atlasapi.remotesite.channel4.pmlsd.epg.C4EpgEntryBroadcastExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgMedia;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.TypedLink;
@@ -29,8 +26,12 @@ public class C4EpgEntryBroadcastExtractorTest {
 
     private final C4EpgEntryBroadcastExtractor extractor = new C4EpgEntryBroadcastExtractor();
 
-    private final Channel channel = new Channel(Publisher.METABROADCAST, "Channel 4", "key", false, MediaType.VIDEO, "http://www.channel4.com");
-    
+    private final Channel channel = Channel.builder()
+        .withSource(Publisher.METABROADCAST)
+        .withTitle("Channel 4")
+        .withUri("http://www.channel4.com")
+        .build();
+     
     @Test
     public void testExtractsBroadcastsFromLinkedEntry() {
         

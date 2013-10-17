@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.channel4.pmlsd.epg;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -12,15 +11,11 @@ import static org.hamcrest.Matchers.nullValue;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
-import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
-import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgMedia;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.TypedLink;
@@ -52,22 +47,24 @@ public class C4EpgEntryContentExtractorTest {
     private final Clock clock = new TimeMachine(now );
     
     private final C4EpgEntryContentExtractor extractor = new C4EpgEntryContentExtractor(resolver, brandUpdater, clock );
-    
-    private final Channel channel = new Channel(Publisher.METABROADCAST, "Channel 4", "key", false, MediaType.VIDEO, "http://www.channel4.com");
+
+    private final Channel channel = Channel.builder()
+        .withSource(Publisher.METABROADCAST)
+        .withTitle("Channel 4")
+        .withUri("http://www.channel4.com")
+        .build();
     
     @Test
     public void testCreatesBrandSeriesItemAndBroadcastForRelatedLinkEntryWhenNothingResolved() {
         C4EpgEntry entry = linkedEntry();
         C4EpgChannelEntry source = new C4EpgChannelEntry(entry, channel);
         
-        final String idUri = "http://www.channel4.com/programmes/30630/003";
-        final String hierarchyUri = "http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-3";
-        final String synthUri = "http://www.channel4.com/programmes/synthesized/the-hoobs/26424439";
-        final String seriesUri = "http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1";
-        final String brandUri = "http://www.channel4.com/programmes/the-hoobs";
+        final String idUri = "http://pmlsc.channel4.com/pmlsd/30630/003";
+        final String seriesUri = "http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1";
+        final String brandUri = "http://pmlsc.channel4.com/pmlsd/the-hoobs";
         
         context.checking(new Expectations(){{
-            one(resolver).findByCanonicalUris(with(hasItems(idUri, hierarchyUri, synthUri)));
+            one(resolver).findByCanonicalUris(with(hasItems(idUri)));
             will(returnValue(ResolvedContent.builder().build()));
             
             one(resolver).findByCanonicalUris(with(hasItems(seriesUri)));
@@ -93,7 +90,6 @@ public class C4EpgEntryContentExtractorTest {
         
         Episode item = (Episode) extracted.getItem();
         assertThat(item.getCanonicalUri(), is(idUri));
-        assertThat(item.getAliasUrls(), hasItem(hierarchyUri));
         assertThat(item.getContainer().getUri(), is(brandUri));
         assertThat(item.getSeriesRef().getUri(), is(seriesUri));
         
@@ -105,11 +101,10 @@ public class C4EpgEntryContentExtractorTest {
         C4EpgEntry entry = unlinkedEntry();
         C4EpgChannelEntry source = new C4EpgChannelEntry(entry, channel);
         
-        final String idUri = "http://www.channel4.com/programmes/40635/014";
-        final String synthUri = "http://www.channel4.com/programmes/synthesized/the-treacle-people/26424438";
+        final String idUri = "http://pmlsc.channel4.com/pmlsd/40635/014";
         
         context.checking(new Expectations(){{
-            one(resolver).findByCanonicalUris(with(hasItems(idUri, synthUri)));
+            one(resolver).findByCanonicalUris(with(hasItems(idUri)));
             will(returnValue(ResolvedContent.builder().build()));
             
             never(brandUpdater).createOrUpdateBrand(with(any(String.class)));
@@ -127,39 +122,16 @@ public class C4EpgEntryContentExtractorTest {
     }
     
     @Test
-    public void testAddsIdAliasForNoRelatedLinkEntryWhenSynthesizedItemResolves() {
-        C4EpgEntry entry = unlinkedEntry();
-        C4EpgChannelEntry source = new C4EpgChannelEntry(entry, channel);
-        
-        final String idUri = "http://www.channel4.com/programmes/40635/014";
-        final String synthUri = "http://www.channel4.com/programmes/synthesized/the-treacle-people/26424438";
-        
-        context.checking(new Expectations(){{
-            one(resolver).findByCanonicalUris(with(hasItems(idUri, synthUri)));
-            will(returnValue(ResolvedContent.builder().put(synthUri, testItem(synthUri)).build()));
-            
-            never(brandUpdater).createOrUpdateBrand(with(any(String.class)));
-        }});
-
-        ContentHierarchyAndBroadcast extracted = extractor.extract(source);
-        
-        assertThat(extracted.getItem().getCanonicalUri(), is(synthUri));
-        assertThat(extracted.getItem().getAliasUrls(), is(hasItem(idUri)));
-    }
-    
-    @Test
     public void testDoesntAddEncodingWhereNoOnDemand() {
         C4EpgEntry entry = entryWithThumbnailNoOnDemand();
         C4EpgChannelEntry source = new C4EpgChannelEntry(entry, channel);
         
-        final String idUri = "http://www.channel4.com/programmes/30630/003";
-        final String hierarchyUri = "http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-3";
-        final String synthUri = "http://www.channel4.com/programmes/synthesized/the-hoobs/26424439";
-        final String seriesUri = "http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1";
-        final String brandUri = "http://www.channel4.com/programmes/the-hoobs";
+        final String idUri = "http://pmlsc.channel4.com/pmlsd/30630/003";
+        final String seriesUri = "http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1";
+        final String brandUri = "http://pmlsc.channel4.com/pmlsd/the-hoobs";
         
         context.checking(new Expectations(){{
-            one(resolver).findByCanonicalUris(with(hasItems(idUri, hierarchyUri, synthUri)));
+            one(resolver).findByCanonicalUris(with(hasItems(idUri)));
             will(returnValue(ResolvedContent.builder().build()));
             
             one(resolver).findByCanonicalUris(with(hasItems(seriesUri)));
@@ -176,15 +148,7 @@ public class C4EpgEntryContentExtractorTest {
         
         assertThat(Iterables.getOnlyElement(extracted.getItem().getVersions()).getManifestedAs().size(), is(0));
     }
-    
-    private Item testItem(String uri) {
-        Item item = C4PmlsdModule.contentFactory().createEpisode();
-        item.setCanonicalUri(uri);
-        Version version = new Version();
-        item.addVersion(version);
-        return item;
-    }
-    
+
     private C4EpgEntry unlinkedEntry() {
         return new C4EpgEntry("tag:pmlsc.channel4.com,2009:slot/26424438")
         .withTitle("The Treacle People")

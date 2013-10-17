@@ -60,18 +60,17 @@ public class C4FourOdEpisodesExtractorTest extends TestCase {
 
 	public void testExtractingEpisodes() throws Exception {
 		
-		List<Episode> episodes = new C4OdEpisodesAdapter(atomApiClient, Optional.<Platform>absent(), new SystemClock()).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		List<Episode> episodes = new C4OdEpisodesAdapter(atomApiClient, Optional.<Platform>absent(), new SystemClock()).fetch("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
 
 		Episode firstEpisode = (Episode) Iterables.get(episodes, 0);
 		
-		assertThat(firstEpisode.getCanonicalUri(), is("http://www.channel4.com/programmes/36423/001"));
+		assertThat(firstEpisode.getCanonicalUri(), is("http://pmlsc.channel4.com/pmlsd/36423/001"));
         // TODO new alias
 		assertThat(firstEpisode.getAliasUrls(), hasItems(
 		    "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045",
-		    "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1/episode-1"
+		    "http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-1/episode-1"
 	    ));
 		
-		assertThat(firstEpisode.getCurie(), is("c4:36423-001"));
 		assertThat(firstEpisode.getTitle(), is("Ramsay's Kitchen Nightmares"));
 		assertThat(firstEpisode.getPublisher(), is(C4PmlsdModule.SOURCE));
 		assertThat(firstEpisode.getSeriesNumber(), is(1));

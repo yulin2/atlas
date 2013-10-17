@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import static org.hamcrest.Matchers.nullValue;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +10,6 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
@@ -37,8 +34,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
-	private static final Channel CHANNEL4 = new Channel(Publisher.METABROADCAST, "Channel 4", "c4", false, MediaType.AUDIO, "http://channel4.com");
-
+    
+	private static final Channel CHANNEL4 = Channel.builder()
+	        .withSource(Publisher.METABROADCAST)
+	        .withTitle("Channel 4")
+	        .withUri("http://www.channel4.com")
+	        .build();
+	
 	private final Mockery context = new Mockery();
     private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
     private final ContentWriter contentWriter = context.mock(ContentWriter.class);

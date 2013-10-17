@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.channel4.pmlsd;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.atlasapi.media.entity.Identified.TO_URI;
 
 import java.util.Collection;
@@ -18,6 +19,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Series;
@@ -44,7 +46,7 @@ import com.sun.syndication.feed.atom.Feed;
 
 public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 
-    private static final Pattern BRAND_PAGE_PATTERN = Pattern.compile("http://www.channel4.com/programmes/([^/\\s]+)");
+    private static final Pattern BRAND_PAGE_PATTERN = Pattern.compile("http://pmlsc.channel4.com/pmlsd/([^/\\s]+)");
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
@@ -80,6 +82,8 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 			if (source.isPresent()) {
 			    BrandSeriesAndEpisodes brandHierarchy = extractor.extract(source.get());
 			    Brand brand = resolveAndUpdate(brandHierarchy.getBrand());
+			    checkUri(brand);
+			    checkSource(brand);
                 writer.createOrUpdate(brand);
 			    
 			    write(brandHierarchy.getSeriesAndEpisodes(), brand);
@@ -99,6 +103,8 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
             if (seryAndEpisodes.getKey().getCanonicalUri() != null) {
                 series = resolveAndUpdate(seryAndEpisodes.getKey());
                 series.setParent(brand);
+                checkUri(series);
+                checkSource(brand);
                 writer.createOrUpdate(series);
             }
             
@@ -109,12 +115,24 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
                     if (series != null) {
                         episode.setSeries(series);
                     }
+                    checkUri(episode);
+                    checkSource(episode);
                     writer.createOrUpdate(episode);
                 } catch (Exception e) {
                     log.warn("Failed to write " + episode.getCanonicalUri(), e);
                 }
             }
         }
+    }
+    
+    private void checkUri(Content c) {
+        checkArgument(c.getCanonicalUri().startsWith(C4AtomApi.PROGRAMMES_BASE),
+            "%s doesn't start with %s", c, C4AtomApi.PROGRAMMES_BASE);
+    }
+
+    private void checkSource(Content c) {
+        checkArgument(c.getPublisher().equals(Publisher.C4_PMLSD),
+            "%s not %s", c, Publisher.C4_PMLSD);
     }
 
     private Episode resolveAndUpdate(Episode episode) {

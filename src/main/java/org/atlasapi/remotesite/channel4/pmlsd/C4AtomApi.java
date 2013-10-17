@@ -28,14 +28,17 @@ public class C4AtomApi {
     public static final Namespace NS_MEDIA_RSS = Namespace.getNamespace("http://search.yahoo.com/mrss/");
 
     private static final String C4_WEB_ROOT = "http://www.channel4.com/";
-	public static final String PROGRAMMES_BASE = C4_WEB_ROOT + "programmes/";
+    public static final String WEB_BASE = C4_WEB_ROOT + "programmes/";
+    private static final String C4_PMLSC_ROOT = "http://pmlsc.channel4.com/";
+    public static final String PROGRAMMES_BASE = C4_PMLSC_ROOT + "pmlsd/";
 
 	private static final String WEB_SAFE_NAME_PATTERN = "[a-z0-9\\-]+";
 	
 	public static final Pattern CANONICAL_BRAND_URI_PATTERN = Pattern.compile(String.format("%s(%s)", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
 	private static final Pattern CANONICAL_EPISODE_URI_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+/episode-\\d+", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
+	private static final Pattern WEB_EPISODE_URI_PATTERN = Pattern.compile(String.format("%s(%s)/episode-guide/series-(\\d+)/episode-(\\d+)", Pattern.quote(WEB_BASE), WEB_SAFE_NAME_PATTERN));
 
-	private static final String FEED_ID_CANONICAL_PREFIX = "tag:www.channel4.com,2009:/programmes/";
+	private static final String FEED_ID_CANONICAL_PREFIX = "tag:pmlsc.channel4.com,2009:/programmes/";
 	private static final String FEED_ID_PREFIX_PATTERN = "tag:[a-z0-9.]+\\.channel4\\.com,\\d{4}:/programmes/";
 	private static final Pattern BRAND_PAGE_ID_PATTERN = Pattern.compile(String.format("%s(%s)", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
 	private static final Pattern SERIES_PAGE_ID_PATTERN = Pattern.compile(String.format("%s(%s/episode-guide/series-\\d+)", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
@@ -111,6 +114,10 @@ public class C4AtomApi {
                 return href;
             }
             Matcher matcher = EPISODE_API_PAGE_PATTERN.matcher(href);
+            if(matcher.matches()) {
+                return episodeUri(matcher.group(1), Integer.parseInt(matcher.group(2)), Integer.parseInt(matcher.group(3)));
+            }
+            matcher = WEB_EPISODE_URI_PATTERN.matcher(href);
             if(matcher.matches()) {
                 return episodeUri(matcher.group(1), Integer.parseInt(matcher.group(2)), Integer.parseInt(matcher.group(3)));
             }

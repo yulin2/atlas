@@ -18,19 +18,19 @@ public class C4EpgEntryUriExtractorTest {
     @Test
     public void testExtractsBrandFromFullEpisodeAtomUri() {
         extractBrand("http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1/episode-3.atom", 
-            "http://www.channel4.com/programmes/the-hoobs");
+            "http://pmlsc.channel4.com/pmlsd/the-hoobs");
     }
 
     @Test
     public void testExtractsBrandFromSeriesAtomUri() {
         extractBrand("http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1.atom", 
-                "http://www.channel4.com/programmes/the-hoobs");
+                "http://pmlsc.channel4.com/pmlsd/the-hoobs");
     }
     
     @Test
     public void testExtractsBrandFromBrandOnlyAtomUri() {
         extractBrand("http://pmlsc.channel4.com/pmlsd/the-hoobs.atom", 
-                "http://www.channel4.com/programmes/the-hoobs");
+                "http://pmlsc.channel4.com/pmlsd/the-hoobs");
     }
     
     private void extractBrand(String input, String output) {
@@ -40,25 +40,18 @@ public class C4EpgEntryUriExtractorTest {
     @Test
     public void testExtractsSeriesFromFullEpisodeAtomUri() {
         C4EpgEntry entry = entryWithRelatedLink("http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1/episode-3.atom");
-        extractSeries(entry, "http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1");
+        extractSeries(entry, "http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1");
     }
     
     @Test
     public void testExtractsSeriesFromSeriesAtomUri() {
         C4EpgEntry entry = entryWithRelatedLink("http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1.atom");
-        extractSeries(entry, "http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1");
+        extractSeries(entry, "http://pmlsc.channel4.com/pmlsd/the-hoobs/episode-guide/series-1");
     }
     
     @Test
     public void testDoesntResolveSeriesFromBrandOnlyAtomUriWhenSeriesNumberIsAbsent() {
         assertFalse(extractor.uriForSeries(entryWithRelatedLink("http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")).isPresent());
-    }
-    
-    @Test
-    public void testDoesResolveSeriesFromBrandOnlyAtomUriWhenSeriesNumberIsPresent() {
-        C4EpgEntry entry = entryWithRelatedLink("http://pmlsc.channel4.com/pmlsd/the-hoobs.atom");
-        entry.withSeriesNumber(1);
-        extractSeries(entry, "http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1");
     }
     
     private void extractSeries(C4EpgEntry input, String output) {
@@ -70,7 +63,7 @@ public class C4EpgEntryUriExtractorTest {
         C4EpgEntry entry = entryWithoutRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438")
                 .withProgrammeId("40635/014")
                 .withTitle("The Treacle People");
-        assertThat(extractor.uriForItemId(entry), is("http://www.channel4.com/programmes/40635/014"));
+        assertThat(extractor.uriForItemId(entry), is("http://pmlsc.channel4.com/pmlsd/40635/014"));
     }
 
     private C4EpgEntry entryWithRelatedLink(String uri) {

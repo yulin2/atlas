@@ -27,18 +27,18 @@ public class C4EpgRelatedLinkBrandUpdaterTest {
     @Test()
     public void testUpdatesBrandForBrandOnlyRelatedLink() {
         checkUpdates("http://pmlsc.channel4.com/pmlsd/freshly-squeezed.atom", 
-            "http://www.channel4.com/programmes/freshly-squeezed");
+            "http://pmlsc.channel4.com/pmlsd/freshly-squeezed");
     }
     
     @Test()
     public void testUpdatesBrandForSeriesRelatedLink() {
         checkUpdates("http://pmlsc.channel4.com/pmlsd/freshly-squeezed/episode-guide/series-1.atom", 
-                "http://www.channel4.com/programmes/freshly-squeezed");
+                "http://pmlsc.channel4.com/pmlsd/freshly-squeezed");
     }
     @Test()
     public void testUpdatesBrandForEpisodeRelatedLink() {
         checkUpdates("http://pmlsc.channel4.com/pmlsd/freshly-squeezed/episode-guide/series-1/episode-3.atom", 
-                "http://www.channel4.com/programmes/freshly-squeezed");
+                "http://pmlsc.channel4.com/pmlsd/freshly-squeezed");
     }
 
     private void checkUpdates(String input, final String delegate) {

@@ -1,14 +1,22 @@
 package org.atlasapi.remotesite.channel4.pmlsd.epg;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
+import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
@@ -107,17 +115,36 @@ public class C4EpgChannelDayUpdater {
         try {
             ContentHierarchyAndBroadcast extractedContent = epgEntryContentExtractor.extract(new C4EpgChannelEntry(entry, channel));
             if (extractedContent.getBrand().isPresent()) {
-                writer.createOrUpdate(extractedContent.getBrand().get());
+                Brand brand = extractedContent.getBrand().get();
+                checkUri(brand);
+                checkSource(brand);
+                writer.createOrUpdate(brand);
             }
             if (extractedContent.getSeries().isPresent()) {
-                writer.createOrUpdate(extractedContent.getSeries().get());
+                Series series = extractedContent.getSeries().get();
+                checkUri(series);
+                checkSource(series);
+                writer.createOrUpdate(series);
             }
-            writer.createOrUpdate(extractedContent.getItem());
-            itemAndBroadcast = new ItemRefAndBroadcast(extractedContent.getItem(), extractedContent.getBroadcast());
+            Item item = extractedContent.getItem();
+            checkUri(item);
+            checkSource(item);
+            writer.createOrUpdate(item);
+            itemAndBroadcast = new ItemRefAndBroadcast(item, extractedContent.getBroadcast());
         } catch (Exception e) {
             log.error(entry.id(), e);
         }
         return Optional.fromNullable(itemAndBroadcast);
+    }
+
+    private void checkUri(Content c) {
+        checkArgument(c.getCanonicalUri().startsWith(C4AtomApi.PROGRAMMES_BASE),
+            "%s doesn't start with %s", c, C4AtomApi.PROGRAMMES_BASE);
+    }
+
+    private void checkSource(Content c) {
+        checkArgument(c.getPublisher().equals(Publisher.C4_PMLSD),
+            "%s not %s", c, Publisher.C4_PMLSD);
     }
 
 }

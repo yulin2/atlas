@@ -63,7 +63,7 @@ public class C4PmlsdModule {
 	private @Autowired ScheduleResolver scheduleResolver;
 	private @Autowired ChannelResolver channelResolver;
 	
-	private @Value("${updaters.c4.enabled}") Boolean tasksEnabled;
+	private @Value("${updaters.c4pmlsd.enabled}") Boolean tasksEnabled;
 	private @Value("${c4.keystore.path}") String keyStorePath;
 	private @Value("${c4.keystore.password}") String keyStorePass;
 	

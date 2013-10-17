@@ -51,7 +51,6 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 		brand.setLastUpdated(clock.now());
 
 		// TODO new alias
-		brand.addAliasUrl(brandUri + "/4od");
 		brand.addAliasUrl(canonicalIdTag(source));
 
 		brand.setTitle(source.getTitle());
@@ -88,7 +87,7 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 	private String canonicalise(Category category) {
 	    Matcher matcher = CATEGORY_PATTERN.matcher(category.getTerm());
 	    if (matcher.matches()) {
-	        return C4AtomApi.PROGRAMMES_BASE + matcher.group(1);
+	        return C4AtomApi.WEB_BASE + matcher.group(1);
 	    }
         return null;
     }

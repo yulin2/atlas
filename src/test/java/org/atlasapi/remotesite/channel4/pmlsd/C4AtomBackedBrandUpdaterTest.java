@@ -1,15 +1,10 @@
 package org.atlasapi.remotesite.channel4.pmlsd;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
-import org.atlasapi.media.entity.Policy.Platform;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.common.base.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class C4AtomBackedBrandUpdaterTest {

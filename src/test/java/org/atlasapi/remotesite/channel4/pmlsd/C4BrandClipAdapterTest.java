@@ -47,7 +47,7 @@ public class C4BrandClipAdapterTest extends TestCase {
 	   
 	public void testExtractingClips() throws Exception {
 		
-		List<Clip> clips = new C4BrandClipAdapter(apiClient, new SystemClock()).fetch("http://www.channel4.com/programmes/hestons-mission-impossible");
+		List<Clip> clips = new C4BrandClipAdapter(apiClient, new SystemClock()).fetch("http://pmlsc.channel4.com/pmlsd/hestons-mission-impossible");
 		assertEquals(5, clips.size());
 		
 		for (Clip clip: clips) {

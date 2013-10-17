@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
 
 import com.google.common.base.Preconditions;
@@ -23,7 +24,7 @@ public class C4EpgRelatedLinkBrandUpdater implements C4BrandUpdater {
         Matcher matcher = brandUriPattern.matcher(uri);
         Preconditions.checkArgument(matcher.matches(), "Invalid URI for brand fetch: " + uri);
         
-        return delegate.createOrUpdateBrand("http://www.channel4.com/programmes/"+matcher.group(1));
+        return delegate.createOrUpdateBrand(C4AtomApi.PROGRAMMES_BASE+matcher.group(1));
     }
 
     @Override
