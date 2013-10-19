@@ -202,7 +202,7 @@ public class EquivModule {
         EquivalenceUpdater<Item> standardItemUpdater = standardItemUpdater(acceptablePublishers);
         EquivalenceUpdater<Container> topLevelContainerUpdater = topLevelContainerUpdater(acceptablePublishers);
 
-        Set<Publisher> nonStandardPublishers = Sets.union(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, YOUVIEW, TALK_TALK), musicPublishers);
+        Set<Publisher> nonStandardPublishers = Sets.union(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, YOUVIEW, TALK_TALK, PA), musicPublishers);
         final EquivalenceUpdaters updaters = new EquivalenceUpdaters();
         for (Publisher publisher : Iterables.filter(Publisher.all(), not(in(nonStandardPublishers)))) {
             updaters.register(publisher, SourceSpecificEquivalenceUpdater.builder(publisher)
@@ -211,6 +211,14 @@ public class EquivModule {
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
         }
+        
+        Set<Publisher> paPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(YOUVIEW));
+        
+        updaters.register(PA, SourceSpecificEquivalenceUpdater.builder(PA)
+                .withItemUpdater(standardItemUpdater(paPublishers))
+                .withTopLevelContainerUpdater(topLevelContainerUpdater(paPublishers))
+                .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
+                .build());
         
         updaters.register(RADIO_TIMES, SourceSpecificEquivalenceUpdater.builder(RADIO_TIMES)
                 .withItemUpdater(rtItemEquivalenceUpdater())
