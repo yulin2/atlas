@@ -216,7 +216,7 @@ public class EquivModule {
         Set<Publisher> paPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(YOUVIEW));
         
         updaters.register(PA, SourceSpecificEquivalenceUpdater.builder(PA)
-                .withItemUpdater(standardItemUpdater(paPublishers))
+                .withItemUpdater(standardItemUpdater(paPublishers, ImmutableSet.<EquivalenceScorer<Item>>of()))
                 .withTopLevelContainerUpdater(topLevelContainerUpdater(paPublishers))
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
