@@ -70,6 +70,8 @@ import org.atlasapi.equiv.results.filters.PublisherFilter;
 import org.atlasapi.equiv.results.filters.SpecializationFilter;
 import org.atlasapi.equiv.results.persistence.FileEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.scorers.BroadcastItemTitleScorer;
 import org.atlasapi.equiv.scorers.ContainerHierarchyMatchingScorer;
 import org.atlasapi.equiv.scorers.CrewMemberScorer;
 import org.atlasapi.equiv.scorers.EquivalenceScorer;
@@ -143,15 +145,13 @@ public class EquivModule {
         ), additional));
     }
     
-    private EquivalenceUpdater<Item> standardItemUpdater(Set<Publisher> acceptablePublishers) {
+    private EquivalenceUpdater<Item> standardItemUpdater(Set<Publisher> acceptablePublishers, Set<? extends EquivalenceScorer<Item>> scorers) {
         return ContentEquivalenceUpdater.<Item> builder()
             .withGenerators(ImmutableSet.<EquivalenceGenerator<Item>> of(
                 new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, 
                     channelResolver, acceptablePublishers, Duration.standardMinutes(10))
             ))
-            .withScorers(ImmutableSet.of(
-                new TitleMatchingItemScorer(), new SequenceItemScorer()
-            ))
+            .withScorers(scorers)
             .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
             .withFilter(this.<Item>standardFilter())
             .withExtractor(PercentThresholdEquivalenceExtractor.<Item> moreThanPercent(90))
@@ -199,7 +199,8 @@ public class EquivModule {
             Sets.union(ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM, NETFLIX, YOUVIEW), musicPublishers)
         );
         
-        EquivalenceUpdater<Item> standardItemUpdater = standardItemUpdater(acceptablePublishers);
+        EquivalenceUpdater<Item> standardItemUpdater = standardItemUpdater(acceptablePublishers, 
+                ImmutableSet.of(new TitleMatchingItemScorer(), new SequenceItemScorer()));
         EquivalenceUpdater<Container> topLevelContainerUpdater = topLevelContainerUpdater(acceptablePublishers);
 
         Set<Publisher> nonStandardPublishers = Sets.union(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, YOUVIEW, TALK_TALK, PA), musicPublishers);
@@ -228,7 +229,7 @@ public class EquivModule {
         
         Set<Publisher> youViewPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(YOUVIEW));
         updaters.register(YOUVIEW, SourceSpecificEquivalenceUpdater.builder(YOUVIEW)
-                .withItemUpdater(broadcastItemEquivalenceUpdater(youViewPublishers))
+                .withItemUpdater(broadcastItemEquivalenceUpdater(youViewPublishers, Score.negativeOne()))
                 .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(youViewPublishers))
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
@@ -236,7 +237,7 @@ public class EquivModule {
         Set<Publisher> reduxPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX));
 
         updaters.register(BBC_REDUX, SourceSpecificEquivalenceUpdater.builder(BBC_REDUX)
-                .withItemUpdater(broadcastItemEquivalenceUpdater(reduxPublishers))
+                .withItemUpdater(broadcastItemEquivalenceUpdater(reduxPublishers, Score.nullScore()))
                 .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(reduxPublishers))
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
@@ -380,10 +381,10 @@ public class EquivModule {
             )));
     }
 
-    private EquivalenceUpdater<Container> broadcastItemContainerEquivalenceUpdater(Set<Publisher> reduxPublishers) {
+    private EquivalenceUpdater<Container> broadcastItemContainerEquivalenceUpdater(Set<Publisher> sources) {
         return ContentEquivalenceUpdater.<Container> builder()
             .withGenerators(ImmutableSet.of(
-                TitleSearchGenerator.create(searchResolver, Container.class, reduxPublishers),
+                TitleSearchGenerator.create(searchResolver, Container.class, sources),
                 new ContainerChildEquivalenceGenerator(contentResolver, equivSummaryStore)
             ))
             .withScorers(ImmutableSet.of(new TitleMatchingContainerScorer()))
@@ -392,12 +393,16 @@ public class EquivModule {
                 ContainerChildEquivalenceGenerator.NAME))
             .withFilter(this.<Container>standardFilter())
             .withExtractor(PercentThresholdEquivalenceExtractor.<Container> moreThanPercent(90))
-            .withHandler(containerResultHandlers(reduxPublishers))
+            .withHandler(containerResultHandlers(sources))
             .build();
     }
 
-    private EquivalenceUpdater<Item> broadcastItemEquivalenceUpdater(Set<Publisher> reduxPublishers) {
-        return standardItemUpdater(reduxPublishers);
+    private EquivalenceUpdater<Item> broadcastItemEquivalenceUpdater(Set<Publisher> sources, Score titleMismatch) {
+        return standardItemUpdater(sources, ImmutableSet.of(
+            new TitleMatchingItemScorer(), 
+            new SequenceItemScorer(), 
+            new BroadcastItemTitleScorer(contentResolver, titleMismatch)
+        ));
     }
 
     private EquivalenceUpdater<Item> rtItemEquivalenceUpdater() {

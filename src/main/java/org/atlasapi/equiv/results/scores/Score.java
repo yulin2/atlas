@@ -27,6 +27,12 @@ public abstract class Score {
     public static final Score ONE = Score.valueOf(1.0);
     public static final Score ZERO = Score.valueOf(0.0);
     
+    private static final Score NEGATIVE_ONE = Score.valueOf(-1.0);
+    
+    public static final Score negativeOne() {
+        return NEGATIVE_ONE;
+    }
+    
     public static final Predicate<Score> IS_REAL_SCORE = new Predicate<Score>() {
 
         @Override
