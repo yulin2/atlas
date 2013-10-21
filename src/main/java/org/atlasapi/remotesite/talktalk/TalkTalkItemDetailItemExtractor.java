@@ -71,6 +71,7 @@ public class TalkTalkItemDetailItemExtractor {
         .toFormatter();
     
     private static final TalkTalkDescriptionExtractor descriptionExtractor = new TalkTalkDescriptionExtractor();
+    private static final TalkTalkFilmYearExtractor filmYearExtractor = new TalkTalkFilmYearExtractor();
     private static final TalkTalkGenresExtractor genresExtractor = new TalkTalkGenresExtractor();
     private static final TalkTalkImagesExtractor imagesExtractor = new TalkTalkImagesExtractor();
     private static final TalkTalkUriCompiler uriCompiler = new TalkTalkUriCompiler();
@@ -119,7 +120,12 @@ public class TalkTalkItemDetailItemExtractor {
             item = new Item();
             item.setSpecialization(Specialization.TV);
         }
-        return setCommonItemFields(item, detail);
+        item = setCommonItemFields(item, detail);
+        
+        if (item instanceof Film) {
+            item.setYear(filmYearExtractor.extractYear(item.getDescription()).orNull());
+        }
+        return item;
     }
 
     private <I extends Item> I setCommonItemFields(I item, ItemDetailType detail) {
