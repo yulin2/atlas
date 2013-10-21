@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:fh="http://purl.org/syndication/history/1.0" xml:base="http://www.channel4.com">
+  <id>tag:www.channel4.com,2009:/programmes/atoz/a</id>
+  <title type="text">Programmes beginning with "A"</title>
+  <updated>2010-09-29T13:35:26.034Z</updated>
+  <author>
+    <name>Channel 4 Television</name>
+  </author>
+  <logo>http://www.channel4.com/static/programmes/images/c4-atom-logo.gif</logo>
+  <link href="http://www.channel4.com/programmes/atoz/a" rel="alternate" type="text/html"/>
+  <link href="http://api.channel4.com/programmes/atoz/a.atom?apikey=mbq3hr7z9dvqwucjne7t79s6" rel="self" type="application/atom+xml"/>
+  <link href="http://api.channel4.com/programmes/atoz.atom?apikey=mbq3hr7z9dvqwucjne7t79s6" rel="up" type="application/atom+xml"/>
+  <entry>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/a-bipolar-expedition/247e28f2-20de-448c-b408-25ddd38cf99d_145x82.jpg" height="82" width="145"/>
+    </media:content>
+    <id>tag:www.channel4.com,2009:/brand/a-bipolar-expedition-part-2</id>
+    <link href="http://www.channel4.com/programmes/a-bipolar-expedition-part-2" rel="alternate" type="text/html"/>
+    <title type="text">A Bipolar Expedition</title>
+    <summary type="html">Paul Downes, a successful businessman with bipolar disorder, invites 12 Ukrainian women to join him at a castle in Jamaica, hoping that one of them can be persuaded to marry him</summary>
+    <updated>2010-09-29T13:35:26.034Z</updated>
+    <link href="http://api.channel4.com/programmes/a-bipolar-expedition/4od.atom?apikey=mbq3hr7z9dvqwucjne7t79s6" rel="related" type="application/atom+xml" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/a-bipolar-expedition/episode-guide.atom?apikey=mbq3hr7z9dvqwucjne7t79s6" rel="related" type="application/atom+xml" title="Episode Guide"/>
+  </entry>
+</feed>
