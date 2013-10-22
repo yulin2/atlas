@@ -8,7 +8,7 @@ import com.google.common.base.Optional;
 
 public class TalkTalkFilmYearExtractor {
 
-    private static final Pattern FILM_YEAR_PATTERN = Pattern.compile(".*\\((\\d{4})\\)\\(\\d+mins\\).*");
+    private static final Pattern FILM_YEAR_PATTERN = Pattern.compile(".*\\((\\d{4})\\)\\(\\d+ ?mins\\).*");
     
     public Optional<Integer> extractYear(String description) {
         Matcher matcher = FILM_YEAR_PATTERN.matcher(description);
