@@ -42,6 +42,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import com.sun.syndication.feed.atom.Feed;
 
 public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
@@ -150,18 +151,6 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         existing.setEpisodeNumber(fetched.getEpisodeNumber());
         existing.setSeriesNumber(fetched.getSeriesNumber());
         
-        Set<String> allAliases = Sets.newHashSet(fetched.getAliasUrls());
-        boolean hasHierarchyUri = (hierarchyUri(fetched) != null);
-        for (String alias : existing.getAliasUrls()) {
-            if (!(C4AtomApi.isACanonicalEpisodeUri(alias) && hasHierarchyUri)) {
-                allAliases.add(alias);
-            }
-        }
-        
-        allAliases.add(fetched.getCanonicalUri());
-        allAliases.remove(existing.getCanonicalUri());
-        existing.setAliasUrls(allAliases);
-        
         return existing;
     }
     
@@ -203,15 +192,6 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         return resolver.itemFor(episode.getCanonicalUri());
     }
     
-    private String hierarchyUri(Episode episode) {
-        for (String alias : episode.getAliasUrls()) {
-            if (C4AtomApi.isACanonicalEpisodeUri(alias)) {
-                return alias;
-            }
-        }
-        return null;
-    }
-
     private Brand resolveAndUpdate(Brand brand) {
         Optional<Brand> existingBrand = resolver.brandFor(brand.getCanonicalUri());
         if (!existingBrand.isPresent()) {
@@ -425,6 +405,13 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
             }
             if (!Objects.equal(existing.getPresentationChannel(), fetched.getPresentationChannel())) {
                 existing.setPresentationChannel(fetched.getPresentationChannel());
+                copyLastUpdated(fetched, existing);
+            }
+            
+            SetView<String> mergedAliases = Sets.union(existing.getAliasUrls(), fetched.getAliasUrls());
+            
+            if (!mergedAliases.equals(existing.getAliasUrls())) {
+                existing.setAliasUrls(mergedAliases);
                 copyLastUpdated(fetched, existing);
             }
         }
