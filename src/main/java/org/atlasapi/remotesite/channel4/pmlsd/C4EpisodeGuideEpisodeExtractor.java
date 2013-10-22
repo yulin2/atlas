@@ -23,13 +23,14 @@ final class C4EpisodeGuideEpisodeExtractor extends BaseC4EpisodeExtractor {
     protected Episode setAdditionalEpisodeFields(Entry entry, Map<String, String> lookup,
             Episode episode) {
         episode.addAliasUrl(hierarchyEpisodeUri(entry));
+        episode.addAliasUrl(entry.getId());
         return episode;
     }
     
     private String hierarchyEpisodeUri(Entry source) {
         Matcher matcher = EPISODE_PAGE_ID_PATTERN.matcher(source.getId());
         if (matcher.matches()) {
-            return C4AtomApi.PROGRAMMES_BASE + matcher.group(1);
+            return C4AtomApi.WEB_BASE + matcher.group(1);
         }
         return null;
     }
