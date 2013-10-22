@@ -52,6 +52,7 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 
 		// TODO new alias
 		brand.addAliasUrl(canonicalIdTag(source));
+		brand.addAliasUrl(brandUri.replace(C4AtomApi.PROGRAMMES_BASE, C4AtomApi.WEB_BASE));
 
 		brand.setTitle(source.getTitle());
 		brand.setDescription(source.getSubtitle().getValue());
