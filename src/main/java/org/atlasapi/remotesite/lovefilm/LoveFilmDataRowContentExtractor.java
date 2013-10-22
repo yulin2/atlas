@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.lovefilm;
 
-import static org.atlasapi.feeds.utils.lovefilm.LoveFilmGenreConverter.TO_ATLAS_GENRE;
-import static org.atlasapi.feeds.utils.lovefilm.LoveFilmGenreConverter.TO_ATLAS_SUB_GENRE;
+import static org.atlasapi.feeds.youview.LoveFilmGenreMapping.TO_ATLAS_GENRE;
+import static org.atlasapi.feeds.youview.LoveFilmGenreMapping.TO_ATLAS_SUB_GENRE;
 import static org.atlasapi.media.entity.Policy.RevenueContract.FREE_TO_VIEW;
 import static org.atlasapi.media.entity.Policy.RevenueContract.PAY_TO_RENT;
 import static org.atlasapi.media.entity.Policy.RevenueContract.SUBSCRIPTION;
@@ -38,6 +38,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.atlasapi.feeds.youview.LoveFilmGenreMapping;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
@@ -327,7 +328,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
 
     private Iterable<String> subGenresFrom(String genreString) {
         Iterable<String> subGenres = COMMA_SPLITTER.split(genreString);
-        return Iterables.transform(subGenres,TO_ATLAS_SUB_GENRE);
+        return Iterables.transform(subGenres, TO_ATLAS_SUB_GENRE);
     }
 
     private Integer yearFrom(String pubDate) {
