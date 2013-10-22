@@ -34,7 +34,7 @@ public class C4AtomApi {
 
 	private static final String WEB_SAFE_NAME_PATTERN = "[a-z0-9\\-]+";
 	
-	public static final Pattern CANONICAL_BRAND_URI_PATTERN = Pattern.compile(String.format("%s(%s)", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
+	private static final Pattern CANONICAL_BRAND_URI_PATTERN = Pattern.compile(String.format("%s(%s)", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
 	private static final Pattern CANONICAL_EPISODE_URI_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+/episode-\\d+", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
 	private static final Pattern WEB_EPISODE_URI_PATTERN = Pattern.compile(String.format("%s(%s)/episode-guide/series-(\\d+)/episode-(\\d+)", Pattern.quote(WEB_BASE), WEB_SAFE_NAME_PATTERN));
 
@@ -193,6 +193,14 @@ public class C4AtomApi {
             return PROGRAMMES_BASE + matcher.group(1);
         }
         return null;
+	}
+
+	public static String hierarchySeriesUri(Feed source) {
+	    Matcher matcher = SERIES_PAGE_ID_PATTERN.matcher(source.getId());
+	    if (matcher.matches()) {
+	        return WEB_BASE + matcher.group(1);
+	    }
+	    return null;
 	}
 
 	public static String clipUri(Entry entry) {

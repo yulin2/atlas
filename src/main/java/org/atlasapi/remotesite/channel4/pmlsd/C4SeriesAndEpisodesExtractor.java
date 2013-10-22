@@ -52,6 +52,7 @@ public class C4SeriesAndEpisodesExtractor implements ContentExtractor<Feed, SetM
         Series series = C4PmlsdModule.contentFactory().createSeries();
         series.setCanonicalUri(uri);
         series.addAliasUrl(C4AtomApi.canonicalizeSeriesFeedId(source));
+        series.addAliasUrl(C4AtomApi.hierarchySeriesUri(source));
 
         series.setLastUpdated(clock.now());
         
