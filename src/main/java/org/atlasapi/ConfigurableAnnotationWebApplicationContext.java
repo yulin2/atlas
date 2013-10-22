@@ -88,7 +88,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 ContentPurgeWebModule.class,
                 GoogleSpreadsheetModule.class
             );
-            if (Configurer.get("youview.upload.enabled").toBoolean()) {
+            if (Configurer.get("youview.upload.lovefilm.enabled").toBoolean() 
+                    || Configurer.get("youview.upload.unbox.enabled").toBoolean()) {
                 builder.add(
                     YouViewUploadModule.class,
                     YouViewFeedsWebModule.class
