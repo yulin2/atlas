@@ -32,10 +32,10 @@ import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -291,7 +291,7 @@ public class C4BrandExtractorTest extends TestCase {
 		assertThat(Iterables.getOnlyElement(recordingWriter.updatedBrands).getClips().size(), is(greaterThan(1)));
 	}
 
-    @Test
+    @Test @Ignore
 	public void testThatOldLocationsAndBroadcastsAreCopied() {
 
 		RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
