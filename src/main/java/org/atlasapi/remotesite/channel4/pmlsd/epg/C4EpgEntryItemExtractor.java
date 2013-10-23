@@ -53,7 +53,7 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
         item.setLastUpdated(now);
         
         item.setCanonicalUri(uriExtractor.uriForItemId(entry));
-        item.setCurie(C4AtomApi.PROGRAMMES_BASE + entry.programmeId());
+        item.addAliasUrl(C4AtomApi.hierarchyUriFromCanonical(item.getCanonicalUri()));
         
         item.setTitle(entry.title());
         item.setDescription(entry.summary());

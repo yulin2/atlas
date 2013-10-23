@@ -4,12 +4,14 @@ import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
 import org.joda.time.DateTime;
 
@@ -51,8 +53,13 @@ public class C4EpgEntryContentExtractor implements
         if (!brand.isPresent()) {
             brand = fetchBrand(source).or(createBrandFrom(source));
         }
+        ensureHierarchyAlias(brand);
+        
         Optional<Series> series = resolveSeries(source).or(createSeriesFrom(source));
+        ensureHierarchyAlias(series);
+        
         Item item = resolveItem(source).or(createItem(source, brand, series));
+        ensureHierarchyUri(item);
         
         Broadcast broadcast = broadcastExtractor.extract(source);
         broadcast.setLastUpdated(now);
@@ -62,6 +69,17 @@ public class C4EpgEntryContentExtractor implements
         connectHeirarchy(item, series, brand);
 
         return new ContentHierarchyAndBroadcast(brand, series, item, broadcast);
+    }
+
+    private void ensureHierarchyAlias(Optional<? extends Content> possibleContent) {
+        if (possibleContent.isPresent()) {
+            ensureHierarchyUri(possibleContent.get());
+        }
+    }
+
+    private void ensureHierarchyUri(Content content) {
+        String uri = content.getCanonicalUri();
+        content.addAliasUrl(C4AtomApi.hierarchyUriFromCanonical(uri));
     }
 
     private void connectHeirarchy(Item item, Optional<Series> series, Optional<Brand> brand) {

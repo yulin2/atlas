@@ -228,5 +228,9 @@ public class C4AtomApi {
 	public BiMap<String, Channel> getChannelMap() {
 		return channelMap;
 	}
+
+    public static String hierarchyUriFromCanonical(String canonicalUri) {
+        return canonicalUri.replace(PROGRAMMES_BASE, WEB_BASE);
+    }
 	
 }

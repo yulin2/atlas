@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 
@@ -22,6 +23,7 @@ public class C4EpgEntrySeriesExtractor implements ContentExtractor<C4EpgEntry, O
             String seriesUri = possibleSeriesUri.get();
             Series series = C4PmlsdModule.contentFactory().createSeries();
             series.setCanonicalUri(seriesUri);
+            series.addAliasUrl(seriesUri.replace(C4AtomApi.PROGRAMMES_BASE, C4AtomApi.WEB_BASE));
             
             if (source.seriesNumber() != null) {
                 series.withSeriesNumber(source.seriesNumber());
