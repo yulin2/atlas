@@ -120,6 +120,8 @@
                         <configuration>
                             <includeGroupIds>org.eclipse.jetty,com.codahale.metrics</includeGroupIds>
                             <outputDirectory>target/atlas</outputDirectory>
+                            <!-- See https://bugs.eclipse.org/bugs/show_bug.cgi?id=406753 for why we exclude some files -->
+                            <excludes>META-INF/*.RSA,META-INF/*.DSA,META-INF/*.SF</excludes>
                         </configuration>
                     </execution>
                     <execution>
@@ -131,6 +133,8 @@
                         <configuration>
                             <includeGroupIds>javax.servlet</includeGroupIds>
                             <outputDirectory>target/atlas</outputDirectory>
+                            <!-- See https://bugs.eclipse.org/bugs/show_bug.cgi?id=406753 for why we exclude some files -->
+                            <excludes>META-INF/*.RSA,META-INF/*.DSA,META-INF/*.SF</excludes>
                         </configuration>
                     </execution>
                 </executions>
