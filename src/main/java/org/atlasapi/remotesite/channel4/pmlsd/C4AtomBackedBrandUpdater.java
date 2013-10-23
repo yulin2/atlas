@@ -382,38 +382,42 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
     }
 
     private <T extends Described> T updateDescribed(T existing, T fetched) {
-        if (canUpdateDescriptions) {
-            if (!Objects.equal(existing.getTitle(), fetched.getTitle())) {
-                existing.setTitle(fetched.getTitle());
-                copyLastUpdated(fetched, existing);
-            }
-            if (!Objects.equal(existing.getDescription(), fetched.getDescription())) {
-                existing.setDescription(fetched.getDescription());
-                copyLastUpdated(fetched, existing);
-            }
-            if (!Objects.equal(existing.getImage(), fetched.getImage())) {
-                existing.setImage(fetched.getImage());
-                copyLastUpdated(fetched, existing);
-            }
-            if (!Objects.equal(existing.getThumbnail(), fetched.getThumbnail())) {
-                existing.setThumbnail(fetched.getThumbnail());
-                copyLastUpdated(fetched, existing);
-            }
-            if (!Objects.equal(existing.getGenres(), fetched.getGenres())) {
-                existing.setGenres(fetched.getGenres());
-                copyLastUpdated(fetched, existing);
-            }
-            if (!Objects.equal(existing.getPresentationChannel(), fetched.getPresentationChannel())) {
-                existing.setPresentationChannel(fetched.getPresentationChannel());
-                copyLastUpdated(fetched, existing);
-            }
-            
-            SetView<String> mergedAliases = Sets.union(existing.getAliasUrls(), fetched.getAliasUrls());
-            
-            if (!mergedAliases.equals(existing.getAliasUrls())) {
-                existing.setAliasUrls(mergedAliases);
-                copyLastUpdated(fetched, existing);
-            }
+        
+        SetView<String> mergedAliases = Sets.union(existing.getAliasUrls(), fetched.getAliasUrls());
+        
+        if (!mergedAliases.equals(existing.getAliasUrls())) {
+            existing.setAliasUrls(mergedAliases);
+            copyLastUpdated(fetched, existing);
+        }
+        
+        return canUpdateDescriptions ? updateDescriptions(existing, fetched)
+                                     : existing;
+    }
+
+    private <T extends Described> T updateDescriptions(T existing, T fetched) {
+        if (!Objects.equal(existing.getTitle(), fetched.getTitle())) {
+            existing.setTitle(fetched.getTitle());
+            copyLastUpdated(fetched, existing);
+        }
+        if (!Objects.equal(existing.getDescription(), fetched.getDescription())) {
+            existing.setDescription(fetched.getDescription());
+            copyLastUpdated(fetched, existing);
+        }
+        if (!Objects.equal(existing.getImage(), fetched.getImage())) {
+            existing.setImage(fetched.getImage());
+            copyLastUpdated(fetched, existing);
+        }
+        if (!Objects.equal(existing.getThumbnail(), fetched.getThumbnail())) {
+            existing.setThumbnail(fetched.getThumbnail());
+            copyLastUpdated(fetched, existing);
+        }
+        if (!Objects.equal(existing.getGenres(), fetched.getGenres())) {
+            existing.setGenres(fetched.getGenres());
+            copyLastUpdated(fetched, existing);
+        }
+        if (!Objects.equal(existing.getPresentationChannel(), fetched.getPresentationChannel())) {
+            existing.setPresentationChannel(fetched.getPresentationChannel());
+            copyLastUpdated(fetched, existing);
         }
         return existing;
     }
