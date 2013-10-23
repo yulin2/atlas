@@ -138,7 +138,11 @@ public class AtlasMain {
     
     private HttpConnectionFactory createHttpConnectionFactory() {
         HttpConfiguration config = new HttpConfiguration();
+<<<<<<< HEAD
         config.setRequestHeaderSize(1024);
+=======
+        config.setRequestHeaderSize(8192);
+>>>>>>> b6ea848... Increase request header size to 8k
         config.setResponseHeaderSize(1024);
         
         return new HttpConnectionFactory(config);
