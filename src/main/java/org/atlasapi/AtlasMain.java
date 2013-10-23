@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import java.util.concurrent.Executor;
 
 import org.eclipse.jetty.io.ByteBufferPool;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -118,8 +119,6 @@ public class AtlasMain {
         return pool;
     }
 
-    // The lifecycle of ServerConnector is handled by Server
-    @SuppressWarnings("resource")
     private void createServerConnector(Server server, HttpConnectionFactory connectionFactory,
             int defaultPort, String portPropertyName, int acceptQueueSize) {
         
@@ -134,6 +133,7 @@ public class AtlasMain {
         
         connector.setPort(getPort(defaultPort, portPropertyName));
         connector.setAcceptQueueSize(acceptQueueSize);
+        server.setConnectors(new Connector[] { connector });
     }
     
     private HttpConnectionFactory createHttpConnectionFactory() {
