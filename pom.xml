@@ -118,7 +118,7 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>org.eclipse.jetty</includeGroupIds>
+                            <includeGroupIds>org.eclipse.jetty,com.codahale.metrics</includeGroupIds>
                             <outputDirectory>target/atlas</outputDirectory>
                         </configuration>
                     </execution>
@@ -340,6 +340,16 @@
             <groupId>org.atlasapi</groupId>
             <artifactId>atlas-persistence</artifactId>
             <version>${atlas.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jetty</artifactId>
+                    <groupId>org.mortbay.jetty</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>it.unimi.dsi</groupId>
@@ -358,8 +368,8 @@
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -518,12 +528,22 @@
            <artifactId>google-http-client-jackson</artifactId>
            <version>1.17.0-rc</version>
        </dependency>
+       <dependency>
+           <groupId>com.codahale.metrics</groupId>
+           <artifactId>metrics-core</artifactId>
+           <version>3.0.1</version>
+       </dependency>
+       <dependency>
+           <groupId>com.codahale.metrics</groupId>
+           <artifactId>metrics-jetty9</artifactId>
+           <version>3.0.1</version>
+       </dependency>
     </dependencies>
     <properties>
         <atlas.version>${project.version}</atlas.version>
         <common.version>1.0-SNAPSHOT</common.version>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
-        <jetty.version>7.4.0.v20110414</jetty.version>
+        <jetty.version>9.0.6.v20130930</jetty.version>
     </properties>
 
     <scm>
