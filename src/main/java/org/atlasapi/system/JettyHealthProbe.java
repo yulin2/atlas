@@ -16,9 +16,9 @@ public class JettyHealthProbe implements HealthProbe, ServletContextAware {
     @Override
     public ProbeResult probe() throws Exception {
         ProbeResult probeResult = new ProbeResult("Requests");
-        int connections = AtlasMain.getMaxNumberOfOpenConnectionsInLastMinute(
+        String connections = AtlasMain.getScalingMetric(
                 servletContext.getAttribute(AtlasMain.CONTEXT_ATTRIBUTE));
-        probeResult.add("request-count", String.valueOf(connections), true);
+        probeResult.add("utilisation", connections, true);
         return probeResult;
     }
 
