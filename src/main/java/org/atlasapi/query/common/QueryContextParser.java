@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.application.auth.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.query.annotation.AnnotationsExtractor;
 
@@ -17,11 +18,13 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 public class QueryContextParser implements ParameterNameProvider {
     
     private final ApplicationSourcesFetcher configFetcher;
+    private final UserFetcher userFetcher;
     private final AnnotationsExtractor annotationExtractor;
     private final SelectionBuilder selectionBuilder;
 
-    public QueryContextParser(ApplicationSourcesFetcher configFetcher, AnnotationsExtractor annotationsParser, Selection.SelectionBuilder selectionBuilder) {
+    public QueryContextParser(ApplicationSourcesFetcher configFetcher, UserFetcher userFetcher, AnnotationsExtractor annotationsParser, Selection.SelectionBuilder selectionBuilder) {
         this.configFetcher = checkNotNull(configFetcher);
+        this.userFetcher = checkNotNull(userFetcher);
         this.annotationExtractor = checkNotNull(annotationsParser);
         this.selectionBuilder = checkNotNull(selectionBuilder);
     }
@@ -46,6 +49,7 @@ public class QueryContextParser implements ParameterNameProvider {
     public ImmutableSet<String> getParameterNames() {
         return ImmutableSet.copyOf(Iterables.concat(
             configFetcher.getParameterNames(), 
+            userFetcher.getParameterNames(),
             annotationExtractor.getParameterNames(), 
             selectionBuilder.getParameterNames(),
             ImmutableSet.of(JsonResponseWriter.CALLBACK)));

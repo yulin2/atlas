@@ -9,15 +9,15 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ReadException;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.output.ErrorResultWriter;
-import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.query.common.Query;
 import org.atlasapi.output.NotAcceptableException;
+import org.atlasapi.output.NotAuthorizedException;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
@@ -42,9 +42,9 @@ import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 @Controller
-public class ApplicationAdminController {
+public class ApplicationsController extends AbstractAdminController {
 
-    private static Logger log = LoggerFactory.getLogger(ApplicationAdminController.class);
+    private static Logger log = LoggerFactory.getLogger(ApplicationsController.class);
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
     private final QueryParser<Application> requestParser;
     private final QueryExecutor<Application> queryExecutor;
@@ -61,13 +61,15 @@ public class ApplicationAdminController {
         }
     }
 
-    public ApplicationAdminController(QueryParser<Application> requestParser,
+    public ApplicationsController(QueryParser<Application> requestParser,
             QueryExecutor<Application> queryExecutor,
             QueryResultWriter<Application> resultWriter,
             ModelReader reader,
             NumberToShortStringCodec idCodec,
             SourceIdCodec sourceIdCodec,
-            ApplicationStore applicationStore) {
+            ApplicationStore applicationStore,
+            UserFetcher userFetcher) {
+        super(userFetcher);
         this.requestParser = requestParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
@@ -77,37 +79,28 @@ public class ApplicationAdminController {
         this.applicationStore = applicationStore;
     }
 
-    public void sendError(HttpServletRequest request,
-            HttpServletResponse response,
-            ResponseWriter writer,
-            Exception e,
-            int responseCode) throws IOException {
-        response.setStatus(responseCode);
-        log.error("Request exception " + request.getRequestURI(), e);
-        ErrorSummary summary = ErrorSummary.forException(e);
-        new ErrorResultWriter().write(summary, writer, request, response);
-    }
-
     @RequestMapping({ "/4.0/applications/{aid}.*", "/4.0/applications.*" })
     public void outputAllApplications(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
+            checkAccess(request);
             Query<Application> applicationsQuery = requestParser.parse(request);
             QueryResult<Application> queryResult = queryExecutor.execute(applicationsQuery);
             resultWriter.write(queryResult, writer);
-        } catch (NotFoundException e) {
-            sendError(request, response, writer, e, 404);
         } catch (Exception e) {
-            sendError(request, response, writer, e, 500);
+            log.error("Request exception " + request.getRequestURI(), e);
+            sendError(request, response, writer, e);
         }
     }
 
     @RequestMapping(value = "/4.0/applications.*", method = RequestMethod.POST)
     public void writeApplication(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ReadException, NotFoundException, UnsupportedFormatException, NotAcceptableException {
+            throws IOException, UnsupportedFormatException, NotAcceptableException, ReadException, NotAuthorizedException {
         ResponseWriter writer = writerResolver.writerFor(request, response);
+        checkAccess(request);
         Application application = deserialize(new InputStreamReader(request.getInputStream()), Application.class);
         if (application.getId() != null) {
             Optional<Application> existing = applicationStore.applicationFor(application.getId());
@@ -126,8 +119,9 @@ public class ApplicationAdminController {
     public void writeApplicationSources(HttpServletRequest request, 
             HttpServletResponse response,
             @PathVariable String aid)
-            throws IOException, ReadException, NotFoundException, QueryParseException {
+            throws IOException, ReadException, NotFoundException, QueryParseException, NotAuthorizedException {
         response.addHeader("Access-Control-Allow-Origin", "*");
+        checkAccess(request);
         Id applicationId = Id.valueOf(idCodec.decode(aid));
         ApplicationSources sources = deserialize(new InputStreamReader(
                 request.getInputStream()), ApplicationSources.class);
@@ -139,8 +133,9 @@ public class ApplicationAdminController {
     @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.POST)
     public void setPrecedenceOrder(HttpServletRequest request, 
             HttpServletResponse response,
-            @PathVariable String aid) throws NotFoundException, IOException, ReadException, QueryExecutionException  {
+            @PathVariable String aid) throws NotFoundException, IOException, ReadException, QueryExecutionException, NotAuthorizedException  {
         response.addHeader("Access-Control-Allow-Origin", "*");
+        checkAccess(request);
         Id applicationId = Id.valueOf(idCodec.decode(aid));
         PrecedenceOrdering ordering = deserialize(new InputStreamReader(request.getInputStream()), PrecedenceOrdering.class);
         List<Publisher> sourceOrder = getSourcesFrom(ordering);
@@ -151,8 +146,9 @@ public class ApplicationAdminController {
     @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.DELETE)
     public void disablePrecedence(HttpServletRequest request, 
             HttpServletResponse response,
-            @PathVariable String aid) throws QueryParseException, NotFoundException {
+            @PathVariable String aid) throws QueryParseException, NotFoundException, NotAuthorizedException {
         response.addHeader("Access-Control-Allow-Origin", "*");
+        checkAccess(request);
         Id applicationId = Id.valueOf(idCodec.decode(aid));
         Application existing = applicationStore.applicationFor(applicationId).get();
         applicationStore.updateApplication(existing.copyWithPrecedenceDisabled());

@@ -116,10 +116,11 @@ public class TwitterAuthController {
         tokenRequestSecrets.remove(requestToken.getToken());
         try {
             AccessToken token = twitter.getOAuthAccessToken(requestToken, oauthVerifier);
+           
+            // Twitter oauth tokens do not expire so null gets passed as expiry date see: https://dev.twitter.com/docs/faq
             Maybe<UserRef> userRef = accessTokenProcessor.process(new AuthToken(token.getToken(), token.getTokenSecret(), UserNamespace.TWITTER, null));
             OAuthResult oauthResult;
             if (userRef.hasValue()) {
-                // TODO pass some user info back?
                 User user = getUser(userRef.requireValue());
                 oauthResult = OAuthResult.builder()
                         .withSuccess(true)

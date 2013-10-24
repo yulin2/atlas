@@ -12,8 +12,7 @@ public class AuthProvidersListWriter implements EntityListWriter<OAuthProvider> 
     @Override
     public void write(OAuthProvider entity, FieldWriter writer, OutputContext ctxt)
             throws IOException {
-        writer.writeField("name", entity.name().toLowerCase());
-        writer.writeField("title", entity.getTitle());
+        writer.writeField("namespace", entity.getNamespace().name().toLowerCase());
         writer.writeField("prompt", entity.getPrompt());
         writer.writeField("authRequestUrl", entity.getAuthRequestUrl());
         writer.writeField("image", entity.getImage());

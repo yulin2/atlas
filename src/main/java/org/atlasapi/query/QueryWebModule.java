@@ -29,6 +29,7 @@ import static org.atlasapi.output.Annotation.TOPICS;
 import static org.atlasapi.output.Annotation.UPCOMING;
 
 import org.atlasapi.application.auth.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -132,6 +133,7 @@ public class QueryWebModule {
 //    private @Autowired SegmentResolver segmentResolver;
 //    private @Autowired ProductResolver productResolver;
     private @Autowired ScheduleIndex scheduleIndex;
+    private @Autowired UserFetcher userFetcher;
 
     private @Autowired ApplicationSourcesFetcher configFetcher;
 
@@ -168,6 +170,7 @@ public class QueryWebModule {
     @Bean
     TopicContentController topicContentController() {
         ContextualQueryContextParser contextParser = new ContextualQueryContextParser(configFetcher,
+                userFetcher,
             new IndexContextualAnnotationsExtractor(ResourceAnnotationIndex.combination()
                 .addImplicitListContext(contentAnnotationIndex())
                 .addExplicitSingleContext(topicAnnotationIndex())
@@ -198,7 +201,8 @@ public class QueryWebModule {
     }
     
     private StandardQueryParser<Content> contentQueryParser() {
-        QueryContextParser contextParser = new QueryContextParser(configFetcher, 
+        QueryContextParser contextParser = new QueryContextParser(configFetcher,
+                userFetcher,
         new IndexAnnotationsExtractor(contentAnnotationIndex()), selectionBuilder());
         
         return new StandardQueryParser<Content>(Resource.CONTENT, 
@@ -207,7 +211,7 @@ public class QueryWebModule {
     }
 
     private StandardQueryParser<Topic> topicQueryParser() {
-        QueryContextParser contextParser = new QueryContextParser(configFetcher, 
+        QueryContextParser contextParser = new QueryContextParser(configFetcher, userFetcher,
         new IndexAnnotationsExtractor(topicAnnotationIndex()), selectionBuilder());
         
         return new StandardQueryParser<Topic>(Resource.TOPIC, 

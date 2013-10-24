@@ -6,9 +6,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.SourceStatus.SourceState;
+import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.output.NotAuthorizedException;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
@@ -30,7 +32,7 @@ import com.google.common.base.Optional;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 @Controller
-public class SourcesController {
+public class SourcesController extends AbstractAdminController {
     private final StandardQueryParser<Publisher> queryParser;
     private final QueryExecutor<Publisher> queryExecutor;
     private final QueryResultWriter<Publisher> resultWriter;
@@ -44,7 +46,9 @@ public class SourcesController {
             QueryResultWriter<Publisher> resultWriter,
             NumberToShortStringCodec idCodec,
             SourceIdCodec sourceIdCodec,
-            ApplicationStore applicationStore) {
+            ApplicationStore applicationStore,
+            UserFetcher userFetcher) {
+        super(userFetcher);
         this.queryParser = queryParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
@@ -58,14 +62,16 @@ public class SourcesController {
      * Post with app id and permission (read/write) required Params: "id":
      * "abc", "permission": "read"
      * @throws NotFoundException 
+     * @throws NotAuthorizedException If Oauth token not valid
      */
     @RequestMapping(value = "/4.0/sources/{sourceId}/applications", method = RequestMethod.POST)
     public void writeSourceForApplication(HttpServletRequest request, 
             HttpServletResponse response,
             @PathVariable String sourceId,
             @RequestParam String id,
-            @RequestParam String permission) throws NotFoundException {
+            @RequestParam String permission) throws NotFoundException, NotAuthorizedException {
         response.addHeader("Access-Control-Allow-Origin", "*");
+        checkAccess(request);
         Optional<Publisher> source = sourceIdCodec.decode(sourceId);
         if (source.isPresent()) {
             Id applicationId = Id.valueOf(idCodec.decode(id));
@@ -90,14 +96,16 @@ public class SourcesController {
      * (read/write) from an app on a source. Post with app id and permission
      * needed.
      * @throws QueryExecutionException 
+     * @throws NotAuthorizedException 
      */
     @RequestMapping(value = "/4.0/sources/{sourceId}/applications", method = RequestMethod.DELETE)
     public void deleteSourceForApplication(HttpServletRequest request, 
             HttpServletResponse response,
             @PathVariable String sourceId,
             @RequestParam String id,
-            @RequestParam String permission) throws QueryExecutionException {
+            @RequestParam String permission) throws QueryExecutionException, NotAuthorizedException {
         response.addHeader("Access-Control-Allow-Origin", "*");
+        checkAccess(request);
         Optional<Publisher> source = sourceIdCodec.decode(sourceId);
         if (source.isPresent()) {
             Id applicationId = Id.valueOf(idCodec.decode(id));
@@ -121,6 +129,7 @@ public class SourcesController {
      * POST /4.0/sources/:sourceId/applications/readers/:appId/state Changes
      * state of app for source, e.g. "available", "requested". Params: "state":
      * "available"
+     * @throws NotAuthorizedException 
      * @throws Exception 
      */
     @RequestMapping(value = "/4.0/sources/{sourceId}/applications/readers/{id}/state", method = RequestMethod.POST)
@@ -128,8 +137,9 @@ public class SourcesController {
             HttpServletResponse response,
             @PathVariable String sourceId,
             @PathVariable String id,
-            @RequestParam String state) throws QueryExecutionException {
+            @RequestParam String state) throws QueryExecutionException, NotAuthorizedException {
         response.addHeader("Access-Control-Allow-Origin", "*");
+        checkAccess(request);
         Optional<Publisher> source = sourceIdCodec.decode(sourceId);
         if (source.isPresent()) {
             Id applicationId = Id.valueOf(idCodec.decode(id));
@@ -146,8 +156,14 @@ public class SourcesController {
     public void listSources(HttpServletRequest request,
             HttpServletResponse response) throws QueryParseException, QueryExecutionException, IOException {
         ResponseWriter writer = writerResolver.writerFor(request, response);
-        Query<Publisher> sourcesQuery = queryParser.parse(request);
-        QueryResult<Publisher> queryResult = queryExecutor.execute(sourcesQuery);
-        resultWriter.write(queryResult, writer);
+        try {
+            checkAccess(request);
+            Query<Publisher> sourcesQuery = queryParser.parse(request);
+            QueryResult<Publisher> queryResult = queryExecutor.execute(sourcesQuery);
+            resultWriter.write(queryResult, writer);
+        } catch (Exception e) {
+            sendError(request, response, writer, e);
+        }
+       
     }
 }

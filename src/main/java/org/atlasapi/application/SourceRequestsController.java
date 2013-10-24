@@ -5,10 +5,12 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotAcceptableException;
+import org.atlasapi.output.NotAuthorizedException;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
@@ -30,7 +32,7 @@ import com.google.common.base.Optional;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 @Controller
-public class SourceRequestsController {
+public class SourceRequestsController extends AbstractAdminController {
     private final StandardQueryParser<SourceRequest> queryParser;
     private final QueryExecutor<SourceRequest> queryExecutor;
     private final QueryResultWriter<SourceRequest> resultWriter;
@@ -44,7 +46,9 @@ public class SourceRequestsController {
             QueryResultWriter<SourceRequest> resultWriter,
             SourceRequestManager sourceRequestManager,
             NumberToShortStringCodec idCodec,
-            SourceIdCodec sourceIdCodec) {
+            SourceIdCodec sourceIdCodec,
+            UserFetcher userFetcher) {
+        super(userFetcher);
         this.queryParser = queryParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
@@ -53,14 +57,22 @@ public class SourceRequestsController {
         this.sourceIdCodec = sourceIdCodec;
     }
     
+    
+    
     @RequestMapping(value = {"/4.0/requests.*", "/4.0/requests/{id}.*"}, method = RequestMethod.GET)
     public void listSourceRequests(HttpServletRequest request, 
             HttpServletResponse response) throws IOException, QueryParseException, QueryExecutionException {
         ResponseWriter writer = null;
-        writer = writerResolver.writerFor(request, response);
-        Query<SourceRequest> sourcesQuery = queryParser.parse(request);
-        QueryResult<SourceRequest> queryResult = queryExecutor.execute(sourcesQuery);
-        resultWriter.write(queryResult, writer);
+        try {
+            writer = writerResolver.writerFor(request, response);
+            checkAccess(request);
+            Query<SourceRequest> sourcesQuery = queryParser.parse(request);
+            QueryResult<SourceRequest> queryResult = queryExecutor.execute(sourcesQuery);
+            resultWriter.write(queryResult, writer);
+        } catch (Exception e) {
+            sendError(request, response, writer, e);
+        }
+      
     }
   
     @RequestMapping(value = "/4.0/sources/{sid}/requests", method = RequestMethod.POST)
@@ -71,9 +83,10 @@ public class SourceRequestsController {
             @RequestParam String appUrl,
             @RequestParam String email,
             @RequestParam String reason,
-            @RequestParam String usageType) throws UnsupportedFormatException, NotAcceptableException, IOException {
+            @RequestParam String usageType) throws UnsupportedFormatException, NotAcceptableException, IOException, NotAuthorizedException, NotFoundException {
 
         response.addHeader("Access-Control-Allow-Origin", "*");
+        checkAccess(request);
         Optional<Publisher> source =sourceIdCodec.decode(sid);
         if (source.isPresent()) {
             Id applicationId = Id.valueOf(idCodec.decode(appId));
@@ -81,27 +94,17 @@ public class SourceRequestsController {
             sourceRequestManager.createOrUpdateRequest(source.get(), usageTypeRequested,
                     applicationId, appUrl, email, reason);
         } else {
-            sendError(request, response,  404);
-        }      
+            throw new NotFoundException(null);
+        }
     }
     
     @RequestMapping(value = "/4.0/requests/{rid}/approve", method = RequestMethod.POST)
     public void storeSourceRequest(HttpServletRequest request, 
             HttpServletResponse response,
-            @PathVariable String rid) throws IOException {
+            @PathVariable String rid) throws IOException, NotAuthorizedException, NotFoundException {
         response.addHeader("Access-Control-Allow-Origin", "*");
+        checkAccess(request);
         Id requestId = Id.valueOf(idCodec.decode(rid));
-        try {
-            sourceRequestManager.approveSourceRequest(requestId);
-        } catch (NotFoundException e) {
-            sendError(request, response,  404);
-        }
+        sourceRequestManager.approveSourceRequest(requestId);
     }
-    
-    public void sendError(HttpServletRequest request,
-            HttpServletResponse response,
-            int responseCode) throws IOException {
-        response.setStatus(responseCode);
-    }
-
 }

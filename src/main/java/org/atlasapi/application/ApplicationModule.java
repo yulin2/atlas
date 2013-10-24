@@ -69,8 +69,11 @@ public class ApplicationModule {
         return new FixedAppIdUserRefBuilder(APP_NAME);
     }
     
+    public @Bean AccessTokenChecker accessTokenChecker() {
+        return new TwitterOAuth1AccessTokenChecker(userRefBuilder() , consumerKey, consumerSecret);
+    }
+    
     public @Bean AccessTokenProcessor accessTokenProcessor() {
-        AccessTokenChecker accessTokenChecker = new TwitterOAuth1AccessTokenChecker(userRefBuilder() , consumerKey, consumerSecret);
-        return new AccessTokenProcessor(accessTokenChecker, credentialsStore());
+        return new AccessTokenProcessor(accessTokenChecker(), credentialsStore());
     }
 }
