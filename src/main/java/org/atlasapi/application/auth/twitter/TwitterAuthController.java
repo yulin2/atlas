@@ -16,6 +16,7 @@ import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
 import org.atlasapi.output.UnsupportedFormatException;
+import org.atlasapi.persistence.auth.TokenRequestStore;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryResult;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
@@ -49,13 +51,13 @@ public class TwitterAuthController {
     private QueryResultWriter<OAuthRequest> oauthRequestResultWriter;
     private QueryResultWriter<OAuthResult> oauthResultResultWriter;
     private AccessTokenProcessor accessTokenProcessor;
-    
-    private Map<String, String> tokenRequestSecrets;
+    private TokenRequestStore tokenRequestStore;
     
     public TwitterAuthController(TwitterApplication twitterApplication, 
             AccessTokenProcessor accessTokenProcessor,
             UserStore userStore, 
             NewUserSupplier userSupplier,
+            TokenRequestStore tokenRequestStore,
             QueryResultWriter<OAuthRequest> oauthRequestResultWriter,
             QueryResultWriter<OAuthResult> oauthResultResultWriter) {
         super();
@@ -68,9 +70,9 @@ public class TwitterAuthController {
         );
         this.userStore = userStore;
         this.userSupplier = userSupplier;
+        this.tokenRequestStore = tokenRequestStore;
         this.oauthRequestResultWriter = oauthRequestResultWriter;
         this.oauthResultResultWriter = oauthResultResultWriter;
-        this.tokenRequestSecrets = Maps.newHashMap();
     }
 
     // TODO restrict callback URLs?
@@ -87,10 +89,12 @@ public class TwitterAuthController {
             }
             RequestToken requestToken = twitter.getOAuthRequestToken(callbackUrl);
             OAuthRequest oauthRequest = OAuthRequest.builder()
+                    .withNamespace(UserNamespace.TWITTER)
                     .withAuthUrl(requestToken.getAuthenticationURL())
                     .withToken(requestToken.getToken())
+                    .withSecret(requestToken.getTokenSecret())
                     .build();
-            tokenRequestSecrets.put(requestToken.getToken(), requestToken.getTokenSecret());
+            tokenRequestStore.store(oauthRequest);
             QueryResult<OAuthRequest> queryResult = QueryResult.singleResult(oauthRequest, QueryContext.standard());
 
             oauthRequestResultWriter.write(queryResult, writer);
@@ -105,15 +109,15 @@ public class TwitterAuthController {
             @RequestParam String oauthVerifier,
             @RequestParam(required = false) String targetUri) throws UnsupportedFormatException, NotAcceptableException, IOException {
         Twitter twitter = twitterFactory.getInstance();
-        if (!tokenRequestSecrets.containsKey(oauthToken)) {
+        Optional<OAuthRequest> storedOAuthRequest = tokenRequestStore.remove(UserNamespace.TWITTER, oauthToken);
+        if (!storedOAuthRequest.isPresent()) {
             response.setStatus(401);
             return;
         }
         
-        RequestToken requestToken = new RequestToken(oauthToken, tokenRequestSecrets.get(oauthToken));
+        RequestToken requestToken = new RequestToken(oauthToken, storedOAuthRequest.get().getSecret());
         ResponseWriter responseWriter = writerResolver.writerFor(request, response);
-
-        tokenRequestSecrets.remove(requestToken.getToken());
+        
         try {
             AccessToken token = twitter.getOAuthAccessToken(requestToken, oauthVerifier);
            

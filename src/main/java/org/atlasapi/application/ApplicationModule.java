@@ -14,6 +14,8 @@ import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.www.ApplicationWebModule;
 import org.atlasapi.persistence.application.ApplicationPersistenceModule;
 import org.atlasapi.persistence.application.SourceRequestStore;
+import org.atlasapi.persistence.auth.MongoTokenRequestStore;
+import org.atlasapi.persistence.auth.TokenRequestStore;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,10 +58,12 @@ public class ApplicationModule {
     }
     
     public @Bean TwitterAuthController twitterAuthController() {
+        TokenRequestStore tokenRequestStore = new MongoTokenRequestStore(adminMongo);
         return new TwitterAuthController(new TwitterApplication(consumerKey, consumerSecret), 
                 accessTokenProcessor(),
                 userStore(), 
                 new NewUserSupplier(new MongoSequentialIdGenerator(adminMongo, "users")),
+                tokenRequestStore,
                 new OAuthRequestQueryResultWriter(new OAuthRequestListWriter()),
                 new OAuthResultQueryResultWriter(new OAuthResultListWriter())
                 );
