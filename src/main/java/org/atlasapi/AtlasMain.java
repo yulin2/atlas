@@ -4,8 +4,11 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.security.ProtectionDomain;
 import java.text.DecimalFormat;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 
+import org.atlasapi.util.jetty.InstrumentedQueuedThreadPool;
 import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -16,13 +19,14 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.Scheduler;
 import org.eclipse.jetty.webapp.WebAppContext;
 
-import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.jetty9.InstrumentedQueuedThreadPool;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 
 public class AtlasMain {
 
-    private static final String METRIC_METHOD_NAME = "getMetric";
+    private static final String METRIC_METHOD_NAME = "getMetrics";
     private static final String SERVER_REQUEST_THREADS_OVERRIDE_PROPERTY_NAME = "request.threads";
     private static final int DEFAULT_SERVER_REQUEST_THREADS = 100;
     private static final String SERVER_REQUEST_THREAD_PREFIX = "api-request-thread";
@@ -37,16 +41,18 @@ public class AtlasMain {
     private static final int MONITORING_DEFAULT_PORT = 8081;
     private static final String MONITORING_PORT_OVERRIDE_PROPERTY_NAME = "monitoring.port";
     
-    private static final String METRIC_UTILIZATION_GAUGE_NAME = "utilization";
-    
     public static final String CONTEXT_ATTRIBUTE = "ATLAS_MAIN";
     private static final String LOCAL_WAR_DIR = "./src/main/webapp";
 
     private static final boolean IS_PROCESSING = Boolean.parseBoolean(
                                                     System.getProperty("processing.config")
                                                  );
+    
+    private static final String SAMPLING_PERIOD_PROPERTY = "samplingPeriodMinutes";
+    private static final int DEFAULT_SAMPLING_PERIOD_MINUTES = 3;
 
     private final MetricRegistry metrics = new MetricRegistry();
+
     
     public static void main(String[] args) throws Exception {
         if (IS_PROCESSING) {
@@ -113,7 +119,8 @@ public class AtlasMain {
     }
     
     private QueuedThreadPool createRequestThreadPool(int maxThreads, String threadNamePrefix) {
-        QueuedThreadPool pool = new InstrumentedQueuedThreadPool(metrics, maxThreads);
+        QueuedThreadPool pool = new InstrumentedQueuedThreadPool(metrics, getSamplingPeriod(), 
+                maxThreads);
         pool.setName(threadNamePrefix);
         
         return pool;
@@ -151,20 +158,34 @@ public class AtlasMain {
         }
         return defaultPort;
     }
+    
+    private int getSamplingPeriod() {
+        String customSamplingDuration = System.getProperty(SAMPLING_PERIOD_PROPERTY);
+        if (customSamplingDuration != null) {
+            return Integer.parseInt(customSamplingDuration);
+        }
+        return DEFAULT_SAMPLING_PERIOD_MINUTES;
+    }
 
     private int defaultPort() {
         return IS_PROCESSING ? PROCESSING_DEFAULT_PORT : API_DEFAULT_PORT;
     }
 
-    @SuppressWarnings("unchecked")
-    public String getMetric() {
-        Gauge<Double> gauge = metrics.getGauges().get(MetricRegistry.name(QueuedThreadPool.class, 
-                SERVER_REQUEST_THREAD_PREFIX + "." + METRIC_UTILIZATION_GAUGE_NAME));
-        Double value = gauge.getValue();
-        return new DecimalFormat("0.00").format(value);
+    public Map<String, String> getMetrics() {
+        DecimalFormat dpsFormat = new DecimalFormat("0.00");
+        
+        Builder<String, String> metricsResults = ImmutableMap.builder();
+        for (Entry<String, Histogram> entry : metrics.getHistograms().entrySet()) {
+            metricsResults.put(entry.getKey() + "-mean", dpsFormat.format(entry.getValue().getSnapshot().getMean()));
+            metricsResults.put(entry.getKey() + "-max", Long.toString(entry.getValue().getSnapshot().getMax()));
+            metricsResults.put(entry.getKey() + "-99th", dpsFormat.format(entry.getValue().getSnapshot().get99thPercentile()));
+        }
+        
+        return metricsResults.build();
     }
 
-    public static String getScalingMetric(Object atlasMain)
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getMetrics(Object atlasMain)
             throws IllegalArgumentException,
             SecurityException, IllegalAccessException, InvocationTargetException {
         Class<? extends Object> clazz = atlasMain.getClass();
@@ -174,7 +195,7 @@ public class AtlasMain {
         }
 
         try {
-            return (String) clazz.getDeclaredMethod(METRIC_METHOD_NAME).invoke(atlasMain);
+            return (Map<String, String>) clazz.getDeclaredMethod(METRIC_METHOD_NAME).invoke(atlasMain);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException(
                     "Couldn't find method " + METRIC_METHOD_NAME + ": Perhaps a mismatch between AtlasMain objects across classloaders?",

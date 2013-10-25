@@ -147,6 +147,7 @@
                         <configuration>
                             <tasks>
                                 <copy file="${project.build.directory}/classes/org/atlasapi/AtlasMain.class" todir="${project.build.directory}/${project.artifactId}/org/atlasapi/" />
+                                <copy file="${project.build.directory}/classes/org/atlasapi/util/jetty/InstrumentedQueuedThreadPool.class" todir="${project.build.directory}/${project.artifactId}/org/atlasapi/util/jetty" />
                             </tasks>
                         </configuration>
                         <goals>
