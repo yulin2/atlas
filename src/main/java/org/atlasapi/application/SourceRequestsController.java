@@ -4,20 +4,17 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.output.NotAcceptableException;
+import org.atlasapi.output.ErrorResultWriter;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
-import org.atlasapi.output.UnsupportedFormatException;
 import org.atlasapi.query.common.Query;
-import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.QueryExecutor;
-import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.QueryResult;
 import org.atlasapi.query.common.StandardQueryParser;
 import org.springframework.stereotype.Controller;
@@ -55,12 +52,18 @@ public class SourceRequestsController {
     
     @RequestMapping(value = {"/4.0/requests.*", "/4.0/requests/{id}.*"}, method = RequestMethod.GET)
     public void listSourceRequests(HttpServletRequest request, 
-            HttpServletResponse response) throws IOException, QueryParseException, QueryExecutionException {
+            HttpServletResponse response) throws IOException {
         ResponseWriter writer = null;
-        writer = writerResolver.writerFor(request, response);
-        Query<SourceRequest> sourcesQuery = queryParser.parse(request);
-        QueryResult<SourceRequest> queryResult = queryExecutor.execute(sourcesQuery);
-        resultWriter.write(queryResult, writer);
+        try {
+            writer = writerResolver.writerFor(request, response);
+            Query<SourceRequest> sourcesQuery = queryParser.parse(request);
+            QueryResult<SourceRequest> queryResult = queryExecutor.execute(sourcesQuery);
+            resultWriter.write(queryResult, writer);
+        } catch (Exception e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, writer, request, response);
+        }
+      
     }
   
     @RequestMapping(value = "/4.0/sources/{sid}/requests", method = RequestMethod.POST)
@@ -71,18 +74,23 @@ public class SourceRequestsController {
             @RequestParam String appUrl,
             @RequestParam String email,
             @RequestParam String reason,
-            @RequestParam String usageType) throws UnsupportedFormatException, NotAcceptableException, IOException {
+            @RequestParam String usageType) throws IOException {
 
         response.addHeader("Access-Control-Allow-Origin", "*");
-        Optional<Publisher> source =sourceIdCodec.decode(sid);
-        if (source.isPresent()) {
-            Id applicationId = Id.valueOf(idCodec.decode(appId));
-            UsageType usageTypeRequested = UsageType.valueOf(usageType.toUpperCase());
-            sourceRequestManager.createOrUpdateRequest(source.get(), usageTypeRequested,
+        try {
+            Optional<Publisher> source =sourceIdCodec.decode(sid);
+            if (source.isPresent()) {
+                Id applicationId = Id.valueOf(idCodec.decode(appId));
+                UsageType usageTypeRequested = UsageType.valueOf(usageType.toUpperCase());
+                sourceRequestManager.createOrUpdateRequest(source.get(), usageTypeRequested,
                     applicationId, appUrl, email, reason);
-        } else {
-            sendError(request, response,  404);
-        }      
+            } else {
+                throw new NotFoundException(null);
+            }
+        } catch (Exception e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, null, request, response);
+        }
     }
     
     @RequestMapping(value = "/4.0/requests/{rid}/approve", method = RequestMethod.POST)
@@ -90,18 +98,12 @@ public class SourceRequestsController {
             HttpServletResponse response,
             @PathVariable String rid) throws IOException {
         response.addHeader("Access-Control-Allow-Origin", "*");
-        Id requestId = Id.valueOf(idCodec.decode(rid));
         try {
+            Id requestId = Id.valueOf(idCodec.decode(rid));
             sourceRequestManager.approveSourceRequest(requestId);
-        } catch (NotFoundException e) {
-            sendError(request, response,  404);
+        } catch (Exception e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, null, request, response);
         }
     }
-    
-    public void sendError(HttpServletRequest request,
-            HttpServletResponse response,
-            int responseCode) throws IOException {
-        response.setStatus(responseCode);
-    }
-
 }

@@ -13,7 +13,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationSources;
-import org.atlasapi.application.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.ApplicationSourcesFetcher;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;

@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.ApplicationSourcesFetcher;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;

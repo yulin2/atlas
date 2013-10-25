@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationSources;
-import org.atlasapi.application.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.ApplicationSourcesFetcher;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.topic.PopularTopicIndex;
 import org.atlasapi.media.topic.Topic;

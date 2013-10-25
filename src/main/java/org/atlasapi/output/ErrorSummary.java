@@ -48,13 +48,15 @@ public class ErrorSummary {
 	}
 	
 	private static Map<Class<? extends Exception>, ErrorSummaryFactory<?>> factoryMap() {
-		return ImmutableMap.<Class<? extends Exception>, ErrorSummaryFactory<?>>of(
-			IllegalArgumentException.class, new DefaultErrorSummaryFactory("BAD_QUERY_ATTRIBUTE", HttpStatusCode.BAD_REQUEST),
-			MalformedDateTimeException.class, new DefaultErrorSummaryFactory("BAD_DATE_TIME_VALUE", HttpStatusCode.BAD_REQUEST),
-			NotFoundException.class, new DefaultErrorSummaryFactory("RESOURCE_NOT_FOUND", HttpStatusCode.NOT_FOUND),
-			NotAcceptableException.class, new DefaultErrorSummaryFactory("NOT_ACCEPTABLE", HttpStatusCode.NOT_ACCEPTABLE),
-			InvalidAnnotationException.class, new DefaultErrorSummaryFactory("BAD_ANNOTATION_VALUE", HttpStatusCode.BAD_REQUEST)
-	    );
+	    
+		return ImmutableMap.<Class<? extends Exception>, ErrorSummaryFactory<?>>builder()
+		    .put(IllegalArgumentException.class, new DefaultErrorSummaryFactory("BAD_QUERY_ATTRIBUTE", HttpStatusCode.BAD_REQUEST))
+		    .put(MalformedDateTimeException.class, new DefaultErrorSummaryFactory("BAD_DATE_TIME_VALUE", HttpStatusCode.BAD_REQUEST))
+		    .put(NotFoundException.class, new DefaultErrorSummaryFactory("RESOURCE_NOT_FOUND", HttpStatusCode.NOT_FOUND))
+		    .put(NotAcceptableException.class, new DefaultErrorSummaryFactory("NOT_ACCEPTABLE", HttpStatusCode.NOT_ACCEPTABLE))
+		    .put(InvalidAnnotationException.class, new DefaultErrorSummaryFactory("BAD_ANNOTATION_VALUE", HttpStatusCode.BAD_REQUEST))
+		    .put(NotAuthorizedException.class, new DefaultErrorSummaryFactory("UNAUTHORIZED", HttpStatusCode.UNAUTHORIZED))
+		    .build();
 	}
 
 	private final String id;

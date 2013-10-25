@@ -9,6 +9,9 @@ import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.output.ErrorResultWriter;
+import org.atlasapi.output.ErrorSummary;
+import org.atlasapi.output.NotAuthorizedException;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
@@ -58,30 +61,36 @@ public class SourcesController {
      * Post with app id and permission (read/write) required Params: "id":
      * "abc", "permission": "read"
      * @throws NotFoundException 
+     * @throws NotAuthorizedException If Oauth token not valid
      */
     @RequestMapping(value = "/4.0/sources/{sourceId}/applications", method = RequestMethod.POST)
     public void writeSourceForApplication(HttpServletRequest request, 
             HttpServletResponse response,
             @PathVariable String sourceId,
             @RequestParam String id,
-            @RequestParam String permission) throws NotFoundException {
+            @RequestParam String permission) throws IOException {
         response.addHeader("Access-Control-Allow-Origin", "*");
-        Optional<Publisher> source = sourceIdCodec.decode(sourceId);
-        if (source.isPresent()) {
-            Id applicationId = Id.valueOf(idCodec.decode(id));
-            Permission permissionType = Permission.valueOf(permission.toUpperCase());
-            Application existing = applicationStore.applicationFor(applicationId).get();
-            Application modified = null;
-            if (permissionType.equals(Permission.READ)) {
-                modified = existing.copyWithSourceEnabled(source.get());
-            } else if (permissionType.equals(Permission.WRITE)) {
-                modified = existing.copyWithAddedWritingSource(source.get());
+        try {
+            Optional<Publisher> source = sourceIdCodec.decode(sourceId);
+            if (source.isPresent()) {
+                Id applicationId = Id.valueOf(idCodec.decode(id));
+                Permission permissionType = Permission.valueOf(permission.toUpperCase());
+                Application existing = applicationStore.applicationFor(applicationId).get();
+                Application modified = null;
+                if (permissionType.equals(Permission.READ)) {
+                    modified = existing.copyWithSourceEnabled(source.get());
+                } else if (permissionType.equals(Permission.WRITE)) {
+                    modified = existing.copyWithAddedWritingSource(source.get());
+                }
+                if (modified != null) {
+                    applicationStore.updateApplication(modified);
+                }
+            } else {
+                throw new NotFoundException(null);
             }
-            if (modified != null) {
-                applicationStore.updateApplication(modified);
-            }
-        } else {
-            throw new NotFoundException(null);
+        } catch (Exception e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, null, request, response);
         }
     }
 
@@ -90,30 +99,36 @@ public class SourcesController {
      * (read/write) from an app on a source. Post with app id and permission
      * needed.
      * @throws QueryExecutionException 
+     * @throws NotAuthorizedException 
      */
     @RequestMapping(value = "/4.0/sources/{sourceId}/applications", method = RequestMethod.DELETE)
     public void deleteSourceForApplication(HttpServletRequest request, 
             HttpServletResponse response,
             @PathVariable String sourceId,
             @RequestParam String id,
-            @RequestParam String permission) throws QueryExecutionException {
+            @RequestParam String permission) throws IOException {
         response.addHeader("Access-Control-Allow-Origin", "*");
-        Optional<Publisher> source = sourceIdCodec.decode(sourceId);
-        if (source.isPresent()) {
-            Id applicationId = Id.valueOf(idCodec.decode(id));
-            Permission permissionType = Permission.valueOf(permission.toUpperCase());
-            Application existing = applicationStore.applicationFor(applicationId).get();
-            Application modified = null;
-            if (permissionType.equals(Permission.READ)) {
-                modified = existing.copyWithSourceDisabled(source.get());
-            } else if (permissionType.equals(Permission.WRITE)) {
-                modified = existing.copyWithRemovedWritingSource(source.get());
+        try {
+            Optional<Publisher> source = sourceIdCodec.decode(sourceId);
+            if (source.isPresent()) {
+                Id applicationId = Id.valueOf(idCodec.decode(id));
+                Permission permissionType = Permission.valueOf(permission.toUpperCase());
+                Application existing = applicationStore.applicationFor(applicationId).get();
+                Application modified = null;
+                if (permissionType.equals(Permission.READ)) {
+                    modified = existing.copyWithSourceDisabled(source.get());
+                } else if (permissionType.equals(Permission.WRITE)) {
+                    modified = existing.copyWithRemovedWritingSource(source.get());
+                }
+                if (modified != null) {
+                    applicationStore.updateApplication(modified);
+                }
+            } else {
+                throw new QueryExecutionException("No source with id " + sourceId);
             }
-            if (modified != null) {
-                applicationStore.updateApplication(modified);
-            }
-        } else {
-            throw new QueryExecutionException("No source with id " + sourceId);
+        } catch (Exception e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, null, request, response);
         }
     }
 
@@ -121,6 +136,7 @@ public class SourcesController {
      * POST /4.0/sources/:sourceId/applications/readers/:appId/state Changes
      * state of app for source, e.g. "available", "requested". Params: "state":
      * "available"
+     * @throws NotAuthorizedException 
      * @throws Exception 
      */
     @RequestMapping(value = "/4.0/sources/{sourceId}/applications/readers/{id}/state", method = RequestMethod.POST)
@@ -128,17 +144,22 @@ public class SourcesController {
             HttpServletResponse response,
             @PathVariable String sourceId,
             @PathVariable String id,
-            @RequestParam String state) throws QueryExecutionException {
+            @RequestParam String state) throws IOException {
         response.addHeader("Access-Control-Allow-Origin", "*");
-        Optional<Publisher> source = sourceIdCodec.decode(sourceId);
-        if (source.isPresent()) {
-            Id applicationId = Id.valueOf(idCodec.decode(id));
-            SourceState requestedState = SourceState.valueOf(state.toUpperCase());
-            Application existing = applicationStore.applicationFor(applicationId).get();
-            applicationStore.updateApplication(
+        try {
+            Optional<Publisher> source = sourceIdCodec.decode(sourceId);
+            if (source.isPresent()) {
+                Id applicationId = Id.valueOf(idCodec.decode(id));
+                SourceState requestedState = SourceState.valueOf(state.toUpperCase());
+                Application existing = applicationStore.applicationFor(applicationId).get();
+                applicationStore.updateApplication(
                     existing.copyWithReadSourceState(source.get(), requestedState));
-        } else {
-            throw new QueryExecutionException("No source with id " + sourceId);
+            } else {
+                throw new QueryExecutionException("No source with id " + sourceId);
+            }
+        } catch (Exception e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, null, request, response);
         }
     }
     
@@ -146,8 +167,13 @@ public class SourcesController {
     public void listSources(HttpServletRequest request,
             HttpServletResponse response) throws QueryParseException, QueryExecutionException, IOException {
         ResponseWriter writer = writerResolver.writerFor(request, response);
-        Query<Publisher> sourcesQuery = queryParser.parse(request);
-        QueryResult<Publisher> queryResult = queryExecutor.execute(sourcesQuery);
-        resultWriter.write(queryResult, writer);
+        try {
+            Query<Publisher> sourcesQuery = queryParser.parse(request);
+            QueryResult<Publisher> queryResult = queryExecutor.execute(sourcesQuery);
+            resultWriter.write(queryResult, writer);
+        } catch (Exception e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, writer, request, response);
+        }
     }
 }
