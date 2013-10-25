@@ -16,18 +16,15 @@ import org.atlasapi.input.ReadException;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.query.common.Query;
-import org.atlasapi.output.NotAcceptableException;
-import org.atlasapi.output.NotAuthorizedException;
-import org.atlasapi.output.NotFoundException;
+import org.atlasapi.output.ErrorResultWriter;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
-import org.atlasapi.output.UnsupportedFormatException;
 import org.atlasapi.persistence.application.ApplicationStore;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.QueryExecutor;
-import org.atlasapi.query.common.QueryParseException;
 import org.atlasapi.query.common.QueryParser;
 import org.atlasapi.query.common.QueryResult;
 import org.slf4j.Logger;
@@ -42,7 +39,7 @@ import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 @Controller
-public class ApplicationsController extends AbstractAdminController {
+public class ApplicationsController {
 
     private static Logger log = LoggerFactory.getLogger(ApplicationsController.class);
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
@@ -69,7 +66,6 @@ public class ApplicationsController extends AbstractAdminController {
             SourceIdCodec sourceIdCodec,
             ApplicationStore applicationStore,
             UserFetcher userFetcher) {
-        super(userFetcher);
         this.requestParser = requestParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
@@ -82,73 +78,92 @@ public class ApplicationsController extends AbstractAdminController {
     @RequestMapping({ "/4.0/applications/{aid}.*", "/4.0/applications.*" })
     public void outputAllApplications(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
-            checkAccess(request);
             Query<Application> applicationsQuery = requestParser.parse(request);
             QueryResult<Application> queryResult = queryExecutor.execute(applicationsQuery);
             resultWriter.write(queryResult, writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
-            sendError(request, response, writer, e);
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, writer, request, response);
         }
     }
 
     @RequestMapping(value = "/4.0/applications.*", method = RequestMethod.POST)
     public void writeApplication(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, UnsupportedFormatException, NotAcceptableException, ReadException, NotAuthorizedException {
-        ResponseWriter writer = writerResolver.writerFor(request, response);
-        checkAccess(request);
-        Application application = deserialize(new InputStreamReader(request.getInputStream()), Application.class);
-        if (application.getId() != null) {
-            Optional<Application> existing = applicationStore.applicationFor(application.getId());
-            application = application.copy().withSlug(existing.get().getSlug()).build();
-            application = applicationStore.updateApplication(application);
-        } else {
-            // New application
-            application = applicationStore.createApplication(application);
-        }
-        QueryResult<Application> queryResult = QueryResult.singleResult(application, QueryContext.standard());
+            throws IOException {
+        ResponseWriter writer = null;
+        try {
+            writer = writerResolver.writerFor(request, response);
+            Application application = deserialize(new InputStreamReader(request.getInputStream()), Application.class);
+            if (application.getId() != null) {
+                Optional<Application> existing = applicationStore.applicationFor(application.getId());
+                application = application.copy().withSlug(existing.get().getSlug()).build();
+                application = applicationStore.updateApplication(application);
+            } else {
+                // New application
+                application = applicationStore.createApplication(application);
+            }
+            QueryResult<Application> queryResult = QueryResult.singleResult(application, QueryContext.standard());
 
-        resultWriter.write(queryResult, writer);
+            resultWriter.write(queryResult, writer);
+        } catch (Exception e) {
+            log.error("Request exception " + request.getRequestURI(), e);
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, writer, request, response);
+        }
     }
 
     @RequestMapping(value = "/4.0/applications/{aid}/sources", method = RequestMethod.POST)
     public void writeApplicationSources(HttpServletRequest request, 
             HttpServletResponse response,
             @PathVariable String aid)
-            throws IOException, ReadException, NotFoundException, QueryParseException, NotAuthorizedException {
+            throws IOException {
         response.addHeader("Access-Control-Allow-Origin", "*");
-        checkAccess(request);
         Id applicationId = Id.valueOf(idCodec.decode(aid));
-        ApplicationSources sources = deserialize(new InputStreamReader(
-                request.getInputStream()), ApplicationSources.class);
-        Application existing = applicationStore.applicationFor(applicationId).get();
-        Application modified = existing.copyWithSources(sources);
-        applicationStore.updateApplication(modified);
+        ApplicationSources sources;
+        try {
+            sources = deserialize(new InputStreamReader(
+                    request.getInputStream()), ApplicationSources.class);
+            Application existing = applicationStore.applicationFor(applicationId).get();
+            Application modified = existing.copyWithSources(sources);
+            applicationStore.updateApplication(modified);
+        } catch (ReadException e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, null, request, response);
+        }
     }
     
     @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.POST)
     public void setPrecedenceOrder(HttpServletRequest request, 
             HttpServletResponse response,
-            @PathVariable String aid) throws NotFoundException, IOException, ReadException, QueryExecutionException, NotAuthorizedException  {
+            @PathVariable String aid) throws IOException {
         response.addHeader("Access-Control-Allow-Origin", "*");
-        checkAccess(request);
         Id applicationId = Id.valueOf(idCodec.decode(aid));
-        PrecedenceOrdering ordering = deserialize(new InputStreamReader(request.getInputStream()), PrecedenceOrdering.class);
-        List<Publisher> sourceOrder = getSourcesFrom(ordering);
-        Application existing = applicationStore.applicationFor(applicationId).get();
-        applicationStore.updateApplication(existing.copyWithReadSourceOrder(sourceOrder));
+        PrecedenceOrdering ordering;
+        try {
+            ordering = deserialize(new InputStreamReader(request.getInputStream()), PrecedenceOrdering.class);
+            List<Publisher> sourceOrder;
+            sourceOrder = getSourcesFrom(ordering);
+            Application existing = applicationStore.applicationFor(applicationId).get();
+            applicationStore.updateApplication(existing.copyWithReadSourceOrder(sourceOrder));
+        } catch (ReadException e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, null, request, response);
+        } catch (QueryExecutionException e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, null, request, response);
+        }
+      
     }
     
     @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.DELETE)
     public void disablePrecedence(HttpServletRequest request, 
             HttpServletResponse response,
-            @PathVariable String aid) throws QueryParseException, NotFoundException, NotAuthorizedException {
+            @PathVariable String aid) {
         response.addHeader("Access-Control-Allow-Origin", "*");
-        checkAccess(request);
         Id applicationId = Id.valueOf(idCodec.decode(aid));
         Application existing = applicationStore.applicationFor(applicationId).get();
         applicationStore.updateApplication(existing.copyWithPrecedenceDisabled());

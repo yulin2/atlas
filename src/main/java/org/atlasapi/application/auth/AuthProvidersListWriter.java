@@ -13,7 +13,7 @@ public class AuthProvidersListWriter implements EntityListWriter<OAuthProvider> 
     public void write(OAuthProvider entity, FieldWriter writer, OutputContext ctxt)
             throws IOException {
         writer.writeField("namespace", entity.getNamespace().name().toLowerCase());
-        writer.writeField("prompt", entity.getPrompt());
+        writer.writeField("prompt", entity.getLoginPromptMessage());
         writer.writeField("authRequestUrl", entity.getAuthRequestUrl());
         writer.writeField("image", entity.getImage());
     }

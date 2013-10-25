@@ -106,7 +106,7 @@ public class TwitterAuthController {
             @RequestParam String oauthVerifier,
             @RequestParam(required = false) String targetUri) throws UnsupportedFormatException, NotAcceptableException, IOException {
         Twitter twitter = twitterFactory.getInstance();
-        Optional<OAuthRequest> storedOAuthRequest = tokenRequestStore.remove(UserNamespace.TWITTER, oauthToken);
+        Optional<OAuthRequest> storedOAuthRequest = tokenRequestStore.lookupAndRemove(UserNamespace.TWITTER, oauthToken);
         if (!storedOAuthRequest.isPresent()) {
             response.setStatus(401);
             return;

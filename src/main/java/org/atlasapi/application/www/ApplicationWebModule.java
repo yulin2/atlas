@@ -12,6 +12,7 @@ import org.atlasapi.application.SourcesController;
 import org.atlasapi.application.SourcesQueryExecutor;
 import org.atlasapi.application.auth.ApiKeySourcesFetcher;
 import org.atlasapi.application.auth.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.OAuthInterceptor;
 import org.atlasapi.application.auth.OAuthTokenUserFetcher;
 import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.model.deserialize.IdDeserializer;
@@ -48,8 +49,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
@@ -112,6 +115,22 @@ public class ApplicationWebModule {
                 userFetcher());
     }
     
+    public @Bean DefaultAnnotationHandlerMapping controllerMappings() {
+        DefaultAnnotationHandlerMapping controllerClassNameHandlerMapping = new DefaultAnnotationHandlerMapping();
+        Object[] interceptors = { getAuthenticationInterceptor() };
+        controllerClassNameHandlerMapping.setInterceptors(interceptors);
+        return controllerClassNameHandlerMapping;
+    }
+    
+    @Bean OAuthInterceptor getAuthenticationInterceptor() {
+        OAuthInterceptor interceptor =  new OAuthInterceptor(userFetcher());
+        interceptor.setUrlsToProtect(ImmutableSet.of(
+                "/4.0/applications",
+                "/4.0/sources",
+                "/4.0/requests"));
+        return interceptor;
+    }
+    
     @Bean 
     public SourcesController sourcesController() {
         return new SourcesController(sourcesQueryParser(), 
@@ -119,8 +138,7 @@ public class ApplicationWebModule {
                 new SourcesQueryResultWriter(new SourceWithIdWriter(sourceIdCodec, "source", "sources")),
                 idCodec,
                 sourceIdCodec,
-                applicationStore,
-                userFetcher());
+                applicationStore);
     }
     
     @Bean
@@ -134,8 +152,7 @@ public class ApplicationWebModule {
                 new SourceRequestsQueryResultsWriter(new SourceRequestListWriter(sourceIdCodec, idCodec)),
                 manager,
                 idCodec,
-                sourceIdCodec,
-                userFetcher());
+                sourceIdCodec);
     }
     
     private StandardQueryParser<Application> applicationQueryParser() {

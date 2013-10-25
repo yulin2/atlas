@@ -8,7 +8,7 @@ import com.metabroadcast.common.social.model.UserRef;
 
 public interface UserFetcher {
 	
-	Optional<UserRef> userFor(HttpServletRequest request);
+    Optional<UserRef> userFor(HttpServletRequest request);
 
     ImmutableSet<String> getParameterNames();
 
