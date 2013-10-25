@@ -1,8 +1,6 @@
 package org.atlasapi.application.auth.twitter;
 
 import java.io.IOException;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.model.auth.OAuthProvider;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.social.auth.credentials.AuthToken;
 import com.metabroadcast.common.social.model.UserRef;
@@ -125,6 +122,7 @@ public class TwitterAuthController {
             Maybe<UserRef> userRef = accessTokenProcessor.process(new AuthToken(token.getToken(), token.getTokenSecret(), UserNamespace.TWITTER, null));
             OAuthResult oauthResult;
             if (userRef.hasValue()) {
+                // Make sure we have a user 
                 User user = getUser(userRef.requireValue());
                 oauthResult = OAuthResult.builder()
                         .withSuccess(true)
