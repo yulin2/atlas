@@ -71,9 +71,9 @@ public class C4PmlsdModule {
     @PostConstruct
     public void startBackgroundTasks() {
         if (tasksEnabled) {
-            scheduler.schedule(pcC4PmlsdEpgUpdater().withName("C4 PMLSD Epg Updater (15 day)"), TWO_HOURS);
+            scheduler.schedule(pcC4PmlsdEpgUpdater().withName("C4 PMLSD Epg PC Updater (15 day)"), TWO_HOURS);
             scheduler.schedule(pcC4PmlsdAtozUpdater().withName("C4 PMLSD 4OD PC Updater"), BRAND_UPDATE_TIME);
-            scheduler.schedule(xbox4PmlsdEpgUpdater().withName("C4 PMLSC Epg Updater (15 day)"), TWO_HOURS_WITH_OFFSET);
+            scheduler.schedule(xbox4PmlsdEpgUpdater().withName("C4 PMLSC Epg XBox Updater (15 day)"), TWO_HOURS_WITH_OFFSET);
             scheduler.schedule(xboxC4PmlsdAtozUpdater().withName("C4 PMLSD 4OD XBox Updater"), XBOX_UPDATE_TIME);
             log.info("C4 update scheduled tasks installed");
         }
@@ -106,7 +106,8 @@ public class C4PmlsdModule {
 	@Bean public C4EpgChannelDayUpdater pcC4PlmsdEpgChannelDayUpdater() {
 	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(SOURCE, scheduleResolver, contentResolver, pmlsdLastUpdatedSettingContentWriter());
 	    return new C4EpgChannelDayUpdater(new C4EpgClient(c4HttpsClient()), pmlsdLastUpdatedSettingContentWriter(),
-                contentResolver, c4PmlsdBrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()), trimmer);
+                contentResolver, c4PmlsdBrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()), trimmer, 
+                Optional.<String>absent());
 	}
 	
 	@Bean public C4EpgUpdater xbox4PmlsdEpgUpdater() {
@@ -116,7 +117,8 @@ public class C4PmlsdModule {
     @Bean public C4EpgChannelDayUpdater xboxC4PlmsdEpgChannelDayUpdater() {
         ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(SOURCE, scheduleResolver, contentResolver, pmlsdLastUpdatedSettingContentWriter());
         return new C4EpgChannelDayUpdater(new C4EpgClient(c4HttpsClient()), pmlsdLastUpdatedSettingContentWriter(),
-                contentResolver, c4PmlsdBrandFetcher(Optional.of(Platform.XBOX),Optional.of(P06_PLATFORM)), trimmer);
+                contentResolver, c4PmlsdBrandFetcher(Optional.of(Platform.XBOX),Optional.of(P06_PLATFORM)), trimmer, 
+                Optional.of(P06_PLATFORM));
     }
     
 	@Bean protected C4AtoZAtomContentUpdateTask pcC4PmlsdAtozUpdater() {

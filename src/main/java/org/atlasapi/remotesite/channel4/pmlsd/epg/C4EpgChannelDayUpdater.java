@@ -42,10 +42,13 @@ public class C4EpgChannelDayUpdater {
     private final C4EpgEntryContentExtractor epgEntryContentExtractor;
     private final BroadcastTrimmer trimmer;
     private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Optional<String> platform;
     
-    public C4EpgChannelDayUpdater(RemoteSiteClient<List<C4EpgEntry>> scheduleClient, ContentWriter writer, ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer) {
+    public C4EpgChannelDayUpdater(RemoteSiteClient<List<C4EpgEntry>> scheduleClient, ContentWriter writer, ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer, 
+            Optional<String> platform) {
         this.scheduleClient = scheduleClient;
         this.writer = writer;
+        this.platform = platform;
         this.epgEntryContentExtractor = new C4EpgEntryContentExtractor(resolver, brandUpdater);
         this.trimmer = trimmer;
     }
@@ -73,7 +76,11 @@ public class C4EpgChannelDayUpdater {
     }
     
     private String uriFor(String channelKey, LocalDate scheduleDay) {
-        return String.format(epgUriPattern, scheduleDay.toString("yyyy/MM/dd"), channelKey);
+        String uri = String.format(epgUriPattern, scheduleDay.toString("yyyy/MM/dd"), channelKey);
+        if (platform.isPresent()) {
+            uri = uri + "?platform=" + platform.get();
+        }
+        return uri;
     }
     
     private List<C4EpgEntry> getSchedule(String uri) {
