@@ -40,12 +40,17 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
         
         UpdateProgress progress = UpdateProgress.START;
         for (int i = 0; i < elements.size(); i++) {
-            ItemRefAndBroadcast itemAndBroadcast = processor.process(elements.get(i));
-            if (itemAndBroadcast != null) {
-                broadcasts.add(itemAndBroadcast);
-                acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
-                progress = progress.reduce(UpdateProgress.SUCCESS);
-            } else {
+            try {
+                ItemRefAndBroadcast itemAndBroadcast = processor.process(elements.get(i));
+                if (itemAndBroadcast != null) {
+                    broadcasts.add(itemAndBroadcast);
+                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
+                    progress = progress.reduce(UpdateProgress.SUCCESS);
+                } else {
+                    progress = progress.reduce(UpdateProgress.FAILURE);
+                }
+            } catch (Exception e) {
+                log.error(String.format("Failed to process element: %s", elements.get(i).toXML()), e);
                 progress = progress.reduce(UpdateProgress.FAILURE);
             }
         }
