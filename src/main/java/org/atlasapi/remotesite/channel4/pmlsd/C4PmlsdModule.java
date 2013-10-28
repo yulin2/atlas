@@ -55,6 +55,7 @@ public class C4PmlsdModule {
 	private final static RepetitionRule BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
 	private final static RepetitionRule XBOX_UPDATE_TIME = RepetitionRules.daily(new LocalTime(1, 0, 0));
 	private final static RepetitionRule TWO_HOURS = RepetitionRules.every(Duration.standardHours(2));
+	private final static RepetitionRule TWO_HOURS_WITH_OFFSET = RepetitionRules.every(Duration.standardHours(2)).withOffset(Duration.standardHours(1));
 
 	private @Autowired SimpleScheduler scheduler;
 
@@ -70,8 +71,9 @@ public class C4PmlsdModule {
     @PostConstruct
     public void startBackgroundTasks() {
         if (tasksEnabled) {
-            scheduler.schedule(c4PmlsdEpgUpdater().withName("C4 PMLSD Epg Updater (15 day)"), TWO_HOURS);
+            scheduler.schedule(pcC4PmlsdEpgUpdater().withName("C4 PMLSD Epg Updater (15 day)"), TWO_HOURS);
             scheduler.schedule(pcC4PmlsdAtozUpdater().withName("C4 PMLSD 4OD PC Updater"), BRAND_UPDATE_TIME);
+            scheduler.schedule(xbox4PmlsdEpgUpdater().withName("C4 PMLSC Epg Updater (15 day)"), TWO_HOURS_WITH_OFFSET);
             scheduler.schedule(xboxC4PmlsdAtozUpdater().withName("C4 PMLSD 4OD XBox Updater"), XBOX_UPDATE_TIME);
             log.info("C4 update scheduled tasks installed");
         }
@@ -97,16 +99,26 @@ public class C4PmlsdModule {
         return new C4AtomApi(channelResolver);
     }
     
-	@Bean public C4EpgUpdater c4PmlsdEpgUpdater() {
-	    return new C4EpgUpdater(atomPmlsdApi(), c4PlmsdEpgChannelDayUpdater(), new DayRangeGenerator().withLookAhead(7).withLookBack(7));
+	@Bean public C4EpgUpdater pcC4PmlsdEpgUpdater() {
+	    return new C4EpgUpdater(atomPmlsdApi(), pcC4PlmsdEpgChannelDayUpdater(), new DayRangeGenerator().withLookAhead(7).withLookBack(7));
     }
 	
-	@Bean public C4EpgChannelDayUpdater c4PlmsdEpgChannelDayUpdater() {
+	@Bean public C4EpgChannelDayUpdater pcC4PlmsdEpgChannelDayUpdater() {
 	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(SOURCE, scheduleResolver, contentResolver, pmlsdLastUpdatedSettingContentWriter());
 	    return new C4EpgChannelDayUpdater(new C4EpgClient(c4HttpsClient()), pmlsdLastUpdatedSettingContentWriter(),
                 contentResolver, c4PmlsdBrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()), trimmer);
 	}
 	
+	@Bean public C4EpgUpdater xbox4PmlsdEpgUpdater() {
+        return new C4EpgUpdater(atomPmlsdApi(), xboxC4PlmsdEpgChannelDayUpdater(), new DayRangeGenerator().withLookAhead(7).withLookBack(21));
+    }
+    
+    @Bean public C4EpgChannelDayUpdater xboxC4PlmsdEpgChannelDayUpdater() {
+        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(SOURCE, scheduleResolver, contentResolver, pmlsdLastUpdatedSettingContentWriter());
+        return new C4EpgChannelDayUpdater(new C4EpgClient(c4HttpsClient()), pmlsdLastUpdatedSettingContentWriter(),
+                contentResolver, c4PmlsdBrandFetcher(Optional.of(Platform.XBOX),Optional.of(P06_PLATFORM)), trimmer);
+    }
+    
 	@Bean protected C4AtoZAtomContentUpdateTask pcC4PmlsdAtozUpdater() {
 		return new C4AtoZAtomContentUpdateTask(c4HttpsClient(), ATOZ_BASE, c4PmlsdBrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()));
 	}
@@ -127,7 +139,7 @@ public class C4PmlsdModule {
 	}
 	
 	@Bean protected C4EpgChannelDayUpdateController c4EpgChannelDayUpdateController() {
-	    return new C4EpgChannelDayUpdateController(atomPmlsdApi(), c4PlmsdEpgChannelDayUpdater());
+	    return new C4EpgChannelDayUpdateController(atomPmlsdApi(), pcC4PlmsdEpgChannelDayUpdater());
 	}
 	
     @Bean protected LastUpdatedSettingContentWriter pmlsdLastUpdatedSettingContentWriter() {
