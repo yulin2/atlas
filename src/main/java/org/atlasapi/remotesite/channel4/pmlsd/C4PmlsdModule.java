@@ -111,7 +111,7 @@ public class C4PmlsdModule {
 	}
 	
 	@Bean public C4EpgUpdater xbox4PmlsdEpgUpdater() {
-        return new C4EpgUpdater(atomPmlsdApi(), xboxC4PlmsdEpgChannelDayUpdater(), new DayRangeGenerator().withLookAhead(7).withLookBack(21));
+        return new C4EpgUpdater(atomPmlsdApi(), xboxC4PlmsdEpgChannelDayUpdater(), new DayRangeGenerator().withLookAhead(7).withLookBack(7));
     }
     
     @Bean public C4EpgChannelDayUpdater xboxC4PlmsdEpgChannelDayUpdater() {
