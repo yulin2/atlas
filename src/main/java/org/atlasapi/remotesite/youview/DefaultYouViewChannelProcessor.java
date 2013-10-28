@@ -63,7 +63,8 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
             try {
                 scheduleWriter.replaceScheduleBlock(Publisher.YOUVIEW, channel, broadcasts);
             } catch (IllegalArgumentException e) {
-                log.error(e.getMessage(), e);
+                log.error(String.format("Failed to update schedule for channel %s (%s) on %s: %s", 
+                        channel.getTitle(), getYouViewId(channel), startTime.toString(), e.getMessage()), e);
             }
         }
         
