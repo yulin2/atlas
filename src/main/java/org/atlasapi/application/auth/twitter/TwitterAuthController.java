@@ -150,15 +150,16 @@ public class TwitterAuthController {
         User user = userStore.userForRef(userRef).or(userSupplier);
         if (user.getUserRef() == null) {
             user = user.copy().withUserRef(userRef).build();
+            // Default personal information to that supplied by twitter
+            user = user.copy()
+                    .withScreenName(twitterUserDetails.getScreenName())
+                    .withFullName(twitterUserDetails.getFullName())
+                    .withProfileImage(twitterUserDetails.getProfileImage())
+                    .withWebsite(twitterUserDetails.getHomepageUrl())
+                    .withProfileComplete(false)
+                    .build();
+            userStore.store(user);
         }
-        // Update personal information from Twitter
-        user = user.copy()
-                .withScreenName(twitterUserDetails.getScreenName())
-                .withFullName(twitterUserDetails.getFullName())
-                .withProfileImage(twitterUserDetails.getProfileImage())
-                .withWebsite(twitterUserDetails.getHomepageUrl())
-                .build();
-        userStore.store(user);
     }
     
     private TwitterUserDetails getUserDetails(Twitter twitter, UserRef userRef) throws TwitterException {

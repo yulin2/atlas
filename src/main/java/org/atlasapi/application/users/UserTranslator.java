@@ -12,6 +12,7 @@ import com.mongodb.DBObject;
 
 public class UserTranslator {
     
+    private static final String PROFILE_COMPLETE_KEY = "profileComplete";
     private static final String PROFILE_IMAGE_KEY = "profileImage";
     private static final String WEBSITE_KEY = "website";
     private static final String EMAIL_KEY = "email";
@@ -46,6 +47,7 @@ public class UserTranslator {
         TranslatorUtils.from(dbo, APPS_KEY, user.getApplications());
         TranslatorUtils.from(dbo, MANAGES_KEY, Iterables.transform(user.getSources(), Publisher.TO_KEY));
         TranslatorUtils.from(dbo, ROLE_KEY, user.getRole().toString().toLowerCase());
+        TranslatorUtils.from(dbo,  PROFILE_COMPLETE_KEY, user.isProfileComplete());
         
         return dbo;
     }
@@ -53,6 +55,10 @@ public class UserTranslator {
     public User fromDBObject(DBObject dbo) {
         if (dbo == null) {
             return null;
+        }
+        boolean profileComplete = false;
+        if (TranslatorUtils.toBoolean(dbo, PROFILE_COMPLETE_KEY) != null) {
+            profileComplete = TranslatorUtils.toBoolean(dbo, PROFILE_COMPLETE_KEY);
         }
         
         return User.builder()
@@ -67,6 +73,7 @@ public class UserTranslator {
                 .withApplicationSlugs(TranslatorUtils.toSet(dbo, APPS_KEY))
                 .withSources(ImmutableSet.copyOf(Iterables.transform(TranslatorUtils.toSet(dbo, MANAGES_KEY),Publisher.FROM_KEY)))
                 .withRole(Role.valueOf(TranslatorUtils.toString(dbo, ROLE_KEY).toUpperCase()))
+                .withProfileComplete(profileComplete)
                 .build();    }
     
 }
