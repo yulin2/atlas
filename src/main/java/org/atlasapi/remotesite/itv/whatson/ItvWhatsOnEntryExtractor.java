@@ -1,26 +1,28 @@
 package org.atlasapi.remotesite.itv.whatson;
 
+import java.util.Map;
+
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.ImageAspectRatio;
 import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.Location;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.media.MimeType;
@@ -41,16 +43,10 @@ public class ItvWhatsOnEntryExtractor {
     private static final ImageAspectRatio PRIMARY_IMAGE_ASPECT_RATIO = ImageAspectRatio.SIXTEEN_BY_NINE;
     private static final MimeType PRIMARY_IMAGE_MIMETYPE = MimeType.IMAGE_JPG;
     
-    private final BiMap<String, String> channelMap;
+    private final Map<String, Channel> channelMap;
     
-    public ItvWhatsOnEntryExtractor() {
-        channelMap = ImmutableBiMap.<String, String>builder()
-                .put("ITV1", "http://www.itv.com/channels/itv1/london")
-                .put("ITV2", "http://www.itv.com/channels/itv2")
-                .put("ITV3", "http://www.itv.com/channels/itv3")
-                .put("ITV4", "http://www.itv.com/channels/itv4")
-                .put("CITV", "http://www.itv.com/channels/citv")
-                .build();
+    public ItvWhatsOnEntryExtractor(Map<String, Channel> channelMap) {
+        this.channelMap = ImmutableMap.copyOf(channelMap);
     }
    
     public Optional<Brand> toBrand(ItvWhatsOnEntry entry) {
@@ -141,7 +137,7 @@ public class ItvWhatsOnEntryExtractor {
     }
     
     public Broadcast toBroadcast(ItvWhatsOnEntry entry) {
-        String channelUri = channelMap.get(entry.getChannel());
+        String channelUri = channelMap.get(entry.getChannel()).getUri();
         DateTime start = entry.getBroadcastDate();
         DateTime end = entry.getBroadcastDate().plusSeconds(entry.getDuration().getTotalSeconds());
         Broadcast broadcast = new Broadcast(channelUri, start, end);
