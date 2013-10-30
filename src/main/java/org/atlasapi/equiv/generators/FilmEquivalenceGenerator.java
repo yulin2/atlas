@@ -97,7 +97,7 @@ public class FilmEquivalenceGenerator implements EquivalenceGenerator<Item> {
                 desc.appendText("%s (%s) scored 1.0 (IMDB match)", equivFilm.getTitle(), equivFilm.getCanonicalUri());
                 scores.addEquivalent(equivFilm, Score.valueOf(1.0));
                 
-            } else if ((film.getYear() != null && sameYear(film, equivFilm)) || acceptNullYears) { 
+            } else if ((film.getYear() != null && sameYear(film, equivFilm)) || (film.getYear() == null && acceptNullYears)) { 
                 Score score = Score.valueOf(titleMatcher.titleMatch(film, equivFilm));
                 desc.appendText("%s (%s) scored %s", equivFilm.getTitle(), equivFilm.getCanonicalUri(), score);
                 scores.addEquivalent(equivFilm, score);
