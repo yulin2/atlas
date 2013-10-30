@@ -80,7 +80,7 @@ public class AuthController {
             Optional<UserRef> currentUserRef = userFetcher.userFor(request);
             Optional<User> user = userStore.userForRef(currentUserRef.get());
             String userUrl = String.format(USER_URL, 
-                    idCodec.encode(BigInteger.valueOf(user.get().getId())),
+                    idCodec.encode(BigInteger.valueOf(user.get().getId().longValue())),
                     "json");
             Map<String, String> oauthParams = Maps.newHashMap();
             oauthParams.put(OAUTH_PROVIDER_QUERY_PARAMETER, oauthProvider);

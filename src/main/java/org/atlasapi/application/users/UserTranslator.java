@@ -1,5 +1,6 @@
 package org.atlasapi.application.users;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableSet;
@@ -36,7 +37,7 @@ public class UserTranslator {
         
         BasicDBObject dbo = new BasicDBObject();
         
-        TranslatorUtils.from(dbo, MongoConstants.ID, user.getId());
+        TranslatorUtils.from(dbo, MongoConstants.ID, user.getId().longValue());
         TranslatorUtils.from(dbo, USER_REF_KEY, userTranslator.toDBObject(user.getUserRef()));
         TranslatorUtils.from(dbo, SCREEN_NAME_KEY, user.getScreenName());
         TranslatorUtils.from(dbo, FULL_NAME_KEY, user.getFullName());
@@ -62,7 +63,7 @@ public class UserTranslator {
         }
         
         return User.builder()
-                .withId(TranslatorUtils.toLong(dbo, MongoConstants.ID))
+                .withId(Id.valueOf(TranslatorUtils.toLong(dbo, MongoConstants.ID)))
                 .withUserRef(userTranslator.fromDBObject(TranslatorUtils.toDBObject(dbo, USER_REF_KEY)))
                 .withScreenName(TranslatorUtils.toString(dbo, SCREEN_NAME_KEY))
                 .withFullName(TranslatorUtils.toString(dbo, FULL_NAME_KEY))

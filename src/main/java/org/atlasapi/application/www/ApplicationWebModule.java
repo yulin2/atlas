@@ -1,5 +1,7 @@
 package org.atlasapi.application.www;
 
+import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
+
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationsController;
 import org.atlasapi.application.ApplicationQueryExecutor;
@@ -20,8 +22,10 @@ import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.auth.www.AuthController;
 import org.atlasapi.application.model.deserialize.IdDeserializer;
 import org.atlasapi.application.model.deserialize.PublisherDeserializer;
+import org.atlasapi.application.model.deserialize.RoleDeserializer;
 import org.atlasapi.application.model.deserialize.SourceReadEntryDeserializer;
 import org.atlasapi.application.sources.SourceIdCodec;
+import org.atlasapi.application.users.Role;
 import org.atlasapi.application.users.User;
 import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.users.UsersController;
@@ -84,6 +88,7 @@ public class ApplicationWebModule {
     private final JsonDeserializer<DateTime> datetimeDeserializer = new JodaDateTimeSerializer();
     private final JsonDeserializer<SourceReadEntry> readsDeserializer = new SourceReadEntryDeserializer();
     private final JsonDeserializer<Publisher> publisherDeserializer = new PublisherDeserializer();
+    private final JsonDeserializer<Role> roleDeserializer = new RoleDeserializer();
     private @Autowired @Qualifier(value = "adminMongo") DatabasedMongo adminMongo;
     private @Autowired SourceRequestStore sourceRequestStore;
     private @Autowired ApplicationStore applicationStore;
@@ -96,6 +101,8 @@ public class ApplicationWebModule {
             .registerTypeAdapter(Id.class, idDeserializer)
             .registerTypeAdapter(SourceReadEntry.class, readsDeserializer)
             .registerTypeAdapter(Publisher.class, publisherDeserializer)
+            .registerTypeAdapter(Role.class, roleDeserializer)
+            .setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES)
             .create();
     
     @Bean
@@ -181,7 +188,10 @@ public class ApplicationWebModule {
         return new UsersController(usersQueryParser(),
                 new UsersQueryExecutor(userStore),
                 new UsersQueryResultWriter(usersListWriter()),
-                userFetcher());
+                gsonModelReader(),
+                idCodec,
+                userFetcher(),
+                userStore);
     }
     
     private StandardQueryParser<Application> applicationQueryParser() {

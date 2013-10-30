@@ -28,7 +28,7 @@ public class UsersListWriter implements EntityListWriter<User> {
     @Override
     public void write(User entity, FieldWriter writer, OutputContext ctxt) throws IOException {
         ctxt.startResource(Resource.APPLICATION);
-        writer.writeField("id", idCodec.encode(BigInteger.valueOf(entity.getId())));
+        writer.writeField("id", idCodec.encode(BigInteger.valueOf(entity.getId().longValue())));
         writer.writeObject(userRefWriter, entity.getUserRef(), ctxt);
         writer.writeField("screen_name", entity.getScreenName());
         writer.writeField("full_name", entity.getFullName());
