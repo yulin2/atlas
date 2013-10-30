@@ -358,7 +358,7 @@ public class EquivModule {
         return ContentEquivalenceUpdater.<Item> builder()
             .withGenerators(ImmutableSet.of(
                 new ContainerCandidatesItemEquivalenceGenerator(contentResolver, equivSummaryStore),
-                new FilmEquivalenceGenerator(searchResolver, acceptablePublishers, false)
+                new FilmEquivalenceGenerator(searchResolver, acceptablePublishers, true)
             ))
             .withScorers(ImmutableSet.of(
                 new TitleMatchingItemScorer(),
