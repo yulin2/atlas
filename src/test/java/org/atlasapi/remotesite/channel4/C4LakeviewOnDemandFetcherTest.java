@@ -51,14 +51,6 @@ public class C4LakeviewOnDemandFetcherTest {
         assertEquals("https://ais.channel4.com/asset/3573948", location.getUri());
         assertEquals(Platform.XBOX, location.getPolicy().getPlatform());
         
-        // I don't think the availability start time is set correctly, as it's from TXDate not
-        // availability start but I'm not touching it as Fred says it was done for a reason, 
-        // not that he could remember why, nor is it documented.
-        assertEquals(new DateTime(2013, DateTimeConstants.SEPTEMBER, 9, 22, 00, 0).withZone(DateTimeZone.forID("Europe/London")), 
-                location.getPolicy().getAvailabilityStart());
-        assertEquals(new DateTime(2013, DateTimeConstants.OCTOBER, 9, 22, 40, 0).withZone(DateTimeZone.forID("Europe/London")), 
-                location.getPolicy().getAvailabilityEnd());
-        
     }
     
 }
