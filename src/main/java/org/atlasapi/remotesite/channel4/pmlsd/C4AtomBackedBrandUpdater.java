@@ -148,8 +148,15 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         updateItem(existing, fetched);
         copyLastUpdated(fetched, existing);
         
-        existing.setEpisodeNumber(fetched.getEpisodeNumber());
-        existing.setSeriesNumber(fetched.getSeriesNumber());
+        Integer episodeNumber = fetched.getEpisodeNumber();
+        if (episodeNumber != null) {
+            existing.setEpisodeNumber(episodeNumber);
+        }
+        
+        Integer seriesNumber = fetched.getSeriesNumber();
+        if (seriesNumber != null) {
+            existing.setSeriesNumber(seriesNumber);
+        }
         
         return existing;
     }
