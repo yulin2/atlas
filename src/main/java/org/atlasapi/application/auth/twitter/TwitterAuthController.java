@@ -150,6 +150,8 @@ public class TwitterAuthController {
         User user = userStore.userForRef(userRef).or(userSupplier);
         if (user.getUserRef() == null) {
             user = user.copy().withUserRef(userRef).build();
+        }
+        if (user.getProfileImage() == null) {
             // Default personal information to that supplied by twitter
             user = user.copy()
                     .withScreenName(twitterUserDetails.getScreenName())
