@@ -26,12 +26,14 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.social.auth.credentials.AuthToken;
+import com.metabroadcast.common.social.model.TwitterUserDetails;
 import com.metabroadcast.common.social.model.UserRef;
 import com.metabroadcast.common.social.model.UserRef.UserNamespace;
 import com.metabroadcast.common.social.twitter.TwitterApplication;
 import com.metabroadcast.common.social.user.AccessTokenProcessor;
 import com.metabroadcast.common.url.UrlEncoding;
 
+import twitter4j.ResponseList;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -111,7 +113,6 @@ public class TwitterAuthController {
             response.setStatus(401);
             return;
         }
-        
         RequestToken requestToken = new RequestToken(oauthToken, storedOAuthRequest.get().getSecret());
         ResponseWriter responseWriter = writerResolver.writerFor(request, response);
         
@@ -123,7 +124,7 @@ public class TwitterAuthController {
             OAuthResult oauthResult;
             if (userRef.hasValue()) {
                 // Make sure we have a user 
-                User user = getUser(userRef.requireValue());
+                updateUser(twitter, userRef.requireValue());
                 oauthResult = OAuthResult.builder()
                         .withSuccess(true)
                         .withProvider(OAuthProvider.TWITTER)
@@ -144,13 +145,40 @@ public class TwitterAuthController {
         } 
     }
     
-    private User getUser(UserRef userRef) {
+    private void updateUser(Twitter twitter, UserRef userRef) throws TwitterException {
+        TwitterUserDetails twitterUserDetails = getUserDetails(twitter, userRef);
         User user = userStore.userForRef(userRef).or(userSupplier);
         if (user.getUserRef() == null) {
-            user.setUserRef(userRef);
+            user = user.copy().withUserRef(userRef).build();
+            // Default personal information to that supplied by twitter
+            user = user.copy()
+                    .withScreenName(twitterUserDetails.getScreenName())
+                    .withFullName(twitterUserDetails.getFullName())
+                    .withProfileImage(twitterUserDetails.getProfileImage())
+                    .withWebsite(twitterUserDetails.getHomepageUrl())
+                    .withProfileComplete(false)
+                    .build();
             userStore.store(user);
         }
-        return user;
+    }
+    
+    private TwitterUserDetails getUserDetails(Twitter twitter, UserRef userRef) throws TwitterException {
+        TwitterUserDetails userDetails = new TwitterUserDetails(userRef);
+      
+        long userIds[] = new long[]{ Long.valueOf(userRef.getUserId()) };
+        ResponseList<twitter4j.User> lookupResult = twitter.lookupUsers(userIds);
+        if (!lookupResult.isEmpty()) {
+            twitter4j.User twUser = lookupResult.get(0);
+            String homepageUrl = twUser.getURLEntity().getExpandedURL();
+            if (homepageUrl == null) {
+                homepageUrl = twUser.getURLEntity().getURL();
+            }
+            userDetails.withProfileImage(twUser.getProfileImageURLHttps());
+            userDetails.withHomepageUrl(homepageUrl);
+            userDetails.withScreenName(twUser.getScreenName());
+            userDetails.withFullName(twUser.getName());
+        }
+        return userDetails;
     }
 
 }

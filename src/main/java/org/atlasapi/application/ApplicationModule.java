@@ -52,11 +52,6 @@ public class ApplicationModule {
         return new MongoDBCredentialsStore(adminMongo);
     }
     
-    public @Bean
-    AuthController authController() {
-        return new AuthController(new AuthProvidersQueryResultWriter(new AuthProvidersListWriter()));
-    }
-    
     public @Bean TwitterAuthController twitterAuthController() {
         TokenRequestStore tokenRequestStore = new MongoTokenRequestStore(adminMongo);
         return new TwitterAuthController(new TwitterApplication(consumerKey, consumerSecret), 
