@@ -1,5 +1,7 @@
 package org.atlasapi.application.www;
 
+import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
+
 import org.atlasapi.application.Application;
 import org.atlasapi.application.ApplicationsController;
 import org.atlasapi.application.ApplicationQueryExecutor;
@@ -12,19 +14,30 @@ import org.atlasapi.application.SourcesController;
 import org.atlasapi.application.SourcesQueryExecutor;
 import org.atlasapi.application.auth.ApiKeySourcesFetcher;
 import org.atlasapi.application.auth.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.AuthProvidersListWriter;
+import org.atlasapi.application.auth.AuthProvidersQueryResultWriter;
 import org.atlasapi.application.auth.OAuthInterceptor;
 import org.atlasapi.application.auth.OAuthTokenUserFetcher;
 import org.atlasapi.application.auth.UserFetcher;
+import org.atlasapi.application.auth.www.AuthController;
 import org.atlasapi.application.model.deserialize.IdDeserializer;
 import org.atlasapi.application.model.deserialize.PublisherDeserializer;
+import org.atlasapi.application.model.deserialize.RoleDeserializer;
 import org.atlasapi.application.model.deserialize.SourceReadEntryDeserializer;
 import org.atlasapi.application.sources.SourceIdCodec;
+import org.atlasapi.application.users.Role;
+import org.atlasapi.application.users.User;
+import org.atlasapi.application.users.UserStore;
+import org.atlasapi.application.users.UsersController;
+import org.atlasapi.application.users.UsersQueryExecutor;
 import org.atlasapi.application.writers.ApplicationListWriter;
 import org.atlasapi.application.writers.ApplicationQueryResultWriter;
 import org.atlasapi.application.writers.SourceRequestListWriter;
 import org.atlasapi.application.writers.SourceRequestsQueryResultsWriter;
 import org.atlasapi.application.writers.SourceWithIdWriter;
 import org.atlasapi.application.writers.SourcesQueryResultWriter;
+import org.atlasapi.application.writers.UsersListWriter;
+import org.atlasapi.application.writers.UsersQueryResultWriter;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.input.GsonModelReader;
 import org.atlasapi.input.ModelReader;
@@ -75,17 +88,21 @@ public class ApplicationWebModule {
     private final JsonDeserializer<DateTime> datetimeDeserializer = new JodaDateTimeSerializer();
     private final JsonDeserializer<SourceReadEntry> readsDeserializer = new SourceReadEntryDeserializer();
     private final JsonDeserializer<Publisher> publisherDeserializer = new PublisherDeserializer();
+    private final JsonDeserializer<Role> roleDeserializer = new RoleDeserializer();
     private @Autowired @Qualifier(value = "adminMongo") DatabasedMongo adminMongo;
     private @Autowired SourceRequestStore sourceRequestStore;
     private @Autowired ApplicationStore applicationStore;
     private @Autowired CredentialsStore credentialsStore;
     private @Autowired AccessTokenChecker accessTokenChecker;
+    private @Autowired UserStore userStore;
     
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(DateTime.class, datetimeDeserializer)
             .registerTypeAdapter(Id.class, idDeserializer)
             .registerTypeAdapter(SourceReadEntry.class, readsDeserializer)
             .registerTypeAdapter(Publisher.class, publisherDeserializer)
+            .registerTypeAdapter(Role.class, roleDeserializer)
+            .setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES)
             .create();
     
     @Bean
@@ -102,6 +119,15 @@ public class ApplicationWebModule {
     SelectionBuilder selectionBuilder() {
         return Selection.builder().withDefaultLimit(50).withMaxLimit(100);
     }
+    
+
+    
+    public @Bean
+    AuthController authController() {
+        return new AuthController(new AuthProvidersQueryResultWriter(new AuthProvidersListWriter()),
+                userFetcher(), userStore, idCodec);
+    }
+    
     @Bean
     public ApplicationsController applicationAdminController() {
         return new ApplicationsController(
@@ -127,7 +153,9 @@ public class ApplicationWebModule {
         interceptor.setUrlsToProtect(ImmutableSet.of(
                 "/4.0/applications",
                 "/4.0/sources",
-                "/4.0/requests"));
+                "/4.0/requests",
+                "/4.0/users",
+                "/4.0/auth/user"));
         return interceptor;
     }
     
@@ -155,6 +183,17 @@ public class ApplicationWebModule {
                 sourceIdCodec);
     }
     
+    @Bean
+    public UsersController usersController() {
+        return new UsersController(usersQueryParser(),
+                new UsersQueryExecutor(userStore),
+                new UsersQueryResultWriter(usersListWriter()),
+                gsonModelReader(),
+                idCodec,
+                userFetcher(),
+                userStore);
+    }
+    
     private StandardQueryParser<Application> applicationQueryParser() {
         QueryContextParser contextParser = new QueryContextParser(configFetcher(), userFetcher(),
                 new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
@@ -176,6 +215,22 @@ public class ApplicationWebModule {
     @Bean
     protected EntityListWriter<Application> applicationListWriter() {
         return new ApplicationListWriter(idCodec, sourceIdCodec);
+    }
+    
+    private StandardQueryParser<User> usersQueryParser() {
+        QueryContextParser contextParser = new QueryContextParser(configFetcher(), userFetcher(),
+                new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
+
+        return new StandardQueryParser<User>(Resource.USER,
+                new QueryAttributeParser(ImmutableList.of(
+                    QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec))
+                    )),
+                idCodec, contextParser);
+    }
+    
+    @Bean
+    protected EntityListWriter<User> usersListWriter() {
+        return new UsersListWriter(idCodec);
     }
     
     public @Bean

@@ -10,7 +10,8 @@ public enum Resource {
     PERSON("person", "people"),
     APPLICATION("application", "applications"),
     SOURCE("source", "sources"),
-    SOURCE_REQUEST("source_request", "source_requests")
+    SOURCE_REQUEST("source_request", "source_requests"),
+    USER("user", "users")
     ;
     
     private final String singular;
