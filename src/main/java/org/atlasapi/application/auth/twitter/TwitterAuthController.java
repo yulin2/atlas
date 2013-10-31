@@ -165,8 +165,7 @@ public class TwitterAuthController {
     private TwitterUserDetails getUserDetails(Twitter twitter, UserRef userRef) throws TwitterException {
         TwitterUserDetails userDetails = new TwitterUserDetails(userRef);
       
-        long userIds[] = new long[1];
-        userIds[0] = Long.valueOf(userRef.getUserId());
+        long userIds[] = new long[]{ Long.valueOf(userRef.getUserId()) };
         ResponseList<twitter4j.User> lookupResult = twitter.lookupUsers(userIds);
         if (!lookupResult.isEmpty()) {
             twitter4j.User twUser = lookupResult.get(0);
