@@ -149,17 +149,20 @@ public class ApplicationWebModule {
     }
     
     @Bean OAuthInterceptor getAuthenticationInterceptor() {
-        OAuthInterceptor interceptor =  new OAuthInterceptor(userFetcher(), idCodec);
-        interceptor.setUrlsToProtect(ImmutableSet.of(
-                "/4.0/applications",
-                "/4.0/sources",
-                "/4.0/requests",
-                "/4.0/users",
-                "/4.0/auth/user"));
-        interceptor.setUrlsNotRequiringCompleteProfile(ImmutableSet.of(
+        return OAuthInterceptor
+                .builder()
+                .withUserFetcher(userFetcher())
+                .withIdCodec(idCodec)
+                .withUrlsToProtect(ImmutableSet.of(
+                        "/4.0/applications",
+                        "/4.0/sources",
+                        "/4.0/requests",
+                        "/4.0/users",
+                        "/4.0/auth/user"))
+               .withUrlsNotNeedingCompleteProfile(ImmutableSet.of(
                 "/4.0/auth/user",
-                "/4.0/users/:uid"));
-        return interceptor;
+                "/4.0/users/:uid"))
+                .build();
     }
     
     @Bean 
