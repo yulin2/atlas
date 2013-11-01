@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.SourceStatus.SourceState;
+import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
@@ -41,19 +42,22 @@ public class SourcesController {
     private final NumberToShortStringCodec idCodec;
     private final SourceIdCodec sourceIdCodec;
     private final ApplicationStore applicationStore;
+    private final UserFetcher userFetcher;
     
     public SourcesController(StandardQueryParser<Publisher> queryParser,
             QueryExecutor<Publisher> queryExecutor,
             QueryResultWriter<Publisher> resultWriter,
             NumberToShortStringCodec idCodec,
             SourceIdCodec sourceIdCodec,
-            ApplicationStore applicationStore) {
+            ApplicationStore applicationStore,
+            UserFetcher userFetcher) {
         this.queryParser = queryParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
         this.idCodec = idCodec;
         this.sourceIdCodec = sourceIdCodec;
         this.applicationStore = applicationStore;
+        this.userFetcher = userFetcher;
     }
 
     /**

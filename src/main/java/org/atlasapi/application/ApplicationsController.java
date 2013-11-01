@@ -50,6 +50,7 @@ public class ApplicationsController {
     private final NumberToShortStringCodec idCodec;
     private final SourceIdCodec sourceIdCodec;
     private final ApplicationStore applicationStore;
+    private final UserFetcher userFetcher;
     
     private static class PrecedenceOrdering {
         private List<String> ordering;
@@ -73,6 +74,7 @@ public class ApplicationsController {
         this.idCodec = idCodec;
         this.sourceIdCodec = sourceIdCodec;
         this.applicationStore = applicationStore;
+        this.userFetcher = userFetcher;
     }
 
     @RequestMapping({ "/4.0/applications/{aid}.*", "/4.0/applications.*" })

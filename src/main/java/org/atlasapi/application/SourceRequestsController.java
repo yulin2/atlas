@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
@@ -35,19 +37,22 @@ public class SourceRequestsController {
     private final SourceRequestManager sourceRequestManager;
     private final NumberToShortStringCodec idCodec;
     private final SourceIdCodec sourceIdCodec;
+    private final UserFetcher userFetcher;
     
     public SourceRequestsController(StandardQueryParser<SourceRequest> queryParser,
             QueryExecutor<SourceRequest> queryExecutor,
             QueryResultWriter<SourceRequest> resultWriter,
             SourceRequestManager sourceRequestManager,
             NumberToShortStringCodec idCodec,
-            SourceIdCodec sourceIdCodec) {
+            SourceIdCodec sourceIdCodec,
+            UserFetcher userFetcher) {
         this.queryParser = queryParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
         this.sourceRequestManager = sourceRequestManager;
         this.idCodec = idCodec;
         this.sourceIdCodec = sourceIdCodec;
+        this.userFetcher = userFetcher;
     }
     
     @RequestMapping(value = {"/4.0/requests.*", "/4.0/requests/{id}.*"}, method = RequestMethod.GET)
