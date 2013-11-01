@@ -1,5 +1,6 @@
 package org.atlasapi.application.auth;
 
+import java.io.IOException;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,9 +9,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.users.User;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
+import org.atlasapi.output.NotAcceptableException;
 import org.atlasapi.output.NotAuthorizedException;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
+import org.atlasapi.output.UnsupportedFormatException;
 import org.atlasapi.output.UserProfileIncompleteException;
 import org.elasticsearch.common.Preconditions;
 import org.slf4j.Logger;
@@ -45,49 +48,51 @@ public class OAuthInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
             Object handler) throws Exception {
-        try {
-            return authorized(request, response);
-        } catch (Exception exception) {
-            ResponseWriter writer = writerResolver.writerFor(request, response);
-            ErrorSummary summary = ErrorSummary.forException(exception);
-            new ErrorResultWriter().write(summary, writer, request, response);
-        }
-        return false;
-    }
-    
-    public boolean authorized(HttpServletRequest request, HttpServletResponse response) throws NotAuthorizedException, UserProfileIncompleteException {
-        if (urlsToProtect.isEmpty()) {
-            return true; // given we are aren't protecting things that are really private.
-        }
-        Optional<User> user = userFetcher.userFor(request);
         
-        if (authenticationIsRequired(request) && !user.isPresent()) {
-            throw new NotAuthorizedException();
-        }
-        if (user.isPresent() && !user.get().isProfileComplete() && requiresCompleteProfile(request, user.get())) {
-            throw new UserProfileIncompleteException();
+        Optional<User> user = userFetcher.userFor(request);
+        String uri = request.getRequestURI();
+        
+        if (!authorized(user, uri)) {
+            writeError(request, response, new NotAuthorizedException());
+            return false;
+        } else if (user.isPresent() && needsProfile(uri, user.get()) && !hasProfile(user)) {
+            writeError(request, response, new UserProfileIncompleteException());
+            return false;
         }
         return true;
     }
     
-    private boolean authenticationIsRequired(final HttpServletRequest request) {
-        String requestUri = request.getRequestURI();
-
-        for (String uri : urlsToProtect) {
-            if (requestUri.startsWith(uri)) {
-                return !exceptions.contains(requestUri);
-            }
-        }
-        return false;
+    private boolean hasProfile(Optional<User> user) {
+        return user.isPresent() && user.get().isProfileComplete();
     }
     
-    private boolean requiresCompleteProfile(HttpServletRequest request, User user) {
-        String uid = idCodec.encode(user.getId().toBigInteger());
-        String requestUri = uriWithoutExtension(request.getRequestURI()).replace(uid, ":uid");
+    private void writeError(HttpServletRequest request, HttpServletResponse response, Exception exception) throws IOException, UnsupportedFormatException, NotAcceptableException {
+        ResponseWriter writer = writerResolver.writerFor(request, response);
+        ErrorSummary summary = ErrorSummary.forException(exception);
+        new ErrorResultWriter().write(summary, writer, request, response);
+    }
+    
+    private boolean authorized(Optional<User> user, String requestUri) throws NotAuthorizedException, UserProfileIncompleteException {
+        if (urlsToProtect.isEmpty()) {
+            return true; 
+        }
         
-        // Make a subset by taking urls to protect and removing urls not needing auth
+        boolean protectedUrl = false;
         for (String uri : urlsToProtect) {
             if (requestUri.startsWith(uri)) {
+                protectedUrl = !exceptions.contains(requestUri);
+            }
+        }
+        return !protectedUrl || (user.isPresent() && protectedUrl);
+    }
+    
+    private boolean needsProfile(String uri, User user) {
+        String uid = idCodec.encode(user.getId().toBigInteger());
+        String requestUri = uriWithoutExtension(uri).replace(uid, ":uid");
+        
+        // Make a subset by taking urls to protect and removing urls not needing auth
+        for (String urlToProtect : urlsToProtect) {
+            if (requestUri.startsWith(urlToProtect)) {
                 return !exceptions.contains(requestUri) && !urlsNotNeedingCompleteProfile.contains(requestUri);
             }
         }

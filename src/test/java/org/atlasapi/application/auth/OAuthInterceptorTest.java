@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -22,11 +23,13 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public class OAuthInterceptorTest {
 
-    @Test(expected = NotAuthorizedException.class)
-    public void testProtectsUrlNoUser() throws IOException, NotAuthorizedException, UserProfileIncompleteException {
+    @Test
+    public void testProtectsUrlNoUser() throws Exception {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRequestURI()).thenReturn("/myprotectedUrl.json");
         HttpServletResponse response = mock(HttpServletResponse.class);
+        ServletOutputStream stream = mock(ServletOutputStream.class);
+        when(response.getOutputStream()).thenReturn(stream);
         UserFetcher userFetcher = mock(UserFetcher.class);
         NumberToShortStringCodec idCodec = mock(NumberToShortStringCodec.class);
         when(userFetcher.userFor(request)).thenReturn(Optional.<User>absent());
@@ -38,17 +41,19 @@ public class OAuthInterceptorTest {
                         "/myprotectedUrl"))
                 .withUrlsNotNeedingCompleteProfile(ImmutableSet.of(""))
                 .build();
-        assertFalse(interceptor.authorized(request, response));
+        assertFalse(interceptor.preHandle(request, response, null));
     }
     
-    @Test(expected = UserProfileIncompleteException.class)
-    public void testProtectsUrlNeedingFullProfile() throws IOException, NotAuthorizedException, UserProfileIncompleteException {
+    @Test
+    public void testProtectsUrlNeedingFullProfile() throws Exception {
         User user = mock(User.class);
         when(user.getId()).thenReturn(Id.valueOf(new BigInteger("5000")));
         when(user.isProfileComplete()).thenReturn(false);
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRequestURI()).thenReturn("/myprotectedUrl.json");
         HttpServletResponse response = mock(HttpServletResponse.class);
+        ServletOutputStream stream = mock(ServletOutputStream.class);
+        when(response.getOutputStream()).thenReturn(stream);
         UserFetcher userFetcher = mock(UserFetcher.class);
         NumberToShortStringCodec idCodec = mock(NumberToShortStringCodec.class);
         when(idCodec.encode(new BigInteger("5000"))).thenReturn("bcdf");
@@ -61,17 +66,19 @@ public class OAuthInterceptorTest {
                         "/myprotectedUrl"))
                 .withUrlsNotNeedingCompleteProfile(ImmutableSet.of(""))
                 .build();
-        assertFalse(interceptor.authorized(request, response));
+       assertFalse(interceptor.preHandle(request, response, null));
     }
     
     @Test
-    public void testNeedingFullProfileException() throws IOException, NotAuthorizedException, UserProfileIncompleteException {
+    public void testNeedingFullProfileException() throws Exception  {
         User user = mock(User.class);
         when(user.getId()).thenReturn(Id.valueOf(new BigInteger("5000")));
         when(user.isProfileComplete()).thenReturn(false);
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRequestURI()).thenReturn("/something/bcdf.json");
         HttpServletResponse response = mock(HttpServletResponse.class);
+        ServletOutputStream stream = mock(ServletOutputStream.class);
+        when(response.getOutputStream()).thenReturn(stream);
         UserFetcher userFetcher = mock(UserFetcher.class);
         NumberToShortStringCodec idCodec = mock(NumberToShortStringCodec.class);
         when(idCodec.encode(new BigInteger("5000"))).thenReturn("bcdf");
@@ -84,16 +91,18 @@ public class OAuthInterceptorTest {
                         "/myprotectedUrl"))
                 .withUrlsNotNeedingCompleteProfile(ImmutableSet.of("/something/:uid"))
                 .build();
-        assertTrue(interceptor.authorized(request, response));
+        assertTrue(interceptor.preHandle(request, response, null));
     }
     
     @Test
-    public void testNotProtectingOtherUrl() throws IOException, NotAuthorizedException, UserProfileIncompleteException {
+    public void testNotProtectingOtherUrl() throws Exception {
         User user = mock(User.class);
         when(user.getId()).thenReturn(Id.valueOf(new BigInteger("5000")));
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRequestURI()).thenReturn("/other.json");
         HttpServletResponse response = mock(HttpServletResponse.class);
+        ServletOutputStream stream = mock(ServletOutputStream.class);
+        when(response.getOutputStream()).thenReturn(stream);
         UserFetcher userFetcher = mock(UserFetcher.class);
         NumberToShortStringCodec idCodec = mock(NumberToShortStringCodec.class);
         when(idCodec.encode(new BigInteger("5000"))).thenReturn("bcdf");
@@ -106,6 +115,6 @@ public class OAuthInterceptorTest {
                         "/myprotectedUrl"))
                 .withUrlsNotNeedingCompleteProfile(ImmutableSet.of("/something/:uid"))
                 .build();
-        assertTrue(interceptor.authorized(request, response));
+        assertTrue(interceptor.preHandle(request, response, null));
     }
 }
