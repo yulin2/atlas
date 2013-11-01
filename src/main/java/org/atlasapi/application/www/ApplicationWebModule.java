@@ -125,7 +125,7 @@ public class ApplicationWebModule {
     public @Bean
     AuthController authController() {
         return new AuthController(new AuthProvidersQueryResultWriter(new AuthProvidersListWriter()),
-                userFetcher(), userStore, idCodec);
+                userFetcher(), idCodec);
     }
     
     @Bean
@@ -149,14 +149,20 @@ public class ApplicationWebModule {
     }
     
     @Bean OAuthInterceptor getAuthenticationInterceptor() {
-        OAuthInterceptor interceptor =  new OAuthInterceptor(userFetcher());
-        interceptor.setUrlsToProtect(ImmutableSet.of(
-                "/4.0/applications",
-                "/4.0/sources",
-                "/4.0/requests",
-                "/4.0/users",
-                "/4.0/auth/user"));
-        return interceptor;
+        return OAuthInterceptor
+                .builder()
+                .withUserFetcher(userFetcher())
+                .withIdCodec(idCodec)
+                .withUrlsToProtect(ImmutableSet.of(
+                        "/4.0/applications",
+                        "/4.0/sources",
+                        "/4.0/requests",
+                        "/4.0/users",
+                        "/4.0/auth/user"))
+               .withUrlsNotNeedingCompleteProfile(ImmutableSet.of(
+                "/4.0/auth/user",
+                "/4.0/users/:uid"))
+                .build();
     }
     
     @Bean 
@@ -166,7 +172,8 @@ public class ApplicationWebModule {
                 new SourcesQueryResultWriter(new SourceWithIdWriter(sourceIdCodec, "source", "sources")),
                 idCodec,
                 sourceIdCodec,
-                applicationStore);
+                applicationStore,
+                userFetcher());
     }
     
     @Bean
@@ -180,7 +187,8 @@ public class ApplicationWebModule {
                 new SourceRequestsQueryResultsWriter(new SourceRequestListWriter(sourceIdCodec, idCodec)),
                 manager,
                 idCodec,
-                sourceIdCodec);
+                sourceIdCodec,
+                userFetcher());
     }
     
     @Bean
@@ -241,7 +249,7 @@ public class ApplicationWebModule {
     public @Bean
     UserFetcher userFetcher() {
         CachingAccessTokenChecker cachingAccessTokenChecker = new CachingAccessTokenChecker(accessTokenChecker);
-        return new OAuthTokenUserFetcher(credentialsStore, cachingAccessTokenChecker);
+        return new OAuthTokenUserFetcher(credentialsStore, cachingAccessTokenChecker, userStore);
     }
     
     private StandardQueryParser<Publisher> sourcesQueryParser() {

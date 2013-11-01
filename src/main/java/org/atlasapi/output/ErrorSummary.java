@@ -56,6 +56,7 @@ public class ErrorSummary {
 		    .put(NotAcceptableException.class, new DefaultErrorSummaryFactory("NOT_ACCEPTABLE", HttpStatusCode.NOT_ACCEPTABLE))
 		    .put(InvalidAnnotationException.class, new DefaultErrorSummaryFactory("BAD_ANNOTATION_VALUE", HttpStatusCode.BAD_REQUEST))
 		    .put(NotAuthorizedException.class, new DefaultErrorSummaryFactory("UNAUTHORIZED", HttpStatusCode.UNAUTHORIZED))
+		    .put(UserProfileIncompleteException.class, new DefaultErrorSummaryFactory("FORBIDDEN_USER_INCOMPLETE", HttpStatusCode.FORBIDDEN))
 		    .build();
 	}
 

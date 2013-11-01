@@ -1,6 +1,10 @@
 package org.atlasapi.application.auth;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.atlasapi.application.users.User;
+import org.atlasapi.application.users.UserStore;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
@@ -17,11 +21,14 @@ public class OAuthTokenUserFetcher implements UserFetcher {
     
     private final CredentialsStore credentialsStore;
     private final AccessTokenChecker accessTokenChecker;
+    private final UserStore userStore;
 
     public OAuthTokenUserFetcher(CredentialsStore credentialsStore,
-            AccessTokenChecker accessTokenChecker) {
+            AccessTokenChecker accessTokenChecker,
+            UserStore userStore) {
         this.credentialsStore = credentialsStore;
         this.accessTokenChecker = accessTokenChecker;
+        this.userStore = userStore;
     }
     
     public ImmutableSet<String> getParameterNames() {
@@ -29,7 +36,7 @@ public class OAuthTokenUserFetcher implements UserFetcher {
                 OAUTH_TOKEN_QUERY_PARAMETER);
     }
 
-    public Optional<UserRef> userFor(HttpServletRequest request) {
+    public Optional<UserRef> userRefFor(HttpServletRequest request) {
         if (!Strings.isNullOrEmpty(request.getParameter(OAUTH_PROVIDER_QUERY_PARAMETER))) {
             UserNamespace oauthProviderNamespace = UserNamespace.valueOf(request.getParameter(OAUTH_PROVIDER_QUERY_PARAMETER).toUpperCase());
             String oauthToken = request.getParameter(OAUTH_TOKEN_QUERY_PARAMETER);
@@ -40,5 +47,14 @@ public class OAuthTokenUserFetcher implements UserFetcher {
             }
         }
         return Optional.absent();
+    }
+    
+    public Optional<User> userFor(HttpServletRequest request) {
+        Optional<UserRef> userRef = userRefFor(request);
+        if (userRef.isPresent()) {
+            return userStore.userForRef(userRef.get());
+        } else {
+            return Optional.absent();
+        }
     }
 }

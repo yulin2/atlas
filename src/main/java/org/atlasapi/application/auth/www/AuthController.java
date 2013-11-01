@@ -38,17 +38,14 @@ public class AuthController {
     private static Logger log = LoggerFactory.getLogger(AuthController.class);
     private final QueryResultWriter<OAuthProvider> resultWriter;
     private final UserFetcher userFetcher;
-    private final UserStore userStore;
     private final NumberToShortStringCodec idCodec;
     private final String USER_URL = "/4.0/users/%s.%s";
     
     public AuthController(QueryResultWriter<OAuthProvider> resultWriter,
             UserFetcher userFetcher,
-            UserStore userStore,
             NumberToShortStringCodec idCodec) {
         this.resultWriter = resultWriter;
         this.userFetcher = userFetcher;
-        this.userStore = userStore;
         this.idCodec = idCodec;
     }
     
@@ -77,8 +74,7 @@ public class AuthController {
         try {
             // Should always be able to get a user ref here as
             // missing oauth user would be intercepted
-            Optional<UserRef> currentUserRef = userFetcher.userFor(request);
-            Optional<User> user = userStore.userForRef(currentUserRef.get());
+            Optional<User> user = userFetcher.userFor(request);
             String userUrl = String.format(USER_URL, 
                     idCodec.encode(BigInteger.valueOf(user.get().getId().longValue())),
                     "json");
