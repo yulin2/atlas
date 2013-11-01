@@ -1,8 +1,8 @@
 package org.atlasapi.application.writers;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import org.atlasapi.application.users.User;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.EntityWriter;
@@ -11,6 +11,8 @@ import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.writers.SourceWriter;
 import org.atlasapi.query.common.Resource;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.social.model.UserRef;
 
@@ -20,15 +22,29 @@ public class UsersListWriter implements EntityListWriter<User> {
     private final EntityListWriter<Publisher> sourcesWriter = SourceWriter.sourceListWriter("sources");
     private final NumberToShortStringCodec idCodec;
     
+    private final Function<Id, String> ENCODE_APP_IDS = new Function<Id, String>() {
+
+        @Override
+        public String apply(Id input) {
+            return idCodec.encode(input.toBigInteger());
+        }
+        
+    };
+    
 
     public UsersListWriter(NumberToShortStringCodec idCodec) {
         this.idCodec = idCodec;
     }
+    
+    private Iterable<String> getStringAppIds(User user) {
+        return Iterables.transform(user.getApplicationIds(), ENCODE_APP_IDS);
+    }
+    
 
     @Override
     public void write(User entity, FieldWriter writer, OutputContext ctxt) throws IOException {
         ctxt.startResource(Resource.APPLICATION);
-        writer.writeField("id", idCodec.encode(BigInteger.valueOf(entity.getId().longValue())));
+        writer.writeField("id", idCodec.encode(entity.getId().toBigInteger()));
         writer.writeObject(userRefWriter, entity.getUserRef(), ctxt);
         writer.writeField("screen_name", entity.getScreenName());
         writer.writeField("full_name", entity.getFullName());
@@ -36,7 +52,7 @@ public class UsersListWriter implements EntityListWriter<User> {
         writer.writeField("email", entity.getEmail());
         writer.writeField("website", entity.getWebsite());
         writer.writeField("profile_image", entity.getProfileImage());
-        writer.writeList("applications", "application", entity.getApplications(), ctxt);
+        writer.writeList("applications", "application", getStringAppIds(entity), ctxt);
         writer.writeList(sourcesWriter, entity.getSources(), ctxt);
         writer.writeField("role", entity.getRole().toString().toLowerCase());
         writer.writeField("profile_complete", entity.isProfileComplete());
