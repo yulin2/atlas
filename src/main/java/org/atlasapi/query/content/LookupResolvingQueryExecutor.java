@@ -2,19 +2,18 @@ package org.atlasapi.query.content;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.LookupRef;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.DefaultEquivalentContentResolver;
+import org.atlasapi.persistence.content.EquivalentContent;
+import org.atlasapi.persistence.content.EquivalentContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,33 +21,30 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Maps.EntryTransformer;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Multimaps;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     private final Logger log = LoggerFactory.getLogger(LookupResolvingQueryExecutor.class);
     private final KnownTypeContentResolver cassandraContentResolver;
-    private final KnownTypeContentResolver mongoContentResolver;
-    private final LookupEntryStore mongoLookupResolver;
     private final boolean cassandraEnabled;
+    private final EquivalentContentResolver mongoEquivsResolver;
 
     public LookupResolvingQueryExecutor(KnownTypeContentResolver cassandraContentResolver, KnownTypeContentResolver mongoContentResolver, LookupEntryStore mongoLookupResolver, boolean cassandraEnable) {
         this.cassandraContentResolver = cassandraContentResolver;
-        this.mongoContentResolver = mongoContentResolver;
-        this.mongoLookupResolver = mongoLookupResolver;
+        this.mongoEquivsResolver = new DefaultEquivalentContentResolver(mongoContentResolver, mongoLookupResolver);
         this.cassandraEnabled = cassandraEnable;
     }
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-        Map<String, List<Identified>> results = resolveMongoEntries(query, mongoLookupResolver.entriesForIdentifiers(uris, true));
+        EquivalentContent mongoResolved = mongoEquivsResolver.resolveUris(uris, query.getConfiguration(), query.getAnnotations(), true);
+        Map<String, List<Identified>> results = Multimaps.asMap(ArrayListMultimap.<String, Identified>create(mongoResolved));
         if (cassandraEnabled && results.isEmpty()) {
             try {
                 results = resolveCassandraEntries(uris, query);
@@ -62,83 +58,17 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     @Override
     public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
-        Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForIds(ids));
+        EquivalentContent mongoResolved = mongoEquivsResolver.resolveIds(ids, query.getConfiguration(), query.getAnnotations());
+        Map<String, List<Identified>> mongoResults = Multimaps.asMap(ArrayListMultimap.<String, Identified>create(mongoResolved));
         return ImmutableMap.copyOf(mongoResults);
     }
 
     @Override
     public Map<String, List<Identified>> executeAliasQuery(Optional<String> namespace, Iterable<String> values,
             ContentQuery query) {
-        Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForAliases(namespace, values));
+        EquivalentContent mongoResolved = mongoEquivsResolver.resolveAliases(namespace, values, query.getConfiguration(), query.getAnnotations());
+        Map<String, List<Identified>> mongoResults = Multimaps.asMap(ArrayListMultimap.<String, Identified>create(mongoResolved));
         return ImmutableMap.copyOf(mongoResults);
-    }
-
-    private Map<String, List<Identified>> resolveMongoEntries(final ContentQuery query, Iterable<LookupEntry> lookupEntries) {
-        final ApplicationConfiguration configuration = query.getConfiguration();
-        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(lookupEntries, LookupEntry.TO_ID);
-
-        Map<String, Set<LookupRef>> lookupRefs = Maps.transformValues(lookup, LookupEntry.TO_EQUIVS);
-
-        Iterable<LookupRef> filteredRefs = Iterables.filter(Iterables.concat(lookupRefs.values()), enabledPublishers(configuration));
-
-        if (Iterables.isEmpty(filteredRefs)) {
-            return ImmutableMap.of();
-        }
-
-
-        final ResolvedContent allResolvedResults = mongoContentResolver.findByLookupRefs(filteredRefs);
-
-        return Maps.transformEntries(lookup, new EntryTransformer<String, LookupEntry, List<Identified>>() {
-
-            @Override
-            public List<Identified> transformEntry(String uri, LookupEntry entry) {
-                if (!containsRequestedUri(entry.equivalents(), uri)) {
-                    return ImmutableList.of();
-                }
-                List<Identified> identifieds = ImmutableList.copyOf(Iterables.filter(Iterables.transform(entry.equivalents(), new Function<LookupRef, Identified>() {
-
-                    @Override
-                    public Identified apply(LookupRef input) {
-                        return allResolvedResults.get(input.uri()).valueOrNull();
-                    }
-                }), Predicates.notNull()));
-                
-                if (!entry.created().equals(entry.updated())) {
-                    for (Identified ided : identifieds) {
-                        ided.setEquivalenceUpdate(entry.updated());
-                    }
-                }
-
-                return setEquivalentToFields(identifieds, entry.equivalents());
-            }
-        });
-    }
-
-    private boolean containsRequestedUri(Iterable<LookupRef> equivRefs, String uri) {
-        for (LookupRef equivRef : equivRefs) {
-            if (equivRef.uri().equals(uri)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private List<Identified> setEquivalentToFields(List<Identified> resolvedResults, Set<LookupRef> equivs) {
-        for (Identified identified : resolvedResults) {
-            identified.setEquivalentTo(equivs);
-        }
-        return resolvedResults;
-    }
-
-    private Predicate<LookupRef> enabledPublishers(ApplicationConfiguration config) {
-        final Set<Publisher> enabledPublishers = config.getEnabledSources();
-        return new Predicate<LookupRef>() {
-
-            @Override
-            public boolean apply(LookupRef input) {
-                return enabledPublishers.contains(input.publisher());
-            }
-        };
     }
 
     private Map<String, List<Identified>> resolveCassandraEntries(Iterable<String> uris, ContentQuery query) {
