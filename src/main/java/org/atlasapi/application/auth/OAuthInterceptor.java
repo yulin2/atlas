@@ -28,7 +28,7 @@ public class OAuthInterceptor extends HandlerInterceptorAdapter {
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
     private final UserFetcher userFetcher;
     private final NumberToShortStringCodec idCodec;
-    private final Set<String> exceptions;
+    private final Set<String> exemptions;
     private final Set<String> urlsToProtect;
     private final Set<String> urlsNotNeedingCompleteProfile;
     private static final Logger log = LoggerFactory.getLogger(OAuthInterceptor.class);
@@ -37,12 +37,12 @@ public class OAuthInterceptor extends HandlerInterceptorAdapter {
             NumberToShortStringCodec idCodec,
             Set<String> urlsToProtect,
             Set<String> urlsNotNeedingCompleteProfile,
-            Set<String> exceptions) {
+            Set<String> exemptions) {
         this.userFetcher = userFetcher;
         this.idCodec = idCodec;
         this.urlsToProtect = ImmutableSet.copyOf(urlsToProtect);
         this.urlsNotNeedingCompleteProfile = ImmutableSet.copyOf(urlsNotNeedingCompleteProfile);
-        this.exceptions = ImmutableSet.copyOf(exceptions);
+        this.exemptions = ImmutableSet.copyOf(exemptions);
     }
     
     @Override
@@ -55,15 +55,15 @@ public class OAuthInterceptor extends HandlerInterceptorAdapter {
         if (!authorized(user, uri)) {
             writeError(request, response, new NotAuthorizedException());
             return false;
-        } else if (user.isPresent() && needsProfile(uri, user.get()) && !hasProfile(user)) {
+        } else if (user.isPresent() && !hasProfile(user.get()) && needsProfile(uri, user.get())) {
             writeError(request, response, new UserProfileIncompleteException());
             return false;
         }
         return true;
     }
     
-    private boolean hasProfile(Optional<User> user) {
-        return user.isPresent() && user.get().isProfileComplete();
+    private boolean hasProfile(User user) {
+        return user.isProfileComplete();
     }
     
     private void writeError(HttpServletRequest request, HttpServletResponse response, Exception exception) throws IOException, UnsupportedFormatException, NotAcceptableException {
@@ -80,7 +80,7 @@ public class OAuthInterceptor extends HandlerInterceptorAdapter {
         boolean protectedUrl = false;
         for (String uri : urlsToProtect) {
             if (requestUri.startsWith(uri)) {
-                protectedUrl = !exceptions.contains(requestUri);
+                protectedUrl = !exemptions.contains(requestUri);
             }
         }
         return !protectedUrl || (user.isPresent() && protectedUrl);
@@ -93,7 +93,7 @@ public class OAuthInterceptor extends HandlerInterceptorAdapter {
         // Make a subset by taking urls to protect and removing urls not needing auth
         for (String urlToProtect : urlsToProtect) {
             if (requestUri.startsWith(urlToProtect)) {
-                return !exceptions.contains(requestUri) && !urlsNotNeedingCompleteProfile.contains(requestUri);
+                return !exemptions.contains(requestUri) && !urlsNotNeedingCompleteProfile.contains(requestUri);
             }
         }
         return false;
@@ -114,7 +114,7 @@ public class OAuthInterceptor extends HandlerInterceptorAdapter {
     public static class Builder {
         private UserFetcher userFetcher;
         private NumberToShortStringCodec idCodec;
-        private Set<String> exceptions = ImmutableSet.of();
+        private Set<String> exemptions = ImmutableSet.of();
         private Set<String> urlsToProtect = ImmutableSet.of();
         private Set<String> urlsNotNeedingCompleteProfile = ImmutableSet.of();
         
@@ -128,8 +128,8 @@ public class OAuthInterceptor extends HandlerInterceptorAdapter {
             return this;
         }
         
-        public Builder withExceptions(Set<String> exceptions) {
-            this.exceptions = exceptions;
+        public Builder withExemptions(Set<String> exemptions) {
+            this.exemptions = exemptions;
             return this;
         }
         
@@ -153,7 +153,7 @@ public class OAuthInterceptor extends HandlerInterceptorAdapter {
                     this.idCodec,
                     this.urlsToProtect,
                     this.urlsNotNeedingCompleteProfile,
-                    this.exceptions);
+                    this.exemptions);
         }
     }
 }

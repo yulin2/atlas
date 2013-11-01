@@ -23,6 +23,11 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public class OAuthInterceptorTest {
 
+    /**
+     * Test that access is denied to a url under protection if no
+     * user present
+     * @throws Exception
+     */
     @Test
     public void testProtectsUrlNoUser() throws Exception {
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -44,6 +49,11 @@ public class OAuthInterceptorTest {
         assertFalse(interceptor.preHandle(request, response, null));
     }
     
+    /**
+     * Test that a url requiring a completed user profile is not
+     * accessible to a user with an incomplete profile
+     * @throws Exception
+     */
     @Test
     public void testProtectsUrlNeedingFullProfile() throws Exception {
         User user = mock(User.class);
@@ -69,8 +79,13 @@ public class OAuthInterceptorTest {
        assertFalse(interceptor.preHandle(request, response, null));
     }
     
+    /**
+     * Test that a url granted an exemption from needing a full profile
+     * is accesible by  a user with an incomplete profile
+     * @throws Exception
+     */
     @Test
-    public void testNeedingFullProfileException() throws Exception  {
+    public void testNeedingFullProfileExemption() throws Exception  {
         User user = mock(User.class);
         when(user.getId()).thenReturn(Id.valueOf(new BigInteger("5000")));
         when(user.isProfileComplete()).thenReturn(false);
@@ -94,6 +109,10 @@ public class OAuthInterceptorTest {
         assertTrue(interceptor.preHandle(request, response, null));
     }
     
+    /**
+     * Check that the OAuthInterceptor won't block urls
+     * that it is not meant to protect
+     */
     @Test
     public void testNotProtectingOtherUrl() throws Exception {
         User user = mock(User.class);
