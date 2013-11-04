@@ -6,12 +6,14 @@ import org.atlasapi.content.criteria.IdAttributeQuery;
 import org.atlasapi.content.criteria.QueryVisitorAdapter;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.output.NotFoundException;
+import org.atlasapi.output.ResourceForbiddenException;
 import org.atlasapi.output.useraware.UserAwareQueryResult;
 import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.useraware.UserAwareQuery;
 import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 public class UsersQueryExecutor implements UserAwareQueryExecutor<User> {
@@ -27,8 +29,11 @@ public class UsersQueryExecutor implements UserAwareQueryExecutor<User> {
         return query.isListQuery() ? multipleQuery(query) : singleQuery(query);
     }
     
-    private UserAwareQueryResult<User> singleQuery(UserAwareQuery<User> query) throws NotFoundException {
+    private UserAwareQueryResult<User> singleQuery(UserAwareQuery<User> query) throws NotFoundException, ResourceForbiddenException {
         Id id = query.getOnlyId();
+        if (!query.getContext().isAdminUser() && id.equals(query.getContext().getUser().get().getId())) {
+            throw new ResourceForbiddenException();
+        }
         Optional<User> user = userStore.userForId(id);
         if (user.isPresent()) {
             return UserAwareQueryResult.singleResult(user.get(), query.getContext());
@@ -39,6 +44,10 @@ public class UsersQueryExecutor implements UserAwareQueryExecutor<User> {
     
     private UserAwareQueryResult<User> multipleQuery(UserAwareQuery<User> query) throws NotFoundException {
         AttributeQuerySet operands = query.getOperands();
+        // Can only return own profile if non admin user
+        if (!query.getContext().isAdminUser()) {
+            return usersQueryForIds(query, ImmutableList.of(query.getContext().getUser().get().getId()));
+        }
         
         Iterable<Id> ids = Iterables.concat(operands.accept(new QueryVisitorAdapter<List<Id>>() {
             @Override
