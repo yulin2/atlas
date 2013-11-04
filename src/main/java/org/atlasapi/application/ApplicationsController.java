@@ -11,21 +11,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
+import org.atlasapi.application.users.Role;
+import org.atlasapi.application.users.User;
+import org.atlasapi.application.users.UserStore;
 import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ReadException;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
-import org.atlasapi.output.QueryResultWriter;
+import org.atlasapi.output.ResourceForbiddenException;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
 import org.atlasapi.output.useraware.UserAwareQueryResult;
 import org.atlasapi.output.useraware.UserAwareQueryResultWriter;
 import org.atlasapi.persistence.application.ApplicationStore;
-import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryExecutionException;
-import org.atlasapi.query.common.QueryResult;
 import org.atlasapi.query.common.useraware.UserAwareQuery;
 import org.atlasapi.query.common.useraware.UserAwareQueryContext;
 import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
@@ -54,6 +55,7 @@ public class ApplicationsController {
     private final SourceIdCodec sourceIdCodec;
     private final ApplicationStore applicationStore;
     private final UserFetcher userFetcher;
+    private final UserStore userStore;
     
     private static class PrecedenceOrdering {
         private List<String> ordering;
@@ -69,7 +71,8 @@ public class ApplicationsController {
             NumberToShortStringCodec idCodec,
             SourceIdCodec sourceIdCodec,
             ApplicationStore applicationStore,
-            UserFetcher userFetcher) {
+            UserFetcher userFetcher,
+            UserStore userStore) {
         this.requestParser = requestParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
@@ -78,6 +81,7 @@ public class ApplicationsController {
         this.sourceIdCodec = sourceIdCodec;
         this.applicationStore = applicationStore;
         this.userFetcher = userFetcher;
+        this.userStore = userStore;
     }
 
     @RequestMapping({ "/4.0/applications/{aid}.*", "/4.0/applications.*" })
@@ -104,12 +108,20 @@ public class ApplicationsController {
             writer = writerResolver.writerFor(request, response);
             Application application = deserialize(new InputStreamReader(request.getInputStream()), Application.class);
             if (application.getId() != null) {
+                if (!userCanAccessApplication(application.getId(), request)) {
+                    throw new ResourceForbiddenException();
+                }
                 Optional<Application> existing = applicationStore.applicationFor(application.getId());
-                application = application.copy().withSlug(existing.get().getSlug()).build();
+                // Copy across slug and disallow modification of credentials
+                application = application.copy().withSlug(existing.get().getSlug())
+                        .withCredentials(existing.get().getCredentials()).build();
                 application = applicationStore.updateApplication(application);
             } else {
                 // New application
                 application = applicationStore.createApplication(application);
+                // Add application to user ownership
+                User user = userFetcher.userFor(request).get();
+                userStore.store(user.copyWithAdditionalApplication(application));
             }
             UserAwareQueryResult<Application> queryResult = UserAwareQueryResult.singleResult(application, UserAwareQueryContext.standard());
 
@@ -130,12 +142,15 @@ public class ApplicationsController {
         Id applicationId = Id.valueOf(idCodec.decode(aid));
         ApplicationSources sources;
         try {
+            if (!userCanAccessApplication(applicationId, request)) {
+                throw new ResourceForbiddenException();
+            }
             sources = deserialize(new InputStreamReader(
                     request.getInputStream()), ApplicationSources.class);
             Application existing = applicationStore.applicationFor(applicationId).get();
             Application modified = existing.copyWithSources(sources);
             applicationStore.updateApplication(modified);
-        } catch (ReadException e) {
+        } catch (Exception e) {
             ErrorSummary summary = ErrorSummary.forException(e);
             new ErrorResultWriter().write(summary, null, request, response);
         }
@@ -149,29 +164,37 @@ public class ApplicationsController {
         Id applicationId = Id.valueOf(idCodec.decode(aid));
         PrecedenceOrdering ordering;
         try {
+            if (!userCanAccessApplication(applicationId, request)) {
+                throw new ResourceForbiddenException();
+            }
             ordering = deserialize(new InputStreamReader(request.getInputStream()), PrecedenceOrdering.class);
             List<Publisher> sourceOrder;
             sourceOrder = getSourcesFrom(ordering);
             Application existing = applicationStore.applicationFor(applicationId).get();
             applicationStore.updateApplication(existing.copyWithReadSourceOrder(sourceOrder));
-        } catch (ReadException e) {
+        } catch (Exception e) {
             ErrorSummary summary = ErrorSummary.forException(e);
             new ErrorResultWriter().write(summary, null, request, response);
-        } catch (QueryExecutionException e) {
-            ErrorSummary summary = ErrorSummary.forException(e);
-            new ErrorResultWriter().write(summary, null, request, response);
-        }
+        } 
       
     }
     
     @RequestMapping(value = "/4.0/applications/{aid}/precedence", method = RequestMethod.DELETE)
     public void disablePrecedence(HttpServletRequest request, 
             HttpServletResponse response,
-            @PathVariable String aid) {
-        response.addHeader("Access-Control-Allow-Origin", "*");
-        Id applicationId = Id.valueOf(idCodec.decode(aid));
-        Application existing = applicationStore.applicationFor(applicationId).get();
-        applicationStore.updateApplication(existing.copyWithPrecedenceDisabled());
+            @PathVariable String aid) throws IOException {
+        try {
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            Id applicationId = Id.valueOf(idCodec.decode(aid));
+            if (!userCanAccessApplication(applicationId, request)) {
+                throw new ResourceForbiddenException();
+            }
+            Application existing = applicationStore.applicationFor(applicationId).get();
+            applicationStore.updateApplication(existing.copyWithPrecedenceDisabled());
+        } catch (Exception e) {
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, null, request, response);
+        } 
     }
 
     private <T> T deserialize(Reader input, Class<T> cls) throws IOException, ReadException {
@@ -189,5 +212,14 @@ public class ApplicationsController {
             }
         }
         return sources.build();
+    }
+    
+    private boolean userCanAccessApplication(Id id, HttpServletRequest request) {
+        Optional<User> user = userFetcher.userFor(request);
+        if (!user.isPresent()) {
+            return false;
+        } else {
+            return user.get().is(Role.ADMIN) || user.get().getApplicationIds().contains(id);
+        }
     }
 }

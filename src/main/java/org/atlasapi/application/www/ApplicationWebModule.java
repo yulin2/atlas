@@ -138,7 +138,8 @@ public class ApplicationWebModule {
                 idCodec,
                 sourceIdCodec,
                 applicationStore,
-                userFetcher());
+                userFetcher(),
+                userStore);
     }
     
     public @Bean DefaultAnnotationHandlerMapping controllerMappings() {
