@@ -56,6 +56,7 @@ public class ApplicationQueryExecutor implements UserAwareQueryExecutor<Applicat
 
     private UserAwareQueryResult<Application> multipleQuery(UserAwareQuery<Application> query) {
         AttributeQuerySet operands = query.getOperands();
+        User user = query.getContext().getUser().get();
 
         Iterable<Id> ids = Iterables.concat(operands.accept(new QueryVisitorAdapter<List<Id>>() {
            @Override
@@ -83,13 +84,17 @@ public class ApplicationQueryExecutor implements UserAwareQueryExecutor<Applicat
         } else if (writes != null) {
             results = applicationStore.writersFor(writes);
         } else {
-            results = applicationStore.allApplications();
+            if (query.getContext().isAdminUser()) {
+                results = applicationStore.allApplications();
+            } else {
+                results = applicationStore.applicationsFor(user.getApplicationIds());
+            }
         }
         
         if (query.getContext().isAdminUser()) {
             return UserAwareQueryResult.listResult(results, query.getContext());
         } else {
-            return UserAwareQueryResult.listResult(filterByUserViewable(results, query), query.getContext());
+            return UserAwareQueryResult.listResult(filterByUserViewable(results, user), query.getContext());
         }
     }
     
@@ -102,8 +107,7 @@ public class ApplicationQueryExecutor implements UserAwareQueryExecutor<Applicat
         }
     }
     
-    private Iterable<Application> filterByUserViewable(Iterable<Application> applications, UserAwareQuery<Application> query) {
-        final User user = query.getContext().getUser().get();
+    private Iterable<Application> filterByUserViewable(Iterable<Application> applications, final User user) {
         return Iterables.filter(applications, new Predicate<Application>() {
 
             @Override
