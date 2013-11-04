@@ -2,6 +2,7 @@ package org.atlasapi.query.common.useraware;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.atlasapi.application.users.Role;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.media.common.Id;
 
@@ -30,7 +31,7 @@ public abstract class UserAwareQuery<T> {
 
     public abstract AttributeQuerySet getOperands();
 
-    public abstract Id getOnlyId();
+    public abstract Id getOnlyId();    
 
     public static final class SingleQuery<T> extends UserAwareQuery<T> {
 

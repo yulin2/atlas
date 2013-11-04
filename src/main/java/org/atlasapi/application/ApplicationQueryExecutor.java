@@ -86,7 +86,7 @@ public class ApplicationQueryExecutor implements UserAwareQueryExecutor<Applicat
             results = applicationStore.allApplications();
         }
         
-        if (query.getContext().getUser().get().getRole().equals(Role.ADMIN)) {
+        if (query.getContext().isAdminUser()) {
             return UserAwareQueryResult.listResult(results, query.getContext());
         } else {
             return UserAwareQueryResult.listResult(filterByUserViewable(results, query), query.getContext());

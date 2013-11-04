@@ -3,6 +3,7 @@ package org.atlasapi.query.common.useraware;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.atlasapi.application.ApplicationSources;
+import org.atlasapi.application.users.Role;
 import org.atlasapi.application.users.User;
 import org.atlasapi.query.annotation.ActiveAnnotations;
 
@@ -53,6 +54,10 @@ public class UserAwareQueryContext {
     
     public Optional<Selection> getSelection() {
         return this.selection;
+    }
+    
+    public boolean isAdminUser() {
+        return this.getUser().get().getRole().equals(Role.ADMIN);
     }
 
     @Override
