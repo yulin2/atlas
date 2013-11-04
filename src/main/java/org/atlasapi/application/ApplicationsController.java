@@ -15,18 +15,21 @@ import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ReadException;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.query.common.Query;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
+import org.atlasapi.output.useraware.UserAwareQueryResult;
+import org.atlasapi.output.useraware.UserAwareQueryResultWriter;
 import org.atlasapi.persistence.application.ApplicationStore;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryExecutionException;
-import org.atlasapi.query.common.QueryExecutor;
-import org.atlasapi.query.common.QueryParser;
 import org.atlasapi.query.common.QueryResult;
+import org.atlasapi.query.common.useraware.UserAwareQuery;
+import org.atlasapi.query.common.useraware.UserAwareQueryContext;
+import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
+import org.atlasapi.query.common.useraware.UserAwareQueryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -43,9 +46,9 @@ public class ApplicationsController {
 
     private static Logger log = LoggerFactory.getLogger(ApplicationsController.class);
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
-    private final QueryParser<Application> requestParser;
-    private final QueryExecutor<Application> queryExecutor;
-    private final QueryResultWriter<Application> resultWriter;
+    private final UserAwareQueryParser<Application> requestParser;
+    private final UserAwareQueryExecutor<Application> queryExecutor;
+    private final UserAwareQueryResultWriter<Application> resultWriter;
     private final ModelReader reader;
     private final NumberToShortStringCodec idCodec;
     private final SourceIdCodec sourceIdCodec;
@@ -59,9 +62,9 @@ public class ApplicationsController {
         }
     }
 
-    public ApplicationsController(QueryParser<Application> requestParser,
-            QueryExecutor<Application> queryExecutor,
-            QueryResultWriter<Application> resultWriter,
+    public ApplicationsController(UserAwareQueryParser<Application> requestParser,
+            UserAwareQueryExecutor<Application> queryExecutor,
+            UserAwareQueryResultWriter<Application> resultWriter,
             ModelReader reader,
             NumberToShortStringCodec idCodec,
             SourceIdCodec sourceIdCodec,
@@ -83,8 +86,8 @@ public class ApplicationsController {
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
-            Query<Application> applicationsQuery = requestParser.parse(request);
-            QueryResult<Application> queryResult = queryExecutor.execute(applicationsQuery);
+            UserAwareQuery<Application> applicationsQuery = requestParser.parse(request);
+            UserAwareQueryResult<Application> queryResult = queryExecutor.execute(applicationsQuery);
             resultWriter.write(queryResult, writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
@@ -108,7 +111,7 @@ public class ApplicationsController {
                 // New application
                 application = applicationStore.createApplication(application);
             }
-            QueryResult<Application> queryResult = QueryResult.singleResult(application, QueryContext.standard());
+            UserAwareQueryResult<Application> queryResult = UserAwareQueryResult.singleResult(application, UserAwareQueryContext.standard());
 
             resultWriter.write(queryResult, writer);
         } catch (Exception e) {

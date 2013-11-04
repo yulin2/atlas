@@ -53,10 +53,11 @@ import org.atlasapi.query.common.AttributeCoercers;
 import org.atlasapi.query.common.IndexAnnotationsExtractor;
 import org.atlasapi.query.common.QueryAtomParser;
 import org.atlasapi.query.common.QueryAttributeParser;
-import org.atlasapi.query.common.QueryContextParser;
 import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.Resource;
-import org.atlasapi.query.common.StandardQueryParser;
+import org.atlasapi.query.common.useraware.StandardUserAwareQueryParser;
+import org.atlasapi.query.common.useraware.UserAwareQueryContextParser;
+import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -132,7 +133,7 @@ public class ApplicationWebModule {
     public ApplicationsController applicationAdminController() {
         return new ApplicationsController(
                 applicationQueryParser(),
-                applicationQueryExecutor(),
+                new ApplicationQueryExecutor(applicationStore),
                 new ApplicationQueryResultWriter(applicationListWriter()),
                 gsonModelReader(),
                 idCodec,
@@ -202,11 +203,11 @@ public class ApplicationWebModule {
                 userStore);
     }
     
-    private StandardQueryParser<Application> applicationQueryParser() {
-        QueryContextParser contextParser = new QueryContextParser(configFetcher(), userFetcher(),
+    private StandardUserAwareQueryParser<Application> applicationQueryParser() {
+        UserAwareQueryContextParser contextParser = new UserAwareQueryContextParser(configFetcher(), userFetcher(),
                 new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
 
-        return new StandardQueryParser<Application>(Resource.APPLICATION,
+        return new StandardUserAwareQueryParser<Application>(Resource.APPLICATION,
                 new QueryAttributeParser(ImmutableList.of(
                     QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec)),
                     QueryAtomParser.valueOf(Attributes.SOURCE_READS, AttributeCoercers.sourceIdCoercer(sourceIdCodec)),
@@ -216,20 +217,15 @@ public class ApplicationWebModule {
     }
     
     @Bean
-    protected QueryExecutor<Application> applicationQueryExecutor() {
-        return new ApplicationQueryExecutor(applicationStore);
-    }
-    
-    @Bean
     protected EntityListWriter<Application> applicationListWriter() {
         return new ApplicationListWriter(idCodec, sourceIdCodec);
     }
     
-    private StandardQueryParser<User> usersQueryParser() {
-        QueryContextParser contextParser = new QueryContextParser(configFetcher(), userFetcher(),
+    private StandardUserAwareQueryParser<User> usersQueryParser() {
+        UserAwareQueryContextParser contextParser = new UserAwareQueryContextParser(configFetcher(), userFetcher(),
                 new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
 
-        return new StandardQueryParser<User>(Resource.USER,
+        return new StandardUserAwareQueryParser<User>(Resource.USER,
                 new QueryAttributeParser(ImmutableList.of(
                     QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec))
                     )),
@@ -252,11 +248,11 @@ public class ApplicationWebModule {
         return new OAuthTokenUserFetcher(credentialsStore, cachingAccessTokenChecker, userStore);
     }
     
-    private StandardQueryParser<Publisher> sourcesQueryParser() {
-        QueryContextParser contextParser = new QueryContextParser(configFetcher(), userFetcher(), 
+    private StandardUserAwareQueryParser<Publisher> sourcesQueryParser() {
+        UserAwareQueryContextParser contextParser = new UserAwareQueryContextParser(configFetcher(), userFetcher(), 
                 new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
 
-        return new StandardQueryParser<Publisher>(Resource.SOURCE,
+        return new StandardUserAwareQueryParser<Publisher>(Resource.SOURCE,
                 new QueryAttributeParser(ImmutableList.of(
                         QueryAtomParser.valueOf(Attributes.ID,
                                 AttributeCoercers.idCoercer(idCodec))
@@ -265,15 +261,15 @@ public class ApplicationWebModule {
     }
     
     @Bean
-    protected QueryExecutor<Publisher> soucesQueryExecutor() {
+    protected UserAwareQueryExecutor<Publisher> soucesQueryExecutor() {
         return new SourcesQueryExecutor(sourceIdCodec);
     }
     
-    private StandardQueryParser<SourceRequest> sourceRequestsQueryParser() {
-        QueryContextParser contextParser = new QueryContextParser(configFetcher(), userFetcher(), 
+    private StandardUserAwareQueryParser<SourceRequest> sourceRequestsQueryParser() {
+        UserAwareQueryContextParser contextParser = new UserAwareQueryContextParser(configFetcher(), userFetcher(), 
                 new IndexAnnotationsExtractor(applicationAnnotationIndex()), selectionBuilder());
 
-        return new StandardQueryParser<SourceRequest>(Resource.SOURCE_REQUEST,
+        return new StandardUserAwareQueryParser<SourceRequest>(Resource.SOURCE_REQUEST,
                 new QueryAttributeParser(ImmutableList.of(
                         QueryAtomParser.valueOf(Attributes.SOURCE_REQUEST_SOURCE,
                                 AttributeCoercers.sourceIdCoercer(sourceIdCodec))

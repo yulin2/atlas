@@ -15,14 +15,14 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.NotFoundException;
-import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
-import org.atlasapi.query.common.Query;
-import org.atlasapi.query.common.QueryContext;
-import org.atlasapi.query.common.QueryExecutor;
-import org.atlasapi.query.common.QueryParser;
-import org.atlasapi.query.common.QueryResult;
+import org.atlasapi.output.useraware.UserAwareQueryResult;
+import org.atlasapi.output.useraware.UserAwareQueryResultWriter;
+import org.atlasapi.query.common.useraware.UserAwareQuery;
+import org.atlasapi.query.common.useraware.UserAwareQueryContext;
+import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
+import org.atlasapi.query.common.useraware.UserAwareQueryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -37,17 +37,17 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 public class UsersController {
     private static Logger log = LoggerFactory.getLogger(UsersController.class);
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
-    private final QueryParser<User> requestParser;
-    private final QueryExecutor<User> queryExecutor;
-    private final QueryResultWriter<User> resultWriter;
+    private final UserAwareQueryParser<User> requestParser;
+    private final UserAwareQueryExecutor<User> queryExecutor;
+    private final UserAwareQueryResultWriter<User> resultWriter;
     private final ModelReader reader;
     private final NumberToShortStringCodec idCodec;
     private final UserFetcher userFetcher;
     private final UserStore userStore;
     
-    public UsersController(QueryParser<User> requestParser,
-            QueryExecutor<User> queryExecutor, 
-            QueryResultWriter<User> resultWriter,
+    public UsersController(UserAwareQueryParser<User> requestParser,
+            UserAwareQueryExecutor<User> queryExecutor, 
+            UserAwareQueryResultWriter<User> resultWriter,
             ModelReader reader,
             NumberToShortStringCodec idCodec,
             UserFetcher userFetcher,
@@ -66,8 +66,8 @@ public class UsersController {
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
-            Query<User> applicationsQuery = requestParser.parse(request);
-            QueryResult<User> queryResult = queryExecutor.execute(applicationsQuery);
+            UserAwareQuery<User> applicationsQuery = requestParser.parse(request);
+            UserAwareQueryResult<User> queryResult = queryExecutor.execute(applicationsQuery);
             resultWriter.write(queryResult, writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
@@ -89,7 +89,7 @@ public class UsersController {
                 User posted = deserialize(new InputStreamReader(request.getInputStream()), User.class);
                 User modified = updateProfileFields(posted, user.get());
                 userStore.store(modified);
-                QueryResult<User> queryResult = QueryResult.singleResult(modified, QueryContext.standard());
+                UserAwareQueryResult<User> queryResult = UserAwareQueryResult.singleResult(modified, UserAwareQueryContext.standard());
                 resultWriter.write(queryResult, writer);
             } else {
                 throw new NotFoundException(userId);

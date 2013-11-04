@@ -6,15 +6,16 @@ import org.atlasapi.content.criteria.EnumAttributeQuery;
 import org.atlasapi.content.criteria.QueryVisitorAdapter;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.output.useraware.UserAwareQueryResult;
 import org.atlasapi.persistence.application.SourceRequestStore;
-import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryExecutionException;
-import org.atlasapi.query.common.QueryExecutor;
-import org.atlasapi.query.common.QueryResult;
+import org.atlasapi.query.common.useraware.UserAwareQuery;
+import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
+
 import com.google.common.collect.Iterables;
 
 
-public class SourceRequestQueryExecutor implements QueryExecutor<SourceRequest> {
+public class SourceRequestQueryExecutor implements UserAwareQueryExecutor<SourceRequest> {
     private final SourceRequestStore requestStore;
     private static final QueryVisitorAdapter<Publisher> PUBLISHERS_VISITOR = new QueryVisitorAdapter<Publisher>(){
       
@@ -33,16 +34,16 @@ public class SourceRequestQueryExecutor implements QueryExecutor<SourceRequest> 
     }
 
     @Override
-    public QueryResult<SourceRequest> execute(Query<SourceRequest> query)
+    public UserAwareQueryResult<SourceRequest> execute(UserAwareQuery<SourceRequest> query)
             throws QueryExecutionException {
         AttributeQuerySet operands = query.getOperands();
 
         List<Publisher> source = operands.accept(PUBLISHERS_VISITOR);
         
         if (source.isEmpty()) {
-            return QueryResult.listResult(requestStore.all(), query.getContext());
+            return UserAwareQueryResult.listResult(requestStore.all(), query.getContext());
         } else {
-            return QueryResult.listResult(requestStore.sourceRequestsFor(source.get(0)), query.getContext());            
+            return UserAwareQueryResult.listResult(requestStore.sourceRequestsFor(source.get(0)), query.getContext());            
         }
     }
 

@@ -9,6 +9,7 @@ import org.atlasapi.output.annotation.OutputAnnotation;
 import org.atlasapi.query.annotation.ActiveAnnotations;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.Resource;
+import org.atlasapi.query.common.useraware.UserAwareQueryContext;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -20,6 +21,11 @@ import com.google.common.collect.Lists;
 public class OutputContext {
 
     public static OutputContext valueOf(QueryContext standard) {
+        return new OutputContext(standard.getAnnotations(),
+                standard.getApplicationSources());
+    }
+    
+    public static OutputContext valueOf(UserAwareQueryContext standard) {
         return new OutputContext(standard.getAnnotations(),
                 standard.getApplicationSources());
     }

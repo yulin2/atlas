@@ -12,13 +12,13 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.NotFoundException;
-import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
-import org.atlasapi.query.common.Query;
-import org.atlasapi.query.common.QueryExecutor;
-import org.atlasapi.query.common.QueryResult;
-import org.atlasapi.query.common.StandardQueryParser;
+import org.atlasapi.output.useraware.UserAwareQueryResult;
+import org.atlasapi.output.useraware.UserAwareQueryResultWriter;
+import org.atlasapi.query.common.useraware.UserAwareQuery;
+import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
+import org.atlasapi.query.common.useraware.UserAwareQueryParser;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,18 +30,18 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 @Controller
 public class SourceRequestsController {
-    private final StandardQueryParser<SourceRequest> queryParser;
-    private final QueryExecutor<SourceRequest> queryExecutor;
-    private final QueryResultWriter<SourceRequest> resultWriter;
+    private final UserAwareQueryParser<SourceRequest> queryParser;
+    private final UserAwareQueryExecutor<SourceRequest> queryExecutor;
+    private final UserAwareQueryResultWriter<SourceRequest> resultWriter;
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
     private final SourceRequestManager sourceRequestManager;
     private final NumberToShortStringCodec idCodec;
     private final SourceIdCodec sourceIdCodec;
     private final UserFetcher userFetcher;
     
-    public SourceRequestsController(StandardQueryParser<SourceRequest> queryParser,
-            QueryExecutor<SourceRequest> queryExecutor,
-            QueryResultWriter<SourceRequest> resultWriter,
+    public SourceRequestsController(UserAwareQueryParser<SourceRequest> queryParser,
+            UserAwareQueryExecutor<SourceRequest> queryExecutor,
+            UserAwareQueryResultWriter<SourceRequest> resultWriter,
             SourceRequestManager sourceRequestManager,
             NumberToShortStringCodec idCodec,
             SourceIdCodec sourceIdCodec,
@@ -61,8 +61,8 @@ public class SourceRequestsController {
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
-            Query<SourceRequest> sourcesQuery = queryParser.parse(request);
-            QueryResult<SourceRequest> queryResult = queryExecutor.execute(sourcesQuery);
+            UserAwareQuery<SourceRequest> sourcesQuery = queryParser.parse(request);
+            UserAwareQueryResult<SourceRequest> queryResult = queryExecutor.execute(sourcesQuery);
             resultWriter.write(queryResult, writer);
         } catch (Exception e) {
             ErrorSummary summary = ErrorSummary.forException(e);
