@@ -8,12 +8,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
+import org.atlasapi.application.users.Role;
+import org.atlasapi.application.users.User;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.NotAuthorizedException;
 import org.atlasapi.output.NotFoundException;
+import org.atlasapi.output.ResourceForbiddenException;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
 import org.atlasapi.output.useraware.UserAwareQueryResult;
@@ -76,7 +79,11 @@ public class SourcesController {
         response.addHeader("Access-Control-Allow-Origin", "*");
         try {
             Optional<Publisher> source = sourceIdCodec.decode(sourceId);
+            // Only people with admin permission on source can use this endpoint
             if (source.isPresent()) {
+                if (!userMangesSource(source.get(), request)) {
+                    throw new ResourceForbiddenException();
+                }
                 Id applicationId = Id.valueOf(idCodec.decode(id));
                 Permission permissionType = Permission.valueOf(permission.toUpperCase());
                 Application existing = applicationStore.applicationFor(applicationId).get();
@@ -115,6 +122,10 @@ public class SourcesController {
         try {
             Optional<Publisher> source = sourceIdCodec.decode(sourceId);
             if (source.isPresent()) {
+                // Only people with admin permission on source can use this endpoint
+                if (!userMangesSource(source.get(), request)) {
+                    throw new ResourceForbiddenException();
+                }
                 Id applicationId = Id.valueOf(idCodec.decode(id));
                 Permission permissionType = Permission.valueOf(permission.toUpperCase());
                 Application existing = applicationStore.applicationFor(applicationId).get();
@@ -153,6 +164,10 @@ public class SourcesController {
         try {
             Optional<Publisher> source = sourceIdCodec.decode(sourceId);
             if (source.isPresent()) {
+                // Only people with admin permission on source can use this endpoint
+                if (!userMangesSource(source.get(), request)) {
+                    throw new ResourceForbiddenException();
+                }
                 Id applicationId = Id.valueOf(idCodec.decode(id));
                 SourceState requestedState = SourceState.valueOf(state.toUpperCase());
                 Application existing = applicationStore.applicationFor(applicationId).get();
@@ -178,6 +193,15 @@ public class SourcesController {
         } catch (Exception e) {
             ErrorSummary summary = ErrorSummary.forException(e);
             new ErrorResultWriter().write(summary, writer, request, response);
+        }
+    }
+    
+    private boolean userMangesSource(Publisher source, HttpServletRequest request) {
+        Optional<User> user = userFetcher.userFor(request);
+        if (!user.isPresent()) {
+            return false;
+        } else {
+            return user.get().is(Role.ADMIN) || user.get().getSources().contains(source);
         }
     }
 }
