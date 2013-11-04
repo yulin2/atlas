@@ -15,6 +15,7 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.NotFoundException;
+import org.atlasapi.output.ResourceForbiddenException;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
 import org.atlasapi.output.useraware.UserAwareQueryResult;
@@ -84,6 +85,11 @@ public class UsersController {
         try {
             writer = writerResolver.writerFor(request, response);
             Id userId = Id.valueOf(idCodec.decode(uid));
+            User editingUser = userFetcher.userFor(request).get();
+            // if not own profile then need to be admin
+            if (!editingUser.is(Role.ADMIN) && !editingUser.getId().equals(userId)) {
+                throw new ResourceForbiddenException();
+            }
             Optional<User> user = userStore.userForId(userId);
             if (user.isPresent()) {
                 User posted = deserialize(new InputStreamReader(request.getInputStream()), User.class);

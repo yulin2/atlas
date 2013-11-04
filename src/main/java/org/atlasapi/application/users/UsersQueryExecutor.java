@@ -31,7 +31,7 @@ public class UsersQueryExecutor implements UserAwareQueryExecutor<User> {
     
     private UserAwareQueryResult<User> singleQuery(UserAwareQuery<User> query) throws NotFoundException, ResourceForbiddenException {
         Id id = query.getOnlyId();
-        if (!query.getContext().isAdminUser() && id.equals(query.getContext().getUser().get().getId())) {
+        if (!query.getContext().isAdminUser() && !id.equals(query.getContext().getUser().get().getId())) {
             throw new ResourceForbiddenException();
         }
         Optional<User> user = userStore.userForId(id);
