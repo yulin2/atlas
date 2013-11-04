@@ -7,11 +7,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
+import org.atlasapi.application.users.Role;
+import org.atlasapi.application.users.User;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.NotFoundException;
+import org.atlasapi.output.ResourceForbiddenException;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
 import org.atlasapi.output.useraware.UserAwareQueryResult;
@@ -77,7 +80,6 @@ public class SourceRequestsController {
             @PathVariable String sid,
             @RequestParam String appId,
             @RequestParam String appUrl,
-            @RequestParam String email,
             @RequestParam String reason,
             @RequestParam String usageType) throws IOException {
 
@@ -87,8 +89,9 @@ public class SourceRequestsController {
             if (source.isPresent()) {
                 Id applicationId = Id.valueOf(idCodec.decode(appId));
                 UsageType usageTypeRequested = UsageType.valueOf(usageType.toUpperCase());
+                User user = userFetcher.userFor(request).get();
                 sourceRequestManager.createOrUpdateRequest(source.get(), usageTypeRequested,
-                    applicationId, appUrl, email, reason);
+                    applicationId, appUrl, user.getEmail(), reason);
             } else {
                 throw new NotFoundException(null);
             }
@@ -105,7 +108,7 @@ public class SourceRequestsController {
         response.addHeader("Access-Control-Allow-Origin", "*");
         try {
             Id requestId = Id.valueOf(idCodec.decode(rid));
-            sourceRequestManager.approveSourceRequest(requestId);
+            sourceRequestManager.approveSourceRequest(requestId, userFetcher.userFor(request).get());
         } catch (Exception e) {
             ErrorSummary summary = ErrorSummary.forException(e);
             new ErrorResultWriter().write(summary, null, request, response);

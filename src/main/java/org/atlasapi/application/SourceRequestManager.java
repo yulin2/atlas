@@ -1,9 +1,12 @@
 package org.atlasapi.application;
 
 import org.atlasapi.application.SourceStatus.SourceState;
+import org.atlasapi.application.users.Role;
+import org.atlasapi.application.users.User;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
+import org.atlasapi.output.ResourceForbiddenException;
 import org.atlasapi.persistence.application.ApplicationStore;
 import org.atlasapi.persistence.application.SourceRequestStore;
 import org.elasticsearch.common.Preconditions;
@@ -70,13 +73,19 @@ public class SourceRequestManager {
     
     /**
      * Approve source request and change source status on app to available
+     * Must be admin of source to approve
      * @param id
      * @throws NotFoundException
+     * @throws ResourceForbiddenException 
      */
-    public void approveSourceRequest(Id id) throws NotFoundException {
+    public void approveSourceRequest(Id id, User approvingUser) throws NotFoundException, ResourceForbiddenException {
         Optional<SourceRequest> sourceRequest = sourceRequestStore.sourceRequestFor(id);
         if (!sourceRequest.isPresent()) {
             throw new NotFoundException(id);
+        }
+        if (!approvingUser.is(Role.ADMIN) 
+                && !approvingUser.getSources().contains(sourceRequest.get().getSource())) {
+            throw new ResourceForbiddenException();
         }
         Application existing = applicationStore.applicationFor(sourceRequest.get().getAppId()).get();
         applicationStore.updateApplication(
