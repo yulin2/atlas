@@ -53,7 +53,6 @@ import org.atlasapi.query.common.AttributeCoercers;
 import org.atlasapi.query.common.IndexAnnotationsExtractor;
 import org.atlasapi.query.common.QueryAtomParser;
 import org.atlasapi.query.common.QueryAttributeParser;
-import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.Resource;
 import org.atlasapi.query.common.useraware.StandardUserAwareQueryParser;
 import org.atlasapi.query.common.useraware.UserAwareQueryContextParser;
