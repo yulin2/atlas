@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.channel4.pmlsd;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelQuery;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.MediaType;
@@ -58,6 +59,11 @@ public class C4DummyChannelResolver implements ChannelResolver {
 
     @Override
     public Map<String, Channel> forAliases(String aliasPrefix) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Iterable<Channel> allChannels(ChannelQuery query) {
         throw new UnsupportedOperationException();
     }
 
