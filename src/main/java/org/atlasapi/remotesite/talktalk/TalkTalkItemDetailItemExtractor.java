@@ -53,6 +53,7 @@ public class TalkTalkItemDetailItemExtractor {
 
     private static final Pattern NUMBERED_EPISODE_TITLE = Pattern.compile("^Ep\\s*(\\d+)\\s*:\\s*(.*)");
     private static final String MOVIE_CHANNEL_GENRE_CODE = "CHMOVIES";
+    private static final String CHANNEL_URI_PREFIX = "http://talktalk.net/channels/";
     
     private static final Map<ProductTypeType, RevenueContract> revenueContractLookup =  ImmutableMap.of(
             ProductTypeType.FREE, RevenueContract.FREE_TO_VIEW, 
@@ -70,6 +71,7 @@ public class TalkTalkItemDetailItemExtractor {
         .toFormatter();
     
     private static final TalkTalkDescriptionExtractor descriptionExtractor = new TalkTalkDescriptionExtractor();
+    private static final TalkTalkFilmYearExtractor filmYearExtractor = new TalkTalkFilmYearExtractor();
     private static final TalkTalkGenresExtractor genresExtractor = new TalkTalkGenresExtractor();
     private static final TalkTalkImagesExtractor imagesExtractor = new TalkTalkImagesExtractor();
     private static final TalkTalkUriCompiler uriCompiler = new TalkTalkUriCompiler();
@@ -118,7 +120,12 @@ public class TalkTalkItemDetailItemExtractor {
             item = new Item();
             item.setSpecialization(Specialization.TV);
         }
-        return setCommonItemFields(item, detail);
+        item = setCommonItemFields(item, detail);
+        
+        if (item instanceof Film) {
+            item.setYear(filmYearExtractor.extractYear(item.getDescription()).orNull());
+        }
+        return item;
     }
 
     private <I extends Item> I setCommonItemFields(I item, ItemDetailType detail) {
@@ -165,11 +172,21 @@ public class TalkTalkItemDetailItemExtractor {
     }
 
     private Set<Location> extractLocations(ItemDetailType detail) {
-        Location location = new Location(); 
+        
+        Location location = new Location();
+        location.setUri(extractLocationUri(detail));
         location.setPolicy(extractPolicy(detail));
         return ImmutableSet.of(location);
     }
 
+    private String extractLocationUri(ItemDetailType detail) {
+        if (detail.getChannel() != null && detail.getChannel().getId() != null) {
+            return CHANNEL_URI_PREFIX + detail.getChannel().getId();
+        } else {
+            return null;
+        }
+    }
+    
     private Policy extractPolicy(ItemDetailType detail) {
         Policy policy = new Policy();
         AvailabilityType availability = detail.getAvailability();

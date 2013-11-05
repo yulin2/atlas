@@ -1,5 +1,8 @@
 package org.atlasapi.system;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import javax.servlet.ServletContext;
 
 import org.atlasapi.AtlasMain;
@@ -16,9 +19,12 @@ public class JettyHealthProbe implements HealthProbe, ServletContextAware {
     @Override
     public ProbeResult probe() throws Exception {
         ProbeResult probeResult = new ProbeResult("Requests");
-        String connections = AtlasMain.getMaxNumberOfOpenConnectionsInLastMinute(
+        Map<String, String> metrics = AtlasMain.getMetrics(
                 servletContext.getAttribute(AtlasMain.CONTEXT_ATTRIBUTE));
-        probeResult.add("utilisation", connections, true);
+        
+        for (Entry<String, String> entry : metrics.entrySet()) {
+            probeResult.addInfo(entry.getKey(), entry.getValue());
+        }
         return probeResult;
     }
 

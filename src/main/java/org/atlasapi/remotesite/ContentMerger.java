@@ -5,6 +5,7 @@ import java.util.Map;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
@@ -27,7 +28,14 @@ public class ContentMerger {
             Episode extractedEp = (Episode) extracted;
             currentEp.setEpisodeNumber(extractedEp.getEpisodeNumber());
             currentEp.setSeriesRef(extractedEp.getSeriesRef());
-        }        
+        }
+        
+        if (current instanceof Film && extracted instanceof Film) {
+            Film currentFilm = (Film) current;
+            Film extractedFilm = (Film) extracted;
+            currentFilm.setYear(extractedFilm.getYear());
+        }
+        
         return current;
     }
 

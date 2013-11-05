@@ -15,6 +15,7 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -58,7 +59,11 @@ public class RootEquivalenceUpdater implements EquivalenceUpdater<Content> {
     }
 
     private Iterable<Series> seriesOf(Brand brand) {
-        List<String> childUris = Lists.transform(brand.getSeriesRefs(), SeriesRef.TO_URI);
+        ImmutableList<SeriesRef> seriesRefs = brand.getSeriesRefs();
+        if (seriesRefs.isEmpty()) {
+            return ImmutableList.of();
+        }
+        List<String> childUris = Lists.transform(seriesRefs, SeriesRef.TO_URI);
         ResolvedContent children = contentResolver.findByCanonicalUris(childUris);
         return Iterables.filter(children.getAllResolvedResults(), Series.class);
     }

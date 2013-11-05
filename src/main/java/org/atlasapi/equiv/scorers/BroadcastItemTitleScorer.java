@@ -1,14 +1,12 @@
 package org.atlasapi.equiv.scorers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.Set;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
-import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
@@ -35,16 +33,22 @@ import com.metabroadcast.common.base.Maybe;
  * </ol>
  * 
  * Any match results in a score of {@link Score#ONE one} otherwise the score is
- * {@link Score#NULL_SCORE null}.
+ * configured mismatch score.
  */
 public class BroadcastItemTitleScorer implements EquivalenceScorer<Item> {
 
     public static final String NAME = "Broadcast-Title";
     
     private final ContentResolver resolver;
+    private final Score misMatchScore;
 
     public BroadcastItemTitleScorer(ContentResolver resolver) {
-        this.resolver = checkNotNull(resolver);
+        this(resolver, Score.nullScore());
+    }
+    
+    public BroadcastItemTitleScorer(ContentResolver resolver, Score misMatchScore) {
+        this.resolver = resolver;
+        this.misMatchScore = misMatchScore;
     }
 
     @Override
@@ -105,8 +109,8 @@ public class BroadcastItemTitleScorer implements EquivalenceScorer<Item> {
         }
         
         desc.appendText("%s scores %s, no item/container title matches",
-                candidate.getCanonicalUri(), Score.NULL_SCORE); 
-        return Score.NULL_SCORE;
+                candidate.getCanonicalUri(), misMatchScore); 
+        return misMatchScore;
     }
 
     private boolean equalTitles(Content c1, Content c2) {

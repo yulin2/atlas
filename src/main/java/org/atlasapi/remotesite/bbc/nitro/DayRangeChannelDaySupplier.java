@@ -36,7 +36,6 @@ public class DayRangeChannelDaySupplier implements Supplier<ImmutableList<Channe
         ImmutableList.Builder<ChannelDay> channelDays = ImmutableList.builder();
         while (channels.hasNext())  {
             Channel channel = channels.next();
-            System.out.println(dayRange.lowerEndpoint());
             
             LocalDate day = dayRange.lowerEndpoint();
             if (BoundType.OPEN.equals(dayRange.lowerBoundType())) {

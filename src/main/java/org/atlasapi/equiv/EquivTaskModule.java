@@ -67,7 +67,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 public class EquivTaskModule {
 
     private static final Set<String> ignored = ImmutableSet.of("http://www.bbc.co.uk/programmes/b006mgyl"); 
-    private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
+//  private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
     private static final RepetitionRule RT_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(7, 00));
     private static final RepetitionRule TALKTALK_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(11, 15));
     private static final RepetitionRule YOUVIEW_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(15, 00));
@@ -109,45 +109,45 @@ public class EquivTaskModule {
             
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_MUSIC).withName("Music Equivalence Updater"), RepetitionRules.every(Duration.standardHours(6)));
             
-            Builder taskBuilder = ScheduleEquivalenceUpdateTask.builder()
-                .withUpdater(equivUpdater)
-                .withScheduleResolver(scheduleResolver)
-                .withBack(0)
-                .withForward(7);
-            
-            taskScheduler.schedule(taskBuilder
+            taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(YOUVIEW)
                     .withChannels(youViewChannelResolver().getAllChannels())
                     .build().withName("YouView Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(taskBuilder
+            taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(BBC)
                     .withChannels(bbcChannels())
                     .build().withName("BBC Schedule Equivalence (8 day) Updater"), 
                 BBC_SCHEDULE_EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(taskBuilder
+            taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(ITV)
                     .withChannels(itvChannels())
                     .build().withName("ITV Schedule Equivalence (8 day) Updater"), 
                 ITV_SCHEDULE_EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(taskBuilder
+            taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(C4)
                     .withChannels(c4Channels())
                     .build().withName("C4 Schedule Equivalence (8 day) Updater"), 
                 C4_SCHEDULE_EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(taskBuilder
+            taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(FIVE)
                     .withChannels(fiveChannels())
                     .build().withName("Five Schedule Equivalence (8 day) Updater"), 
                 FIVE_SCHEDULE_EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(taskBuilder
-                    .withBack(7)
-                    .withForward(0)
+            taskScheduler.schedule(taskBuilder(7, 0)
                     .withPublishers(BBC_REDUX)
                     .withChannels(bbcReduxChannels())
                     .build().withName("Redux Schedule Equivalence (8 day) Updater"), 
                 REDUX_SCHEDULE_EQUIVALENCE_REPETITION);
         }
+    }
+
+    private Builder taskBuilder(int back, int forward) {
+        return ScheduleEquivalenceUpdateTask.builder()
+            .withUpdater(equivUpdater)
+            .withScheduleResolver(scheduleResolver)
+            .withBack(back)
+            .withForward(forward);
     }
 
     public @Bean MongoScheduleTaskProgressStore progressStore() {

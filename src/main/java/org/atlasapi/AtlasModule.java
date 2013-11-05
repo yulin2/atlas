@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.health.HealthProbe;
@@ -34,6 +35,7 @@ import com.metabroadcast.common.webapp.properties.ContextConfigurer;
 import com.mongodb.Mongo;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
+import com.mongodb.WriteConcern;
 
 @Configuration
 public class AtlasModule {
@@ -41,6 +43,7 @@ public class AtlasModule {
 	private final String mongoHost = Configurer.get("mongo.host").get();
 	private final String dbName = Configurer.get("mongo.dbName").get();
 	private final Parameter processingConfig = Configurer.get("processing.config");
+	private final Parameter processingWriteConcern = Configurer.get("processing.mongo.writeConcern");
 
 	public @Bean DatabasedMongo databasedMongo() {
 	    return new DatabasedMongo(mongo(), dbName);
@@ -50,6 +53,17 @@ public class AtlasModule {
         Mongo mongo = new Mongo(mongoHosts());
         if(processingConfig == null || !processingConfig.toBoolean()) {
             mongo.setReadPreference(ReadPreference.secondaryPreferred());
+        } else {
+            if (processingWriteConcern != null 
+                    && !Strings.isNullOrEmpty(processingWriteConcern.get())) {
+                
+                WriteConcern writeConcern = WriteConcern.valueOf(processingWriteConcern.get());
+                if (writeConcern == null) {
+                    throw new IllegalArgumentException("Could not parse write concern: " + 
+                                    processingWriteConcern.get());
+                }
+                mongo.setWriteConcern(writeConcern);
+            }
         }
         return mongo;
     }

@@ -16,7 +16,7 @@ public class MongoPicksLastProcessedStore implements PicksLastProcessedStore {
 
     private static final String KEY = "lastProcessedScheduleDay";
     private static final String DATE_KEY = "lastProcessed";
-    private static final String COLLECTION = "scheduledTaskStatus-metabroadcastPicks";
+    private static final String COLLECTION = "scheduledTaskStatus.metabroadcastPicks";
     private final DBCollection collection;
     
     public MongoPicksLastProcessedStore(DatabasedMongo mongo) {

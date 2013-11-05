@@ -108,7 +108,7 @@ aliasMapping["(" + escapeRegExp("http://www.bbc.co.uk/iplayer") + ")"] = {"names
 
 aliasMapping[escapeRegExp("http://devapi.bbcredux.com/channels/") + "([a-z0-9]*)"] = {"namespace" : "", "value" : "1"};
 aliasMapping[escapeRegExp("http://g.bbcredux.com/programme/") + "([0-9]*)"] = {"namespace" : "", "value" : "1"};
-aliasMapping[escapeRegExp("http://g.bbcredux.com/programme/") + "([a-z0-9]*)" + escapeRegExp("/") + "([a-z0-9/]*)" + escapeRegExp("/") + "2011-07-12/") + "([0-9]*)"] = {"namespace" : "", "value" : "1"};
+aliasMapping[escapeRegExp("http://g.bbcredux.com/programme/") + "([a-z0-9]*)" + escapeRegExp("/") + "([a-z0-9/]*)" + escapeRegExp("/") + "2011-07-12/" + "([0-9]*)"] = {"namespace" : "", "value" : "1"};
 
 aliasMapping["(^BBW_[^_]+_[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
 aliasMapping["(^BBC_[^_]+_[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};

@@ -11,7 +11,7 @@ import com.metabroadcast.common.time.SystemClock;
 
 public class PicksDayRangeSupplier implements Supplier<Range<LocalDate>> {
 
-    private static final LocalDate START_DATE = new LocalDate(2013, DateTimeConstants.OCTOBER, 1);
+    private static final LocalDate START_DATE = new LocalDate(2013, DateTimeConstants.JANUARY, 1);
     private static final int DAYS_INTO_FUTURE_TO_RUN = 1;
 
     private final Clock clock = new SystemClock();

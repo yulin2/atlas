@@ -28,7 +28,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class ItvWhatsOnEntryProcessorTest {
     
     private final ChannelResolver channelResolver = mock(ChannelResolver.class); 
-    private final ItvWhatsOnEntryExtractor extractor = new ItvWhatsOnEntryExtractor(new ItvWhatsonChannelMap(channelResolver));
+    private ItvWhatsOnEntryExtractor extractor;
     
     private String BRAND_URI = "http://itv.com/brand/1/7680";
     private String SERIES_URI = "http://itv.com/series/1/7680-02";
@@ -89,6 +89,7 @@ public class ItvWhatsOnEntryProcessorTest {
                 return Maybe.just(Channel.builder().withUri((String)invocation.getArguments()[0]).build());
             }
         });
+        extractor = new ItvWhatsOnEntryExtractor(new ItvWhatsonChannelMap(channelResolver));
     }
     
     

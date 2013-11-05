@@ -27,29 +27,30 @@ import com.google.common.collect.ImmutableSet;
 @RunWith(MockitoJUnitRunner.class)
 public class BroadcastItemTitleScorerTest {
 
+    private final Score mismatchScore = Score.nullScore();
     private final ContentResolver resolver = mock(ContentResolver.class);
     private final BroadcastItemTitleScorer scorer
-        = new BroadcastItemTitleScorer(resolver);
+        = new BroadcastItemTitleScorer(resolver, mismatchScore);
     
     @Test
-    public void testScoresOneIfBrandTitleMatchesWhenSuggestionHasContainer() {
+    public void testScoresOneIfBrandTitleMatchesWhenCandidateHasContainer() {
         
         Item subject = new Item("subj", "subj", Publisher.YOUVIEW);
         subject.setTitle("Coast");
         
-        Item suggestion = new Item("sugg", "sugg", Publisher.PA);
-        suggestion.setTitle("South Wales");
+        Item candidate = new Item("cand", "cand", Publisher.PA);
+        candidate.setTitle("South Wales");
         
-        Brand suggestionBrand = new Brand("suggBrand", "suggBrand", Publisher.PA);
-        suggestionBrand.setTitle("Coast");
-        suggestion.setContainer(suggestionBrand);
+        Brand candidateBrand = new Brand("candBrand", "candBrand", Publisher.PA);
+        candidateBrand.setTitle("Coast");
+        candidate.setContainer(candidateBrand);
         
-        when(resolver.findByCanonicalUris(argThat(hasItem(suggestionBrand.getCanonicalUri()))))
-            .thenReturn(ResolvedContent.builder().put(suggestionBrand.getCanonicalUri(), suggestionBrand).build());
+        when(resolver.findByCanonicalUris(argThat(hasItem(candidateBrand.getCanonicalUri()))))
+            .thenReturn(ResolvedContent.builder().put(candidateBrand.getCanonicalUri(), candidateBrand).build());
         
-        ScoredCandidates<Item> results = scorer.score(subject, ImmutableSet.of(suggestion), new DefaultDescription());
+        ScoredCandidates<Item> results = scorer.score(subject, ImmutableSet.of(candidate), new DefaultDescription());
         
-        assertThat(results.candidates().get(suggestion), is(Score.ONE));
+        assertThat(results.candidates().get(candidate), is(Score.ONE));
         
     }
 
@@ -63,62 +64,62 @@ public class BroadcastItemTitleScorerTest {
         subjectBrand.setTitle("Coast");
         subject.setContainer(subjectBrand);
         
-        Item suggestion = new Item("sugg", "sugg", Publisher.PA);
-        suggestion.setTitle("Coast");
+        Item candidate = new Item("cand", "cand", Publisher.PA);
+        candidate.setTitle("Coast");
         
         when(resolver.findByCanonicalUris(argThat(hasItem(subjectBrand.getCanonicalUri()))))
         .thenReturn(ResolvedContent.builder().put(subjectBrand.getCanonicalUri(), subjectBrand).build());
         
-        ScoredCandidates<Item> results = scorer.score(subject, ImmutableSet.of(suggestion), new DefaultDescription());
+        ScoredCandidates<Item> results = scorer.score(subject, ImmutableSet.of(candidate), new DefaultDescription());
         
-        assertThat(results.candidates().get(suggestion), is(Score.ONE));
+        assertThat(results.candidates().get(candidate), is(Score.ONE));
         
     }
 
     @Test
-    public void testScoresOneIfItemTitleMatchesWhenSuggestionHasContainer() {
+    public void testScoresOneIfItemTitleMatchesWhenCandidateHasContainer() {
         
         Item subject = new Item("subj", "subj", Publisher.YOUVIEW);
         subject.setTitle("Coast");
         
-        Item suggestion = new Item("sugg", "sugg", Publisher.PA);
-        suggestion.setTitle("Coast");
+        Item candidate = new Item("cand", "cand", Publisher.PA);
+        candidate.setTitle("Coast");
         
-        Brand suggestionBrand = new Brand("suggBrand", "suggBrand", Publisher.PA);
-        suggestionBrand.setTitle("Coast");
-        suggestion.setContainer(suggestionBrand);
+        Brand candidateBrand = new Brand("candBrand", "candBrand", Publisher.PA);
+        candidateBrand.setTitle("Coast");
+        candidate.setContainer(candidateBrand);
         
-        ScoredCandidates<Item> results = scorer.score(subject, ImmutableSet.of(suggestion), new DefaultDescription());
+        ScoredCandidates<Item> results = scorer.score(subject, ImmutableSet.of(candidate), new DefaultDescription());
         
-        assertThat(results.candidates().get(suggestion), is(Score.ONE));
+        assertThat(results.candidates().get(candidate), is(Score.ONE));
         
         verify(resolver, never()).findByCanonicalUris(anyIterable());
     }
 
     @Test
-    public void testScoresNullIfNoTitlesMatch() {
+    public void testScoresMismatchScoreIfNoTitlesMatch() {
         
         Item subject = new Item("subj", "subj", Publisher.YOUVIEW);
         
         Brand subjectBrand = new Brand("subjBrand", "subjBrand", Publisher.PA);
         subject.setContainer(subjectBrand);
         
-        Item suggestion = new Item("sugg", "sugg", Publisher.PA);
+        Item candidate = new Item("cand", "cand", Publisher.PA);
         
-        Brand suggestionBrand = new Brand("suggBrand", "suggBrand", Publisher.PA);
-        suggestion.setContainer(suggestionBrand);
+        Brand candidateBrand = new Brand("candBrand", "candBrand", Publisher.PA);
+        candidate.setContainer(candidateBrand);
         
         when(resolver.findByCanonicalUris(argThat(hasItem(subjectBrand.getCanonicalUri()))))
             .thenReturn(ResolvedContent.builder().put(subjectBrand.getCanonicalUri(), subjectBrand).build());
-        when(resolver.findByCanonicalUris(argThat(hasItem(suggestionBrand.getCanonicalUri()))))
-            .thenReturn(ResolvedContent.builder().put(suggestionBrand.getCanonicalUri(), suggestionBrand).build());
+        when(resolver.findByCanonicalUris(argThat(hasItem(candidateBrand.getCanonicalUri()))))
+            .thenReturn(ResolvedContent.builder().put(candidateBrand.getCanonicalUri(), candidateBrand).build());
     
-        ScoredCandidates<Item> results = scorer.score(subject, ImmutableSet.of(suggestion), new DefaultDescription());
+        ScoredCandidates<Item> results = scorer.score(subject, ImmutableSet.of(candidate), new DefaultDescription());
         
-        assertThat(results.candidates().get(suggestion), is(Score.NULL_SCORE));
+        assertThat(results.candidates().get(candidate), is(mismatchScore));
         
         verify(resolver).findByCanonicalUris(argThat(hasItem(subjectBrand.getCanonicalUri())));
-        verify(resolver).findByCanonicalUris(argThat(hasItem(suggestionBrand.getCanonicalUri())));
+        verify(resolver).findByCanonicalUris(argThat(hasItem(candidateBrand.getCanonicalUri())));
     }
 
     @SuppressWarnings("unchecked")

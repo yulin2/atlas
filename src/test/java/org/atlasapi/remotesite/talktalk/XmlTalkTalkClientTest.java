@@ -80,7 +80,7 @@ public class XmlTalkTalkClientTest {
                 Resources.getResource(getClass(), "vod-list.xml"));
         resourceMap.put("http://localhost.com/TVDataInterface/VOD/List/2?groupType=BRAND&groupIdentifier=ABCCASTL&page=1&itemsPerPage=3",
                 Resources.getResource(getClass(), "vod-list.xml"));
-        resourceMap.put("http://localhost.com/TVDataInterface/Detail/Item/2?groupType=EPISODE&groupIdentifier=397212",
+        resourceMap.put("http://localhost.com/TVDataInterface/Detail/Item/2?groupType=EPISODE&groupIdentifier=397212&hdEnabled=false",
                 Resources.getResource(getClass(), "detail.xml"));
         client = new StubSimpleHttpClient(resourceMap);
         

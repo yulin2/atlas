@@ -44,6 +44,10 @@ public class PicksChannelsSupplier implements Supplier<Set<Channel>> {
             @Override
             public Set<Channel> call() throws Exception {
                 Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(Long.valueOf(channelGroupId));
+                if (!channelGroup.isPresent()) {
+                    log.warn("No channel group found for picks ingest. Job will do nothing.");
+                    return ImmutableSet.of();
+                }
                 return currentChannelsIn(channelGroup.get());
             }
             

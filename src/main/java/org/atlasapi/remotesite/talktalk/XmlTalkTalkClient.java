@@ -172,7 +172,9 @@ public class XmlTalkTalkClient implements TalkTalkClient {
     @Override
     public ItemDetailType getItemDetail(GroupType type, String identifier)
             throws TalkTalkException {
-        String url = Urls.appendParameters(String.format("http://%s/TVDataInterface/Detail/Item/2?", host.toString()), parameters(type, identifier));
+        // hdEnabled parameter is a temporary workaround for a bug in the TalkTalk API
+        String url = Urls.appendParameters(String.format("http://%s/TVDataInterface/Detail/Item/2?", host.toString()), 
+                parameters(type, identifier).add("hdEnabled", "false"));
         try {
             return client.get(SimpleHttpRequest.httpRequestFrom(
                 url, transformer(ITEM_DETAIL_LISTENER)
