@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.application.auth.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.InvalidApiKeyException;
 import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.query.annotation.ContextualAnnotationsExtractor;
@@ -29,7 +30,7 @@ public class ContextualQueryContextParser implements ParameterNameProvider {
         this.selectionBuilder = checkNotNull(selectionBuilder);
     }
 
-    public QueryContext parseContext(HttpServletRequest request) throws QueryParseException {
+    public QueryContext parseContext(HttpServletRequest request) throws QueryParseException, InvalidApiKeyException {
         return new QueryContext(
             configFetcher.sourcesFor(request).or(ApplicationSources.defaults()),
             annotationExtractor.extractFromRequest(request),

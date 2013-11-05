@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.application.auth.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.InvalidApiKeyException;
 import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.query.annotation.AnnotationsExtractor;
@@ -31,7 +32,7 @@ public class UserAwareQueryContextParser implements ParameterNameProvider {
         this.selectionBuilder = checkNotNull(selectionBuilder);
     }
     
-    public UserAwareQueryContext parseSingleContext(HttpServletRequest request) throws QueryParseException {
+    public UserAwareQueryContext parseSingleContext(HttpServletRequest request) throws QueryParseException, InvalidApiKeyException {
         return new UserAwareQueryContext(
                 configFetcher.sourcesFor(request).or(ApplicationSources.defaults()),
                 annotationExtractor.extractFromSingleRequest(request),
@@ -40,7 +41,7 @@ public class UserAwareQueryContextParser implements ParameterNameProvider {
                 );
     }
 
-    public UserAwareQueryContext parseListContext(HttpServletRequest request) throws QueryParseException {
+    public UserAwareQueryContext parseListContext(HttpServletRequest request) throws QueryParseException, InvalidApiKeyException {
         return new UserAwareQueryContext(
                 configFetcher.sourcesFor(request).or(ApplicationSources.defaults()),
             annotationExtractor.extractFromListRequest(request),

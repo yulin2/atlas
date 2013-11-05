@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.atlasapi.application.auth.InvalidApiKeyException;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.content.criteria.attribute.Attribute;
@@ -46,7 +47,7 @@ public class ContextualQueryParser<C, R> {
     }
     
     public ContextualQuery<C, R> parse(HttpServletRequest request)
-            throws QueryParseException {
+            throws QueryParseException, InvalidApiKeyException {
         parameterValidator.validateParameters(request);
         QueryContext context = queryContextParser.parseContext(request);
         SingleQuery<C> contextQuery = contextQuery(request, context);

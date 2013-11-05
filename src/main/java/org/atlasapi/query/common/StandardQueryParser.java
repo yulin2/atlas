@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.atlasapi.application.auth.InvalidApiKeyException;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.media.common.Id;
 
@@ -32,7 +33,7 @@ public class StandardQueryParser<T> implements QueryParser<T> {
     }
 
     @Override
-    public Query<T> parse(HttpServletRequest request) throws QueryParseException {
+    public Query<T> parse(HttpServletRequest request) throws QueryParseException, InvalidApiKeyException {
         parameterValidator.validateParameters(request);
         Id singleId = tryExtractSingleId(request);
         return singleId != null ? singleQuery(request, singleId) 
@@ -45,11 +46,11 @@ public class StandardQueryParser<T> implements QueryParser<T> {
                               : null;
     }
     
-    private Query<T> singleQuery(HttpServletRequest request, Id singleId) throws QueryParseException {
+    private Query<T> singleQuery(HttpServletRequest request, Id singleId) throws QueryParseException, InvalidApiKeyException {
         return Query.singleQuery(singleId, contextParser.parseSingleContext(request));
     }
 
-    private Query<T> listQuery(HttpServletRequest request) throws QueryParseException {
+    private Query<T> listQuery(HttpServletRequest request) throws QueryParseException, InvalidApiKeyException {
         AttributeQuerySet querySet = attributeParser.parse(request);
         return Query.listQuery(querySet,
             contextParser.parseListContext(request));
