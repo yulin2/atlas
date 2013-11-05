@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.health.HealthProbe;
@@ -53,7 +54,9 @@ public class AtlasModule {
         if(processingConfig == null || !processingConfig.toBoolean()) {
             mongo.setReadPreference(ReadPreference.secondaryPreferred());
         } else {
-            if (processingWriteConcern != null) {
+            if (processingWriteConcern != null 
+                    && !Strings.isNullOrEmpty(processingWriteConcern.get())) {
+                
                 WriteConcern writeConcern = WriteConcern.valueOf(processingWriteConcern.get());
                 if (writeConcern == null) {
                     throw new IllegalArgumentException("Could not parse write concern: " + 
