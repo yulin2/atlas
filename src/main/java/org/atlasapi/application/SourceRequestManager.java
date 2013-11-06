@@ -37,7 +37,7 @@ public class SourceRequestManager {
     }
     
     public SourceRequest createOrUpdateRequest(Publisher source, UsageType usageType,
-            Id applicationId, String applicationUrl, String email, String reason) throws UnsupportedEncodingException, MessagingException {
+            Id applicationId, String applicationUrl, String email, String reason) throws MessagingException {
         Optional<SourceRequest> existing = sourceRequestStore.getBy(applicationId, source);
         Preconditions.checkNotNull(source);
         Preconditions.checkNotNull(applicationId);
@@ -46,8 +46,12 @@ public class SourceRequestManager {
             return updateSourceRequest(existing.get(), usageType,
                     applicationUrl, email, reason);
         } else {
-            return createSourceRequest(source, usageType,
-                    applicationId, applicationUrl, email, reason);
+            try {
+                return createSourceRequest(source, usageType,
+                        applicationId, applicationUrl, email, reason);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     
