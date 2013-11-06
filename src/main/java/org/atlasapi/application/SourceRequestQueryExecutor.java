@@ -1,20 +1,26 @@
 package org.atlasapi.application;
 
 import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.atlasapi.application.users.User;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.content.criteria.EnumAttributeQuery;
 import org.atlasapi.content.criteria.QueryVisitorAdapter;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.output.useraware.UserAwareQueryResult;
 import org.atlasapi.persistence.application.SourceRequestStore;
-import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryExecutionException;
-import org.atlasapi.query.common.QueryExecutor;
-import org.atlasapi.query.common.QueryResult;
+import org.atlasapi.query.common.useraware.UserAwareQuery;
+import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
+
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 
-public class SourceRequestQueryExecutor implements QueryExecutor<SourceRequest> {
+public class SourceRequestQueryExecutor implements UserAwareQueryExecutor<SourceRequest> {
     private final SourceRequestStore requestStore;
     private static final QueryVisitorAdapter<Publisher> PUBLISHERS_VISITOR = new QueryVisitorAdapter<Publisher>(){
       
@@ -33,17 +39,34 @@ public class SourceRequestQueryExecutor implements QueryExecutor<SourceRequest> 
     }
 
     @Override
-    public QueryResult<SourceRequest> execute(Query<SourceRequest> query)
+    public UserAwareQueryResult<SourceRequest> execute(UserAwareQuery<SourceRequest> query)
             throws QueryExecutionException {
         AttributeQuerySet operands = query.getOperands();
+        User user = query.getContext().getUser().get();
 
         List<Publisher> source = operands.accept(PUBLISHERS_VISITOR);
+        Iterable<SourceRequest> results;
         
-        if (source.isEmpty()) {
-            return QueryResult.listResult(requestStore.all(), query.getContext());
+        if (source.isEmpty() && query.getContext().isAdminUser()) {
+            results = requestStore.all();
+        } else if (source.isEmpty() && !query.getContext().isAdminUser()) {
+            results = requestStore.sourceRequestsForApplicationIds(
+                     user.getApplicationIds());
+        } else if (!source.isEmpty() && query.getContext().isAdminUser()) {
+            results = requestStore.sourceRequestsFor(source.get(0));           
         } else {
-            return QueryResult.listResult(requestStore.sourceRequestsFor(source.get(0)), query.getContext());            
+            results = filterRequestsByUserApplications(requestStore.sourceRequestsFor(source.get(0)), user);
         }
+        
+        return UserAwareQueryResult.listResult(results, query.getContext());
     }
+    
+    private Iterable<SourceRequest> filterRequestsByUserApplications(Iterable<SourceRequest> sourceRequests, final User user) {
+        return Iterables.filter(sourceRequests, new Predicate<SourceRequest>() {
 
+            @Override
+            public boolean apply(@Nullable SourceRequest input) {
+                return user.getApplicationIds().contains(input.getAppId());
+            }});
+    }
 }

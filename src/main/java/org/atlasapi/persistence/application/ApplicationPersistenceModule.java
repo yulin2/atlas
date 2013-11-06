@@ -1,6 +1,5 @@
 package org.atlasapi.persistence.application;
 
-import org.atlasapi.persistence.application.ApplicationStore;
 import org.atlasapi.persistence.application.MongoApplicationStore;
 import org.atlasapi.persistence.application.MongoSourceRequestStore;
 import org.atlasapi.persistence.application.SourceRequestStore;
@@ -25,7 +24,7 @@ public class ApplicationPersistenceModule {
 
 
     @Bean
-    protected ApplicationStore applicationsStore() {
+    protected LegacyApplicationStore applicationsStore() {
         IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "application");
         return new CacheBackedApplicationStore(new MongoApplicationStore(idGenerator, idCodec, adminMongo), cacheMinutes);
     }

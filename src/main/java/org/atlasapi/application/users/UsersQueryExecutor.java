@@ -6,14 +6,17 @@ import org.atlasapi.content.criteria.IdAttributeQuery;
 import org.atlasapi.content.criteria.QueryVisitorAdapter;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.output.NotFoundException;
-import org.atlasapi.query.common.Query;
+import org.atlasapi.output.ResourceForbiddenException;
+import org.atlasapi.output.useraware.UserAwareQueryResult;
 import org.atlasapi.query.common.QueryExecutionException;
-import org.atlasapi.query.common.QueryExecutor;
-import org.atlasapi.query.common.QueryResult;
+import org.atlasapi.query.common.useraware.UserAwareQuery;
+import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
+
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-public class UsersQueryExecutor implements QueryExecutor<User> {
+public class UsersQueryExecutor implements UserAwareQueryExecutor<User> {
     
     private final UserStore userStore;
     
@@ -22,22 +25,29 @@ public class UsersQueryExecutor implements QueryExecutor<User> {
     }
     
     @Override
-    public QueryResult<User> execute(Query<User> query) throws QueryExecutionException {
+    public UserAwareQueryResult<User> execute(UserAwareQuery<User> query) throws QueryExecutionException {
         return query.isListQuery() ? multipleQuery(query) : singleQuery(query);
     }
     
-    private QueryResult<User> singleQuery(Query<User> query) throws NotFoundException {
+    private UserAwareQueryResult<User> singleQuery(UserAwareQuery<User> query) throws NotFoundException, ResourceForbiddenException {
         Id id = query.getOnlyId();
+        if (!query.getContext().isAdminUser() && !id.equals(query.getContext().getUser().get().getId())) {
+            throw new ResourceForbiddenException();
+        }
         Optional<User> user = userStore.userForId(id);
         if (user.isPresent()) {
-            return QueryResult.singleResult(user.get(), query.getContext());
+            return UserAwareQueryResult.singleResult(user.get(), query.getContext());
         } else {
             throw new NotFoundException(id);
         }
     }
     
-    private QueryResult<User> multipleQuery(Query<User> query) throws NotFoundException {
+    private UserAwareQueryResult<User> multipleQuery(UserAwareQuery<User> query) throws NotFoundException {
         AttributeQuerySet operands = query.getOperands();
+        // Can only return own profile if non admin user
+        if (!query.getContext().isAdminUser()) {
+            return usersQueryForIds(query, ImmutableList.of(query.getContext().getUser().get().getId()));
+        }
         
         Iterable<Id> ids = Iterables.concat(operands.accept(new QueryVisitorAdapter<List<Id>>() {
             @Override
@@ -52,11 +62,11 @@ public class UsersQueryExecutor implements QueryExecutor<User> {
     
     }
     
-    private QueryResult<User> usersQueryForIds(Query<User> query, Iterable<Id> ids) {
-        return QueryResult.listResult(userStore.usersFor(ids), query.getContext());
+    private UserAwareQueryResult<User> usersQueryForIds(UserAwareQuery<User> query, Iterable<Id> ids) {
+        return UserAwareQueryResult.listResult(userStore.usersFor(ids), query.getContext());
     }
     
-    private QueryResult<User> allUsersQuery(Query<User> query) {
-        return QueryResult.listResult(userStore.allUsers(), query.getContext());
+    private UserAwareQueryResult<User> allUsersQuery(UserAwareQuery<User> query) {
+        return UserAwareQueryResult.listResult(userStore.allUsers(), query.getContext());
     }
 }

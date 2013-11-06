@@ -8,22 +8,25 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.SourceStatus.SourceState;
 import org.atlasapi.application.auth.UserFetcher;
 import org.atlasapi.application.sources.SourceIdCodec;
+import org.atlasapi.application.users.Role;
+import org.atlasapi.application.users.User;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.NotAuthorizedException;
 import org.atlasapi.output.NotFoundException;
-import org.atlasapi.output.QueryResultWriter;
+import org.atlasapi.output.ResourceForbiddenException;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
+import org.atlasapi.output.useraware.UserAwareQueryResult;
+import org.atlasapi.output.useraware.UserAwareQueryResultWriter;
 import org.atlasapi.persistence.application.ApplicationStore;
-import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryExecutionException;
-import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryParseException;
-import org.atlasapi.query.common.QueryResult;
-import org.atlasapi.query.common.StandardQueryParser;
+import org.atlasapi.query.common.useraware.UserAwareQuery;
+import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
+import org.atlasapi.query.common.useraware.UserAwareQueryParser;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,18 +38,18 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 @Controller
 public class SourcesController {
-    private final StandardQueryParser<Publisher> queryParser;
-    private final QueryExecutor<Publisher> queryExecutor;
-    private final QueryResultWriter<Publisher> resultWriter;
+    private final UserAwareQueryParser<Publisher> queryParser;
+    private final UserAwareQueryExecutor<Publisher> queryExecutor;
+    private final UserAwareQueryResultWriter<Publisher> resultWriter;
     private final ResponseWriterFactory writerResolver = new ResponseWriterFactory();
     private final NumberToShortStringCodec idCodec;
     private final SourceIdCodec sourceIdCodec;
     private final ApplicationStore applicationStore;
     private final UserFetcher userFetcher;
     
-    public SourcesController(StandardQueryParser<Publisher> queryParser,
-            QueryExecutor<Publisher> queryExecutor,
-            QueryResultWriter<Publisher> resultWriter,
+    public SourcesController(UserAwareQueryParser<Publisher> queryParser,
+            UserAwareQueryExecutor<Publisher> queryExecutor,
+            UserAwareQueryResultWriter<Publisher> resultWriter,
             NumberToShortStringCodec idCodec,
             SourceIdCodec sourceIdCodec,
             ApplicationStore applicationStore,
@@ -76,7 +79,11 @@ public class SourcesController {
         response.addHeader("Access-Control-Allow-Origin", "*");
         try {
             Optional<Publisher> source = sourceIdCodec.decode(sourceId);
+            // Only people with admin permission on source can use this endpoint
             if (source.isPresent()) {
+                if (!userMangesSource(source.get(), request)) {
+                    throw new ResourceForbiddenException();
+                }
                 Id applicationId = Id.valueOf(idCodec.decode(id));
                 Permission permissionType = Permission.valueOf(permission.toUpperCase());
                 Application existing = applicationStore.applicationFor(applicationId).get();
@@ -115,6 +122,10 @@ public class SourcesController {
         try {
             Optional<Publisher> source = sourceIdCodec.decode(sourceId);
             if (source.isPresent()) {
+                // Only people with admin permission on source can use this endpoint
+                if (!userMangesSource(source.get(), request)) {
+                    throw new ResourceForbiddenException();
+                }
                 Id applicationId = Id.valueOf(idCodec.decode(id));
                 Permission permissionType = Permission.valueOf(permission.toUpperCase());
                 Application existing = applicationStore.applicationFor(applicationId).get();
@@ -153,6 +164,10 @@ public class SourcesController {
         try {
             Optional<Publisher> source = sourceIdCodec.decode(sourceId);
             if (source.isPresent()) {
+                // Only people with admin permission on source can use this endpoint
+                if (!userMangesSource(source.get(), request)) {
+                    throw new ResourceForbiddenException();
+                }
                 Id applicationId = Id.valueOf(idCodec.decode(id));
                 SourceState requestedState = SourceState.valueOf(state.toUpperCase());
                 Application existing = applicationStore.applicationFor(applicationId).get();
@@ -172,12 +187,21 @@ public class SourcesController {
             HttpServletResponse response) throws QueryParseException, QueryExecutionException, IOException {
         ResponseWriter writer = writerResolver.writerFor(request, response);
         try {
-            Query<Publisher> sourcesQuery = queryParser.parse(request);
-            QueryResult<Publisher> queryResult = queryExecutor.execute(sourcesQuery);
+            UserAwareQuery<Publisher> sourcesQuery = queryParser.parse(request);
+            UserAwareQueryResult<Publisher> queryResult = queryExecutor.execute(sourcesQuery);
             resultWriter.write(queryResult, writer);
         } catch (Exception e) {
             ErrorSummary summary = ErrorSummary.forException(e);
             new ErrorResultWriter().write(summary, writer, request, response);
+        }
+    }
+    
+    private boolean userMangesSource(Publisher source, HttpServletRequest request) {
+        Optional<User> user = userFetcher.userFor(request);
+        if (!user.isPresent()) {
+            return false;
+        } else {
+            return user.get().is(Role.ADMIN) || user.get().getSources().contains(source);
         }
     }
 }

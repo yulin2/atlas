@@ -1,4 +1,4 @@
-package org.atlasapi.query.common;
+package org.atlasapi.query.common.useraware;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -10,21 +10,26 @@ import javax.servlet.http.HttpServletRequest;
 import org.atlasapi.application.auth.InvalidApiKeyException;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.media.common.Id;
+import org.atlasapi.query.common.AbstractRequestParameterValidator;
+import org.atlasapi.query.common.QueryAttributeParser;
+import org.atlasapi.query.common.QueryParseException;
+import org.atlasapi.query.common.QueryRequestParameterValidator;
+import org.atlasapi.query.common.Resource;
 
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
-public class StandardQueryParser<T> implements QueryParser<T> {
+public class StandardUserAwareQueryParser<T> implements UserAwareQueryParser<T> {
 
     private final NumberToShortStringCodec idCodec;
     private final QueryAttributeParser attributeParser;
-    private final QueryContextParser contextParser;
+    private final UserAwareQueryContextParser contextParser;
 
     private final Pattern singleResourcePattern;
     private final AbstractRequestParameterValidator parameterValidator;
 
-    public StandardQueryParser(Resource resource, QueryAttributeParser attributeParser,
+    public StandardUserAwareQueryParser(Resource resource, QueryAttributeParser attributeParser,
                             NumberToShortStringCodec idCodec,
-                            QueryContextParser contextParser) {
+                            UserAwareQueryContextParser contextParser) {
         this.parameterValidator = new QueryRequestParameterValidator(attributeParser, contextParser.getParameterNames());
         this.attributeParser = checkNotNull(attributeParser);
         this.contextParser = checkNotNull(contextParser);
@@ -33,7 +38,7 @@ public class StandardQueryParser<T> implements QueryParser<T> {
     }
 
     @Override
-    public Query<T> parse(HttpServletRequest request) throws QueryParseException, InvalidApiKeyException {
+    public UserAwareQuery<T> parse(HttpServletRequest request) throws QueryParseException, InvalidApiKeyException {
         parameterValidator.validateParameters(request);
         Id singleId = tryExtractSingleId(request);
         return singleId != null ? singleQuery(request, singleId) 
@@ -46,13 +51,13 @@ public class StandardQueryParser<T> implements QueryParser<T> {
                               : null;
     }
     
-    private Query<T> singleQuery(HttpServletRequest request, Id singleId) throws QueryParseException, InvalidApiKeyException {
-        return Query.singleQuery(singleId, contextParser.parseSingleContext(request));
+    private UserAwareQuery<T> singleQuery(HttpServletRequest request, Id singleId) throws QueryParseException, InvalidApiKeyException {
+        return UserAwareQuery.singleQuery(singleId, contextParser.parseSingleContext(request));
     }
 
-    private Query<T> listQuery(HttpServletRequest request) throws QueryParseException, InvalidApiKeyException {
+    private UserAwareQuery<T> listQuery(HttpServletRequest request) throws QueryParseException, InvalidApiKeyException {
         AttributeQuerySet querySet = attributeParser.parse(request);
-        return Query.listQuery(querySet,
+        return UserAwareQuery.listQuery(querySet,
             contextParser.parseListContext(request));
     }
     

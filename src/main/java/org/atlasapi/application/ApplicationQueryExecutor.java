@@ -2,14 +2,19 @@ package org.atlasapi.application;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
+import org.atlasapi.output.ResourceForbiddenException;
+import org.atlasapi.output.useraware.UserAwareQueryResult;
 import org.atlasapi.persistence.application.ApplicationStore;
-import org.atlasapi.query.common.Query;
 import org.atlasapi.query.common.QueryExecutionException;
-import org.atlasapi.query.common.QueryExecutor;
-import org.atlasapi.query.common.QueryResult;
+import org.atlasapi.query.common.useraware.UserAwareQuery;
+import org.atlasapi.query.common.useraware.UserAwareQueryExecutor;
+import org.atlasapi.application.users.Role;
+import org.atlasapi.application.users.User;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.content.criteria.IdAttributeQuery;
@@ -17,9 +22,10 @@ import org.atlasapi.content.criteria.QueryVisitorAdapter;
 import org.atlasapi.content.criteria.attribute.Attributes;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
-public class ApplicationQueryExecutor implements QueryExecutor<Application> {
+public class ApplicationQueryExecutor implements UserAwareQueryExecutor<Application> {
 
     private final ApplicationStore applicationStore;
 
@@ -28,24 +34,29 @@ public class ApplicationQueryExecutor implements QueryExecutor<Application> {
     }
 
     @Override
-    public QueryResult<Application> execute(Query<Application> query)
+    public UserAwareQueryResult<Application> execute(UserAwareQuery<Application> query)
             throws QueryExecutionException {
         return query.isListQuery() ? multipleQuery(query) : singleQuery(query);
     }
 
-    private QueryResult<Application> singleQuery(Query<Application> query) throws NotFoundException {
+    private UserAwareQueryResult<Application> singleQuery(UserAwareQuery<Application> query) throws NotFoundException, ResourceForbiddenException {
         Id id = query.getOnlyId();
+        if (!userCanAccessApplication(id, query)) {
+            throw new ResourceForbiddenException();
+        }
+       
         Optional<Application> application = applicationStore.applicationFor(id);
         if (application.isPresent()) {
-            return QueryResult.singleResult(application.get(), query.getContext());
+            return UserAwareQueryResult.singleResult(application.get(), query.getContext());
         } else {
             throw new NotFoundException(id);
         }
 
     }
 
-    private QueryResult<Application> multipleQuery(Query<Application> query) {
+    private UserAwareQueryResult<Application> multipleQuery(UserAwareQuery<Application> query) {
         AttributeQuerySet operands = query.getOperands();
+        User user = query.getContext().getUser().get();
 
         Iterable<Id> ids = Iterables.concat(operands.accept(new QueryVisitorAdapter<List<Id>>() {
            @Override
@@ -63,30 +74,45 @@ public class ApplicationQueryExecutor implements QueryExecutor<Application> {
                 writes = (Publisher) Iterables.getOnlyElement(operand.getValue());
             }
         }
+        
+        Iterable<Application> results = null;
+        
         if (!Iterables.isEmpty(ids)) {
-            return applicationsQueryForIds(query, ids);
+            results = applicationStore.applicationsFor(ids);
         } else if (reads != null) {
-            return applicationsReading(query, reads);
+            results = applicationStore.allApplications();
         } else if (writes != null) {
-            return applicationsWriting(query, writes);
+            results = applicationStore.writersFor(writes);
         } else {
-            return allApplicationsQuery(query);
+            if (query.getContext().isAdminUser()) {
+                results = applicationStore.allApplications();
+            } else {
+                results = applicationStore.applicationsFor(user.getApplicationIds());
+            }
+        }
+        
+        if (query.getContext().isAdminUser()) {
+            return UserAwareQueryResult.listResult(results, query.getContext());
+        } else {
+            return UserAwareQueryResult.listResult(filterByUserViewable(results, user), query.getContext());
         }
     }
     
-    private QueryResult<Application> applicationsQueryForIds(Query<Application> query, Iterable<Id> ids) {
-        return QueryResult.listResult(applicationStore.applicationsFor(ids), query.getContext());
+    private boolean userCanAccessApplication(Id id, UserAwareQuery<Application> query) {
+        Optional<User> user = query.getContext().getUser();
+        if (!user.isPresent()) {
+            return false;
+        } else {
+            return user.get().is(Role.ADMIN) || user.get().getApplicationIds().contains(id);
+        }
     }
     
-    private QueryResult<Application> allApplicationsQuery(Query<Application> query) {
-        return QueryResult.listResult(applicationStore.allApplications(), query.getContext());
-    }
-    
-    private QueryResult<Application> applicationsReading(Query<Application> query, Publisher source) {
-        return QueryResult.listResult(applicationStore.readersFor(source), query.getContext());
-    }
-    
-    private QueryResult<Application> applicationsWriting(Query<Application> query, Publisher source) {
-        return QueryResult.listResult(applicationStore.writersFor(source), query.getContext());
+    private Iterable<Application> filterByUserViewable(Iterable<Application> applications, final User user) {
+        return Iterables.filter(applications, new Predicate<Application>() {
+
+            @Override
+            public boolean apply(@Nullable Application input) {
+                return user.getApplicationIds().contains(input.getId());
+            }});
     }
 }

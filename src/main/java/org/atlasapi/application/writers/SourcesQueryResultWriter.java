@@ -4,15 +4,15 @@ import java.io.IOException;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.EntityListWriter;
 import org.atlasapi.output.OutputContext;
-import org.atlasapi.output.QueryResultWriter;
 import org.atlasapi.output.ResponseWriter;
-import org.atlasapi.query.common.QueryContext;
-import org.atlasapi.query.common.QueryResult;
+import org.atlasapi.output.useraware.UserAwareQueryResult;
+import org.atlasapi.output.useraware.UserAwareQueryResultWriter;
+import org.atlasapi.query.common.useraware.UserAwareQueryContext;
 
 import com.google.common.collect.FluentIterable;
 
 
-public class SourcesQueryResultWriter implements QueryResultWriter<Publisher> {
+public class SourcesQueryResultWriter implements UserAwareQueryResultWriter<Publisher> {
     private final EntityListWriter<Publisher> sourcesWriter;
     
     public SourcesQueryResultWriter(EntityListWriter<Publisher> sourcesWriter) {
@@ -20,14 +20,14 @@ public class SourcesQueryResultWriter implements QueryResultWriter<Publisher> {
     }
 
     @Override
-    public void write(QueryResult<Publisher> result, ResponseWriter responseWriter)
+    public void write(UserAwareQueryResult<Publisher> result, ResponseWriter responseWriter)
             throws IOException {
         responseWriter.startResponse();
         writeResult(result, responseWriter);
         responseWriter.finishResponse();
     }
     
-    private void writeResult(QueryResult<Publisher> result, ResponseWriter writer)
+    private void writeResult(UserAwareQueryResult<Publisher> result, ResponseWriter writer)
             throws IOException {
         OutputContext ctxt = outputContext(result.getContext());
 
@@ -40,7 +40,7 @@ public class SourcesQueryResultWriter implements QueryResultWriter<Publisher> {
 
     }
     
-    private OutputContext outputContext(QueryContext queryContext) {
+    private OutputContext outputContext(UserAwareQueryContext queryContext) {
         return OutputContext.valueOf(queryContext);
     }
 

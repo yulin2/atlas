@@ -13,6 +13,7 @@ import org.atlasapi.application.ApplicationSources;
 import org.atlasapi.application.SourceReadEntry;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.auth.ApplicationSourcesFetcher;
+import org.atlasapi.application.auth.InvalidApiKeyException;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.NotFoundException;
@@ -67,7 +68,7 @@ class ScheduleRequestParser {
         this.annotationExtractor = annotationsExtractor;
     }
 
-    public ScheduleQuery queryFrom(HttpServletRequest request) throws QueryParseException, NotFoundException {
+    public ScheduleQuery queryFrom(HttpServletRequest request) throws QueryParseException, NotFoundException, InvalidApiKeyException {
         Id channel = extractChannel(request);
 
         validator.validateParameters(request);
@@ -142,7 +143,7 @@ class ScheduleRequestParser {
         return publisher.get();
     }
 
-    private ApplicationSources getConfiguration(HttpServletRequest request) {
+    private ApplicationSources getConfiguration(HttpServletRequest request) throws InvalidApiKeyException {
         Optional<ApplicationSources> config = applicationStore.sourcesFor(request);
         if (config.isPresent()) {
             return config.get();

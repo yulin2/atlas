@@ -34,6 +34,7 @@ public class ApplicationListWriter implements EntityListWriter<Application> {
             throws IOException {
         ctxt.startResource(Resource.APPLICATION);
         writer.writeField("id", idCodec.encode(entity.getId().toBigInteger()));
+        writer.writeField("revoked", entity.isRevoked());
         writer.writeField("title", entity.getTitle());
         writer.writeField("description", entity.getDescription());
         writer.writeField("created", entity.getCreated());
