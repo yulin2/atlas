@@ -46,7 +46,7 @@ import com.sun.syndication.feed.atom.Feed;
 @Configuration
 public class C4Module {
 
-	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
+	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(23, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	private final static RepetitionRule TWO_HOURS = RepetitionRules.every(Duration.standardHours(2));
 
