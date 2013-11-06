@@ -5,12 +5,13 @@ import org.atlasapi.application.auth.OAuthRequestQueryResultWriter;
 import org.atlasapi.application.auth.OAuthResultListWriter;
 import org.atlasapi.application.auth.OAuthResultQueryResultWriter;
 import org.atlasapi.application.auth.twitter.TwitterAuthController;
+import org.atlasapi.application.notification.NotifierModule;
 import org.atlasapi.application.users.MongoUserStore;
 import org.atlasapi.application.users.NewUserSupplier;
 import org.atlasapi.application.users.UserStore;
 import org.atlasapi.application.www.ApplicationWebModule;
 import org.atlasapi.persistence.application.ApplicationPersistenceModule;
-import org.atlasapi.persistence.application.ApplicationStore;
+import org.atlasapi.persistence.application.LegacyApplicationStore;
 import org.atlasapi.persistence.application.SourceRequestStore;
 import org.atlasapi.persistence.auth.MongoTokenRequestStore;
 import org.atlasapi.persistence.auth.TokenRequestStore;
@@ -31,12 +32,12 @@ import com.metabroadcast.common.social.user.FixedAppIdUserRefBuilder;
 import com.metabroadcast.common.social.user.TwitterOAuth1AccessTokenChecker;
 
 @Configuration
-@Import({ ApplicationPersistenceModule.class, ApplicationWebModule.class })
+@Import({ ApplicationPersistenceModule.class, ApplicationWebModule.class, NotifierModule.class })
 public class ApplicationModule {
     private static final String APP_NAME = "atlas";
     private @Autowired @Qualifier(value = "adminMongo") DatabasedMongo adminMongo;
     private @Autowired SourceRequestStore sourceRequestStore;
-    private @Autowired ApplicationStore applicationStore;
+    private @Autowired LegacyApplicationStore applicationStore;
     @Value("${twitter.auth.consumerKey}") private String consumerKey;
     @Value("${twitter.auth.consumerSecret}") private String consumerSecret;
     @Value("${local.host.name}") private String host;

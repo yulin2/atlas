@@ -110,6 +110,7 @@ public class SourceRequestsController {
             Id requestId = Id.valueOf(idCodec.decode(rid));
             sourceRequestManager.approveSourceRequest(requestId, userFetcher.userFor(request).get());
         } catch (Exception e) {
+            e.printStackTrace();
             ErrorSummary summary = ErrorSummary.forException(e);
             new ErrorResultWriter().write(summary, null, request, response);
         }

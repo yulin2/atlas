@@ -24,6 +24,7 @@ import org.atlasapi.application.model.deserialize.IdDeserializer;
 import org.atlasapi.application.model.deserialize.PublisherDeserializer;
 import org.atlasapi.application.model.deserialize.RoleDeserializer;
 import org.atlasapi.application.model.deserialize.SourceReadEntryDeserializer;
+import org.atlasapi.application.notification.EmailNotificationSender;
 import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.application.users.Role;
 import org.atlasapi.application.users.User;
@@ -95,6 +96,7 @@ public class ApplicationWebModule {
     private @Autowired CredentialsStore credentialsStore;
     private @Autowired AccessTokenChecker accessTokenChecker;
     private @Autowired UserStore userStore;
+    private @Autowired EmailNotificationSender emailSender;
     
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(DateTime.class, datetimeDeserializer)
@@ -182,7 +184,8 @@ public class ApplicationWebModule {
         IdGenerator idGenerator = new MongoSequentialIdGenerator(adminMongo, "sourceRequest");
         SourceRequestManager manager = new SourceRequestManager(sourceRequestStore, 
                 applicationStore, 
-                idGenerator);
+                idGenerator,
+                emailSender);
         return new SourceRequestsController(sourceRequestsQueryParser(),
                 new SourceRequestQueryExecutor(sourceRequestStore),
                 new SourceRequestsQueryResultsWriter(new SourceRequestListWriter(sourceIdCodec, idCodec)),
