@@ -5,6 +5,7 @@ import org.atlasapi.application.auth.OAuthRequestQueryResultWriter;
 import org.atlasapi.application.auth.OAuthResultListWriter;
 import org.atlasapi.application.auth.OAuthResultQueryResultWriter;
 import org.atlasapi.application.auth.twitter.TwitterAuthController;
+import org.atlasapi.application.notification.NotifierModule;
 import org.atlasapi.application.users.MongoUserStore;
 import org.atlasapi.application.users.NewUserSupplier;
 import org.atlasapi.application.users.UserStore;
@@ -31,7 +32,7 @@ import com.metabroadcast.common.social.user.FixedAppIdUserRefBuilder;
 import com.metabroadcast.common.social.user.TwitterOAuth1AccessTokenChecker;
 
 @Configuration
-@Import({ ApplicationPersistenceModule.class, ApplicationWebModule.class })
+@Import({ ApplicationPersistenceModule.class, ApplicationWebModule.class, NotifierModule.class })
 public class ApplicationModule {
     private static final String APP_NAME = "atlas";
     private @Autowired @Qualifier(value = "adminMongo") DatabasedMongo adminMongo;
