@@ -20,7 +20,6 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
-import org.atlasapi.output.NotAuthorizedException;
 import org.atlasapi.output.ResourceForbiddenException;
 import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.ResponseWriterFactory;
@@ -115,8 +114,7 @@ public class ApplicationsController {
                 Optional<Application> existing = applicationStore.applicationFor(application.getId());
                 // Copy across slug and disallow modification of credentials
                 application = application.copy().withSlug(existing.get().getSlug())
-                        .withCredentials(existing.get().getCredentials())
-                        .withRevoked(existing.get().isRevoked()).build();
+                        .withCredentials(existing.get().getCredentials()).build();
                 application = applicationStore.updateApplication(application);
             } else {
                 // New application
@@ -193,44 +191,6 @@ public class ApplicationsController {
             }
             Application existing = applicationStore.applicationFor(applicationId).get();
             applicationStore.updateApplication(existing.copyWithPrecedenceDisabled());
-        } catch (Exception e) {
-            ErrorSummary summary = ErrorSummary.forException(e);
-            new ErrorResultWriter().write(summary, null, request, response);
-        } 
-    }
-    
-    @RequestMapping(value = "/4.0/applications/{aid}/revoke", method = RequestMethod.POST)
-    public void revokeApplication(HttpServletRequest request, 
-            HttpServletResponse response,
-            @PathVariable String aid) throws IOException {
-        try {
-            response.addHeader("Access-Control-Allow-Origin", "*");
-            Id applicationId = Id.valueOf(idCodec.decode(aid));
-            Optional<User> user = userFetcher.userFor(request);
-            if (!user.isPresent() || !user.get().is(Role.ADMIN)) {
-                throw new NotAuthorizedException();
-            }
-            Application existing = applicationStore.applicationFor(applicationId).get();
-            applicationStore.updateApplication(existing.copy().withRevoked(true).build());
-        } catch (Exception e) {
-            ErrorSummary summary = ErrorSummary.forException(e);
-            new ErrorResultWriter().write(summary, null, request, response);
-        } 
-    }
-    
-    @RequestMapping(value = "/4.0/applications/{aid}/revoke", method = RequestMethod.DELETE)
-    public void unRevokeApplication(HttpServletRequest request, 
-            HttpServletResponse response,
-            @PathVariable String aid) throws IOException {
-        try {
-            response.addHeader("Access-Control-Allow-Origin", "*");
-            Id applicationId = Id.valueOf(idCodec.decode(aid));
-            Optional<User> user = userFetcher.userFor(request);
-            if (!user.isPresent() || !user.get().is(Role.ADMIN)) {
-                throw new NotAuthorizedException();
-            }
-            Application existing = applicationStore.applicationFor(applicationId).get();
-            applicationStore.updateApplication(existing.copy().withRevoked(false).build());
         } catch (Exception e) {
             ErrorSummary summary = ErrorSummary.forException(e);
             new ErrorResultWriter().write(summary, null, request, response);
