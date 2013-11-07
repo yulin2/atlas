@@ -1,6 +1,8 @@
 package org.atlasapi.application.writers;
 
 import java.io.IOException;
+
+import org.atlasapi.application.sources.SourceIdCodec;
 import org.atlasapi.application.users.User;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
@@ -19,7 +21,7 @@ import com.metabroadcast.common.social.model.UserRef;
 
 public class UsersListWriter implements EntityListWriter<User> {
     private final EntityWriter<UserRef> userRefWriter = UserRefWriter.userRefWriter("userRef");
-    private final EntityListWriter<Publisher> sourcesWriter = SourceWriter.sourceListWriter("sources");
+    private final EntityListWriter<Publisher> sourcesWriter;
     private final NumberToShortStringCodec idCodec;
     
     private final Function<Id, String> ENCODE_APP_IDS = new Function<Id, String>() {
@@ -31,9 +33,10 @@ public class UsersListWriter implements EntityListWriter<User> {
         
     };
     
-
-    public UsersListWriter(NumberToShortStringCodec idCodec) {
+    public UsersListWriter(NumberToShortStringCodec idCodec,
+            SourceIdCodec sourceIdCodec) {
         this.idCodec = idCodec;
+        this.sourcesWriter = new SourceWithIdWriter(sourceIdCodec, "sources", "sources");
     }
     
     private Iterable<String> getStringAppIds(User user) {

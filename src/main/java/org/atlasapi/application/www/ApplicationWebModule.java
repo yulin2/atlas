@@ -237,7 +237,7 @@ public class ApplicationWebModule {
     
     @Bean
     protected EntityListWriter<User> usersListWriter() {
-        return new UsersListWriter(idCodec);
+        return new UsersListWriter(idCodec, sourceIdCodec);
     }
     
     public @Bean
