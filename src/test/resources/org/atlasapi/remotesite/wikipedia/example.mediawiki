@@ -1,0 +1,191 @@
+{{Infobox film
+|name=Hackers
+|image=Hackersposter.jpg
+|caption=Poster design by Dawn Patrol<ref>[http://www.impawards.com/1995/hackers_ver1.html Hackers Poster]. IMP Awards Gallery. Retrieved 2010-07-08.</ref>
+|director=[[Iain Softley]]
+|producer=Michael Peyser
+|writer=[[Rafael Moreu]]
+|starring=[[Jonny Lee Miller]]<br>[[Angelina Jolie]]<br>[[Jesse Bradford]]<br>[[Matthew Lillard]]<br>[[Fisher Stevens]]<br>[[Lorraine Bracco]]<br>[[Renoly Santiago]]<br>[[Laurence Mason]]
+|music=[[Simon Boswell]]
+|cinematography=[[Andrzej Sekuła]]
+|editing=Chris Blunden<br>[[Martin Walsh (film editor)|Martin Walsh]]	
+|distributor= [[United Artists]]
+|released=September 15, 1995
+|runtime=107 minutes
+|country=United States
+|language=English
+|budget=<!--N/A-->
+|gross=$7,563,728 (US)<ref>{{cite web|url=http://boxofficemojo.com/movies/?id=hackers.htm|title=Hackers at Box Office Mojo|accessdate=May 20, 2012}}</ref>
+}}
+
+'''''Hackers''''' is a 1995 American [[cyberpunk]] [[thriller (genre)|thriller]] film directed by [[Iain Softley]] and starring [[Jonny Lee Miller]], [[Angelina Jolie]], [[Renoly Santiago]], [[Matthew Lillard]], [[Lorraine Bracco]] and [[Fisher Stevens]]. The film follows the exploits of a group of gifted high school [[Hacker (computer security)|hackers]] and their involvement in a corporate extortion conspiracy. Made in the 90s when the [[internet]] was unfamiliar to the general public, it is a [[cult classic]] reflective of the verbatim quotes in the film from the [[Hacker Manifesto]], of a borderless world free of national, religious, and racial identity biases, to fight the powerful. ''Hackers'' has achieved both dated [[cult classic]] status and prescience.<ref>http://www.avclub.com/articles/hackers-may-have-been-of-its-time-but-it-was-also,72249/</ref>
+
+==Plot summary==
+In 1988, Dade "Zero Cool" Murphy (age 11) is arrested and charged with crashing 1,507 computer systems in one day and causing a single-day 7-point drop in the [[New York Stock Exchange]]. Upon conviction, his family is fined $45,000 for the events, and he is banned from owning or operating computers or touch-tone telephones until his 18th birthday.
+
+Seven years later, Dade ([[Jonny Lee Miller]]), is now living alone with his mother (his parents are divorced) and bought himself a computer again since he can now own it. One day, he calls a local television station, dupes the security guard into giving him the [[modem]]'s phone number and successfully hacks into the station's computer network, changing the current TV program to an episode of ''[[The Outer Limits (1963 TV series)|The Outer Limits]]''. However, Dade is "attacked" by a hacker ([[Nickname#Computing|handle]] "Acid Burn") on the same network, and they converse together. During the conversation, Dade identifies himself by a new alias, Crash Override, rather than reveal himself as "Zero Cool".
+
+Dade enrolls at Stuyvesant High School in [[New York]], where he meets Kate Libby ([[Angelina Jolie]]), who is assigned to take him on a tour of the school. After pranking Dade by claiming there's a pool on the roof of the school, only to lock him outside with several other students during a rainstorm, a rift develops between Dade and Kate. Ramon "The Fantom Phreak" Sanchez ([[Renoly Santiago]]) takes notice of Dade's skills and invites him to a hacker nightclub, Cyberdelia, where the rivalry between Dade and Kate intensifies as Dade beats Kate's high score in [[Wipeout (video game)|"Wipeout"]]. Dade exacts revenge for the earlier prank by scheduling a test of the school's sprinkler system the next day. Dade begins integrating himself into Phreak's circle of hacker friends: Emmanuel "Cereal Killer" Goldstein ([[Matthew Lillard]]), Paul "Lord Nikon" Cook ([[Laurence Mason]]) (so named for his [[photographic memory]]), and Joey Pardella ([[Jesse Bradford]]), an aspiring novice hacker without an alias. At a party, Dade learns that Kate is "Acid Burn", the hacker that earlier kicked him out of the TV network.
+
+Meanwhile, Joey, out to prove his skills, successfully breaks into "The Gibson", an Ellingson Mineral Company [[supercomputer]]. He attempts to download a garbage file as proof of his feat, but his mother enters and disconnects his computer in anger, leaving Joey with a [[fragmentation (computing)|fragmented]] file.  However, prior to Joey's disconnection, the company's [[information technology|IT]] employee Hal ([[Penn Jillette]]) detects this unauthorized entry and summons computer security officer Eugene "The Plague" Belford ([[Fisher Stevens]]) to deal with the problem. Plague realizes the garbage file being downloaded is in fact a virus he inserted to defraud Ellingson. Review of the garbage file could reveal that The Plague is stealing from the company via ''[[salami slicing]]''. The Plague pretends the hackers are to blame and enlists the [[United States Secret Service|US Secret Service]] to recover the file, claiming it is the code to a second [[computer virus]] (named "Da Vinci" for an image of the [[Vitruvian Man]] that accompanies it) that Plague inserted as a [[red herring]] that will capsize the company's oil tanker fleet.
+
+Joey is arrested and his computer is confiscated and searched, but the Secret Service finds nothing in the software, as Joey has hidden the disk containing the files. In response, Dade and Kate decide to settle their disagreements regarding the other's computing supremacy with a bet in the form of a hacking duel, with Dade choosing a date with Kate as his prize; Kate electing to have Dade perform menial computing tasks. The hacking duel focuses on harassing Secret Service Agent Richard Gill ([[Wendell Pierce]]), "Hacker enemy number one", who was involved in Joey's arrest. Phreak, Cereal, and Nikon act as judges. After various pranks including canceling Gill's credit cards, creating a fake embarrassing personal ad in Gill's name, fabricating a criminal record, and changing his payroll status to "deceased", the duel remains tied.
+
+After being released on parole, Joey reveals the disk to Phreak in a public park; but they quickly realize that they are being followed by the Secret Service. The next day, Phreak is arrested. He uses his phone call to inform Kate that he hid the disk in a boy's bathroom at school. That evening, Kate and Cereal Killer ask Dade for his help; but, stating he has "a record" before, declines. Kate then asks Dade to copy the disk so that, if anyone else is arrested, they have the disk as un-tampered evidence. After determining that Dade is not the one who hacked into Ellingson, The Plague attempts to enlist Dade's help to find the one who did. First, he sends Dade a high-powered laptop that upon start-up displays a video message from The Plague encouraging Dade to join forces with The Plague. Later, he threatens to have Dade's mother incarcerated with a manufactured criminal record. At this, Dade agrees to deliver Kate's copy of the disk.
+
+Meanwhile, Kate, Lord Nikon, and Cereal Killer attempt to discern the contents of the disk. Dade joins them; and, after working all night, they learn the purpose of its code—a worm designed to [[Salami slicing|salami-slice]] $25 million from Ellingson transactions. Dade confesses that he knows Plague is behind this scheme, because he was the one who wanted Kate's copy of the disk. He admits he gave Plague the disk and reveals his earlier hacking history as "Zero Cool". Lord Nikon and Cereal display great reverence and excitement finding out that Dade is Zero Cool, since he became "a hacker legend" after his 1988 hacking. Kate is nonplussed, as their futures are still at risk. Determined to stop the scheme, the assembled hackers plan to hack the Gibson again. Kate and Dade go dumpster-diving for employee memos with passwords; Cereal Killer downloads a [[phone tap]] in the Ellingson offices; and Nikon poses as a delivery boy wandering the Ellingson cubicles, memorizing employee passwords as they enter them in the secured codes. 
+
+Reading the memos, they discover that the Da Vinci virus is set to capsize the oil fleet the next day, which would provide the perfect cover to distract from the salami-slicing worm. In need of help, Dade and Kate seek out Razor and Blade, the producers of a hacker-themed pirate TV show, "Hack the Planet." Razor and Blade are at a club where [[Urban Dance Squad]] is performing and after Dade and Kate gain access to their space, they manage to convince Razor and Blade to join them in disrupting The Gibson enough that the garbage file can be located and copied. Lord Nikon and Cereal Killer learn through their Ellingson phone tap that warrants for their arrest are to be executed at 9AM the next day, and have to hurry up before that time.
+
+The next morning, after being [[pager|paged]] by Kate, Nikon and Cereal roller-blade from Washington Square Park, evading the Secret Service with a bug that reconfigures traffic lights and converge on [[Grand Central Terminal|Grand Central station]], where they use payphones and [[acoustic coupler]]s to begin their assault on the Gibson. At first, their attempts are easily rebuffed by Plague, who calls Dade to warn him to escape before he is arrested. However, Razor and Blade have contacted hackers around the world, who lend their support with virus attacks, hampering the Gibson and distracting Plague long enough for Dade to download the incriminating file to a floppy disk.
+
+Shortly after crashing the Gibson, Dade and company are arrested. As they're being led away, Dade surreptitiously informs Cereal Killer, hiding in the crowd, that he's tossed the disk in a trashcan. As Dade and Kate are being interrogated, Razor and Blade jam the local television signals and broadcast live video of Cereal Killer, revealing the plot and Plague's complicity, along with the account number with the stolen funds. Plague is arrested while attempting to flee to Japan under the alias "Mr. Babbage." Their names cleared, Dade and Kate go on a date at a swimming pool on the roof of a building, their friends showing off their latest hack—the lights in several adjacent office buildings spelling out "CRASH AND BURN."
+
+==Cast==
+*[[Jonny Lee Miller]] as Dade Murphy, (a.k.a. Zero Cool; a.k.a. Crash Override)
+*[[Angelina Jolie]] as Kate Libby (a.k.a. Acid Burn). The director auditioned [[Hilary Swank]], [[Heather Graham]], and [[Liv Tyler]] for the role which ultimately went to Jolie. The part was originally offered to [[Katherine Heigl]], but due to prior commitments to ''[[Under Siege 2: Dark Territory]]'' (1995) had to turn it down.<ref name=Trivia>[http://www.imdb.com/title/tt0113243/trivia Hackers (1995) - Trivia]. [[IMDb]]. Retrieved 2010-09-06.</ref>
+*[[Renoly Santiago]] as Ramόn Sánchez (a.k.a. The Phantom Phreak)
+*[[Matthew Lillard]] as Emmanuel Goldstein (a.k.a. Cereal Killer). He is named after the eponymous [[Emmanuel Goldstein]] from the novel [[Nineteen Eighty-Four]].
+*[[Laurence Mason]] as Paul Cook (a.k.a. Lord Nikon)
+*[[Jesse Bradford]] as Joey Pardella
+*[[Fisher Stevens]] as Eugene Belford (a.k.a. The Plague)
+*[[Lorraine Bracco]] as Margo Wallace 
+*[[Alberta Watson]] as Lauren Murphy
+*[[Penn Jillette]] as Hal
+*[[Wendell Pierce]] as Special Agent Richard Gill, U.S. Secret Service
+*[[Marc Anthony]] as Special Agent Ray, U.S. Secret Service
+*[[Michael Gaston]] as Special Agent Bob, U.S. Secret Service
+*[[Felicity Huffman]] as Prosecuting Attorney
+*Darren Lee as Razor
+*Peter Y. Kim as Blade
+*Max Ligosh as Young Dade Murphy
+
+==Production==
+
+===Screenplay===
+The [[screenplay]], written by [[Rafael Moreu]], is highly inspired by the [[Hacker (programmer subculture)|hacker]] and [[cyberpunk]] subcultures.<ref name="Booklet"/> He saw the film as more than just about computer hacking but something much larger: "In fact, to call hackers a counterculture makes it sound like they're a transitory thing; I think they're the next step in human evolution."<ref name="McClellan">{{cite news | last=McClellan | first=Jim | url= | title=Cyberspace: The Hack Pack | work=[[The Observer]] | date=January 8, 1995 | accessdate= }}</ref> He had been interested in hacking since the early 1980s. After the crackdown in the United States during 1989 and 1990, he decided to write a script about the subculture. For research, Moreu went to a meeting organized by the New York-based hacker magazine ''[[2600: The Hacker Quarterly]]''. There, he met Phiber Optik, a.k.a. Mark Abene, a 22-year-old hacker who spent most of 1994 in prison on hacking charges.<ref name="McClellan"/> Moreu also hung out with other young hackers being harassed by the government and began to figure out how it would translate into a film. He remembered, "One guy was talking about how he'd done some really interesting stuff with a laptop and payphones and that cracked it for me, because it made it cinematic".<ref name="McClellan"/> The character Eugene Belford uses Babbage as a pseudonym at the end of the film, a reference to [[Charles Babbage]], an inventor of an early form of the computer. The fictional computer mainframe named the "Gibson" is a homage to cyberpunk author [[William Gibson]] and originator of the term "Cyberspace" in his 1982 book [[Neuromancer]].
+
+===Pre-production===
+The cast spent three weeks learning how to type, rollerblade and got to know each other. They also read a lot about computers and met with actual computer hackers.<ref name="Empire">{{cite news | last= | first= | url= | title=Jonny Lee Miller and Angelina Jolie - The Happy Couple | work=[[Empire (magazine)|Empire]] | date=June 1996| accessdate= }}</ref> Actor Jonny Lee Miller even attended a hacker's convention.<ref name="Penfold">{{cite news | last=Penfold | first=Phil | url= | title=Good Work If You Can Hack It | work=The Herald | date=May 3, 1996| accessdate= }}</ref>
+
+===Shooting===
+The school scenes were filmed in [[Stuyvesant High School]] and the surrounding areas in the [[TriBeCa]] and [[East Village, Manhattan|East Village]] neighborhoods of Manhattan in November 1994. Many scenes included real school seniors as extras.<ref>http://www.imdb.com/title/tt0113243/trivia?ref_=tt_trv_trv</ref><ref>{{cite web|url=http://www.shsaa.org/index.php?option=com_content&task=view&id=25&Itemid=54 |title=Stuyvesant High School Alumni Association, Inc. - SHS &#124; Stuyvesant High School |publisher=SHSAA |date=2006-05-06 |accessdate=2010-04-16}}</ref>
+
+===Post-production===
+Softley did not use CGI for any of the sequences in cyberspace. He said they used "more-conventional methods of [[Motion control photography|motion control]], animation, models, and [[rotoscoping]] to create a real, three-dimensional world, because... [[Computer-generated imagery|computer graphics]] alone can sometimes lend a more flat, sterile image."<ref name="Booklet"/> [[Psygnosis]] created the CGI for the arcade game sequence.<ref>{{cite web|url=http://www.eurogamer.net/articles/2013-03-22-wipeout-the-rise-and-fall-of-sony-studio-liverpool|title=WipEout: The rise and fall of Sony Studio Liverpool|last=Yin-Poole|first=Wesley|date=22 March 2013|work=[[Eurogamer]]|publisher=Gamer Network|accessdate=22 March 2013}}</ref>
+
+Shortly after the filming ended, Jonny Lee Miller and Angelina Jolie were married, and after divorcing, remain good friends.
+
+===Marketing===
+MGM/UA set up a website for ''Hackers'' that soon afterwards was allegedly hacked by a group called the "Internet Liberation Front." A photograph of the film's stars Angelina Jolie and Jonny Lee Miller were doodled upon, and the words "this is going to be an entertaining fun promotional site for a movie," were replaced with "this is going to be a lame, cheesy promotional site for a movie!" The studio maintained the site during the theatrical run of the movie in its altered form.<ref name="Booklet">Hackers MGM DVD 8-page booklet featuring trivia, production notes and a revealing look at the making of the film.</ref><ref>[http://web.archive.org/web/20000229152611/www.mgmua.com/hackers/inventory/hacked/index.html Hacked website] - Original MGM/UA website after defacement by the Internet Liberation Front (on [http://archive.org Archive.org])</ref><ref>[http://web.archive.org/web/19981201235406/www.mgmua.com/hackers/ Original MGM/UA website] (on [http://archive.org Archive.org])</ref>
+
+The movie poster shows Acid Burn and Crash Override with various words and ASCII symbols transposed on their faces, with the words:
+* Hacker names from the movie, including Lord Nikon, Acid Burn, and Crash Override.
+* Most commonly used passwords, noted by Plague, such as God, Sex, Love, and Secret.
+* Phreak, a "phone freak" hacker whose specialty is telephone systems, with the main Phreaker in the hacker group Phantom Phreak.
+
+==Soundtrack==
+The music soundtrack combines [[electronica]], pulsating [[Polyrhythm|tribal rhythms]] and [[techno]]/[[house music]] of early hardcore groups like [[The Prodigy|Prodigy]], [[Underworld (band)|Underworld]] and [[Orbital (band)|Orbital]]. Extremely popular with 4.5 of 5 stars from 48 reviewers,<ref>http://www.amazon.com/Hackers/product-reviews/B000005OMF/ref=dp_top_cm_cr_acr_txt/178-3446728-1440000?ie=UTF8&showViewpoints=1</ref> it was released in 3 separate volumes over a number of years. The first volume was composed entirely of music featured in the film (with the exception of [[Carl Cox]]'s "Phoebus Apollo"), while the second and third are a mix of music "inspired by the film" as well as music actually in the film. The most featured song in the movie is "[[Voodoo People]]" by [[The Prodigy]].
+
+Some tracks are by [[Guy Pratt]]. According to Pratt on Twitter,<ref>"[http://twitter.com/guypratt/status/44659963016126466 believe it or not David!]" in reply to "[http://twitter.com/steviegell/status/41927794443292672 who did the David'esque guitars on't 'Hackers' OST?]"</ref> they feature an uncredited guitar performance by [[David Gilmour]].
+
+===''Hackers''===
+# "Original Bedroom Rockers" - [[Kruder & Dorfmeister]]
+# "[[Cowgirl (song)|Cowgirl]]" - [[Underworld (band)|Underworld]]
+# "[[Voodoo People]]" – [[The Prodigy]]
+# "[[Open Up (song)|Open Up]]" – [[Leftfield]] (feat. [[John Lydon]])
+# "Phoebus Apollo" – [[Carl Cox]]
+# "The Joker" - [[Josh Abrahams]]
+# "[[Halcyon (Orbital song)|Halcyon and On and On]]" - [[Orbital (band)|Orbital]]
+# "Communicate" (Headquake Hazy Cloud Mix) - [[Plastico]]
+# "[[One Love (The Prodigy song)|One Love]]" – [[The Prodigy]]
+# "Connected" -  [[Stereo MCs]]
+# "Eyes, Lips, Body" (Mekon Vocal Mix) - [[Ramshackle]]
+# "Good Grief" – [[Urban Dance Squad]]
+# "Richest Junkie Still Alive" (Sank Remix) - [[Machines of Loving Grace]]
+# "[[Heaven Knows (Squeeze song)|Heaven Knows]]" - [[Squeeze (band)|Squeeze]]
+
+===''Hackers 2: Music From And Inspired By The Original Motion Picture 'Hackers'''===
+# "Firestarter" (Empirion mix) - [[The Prodigy]]
+# "Toxygene" - [[The Orb]]
+# "Little Wonder" (Danny Saber Dance Mix) - [[David Bowie]]
+# "Fire" - [[Scooter (band)|Scooter]]
+# "Narcotic Influence 2" - [[Empirion]]
+# "Remember" - [[BT (musician)|BT]]
+# "Go" - [[Moby]]
+# "Inspection" (Check One) - [[Leftfield]]
+# "Cherry Pie" - [[Underworld]]
+# "To Be Loved" (Disco Citizens R&D Edit)[Mix] - Luce Drayton
+# "Speed Freak" (Moby Remix) - Orbital
+# "Get Ready to Bounce" (Radio Attack) - [[Brooklyn Bounce]]
+# "Off Shore" (Disco Citizens Edit) - [[Chicane (recording artist)|Chicane]]
+# "Original" - [[Leftfield]]
+
+===''Hackers 3''===
+# "Why Can't It Stop" - [[Moby]]
+# "Godspeed" (BT Edit Mix) - [[BT (musician)|BT]]
+# "Absurd" (Whitewash Mix) - [[Fluke (band)|Fluke]]
+# "Quiet Then" - [[Cloak]]
+# "I Am Fresh" - [[Monkey Mafia]]
+# "Phuture 2000" (Radio Edit) - Carl Cox
+# "An Fhomhair" - Orbital
+# "Fashion" (Ian Pooley Mix) - Phunky Data
+# "Psychopath" (Leftfield Mix) - John Lydon
+# "Stop & Panic" - [[Cirrus (band)|Cirrus]]
+# "Strong in Love" - Chicane
+# "Hack the Planet" - Brooklyn Bounce
+# "Diskette" - [[Simon Boswell]]
+# "Launch Divinci" - Simon Boswell
+
+===Additional information===
+Songs featured in the film but not appearing on any soundtracks:
+
+* "Connection" - Performed by [[Elastica]]
+* "Real Wild Child" - Written by Johnny O'Keefe, Johnny Greenan and 'Dave Owen (VIII)' (as Dave Owens)
+* "Protection" - Performed by [[Massive Attack]]
+* "Combination" - Performed by [[Guy Pratt]]
+* "Grand Central Station" - Performed by [[Deep Cover]]
+
+==Reception==
+''Hackers'' earned mixed reviews. Some critics praised the film for its stylish visuals but criticized its unconvincing look at hackers and their subculture. [[Roger Ebert]] gave the film three out of four stars and wrote, "The movie is smart and entertaining, then, as long as you don't take the computer stuff very seriously. I didn't. I took it approximately as seriously as the [[archeology]] in ''[[Indiana Jones (franchise)|Indiana Jones]]''".<ref name="ebert">{{cite news |last=Ebert |first=Roger |authorlink=Roger Ebert |title=Hackers |work=[[Chicago Sun-Times]] |date=September 15, 1995 |url=http://rogerebert.suntimes.com/apps/pbcs.dll/article?AID=/19950915/REVIEWS/509150302/1023 |accessdate=2009-09-02}}</ref> On the show [[Siskel & Ebert]], Ebert gave the film thumbs up while [[Gene Siskel]] gave the film thumbs down, saying, "I didn't find the characters that interesting and I really didn't like the villain in this piece. I thought Fisher Stevens was not very threatening... The writing is so arch".<ref>{{cite video |people=[[Gene Siskel]] & [[Roger Ebert]] |title=Siskel & Ebert At The Movies: Hackers |url=http://bventertainment.go.com/tv/buenavista/atm/reviews.html?sec=6&subsec=Hackers |location=Chicago, IL |medium=Television Production |publisher=Buena Vista Television |date=September 15, 1995 |accessdate=2010-04-23}}</ref>
+
+In his review for the ''[[San Francisco Chronicle]]'', Peter Stack wrote, "Want a believable plot or acting? Forget it. But if you just want knockout images, unabashed eye candy and a riveting look at a complex world that seems both real and fake at the same time, ''Hackers'' is one of the most intriguing movies of the year".<ref name="stack">{{cite news |last=Stack |first=Peter |title=''Hackers'' Computes Visually |work=[[San Francisco Chronicle]] |date=September 15, 1995 |url=http://www.sfgate.com/cgi-bin/article.cgi?f=/c/a/1995/09/15/DD9369.DTL |accessdate=2009-09-02}}</ref> 
+
+''[[USA Today]]'' gave the film three out of four stars and Mike Clark wrote, "When a movie's premise repels all rational analysis, speed is the make-or-break component. To its credit, ''Hackers'' recalls the pumped-up energy of ''[[Pump Up the Volume (film)|Pump Up the Volume]]'', as well as its casting prowess".<ref name="clark">{{cite news |last=Clark |first=Mike |title=''Hackers'' accesses thrills |work=[[USA Today]] |pages= 4D |date=September 15, 1995}}</ref> In his review for the ''[[Toronto Star]]'', Peter Goddard wrote, "''Hackers'' joy-rides down the same back streets [[Marlon Brando]] did in ''[[The Wild One]]'', or [[Bruce Springsteen]] does in [[Born To Run]]. It gives all the classic kicks of the classic B-flicks, with more action than brains, cool hair and hot clothes, and all the latest tech revved to the max".<ref name="goddard">{{cite news |last=Goddard |first=Peter |title=Great road movie for info highway |work=[[Toronto Star]] |pages=C8 |date=September 16, 1995}}</ref>
+
+''Chicago Reader'' critic Jonathan Rosenbaum noted that, "Without being any sort of miracle, this is an engaging and lively exploitation fantasy-thriller about computer hackers, anarchistic in spirit, that succeeds at just about everything "The Net" failed to—especially in representing computer operations with some visual flair."<ref>http://www.metacritic.com/movie/hackers/critic-reviews</ref>
+
+The ''[[Los Angeles Times]]'' David Kronke wrote, "imagination of Rafael Moreu, making his feature screenwriting debut, and director Iain Softley...piles on the attitude and stylized visuals, no one will notice just how empty and uninvolving the story really is".<ref name="kronke">{{cite news |last=Kronke |first=David |title=''Hackers'': World of Hip Computer Nerds |work=[[Los Angeles Times]] |date=September 15, 1995 |url=http://www.calendarlive.com/movies/reviews/cl-movie960406-117,0,374634.story |accessdate = 2009-09-02}} {{Dead link|date=October 2010|bot=H3llBot}}</ref> In his review for the ''[[Washington Post]]'', Hal Hinson wrote, "As its stars, Miller and Jolie seem just as one-dimensional—except that, in their case, the effect is intentional".<ref name="hinson">{{cite news |last=Hinson |first=Hal |title=''Hackers'' |work=[[Washington Post]] |date=September 15, 1995 |url=http://www.washingtonpost.com/wp-srv/style/longterm/movies/videos/hackersrhinson_c02d40.htm |accessdate=2009-09-02}}</ref> ''[[Entertainment Weekly]]'' gave the film a "D" rating and [[Owen Gleiberman]] wrote, "the movie buys in to the computer-kid-as-elite-rebel mystique currently being peddled by magazines like ''[[Wired (magazine)|Wired]]''".<ref name="Gleiberman">{{cite news |last=Gleiberman |first=Owen |authorlink=Owen Gleiberman |title=''Hackers'' |work=[[Entertainment Weekly]] |date=October 6, 1995 |url=http://www.ew.com/ew/article/0,,298989,00.html |accessdate=2010-05-25}}</ref>
+
+The film has a metascore of 46 by critics, with a 6.1/10 by users on [[Metacritic]]<ref>[http://www.metacritic.com/movie/hackers Hackers]. [[Metacritic]]. Retrieved 2010-04-20.</ref> and a 34% rating on [[Rotten Tomatoes]] based on 41 reviews.<ref>[http://www.rottentomatoes.com/m/hackers/ Hackers]. [[Rotten Tomatoes]]. Retrieved 2013-08-11.</ref>
+
+==See also==
+*[[List of films featuring surveillance]]
+*[[Cyberpunk]]
+
+==References==
+{{Reflist|30em}}
+
+==External links==
+* {{IMDb title|id=0113243|title=Hackers}}
+* {{rotten-tomatoes|id=hackers|title=Hackers}}
+* {{metacritic film|id=hackers|title=Hackers}}
+* {{mojo title|hackers|title=Hackers}}
+
+{{Iain Softley}}
+
+{{DEFAULTSORT:Hackers (Film)}}
+[[Category:1995 films]]
+[[Category:1990s teen films]]
+[[Category:1990s thriller films]]
+[[Category:American films]]
+[[Category:American crime thriller films]]
+[[Category:American teen films]]
+[[Category:Films about computing]]
+[[Category:Films set in New York City]]
+[[Category:Films shot anamorphically]]
+[[Category:United Artists films]]
+[[Category:English-language films]]
+[[Category:Pinewood Studios films]]
+[[Category:Techno-thriller films]]
+[[Category:Film scores by Simon Boswell]]
