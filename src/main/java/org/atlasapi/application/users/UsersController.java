@@ -97,7 +97,7 @@ public class UsersController {
                 // Only admins can change the role for a user
                 // if editing user is not an admin reject 
                 if (!editingUser.is(Role.ADMIN) && isUserRoleChanged(posted, existing.get())) {
-                    throw InsufficientPrivilegeException.CANNOT_CHANGE_USER_ROLE;
+                    throw new InsufficientPrivilegeException("You do not have permission to change the user role");
                 }
                 User modified = updateProfileFields(posted, existing.get(), editingUser);
                 userStore.store(modified);
@@ -114,7 +114,7 @@ public class UsersController {
     }
     
     private boolean isUserRoleChanged(User posted, User existing) {
-        return posted.getRole().equals(existing.getRole());
+        return !posted.getRole().equals(existing.getRole());
     }
     
     /**
