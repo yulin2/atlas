@@ -50,6 +50,7 @@ public class ChannelSimplifier {
         simple.setAliases(Sets.union(input.getAliasUrls(), ImmutableSet.of(createV4AliasUrl(input))));
         simple.setHighDefinition(input.getHighDefinition());
         simple.setRegional(input.getRegional());
+        simple.setAdult(input.getAdult());
         if (input.getTimeshift() != null) {
             simple.setTimeshift(input.getTimeshift().getStandardSeconds());
         }

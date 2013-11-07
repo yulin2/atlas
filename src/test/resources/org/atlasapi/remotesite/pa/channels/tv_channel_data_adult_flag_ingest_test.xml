@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE tv_channel_data SYSTEM "tv_channel_data.dtd">
+
+<tv_channel_data>
+  <stations>
+    <station id="1">
+      <names>
+        <name start_date="2013-01-29">BBC One</name>
+      </names>
+      <channels>
+        <channel id="2" start_date="1999-01-01" media_type="TV">
+          <names>
+            <name start_date="2012-11-13">BBC One Scotland</name>
+          </names>
+          <variation type="regional" />
+          <logos>
+            <logo width="320" type="Normal" start_date="2012-11-21" height="180">p131774.png</logo>
+            <logo width="320" type="Transparent Dark" start_date="2012-11-21" height="180">p1201211212.png</logo>
+            <logo width="320" type="Transparent Light" start_date="2012-11-21" height="180">p2201211212.png</logo>
+          </logos>
+          <urls>
+            <url type="Web_Simulcast">http://www.bbc.co.uk/tv/bbcone/live</url>
+          </urls>
+          <provider_channel_ids>
+            <provider_channel_id service_provider_id="9">1129</provider_channel_id>
+          </provider_channel_ids>
+        </channel>
+        <channel id="1" start_date="1999-01-01" media_type="TV">
+          <names>
+            <name start_date="2012-11-13">BBC One Northern Ireland</name>
+          </names>
+          <variation type="regional" />
+          <logos>
+            <logo width="320" type="Normal" start_date="2012-11-21" height="180">p131751.png</logo>
+            <logo width="320" type="Transparent Dark" start_date="2012-11-21" height="180">p1201211211.png</logo>
+            <logo width="320" type="Transparent Light" start_date="2012-11-21" height="180">p2201211211.png</logo>
+          </logos>
+          <urls>
+            <url type="Web_Simulcast">http://www.bbc.co.uk/tv/bbcone/live</url>
+          </urls>
+          <provider_channel_ids>
+            <provider_channel_id service_provider_id="9">1130</provider_channel_id>
+          </provider_channel_ids>
+        </channel>
+      </channels>
+    </station>
+    <station id="12">
+      <names>
+        <name start_date="2009-01-13">The Adult Channel</name>
+      </names>
+      <genres>
+        <genre>Adult</genre>
+      </genres>
+      <channels>
+        <channel id="55" start_date="1999-01-01" media_type="TV">
+          <names>
+            <name start_date="2009-01-13">The Adult Channel</name>
+          </names>
+          <logos>
+            <logo width="320" type="Normal" start_date="2012-11-21" height="180">p131815.png</logo>
+            <logo width="320" type="Transparent Dark" start_date="2012-11-21" height="180">p12012112155.png</logo>
+            <logo width="320" type="Transparent Light" start_date="2012-11-21" height="180">p22012112155.png</logo>
+          </logos>
+        </channel>
+        <channel id="56" start_date="1999-01-01" media_type="TV">
+          <names>
+            <name start_date="2009-01-13">Another Adult Channel</name>
+          </names>
+          <logos>
+            <logo width="320" type="Normal" start_date="2012-11-21" height="180">p131815.png</logo>
+            <logo width="320" type="Transparent Dark" start_date="2012-11-21" height="180">p12012112155.png</logo>
+            <logo width="320" type="Transparent Light" start_date="2012-11-21" height="180">p22012112155.png</logo>
+          </logos>
+        </channel>
+      </channels>
+    </station>
+    <station id="53">
+      <names>
+        <name start_date="2009-01-09">Playboy TV</name>
+      </names>
+      <genres>
+        <genre>Adult</genre>
+      </genres>
+      <channels>
+        <channel id="103" start_date="1999-01-01" media_type="TV">
+          <names>
+            <name start_date="2009-01-09">Playboy TV</name>
+          </names>
+          <logos>
+            <logo width="320" type="Normal" start_date="2012-11-21" height="180">p131454.png</logo>
+            <logo width="320" type="Transparent Dark" start_date="2012-11-21" height="180">p120121121103.png</logo>
+            <logo width="320" type="Transparent Light" start_date="2012-11-21" height="180">p220121121103.png</logo>
+          </logos>
+          <provider_channel_ids>
+            <provider_channel_id service_provider_id="9">4312393</provider_channel_id>
+          </provider_channel_ids>
+        </channel>
+      </channels>
+    </station>
+  </stations>
+  <regions>
+  </regions>
+  <service_providers>
+    <service_provider id="9">
+      <names>
+        <name start_date="2000-01-01">YouView</name>
+      </names>
+      <regionalisation_list>
+        <regionalisation region_id="172" />
+        <regionalisation region_id="173" />
+        <regionalisation region_id="174" />
+        <regionalisation region_id="175" />
+        <regionalisation region_id="176" />
+        <regionalisation region_id="177" />
+        <regionalisation region_id="178" />
+        <regionalisation region_id="179" />
+        <regionalisation region_id="180" />
+        <regionalisation region_id="181" />
+        <regionalisation region_id="182" />
+        <regionalisation region_id="183" />
+        <regionalisation region_id="184" />
+        <regionalisation region_id="185" />
+        <regionalisation region_id="186" />
+        <regionalisation region_id="187" />
+        <regionalisation region_id="188" />
+        <regionalisation region_id="189" />
+        <regionalisation region_id="190" />
+        <regionalisation region_id="191" />
+        <regionalisation region_id="192" />
+      </regionalisation_list>
+    </service_provider>
+  </service_providers>
+  <platforms>
+  </platforms>
+</tv_channel_data>

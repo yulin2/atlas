@@ -37,6 +37,7 @@ import com.google.common.primitives.Ints;
 
 public class PaChannelsIngester {
 
+    private static final String GENRE_ADULT = "Adult";
     private static final String SIMULCAST_LINK_TYPE = "Web_Simulcast";
     private static final String REGIONAL_VARIATION = "regional";
     static final String IMAGE_PREFIX = "http://images.atlas.metabroadcast.com/pressassociation.com/channels/";
@@ -70,11 +71,12 @@ public class PaChannelsIngester {
     public ChannelTree processStation(Station station, List<ServiceProvider> serviceProviders) {
         try {
             if (!station.getChannels().getChannel().isEmpty()) {
+                Boolean isAdult = isAdult(station);
                 if (station.getChannels().getChannel().size() == 1) {
-                    return new ChannelTree(null, ImmutableList.of(processStandaloneChannel(station.getChannels().getChannel().get(0), serviceProviders)));
+                    return new ChannelTree(null, ImmutableList.of(processStandaloneChannel(station.getChannels().getChannel().get(0), serviceProviders, isAdult)));
                 } else {
-                    Channel parent = processParentChannel(station, station.getChannels().getChannel().get(0));
-                    List<Channel> children = processChildChannels(station.getChannels().getChannel(), serviceProviders);
+                    Channel parent = processParentChannel(station, station.getChannels().getChannel().get(0), isAdult);
+                    List<Channel> children = processChildChannels(station.getChannels().getChannel(), serviceProviders, isAdult);
                     return new ChannelTree(parent, children);
                 }
             } else {
@@ -86,10 +88,10 @@ public class PaChannelsIngester {
         return new ChannelTree(null, ImmutableList.<Channel>of());
     }
 
-    private List<Channel> processChildChannels(List<org.atlasapi.remotesite.pa.channels.bindings.Channel> channels, List<ServiceProvider> serviceProviders) {
+    private List<Channel> processChildChannels(List<org.atlasapi.remotesite.pa.channels.bindings.Channel> channels, List<ServiceProvider> serviceProviders, Boolean isAdult) {
         Builder<Channel> children = ImmutableList.<Channel>builder();
         for (org.atlasapi.remotesite.pa.channels.bindings.Channel paChannel : channels) {
-            children.add(processStandaloneChannel(paChannel, serviceProviders)); 
+            children.add(processStandaloneChannel(paChannel, serviceProviders, isAdult)); 
         }
         return children.build();
     }
@@ -101,14 +103,29 @@ public class PaChannelsIngester {
     private String generateStationKey(String id) {
         return "pa-station-" + id;
     }
+    
+    // Genres element contains a single Genre element, that has only
+    // one possible value: Adult. This Genres element will only be present
+    // on Stations which contain adult channels. This flag is therefore either
+    // true or null (unknown)
+    private Boolean isAdult(Station station) {
+        if (station.getGenres() != null) {
+            String genre = station.getGenres().getGenre();
+            if (genre.equals(GENRE_ADULT)) {
+                return true;
+            }
+        }
+        return null;
+    }
 
-    private Channel processParentChannel(Station station, org.atlasapi.remotesite.pa.channels.bindings.Channel firstChild) {
+    private Channel processParentChannel(Station station, org.atlasapi.remotesite.pa.channels.bindings.Channel firstChild, Boolean isAdult) {
         
         Channel parentChannel = Channel.builder()
             .withUri(STATION_URI_PREFIX + station.getId())
             .withKey(generateStationKey(station.getId()))
             .withSource(Publisher.METABROADCAST)
             .withAvailableFrom(ImmutableList.of(Publisher.PA))
+            .withAdult(isAdult)
             .build();
         
         // will soon have station images, but do not currently, hence is commented out here
@@ -134,7 +151,7 @@ public class PaChannelsIngester {
         return STATION_ALIAS_PREFIX + id;
     }
 
-    private Channel processStandaloneChannel(org.atlasapi.remotesite.pa.channels.bindings.Channel paChannel, List<ServiceProvider> serviceProviders) {
+    private Channel processStandaloneChannel(org.atlasapi.remotesite.pa.channels.bindings.Channel paChannel, List<ServiceProvider> serviceProviders, Boolean isAdult) {
         LocalDate startDate = formatter.parseLocalDate(paChannel.getStartDate());
         
         Channel channel = Channel.builder()
@@ -144,6 +161,7 @@ public class PaChannelsIngester {
                 .withAvailableFrom(ImmutableList.of(Publisher.PA))
                 .withStartDate(startDate)
                 .withEndDate(null)
+                .withAdult(isAdult)
                 .build();
         
         if (paChannel.getProviderChannelIds() != null) {

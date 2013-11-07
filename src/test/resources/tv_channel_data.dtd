@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!-- listings channel_data DTD v1.5 19/06/2013 mj -->
 
 <!ELEMENT tv_channel_data (stations, regions?, service_providers?, platforms?)>
 
 <!ELEMENT stations (station+)>
 
-<!ELEMENT station (names, channels)>
+<!ELEMENT station (names, genres?, channels)>
 <!ATTLIST station
   id CDATA #REQUIRED
 >
@@ -46,7 +45,6 @@
 <!ATTLIST url
   type CDATA #REQUIRED
 >
-
 
 
 <!ELEMENT provider_channel_ids (provider_channel_id+)>
@@ -94,10 +92,13 @@
 <!-- name which can be date dependent due to entity changing its name from a particular date -->
 <!ELEMENT names (name+)>
 <!ELEMENT name (#PCDATA)>
-<!ATTLIST name  start_date  CDATA   #REQUIRED>
-<!ATTLIST name  end_date    CDATA   #IMPLIED>
-<!ATTLIST name  type CDATA  #IMPLIED>
+<!ATTLIST name 	start_date	CDATA	#REQUIRED>
+<!ATTLIST name 	end_date	CDATA	#IMPLIED>
+<!ATTLIST name 	type CDATA	#IMPLIED>
 
+<!-- station genres -->
+<!ELEMENT genre (#PCDATA)>
+<!ELEMENT genres (genre)>
 
 <!-- platform_epg_content -->
 <!ELEMENT epg (epg_content+)>
