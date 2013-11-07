@@ -61,6 +61,7 @@ public class ErrorSummary {
 		    .put(UserProfileIncompleteException.class, new DefaultErrorSummaryFactory("FORBIDDEN_USER_INCOMPLETE", HttpStatusCode.FORBIDDEN))
 		    .put(ResourceForbiddenException.class, new DefaultErrorSummaryFactory("FORBIDDEN_RESOURCE", HttpStatusCode.FORBIDDEN))
 		    .put(InvalidApiKeyException.class, new DefaultErrorSummaryFactory("INVALID_API_KEY", HttpStatusCode.FORBIDDEN))
+		    .put(InsufficientPrivilegeException.class, new DefaultErrorSummaryFactory("FORBIDDEN_INSUFFICIENT_PRIVILEGES", HttpStatusCode.FORBIDDEN))
 		    .build();
 	}
 
