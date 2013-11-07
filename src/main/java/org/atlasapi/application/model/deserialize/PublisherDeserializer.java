@@ -16,8 +16,13 @@ public class PublisherDeserializer implements JsonDeserializer<Publisher> {
     @Override
     public Publisher deserialize(JsonElement json, Type typeOfT,
             JsonDeserializationContext context) throws JsonParseException {
-        Optional<Publisher> publisher = Publisher.fromPossibleKey(json.getAsJsonPrimitive()
-                .getAsString());
+        String key;
+        if (json.isJsonObject()) {
+            key = json.getAsJsonObject().get("key").getAsJsonPrimitive().getAsString();
+        } else {
+            key = json.getAsJsonPrimitive().getAsString();
+        }
+        Optional<Publisher> publisher = Publisher.fromPossibleKey(key);
         return publisher.get();
     }
 }

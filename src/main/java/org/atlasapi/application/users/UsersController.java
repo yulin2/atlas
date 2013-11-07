@@ -14,6 +14,7 @@ import org.atlasapi.input.ReadException;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
+import org.atlasapi.output.InsufficientPrivilegeException;
 import org.atlasapi.output.NotFoundException;
 import org.atlasapi.output.ResourceForbiddenException;
 import org.atlasapi.output.ResponseWriter;
@@ -90,10 +91,15 @@ public class UsersController {
             if (!editingUser.is(Role.ADMIN) && !editingUser.getId().equals(userId)) {
                 throw new ResourceForbiddenException();
             }
-            Optional<User> user = userStore.userForId(userId);
-            if (user.isPresent()) {
+            Optional<User> existing = userStore.userForId(userId);
+            if (existing.isPresent()) {
                 User posted = deserialize(new InputStreamReader(request.getInputStream()), User.class);
-                User modified = updateProfileFields(posted, user.get());
+                // Only admins can change the role for a user
+                // if editing user is not an admin reject 
+                if (!editingUser.is(Role.ADMIN) && isUserRoleChanged(posted, existing.get())) {
+                    throw new InsufficientPrivilegeException("You do not have permission to change the user role");
+                }
+                User modified = updateProfileFields(posted, existing.get(), editingUser);
                 userStore.store(modified);
                 UserAwareQueryResult<User> queryResult = UserAwareQueryResult.singleResult(modified, UserAwareQueryContext.standard());
                 resultWriter.write(queryResult, writer);
@@ -107,16 +113,21 @@ public class UsersController {
         }
     }
     
+    private boolean isUserRoleChanged(User posted, User existing) {
+        return !posted.getRole().equals(existing.getRole());
+    }
+    
     /**
      * Only allow certain fields to be updated
      */
-    private User updateProfileFields(User posted, User user) {
-        return user.copy()
+    private User updateProfileFields(User posted, User existing, User editingUser) {
+       return existing.copy()
                 .withFullName(posted.getFullName())
                 .withCompany(posted.getCompany())
                 .withEmail(posted.getEmail())
                 .withWebsite(posted.getWebsite())
                 .withProfileComplete(posted.isProfileComplete())
+                .withRole(posted.getRole())
                 .build();
                 
     }
