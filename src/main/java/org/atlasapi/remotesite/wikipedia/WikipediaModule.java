@@ -10,7 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
 public class WikipediaModule {
     private static final Logger log = LoggerFactory.getLogger(WikipediaModule.class);
     static final Publisher SOURCE = Publisher.WIKIPEDIA;
@@ -40,6 +43,10 @@ public class WikipediaModule {
     }
     
     public FilmsUpdater allFilmsUpdater() {
+        return new FilmsUpdater(titleSource, fetcher, filmExtractor, contentResolver, contentWriter);
+    }
+    
+    public FilmsUpdater filmsUpdaterForTitles(FilmArticleTitleSource titleSource) {
         return new FilmsUpdater(titleSource, fetcher, filmExtractor, contentResolver, contentWriter);
     }
 }
