@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.joda.time.DateTime;
 import xtc.parser.ParseException;
 
 /**
@@ -15,14 +16,24 @@ import xtc.parser.ParseException;
  */
 public class FilmExtractor implements ContentExtractor<Article, Film> {
 
+    public String urlFor(Article article) {  // TODO I don't particularly like this – should probably abstract Article differently
+        return "http://en.wikipedia.org/wiki/" + article.getTitle();
+    }
+    
+    public DateTime lastModifiedTimeFor(Article article) {
+        return new DateTime(article.getEditTimestamp());
+    }
+    
     @Override
     public Film extract(Article article) {
         String source = article.getText();
         try {
             ListMultimap<String, String> infoboxAttrs = FilmInfoboxScraper.getInfoboxAttrs(source);
             
-            String url = "http://en.wikipedia.org/wiki/" + article.getTitle();  // TODO probably not...
+            String url = urlFor(article);
             Film flim = new Film(url, url, Publisher.WIKIPEDIA);
+            
+            flim.setLastUpdated(lastModifiedTimeFor(article));
             
             List<String> title = infoboxAttrs.get("name");
             if (title.size() == 1) {

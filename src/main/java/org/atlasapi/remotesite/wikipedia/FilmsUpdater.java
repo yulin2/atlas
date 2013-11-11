@@ -1,9 +1,14 @@
 package org.atlasapi.remotesite.wikipedia;
 
+import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import net.sourceforge.jwbf.core.contentRep.Article;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +36,16 @@ public class FilmsUpdater extends ScheduledTask {
     protected void runTask() {
         for (String title : titleSource.getAllFilmArticleTitles()) {
             try {
+                Article article = fetcher.fetchArticle(title);
+                Maybe<Identified> storedVersion = resolver.findByCanonicalUris(ImmutableList.of(extractor.urlFor(article))).getFirstValue();
+                if(storedVersion.hasValue()
+                  && storedVersion.valueOrNull().getLastUpdated() != null
+                  && !storedVersion.valueOrNull().getLastUpdated().isBefore(extractor.lastModifiedTimeFor(article))) {
+                    log.info("Skipping up-to-date film article \"" + title + "\"");
+                    continue;
+                }
                 log.info("Processing film article \"" + title + "\"");
-                Film flim = extractor.extract(fetcher.fetchArticle(title));
+                Film flim = extractor.extract(article);
                 writer.createOrUpdate(flim);
             } catch (Exception e) {
                 log.warn("Failed to correctly extract the film \"" + title + "\" from Wikipedia", e);
