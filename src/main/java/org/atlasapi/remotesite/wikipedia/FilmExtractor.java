@@ -33,7 +33,7 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
             
             List<CrewMember> people = flim.getPeople();
             for(String director : infoboxAttrs.get("director")) {
-                people.add(new CrewMember().withRole(CrewMember.Role.DIRECTOR).withName(director));
+                people.add(new CrewMember().withRole(CrewMember.Role.DIRECTOR).withName(director).withPublisher(Publisher.WIKIPEDIA));
             }
             
             return flim;

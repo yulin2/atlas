@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.wikipedia;
 import de.fau.cs.osr.ptk.common.AstVisitor;
 import de.fau.cs.osr.ptk.common.ast.AstNode;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedList;
 import org.sweble.wikitext.lazy.LazyParser;
 import org.sweble.wikitext.lazy.ParserConfigInterface;
@@ -25,7 +26,7 @@ public class FilmIndexScraper {
     /**
      * Returns a list of film article names (link targets) from the given Mediawiki source code of an alphabetical film index page.
      */
-    public static Iterable<String> extractNames(String indexText) throws IOException, ParseException {
+    public static Collection<String> extractNames(String indexText) throws IOException, ParseException {
         AstNode indexAST = parser.parseArticle(indexText, "");
         
         Visitor v = new Visitor();

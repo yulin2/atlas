@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Contains helper methods for dealing with the SWEBLE parser's AST output.
+ * Contains helper methods for dealing with the SWEBLE wikitext parser and its AST output.
  */
 public class SwebleHelper {
 

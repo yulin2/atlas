@@ -39,6 +39,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
+import org.atlasapi.remotesite.wikipedia.WikipediaModule;
 
 public class RemoteSiteModuleConfigurer {
 
@@ -77,6 +78,7 @@ public class RemoteSiteModuleConfigurer {
         .put("thesuntvpicks", TheSunModule.class)
         .put("talktalk", TalkTalkModule.class)
         .put("itvwhatson", ItvWhatsOnModule.class)
+        .put("wikipedia", WikipediaModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
