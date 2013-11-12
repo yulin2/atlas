@@ -68,7 +68,6 @@ public class ItvWhatsOnModule {
                 .withProcessor(processor())
                 .withLookBack(0)
                 .withLookAhead(0)
-                .withLog(log)
                 .build();
     }
     
@@ -80,7 +79,6 @@ public class ItvWhatsOnModule {
                 .withProcessor(processor())
                 .withLookBack(7)
                 .withLookAhead(7)
-                .withLog(log)
                 .build();
     }   
 }
