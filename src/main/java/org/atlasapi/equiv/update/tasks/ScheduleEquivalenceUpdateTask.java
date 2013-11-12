@@ -6,7 +6,7 @@ import static com.metabroadcast.common.scheduling.UpdateProgress.SUCCESS;
 import java.util.Iterator;
 import java.util.List;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Content;

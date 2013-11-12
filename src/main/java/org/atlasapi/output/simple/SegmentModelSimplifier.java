@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.segment.Segment;
 import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.media.segment.SegmentRef;

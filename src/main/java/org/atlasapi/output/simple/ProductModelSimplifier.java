@@ -3,7 +3,7 @@ package org.atlasapi.output.simple;
 import java.math.BigInteger;
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductLocation;
 import org.atlasapi.output.Annotation;
