@@ -135,6 +135,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
             if (itemAndBroadcast.hasValue()) {
             	Item item = itemAndBroadcast.requireValue().getItem();
+            	item.setGenericDescription(isGenericDescription(progData));
                 if (possibleSeries.hasValue() && item instanceof Episode) {
                 	Episode episode = (Episode) item;
                     episode.setSeries(possibleSeries.requireValue());
@@ -152,6 +153,14 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         } catch (Exception e) {
         	e.printStackTrace();
         	log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
+        }
+        return null;
+    }
+
+    private Boolean isGenericDescription(ProgData progData) {
+        String generic = progData.getGeneric();
+        if (generic != null && "1".equals(generic)) {
+            return true;
         }
         return null;
     }

@@ -20,7 +20,6 @@ import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.KeyPhrase;
 import org.atlasapi.media.entity.simple.Language;
-import org.atlasapi.media.entity.simple.RelatedLink;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
@@ -90,6 +89,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
                 simpleDescription.setOriginalLanguages(languagesFrom(content.getLanguages()));
                 simpleDescription.setCertificates(simpleCertificates(content.getCertificates()));
             }
+            simpleDescription.setGenericDescription(content.getGenericDescription());
         }
         
         if (annotations.contains(Annotation.CLIPS)) {
