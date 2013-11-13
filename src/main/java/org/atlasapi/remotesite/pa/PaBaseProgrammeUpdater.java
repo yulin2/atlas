@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.pa;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -10,6 +12,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,6 +49,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.scheduling.ScheduledTask;
@@ -145,6 +149,8 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		
 		List<Future<Integer>> submitted = Lists.newArrayList();
 
+		Map<String, AtomicInteger> jobsRemainingPerFile = Maps.newHashMap();
+		
 		for (File file : files) {
 		    if(!shouldContinue()) {
 		        break;
@@ -158,10 +164,11 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		            final File fileToProcess = dataStore.copyForProcessing(file);
 		            final String scheduleDay = matcher.group(1);
 
-		            unmarshaller.setListener(channelDataProcessingListener(completion, submitted, fileToProcess, scheduleDay));
+		            AtomicInteger jobsRemaining = new AtomicInteger();
+		            jobsRemainingPerFile.put(file.getName(), jobsRemaining);
 		            
+		            unmarshaller.setListener(channelDataProcessingListener(jobsRemaining, completion, submitted, fileToProcess, scheduleDay));
 		            reader.parse(fileToProcess.toURI().toString());
-		            storeResult(FileUploadResult.successfulUpload(SERVICE, file.getName()));
 		        }
 		        else {
 		            log.info("Not processing file " + file.toString() + " as filename format is not recognised");
@@ -198,6 +205,17 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		if (!shouldContinue()) {
 		    cancelTasks(submitted);
 		    return;
+		} else {
+		    for (Entry<String, AtomicInteger> entry : jobsRemainingPerFile.entrySet()) {
+		        String fileName = entry.getKey();
+		        FileUploadResult result;
+		        if (entry.getValue().get() == 0) {
+		            result = FileUploadResult.successfulUpload(SERVICE, fileName);
+		        } else {
+		            result = FileUploadResult.failedUpload(SERVICE, fileName);
+		        }
+		        storeResult(result);
+		    }
 		}
 	}
 
@@ -209,7 +227,10 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         reportStatus("Jobs cancelled");
     }
 
-    private Listener channelDataProcessingListener(final CompletionService<Integer> completion, final List<Future<Integer>> submitted, final File fileToProcess, final String fileDate) {
+    private Listener channelDataProcessingListener(final AtomicInteger jobsCounter, 
+            final CompletionService<Integer> completion, final List<Future<Integer>> submitted, 
+            final File fileToProcess, final String fileDate) {
+        
         return new Unmarshaller.Listener() {
             public void beforeUnmarshal(Object target, Object parent) {
             }
@@ -250,12 +271,18 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                                     scheduleDay,
                                     version
                             );
+                            jobsCounter.incrementAndGet();
                             Future<Integer> future = completion.submit(new Callable<Integer>() {
                                 @Override
                                 public Integer call() {
-                                    return processor.process(data, currentlyProcessing);
+                                    try {
+                                        return processor.process(data, currentlyProcessing);
+                                    } finally {
+                                        jobsCounter.decrementAndGet();
+                                    }
                                 }
                             });
+                            
                             submitted.add(future);
                         } catch (Throwable e) {
                             log.error("Exception submitting PA channel update job in file " + fileToProcess.getName(), e);
