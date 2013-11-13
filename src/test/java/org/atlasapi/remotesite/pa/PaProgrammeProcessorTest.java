@@ -7,7 +7,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -376,4 +378,51 @@ public class PaProgrammeProcessorTest {
         
     }
 
+    @Test
+    public void testDoesntSetGenericDescriptionFlagIfNotGeneric() {
+        Film film = new Film("http://pressassociation.com/films/5", "pa:f-5", Publisher.PA);
+        Version version = new Version();
+        version.setProvider(Publisher.PA);
+        film.addVersion(version);
+        
+        Brand expectedItemBrand = new Brand("http://pressassociation.com/brands/5", "pa:b-5", Publisher.PA);
+        Series expectedItemSeries= new Series("http://pressassociation.com/series/5-6", "pa:s-5-6", Publisher.PA);
+        setupContentResolver(film, expectedItemBrand, expectedItemSeries);
+        
+        ProgData progData = setupProgData();
+        progData.setGeneric(null);
+        
+        progProcessor.process(progData, channel, UTC, Timestamp.of(0));
+        
+        ArgumentCaptor<Item> argCaptor = ArgumentCaptor.forClass(Item.class);
+        verify(contentWriter).createOrUpdate(argCaptor.capture());
+        
+        Item written = argCaptor.getValue();
+        
+        assertNull(written.getGenericDescription());
+    }
+
+    @Test
+    public void testSetsGenericDescriptionFlagIfGeneric() {
+        Film film = new Film("http://pressassociation.com/films/5", "pa:f-5", Publisher.PA);
+        Version version = new Version();
+        version.setProvider(Publisher.PA);
+        film.addVersion(version);
+        
+        Brand expectedItemBrand = new Brand("http://pressassociation.com/brands/5", "pa:b-5", Publisher.PA);
+        Series expectedItemSeries= new Series("http://pressassociation.com/series/5-6", "pa:s-5-6", Publisher.PA);
+        setupContentResolver(film, expectedItemBrand, expectedItemSeries);
+        
+        ProgData progData = setupProgData();
+        progData.setGeneric("1");
+        
+        progProcessor.process(progData, channel, UTC, Timestamp.of(0));
+        
+        ArgumentCaptor<Item> argCaptor = ArgumentCaptor.forClass(Item.class);
+        verify(contentWriter).createOrUpdate(argCaptor.capture());
+        
+        Item written = argCaptor.getValue();
+        
+        assertTrue(written.getGenericDescription());
+    }
 }
