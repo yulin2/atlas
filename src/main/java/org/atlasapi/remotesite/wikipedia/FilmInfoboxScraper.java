@@ -72,7 +72,6 @@ public final class FilmInfoboxScraper {
                 return;
             }
             TemplateArgument a = (TemplateArgument) n;
-//                attrs.put(flattenTextNodeList(a.getName()), flattenTextNodeList(a.getValue()));
 
             final String key = SwebleHelper.flattenTextNodeList(a.getName());
             AstNode value = parser.parseArticle(SwebleHelper.flattenTextNodeList(a.getValue()), "");

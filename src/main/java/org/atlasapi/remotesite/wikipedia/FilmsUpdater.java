@@ -1,14 +1,13 @@
 package org.atlasapi.remotesite.wikipedia;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.scheduling.ScheduledTask;
-import net.sourceforge.jwbf.core.contentRep.Article;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.ResolvedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,25 +24,20 @@ public class FilmsUpdater extends ScheduledTask {
     private ContentWriter writer;
     
     public FilmsUpdater(FilmArticleTitleSource titleSource, ArticleFetcher fetcher, FilmExtractor extractor, ContentResolver resolver, ContentWriter writer) {
-        this.titleSource = titleSource;
-        this.fetcher = fetcher;
-        this.extractor = extractor;
-        this.resolver = resolver;
-        this.writer = writer;
+        this.titleSource = checkNotNull(titleSource);
+        this.fetcher = checkNotNull(fetcher);
+        this.extractor = checkNotNull(extractor);
+        this.resolver = checkNotNull(resolver);
+        this.writer = checkNotNull(writer);
     }
 
     @Override
     protected void runTask() {
-        for (String title : titleSource.getAllFilmArticleTitles()) {
+        Iterable<String> titles = titleSource.getAllFilmArticleTitles();
+        for (String title : titles) {
             try {
                 Article article = fetcher.fetchArticle(title);
-                Maybe<Identified> storedVersion = resolver.findByCanonicalUris(ImmutableList.of(extractor.urlFor(article))).getFirstValue();
-                if(storedVersion.hasValue()
-                  && storedVersion.valueOrNull().getLastUpdated() != null
-                  && !storedVersion.valueOrNull().getLastUpdated().isBefore(extractor.lastModifiedTimeFor(article))) {
-                    log.info("Skipping up-to-date film article \"" + title + "\"");
-                    continue;
-                }
+
                 log.info("Processing film article \"" + title + "\"");
                 Film flim = extractor.extract(article);
                 writer.createOrUpdate(flim);
