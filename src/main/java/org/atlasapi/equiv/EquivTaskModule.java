@@ -98,7 +98,7 @@ public class EquivTaskModule {
             taskScheduler.schedule(publisherUpdateTask(BBC).withName("BBC Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(C4).withName("C4 Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(ITV).withName("ITV Equivalence Updater"), RepetitionRules.NEVER);
-            taskScheduler.schedule(publisherUpdateTask(FIVE).withName("Five Equivalence Updater"), RepetitionRules.NEVER);
+            taskScheduler.schedule(publisherUpdateTask(FIVE).withName("Five Equivalence Updater"), FIVE_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(BBC_REDUX).withName("Redux Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(ITUNES).withName("Itunes Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(RADIO_TIMES).withName("RT Equivalence Updater"), RT_EQUIVALENCE_REPETITION);
@@ -133,7 +133,7 @@ public class EquivTaskModule {
                     .withPublishers(FIVE)
                     .withChannels(fiveChannels())
                     .build().withName("Five Schedule Equivalence (8 day) Updater"), 
-                FIVE_SCHEDULE_EQUIVALENCE_REPETITION);
+                RepetitionRules.NEVER);
             taskScheduler.schedule(taskBuilder(7, 0)
                     .withPublishers(BBC_REDUX)
                     .withChannels(bbcReduxChannels())
