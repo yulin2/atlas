@@ -2,7 +2,7 @@
 <!DOCTYPE tv_data SYSTEM "TVListings.dtd">
 <tv_data>
   <listings_date date="15/01/2011">
-    <channel_data name="BBC1" channel_id="4">
+    <channel_data name="BBC1" channel_id="4" start_time="2011-01-15T06:00:00+00:00" end_time="2011-01-16T06:00:00+00:00">
       <epgdetails>
         <epg provider_id ="6" provider_name="Virgin TV (Telewest)" channel_number="101"/>
         <epg provider_id ="11" provider_name="Sky NI" channel_number="101"/>
