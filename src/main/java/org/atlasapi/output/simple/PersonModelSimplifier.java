@@ -50,12 +50,15 @@ public class PersonModelSimplifier extends DescribedModelSimplifier<Person, org.
         person.setQuotes(fullPerson.getQuotes());
         
         if (annotations.contains(Annotation.UPCOMING)) {
-            ImmutableSet<String> upcomingUris = ImmutableSet.copyOf(upcomingResolver.upcomingItemsFor(fullPerson));
+            ImmutableSet<String> upcomingUris = ImmutableSet.copyOf(Iterables.transform(
+                    upcomingResolver.upcomingItemsFor(fullPerson), ChildRef.TO_URI));
             person.setUpcomingContent(simpleContentListFrom(filterContent(fullPerson, upcomingUris)));
         }
 
         if (annotations.contains(Annotation.AVAILABLE_LOCATIONS)) {
-            ImmutableSet<String> availableUris = ImmutableSet.copyOf(availableResolver.availableItemsFor(fullPerson, config));
+            ImmutableSet<String> availableUris = ImmutableSet.copyOf(Iterables.transform(
+                    availableResolver.availableItemsFor(fullPerson, config), ChildRef.TO_URI));
+            
             person.setAvailableContent(simpleContentListFrom(filterContent(fullPerson, availableUris)));
         }
         
