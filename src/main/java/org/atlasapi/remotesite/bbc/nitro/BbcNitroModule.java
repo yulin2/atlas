@@ -50,6 +50,7 @@ public class BbcNitroModule {
 
     private @Value("${updaters.bbcnitro.enabled}") Boolean tasksEnabled;
     private @Value("${bbc.nitro.host}") String nitroHost;
+    private @Value("${bbc.nitro.root}") String nitroRoot;
     private @Value("${bbc.nitro.apiKey}") String nitroApiKey;
     private @Value("${bbc.nitro.requestsPerSecond}") Integer nitroRateLimit;
     private @Value("${bbc.nitro.threadCount.today}") Integer nitroTodayThreadCount;
@@ -100,7 +101,8 @@ public class BbcNitroModule {
             return UnconfiguredGlycerin.get();
         }
         Builder glycerin = XmlGlycerin.builder(nitroApiKey)
-                .withHost(HostSpecifier.fromValid(nitroHost));
+                .withHost(HostSpecifier.fromValid(nitroHost))
+                .withRootResource(nitroRoot);
         if (nitroRateLimit != null) {
             glycerin.withLimiter(RateLimiter.create(nitroRateLimit));
         }
