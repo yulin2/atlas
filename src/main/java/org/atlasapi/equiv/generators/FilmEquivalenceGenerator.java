@@ -5,8 +5,8 @@ import static com.google.common.collect.Iterables.filter;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;

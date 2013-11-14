@@ -3,7 +3,7 @@ package org.atlasapi.equiv.query;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.equiv.OutputContentMerger;
 import org.atlasapi.media.entity.Content;

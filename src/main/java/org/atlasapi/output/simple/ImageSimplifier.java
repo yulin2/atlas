@@ -2,7 +2,7 @@ package org.atlasapi.output.simple;
 
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.output.Annotation;
 
