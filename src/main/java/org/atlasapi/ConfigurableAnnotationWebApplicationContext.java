@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.properties.Configurer;
 
 import org.atlasapi.persistence.CassandraPersistenceModule;
+import org.atlasapi.remotesite.wikipedia.WikipediaModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -75,6 +76,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 EquivTaskModule.class,
                 OddJobRandomTaskModule.class,
                 C4PmlsdModule.class,
+                WikipediaModule.class,
                 BbcNitroModule.class,
                 PicksModule.class
             );
