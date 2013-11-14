@@ -100,11 +100,11 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         }
 
         if (annotations.contains(Annotation.AVAILABLE_LOCATIONS)) {
-            simplePlaylist.setAvailableContent(filterAndTransformChildRefs(fullPlayList, availableFilter(fullPlayList, config)));
+            simplePlaylist.setAvailableContent(Iterables.transform(availableItems(fullPlayList, config), toContentIdentifier));
         }
 
         if (annotations.contains(Annotation.UPCOMING)) {
-            simplePlaylist.setUpcomingContent(filterAndTransformChildRefs(fullPlayList, upcomingFilter(fullPlayList)));;
+            simplePlaylist.setUpcomingContent(Iterables.transform(upcomingItems(fullPlayList), toContentIdentifier));;
         }
         
         if (annotations.contains(Annotation.RECENTLY_BROADCAST)) {
@@ -139,12 +139,12 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         return Iterables.transform(Iterables.filter(fullPlayList.getChildRefs(), filter), toContentIdentifier);
     }
 
-    private Predicate<ChildRef> availableFilter(Container fullPlayList, ApplicationConfiguration config) {
-        return asChildRefFilter(availableItemsResolver.availableItemsFor(fullPlayList, config));
+    private Iterable<ChildRef> availableItems(Container fullPlayList, ApplicationConfiguration config) {
+        return availableItemsResolver.availableItemsFor(fullPlayList, config);
     }
 
-    private Predicate<ChildRef> upcomingFilter(Container fullPlayList) {
-        return asChildRefFilter(upcomingItemsResolver.upcomingItemsFor(fullPlayList));
+    private Iterable<ChildRef> upcomingItems(Container fullPlayList) {
+        return upcomingItemsResolver.upcomingItemsFor(fullPlayList);
     }
 
     private Predicate<ChildRef> recentlyBroadcastFilter(Container fullPlayList) {
