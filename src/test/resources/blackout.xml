@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms" xml:base="http://xbox.channel4.com">
+  <id>tag:xbox.channel4.com,2009:/programmes/blackout/4od</id>
+  <title type="text">Blackout on 4oD</title>
+  <updated>2013-09-20T14:00:18.478Z</updated>
+  <author>
+    <name>Channel 4 Television</name>
+  </author>
+  <logo imageSource="own">http://cache.channel4.com/assets/programmes/images/blackout/b723e370-907e-4bd4-8a3e-bf0c6a808fbf_200x113.jpg</logo>
+  <link rel="self" type="application/atom+xml" href="https://xbox.channel4.com/pmlsd/blackout/4od.atom?platform=p06"></link>
+  <link rel="up" type="application/atom+xml" href="https://xbox.channel4.com/pmlsd/blackout.atom?platform=p06"></link>
+  <link title="recommendations" rel="related" type="application/atom+xml" href="https://xbox.channel4.com/pmlsd/blackout/4od/recommendations.atom?platform=p06"></link>
+  <dc:relation.BrandFlattened>true</dc:relation.BrandFlattened>
+  <dc:relation.presentationBrand>C4</dc:relation.presentationBrand>
+  <dc:relation.platformClientVersion>1.1</dc:relation.platformClientVersion>
+  <dc:relation.BrandWebSafeTitle>blackout</dc:relation.BrandWebSafeTitle>
+  <dc:relation.ProgrammeType>OOS</dc:relation.ProgrammeType>
+  <dc:relation.4oDSeriesCount>1</dc:relation.4oDSeriesCount>
+  <dc:relation.4oDProgrammeCount>1</dc:relation.4oDProgrammeCount>
+  <generator version="1.63">PMLSD</generator>
+  <entry>
+    <id>tag:xbox.channel4.com,2009:/programmes/blackout/4od%233573948</id>
+    <title type="text">Blackout</title>
+    <summary type="text">Feature-length 'What-If' drama exploring the effects of a devastating cyber-attack on Britain's national electricity grid</summary>
+    <updated>2013-09-09T10:21:53.701Z</updated>
+    <link rel="related" type="application/atom+xml" href="https://xbox.channel4.com/pmlsd/blackout/episode-guide/series-1/episode-1.atom?platform=p06"></link>
+    <media:group>
+      <media:player url="https://ais.channel4.com/asset/3573948"></media:player>
+      <media:thumbnail imageSource="fallback" height="113" width="200" altText="blackout_wk37_625x352" url="http://cache.channel4.com/assets/programmes/images/blackout/series-1/15de2e83-ef6c-4900-a0a4-1cf9afaf790d_200x113.jpg"></media:thumbnail>
+      <media:rating>adult</media:rating>
+      <media:copyright url="http://cache.channel4.com/terms_and_conditions.html">Terms and Conditions</media:copyright>
+      <media:restriction relationship="allow" type="country">GG,IE,JE,GB,IM</media:restriction>
+      <media:rights status="official"></media:rights>
+    </media:group>
+    <dc:relation.BrandTitle>Blackout</dc:relation.BrandTitle>
+    <dcterms:available>start=2013-09-09T21:40:00.000Z; end=2013-10-09T21:40:00.000Z; scheme=W3C-DTF</dcterms:available>
+    <dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+    <dc:relation.RelatedEntryId feedId="tag:xbox.channel4.com,2009:/programmes/blackout/episode-guide/series-1">tag:xbox.channel4.com,2009:/programmes/blackout/episode-guide/series-1/episode-1</dc:relation.RelatedEntryId>
+    <dc:relation.AgeRating>16</dc:relation.AgeRating>
+    <dc:relation.Guidance>Very strong language and some scenes of violence</dc:relation.Guidance>
+    <dc:date.TXDate>2013-09-09T21:00:00.000Z</dc:date.TXDate>
+    <dc:relation.TXChannel>C4</dc:relation.TXChannel>
+    <dc:relation.Subtitles>false</dc:relation.Subtitles>
+    <dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+    <dc:relation.Duration>71:49</dc:relation.Duration>
+    <dc:relation.LoginRequired>false</dc:relation.LoginRequired>
+    <dc:relation.requestType>CATCHUP</dc:relation.requestType>
+    <dc:relation.programmeId>56188/001</dc:relation.programmeId>
+  </entry>
+</feed>
