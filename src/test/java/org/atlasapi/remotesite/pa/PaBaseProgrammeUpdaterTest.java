@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.pa;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -95,18 +96,20 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         final LocalDate scheduleDay = new LocalDate(2011, DateTimeConstants.JANUARY, 15);
         context.checking(new Expectations() {{
             oneOf(scheduleVersionStore).get(channel, scheduleDay);
-            will(returnValue(Optional.<Long>absent()));
+                will(returnValue(Optional.<Long>absent()));
             oneOf(scheduleVersionStore).store(channel, scheduleDay, 1);
             oneOf(scheduleVersionStore).get(channel, scheduleDay);
-            will(returnValue(Optional.<Long>of(1L)));
+                will(returnValue(Optional.<Long>of(1L)));
             oneOf(scheduleVersionStore).store(channel, scheduleDay, 201202251115L);
             oneOf(scheduleVersionStore).get(channel, scheduleDay);
-            will(returnValue(Optional.<Long>of(201202251115L)));
+                will(returnValue(Optional.<Long>of(201202251115L)));
             oneOf(scheduleVersionStore).get(channel, scheduleDay);
-            will(returnValue(Optional.<Long>of(201202251115L)));
+                will(returnValue(Optional.<Long>of(201202251115L)));
         }});
         
-        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile()), new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())), null, scheduleVersionStore);
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(
+                new File(Resources.getResource("20110115_tvdata.xml").getFile()), 
+                new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())), null, scheduleVersionStore);
         updater.run();
         Identified content = null;
 
@@ -141,8 +144,11 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         assertFalse(version.getBroadcasts().isEmpty());
         assertTrue(version.is3d());
 
-        Broadcast broadcast = version.getBroadcasts().iterator().next();
-        assertEquals("pa:71118472", broadcast.getSourceId());
+        Iterator<Broadcast> broadcasts = version.getBroadcasts().iterator();
+        Broadcast broadcast1 = broadcasts.next();
+        assertEquals("pa:71118471", broadcast1.getSourceId());
+        Broadcast broadcast2 = broadcasts.next();
+        assertEquals("pa:71118472", broadcast2.getSourceId());
 
         updater.run();
         Thread.sleep(1000);
@@ -159,9 +165,10 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         version = item.getVersions().iterator().next();
         assertFalse(version.getBroadcasts().isEmpty());
 
-        broadcast = version.getBroadcasts().iterator().next();
-        assertEquals("pa:71118472", broadcast.getSourceId());
-        assertTrue(broadcast.getRepeat());
+        broadcasts = version.getBroadcasts().iterator();
+        broadcast1 = broadcasts.next();
+        assertEquals("pa:71118471", broadcast1.getSourceId());
+        assertTrue(broadcast1.getRepeat());
 
 //        // Test people get created
 //        for (CrewMember crewMember : item.people()) {
