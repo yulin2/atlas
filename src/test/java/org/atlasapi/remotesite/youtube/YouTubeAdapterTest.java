@@ -32,6 +32,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -42,6 +43,7 @@ import com.metabroadcast.common.http.HttpStatusCodeException;
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 @RunWith(JMock.class)
+@Ignore
 public class YouTubeAdapterTest extends TestCase {
 
     private final Mockery context = new Mockery();

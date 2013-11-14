@@ -4,7 +4,9 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Publisher;
+import org.junit.Ignore;
 
+@Ignore
 public class YouTubeFeedIntegrationTest extends TestCase {
 
     private YouTubeFeedAdapter feedAdapter = new YouTubeFeedAdapter();

@@ -33,6 +33,7 @@ import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
 import org.atlasapi.remotesite.youtube.entity.YouTubeThumbnail;
 import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.joda.time.Duration;
+import org.junit.Ignore;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
@@ -44,6 +45,7 @@ import com.google.common.collect.Sets;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
+@Ignore
 public class YouTubeGraphExtractorTest extends TestCase {
 
 	static final String ITEM_URI = "http://www.youtube.com/watch?v=otA7tjinFX4";
