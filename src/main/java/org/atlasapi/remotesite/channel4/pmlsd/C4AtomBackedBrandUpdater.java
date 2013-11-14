@@ -57,6 +57,8 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 	private final ContentExtractor<Feed, BrandSeriesAndEpisodes> extractor;
 	private final Optional<Platform> platform;
 	private final boolean canUpdateDescriptions;
+	private boolean canUpdateClips;
+
 
 	
 	public C4AtomBackedBrandUpdater(C4AtomApiClient feedClient, Optional<Platform> platform, ContentResolver contentResolver, ContentWriter contentWriter, ContentExtractor<Feed, BrandSeriesAndEpisodes> extractor) {
@@ -66,6 +68,7 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 		this.writer = contentWriter;
 		this.extractor = extractor;
 		this.canUpdateDescriptions = !platform.isPresent();
+		this.canUpdateClips = !platform.isPresent();
 	}
 	
 	@Override
@@ -218,11 +221,13 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
     private <T extends Content> T updateContent(T existing, T fetched) {
         existing = updateDescribed(existing, fetched);
         
-        Set<Clip> mergedClips = mergeClips(existing, fetched);
+        if (canUpdateClips) {
+            Set<Clip> mergedClips = mergeClips(existing, fetched);
+            existing.setClips(mergedClips);
         
-        existing.setClips(mergedClips);
-        if (!Objects.equal(mergedClips, existing.getClips())) {
-            copyLastUpdated(fetched, existing);
+            if (!Objects.equal(mergedClips, existing.getClips())) {
+                copyLastUpdated(fetched, existing);
+            }
         }
 
         return existing;
