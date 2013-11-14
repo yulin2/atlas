@@ -147,31 +147,6 @@ public class ChildRefUpdateTaskTest extends TestCase {
         checkEpisode(resolve(item1), 3L, 1L, null);
         
     }
-    
-    @Test
-    public void testUpdatesReferencesInBrandAndNoSeries() {
-        Brand brand = new Brand("brandUri", "cBrandUri", BBC);
-        Episode episode1 = episodeWithContainers("ep1", null, brand);
-        Item item1 = itemWithContainer("ep2", brand);
-        
-        write(brand, episode1, item1);
-        
-        setId("containers", brand.getCanonicalUri(), 1L);
-        setId("children", episode1.getCanonicalUri(), 2L);
-        setId("children", item1.getCanonicalUri(), 3L);
-        
-        assertThat(resolve(brand).getId(), is(1L));
-        checkEpisode(resolve(episode1), 2L, null, null);
-        checkEpisode(resolve(item1), 3L, null, null);
-        
-        task.run();
-        
-        assertThat(resolve(brand).getId(), is(1L));
-        checkEpisode(resolve(episode1), 2L, 1L, null);
-        checkEpisode(resolve(item1), 3L, 1L, null);
-        
-    }
-
 
     private void checkEpisode(Item resolvedItem, Long episodeId, Long brandId, Long seriesId) {
         assertThat(resolvedItem.getId(), is(episodeId));
