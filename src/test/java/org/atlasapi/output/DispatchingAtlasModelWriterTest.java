@@ -2,7 +2,7 @@ package org.atlasapi.output;
 
 import java.io.IOException;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Test;

@@ -2,7 +2,7 @@ package org.atlasapi.output.simple;
 
 import static org.junit.Assert.assertEquals;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;

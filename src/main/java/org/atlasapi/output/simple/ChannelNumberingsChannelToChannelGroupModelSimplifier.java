@@ -3,7 +3,7 @@ package org.atlasapi.output.simple;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelNumbering;

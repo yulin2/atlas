@@ -1,13 +1,13 @@
 package org.atlasapi.equiv.generators;
 
-import static org.atlasapi.application.ApplicationConfiguration.defaultConfiguration;
+import static org.atlasapi.application.v3.ApplicationConfiguration.defaultConfiguration;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;

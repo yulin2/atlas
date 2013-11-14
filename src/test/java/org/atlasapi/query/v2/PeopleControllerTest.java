@@ -11,8 +11,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ModelTransformer;
 import org.atlasapi.media.entity.Person;

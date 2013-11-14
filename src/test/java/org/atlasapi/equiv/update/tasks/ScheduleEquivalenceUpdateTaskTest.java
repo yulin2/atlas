@@ -3,7 +3,7 @@ package org.atlasapi.equiv.update.tasks;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Content;

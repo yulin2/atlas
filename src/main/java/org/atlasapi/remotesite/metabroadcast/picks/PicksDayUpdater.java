@@ -4,7 +4,7 @@ import static com.google.common.collect.Iterables.*;
 
 import java.util.List;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;

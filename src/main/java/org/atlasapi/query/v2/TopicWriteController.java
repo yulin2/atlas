@@ -8,8 +8,8 @@ import java.io.Reader;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ModelTransformer;
 import org.atlasapi.input.ReadException;

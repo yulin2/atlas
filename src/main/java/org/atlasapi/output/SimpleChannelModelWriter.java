@@ -2,7 +2,7 @@ package org.atlasapi.output;
 
 import java.util.Set;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.simple.ChannelQueryResult;
 import org.atlasapi.output.simple.ChannelModelSimplifier;

@@ -3,7 +3,7 @@ package org.atlasapi.output.simple;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.AvailableItemsResolver;

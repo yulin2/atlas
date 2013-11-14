@@ -9,7 +9,7 @@ import java.io.StringReader;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.TopicRef.Relationship;
 import org.atlasapi.media.entity.simple.Description;
