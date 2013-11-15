@@ -4,14 +4,21 @@ import org.joda.time.DateTime;
 
 public abstract class Article {
 
-    abstract DateTime getLastModified();
+    public abstract DateTime getLastModified();
 
-    abstract String getMediaWikiSource();
+    public abstract String getMediaWikiSource();
 
-    abstract String getTitle();
+    public abstract String getTitle();
 
     public String getUrl() {
-        String safeTitle = getTitle().replaceAll(" ", "_")
+        return urlFromTitle(getTitle());
+    }
+    
+    /**
+     * Calculates the English Wikipedia URL for a given article title.
+     */
+    public static String urlFromTitle(String title) {
+        String safeTitle = title.replaceAll(" ", "_")
                 .replaceAll("\"", "%22").replaceAll("'", "%27")
                 .replaceAll(",", "%2C").replaceAll(";", "%3B")
                 .replaceAll("<", "%3C").replaceAll(">", "%3E")

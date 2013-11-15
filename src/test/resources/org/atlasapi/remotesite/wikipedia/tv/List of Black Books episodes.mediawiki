@@ -1,0 +1,272 @@
+{{DISPLAYTITLE:List of ''Black Books'' episodes}}
+[[File:Black Books box.jpg|200px|thumb|right|''Black Books'': Definitive Collector's Edition. This [[box set]] contains all 18 episodes from all three seasons including special features on 3 DVDs.]]
+''[[Black Books]]'', an English [[sitcom]] television series created by [[Dylan Moran]] and [[Graham Linehan]], premiered on 29 September 2000 on [[Channel 4]] in the United Kingdom and Ireland, and ended on 15 April 2004. The show spans 18 episodes over three seasons. The original 45 minute [[Television pilot|pilot]], recorded in 1998, has not been broadcast and all other episodes were approximately 25 minutes long. Moran and Linehan decided to end the show in its third season. Moran has stated that there will be no more series<ref>{{cite web|url=http://www.digitalspy.ie/tv/blog/a349015/black-books-tube-talk-gold.html|title=Black Books: Tube  Talk Gold – TV Blog – Digital Spy|publisher=[[Digital Spy]]|last=Jeffery|first=Morgan|date=5 November 2011|accessdate=25 June 2012}}</ref> and ''[[The Times]]'' reported the series has been "killed off".<ref>{{cite web|url=http://www.timesonline.co.uk/article/0,,2090-1722168,00.html|title=Droll Troll Who Puts the Odd in Couple &#124; The Sunday Times|work=[[The Times]]|last=Brown|first=Allan|date=7 August 2005|accessdate=8 May 2010|archiveurl=http://www.webcitation.org/5oxcNvbH1|archivedate=13 April 2011}}</ref>
+
+All three seasons of ''Black Books'' were released on DVD in the United Kingdom in 2006.<ref name="amz" /> The first two seasons were released in North America the same year<ref name="s1">{{cite web|url=http://www.tvshowsondvd.com/releases/Black-Books-Complete-1st-Series/5324|title=Black Books – The Complete 1st Series DVD Information|publisher=[[TVShowsonDVD.com]]|accessdate=25 June 2012}}</ref><ref name="s2">{{cite web|url=http://www.tvshowsondvd.com/releases/Black-Books-Complete-2nd-Series/6083|title=Black Books – The Complete 2nd Series DVD Information|publisher=TVShowsonDVD.com|accessdate=25 June 2012}}</ref> and the third season was released in 2007.<ref name="s3">{{cite web|url=http://www.tvshowsondvd.com/releases/Black-Books-Complete-3rd-Series/7088|title=Black Books – The Complete 3rd Series DVD Information|publisher=TVShowsonDVD.com|accessdate=25 June 2012}}</ref> A complete series DVD box set with additional features, titled "The Complete ''Black Books''" was released in 2007.<ref>{{cite web|url=http://www.tvshowsondvd.com/releases/Black-Books-Complete-Series/7087|title=Black Books – The Complete Black Books DVD Information|publisher=TVShowsonDVD.com|accessdate=25 June 2012}}</ref> A limited edition DVD box set, titled "The Definitive Collector's Edition," was released in 2010 and included additional features, a booklet of liner notes and a wine bottle opener.<ref>{{cite web|url=http://shop.abc.net.au/products/black-books-the-definitive-collectors-edition-wine-set|title=Black Books – The Definitive Collector's Edition (Wine Set)|publisher=[[ABC Online]]|accessdate=25 June 2012}}</ref>
+
+''Black Books'' is set in the eponymous [[London]] bookshop Black Books and follows the lives of its owner [[Characters of Black Books#Bernard Black|Bernard Black]], his assistant [[Characters of Black Books#Manny Bianco|Manny Bianco]] and their friend [[Characters of Black Books#Fran Katzenjammer|Fran Katzenjammer]].<ref>{{cite web|url=http://www.channel4.com/programmes/black-books|title=Black Books – Channel 4|publisher=[[Channel 4]]|accessdate=25 June 2012}}</ref> The regular cast included Dylan Moran as Bernard Black, [[Bill Bailey]] as Manny Bianco and [[Tamsin Greig]] as Fran Katzenjammer. The show featured a number of guest stars throughout its original run, including [[Martin Freeman]], [[Johnny Vegas]], [[Rob Brydon]], [[Simon Pegg]] and [[Julian Rhind-Tutt]].
+
+==Series overview==
+{| class="wikitable" style="text-align:left;"
+|-
+! scope="col" colspan="2" rowspan="2" width="75"| Season
+! scope="col" rowspan="2" width="50"| Episodes
+! scope="col" colspan="2" width="300"| Originally aired
+! scope="col" colspan="2" width="300"| DVD release
+|-
+! scope="col" width="150"| [[Season premiere]]
+! scope="col" width="150"| [[Season finale]]
+! scope="col" width="150"| [[DVD region code|Region 1]]
+! scope="col" width="150"| [[DVD region code|Region 2]]
+|-
+| style="width:5px" bgcolor="B7410E"|
+| style="text-align:center;"| '''[[#Season 1 (2000)|1]]'''
+| style="text-align:center;"| 6
+| style="text-align:center;"| 29 September 2000
+| style="text-align:center;"| 3 November 2000
+| style="text-align:center;"| 10 January 2006<ref name="s1" />
+| rowspan="3" style="text-align:center;"| 13 June 2006<ref name="amz">{{cite web|url=http://www.amazon.co.uk/Black-Books-Series-1-DVD/dp/B000F3SZT0|title=Black Books: Series 1 [DVD&#93;}}{{cite web|url=http://www.amazon.co.uk/Black-Books-Series-2-DVD/dp/B000F3UITK|title=Black Books: Series 2 [DVD&#93;}}{{cite web|url=http://www.amazon.co.uk/Black-Books-Series-3-DVD/dp/B000F46U3C|title=Black Books: Series 3 [DVD&#93;|publisher=[[Amazon.com|Amazon]]|accessdate=25 June 2012}}</ref>
+|-
+| style="width:5px" bgcolor="003366"|
+| style="text-align:center;"| '''[[#Season 2 (2002)|2]]'''
+| style="text-align:center;"| 6
+| style="text-align:center;"| 1 March 2002
+| style="text-align:center;"| 5 April 2002
+| style="text-align:center;"| 14 November 2006<ref name="s2" />
+|-
+| style="width:5px" bgcolor="FFA000"|
+| style="text-align:center;"| '''[[#Season 3 (2004)|3]]'''
+| style="text-align:center;"| 6
+| style="text-align:center;"| 11 March 2004
+| style="text-align:center;"| 15 April 2004
+| style="text-align:center;"| 13 November 2007<ref name="s3" />
+|}
+
+== Original unaired pilot ==
+{| class="wikitable plainrowheaders" style="width:98%;"
+|-
+! No. !! Title !! Writer !! Director !! Airdate
+{{Episode list
+ |EpisodeNumber=—
+ |Title=Pilot Episode
+ |Aux1=—
+ |Aux2=—
+ |OriginalAirDate=''Unaired''
+ |ShortSummary=The show's pilot was decidedly darker, revolving around Bernard's, and later Manny's, decision to commit suicide. It featured Manny (surname Zimmerman in reference to Bob Dylan) as a professional depression-o-gram, and the Fran character as Valerie, a philosophy lecturer.
+
+To date it remains unreleased in mainstream media.
+}}
+|}
+
+== Series 1 (2000) ==
+{| class="wikitable plainrowheaders" style="width:98%;"
+|-
+! No. !! Title !! Writer !! Director !! Airdate
+{{Episode list
+ |EpisodeNumber=1
+ |Title=Cooking the Books
+ |Aux1=[[Dylan Moran]], [[Graham Linehan]]
+ |Aux2=[[Graham Linehan]], Nick Wood
+ |OriginalAirDate=Friday {{Start date|2000|9|29|df=yes}}
+ |ShortSummary=After his accountant flees from the police, Bernard is faced with the daunting prospect of doing his own [[tax]]es, and resorts to pairing his socks,  getting drunk with door-to-door evangelists, and trying to seriously injure himself since it will allow him to defer his tax return. Manny, an [[accountant]], enters Black Books for the first time to buy the ''[[The Little Book of Calm]]'' on his way to work and somehow manages to swallow it. Fran is distracted from being on-call as a friend's birth coach when she's bedevilled by a weird, unfathomable sphere that isn't actually 'a bald [[furby]]'. Naturally, chaos ensues. At the end of the episode, Manny demonstrates that Fran's sphere is a lighter.
+
+Guest stars [[Martin Freeman]] as Manny's doctor and [[Rupert Vansittart]] as the tasteful customer.
+}}
+{{Episode list
+ |EpisodeNumber=2
+ |Title=Manny's First Day
+ |Aux1=[[Dylan Moran]], [[Graham Linehan]]
+ |Aux2=[[Graham Linehan]], Nick Wood
+ |OriginalAirDate=Friday {{Start date|2000|10|6|df=yes}}
+ |ShortSummary=Bernard wakes up from a boozy night to discover he's accidentally given Manny a job at the bookshop, then spends the day trying to get rid of him. Manny proving to be a charming, sociable and extremely competent employee, apparently unaware that it's 'not that kind of operation'. An offering of wine from Manny and the threat of physical violence from Fran persuade Bernard to keep Manny on board.
+
+Guest stars [[David Cann]] as the roaring customer and co-writer [[Graham Linehan]], as the "I Love Books" customer.
+}}
+{{Episode list
+ |EpisodeNumber=3
+ |Title=Grapes of Wrath
+ |Aux1=[[Dylan Moran]], [[Graham Linehan]]
+ |Aux2=[[Graham Linehan]], Nick Wood
+ |OriginalAirDate=Friday {{Start date|2000|10|13|df=yes}}
+ |ShortSummary=When the sheer filth of the bookshop overwhelms him, Manny calls a creepy cleaner, and Bernard reluctantly agrees to house-sit for a friend. Unfortunately, the two manage to drink a very expensive bottle of wine that was due to be presented to the [[Pope]], and have to figure out a way to replace it. Meanwhile, Fran goes on a date with a very nice man which is nothing short of disastrous. She ends up dating the cleaner. 
+
+Guest star: [[Kevin Eldon]] as the cleaner.
+}}
+{{Episode list
+ |EpisodeNumber=4
+ |Title=The Blackout
+ |Aux1=[[Dylan Moran]], [[Graham Linehan]]
+ |Aux2=[[Graham Linehan]], Nick Wood
+ |OriginalAirDate=Friday {{Start date|2000|10|20|df=yes}}
+ |ShortSummary=After celebrating his birthday fueling an all-night [[The Sweeney]] marathon by drinking [[espresso]], Manny thinks he's a 1970s cop and manages to go from eyeing old men suspiciously in the bookshop to being trapped at the local police station helping a ''real'' detective put the '[[Good cop/bad cop|good cop, bad cop]]' routine on a local villain.  Bernard explains how going to a dinner party eventually led to a broken arm while Fran describes the steps from seeing her boyfriend having dinner with another woman to being in hospital with a neck injury.
+
+Guest stars [[Colin McFarlane]] as the detective.
+}}
+{{Episode list
+ |EpisodeNumber=5
+ |Title=The Big Lock-Out
+ |Aux1=[[Dylan Moran]], [[Graham Linehan]]
+ |Aux2=[[Graham Linehan]], Nick Wood
+ |OriginalAirDate=Friday {{Start date|2000|10|27|df=yes}}
+ |ShortSummary=After being burgled, Black Books gets a new alarm and security door fitted, but Manny fails to listen to the unlock code, distracted by a little [[Subbuteo]] player in the installer's hair ("there was a little man ... in his hair").  This quickly results in Manny being trapped alone inside with only a quickly-emptied bottle of [[Absinthe]] and dead [[bee]]s for company and Bernard locked outside with just enough money for [[popcorn]] and a [[movie theatre|cinema]] ticket. Meanwhile, Fran has taken the phone off the hook to listen to silky-voiced Howell Granger read the [[shipping forecast]] on the radio, leaving Bernard to wander the streets of London penniless, cold and wet, with only an adult video-shop and the allure of fast-food employment between him and freezing.
+
+Guest stars: [[Nick Frost]] as the alarm installer, [[Peter Serafinowicz]] as Howell Granger, writer [[Graham Linehan]] as a fast-food customer, and [[Tony Way]] as the fast-food chain and cinema employee.
+}}
+{{Episode list
+ |EpisodeNumber=6
+ |Title=He's Leaving Home
+ |Aux1=[[Dylan Moran]], [[Graham Linehan]]
+ |Aux2=[[Graham Linehan]], Nick Wood
+ |OriginalAirDate=Friday {{Start date|2000|11|3|df=yes}}
+ |ShortSummary=Bernard finally breaks the last straw with his constant bullying, and Manny leaves home, but doesn't even manage to let Bernard know about this without being attacked by a bee in a telephone box and finding himself on the streets.  He is soon picked up by a photographer with a beard fetish and is treated to a glamorous life of expensive clothes, satin sheets and crinkle-cut chips in silver bowls, but such high living comes at a high price.
+
+Guest stars: [[Omid Djalili]] as Trebor the photographer, and [[David Walliams]] as a customer.
+}}
+|}
+
+== Series 2 (2002) ==
+{| class="wikitable plainrowheaders" style="width:98%;"
+|-
+! No. !! Title !! Writer !! Director !! Airdate
+{{Episode list
+ |EpisodeNumber=7
+ |Title=The Entertainer
+ |Aux1=[[Dylan Moran]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Friday {{Start date|2002|3|1|df=yes}}
+ |ShortSummary=Fran decides to learn the piano and enlists the services of an elderly blind Russian tutor. His harsh methods and her inability to master it in 5 minutes inclines her to quit.  Manny discovers he can play the piano purely on instinct, and against all odds Bernard gets a date with an attractive woman. As a result, Fran and Bernard bribe Manny to hide inside the piano, armed with only spoons, in an attempt to make themselves look good.
+
+Guest star: [[Nina Conti]] as Bernard's date.
+}}
+{{Episode list
+ |EpisodeNumber=8
+ |Title=Fever
+ |Aux1=[[Dylan Moran]], [[Kevin Cecil]], [[Andy Riley]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Friday {{Start date|2002|3|8|df=yes}}
+ |ShortSummary=A heat wave sweeps London, causing Bernard to obsess about beautiful girls and to seek a "Summer Girlfriend", Fran to suffer from insomnia, and Manny to panic about his 'Dave's Syndrome', a curious condition that purportedly triggers at 88°F (31°C). Naturally, Bernard refuses to believe a word of Manny's "[[attention seeking]] nonsense" and tries to get Manny as hot as possible.  Fran discovers the walls of her flat are literally closing in as her unscrupulous landlord creates another flat from the stolen space. Bernard pretends to be her lawyer in an attempt to rectify the situation but quickly falls for the new lodger, Summer Girl Alice. At the end of this episode, Bernard asks Fran when they will admit they are deeply attracted to each other. Fran replies, 'only when one of us is dead', and Manny's condition triggers, with disastrous consequences. 
+
+Guest starring [[Johnny Vegas]] as Fran's landlord and [[Rose Keegan]] as Alice.
+}}
+{{Episode list
+ |EpisodeNumber=9
+ |Title=The Fixer
+ |Aux1=[[Dylan Moran]], [[Arthur Mathews (writer)|Arthur Mathews]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Friday {{Start date|2002|3|15|df=yes}}
+ |ShortSummary=While Fran is in desperate need of a job, Manny gets a call from old friend Gus, a diminutive underworld figure. Gus agrees to get Fran a job working for a guy named Nugent in exchange for the bookstore hosting a reading of his nephew Danny's new book.  Alas, Fran hasn't a clue what her new job involves, and Danny is a hulking great [[illiterate]] whose [[Ghostwriter|ghostwritten]] autobiography describes the pain he's inflicted on many others in great detail and which he will happily inflict on Bernard and Manny if they can't teach him to read within 2 days. Fran gets promoted. Bernard worries about his thumbs.
+
+Guest stars: [[Ricky Grover]] as Danny, [[Rob Brydon]] as B. Nugent, and [[Big Mick (actor)|Big Mick]] as Gus.
+}}
+{{Episode list
+ |EpisodeNumber=10
+ |Title=Blood
+ |Aux1=[[Kevin Cecil]], [[Andy Riley]], [[Dylan Moran]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Friday {{Start date|2002|3|22|df=yes}}
+ |ShortSummary=Fran delves into [[genealogy]] to uncover her Eastern European roots, but upon meeting her newly-discovered family, she soon wants to get rid of them. Meanwhile Manny and Bernard try to re-invent the shop, firstly as a trendy upmarket café-bookshop (with sofas that swallow you) and then, apocalyptically, as an upscale restaurant. However, the shop is overrun by a horde of unseen creatures that Manny and Bernard must make an effort to destroy.
+
+Guest starring [[Mark Donovan]] as Cousin Gregor.
+}}
+{{Episode list
+ |EpisodeNumber=11
+ |Title=Hello Sun
+ |Aux1=[[Dylan Moran]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Friday {{Start date|2002|3|29|df=yes}}
+ |ShortSummary=Fran takes up [[Yoga]] with Eva ([[Jessica Hynes]]) and piously lectures everyone about how much better she feels, but she isn't as good at controlling her own urges. Meanwhile, Bernard discovers a copy of the complete works of [[Sigmund Freud|Freud]] and begins tormenting Manny by diagnosing his various [[neurosis|neuroses]]--but this leads to Manny gaining the confidence to finally stand up to him.
+}}
+{{Episode list
+ |EpisodeNumber=12
+ |Title=A Nice Change
+ |Aux1=[[Dylan Moran]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Friday {{Start date|2002|4|5|df=yes}}
+ |ShortSummary=When around-the-clock building commences next door, Bernard, Manny and Fran decide to go on holiday. Manny wants adventure, Fran wants relaxation, and Bernard just wants somewhere exactly like the bookshop. They're quickly packed and ready to go—except for a lapse in Manny's memory, which forces them to buy cheap tickets that entitle them to see a lot of international [[airport]]s.
+}}
+|}
+
+==Series 3 (2004)==
+{| class="wikitable plainrowheaders" style="width:98%;"
+|-
+! No. !! Title !! Writer !! Director !! Airdate
+{{Episode list
+ |EpisodeNumber=13
+ |Title=Manny Come Home
+ |Aux1=[[Kevin Cecil]], [[Andy Riley]], [[Dylan Moran]]
+ |Aux2=David McCarthy
+ |OriginalAirDate=Thursday {{Start date|2004|3|11|df=yes}}
+ |ShortSummary=Fran returns from a holiday in [[Cornwall]] to find Bernard living amongst mouldy books and dead [[badger]]s and Manny working next door at the extremely glossy Goliath Books following an incident involving Manny's hand and a sandwich toaster, where he is decidedly out of place amongst creepy manager Evan and his army of hyper-efficient pastel-shirted followers. Armed with only a "duty to do" card (a card that elicits a "doo-ti-too-doo" sound when inserted into the corresponding slot on a computer) and an endless supply of muffins, Manny manages to resist Fran's rather self-serving attempts to drag him back to Bernard so that she has somewhere to hang out. Bernard's physical condition deteriorates rapidly without Manny's care ("I feel like I've been beaten up, underwater"), but Manny is soon questioning his choice of career as Evan demands an unthinkable sacrifice.
+
+Guest star: [[Simon Pegg]] as Evan.
+}}
+{{Episode list
+ |EpisodeNumber=14
+ |Title=Elephants and Hens
+ |Aux1=[[Dylan Moran]], [[Kevin Cecil]], [[Andy Riley]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Thursday {{Start date|2004|3|18|df=yes}}
+ |ShortSummary=Fran leaves for the weekend to go to her friend Becky's [[hen party]] while Bernard and Manny, inspired by their latest children's-book event, decide to write and illustrate a book for children.  Bernard's first effort comes to over 1,000 pages, covers [[Joseph Stalin]], a lens grinder, a broken marriage, and a truth-seeking journalist – a bit complex for kids. The subsequent masterpiece, ''The Elephant and the Balloon,'' could bring them international fame—and all its problems. Meanwhile, Fran's hen party is a disaster: the booze starts flowing, and a game of truth stirs up tears and recriminations.
+
+Guest stars: [[Lucy Davis]] as Becky, [[Olivia Colman]] as Tanya, Charlie Hicks as Timmy and, [[Oliver Golding]] as Young Customer.
+}}
+{{Episode list
+ |EpisodeNumber=15
+ |Title=Moo-Ma and Moo-Pa
+ |Aux1=[[Dylan Moran]], [[Kevin Cecil]], [[Andy Riley]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Thursday {{Start date|2004|3|25|df=yes}}
+ |ShortSummary=Manny's irritating parents, 'Moo-Ma' and 'Moo-Pa', unexpectedly come to stay after Bernard deletes Manny's answerphone messages.  Bernard is instantly infuriated by their mere existence, not to mention their annoying quirks and songs, but his patience and Fran's nerves are tested when it's revealed that Manny's letters home have greatly embellished his actual accomplishments in life.
+
+Guest stars: [[Annette Crosbie]] as Moo-Ma, [[Sam Kelly]] as Moo-Pa, and [[Nick Frost]] as an answerphone voice. 
+}}
+{{Episode list
+ |EpisodeNumber=16
+ |Title=A Little Flutter
+ |Aux1=[[Dylan Moran]], [[Kevin Cecil]], [[Andy Riley]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Thursday {{Start date|2004|4|1|df=yes}}
+ |ShortSummary=After a small win on the [[Grand National]], Bernard becomes addicted to gambling, leaving Fran and Manny in a bitter competition to sell as many books as possible. Soon horses aren't enough and Bernard lands in an illegal poker game against a group of ruthless, successful gamblers, including Dave 'Mouse Ear' Smith. Being utterly hopeless at cards, Bernard (now nicknamed ''The Gold Mine'') loses everything, and Fran and Manny need to hatch a plan to obtain the money before Bernard's debtors "evict" him from his shop, £20,000, and/or his legs.
+
+Guest stars: [[Keith Allen (actor)|Keith Allen]] as 'Mouse Ears' Smith and [[Craig Parkinson]] as Martin the Tout.
+}}
+{{Episode list
+ |EpisodeNumber=17
+ |Title=Travel Writer
+ |Aux1=[[Kevin Cecil]], [[Andy Riley]], [[Dylan Moran]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Thursday {{Start date|2004|4|8|df=yes}}
+ |ShortSummary=Manny organises a book launch party at the shop with charismatic-but-smug travel writer Jason, and everyone starts falling for him and his stories of far-away adventure.  Meanwhile, Bernard's landlord has died and a small cat now owns the building. Driven to destroy the cat's burgeoning real-estate empire, he attempts to persuade an animal-loving pest exterminator to turn kitty hitman. His attempts fail and cause the exterminator to commit suicide. When Bernard tries to finish the job, Manny is injured.
+
+Guest starring [[Julian Rhind-Tutt]] as Jason and [[Catherine Shepherd]] as Bridget.
+}}
+{{Episode list
+ |EpisodeNumber=18
+ |Title=Party
+ |Aux1=[[Kevin Cecil]], [[Andy Riley]], [[Dylan Moran]]
+ |Aux2=Martin Dennis
+ |OriginalAirDate=Thursday {{Start date|2004|4|15|df=yes}}
+ |ShortSummary=On a slow Friday night, Manny suggests that the gang go to a party which will be attended by Rowena, a girl he likes. Instantly jealous, Bernard overcomes his natural reluctance with curiosity to see what kind of "so-called person" could find Manny attractive. Manny arms himself with an array of items to strategically leave about the house to give him an excuse to call her, and Fran checks her perfect new hairstyle. They return much later armed with a bizarre selection of alcohol, messed-up hair, and a desire to dance badly. An excess of [[beetroot]] [[liqueur]] gives Manny the courage to confront Bernard regarding his disdain for Manny's affection for Rowena — this brings forth a shocking revelation from Bernard, which is soon tarnished as Fran tells Manny the truth about Bernard.
+}}
+|}
+
+==Extras==
+# '''Bernard's Letter''' — The reply that a typically furious Bernard writes to the editor of a publishing firm after they refuse to publish the novel that he had spent the entire weekend writing.
+# '''Commentary''' — Every episode in the first and second series has a commentary from [[Dylan Moran]], [[Bill Bailey]] and [[Tamsin Greig]].
+# '''Black Dolls''' — A doll-version of Black Books in which Fran takes Manny into the real world where she feeds him drugs and grapes. Manny eventually decides that the real world is too tough for him, and after a 'talk' from Bernard he promises to stay in the shop.
+
+==See also==
+* [[Characters of Black Books]]
+
+==References==
+{{reflist}}
+
+==External links==
+{{wikiquote|Black Books}}
+*[http://www.channel4.com/blackbooks ''Black Books''] at [[Channel 4#Channel4.com|Channel4.com]]
+*[http://ftvdb.bfi.org.uk/sift/series/34143 ''Black Books''] at the [[British Film Institute]]
+*{{imdb title|id=262150|title=Black Books}}
+
+{{DEFAULTSORT:Black Books}}
+[[Category:Lists of sitcom television series episodes]]
+[[Category:Lists of British television series episodes]]

@@ -1,0 +1,122 @@
+{{More footnotes|date=October 2011}}
+{{Infobox television
+| bgcolour             = #000
+| colour text          = #fff
+| show_name            = Black Books
+| image                = [[File:Black Books titles.jpg|250px]]
+| caption              = Title screen featuring the front of Black Books.
+| genre                = [[Situation comedy| Sitcom]]
+| creator              = [[Dylan Moran]]<br>[[Graham Linehan]]
+| writer               = Dylan Moran<br>Graham Linehan<br>[[Arthur Mathews (writer)|Arthur Mathews]]<br />[[Kevin Cecil]]<br />[[Andy Riley]]
+| starring             = [[Dylan Moran]]<br>[[Bill Bailey]]<br>[[Tamsin Greig]]
+| composer             = [[Jonathan Whitehead]]
+| country              = United Kingdom
+| language             = English
+| num_series           = 3
+| num_episodes         = 18
+| list_episodes        = List of Black Books episodes
+| executive_producer   = William Burdett-Coutts	
+| producer             = [[Nira Park]]<br />Julian Meers
+| co-producer          = Karen Beever
+| editor               = Paul Machliss<br />Nick Ames
+| location             = [[Teddington Studios]]<br />[[Teddington]], [[London]]<br />(primary location)<br />Leigh Street<br />[[Bloomsbury]], London
+| camera               = [[Multiple-camera setup| Multiple]]
+| runtime              = 25 minutes
+| company              = [[Big Talk Productions|Big Talk]]
+| distributor          = [[Channel 4|Channel 4 Sales]]
+| channel              = [[Channel 4]]
+| picture_format       = [[576p]] [[SDTV]]
+| audio_format         = [[Dolby Digital|Dolby Digital Stereo]]
+| first_aired          = {{Start date|df= y|2000|9|29}}
+| last_aired           = {{End date|df= y|2004|4|15}}
+| status               = Ended
+| website              = http://www.channel4.com/programmes/black-books
+| website_title        = Official website}}
+'''''Black Books''''' is a British [[sitcom]] created by [[Dylan Moran]] and [[Graham Linehan]] that was broadcast on [[Channel 4]] from 2000 to 2004.  Starring Moran, [[Bill Bailey]] and [[Tamsin Greig]], the series is set in the eponymous London bookshop Black Books and follows the lives of its owner [[Bernard Black]] (Moran), his assistant [[Manny Bianco]] (Bailey) and their friend [[Fran Katzenjammer]] (Greig). The series was produced by [[Big Talk Productions]],<ref>{{cite web |url=http://www.bigtalkproductions.com/black-books/ |title= Black Books  | website=[[Big Talk Productions]] |accessdate=20 July 2013}}</ref> in association with Channel 4.
+
+''Black Books'' was produced in a [[multiple-camera setup]], and was primarily filmed at [[Teddington Studios]] in [[Teddington]], London,<ref>{{cite web |url= http://www.nostairway.com/blog/how-teddington-studios-will-benefit-us-as-a-video-production-company |title=How Teddington Studios Will Benefit Us as a Video Production Company | date = 12 March 2012 |website= Nostairway Media |accessdate= 20 July 2013}}</ref><ref name= "IMDb">{{cite web | url = http://www.imdb.com/title/tt0262150/locations |title=''Black Books'' (TV Series 2000–2004) – Filming Locations |website= [[Internet Movie Database|IMDb]] |accessdate = 20 July 2013}}</ref> with exterior scenes filmed on location on Leigh Street and the surrounding areas in [[Bloomsbury]].<ref name="IMDb"/> The debut episode premiered on 29 September 2000<ref name="Digital Spy">{{cite web |url=http://www.digitalspy.com.au/british-tv/tubetalk/a349015/black-books-tube-talk-gold.html |title=<nowiki>'</nowiki>''Black Books''<nowiki>'</nowiki>: Tube Talk Gold – British TV Blog – Digital Spy |last=Jeffery |first=Morgan |date=5 November 2011 |website=[[Digital Spy]] |accessdate=20 July 2013}}</ref> and three seasons followed, with the final episode airing on 15 April 2004.<ref name="Digital Spy"/>
+
+''Black Books'' was a critical success, winning a number of awards, including two [[British Academy Television Awards|BAFTA]] awards for Best Situation Comedy in 2001 and 2005 and a Bronze Rose at the [[Festival Rose d'Or]]‒and being called "a hugely popular series" by ''[[The Times]]''.<ref name="The Times">{{cite news |last=Brown |first=Allan |date=7 August 2005 |title=Droll Troll Who Puts the Odd in Couple |work=[[The Times]] |url=http://www.timesonline.co.uk/tol/news/uk/scotland/article551893.ece |archiveurl=http://www.webcitation.org/5oxcNvbH1 |archivedate=13 April 2010 |accessdate=20 July 2013}}</ref>
+
+== Synopsis ==
+
+Bernard Black is the proprietor of his small bookshop, Black Books. The series revolves around the lives of Bernard, Manny and Fran. A central theme is Bernard's odd position as a belligerent and openly hostile shopkeeper who has a loathing of the outside world and all the people who inhabit it, except his oldest friend, Fran, who initially ran a trendy [[bric-a-brac]] shop, Nifty Gifty, next-door to the shop.
+
+Bernard displays little enthusiasm or interest in retail (or, indeed, anything outside drinking, smoking and reading) and actively avoids having to interact with anyone, even inside his shop, as he has a personal dislike of his customers, treating his bookshop more like a personal library. It is suggested that Fran and Bernard once slept together, but now they remain happy to be friends, sharing a love of smoking heavily and drinking to excess. Fran otherwise has a rather hopeless love life.
+
+Manny is introduced in the first episode as a stressed-out accountant who enters the bookshop seeking ''[[Paul_Wilson_(meditation_teacher)#The_Little_Book_of_Calm|The Little Book of Calm]]''. During a drunken night out, Bernard offers him a job as a shop assistant and a room above the shop if he will do Bernard's accounts for him. Sobering up, Bernard realises Manny's optimistic nature is not suited to "this kind of operation". Fran, however, seeing that Manny is good for Bernard, forces Bernard to let him stay.
+
+Many episodes are driven by Manny and Fran's attempts to force Bernard into a more socially acceptable lifestyle. Their efforts usually result in chaos, sucking them back into Bernard's [[nihilism|nihilistic]] view of the world. The bookshop, which also doubles as Manny and Bernard's residence, is frequently depicted as being in an unhealthy state of dirtiness and often inhabited by animals and other unidentified creatures, while disorder is a frequent aspect of the running of the shop. Manny's attempts to improve both the shop and the residence often fail.
+
+In October 2011, Graham Linehan was asked what Bernard, Manny and Fran would be doing a decade after the events of the series. Linehan responded, "They'll grow up, like everyone else."<ref>{{cite web |url=http://www.reddit.com/r/IAmA/comments/lix9h/iama_man_named_graham_linehan_creator_of_the_it/ |title=IAmA Man Named Graham Linehan, Creator of ''The IT Crowd'' : IAmA |last=Linehan |first=Graham |authorlink=Graham Linehan |date=20 October 2011 |website=[[Reddit]] |accessdate=20 July 2013}}</ref>
+
+== Cast ==
+{{Main|Characters of Black Books}}
+
+The series revolves around the three main characters of Bernard Black ([[Dylan Moran]]), Manny Bianco ([[Bill Bailey]]) and Fran Katzenjammer ([[Tamsin Greig]]), who all appeared in every episode. Supporting characters appear briefly in single episodes, while the show also featured several guest stars, such as actor [[Simon Pegg]] and writer [[Graham Linehan]].
+
+== Episodes ==
+{{Main|List of Black Books episodes}}
+
+''Black Books'' ran for a total of 18 half-hour episodes, broadcast over three series of six episodes each. Series 1 premiered on 29 September 2000 and ran until 3 November 2000, series 2 from 1 March 2002 to 5 April 2002 and series 3 from 11 March 2004 to 15 April 2004.
+
+== Production ==
+[[Image:black-books-shop.jpg|thumb|right|Collinge & Clark bookshop, used for exterior shots in the series]]
+
+A pilot for the show was featured in the 1998 Channel 4 sitcom festival in [[Riverside Studios]].<ref name="Ogle">{{cite news |last=Ogle |first=Tina |date=17 September 2000 |title=Here's the Odd Couple of Comedy |newspaper=[[The Observer]] |url=http://observer.guardian.co.uk/screen/story/0,,369285,00.html |archiveurl=http://www.webcitation.org/5oxcgpHNZ |archivedate=20 July 2013 |accessdate=20 July 2013}}</ref> This early version was decidedly darker, revolving around Bernard's, and later Manny's, decision to commit suicide. It featured Manny (surname Zimmerman in reference to [[Bob Dylan]]) <!-- as who --> and the Fran character as Valerie, a philosophy lecturer.
+
+The pilot was an original creation of Moran's and the series was his first creation as a writer for a television series. Linehan, co-writer of the 1995 Channel 4 sitcom ''[[Father Ted]]'', joined at the outset to co-write the series with Moran at the suggestion of producer William Burdett-Coutts after Linehan saw the pilot and had seen Moran performing in [[Dublin]]. The characters were Moran's original creation, created over a month-long process he calls "spitballing", i.e. talking spontaneously to each other in character.<ref name="Ogle"/>
+
+The concept of Bernard owning a bookshop came about because of Moran's view of bookshops as doomed enterprises. Moran said "Running a second-hand bookshop is a guaranteed commercial failure. It's a whole philosophy. There were bookshops that I frequented and I was always struck by the loneliness and doggedness of these men who piloted this death ship", while Linehan said his belligerent personality reflected a sign he once saw in a bookshop stating "Please put the books anywhere you like because we've got nothing better to do than put them back". Moran said of the series, "We just wanted to cram as much elaborate stupidity into a half-hour that could make it be coherent and that you would believe".<ref name="Ogle"/>
+
+The fictional address for the bookshop is ''Black Books'', 13 Little Bevan Street, Bloomsbury, London WC1.<ref name=TravelWriter>{{cite episode |title=Travel Writer |airdate=8 April 2004 |season=3 |number=5}}</ref> Manny also states the shop is located "just off [[Russell Square]]".<ref name=HesLeavingHome>{{cite episode |title=He's Leaving Home |series=Black Books |network=Channel 4 |airdate=3 November 2000 |seriesno=1 |number=6}}</ref> The exterior scenes of the bookshop were filmed outside a real bookshop, albeit a smaller one, called Collinge & Clark, located at 13 Leigh Street, Bloomsbury.
+
+The audio commentary for ''[[Shaun of the Dead]]'' states that ''Black Books'' is considered by the producers to be a sister show of the 1999 Channel 4 sitcom ''[[Spaced]]'', also produced by Nira Park. The show features several actors from ''Spaced'', while in one episode Manny is heard speaking to Twist Morgan, a [[List of characters in Spaced|character from ''Spaced'']].<ref name=HesLeavingHome/> [[Simon Pegg]] guest-starred as Bill Bailey's boss in one episode, an inversion of their roles in ''Spaced''; [[Nick Frost]] appeared at the beginning of the episode "The Big Lockout" to install a new security system for the shop, though lost Manny's attention when he spotted a [[Subbuteo]] player in his hair; [[Jessica Hynes|Jessica Stevenson]] made an appearance as a friend of Fran's, who was trying to help her live a healthier lifestyle with attempts to change her diet and get her to exercise more; while [[Peter Serafinowicz]] played a radio broadcaster whose dulcet tones reading the shipping forecast drive Fran wild with desire.
+
+== Awards and reception ==
+''Black Books'' won the [[British Academy of Film and Television Arts|BAFTA]] for Best Situation Comedy in 2001 and 2005, and won a Bronze Rose at the [[Rose d'Or|Festival Rose d'Or]] of Montreux in 2001. As well as nominations for British Comedy Awards and the Irish Film and Television Awards.
+
+According to Allan Brown, writing for ''[[The Times]]'' in August 2005, the show was "killed off after three hugely popular series".<ref name="The Times"/>
+
+In [[Channel 4]]'s "The World's Greatest Comedy Characters" poll, Bernard was voted 19th.<ref>{{cite web |url=http://www.listology.com/list/channel-4s-worlds-50-greatest-comedy-characters |title=Channel 4's "World's 50 Greatest Comedy Characters" |work=listology.com |accessdate=19 October 2011}}</ref> The show ranked 58th out of 100 in the BBC's [[Britain's Best Sitcom]] poll in 2004.
+
+== References ==
+
+{{reflist|2}}
+
+*{{cite web
+|title=Black Books - Graham Linehan
+|url= http://www.channel4.com/community/showcards/B/Black_Books_-_Graham_Linehan.html
+|publisher=Channel 4
+|work=Channel4.com > Community > Chats
+|date=13 October 2000
+|accessdate=13 April 2010
+}}
+*{{cite web
+|first=Mark
+|last=Wright
+|title=Unsung Heroes of Television: Bernard Black
+|url=http://blogs.thestage.co.uk/tvtoday/2008/05/unsung-heroes-of-television-bernard-black/
+|work=The Stage
+|date=28 May 2008
+|accessdate=13 April 2010}}
+
+== External links ==
+{{wikiquote}}
+
+* {{Channel4.com|blackbooks|''Black Books''}}
+* {{IMDb title|0262150}}
+* {{Citation | url = http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q=Leigh+Street,+Bloomsbury&sll=37.0625,-95.677068&sspn=31.977057,79.013672&ie=UTF8&hq=Leigh+Street,+Bloomsbury&hnear=&radius=15000&t=h&layer=c&cbll=51.526593,-0.125015&panoid=6SLZCXqYgv5IARv3FYDlgw&cbp=12,126.89,,0,6.95&ll=51.526681,-0.124783&spn=0.092702,0.439453&z=12 | publisher = Google | title = Street view of filming location}}.
+
+{{BAFTA TV Award for Best Situation Comedy 2000–2019}}
+{{Graham Linehan}}
+
+[[Category:Channel 4 sitcoms]]
+[[Category:2000s British television series]]
+[[Category:2000 British television programme debuts]]
+[[Category:2004 British television programme endings]]
+
+[[Category:Television shows set in London]]
+[[Category:BAFTA winners (television series)]]
+[[Category:Television series by Big Talk Productions]]
+[[Category:English-language television programming]]
