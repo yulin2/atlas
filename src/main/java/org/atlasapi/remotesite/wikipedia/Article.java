@@ -4,11 +4,11 @@ import org.joda.time.DateTime;
 
 public abstract class Article {
 
-    abstract DateTime getLastModified();
+    public abstract DateTime getLastModified();
 
-    abstract String getMediaWikiSource();
+    public abstract String getMediaWikiSource();
 
-    abstract String getTitle();
+    public abstract String getTitle();
 
     public String getUrl() {
         String safeTitle = getTitle().replaceAll(" ", "_")

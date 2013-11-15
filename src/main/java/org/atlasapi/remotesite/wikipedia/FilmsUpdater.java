@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.wikipedia;
 
+import org.atlasapi.remotesite.wikipedia.film.FilmExtractor;
+import org.atlasapi.remotesite.wikipedia.film.FilmArticleTitleSource;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
@@ -8,6 +10,10 @@ import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.remotesite.wikipedia.Article;
+import org.atlasapi.remotesite.wikipedia.ArticleFetcher;
+import org.atlasapi.remotesite.wikipedia.film.FilmArticleTitleSource;
+import org.atlasapi.remotesite.wikipedia.film.FilmExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
