@@ -9,15 +9,11 @@ import de.fau.cs.osr.ptk.common.ast.NodeList;
 import de.fau.cs.osr.ptk.common.ast.Text;
 import java.io.IOException;
 import java.util.Iterator;
-import org.sweble.wikitext.lazy.LazyParser;
-import org.sweble.wikitext.lazy.LazyPreprocessor;
-import org.sweble.wikitext.lazy.ParserConfigInterface;
 import org.sweble.wikitext.lazy.parser.InternalLink;
 import org.sweble.wikitext.lazy.parser.LazyParsedPage;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
 import org.sweble.wikitext.lazy.preprocessor.Template;
 import org.sweble.wikitext.lazy.preprocessor.TemplateArgument;
-import org.sweble.wikitext.lazy.utils.SimpleParserConfig;
 import xtc.parser.ParseException;
 
 /**
@@ -25,15 +21,11 @@ import xtc.parser.ParseException;
  */
 public final class FilmInfoboxScraper {
 
-    private static final ParserConfigInterface cfg = new SimpleParserConfig();
-    private static final LazyParser parser = new LazyParser(cfg);
-    private static final LazyPreprocessor preprocessor = new LazyPreprocessor(cfg);
-
     /**
      * Returns the key/value arguments given to the Film infobox template in the given Mediawiki page source. 
      */
     public static ListMultimap<String, String> getInfoboxAttrs(String articleText) throws IOException, ParseException {
-        LazyPreprocessedPage ast = (LazyPreprocessedPage) preprocessor.parseArticle(articleText, "");
+        LazyPreprocessedPage ast = SwebleHelper.preprocess(articleText, false);
 
         InfoboxVisitor v = new InfoboxVisitor();
         Iterator<AstNode> topLevelEls = ast.getContent().iterator();
@@ -74,7 +66,7 @@ public final class FilmInfoboxScraper {
             TemplateArgument a = (TemplateArgument) n;
 
             final String key = SwebleHelper.flattenTextNodeList(a.getName());
-            AstNode value = parser.parseArticle(SwebleHelper.flattenTextNodeList(a.getValue()), "");
+            AstNode value = SwebleHelper.parse(SwebleHelper.flattenTextNodeList(a.getValue()));
             new InfoboxIndividualValueExtractor(new Function<String, Void>() {
                 @Override
                 public Void apply(String f) {
