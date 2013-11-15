@@ -4,10 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
+import org.atlasapi.remotesite.channel4.pmlsd.epg.ContentHierarchyAndBroadcast;
 import org.atlasapi.remotesite.pa.PaBaseProgrammeUpdater.PaChannelData;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
@@ -17,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableMap.Builder;
 
 public class PaChannelProcessor {
@@ -26,12 +29,15 @@ public class PaChannelProcessor {
     private final BroadcastTrimmer trimmer;
     private final ScheduleWriter scheduleWriter;
     private final PaScheduleVersionStore scheduleVersionStore;
+    private final ContentBuffer contentStore;
 
-    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter, PaScheduleVersionStore scheduleVersionStore) {
+    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter, 
+            PaScheduleVersionStore scheduleVersionStore, ContentBuffer contentStore) {
         this.processor = processor;
         this.trimmer = trimmer;
         this.scheduleWriter = scheduleWriter;
         this.scheduleVersionStore = scheduleVersionStore;
+        this.contentStore = contentStore;
     }
 
     public int process(PaChannelData channelData, Set<String> currentlyProcessing) {
@@ -44,10 +50,13 @@ public class PaChannelProcessor {
                 String programmeLock = lockIdentifier(programme);
                 lock(currentlyProcessing, programmeLock);
                 try {
-                    ItemRefAndBroadcast itemAndBroadcast = processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
-                    if(itemAndBroadcast != null) {
-	                    broadcasts.add(itemAndBroadcast);
-	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
+                    
+                    ContentHierarchyAndBroadcast hierarchy = processor.process(programme, channel, 
+                            channelData.zone(), channelData.lastUpdated());
+                    if(hierarchy != null) {
+                        contentStore.add(hierarchy);
+	                    broadcasts.add(new ItemRefAndBroadcast(hierarchy.getItem(), hierarchy.getBroadcast()));
+	                    acceptableBroadcastIds.put(hierarchy.getBroadcast().getSourceId(), hierarchy.getItem().getCanonicalUri());
                     }
                     scheduleVersionStore.store(channel, channelData.scheduleDay(), channelData.version());
                     processed++;
@@ -57,6 +66,7 @@ public class PaChannelProcessor {
                     unlock(currentlyProcessing, programmeLock);
                 }
             }
+            
             if (trimmer != null) {
                 trimmer.trimBroadcasts(channelData.schedulePeriod(), channel, acceptableBroadcastIds.build());
             }
@@ -65,6 +75,8 @@ public class PaChannelProcessor {
         } catch (Exception e) {
             //TODO: should we just throw e?
             log.error(String.format("Error processing channel %s", channel.getKey()));
+        } finally {
+            contentStore.flush();
         }
         return processed;
     }
