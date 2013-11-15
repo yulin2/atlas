@@ -1,23 +1,33 @@
 package org.atlasapi.remotesite.wikipedia;
 
-import de.fau.cs.osr.ptk.common.ast.AstNode;
-import de.fau.cs.osr.ptk.common.ast.NodeList;
-import de.fau.cs.osr.ptk.common.ast.Text;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+
+import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sweble.wikitext.lazy.LazyParser;
 import org.sweble.wikitext.lazy.LazyPreprocessor;
 import org.sweble.wikitext.lazy.ParserConfigInterface;
 import org.sweble.wikitext.lazy.parser.LazyParsedPage;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
+import org.sweble.wikitext.lazy.preprocessor.Template;
+import org.sweble.wikitext.lazy.preprocessor.TemplateArgument;
+import org.sweble.wikitext.lazy.utils.RtWikitextPrinter;
 import org.sweble.wikitext.lazy.utils.SimpleParserConfig;
+
 import xtc.parser.ParseException;
+import de.fau.cs.osr.ptk.common.AstVisitor;
+import de.fau.cs.osr.ptk.common.ast.AstNode;
+import de.fau.cs.osr.ptk.common.ast.NodeList;
+import de.fau.cs.osr.ptk.common.ast.Text;
 
 /**
- * Contains helper methods for dealing with the SWEBLE wikitext parser and its AST output.
+ * Contains helper methods for dealing with the SWEBLE wikitext parser ({@link org.sweble.wikitext.lazy}) and its AST output.
  */
 public class SwebleHelper {
+    private static final Logger log = LoggerFactory.getLogger(SwebleHelper.class);
     private static final ParserConfigInterface cfg = new SimpleParserConfig();
     private static final LazyParser parser = new LazyParser(cfg);
     private static final LazyPreprocessor preprocessor = new LazyPreprocessor(cfg);
@@ -28,8 +38,12 @@ public class SwebleHelper {
      * @see #parse(java.lang.String)
      * @see <a href="http://sweble.org/downloads/diwp-preprint.pdf">SWEBLE spec pdf</a>
      */
-    public static LazyPreprocessedPage preprocess(String mediaWikiSource, boolean includeOnly) throws IOException, ParseException {
-        return (LazyPreprocessedPage) preprocessor.parseArticle(mediaWikiSource, "", includeOnly);
+    public static LazyPreprocessedPage preprocess(String mediaWikiSource, boolean includeOnly) {
+        try {
+            return (LazyPreprocessedPage) preprocessor.parseArticle(mediaWikiSource, "", includeOnly);
+        } catch (IOException|ParseException ex) {
+            throw new RuntimeException(ex);
+        }
     }
     
     /**
@@ -37,8 +51,12 @@ public class SwebleHelper {
      * @see #preprocess(java.lang.String, boolean)
      * @see <a href="http://sweble.org/downloads/diwp-preprint.pdf">SWEBLE spec pdf</a>
      */
-    public static LazyParsedPage parse(String mediaWikiSource) throws IOException, ParseException {
-        return (LazyParsedPage) parser.parseArticle(mediaWikiSource, "");
+    public static LazyParsedPage parse(String mediaWikiSource) {
+        try {
+            return (LazyParsedPage) parser.parseArticle(mediaWikiSource, "");
+        } catch (IOException|ParseException ex) {
+            throw new RuntimeException(ex);
+        }
     }
     
     /**
@@ -69,6 +87,13 @@ public class SwebleHelper {
     }
 
     /**
+     * Recovers the original source of the given AST portion.
+     */
+    public static String unparse(AstNode n) {
+        return RtWikitextPrinter.print(n);
+    }
+    
+    /**
      * Quick and dirty way to flatten a NodeList containing a bunch of Text nodes into a single string -- for instance, to process them with the other half of the parsing process (or some other form of interpretation) and get information out.
      * 
      * Watch out though, because any other, non-Text nodes will be ignored...
@@ -86,4 +111,52 @@ public class SwebleHelper {
         return b.toString().trim();
     }
     
+    /**
+     * Tries to interpret the given AST as a {@link LocalDate}. The AST should be of the preprocessed (not parsed) type, and should contain no other dubious content.
+     */
+    public static LocalDate extractDate(AstNode node) {
+        try {
+            Object result = new DateVisitor().go(node);
+            if (result != null && result instanceof LocalDate) {
+                return (LocalDate) result;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract date from node \""+ unparse(node) +"\"");
+        }
+        
+        return null;
+    }
+    
+    protected static class DateVisitor extends AstVisitor {
+        public LocalDate visit(NodeList l) {
+            for (AstNode n : l) {
+                Object result = go(n);
+                if (result != null && result instanceof LocalDate) {
+                    return (LocalDate) result;
+                }
+            }
+            return null;
+        }
+        public LocalDate visit(Template t) {
+            String name = SwebleHelper.flattenTextNodeList(t.getName());
+            if (! "Start date".equalsIgnoreCase(name) && ! "End date".equalsIgnoreCase(name)) {
+                return null;
+            }
+            try {
+                NodeList args = t.getArgs();
+                String y = flattenTextNodeList(((TemplateArgument) args.get(0)).getValue());
+                String m = flattenTextNodeList(((TemplateArgument) args.get(1)).getValue());
+                String d = flattenTextNodeList(((TemplateArgument) args.get(2)).getValue());
+                return new LocalDate(Integer.parseInt(y), Integer.parseInt(m), Integer.parseInt(d));
+            } catch (Exception e) {
+                log.warn("Failed to extract date from date template \""+ unparse(t) +"\"");
+            }
+            return null;
+        }
+        @Override
+        protected Object visitNotFound(AstNode node) {
+            return null;
+        }
+    };
+
 }

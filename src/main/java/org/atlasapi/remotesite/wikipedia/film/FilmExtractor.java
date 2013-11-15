@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.wikipedia;
+package org.atlasapi.remotesite.wikipedia.film;
 
 import com.google.common.collect.ListMultimap;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.wikipedia.Article;
 import xtc.parser.ParseException;
 
 /**
