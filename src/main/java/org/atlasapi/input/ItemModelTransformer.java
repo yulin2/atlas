@@ -7,6 +7,7 @@ import java.util.Set;
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
@@ -22,6 +23,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Sets;
@@ -51,11 +53,17 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
             item = film;
         } else if ("song".equals(type)) {
             item = createSong(inputItem);
+        } else if ("clip".equals(type)) {
+            item = createClip(inputItem);
         } else {
             item = new Item();
         }
         item.setLastUpdated(now);
         return setItemFields(item, inputItem, now);
+    }
+    
+    private Clip createClip(org.atlasapi.media.entity.simple.Item inputItem) {
+        return new Clip();
     }
 
     protected Item createSong(org.atlasapi.media.entity.simple.Item inputItem) {
@@ -66,7 +74,6 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         }
         return song;
     }
-    
 
     private Item createEpisode(org.atlasapi.media.entity.simple.Item inputItem) {
         Episode episode = new Episode();
