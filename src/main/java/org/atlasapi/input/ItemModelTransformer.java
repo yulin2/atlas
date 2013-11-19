@@ -22,6 +22,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Sets;
@@ -35,8 +36,8 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
 
     private final BroadcastModelTransformer broadcastTransformer;
     
-    public ItemModelTransformer(ContentResolver resolver, TopicStore topicStore, Clock clock) {
-        super(resolver, topicStore, clock);
+    public ItemModelTransformer(ContentResolver resolver, TopicStore topicStore, ClipModelTransformer clipsModelTransformer, Clock clock) {
+        super(resolver, topicStore, clipsModelTransformer, clock);
         this.broadcastTransformer = new BroadcastModelTransformer();
     }
 
@@ -66,7 +67,6 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         }
         return song;
     }
-    
 
     private Item createEpisode(org.atlasapi.media.entity.simple.Item inputItem) {
         Episode episode = new Episode();
