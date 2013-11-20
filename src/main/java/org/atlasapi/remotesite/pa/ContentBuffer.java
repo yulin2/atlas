@@ -15,6 +15,7 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.ContentHierarchyAndBroadcast;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -52,9 +53,9 @@ public class ContentBuffer implements ContentResolver {
     private final ItemsPeopleWriter peopleWriter;
     
     public ContentBuffer(ContentResolver contentResolver, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter) {
-        this.resolver = contentResolver;
-        this.writer = contentWriter;
-        this.peopleWriter = peopleWriter;
+        this.resolver = Preconditions.checkNotNull(contentResolver);
+        this.writer = Preconditions.checkNotNull(contentWriter);
+        this.peopleWriter = Preconditions.checkNotNull(peopleWriter);
     }
     
     public void add(ContentHierarchyAndBroadcast hierarchy) {
@@ -65,6 +66,7 @@ public class ContentBuffer implements ContentResolver {
             contentCache.get().put(hierarchy.getSeries().get().getCanonicalUri(), hierarchy.getSeries().get());
         }
         contentCache.get().put(hierarchy.getItem().getCanonicalUri(), hierarchy.getItem());
+        hierarchies.get().add(hierarchy);
     }
     
     public ResolvedContent findByCanonicalUris(Iterable<String> canonicalUris) {

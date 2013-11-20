@@ -4,23 +4,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
-import org.atlasapi.remotesite.channel4.pmlsd.epg.ContentHierarchyAndBroadcast;
 import org.atlasapi.remotesite.pa.PaBaseProgrammeUpdater.PaChannelData;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Sets;
 
 public class PaChannelProcessor {
 
@@ -29,21 +27,24 @@ public class PaChannelProcessor {
     private final BroadcastTrimmer trimmer;
     private final ScheduleWriter scheduleWriter;
     private final PaScheduleVersionStore scheduleVersionStore;
-    private final ContentBuffer contentStore;
+    private final ContentBuffer contentBuffer;
+    private final ContentWriter contentWriter;
 
     public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter, 
-            PaScheduleVersionStore scheduleVersionStore, ContentBuffer contentStore) {
+            PaScheduleVersionStore scheduleVersionStore, ContentBuffer contentBuffer, ContentWriter contentWriter) {
         this.processor = processor;
         this.trimmer = trimmer;
         this.scheduleWriter = scheduleWriter;
         this.scheduleVersionStore = scheduleVersionStore;
-        this.contentStore = contentStore;
+        this.contentBuffer = contentBuffer;
+        this.contentWriter = contentWriter;
     }
 
     public int process(PaChannelData channelData, Set<String> currentlyProcessing) {
         int processed = 0;
         Set<ItemRefAndBroadcast> broadcasts = new HashSet<ItemRefAndBroadcast>();
         Channel channel = channelData.channel();
+        Set<ContentHierarchyAndSummaries> hierarchiesAndSummaries = Sets.newHashSet();
         try {
             Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
             for (ProgData programme : channelData.programmes()) {
@@ -51,10 +52,11 @@ public class PaChannelProcessor {
                 lock(currentlyProcessing, programmeLock);
                 try {
                     
-                    ContentHierarchyAndBroadcast hierarchy = processor.process(programme, channel, 
+                    ContentHierarchyAndSummaries hierarchy = processor.process(programme, channel, 
                             channelData.zone(), channelData.lastUpdated());
                     if(hierarchy != null) {
-                        contentStore.add(hierarchy);
+                        contentBuffer.add(hierarchy);
+                        hierarchiesAndSummaries.add(hierarchy);
 	                    broadcasts.add(new ItemRefAndBroadcast(hierarchy.getItem(), hierarchy.getBroadcast()));
 	                    acceptableBroadcastIds.put(hierarchy.getBroadcast().getSourceId(), hierarchy.getItem().getCanonicalUri());
                     }
@@ -76,7 +78,15 @@ public class PaChannelProcessor {
             //TODO: should we just throw e?
             log.error(String.format("Error processing channel %s", channel.getKey()));
         } finally {
-            contentStore.flush();
+            contentBuffer.flush();
+            for (ContentHierarchyAndSummaries hierarchy : hierarchiesAndSummaries) {
+                if (hierarchy.getBrandSummary().isPresent()) {
+                    contentWriter.createOrUpdate(hierarchy.getBrandSummary().get());
+                }
+                if (hierarchy.getSeriesSummary().isPresent()) {
+                    contentWriter.createOrUpdate(hierarchy.getSeriesSummary().get());
+                }
+            }
         }
         return processed;
     }

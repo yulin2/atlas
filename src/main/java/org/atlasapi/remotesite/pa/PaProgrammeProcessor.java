@@ -99,20 +99,21 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
 
     @Override
-    public ContentHierarchyAndBroadcast process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
+    public ContentHierarchyAndSummaries process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         try {
             if (! Strings.isNullOrEmpty(progData.getSeriesId()) && IGNORED_BRANDS.contains(progData.getSeriesId())) {
                 return null;
             }
+            
+            Brand brandSummary = null;
+            Series seriesSummary = null;
 
             Optional<Brand> possibleBrand = getBrand(progData, channel, updatedAt);
             if (possibleBrand.isPresent()) {
                 Brand originalBrand = possibleBrand.get();
                 if (hasBrandSummary(progData)) {
-                    Brand summaryBrand = extractSummaryBrand(progData, originalBrand.getCanonicalUri(), updatedAt);
-                    summaryBrand.setEquivalentTo(ImmutableSet.of(LookupRef.from(originalBrand)));
-
-                    contentWriter.createOrUpdate(summaryBrand);
+                    brandSummary = extractSummaryBrand(progData, originalBrand.getCanonicalUri(), updatedAt);
+                    brandSummary.setEquivalentTo(ImmutableSet.of(LookupRef.from(originalBrand)));
                 }
             }
 
@@ -120,10 +121,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             if (possibleSeries.isPresent()) {
                 Series originalSeries = possibleSeries.get();
                 if (hasSeriesSummary(progData)) {
-                    Series summarySeries = extractSummarySeries(progData, originalSeries.getCanonicalUri(), updatedAt);
-                    summarySeries.setEquivalentTo(ImmutableSet.of(LookupRef.from(originalSeries)));
-
-                    contentWriter.createOrUpdate(summarySeries);
+                    seriesSummary = extractSummarySeries(progData, originalSeries.getCanonicalUri(), updatedAt);
+                    seriesSummary.setEquivalentTo(ImmutableSet.of(LookupRef.from(originalSeries)));
                 }
             }
 
@@ -136,7 +135,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         	item.setGenericDescription(isGenericDescription(progData));
             item.setLastUpdated(updatedAt.toDateTimeUTC());
             
-            return new ContentHierarchyAndBroadcast(possibleBrand, possibleSeries, item, itemAndBroadcast.getBroadcast().requireValue());
+            return new ContentHierarchyAndSummaries(possibleBrand, possibleSeries, item, itemAndBroadcast.getBroadcast().requireValue(), 
+                    Optional.fromNullable(brandSummary), Optional.fromNullable(seriesSummary));
         } catch (Exception e) {
         	e.printStackTrace();
         	log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));

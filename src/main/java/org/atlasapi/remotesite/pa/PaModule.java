@@ -46,6 +46,7 @@ import org.atlasapi.s3.S3Client;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,7 +72,7 @@ public class PaModule {
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
-    private @Autowired ContentResolver contentResolver;
+    private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired PeopleResolver personResolver;
@@ -152,20 +153,22 @@ public class PaModule {
     
     @Bean PaCompleteUpdater paCompleteUpdater() {
         PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), scheduleWriter, paScheduleVersionStore(), contentBuffer());
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), 
+                scheduleWriter, paScheduleVersionStore(), contentBuffer(), contentWriter);
         ExecutorService executor = Executors.newFixedThreadPool(contentUpdaterThreadCount, new ThreadFactoryBuilder().setNameFormat("pa-complete-updater-%s").build());
         PaCompleteUpdater updater = new PaCompleteUpdater(executor, channelProcessor, paProgrammeDataStore(), channelResolver);
         return updater;
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, paScheduleVersionStore(), contentBuffer());
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), 
+                scheduleWriter, paScheduleVersionStore(), contentBuffer(), contentWriter);
         ExecutorService executor = Executors.newFixedThreadPool(contentUpdaterThreadCount, new ThreadFactoryBuilder().setNameFormat("pa-recent-updater-%s").build());
         PaRecentUpdater updater = new PaRecentUpdater(executor, channelProcessor, paProgrammeDataStore(), channelResolver, fileUploadResultStore(), paScheduleVersionStore());
         return updater;
     }
     
-    @Bean ContentBuffer contentBuffer() {
+    @Bean @Qualifier("PaContentBuffer") ContentBuffer contentBuffer() {
         return new ContentBuffer(contentResolver, contentWriter, peopleWriter);
     }
     
@@ -178,8 +181,10 @@ public class PaModule {
     }
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, paScheduleVersionStore(), contentBuffer());
-        return new PaSingleDateUpdatingController(channelProcessor, scheduleResolver, channelResolver, paProgrammeDataStore());
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), 
+                scheduleWriter, paScheduleVersionStore(), contentBuffer(), contentWriter);
+        return new PaSingleDateUpdatingController(channelProcessor, scheduleResolver, channelResolver, 
+                paProgrammeDataStore());
     }
     
     public @Bean PaScheduleVersionStore paScheduleVersionStore() {
