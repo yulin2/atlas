@@ -1,16 +1,17 @@
 package org.atlasapi.input;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.io.StringReader;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.TopicRef.Relationship;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.TopicRef;
@@ -27,11 +28,7 @@ public class GsonDescriptionReaderTest {
 
     @Test
     public void test() throws Exception {
-        Item item1 = new Item("http://example.org/1");
-        Item item2 = new Item("http://example.org/2");
-        Item testItem = ItemTestDataBuilder.item()
-                .withClips(item1, item2)
-                .build();
+        Item testItem = ItemTestDataBuilder.item().build();
         TopicRef topicRef = new TopicRef();
         topicRef.setRelationship("about");
         testItem.setTopics(ImmutableSet.of(topicRef));
@@ -52,8 +49,6 @@ public class GsonDescriptionReaderTest {
         assertThat(desc.getUri(), is(testItem.getUri()));
         assertThat(desc.getTitle(), is(testItem.getTitle()));
         assertThat(desc.getTopics().isEmpty(), is(false));
-        assertEquals(2, desc.getClips().size());
-        assertTrue(desc.getClips().containsAll(ImmutableSet.of(item1, item2)));
         
     }
 

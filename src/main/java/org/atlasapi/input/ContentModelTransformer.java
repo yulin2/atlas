@@ -10,7 +10,6 @@ import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
-import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.KeyPhrase;
@@ -44,14 +43,12 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
     private final ContentResolver resolver;
     private final TopicStore topicStore;
     protected final Clock clock;
-    private final ItemModelTransformer clipsModelTransformer;
 
     public ContentModelTransformer(ContentResolver resolver, TopicStore topicStore, Clock clock) {
         super(clock);
         this.resolver = resolver;
         this.topicStore = topicStore;
         this.clock = clock;
-        this.clipsModelTransformer = new ItemModelTransformer(resolver, topicStore, clock);
     }
     
     @Override
@@ -66,20 +63,9 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         result.setTopicRefs(topicRefs(inputContent.getTopics()));
         result.setKeyPhrases(keyPhrases(inputContent.getKeyPhrases(), inputContent.getPublisher()));
         result.setGenres(inputContent.getGenres());
-        result.setClips(transformClips(inputContent));
         return result;
     }
 
-    private Iterable<Clip> transformClips(Description inputContent) {
-        List<Clip> clips = Lists.newArrayListWithCapacity(inputContent.getClips().size());
-        for (org.atlasapi.media.entity.simple.Item inputClip : inputContent.getClips()) {
-            Clip clip = (Clip) this.clipsModelTransformer.transform(inputClip);
-            clip.setClipOf(inputContent.getUri());
-            clips.add(clip);
-        }
-        return clips;
-    }
-    
     private Iterable<KeyPhrase> keyPhrases(Iterable<org.atlasapi.media.entity.simple.KeyPhrase> keyPhrases, final PublisherDetails contentPublisher) {
         return ImmutableList.copyOf(Iterables.transform(keyPhrases, new Function<org.atlasapi.media.entity.simple.KeyPhrase, KeyPhrase>() {
 
@@ -197,4 +183,5 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         member.setCurie(person.getCurie());
         return member;
     }
+
 }
