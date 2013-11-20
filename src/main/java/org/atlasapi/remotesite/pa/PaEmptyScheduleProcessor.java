@@ -30,7 +30,7 @@ public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
     }
 
     @Override
-    public ContentHierarchyAndBroadcast process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
+    public ContentHierarchyAndSummaries process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         if (emptySlot(progData, channel, zone)) {
             return delegate.process(progData, channel, zone, updatedAt);
         }
