@@ -50,9 +50,12 @@ public class BbcNitroModule {
 
     private @Value("${updaters.bbcnitro.enabled}") Boolean tasksEnabled;
     private @Value("${bbc.nitro.host}") String nitroHost;
+    private @Value("${bbc.nitro.root}") String nitroRoot;
     private @Value("${bbc.nitro.apiKey}") String nitroApiKey;
     private @Value("${bbc.nitro.requestsPerSecond}") Integer nitroRateLimit;
-    private @Value("${bbc.nitro.threadCount}") Integer nitroThreadCount;
+    private @Value("${bbc.nitro.threadCount.today}") Integer nitroTodayThreadCount;
+    private @Value("${bbc.nitro.threadCount.fortnight}") Integer nitroFortnightThreadCount;
+    private @Value("${bbc.nitro.requestPageSize}") Integer nitroRequestPageSize;
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
@@ -67,16 +70,16 @@ public class BbcNitroModule {
     @PostConstruct
     public void configure() {
         if (tasksEnabled) {
-            scheduler.schedule(nitroScheduleUpdateTask(7, 7).withName("Nitro 15 day updater"),
-                    RepetitionRules.every(Duration.standardHours(2)));
-            scheduler.schedule(nitroScheduleUpdateTask(0, 0).withName("Nitro today updater"),
-                    RepetitionRules.every(Duration.standardMinutes(10)));
+            scheduler.schedule(nitroScheduleUpdateTask(7, 7, nitroFortnightThreadCount)
+                .withName("Nitro 15 day updater"), RepetitionRules.every(Duration.standardHours(2)));
+            scheduler.schedule(nitroScheduleUpdateTask(0, 0, nitroTodayThreadCount)
+                .withName("Nitro today updater"), RepetitionRules.every(Duration.standardMinutes(10)));
         }
     }
 
-    private ScheduledTask nitroScheduleUpdateTask(int back, int forward) {
+    private ScheduledTask nitroScheduleUpdateTask(int back, int forward, Integer threadCount) {
         DayRangeChannelDaySupplier drcds = new DayRangeChannelDaySupplier(bbcChannelSupplier(), dayRangeSupplier(back, forward));
-        ExecutorService executor = Executors.newFixedThreadPool(nitroThreadCount, nitroThreadFactory);
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount, nitroThreadFactory);
         return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor());
     }
     
@@ -98,7 +101,8 @@ public class BbcNitroModule {
             return UnconfiguredGlycerin.get();
         }
         Builder glycerin = XmlGlycerin.builder(nitroApiKey)
-                .withHost(HostSpecifier.fromValid(nitroHost));
+                .withHost(HostSpecifier.fromValid(nitroHost))
+                .withRootResource(nitroRoot);
         if (nitroRateLimit != null) {
             glycerin.withLimiter(RateLimiter.create(nitroRateLimit));
         }
@@ -116,9 +120,13 @@ public class BbcNitroModule {
 
     @Bean
     NitroBroadcastHandler<ImmutableList<Optional<ItemRefAndBroadcast>>> nitroBroadcastHandler() {
-        SystemClock clock = new SystemClock();
         return new ContentUpdatingNitroBroadcastHandler(contentResolver, contentWriter, 
-                new GlycerinNitroContentAdapter(glycerin(), nitroClient(), clock), clock, GroupLock.<String>natural());
+                nitroContentAdapter(), new SystemClock(), GroupLock.<String>natural());
+    }
+
+    @Bean
+    GlycerinNitroContentAdapter nitroContentAdapter() {
+        return new GlycerinNitroContentAdapter(glycerin(), nitroClient(), new SystemClock(), nitroRequestPageSize);
     }
 
     private Supplier<Range<LocalDate>> dayRangeSupplier(int back, int forward) {
