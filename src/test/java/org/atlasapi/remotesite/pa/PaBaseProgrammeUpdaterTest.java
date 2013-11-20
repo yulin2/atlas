@@ -8,6 +8,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelQuery;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
@@ -269,6 +270,11 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
         @Override
         public Maybe<Channel> forAlias(String alias) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Iterable<Channel> allChannels(ChannelQuery query) {
             throw new UnsupportedOperationException();
         }
     	

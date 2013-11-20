@@ -3,7 +3,6 @@ package org.atlasapi.query.v2;
 import static com.google.common.collect.Iterables.transform;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelQuery;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -19,8 +19,6 @@ import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.query.v2.ChannelFilterer.ChannelFilter;
-import org.atlasapi.query.v2.ChannelFilterer.ChannelFilter.ChannelFilterBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,9 +71,8 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
     private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(100).withDefaultLimit(10);
     private static final Splitter CSV_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
     private static final String TITLE = "title";
-    private static final Object TITLE_REVERSE = "title.reverse";
+    private static final String TITLE_REVERSE = "title.reverse";
 
-    private final ChannelFilterer filterer = new ChannelFilterer();
     private final NumberToShortStringCodec codec;
     private final QueryParameterAnnotationsExtractor annotationExtractor;
     private final ChannelResolver channelResolver;
@@ -99,9 +96,12 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
             final ApplicationConfiguration appConfig = appConfig(request); 
             
             Selection selection = SELECTION_BUILDER.build(request);
-
-            List<Channel> channels = filterer.filter(channelResolver.all(), constructFilter(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey));
             
+            ChannelQuery query = constructQuery(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey);
+            
+            Iterable<Channel> channels = channelResolver.allChannels(query);
+
+            // TODO This is expensive!
             Optional<Ordering<Channel>> ordering = ordering(orderBy);
             if (ordering.isPresent()) {
                 channels = ordering.get().immutableSortedCopy(channels);
@@ -126,7 +126,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
     }
-    
+
     @RequestMapping(value={"/3.0/channels/{id}.*", "/channels/{id}.*"})
     public void listChannel(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("id") String id) throws IOException {
@@ -156,6 +156,30 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
         return validAnnotations.containsAll(annotations);
     }
     
+    private ChannelQuery constructQuery(String platformId, String regionIds,
+            String broadcasterKey, String mediaTypeKey, String availableFromKey) {
+        ChannelQuery.Builder query = ChannelQuery.builder();
+        
+        Set<Long> channelGroups = getChannelGroups(platformId, regionIds);
+        if (!channelGroups.isEmpty()) {
+            query.withChannelGroups(channelGroups);
+        }
+        
+        if (!Strings.isNullOrEmpty(broadcasterKey)) {
+            query.withBroadcaster(Publisher.fromKey(broadcasterKey).requireValue());
+        }
+        
+        if (!Strings.isNullOrEmpty(mediaTypeKey)) {
+            query.withMediaType(MediaType.valueOf(mediaTypeKey.toUpperCase()));
+        }
+        
+        if (!Strings.isNullOrEmpty(availableFromKey)) {
+            query.withAvailableFrom(Publisher.fromKey(availableFromKey).requireValue());
+        }
+        
+        return query.build();
+    }
+    
     private Optional<Ordering<Channel>> ordering(String orderBy) {
         if (!Strings.isNullOrEmpty(orderBy)) {
             if (orderBy.equals(TITLE)) {
@@ -174,29 +198,6 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
             return input.getTitle();
         }
     };
-    
-    private ChannelFilter constructFilter(String platformId, String regionIds, String broadcasterKey, String mediaTypeKey, String availableFromKey) {
-        ChannelFilterBuilder filter = ChannelFilter.builder();
-        
-        Set<Long> channelGroups = getChannelGroups(platformId, regionIds);
-        if (!channelGroups.isEmpty()) {
-            filter.withChannelGroups(channelGroups);
-        }
-        
-        if (!Strings.isNullOrEmpty(broadcasterKey)) {
-            filter.withBroadcaster(Publisher.fromKey(broadcasterKey).requireValue());
-        }
-        
-        if (!Strings.isNullOrEmpty(mediaTypeKey)) {
-            filter.withMediaType(MediaType.valueOf(mediaTypeKey.toUpperCase()));
-        }
-        
-        if (!Strings.isNullOrEmpty(availableFromKey)) {
-            filter.withAvailableFrom(Publisher.fromKey(availableFromKey).requireValue());
-        }
-        
-        return filter.build();
-    }
 
     private Set<Long> getChannelGroups(String platformId, String regionIds) {
         Builder<Long> channelGroups = ImmutableSet.builder();
