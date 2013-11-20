@@ -138,8 +138,6 @@ public class ContentWriteController {
         existing.setTopicRefs(merge ? merge(existing.getTopicRefs(), update.getTopicRefs()) : update.getTopicRefs());
         existing.setPeople(merge ? merge(existing.people(), update.people()) : update.people());
         existing.setKeyPhrases(update.getKeyPhrases());
-        existing.setClips(merge ? merge(existing.getClips(), update.getClips()) : update.getClips());
-
         if (existing instanceof Item && update instanceof Item) {
             return mergeItems((Item)existing, (Item) update);
         }
