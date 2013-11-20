@@ -6,18 +6,19 @@ import java.util.Set;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.pa.PaBaseProgrammeUpdater.PaChannelData;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Sets;
 
 public class PaChannelProcessor {
 
@@ -26,28 +27,38 @@ public class PaChannelProcessor {
     private final BroadcastTrimmer trimmer;
     private final ScheduleWriter scheduleWriter;
     private final PaScheduleVersionStore scheduleVersionStore;
+    private final ContentBuffer contentBuffer;
+    private final ContentWriter contentWriter;
 
-    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter, PaScheduleVersionStore scheduleVersionStore) {
+    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter, 
+            PaScheduleVersionStore scheduleVersionStore, ContentBuffer contentBuffer, ContentWriter contentWriter) {
         this.processor = processor;
         this.trimmer = trimmer;
         this.scheduleWriter = scheduleWriter;
         this.scheduleVersionStore = scheduleVersionStore;
+        this.contentBuffer = contentBuffer;
+        this.contentWriter = contentWriter;
     }
 
     public int process(PaChannelData channelData, Set<String> currentlyProcessing) {
         int processed = 0;
         Set<ItemRefAndBroadcast> broadcasts = new HashSet<ItemRefAndBroadcast>();
         Channel channel = channelData.channel();
+        Set<ContentHierarchyAndSummaries> hierarchiesAndSummaries = Sets.newHashSet();
         try {
             Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
             for (ProgData programme : channelData.programmes()) {
                 String programmeLock = lockIdentifier(programme);
                 lock(currentlyProcessing, programmeLock);
                 try {
-                    ItemRefAndBroadcast itemAndBroadcast = processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
-                    if(itemAndBroadcast != null) {
-	                    broadcasts.add(itemAndBroadcast);
-	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
+                    
+                    ContentHierarchyAndSummaries hierarchy = processor.process(programme, channel, 
+                            channelData.zone(), channelData.lastUpdated());
+                    if(hierarchy != null) {
+                        contentBuffer.add(hierarchy);
+                        hierarchiesAndSummaries.add(hierarchy);
+	                    broadcasts.add(new ItemRefAndBroadcast(hierarchy.getItem(), hierarchy.getBroadcast()));
+	                    acceptableBroadcastIds.put(hierarchy.getBroadcast().getSourceId(), hierarchy.getItem().getCanonicalUri());
                     }
                     scheduleVersionStore.store(channel, channelData.scheduleDay(), channelData.version());
                     processed++;
@@ -57,6 +68,7 @@ public class PaChannelProcessor {
                     unlock(currentlyProcessing, programmeLock);
                 }
             }
+            
             if (trimmer != null) {
                 trimmer.trimBroadcasts(channelData.schedulePeriod(), channel, acceptableBroadcastIds.build());
             }
@@ -65,6 +77,16 @@ public class PaChannelProcessor {
         } catch (Exception e) {
             //TODO: should we just throw e?
             log.error(String.format("Error processing channel %s", channel.getKey()));
+        } finally {
+            contentBuffer.flush();
+            for (ContentHierarchyAndSummaries hierarchy : hierarchiesAndSummaries) {
+                if (hierarchy.getBrandSummary().isPresent()) {
+                    contentWriter.createOrUpdate(hierarchy.getBrandSummary().get());
+                }
+                if (hierarchy.getSeriesSummary().isPresent()) {
+                    contentWriter.createOrUpdate(hierarchy.getSeriesSummary().get());
+                }
+            }
         }
         return processed;
     }

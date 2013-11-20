@@ -76,7 +76,7 @@ public class PaProgrammeProcessorTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         
-        progProcessor = new PaProgrammeProcessor(contentWriter, contentResolver, itemsPeopleWriter, log);
+        progProcessor = new PaProgrammeProcessor(contentWriter, contentResolver, log);
     }
     
     @Test 

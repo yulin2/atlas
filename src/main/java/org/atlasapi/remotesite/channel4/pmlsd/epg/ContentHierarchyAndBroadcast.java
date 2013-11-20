@@ -27,8 +27,8 @@ public class ContentHierarchyAndBroadcast {
             Optional<Series> series,
             Item item,
             Broadcast broadcast) {
-        this.brand = brand;
-        this.series = series;
+        this.brand = checkNotNull(brand);
+        this.series = checkNotNull(series);
         this.item = checkNotNull(item);
         this.broadcast = checkNotNull(broadcast);
     }

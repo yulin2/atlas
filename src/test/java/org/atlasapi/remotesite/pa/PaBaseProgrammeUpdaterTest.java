@@ -73,6 +73,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 	private MongoScheduleStore scheduleWriter;
 
 	private ChannelResolver channelResolver;
+	private ContentBuffer contentBuffer;
 
     @Override
     @Before
@@ -84,9 +85,10 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         
         channelResolver = new DummyChannelResolver();
         contentWriter = new MongoContentWriter(db, lookupStore, clock);
-        programmeProcessor = new PaProgrammeProcessor(contentWriter, resolver, new DummyItemsPeopleWriter(), log);
+        programmeProcessor = new PaProgrammeProcessor(contentWriter, resolver, log);
         EquivalentContentResolver equivContentResolver = context.mock(EquivalentContentResolver.class);
         scheduleWriter = new MongoScheduleStore(db, resolver, channelResolver, equivContentResolver);
+        contentBuffer = new ContentBuffer(resolver, contentWriter, new DummyItemsPeopleWriter());
     }
 
     @Test
@@ -109,7 +111,8 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         
         TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(
                 new File(Resources.getResource("20110115_tvdata.xml").getFile()), 
-                new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())), null, scheduleVersionStore);
+                new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())), null, scheduleVersionStore,
+                contentBuffer, contentWriter);
         updater.run();
         Identified content = null;
 
@@ -187,7 +190,16 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
             oneOf (trimmer).trimBroadcasts(firstFileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118471", "http://pressassociation.com/episodes/1424497"));
         }});
         
-        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), trimmer, null);
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(
+                programmeProcessor, 
+                channelResolver, 
+                log, 
+                scheduleWriter, 
+                ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), 
+                trimmer, 
+                null,
+                contentBuffer,
+                contentWriter);
         updater.run();
     }
 
@@ -200,7 +212,16 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
             oneOf (trimmer).trimBroadcasts(fileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118472", "http://pressassociation.com/episodes/1424497"));
         }});
         
-        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())), trimmer, null);
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(
+                programmeProcessor, 
+                channelResolver, 
+                log, 
+                scheduleWriter, 
+                ImmutableList.of(new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())), 
+                trimmer,
+                null,
+                contentBuffer,
+                contentWriter);
         updater.run();
     }    
 
@@ -212,8 +233,12 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
         private List<File> files;
 
-        public TestPaProgrammeUpdater(PaProgDataProcessor processor, ChannelResolver channelResolver, AdapterLog log, MongoScheduleStore scheduleWriter, List<File> files, BroadcastTrimmer trimmer, PaScheduleVersionStore scheduleVersionStore) {
-            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, trimmer, scheduleWriter, scheduleVersionStore), new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver, Optional.fromNullable(scheduleVersionStore));
+        public TestPaProgrammeUpdater(PaProgDataProcessor processor, ChannelResolver channelResolver, AdapterLog log, 
+                MongoScheduleStore scheduleWriter, List<File> files, BroadcastTrimmer trimmer, 
+                PaScheduleVersionStore scheduleVersionStore, ContentBuffer contentBuffer, ContentWriter contentWriter) {
+            
+            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, trimmer, scheduleWriter, scheduleVersionStore, contentBuffer, contentWriter), 
+                    new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver, Optional.fromNullable(scheduleVersionStore));
             this.files = files;
         }
 
