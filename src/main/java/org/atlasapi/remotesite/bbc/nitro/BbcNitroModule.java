@@ -73,7 +73,7 @@ public class BbcNitroModule {
             scheduler.schedule(nitroScheduleUpdateTask(7, 7, nitroFortnightThreadCount)
                 .withName("Nitro 15 day updater"), RepetitionRules.every(Duration.standardHours(2)));
             scheduler.schedule(nitroScheduleUpdateTask(0, 0, nitroTodayThreadCount)
-                .withName("Nitro today updater"), RepetitionRules.every(Duration.standardMinutes(10)));
+                .withName("Nitro today updater"), RepetitionRules.every(Duration.standardMinutes(30)));
         }
     }
 
