@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.pa;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,9 +55,9 @@ public class ContentBuffer implements ContentResolver {
     private final ItemsPeopleWriter peopleWriter;
     
     public ContentBuffer(ContentResolver contentResolver, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter) {
-        this.resolver = Preconditions.checkNotNull(contentResolver);
-        this.writer = Preconditions.checkNotNull(contentWriter);
-        this.peopleWriter = Preconditions.checkNotNull(peopleWriter);
+        this.resolver = checkNotNull(contentResolver);
+        this.writer = checkNotNull(contentWriter);
+        this.peopleWriter = checkNotNull(peopleWriter);
     }
     
     public void add(ContentHierarchyAndBroadcast hierarchy) {

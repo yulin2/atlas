@@ -1,13 +1,13 @@
 package org.atlasapi.remotesite.itv.whatson;
-
-import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
 import java.util.List;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
+
+import org.slf4j.Logger;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.joda.time.LocalDate;
+import org.slf4j.LoggerFactory;
 
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DayRange;
 import com.metabroadcast.common.time.DayRangeGenerator;
@@ -19,43 +19,35 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
     private final ItvWhatsOnEntryProcessor processor;
     private final int lookAhead;
     private final int lookBack;
-    private final AdapterLog log;
     private Clock clock;
+    private final Logger log = LoggerFactory.getLogger(getClass());
     
     private ItvWhatsOnUpdater(String feedUrl, 
             RemoteSiteClient<List<ItvWhatsOnEntry>> itvWhatsOnClient, 
             ItvWhatsOnEntryProcessor processor, 
             int lookAhead,
             int lookBack, 
-            AdapterLog log,
             Clock clock) {
         this.feedUrl = feedUrl;
         this.itvWhatsOnClient = itvWhatsOnClient;
         this.processor = processor;
         this.lookBack = lookBack;
         this.lookAhead = lookAhead;
-        this.log = log;
         this.clock = clock;
     }
     
-    private String getFeedForDate(LocalDate date) {
-        return feedUrl + date.toString("YYYY/MM/dd");
-    }
-    
-    private List<ItvWhatsOnEntry> getFeed(String uri) {
-        try {
-            return itvWhatsOnClient.get(uri);
-        } catch (Exception e) {
-            log.record(new AdapterLogEntry(ERROR).withCause(e).withSource(getClass()).withDescription("Exception fetching feed at " + uri));
-            return null;
-        }
-    }
-
-    public void ingestFeedFor(LocalDate date) {
-        List<ItvWhatsOnEntry> entries = getFeed(getFeedForDate(date));
+    public UpdateProgress ingestFeedEntries(List<ItvWhatsOnEntry> entries) {
+        UpdateProgress progress = UpdateProgress.START;
         for (ItvWhatsOnEntry entry : entries) {
-            processor.createOrUpdateAtlasEntityFrom(entry);
+            try {
+                processor.createOrUpdateAtlasEntityFrom(entry);
+                progress = progress.reduce(UpdateProgress.SUCCESS);
+            } catch (Exception e) {
+               log.error("Error processing item '" + entry.getProgrammeTitle() +"'", e);
+               progress = progress.reduce(UpdateProgress.FAILURE);
+            }
         }
+        return progress;
     }
 
     @Override
@@ -64,8 +56,26 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
         .withLookBack(lookBack)
         .withLookAhead(lookAhead);
         DayRange dayRange = dateRangeGenerator.generate(clock.now().toLocalDate());
+
+        UpdateProgress feedLevelProgress = UpdateProgress.START;
+        UpdateProgress itemLevelProgress = UpdateProgress.START;
+        
         for (LocalDate date : dayRange) {
-            ingestFeedFor(date);
+            String feedUri = feedUrl + date.toString("YYYY/MM/dd");
+            reportStatus(String.format("Ingesting %s. Feed %s. Item %s", feedUri, feedLevelProgress, itemLevelProgress));
+            try {
+                List<ItvWhatsOnEntry> entries = itvWhatsOnClient.get(feedUri);
+                itemLevelProgress = itemLevelProgress.reduce(ingestFeedEntries(entries));
+                feedLevelProgress = feedLevelProgress.reduce(UpdateProgress.SUCCESS);
+            } catch (Exception e) {
+                feedLevelProgress = feedLevelProgress.reduce(UpdateProgress.FAILURE);
+                log.error("Exception fetching feed at " + feedUri, e);
+            }
+        }
+        String message = String.format("Finished. Feed %s. Item %s", feedLevelProgress, itemLevelProgress);
+        reportStatus(message);
+        if (feedLevelProgress.hasFailures() || itemLevelProgress.hasFailures()) {
+            throw new RuntimeException(message);
         }
     }
     
@@ -79,7 +89,6 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
         private ItvWhatsOnEntryProcessor processor;
         private int lookAhead;
         private int lookBack;
-        private AdapterLog log;
         private Clock clock = new SystemClock();
         
         public Builder withFeedUrl(String feedUrl) {
@@ -107,11 +116,6 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
             return this;
         }
         
-        public Builder withLog(AdapterLog log) {
-            this.log = log;
-            return this;
-        }
-        
         public Builder withClock(Clock clock) {
             this.clock = clock;
             return this;
@@ -123,7 +127,6 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
                     processor, 
                     lookAhead,
                     lookBack, 
-                    log,
                     clock);
         }
     }

@@ -17,11 +17,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Image;
@@ -216,24 +214,13 @@ public class PaProgrammeProcessorTest {
         
         setupContentResolver(film, expectedItemBrand, expectedItemSeries);
 
-        progProcessor.process(inputProgData, channel, UTC, Timestamp.of(0));
+        ContentHierarchyAndSummaries hierarchy = progProcessor.process(inputProgData, channel, UTC, Timestamp.of(0));
 
-        ArgumentCaptor<Item> itemArgCaptor = ArgumentCaptor.forClass(Item.class);
-        verify(contentWriter, atLeastOnce()).createOrUpdate(itemArgCaptor.capture());
+        assertEquals(expectedSummaryBrand, hierarchy.getBrandSummary().get());
+        assertEquals(expectedSummarySeries, hierarchy.getSeriesSummary().get());
 
-        ArgumentCaptor<Container> containerArgCaptor = ArgumentCaptor.forClass(Container.class);
-        verify(contentWriter, atLeastOnce()).createOrUpdate(containerArgCaptor.capture());
-
-        List<Container> writtenContainers = containerArgCaptor.getAllValues();
-
-        Brand actualSummaryBrand = (Brand)writtenContainers.get(SUMMARY_BRAND_INDEX);
-        Series actualSummarySeries = (Series)writtenContainers.get(SUMMARY_SERIES_INDEX); 
-
-        assertEquals(expectedSummaryBrand, actualSummaryBrand);
-        assertEquals(expectedSummarySeries, actualSummarySeries);
-
-        assertThat(actualSummaryBrand.getEquivalentTo(), hasItem(expectedItemBrandLookupRef));
-        assertThat(actualSummarySeries.getEquivalentTo(), hasItem(expectedItemSeriesLookupRef));
+        assertThat(hierarchy.getBrandSummary().get().getEquivalentTo(), hasItem(expectedItemBrandLookupRef));
+        assertThat(hierarchy.getSeriesSummary().get().getEquivalentTo(), hasItem(expectedItemSeriesLookupRef));
     }
 
     private ProgData setupProgData() {
@@ -393,14 +380,9 @@ public class PaProgrammeProcessorTest {
         ProgData progData = setupProgData();
         progData.setGeneric(null);
         
-        progProcessor.process(progData, channel, UTC, Timestamp.of(0));
+        ContentHierarchyAndSummaries hierarchy = progProcessor.process(progData, channel, UTC, Timestamp.of(0));
         
-        ArgumentCaptor<Item> argCaptor = ArgumentCaptor.forClass(Item.class);
-        verify(contentWriter).createOrUpdate(argCaptor.capture());
-        
-        Item written = argCaptor.getValue();
-        
-        assertNull(written.getGenericDescription());
+        assertNull(hierarchy.getItem().getGenericDescription());
     }
 
     @Test
@@ -417,13 +399,7 @@ public class PaProgrammeProcessorTest {
         ProgData progData = setupProgData();
         progData.setGeneric("1");
         
-        progProcessor.process(progData, channel, UTC, Timestamp.of(0));
-        
-        ArgumentCaptor<Item> argCaptor = ArgumentCaptor.forClass(Item.class);
-        verify(contentWriter).createOrUpdate(argCaptor.capture());
-        
-        Item written = argCaptor.getValue();
-        
-        assertTrue(written.getGenericDescription());
+        ContentHierarchyAndSummaries hierarchy = progProcessor.process(progData, channel, UTC, Timestamp.of(0));
+        assertTrue(hierarchy.getItem().getGenericDescription());
     }
 }

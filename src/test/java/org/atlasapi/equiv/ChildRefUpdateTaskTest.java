@@ -70,9 +70,9 @@ public class ChildRefUpdateTaskTest extends TestCase {
         Brand brand = new Brand("brandUri", "cBrandUri", BBC);
         Series series1 = seriesWithParent("series1Uri", brand).withSeriesNumber(1);
         Series series2 = seriesWithParent("series2Uri", brand).withSeriesNumber(2);
-        Episode episode1 = episodeWithContainers("ep1", series1, brand);
+        Episode episode1 = episodeWithContainers("ep1", 1, series1, brand);
         Item item1 = itemWithContainer("item1", brand);
-        Episode episode2 = episodeWithContainers("ep2", series2, brand);
+        Episode episode2 = episodeWithContainers("ep2", 2, series2, brand);
 
         write(brand, series1, series2, episode1, item1, episode2);
         
@@ -102,7 +102,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
         assertThat(resolvedBrand.getId(), is(1L));
         checkSeriesIds(resolvedBrand.getSeriesRefs(), 3L, 2L);
         checkSeriesNumbers(resolvedBrand.getSeriesRefs(), 2, 1);
-        checkIds(resolvedBrand.getChildRefs(), 4L, 5L, 6L);
+        checkIds(resolvedBrand.getChildRefs(), 5L, 6L, 4L);
         
         checkSeries(resolve(series1), 2L, 1L, 4L, 5L);
         checkSeries(resolve(series2), 3L, 1L, 6L);
@@ -127,7 +127,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
     @Test
     public void testUpdatesReferencesInTopLevelSeries() {
         Series series = seriesWithParent("seriesUri", null);
-        Episode episode1 = episodeWithContainers("ep1", series, series);
+        Episode episode1 = episodeWithContainers("ep1", 1, series, series);
         Item item1 = itemWithContainer("ep2", series);
         
         write(series, episode1, item1);
@@ -142,7 +142,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
         
         task.run();
         
-        checkTopLevelSeries(resolve(series), 1L, 2L, 3L);
+        checkTopLevelSeries(resolve(series), 1L, 3L, 2L);
         checkEpisode(resolve(episode1), 2L, 1L, 1L);
         checkEpisode(resolve(item1), 3L, 1L, null);
         
@@ -201,12 +201,14 @@ public class ChildRefUpdateTaskTest extends TestCase {
         return item;
     }
 
-    private Episode episodeWithContainers(String uri, Series series, Container container) {
+    private Episode episodeWithContainers(String uri, Integer episodeNumber, Series series, 
+            Container container) {
         Episode episode1 = new Episode(uri, "c"+uri, BBC);
         episode1.setContainer(container);
         if (series != null) {
             episode1.setSeries(series);
         }
+        episode1.setEpisodeNumber(episodeNumber);
         return episode1;
     }
 
