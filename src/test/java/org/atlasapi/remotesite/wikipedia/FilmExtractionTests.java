@@ -1,20 +1,25 @@
 package org.atlasapi.remotesite.wikipedia;
 
-import org.atlasapi.remotesite.wikipedia.film.FilmExtractor;
-import org.atlasapi.remotesite.wikipedia.film.FilmInfoboxScraper;
-import com.google.common.base.Charsets;
-import com.google.common.collect.Multimap;
-import com.google.common.io.Resources;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.remotesite.wikipedia.film.FilmExtractor;
+import org.atlasapi.remotesite.wikipedia.film.FilmInfoboxScraper;
 import org.joda.time.DateTime;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Test;
+
 import xtc.parser.ParseException;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.Multimap;
+import com.google.common.io.Resources;
 
 public class FilmExtractionTests {
     String articleText;
@@ -22,7 +27,7 @@ public class FilmExtractionTests {
     
     @Before
     public void setUp() throws IOException {
-        articleText = IOUtils.toString(Resources.getResource(getClass(), "example.mediawiki").openStream(), Charsets.UTF_8.name());
+        articleText = IOUtils.toString(Resources.getResource(getClass(), "film/Hackers.mediawiki").openStream(), Charsets.UTF_8.name());
         article = new Article() {
             @Override
             public DateTime getLastModified() {

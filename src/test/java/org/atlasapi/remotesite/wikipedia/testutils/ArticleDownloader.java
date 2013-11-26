@@ -1,8 +1,11 @@
-package org.atlasapi.remotesite.wikipedia;
+package org.atlasapi.remotesite.wikipedia.testutils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import org.atlasapi.remotesite.wikipedia.Article;
+import org.atlasapi.remotesite.wikipedia.EnglishWikipediaClient;
 
 import com.google.api.client.util.Charsets;
 import com.google.common.io.Files;
