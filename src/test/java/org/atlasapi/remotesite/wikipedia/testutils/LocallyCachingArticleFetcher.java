@@ -1,13 +1,16 @@
-package org.atlasapi.remotesite.wikipedia;
+package org.atlasapi.remotesite.wikipedia.testutils;
 
 import com.google.api.client.util.Charsets;
 import com.google.common.io.Files;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.atlasapi.remotesite.wikipedia.Article;
+import org.atlasapi.remotesite.wikipedia.ArticleFetcher;
 import org.joda.time.DateTime;
 
 public class LocallyCachingArticleFetcher implements ArticleFetcher {
