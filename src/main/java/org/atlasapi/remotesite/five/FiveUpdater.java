@@ -80,13 +80,24 @@ public class FiveUpdater extends ScheduledTask {
         }
     };
 
+    public void updateBrand(String id) {
+        try {
+            Document document = streamHttpClient.get(new SimpleHttpRequest<Document>(BASE_API_URL + "/shows/" + id, TRANSFORMER));
+            process(document.getRootElement().getChildElements());
+        } catch (HttpException e) {
+            Throwables.propagate(e);
+        } catch (Exception e) {
+            Throwables.propagate(e);
+        }
+    }
+    
     @Override
     public void runTask() {
         try {
             Timestamp start = timestamper.timestamp();
             log.record(new AdapterLogEntry(Severity.INFO).withDescription("Five update started from " + BASE_API_URL).withSource(getClass()));
-            
-            process(streamHttpClient.get(new SimpleHttpRequest<Document>(BASE_API_URL + "/shows", TRANSFORMER)));
+            Document document = streamHttpClient.get(new SimpleHttpRequest<Document>(BASE_API_URL + "/shows", TRANSFORMER));
+            process(document.getRootElement().getFirstChildElement("shows").getChildElements());
             
             Timestamp end = timestamper.timestamp();
             log.record(new AdapterLogEntry(Severity.INFO).withDescription("Five update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
@@ -97,10 +108,9 @@ public class FiveUpdater extends ScheduledTask {
         }
     }
     
-    private void process(Document document) {
+    private void process(Elements elements) {
         int processed = 0, failed = 0;
         
-        Elements elements = document.getRootElement().getFirstChildElement("shows").getChildElements();
         for(int i = 0; i < elements.size(); i++) {
             Element element = elements.get(i);
         
