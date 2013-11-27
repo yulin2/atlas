@@ -1,26 +1,33 @@
 package org.atlasapi.remotesite.wikipedia.film;
 
-import com.google.common.base.Function;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
-import de.fau.cs.osr.ptk.common.AstVisitor;
-import de.fau.cs.osr.ptk.common.ast.AstNode;
-import de.fau.cs.osr.ptk.common.ast.NodeList;
-import de.fau.cs.osr.ptk.common.ast.Text;
 import java.io.IOException;
 import java.util.Iterator;
+
 import org.atlasapi.remotesite.wikipedia.SwebleHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sweble.wikitext.lazy.parser.InternalLink;
 import org.sweble.wikitext.lazy.parser.LazyParsedPage;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
 import org.sweble.wikitext.lazy.preprocessor.Template;
 import org.sweble.wikitext.lazy.preprocessor.TemplateArgument;
+
 import xtc.parser.ParseException;
+
+import com.google.common.base.Function;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
+
+import de.fau.cs.osr.ptk.common.AstVisitor;
+import de.fau.cs.osr.ptk.common.ast.AstNode;
+import de.fau.cs.osr.ptk.common.ast.NodeList;
+import de.fau.cs.osr.ptk.common.ast.Text;
 
 /**
  * This utility class extracts information from the Film infobox in a Wikipedia article.
  */
 public final class FilmInfoboxScraper {
+    private final static Logger log = LoggerFactory.getLogger(FilmInfoboxScraper.class);
 
     /**
      * Returns the key/value arguments given to the Film infobox template in the given Mediawiki page source. 
@@ -44,19 +51,24 @@ public final class FilmInfoboxScraper {
         ListMultimap<String,String> attrs = LinkedListMultimap.<String, String>create();
 
         void consumeInfobox(AstNode n) throws IOException, ParseException {
-            if(!(n instanceof Template)) {
+            if (!(n instanceof Template)) {
                 return;
             }
             Template t = (Template) n;
 
             String name = SwebleHelper.flattenTextNodeList(t.getName());
-            if(! "Infobox film".equalsIgnoreCase(name)) {
-                return;
-            }
-
-            Iterator<AstNode> children = t.getArgs().iterator();
-            while(children.hasNext()) {
-                consumeAttribute(children.next());
+            if ("Infobox film".equalsIgnoreCase(name)) {
+                Iterator<AstNode> children = t.getArgs().iterator();
+                while(children.hasNext()) {
+                    consumeAttribute(children.next());
+                }
+            } else if ("IMDb title".equalsIgnoreCase(name)) {
+                NodeList args = t.getArgs();
+                try {
+                    attrs.put("imdbID", SwebleHelper.flattenTextNodeList(((TemplateArgument) args.get(0)).getValue()));
+                } catch (Exception e) {
+                    log.warn("Failed to extract IMDB id from \""+ SwebleHelper.unparse(t) +"\"");
+                }
             }
         }
 

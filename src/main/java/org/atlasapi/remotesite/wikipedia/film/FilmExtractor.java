@@ -1,14 +1,18 @@
 package org.atlasapi.remotesite.wikipedia.film;
 
-import com.google.common.collect.ListMultimap;
 import java.io.IOException;
 import java.util.List;
+
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.wikipedia.Article;
+
 import xtc.parser.ParseException;
+
+import com.google.common.collect.ListMultimap;
 
 /**
  * This attempts to extract a {@link Film} from its Wikipedia article.
@@ -34,8 +38,13 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
             }
             
             List<CrewMember> people = flim.getPeople();
-            for(String director : infoboxAttrs.get("director")) {
+            for (String director : infoboxAttrs.get("director")) {
                 people.add(new CrewMember().withRole(CrewMember.Role.DIRECTOR).withName(director).withPublisher(Publisher.WIKIPEDIA));
+            }
+            
+            for (String imdbID : infoboxAttrs.get("imdbID")) {
+                flim.addAlias(new Alias("imdb:title", imdbID));
+                flim.addAlias(new Alias("imdb:url", "http://imdb.com/title/tt" + imdbID));
             }
             
             return flim;
