@@ -31,6 +31,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public final class TvBrandHierarchyUpdater extends ScheduledTask {
     private static final Logger log = LoggerFactory.getLogger(TvBrandHierarchyUpdater.class);
@@ -46,6 +47,7 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
     
     private final TvBrandHierarchyExtractor extractor;
     private final ContentWriter writer;
+    private UpdateProgress progress = UpdateProgress.START;
     
     public TvBrandHierarchyUpdater(TvBrandArticleTitleSource titleSource, ArticleFetcher fetcher, TvBrandHierarchyExtractor extractor, ContentWriter writer) {
         fetchMeister = new FetchMeister(Preconditions.checkNotNull(fetcher), titleSource.getAllTvBrandArticleTitles());
@@ -73,8 +75,16 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
         }
         executor.shutdown();
         fetchMeister.stop();
+        reportStatus(String.format("Processed: %d brands (%d failed)", progress.getTotalProgress(), progress.getFailures()));
     }
     
+    private void reduceProgress(UpdateProgress occurrence) {
+        synchronized (this) {
+            progress = progress.reduce(occurrence);
+        }
+        reportStatus(String.format("Processing: %d brands so far (%d failed)", progress.getTotalProgress(), progress.getFailures()));
+    }
+
     private void processNext() {
         ListenableFuture<Article> next;
         try {
@@ -90,11 +100,13 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
         Futures.addCallback(updateBrand(next), new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
+                reduceProgress(UpdateProgress.SUCCESS);
                 processNext();
             }
             @Override
             public void onFailure(Throwable t) {
                 log.warn("Failed to process a TV brand", t);
+                reduceProgress(UpdateProgress.FAILURE);
                 processNext();
             }
         });
