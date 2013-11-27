@@ -14,7 +14,6 @@ import org.sweble.wikitext.lazy.parser.LazyParsedPage;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
 import org.sweble.wikitext.lazy.preprocessor.Template;
 import org.sweble.wikitext.lazy.preprocessor.TemplateArgument;
-import org.sweble.wikitext.lazy.utils.RtWikitextPrinter;
 import org.sweble.wikitext.lazy.utils.SimpleParserConfig;
 
 import xtc.parser.ParseException;
@@ -86,11 +85,12 @@ public class SwebleHelper {
         }
     }
 
+
     /**
      * Recovers the original source of the given AST portion.
      */
     public static String unparse(AstNode n) {
-        return RtWikitextPrinter.print(n);
+        return SwebleRtWikitextPrinterCorrected.print(n);
     }
     
     /**
