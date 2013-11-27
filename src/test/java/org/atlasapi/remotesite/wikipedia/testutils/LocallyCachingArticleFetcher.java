@@ -1,17 +1,14 @@
 package org.atlasapi.remotesite.wikipedia.testutils;
 
-import com.google.api.client.util.Charsets;
-import com.google.common.io.Files;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.atlasapi.remotesite.wikipedia.Article;
 import org.atlasapi.remotesite.wikipedia.ArticleFetcher;
 import org.joda.time.DateTime;
+
+import com.google.api.client.util.Charsets;
+import com.google.common.io.Files;
 
 public class LocallyCachingArticleFetcher implements ArticleFetcher {
     private final ArticleFetcher fetcher;
@@ -22,12 +19,12 @@ public class LocallyCachingArticleFetcher implements ArticleFetcher {
         this.outputDirPath = outputDirPath;
     }
     
-    public static String titleToFilename(String title) {
+    private static String titleToFilename(String title) {
         return title.replaceAll("/", "-") + ".mediawiki";
     }
     
-    public void downloadArticle(String title) throws IOException {
-        System.out.println(title);
+    private void downloadArticle(String title) throws IOException {
+        System.out.println("¡¡ DOWNLOADING " + title + " !!");
         Article fetchArticle = fetcher.fetchArticle(title);
         Files.write(fetchArticle.getMediaWikiSource(), new File(outputDirPath + "/" + titleToFilename(title)), Charsets.UTF_8);
     }
