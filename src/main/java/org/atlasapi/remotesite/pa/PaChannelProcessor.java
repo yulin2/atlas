@@ -45,8 +45,8 @@ public class PaChannelProcessor {
         Set<ItemRefAndBroadcast> broadcasts = new HashSet<ItemRefAndBroadcast>();
         Channel channel = channelData.channel();
         Set<ContentHierarchyAndSummaries> hierarchiesAndSummaries = Sets.newHashSet();
+        Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
         try {
-            Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
             for (ProgData programme : channelData.programmes()) {
                 String programmeLock = lockIdentifier(programme);
                 lock(currentlyProcessing, programmeLock);
@@ -60,7 +60,6 @@ public class PaChannelProcessor {
 	                    broadcasts.add(new ItemRefAndBroadcast(hierarchy.getItem(), hierarchy.getBroadcast()));
 	                    acceptableBroadcastIds.put(hierarchy.getBroadcast().getSourceId(), hierarchy.getItem().getCanonicalUri());
                     }
-                    scheduleVersionStore.store(channel, channelData.scheduleDay(), channelData.version());
                     processed++;
                 } catch (Exception e) {
                     log.error(String.format("Error processing channel %s, prog id %s", channel.getKey(), programme.getProgId()));
@@ -68,18 +67,30 @@ public class PaChannelProcessor {
                     unlock(currentlyProcessing, programmeLock);
                 }
             }
-            
+        } catch (Exception e) {
+            //TODO: should we just throw e?
+            log.error(String.format("Error processing channel %s", channel.getKey()), e);
+        } finally {
+            writeContent(hierarchiesAndSummaries, channel);
+        }
+        
+        try {
             if (trimmer != null) {
                 trimmer.trimBroadcasts(channelData.schedulePeriod(), channel, acceptableBroadcastIds.build());
             }
             scheduleWriter.replaceScheduleBlock(Publisher.PA, channel, broadcasts);
-            
+            scheduleVersionStore.store(channel, channelData.scheduleDay(), channelData.version());
         } catch (Exception e) {
-            //TODO: should we just throw e?
-            log.error(String.format("Error processing channel %s", channel.getKey()));
-        } finally {
+            log.error(String.format("Error trimming and writing schedule for channel %s", channel.getKey()), e);
+        }
+        
+        return processed;
+    }
+
+    private void writeContent(Set<ContentHierarchyAndSummaries> hierarchies, Channel channel) {
+        try {
             contentBuffer.flush();
-            for (ContentHierarchyAndSummaries hierarchy : hierarchiesAndSummaries) {
+            for (ContentHierarchyAndSummaries hierarchy : hierarchies) {
                 if (hierarchy.getBrandSummary().isPresent()) {
                     contentWriter.createOrUpdate(hierarchy.getBrandSummary().get());
                 }
@@ -87,10 +98,11 @@ public class PaChannelProcessor {
                     contentWriter.createOrUpdate(hierarchy.getSeriesSummary().get());
                 }
             }
+        } catch (Exception e) {
+            log.error(String.format("Error writing content for channel %s", channel.getKey()), e);
         }
-        return processed;
     }
-
+    
     private void unlock(Set<String> currentlyProcessing, String programmeLock) {
         synchronized (currentlyProcessing) {
             currentlyProcessing.remove(programmeLock);
