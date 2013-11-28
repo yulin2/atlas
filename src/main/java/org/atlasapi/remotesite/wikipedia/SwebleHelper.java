@@ -10,13 +10,20 @@ import org.slf4j.LoggerFactory;
 import org.sweble.wikitext.lazy.LazyParser;
 import org.sweble.wikitext.lazy.LazyPreprocessor;
 import org.sweble.wikitext.lazy.ParserConfigInterface;
+import org.sweble.wikitext.lazy.parser.InternalLink;
 import org.sweble.wikitext.lazy.parser.LazyParsedPage;
+import org.sweble.wikitext.lazy.parser.SemiPre;
+import org.sweble.wikitext.lazy.parser.SemiPreLine;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
 import org.sweble.wikitext.lazy.preprocessor.Template;
 import org.sweble.wikitext.lazy.preprocessor.TemplateArgument;
 import org.sweble.wikitext.lazy.utils.SimpleParserConfig;
 
 import xtc.parser.ParseException;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+
 import de.fau.cs.osr.ptk.common.AstVisitor;
 import de.fau.cs.osr.ptk.common.ast.AstNode;
 import de.fau.cs.osr.ptk.common.ast.NodeList;
@@ -158,5 +165,57 @@ public class SwebleHelper {
             return null;
         }
     };
+    
+    public static class ListItemResult {
+        public final String name;
+        public final Optional<String> articleTitle;
+        public ListItemResult(String name, Optional<String> articleTitle) {
+            this.name = name;
+            this.articleTitle = articleTitle;
+        }
+    }
+    
+    public static ImmutableList<ListItemResult> extractList(AstNode node) {
+        ImmutableList.Builder<ListItemResult> builder = ImmutableList.builder();
+        new ListVisitor(builder).go(node);
+        return builder.build();
+    }
+    
+    protected static class ListVisitor extends AstVisitor {
+        private final ImmutableList.Builder<ListItemResult> builder;
+        public ListVisitor(ImmutableList.Builder<ListItemResult> builder) { this.builder = builder; }
+        
+        // State:
+        public String linkTargetTitle = null;
+        
+        public void visit(LazyParsedPage value) {
+            iterate(value.getContent());
+        }
+        public void visit(SemiPre wtf) {
+            iterate(wtf.getContent());
+        }
+        public void visit(SemiPreLine wtf) {
+            iterate(wtf.getContent());
+        }
+        public void visit(InternalLink link) {
+            NodeList titleContent = link.getTitle().getContent();
+            if(titleContent.isEmpty()) {
+                builder.add(new ListItemResult(link.getTarget(), Optional.of(link.getTarget())));
+            } else {
+                linkTargetTitle = link.getTarget();
+                iterate(titleContent);
+                linkTargetTitle = null;
+            }
+        }
+        public void visit(Text t) {
+            String name = t.getContent().trim();
+            if (name.isEmpty() || name.startsWith("(")) { return; }  // Things that start with brackets are probably extraneous annotations, not names -- skip them.
+            builder.add(new ListItemResult(name, Optional.fromNullable(linkTargetTitle)));
+        }
+
+        @Override
+        protected Object visitNotFound(AstNode node) { return null; }
+
+    }
 
 }
