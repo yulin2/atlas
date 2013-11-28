@@ -11,7 +11,14 @@ public abstract class Article {
     public abstract String getTitle();
 
     public String getUrl() {
-        String safeTitle = getTitle().replaceAll(" ", "_")
+        return urlFromTitle(getTitle());
+    }
+    
+    /**
+     * Calculates the English Wikipedia URL for a given article title.
+     */
+    public static String urlFromTitle(String title) {
+        String safeTitle = title.replaceAll(" ", "_")
                 .replaceAll("\"", "%22").replaceAll("'", "%27")
                 .replaceAll(",", "%2C").replaceAll(";", "%3B")
                 .replaceAll("<", "%3C").replaceAll(">", "%3E")
