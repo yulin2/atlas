@@ -4,35 +4,52 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.atlasapi.remotesite.wikipedia.SwebleHelper;
+import org.atlasapi.remotesite.wikipedia.SwebleHelper.ListItemResult;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sweble.wikitext.lazy.parser.InternalLink;
-import org.sweble.wikitext.lazy.parser.LazyParsedPage;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
 import org.sweble.wikitext.lazy.preprocessor.Template;
 import org.sweble.wikitext.lazy.preprocessor.TemplateArgument;
 
 import xtc.parser.ParseException;
 
-import com.google.common.base.Function;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
+import com.google.common.collect.ImmutableList;
 
-import de.fau.cs.osr.ptk.common.AstVisitor;
 import de.fau.cs.osr.ptk.common.ast.AstNode;
 import de.fau.cs.osr.ptk.common.ast.NodeList;
-import de.fau.cs.osr.ptk.common.ast.Text;
 
 /**
  * This utility class extracts information from the Film infobox in a Wikipedia article.
  */
 public final class FilmInfoboxScraper {
     private final static Logger log = LoggerFactory.getLogger(FilmInfoboxScraper.class);
+    
+    public static class Result {
+        public ImmutableList<ListItemResult> name;
+        public ImmutableList<ListItemResult> directors;
+        public ImmutableList<ListItemResult> producers;
+        public ImmutableList<ListItemResult> writers;
+        public ImmutableList<ListItemResult> screenplayWriters;
+        public ImmutableList<ListItemResult> storyWriters;
+        public ImmutableList<ListItemResult> narrators;
+        public ImmutableList<ListItemResult> starring;
+        public ImmutableList<ListItemResult> composers;
+        public ImmutableList<ListItemResult> cinematographers;
+        public ImmutableList<ListItemResult> editors;
+        public ImmutableList<ListItemResult> productionStudios;
+        public ImmutableList<ListItemResult> distributors;
+        public ImmutableList<LocalDate> releaseDates;  // TODO oh dear, this is mildly complicated
+        public Integer runtimeInMins;
+        public ImmutableList<ListItemResult> countries;
+        public ImmutableList<ListItemResult> language;
+        public String imdbID;
+    }
 
     /**
-     * Returns the key/value arguments given to the Film infobox template in the given Mediawiki page source. 
+     * Returns the information given to the Film infobox template in the given Mediawiki page source.
      */
-    public static ListMultimap<String, String> getInfoboxAttrs(String articleText) throws IOException, ParseException {
+    public static Result getInfoboxAttrs(String articleText) throws IOException, ParseException {
         LazyPreprocessedPage ast = SwebleHelper.preprocess(articleText, false);
 
         InfoboxVisitor v = new InfoboxVisitor();
@@ -48,7 +65,7 @@ public final class FilmInfoboxScraper {
      * This thing looks at a preprocessor-generated AST of a Mediawiki page, finds the Film infobox, and gathers key-value pairs from it.
      */
     private static final class InfoboxVisitor {
-        ListMultimap<String,String> attrs = LinkedListMultimap.<String, String>create();
+        final Result attrs = new Result();
 
         void consumeInfobox(AstNode n) throws IOException, ParseException {
             if (!(n instanceof Template)) {
@@ -65,7 +82,7 @@ public final class FilmInfoboxScraper {
             } else if ("IMDb title".equalsIgnoreCase(name)) {
                 NodeList args = t.getArgs();
                 try {
-                    attrs.put("imdbID", SwebleHelper.flattenTextNodeList(((TemplateArgument) args.get(0)).getValue()));
+                    attrs.imdbID = SwebleHelper.flattenTextNodeList(((TemplateArgument) args.get(0)).getValue());
                 } catch (Exception e) {
                     log.warn("Failed to extract IMDB id from \""+ SwebleHelper.unparse(t) +"\"");
                 }
@@ -73,54 +90,50 @@ public final class FilmInfoboxScraper {
         }
 
         void consumeAttribute(AstNode n) throws IOException, ParseException {
-            if(!(n instanceof TemplateArgument)) {
+            if (!(n instanceof TemplateArgument)) {
                 return;
             }
             TemplateArgument a = (TemplateArgument) n;
 
             final String key = SwebleHelper.flattenTextNodeList(a.getName());
-            AstNode value = SwebleHelper.parse(SwebleHelper.flattenTextNodeList(a.getValue()));
-            new InfoboxIndividualValueExtractor(new Function<String, Void>() {
-                @Override
-                public Void apply(String f) {
-                    if(f.startsWith("(")) {  // This is probably an extraneous annotation, we skip it!
-                        return null;
-                    }
-                    attrs.put(key, f);
-                    return null;
-                }
-            }).go(value);
-        }
-    }
-
-    /**
-     * This looks at a parser-generated AST of the content given to an infobox argument (such as a list of names/links), disregarding formatting and calling back with the individual text chunks that should be taken as values.
-     */
-    public static final class InfoboxIndividualValueExtractor extends AstVisitor {
-
-        Function<String, Void> cb;
-
-        public InfoboxIndividualValueExtractor(Function<String, Void> cb) {
-            this.cb = cb;
-        }
-
-        public void visit(LazyParsedPage value) {
-            iterate(value.getContent());
-        }
-        public void visit(InternalLink link) {
-            NodeList titleContent = link.getTitle().getContent();
-            if(titleContent.isEmpty()) {  // TODO find a more appropriate distinction (this is for the case where two Coen Brothers share an article...)
-                cb.apply(link.getTarget());
-            } else {
-                iterate(titleContent);
+            final AstNode reparsedValue = SwebleHelper.parse(SwebleHelper.unparse(a.getValue()));
+            
+            if ("name".equalsIgnoreCase(key)) {
+                attrs.name = SwebleHelper.extractList(reparsedValue);
+            } else if ("director".equalsIgnoreCase(key)) {
+                attrs.directors = SwebleHelper.extractList(reparsedValue);
+            } else if ("producer".equalsIgnoreCase(key)) {
+                attrs.producers = SwebleHelper.extractList(reparsedValue);
+            } else if ("writer".equalsIgnoreCase(key)) {
+                attrs.writers = SwebleHelper.extractList(reparsedValue);
+            } else if ("screenplay".equalsIgnoreCase(key)) {
+                attrs.screenplayWriters = SwebleHelper.extractList(reparsedValue);
+            } else if ("story".equalsIgnoreCase(key)) {
+                attrs.storyWriters = SwebleHelper.extractList(reparsedValue);
+            } else if ("narrator".equalsIgnoreCase(key)) {
+                attrs.narrators = SwebleHelper.extractList(reparsedValue);
+            } else if ("starring".equalsIgnoreCase(key)) {
+                attrs.starring = SwebleHelper.extractList(reparsedValue);
+            } else if ("music".equalsIgnoreCase(key)) {
+                attrs.composers = SwebleHelper.extractList(reparsedValue);
+            } else if ("cinematography".equalsIgnoreCase(key)) {
+                attrs.cinematographers = SwebleHelper.extractList(reparsedValue);
+            } else if ("editing".equalsIgnoreCase(key)) {
+                attrs.editors = SwebleHelper.extractList(reparsedValue);
+            } else if ("studio".equalsIgnoreCase(key)) {
+                attrs.productionStudios = SwebleHelper.extractList(reparsedValue);
+            } else if ("distributor".equalsIgnoreCase(key)) {
+                attrs.distributors = SwebleHelper.extractList(reparsedValue);
+            } else if ("released".equalsIgnoreCase(key)) {
+                // TODO extract release dates
+            } else if ("runtime".equalsIgnoreCase(key)) {
+                attrs.runtimeInMins = Integer.parseInt(SwebleHelper.flattenTextNodeList(a.getValue()).split(" ", 2)[0]);
+            } else if ("country".equalsIgnoreCase(key)) {
+                attrs.countries = SwebleHelper.extractList(reparsedValue);
+            } else if ("language".equalsIgnoreCase(key)) {
+                attrs.language = SwebleHelper.extractList(reparsedValue);
             }
         }
-        public void visit(Text t) {
-            cb.apply(t.getContent());
-        }
-
-        @Override
-        protected Object visitNotFound(AstNode node) { return null; }
-
     }
+
 }

@@ -10,15 +10,11 @@ import org.apache.commons.io.IOUtils;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.remotesite.wikipedia.film.FilmExtractor;
-import org.atlasapi.remotesite.wikipedia.film.FilmInfoboxScraper;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import xtc.parser.ParseException;
-
 import com.google.common.base.Charsets;
-import com.google.common.collect.Multimap;
 import com.google.common.io.Resources;
 
 public class FilmExtractionTests {
@@ -44,15 +40,6 @@ public class FilmExtractionTests {
                 return "Hackers (film)";
             }
         };
-    }
-
-    @Test
-    public void testInfoboxScraping() throws IOException, ParseException {
-        Multimap<String, String> attrs = FilmInfoboxScraper.getInfoboxAttrs(articleText);
-        assertTrue(attrs.get("producer").contains("Michael Peyser"));
-        assertTrue(attrs.get("name").contains("Hackers"));
-        assertEquals(1, attrs.get("producer").size());
-        assertEquals(1, attrs.get("name").size());
     }
     
     @Test
