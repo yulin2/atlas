@@ -12,6 +12,8 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.wikipedia.Article;
 import org.atlasapi.remotesite.wikipedia.SwebleHelper.ListItemResult;
 import org.atlasapi.remotesite.wikipedia.film.FilmInfoboxScraper.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import xtc.parser.ParseException;
 
@@ -21,6 +23,7 @@ import com.google.common.collect.ImmutableList;
  * This attempts to extract a {@link Film} from its Wikipedia article.
  */
 public class FilmExtractor implements ContentExtractor<Article, Film> {
+    private static final Logger log = LoggerFactory.getLogger(FilmExtractor.class);
 
     @Override
     public Film extract(Article article) {
@@ -37,7 +40,8 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
             if (title.size() == 1) {
                 flim.setTitle(title.get(0).name);
             } else {
-                throw new RuntimeException("Film in Wikipedia article \"" + article.getTitle() + "\" has " + (title.isEmpty() ? "no title." : "multiple titles."));
+                log.warn("Film in Wikipedia article \"" + article.getTitle() + "\" has " + (title.isEmpty() ? "no title." : "multiple titles.") + " Falling back to guessing from article title.");
+                flim.setTitle(guessFilmNameFromArticleTitle(article.getTitle()));
             }
             
             List<CrewMember> people = flim.getPeople();
@@ -63,6 +67,15 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
         }
     }
     
+    private String guessFilmNameFromArticleTitle(String title) {
+        int indexOfBracketedStuffWeDontWant = title.indexOf(" (");
+        if (indexOfBracketedStuffWeDontWant == -1) {  // nothing to discard
+            return title;
+        } else {
+            return title.substring(0, indexOfBracketedStuffWeDontWant);
+        }
+    }
+
     private void crewify(ImmutableList<ListItemResult> from, Role role, List<CrewMember> into) {
         for (ListItemResult person : from) {
             if (person.articleTitle.isPresent()) {  // They have an article! TODO: handle general articles targeted by multiple people's names
