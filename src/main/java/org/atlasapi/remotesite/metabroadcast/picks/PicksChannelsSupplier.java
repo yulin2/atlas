@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
@@ -30,24 +31,24 @@ public class PicksChannelsSupplier implements Supplier<Set<Channel>> {
     
     private final NumberToShortStringCodec codec = new SubstitutionTableNumberCodec();
     private final ChannelResolver channelResolver;
-    private final int channelGroupId;
+    private final Integer channelGroupId;
 
     private final BackgroundComputingValue<Set<Channel>> pickChannels;
     
     public PicksChannelsSupplier(final ChannelGroupResolver channelGroupResolver, ChannelResolver channelResolver, 
             String pickChannelGroup) {
         
-        this.channelGroupId = codec.decode(pickChannelGroup).intValue();
+        this.channelGroupId = Strings.isNullOrEmpty(pickChannelGroup) ? null : codec.decode(pickChannelGroup).intValue();
         this.channelResolver = channelResolver;
         this.pickChannels = new BackgroundComputingValue<Set<Channel>>(Duration.standardHours(1), new Callable<Set<Channel>>() {
 
             @Override
             public Set<Channel> call() throws Exception {
-                Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(Long.valueOf(channelGroupId));
-                if (!channelGroup.isPresent()) {
+                if (channelGroupId == null) {
                     log.warn("No channel group found for picks ingest. Job will do nothing.");
                     return ImmutableSet.of();
                 }
+                Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(Long.valueOf(channelGroupId));
                 return currentChannelsIn(channelGroup.get());
             }
             
