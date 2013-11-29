@@ -56,11 +56,11 @@ public class WikipediaModule {
     }
     
     public FilmsUpdater allFilmsUpdater() {
-        return new FilmsUpdater(allFilmsTitleSource, fetcher, filmExtractor, contentResolver, contentWriter);
+        return new FilmsUpdater(allFilmsTitleSource, fetcher, filmExtractor, contentWriter);
     }
     
     public FilmsUpdater filmsUpdaterForTitles(FilmArticleTitleSource titleSource) {
-        return new FilmsUpdater(titleSource, fetcher, filmExtractor, contentResolver, contentWriter);
+        return new FilmsUpdater(titleSource, fetcher, filmExtractor, contentWriter);
     }
     
     public TvBrandHierarchyUpdater allTvBrandsUpdater() {

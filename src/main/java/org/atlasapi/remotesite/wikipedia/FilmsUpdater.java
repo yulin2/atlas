@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.wikipedia;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.atlasapi.media.entity.Film;
-import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.wikipedia.film.FilmArticleTitleSource;
 import org.atlasapi.remotesite.wikipedia.film.FilmExtractor;
@@ -22,15 +21,13 @@ public class FilmsUpdater extends ScheduledTask {
     private ArticleFetcher fetcher;
     private FilmExtractor extractor;
     
-    private ContentResolver resolver;
     private ContentWriter writer;
     private UpdateProgress progress = UpdateProgress.START;
     
-    public FilmsUpdater(FilmArticleTitleSource titleSource, ArticleFetcher fetcher, FilmExtractor extractor, ContentResolver resolver, ContentWriter writer) {
+    public FilmsUpdater(FilmArticleTitleSource titleSource, ArticleFetcher fetcher, FilmExtractor extractor, ContentWriter writer) {
         this.titleSource = checkNotNull(titleSource);
         this.fetcher = checkNotNull(fetcher);
         this.extractor = checkNotNull(extractor);
-        this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(writer);
     }
 

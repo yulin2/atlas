@@ -37,10 +37,10 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
             flim.setLastUpdated(article.getLastModified());
             
             ImmutableList<ListItemResult> title = info.name;
-            if (title.size() == 1) {
+            if (title != null && title.size() == 1) {
                 flim.setTitle(title.get(0).name);
             } else {
-                log.warn("Film in Wikipedia article \"" + article.getTitle() + "\" has " + (title.isEmpty() ? "no title." : "multiple titles.") + " Falling back to guessing from article title.");
+                log.warn("Film in Wikipedia article \"" + article.getTitle() + "\" has " + (title == null || title.isEmpty() ? "no title." : "multiple titles.") + " Falling back to guessing from article title.");
                 flim.setTitle(guessFilmNameFromArticleTitle(article.getTitle()));
             }
             
@@ -77,6 +77,9 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
     }
 
     private void crewify(ImmutableList<ListItemResult> from, Role role, List<CrewMember> into) {
+        if (from == null) {
+            return;
+        }
         for (ListItemResult person : from) {
             if (person.articleTitle.isPresent()) {  // They have an article! TODO: handle general articles targeted by multiple people's names
                 into.add(new CrewMember(Article.urlFromTitle(person.articleTitle.get()), null, Publisher.WIKIPEDIA).withRole(role).withName(person.name));
