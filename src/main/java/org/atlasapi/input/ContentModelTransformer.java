@@ -55,7 +55,7 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         
     };
     
-    private final Predicate<SameAs> SAMEAS_WITH_URIS_FILTER = new Predicate<SameAs>() {
+    private final Predicate<SameAs> SAMEAS_WITHOUT_IDS_FILTER = new Predicate<SameAs>() {
 
         @Override
         public boolean apply(SameAs input) {
@@ -198,7 +198,7 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
             Iterables.filter(equivalents, SAMEAS_WITH_IDS_FILTER),
             SAMEAS_TO_ID_TRANSFORMER);
         Iterable<String> urisToResolve = Iterables.transform(
-            Iterables.filter(equivalents, SAMEAS_WITH_URIS_FILTER), 
+            Iterables.filter(equivalents, SAMEAS_WITHOUT_IDS_FILTER), 
             SAMEAS_TO_URI_TRANSFORMER);
         
         lookups.addAll(Iterables.transform(
