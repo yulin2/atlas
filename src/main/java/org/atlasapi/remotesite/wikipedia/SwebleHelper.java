@@ -173,6 +173,10 @@ public class SwebleHelper {
             this.name = name;
             this.articleTitle = articleTitle;
         }
+        @Override
+        public String toString() {
+            return name + (articleTitle.isPresent() ? " (=> " + articleTitle.get() + ")" : "");
+        }
     }
     
     public static ImmutableList<ListItemResult> extractList(AstNode node) {
