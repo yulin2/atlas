@@ -2,11 +2,19 @@ package org.atlasapi.remotesite.talktalk;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.atlasapi.media.entity.ChildRef;
+import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.ContentGroupWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkTvStructureCallback;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
@@ -17,15 +25,24 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
  */
 public class TalkTalkChannelProcessingTask extends ScheduledTask {
     
+    public static final String ALL_CONTENT_CONTENT_GROUP_URI = "http://talktalk.net/content-groups/all-content";
+    
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     private final TalkTalkClient client;
 
     private TalkTalkChannelProcessor<UpdateProgress> channelProcessor;
+    private final ContentGroupResolver contentGroupResolver;
+    private final ContentGroupWriter contentGroupWriter;
 
-    public TalkTalkChannelProcessingTask(TalkTalkClient talkTalkClient, TalkTalkChannelProcessor<UpdateProgress> channelProcessor) {
+    public TalkTalkChannelProcessingTask(TalkTalkClient talkTalkClient, 
+            TalkTalkChannelProcessor<UpdateProgress> channelProcessor,
+            ContentGroupResolver contentGroupResolver,
+            ContentGroupWriter contentGroupWriter) {
         this.client = checkNotNull(talkTalkClient);
         this.channelProcessor = checkNotNull(channelProcessor);
+        this.contentGroupResolver = checkNotNull(contentGroupResolver);
+        this.contentGroupWriter = checkNotNull(contentGroupWriter);
     }
 
     @Override
@@ -43,8 +60,11 @@ public class TalkTalkChannelProcessingTask extends ScheduledTask {
                 @Override
                 public void process(ChannelType channel) {
                     try {
+                        ContentGroup contentGroup = createOrGetContentGroup();
                         log.debug("processing channel {}", channel.getId());
-                        progress = progress.reduce(channelProcessor.process(channel));
+                        progress = progress.reduce(channelProcessor.process(channel, 
+                                Optional.of(contentGroup)));
+                        contentGroupWriter.createOrUpdate(contentGroup);
                         reportStatus(progress.toString());
                     } catch (TalkTalkException tte) {
                         log.error("failed to process " + channel.getId(), tte);
@@ -58,6 +78,21 @@ public class TalkTalkChannelProcessingTask extends ScheduledTask {
             // scheduler.
             throw new RuntimeException(tte);
         }
+    }
+    
+    private ContentGroup createOrGetContentGroup() {
+        ContentGroup contentGroup;
+        ResolvedContent resolvedContent = contentGroupResolver
+                .findByCanonicalUris(ImmutableList.of(ALL_CONTENT_CONTENT_GROUP_URI));
+        
+        if (resolvedContent.get(ALL_CONTENT_CONTENT_GROUP_URI).hasValue()) {
+            contentGroup = (ContentGroup) resolvedContent.get(ALL_CONTENT_CONTENT_GROUP_URI).requireValue();
+            contentGroup.setContents(ImmutableList.<ChildRef>of());
+        } else {
+            contentGroup = new ContentGroup(ALL_CONTENT_CONTENT_GROUP_URI, Publisher.TALK_TALK);
+        }
+        
+        return contentGroup;
     }
     
 }
