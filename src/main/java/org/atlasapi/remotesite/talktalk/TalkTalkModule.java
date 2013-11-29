@@ -64,7 +64,8 @@ public class TalkTalkModule {
 
     @Bean
     public ScheduledTask talkTalkUpdater() {
-        return new TalkTalkChannelProcessingTask(talkTalkClient(), talkTalkChannelProcessor());
+        return new TalkTalkChannelProcessingTask(talkTalkClient(), talkTalkChannelProcessor(), 
+                contentGroupResolver, contentGroupWriter);
     }
 
     @Bean
