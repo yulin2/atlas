@@ -39,7 +39,7 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
     /** How many brands we try to process at once. */
     private static final int SIMULTANEOUSNESS = 4;
     /** How many threads we use for all the deferred processing. */
-    private static final int THREADS = 4;
+    private static final int THREADS = 2;
     
     private ListeningExecutorService executor;
     private final FetchMeister fetchMeister;
