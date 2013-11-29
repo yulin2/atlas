@@ -18,10 +18,27 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.time.LocalTimeRange;
 
 
-public class PickPredicate implements Predicate<Item>{
+public class PickPredicate implements Predicate<Item> {
 
+    private static final Set<String> PRIORITY_CHANNELS = ImmutableSet.of(
+                "http://www.bbc.co.uk/services/bbcone/london",
+                "http://www.bbc.co.uk/services/bbctwo/england",
+                "http://www.itv.com/channels/itv1/london",
+                "http://www.channel4.com/",
+                "http://www.five.tv/",
+                "http://www.itv.com/itv2",
+                "http://www.bbc.co.uk/services/bbcthree",
+                "http://www.bbc.co.uk/services/bbcfour",
+                "http://ref.atlasapi.org/channels/sky1",
+                "http://ref.atlasapi.org/channels/skyliving",
+                "http://ref.atlasapi.org/channels/skyatlantic",
+                "http://ref.atlasapi.org/channels/comedycentral",
+                "http://ref.atlasapi.org/channels/universal",
+                "http://ref.atlasapi.org/channels/syfy"
+            );
+    
     private static final LocalTimeRange CHILDRENS_PRIMETIME = new LocalTimeRange(new LocalTime(15, 0, 0), new LocalTime(19, 15, 0));
-    private static final Map<String, LocalTimeRange> CHANNEL_PRIMTIME_OVERRIDES = ImmutableMap.of(
+    private static final Map<String, LocalTimeRange> CHANNEL_PRIMETIME_OVERRIDES = ImmutableMap.of(
             
     );
     
@@ -44,10 +61,18 @@ public class PickPredicate implements Predicate<Item>{
         Broadcast broadcast = Iterables.getOnlyElement(item.flattenBroadcasts());
         return channelUris.contains(broadcast.getBroadcastOn()) 
                 && isPrimetime(item, broadcast)
-                && ( Boolean.TRUE.equals(broadcast.getPremiere()) 
-                        || Boolean.TRUE.equals(broadcast.getNewEpisode()) 
-                        || Boolean.TRUE.equals(broadcast.getNewSeries()) 
-                   ); 
+                && isNewEpisode(item, broadcast); 
+    }
+
+    private boolean isNewEpisode(Item item, Broadcast broadcast) {
+        // The use of a set of PRIORITY_CHANNELS is due to New(Episode|Series) being
+        // unreliable right now. So we'll assume that anything on a priority channel
+        // is a new episode, until we can rely on the New(Episode|Series) flags.
+        return PRIORITY_CHANNELS.contains(broadcast.getBroadcastOn())
+                || Boolean.TRUE.equals(broadcast.getPremiere()) 
+                || Boolean.TRUE.equals(broadcast.getNewEpisode()) 
+                || Boolean.TRUE.equals(broadcast.getNewSeries())
+                || Boolean.TRUE.equals(broadcast.getLive());
     }
 
     /**
@@ -76,6 +101,6 @@ public class PickPredicate implements Predicate<Item>{
     }
     
     private Optional<LocalTimeRange> primetimeForChannel(String channelUri) {
-        return Optional.fromNullable(CHANNEL_PRIMTIME_OVERRIDES.get(channelUri));
+        return Optional.fromNullable(CHANNEL_PRIMETIME_OVERRIDES.get(channelUri));
     }
 }
