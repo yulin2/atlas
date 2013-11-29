@@ -13,7 +13,6 @@ import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -206,15 +205,19 @@ public class QueryWebModule {
     }
     
     ClipModelTransformer clipTransformer() {
-        return new ClipModelTransformer(contentResolver, topicStore, new SystemClock());
+        return new ClipModelTransformer(lookupStore, topicStore, idCodec(), new SystemClock());
+    }
+    
+    NumberToShortStringCodec idCodec() {
+        return SubstitutionTableNumberCodec.lowerCaseOnly();
     }
     
     BrandModelTransformer brandTransformer() {
-    	return new BrandModelTransformer(contentResolver, topicStore, clipTransformer(), new SystemClock());
+    	return new BrandModelTransformer(lookupStore, topicStore, idCodec(), clipTransformer(), new SystemClock());
     }
     
     ItemModelTransformer itemTransformer() {
-    	return new ItemModelTransformer(contentResolver, topicStore, clipTransformer(), new SystemClock());
+    	return new ItemModelTransformer(lookupStore, topicStore, idCodec(), clipTransformer(), new SystemClock());
     }
     
     ContentWriteController contentWriteController() {

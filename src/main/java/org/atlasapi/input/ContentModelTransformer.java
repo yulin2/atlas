@@ -11,8 +11,6 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Clip;
-import org.atlasapi.media.entity.Described;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
@@ -24,33 +22,70 @@ import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Person;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.entity.simple.SameAs;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.lookup.entry.LookupEntry;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.time.Clock;
 
 public abstract class ContentModelTransformer<F extends Description,T extends Content> extends DescribedModelTransformer<F, T> {
-
-    private final ContentResolver resolver;
     private final TopicStore topicStore;
+    private final LookupEntryStore lookupStore;
+    private final NumberToShortStringCodec idCodec;
     protected final Clock clock;
     private final ClipModelTransformer clipsModelTransformer;
+    
+    private final Predicate<SameAs> SAMEAS_WITH_IDS_FILTER = new Predicate<SameAs>() {
 
-    public ContentModelTransformer(ContentResolver resolver, TopicStore topicStore, ClipModelTransformer clipsModelTransformer, Clock clock) {
+        @Override
+        public boolean apply(SameAs input) {
+            return !input.getId().isEmpty();
+        }
+        
+    };
+    
+    private final Predicate<SameAs> SAMEAS_WITH_URIS_FILTER = new Predicate<SameAs>() {
+
+        @Override
+        public boolean apply(SameAs input) {
+            return input.getId().isEmpty();
+        }
+        
+    };
+    
+    private final Function<SameAs, Long> SAMEAS_TO_ID_TRANSFORMER = new Function<SameAs, Long>() {
+
+        @Override
+        public Long apply(SameAs input) {
+            return idCodec.decode(input.getId()).longValue();
+        }
+        
+    };
+    
+    private final Function<SameAs, String> SAMEAS_TO_URI_TRANSFORMER = new Function<SameAs, String>() {
+        @Override
+        public String apply(SameAs input) {
+            return input.getUri();
+        }
+    };
+
+    public ContentModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, NumberToShortStringCodec idCodec, ClipModelTransformer clipsModelTransformer, Clock clock) {
         super(clock);
-        this.resolver = resolver;
+        this.lookupStore = lookupStore;
         this.topicStore = topicStore;
         this.clipsModelTransformer = clipsModelTransformer;
+        this.idCodec = idCodec;
         this.clock = clock;
     }
     
@@ -158,19 +193,25 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
     
     @Override
     protected Set<LookupRef> resolveSameAs(Set<SameAs> equivalents) {
-        return resolveEquivs(Iterables.transform(equivalents, new Function<SameAs, String>() {
-            @Override
-            public String apply(SameAs input) {
-                return input.getUri();
-            }
-        }));
+        ImmutableSet.Builder<LookupRef> lookups = new ImmutableSet.Builder<LookupRef>();
+        Iterable<Long> idsToResolve = Iterables.transform( 
+            Iterables.filter(equivalents, SAMEAS_WITH_IDS_FILTER),
+            SAMEAS_TO_ID_TRANSFORMER);
+        Iterable<String> urisToResolve = Iterables.transform(
+            Iterables.filter(equivalents, SAMEAS_WITH_URIS_FILTER), 
+            SAMEAS_TO_URI_TRANSFORMER);
+        
+        lookups.addAll(Iterables.transform(
+                 lookupStore.entriesForIds(idsToResolve), 
+                                LookupEntry.TO_SELF));
+        lookups.addAll(resolveEquivs(urisToResolve));
+        return lookups.build();
     }
 
     private Set<LookupRef> resolveEquivs(Iterable<String> sameAs) {
-        ResolvedContent resolvedContent = resolver.findByCanonicalUris(sameAs);
-        List<Identified> identified = resolvedContent.getAllResolvedResults();
-        Iterable<Described> described = Iterables.filter(identified,Described.class);
-        return ImmutableSet.copyOf(Iterables.transform(described,LookupRef.FROM_DESCRIBED));
+        return ImmutableSet.copyOf( Iterables.transform(
+             lookupStore.entriesForCanonicalUris(sameAs),
+             LookupEntry.TO_SELF));
     }
 
     private List<CrewMember> transformPeople(List<Person> people, Publisher publisher) {

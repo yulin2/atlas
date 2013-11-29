@@ -18,7 +18,7 @@ import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.currency.Price;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.time.Clock;
@@ -36,8 +37,8 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
 
     private final BroadcastModelTransformer broadcastTransformer;
     
-    public ItemModelTransformer(ContentResolver resolver, TopicStore topicStore, ClipModelTransformer clipsModelTransformer, Clock clock) {
-        super(resolver, topicStore, clipsModelTransformer, clock);
+    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, NumberToShortStringCodec idCodec, ClipModelTransformer clipsModelTransformer, Clock clock) {
+        super(lookupStore, topicStore, idCodec, clipsModelTransformer, clock);
         this.broadcastTransformer = new BroadcastModelTransformer();
     }
 
