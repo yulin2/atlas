@@ -48,6 +48,7 @@ public class TalkTalkChannelProcessingTask extends ScheduledTask {
     @Override
     protected void runTask() {
         try {
+            final ContentGroup contentGroup = createOrGetContentGroup();
             client.processTvStructure(new TalkTalkTvStructureCallback<UpdateProgress>() {
 
                 private UpdateProgress progress = UpdateProgress.START;
@@ -60,11 +61,9 @@ public class TalkTalkChannelProcessingTask extends ScheduledTask {
                 @Override
                 public void process(ChannelType channel) {
                     try {
-                        ContentGroup contentGroup = createOrGetContentGroup();
                         log.debug("processing channel {}", channel.getId());
                         progress = progress.reduce(channelProcessor.process(channel, 
                                 Optional.of(contentGroup)));
-                        contentGroupWriter.createOrUpdate(contentGroup);
                         reportStatus(progress.toString());
                     } catch (TalkTalkException tte) {
                         log.error("failed to process " + channel.getId(), tte);
@@ -73,6 +72,8 @@ public class TalkTalkChannelProcessingTask extends ScheduledTask {
                 }
                 
             });
+            
+            contentGroupWriter.createOrUpdate(contentGroup);
         } catch (TalkTalkException tte) {
             // ensure task is marked failed, the exception is logged by the
             // scheduler.
