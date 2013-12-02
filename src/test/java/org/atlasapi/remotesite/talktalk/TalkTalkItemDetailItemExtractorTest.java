@@ -19,6 +19,7 @@ import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.talktalk.vod.bindings.AvailabilityType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.GenreListType;
@@ -33,15 +34,19 @@ import org.atlasapi.remotesite.talktalk.vod.bindings.SynopsisType;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.time.DateTimeZones;
 
-
+@RunWith(MockitoJUnitRunner.class)
 public class TalkTalkItemDetailItemExtractorTest {
     
-    private final TalkTalkItemDetailItemExtractor extractor = new TalkTalkItemDetailItemExtractor();
+    @Mock private ContentResolver contentResolver;
+    private final TalkTalkItemDetailItemExtractor extractor = new TalkTalkItemDetailItemExtractor(contentResolver);
 
     @Test
     public void testItemIsExtractedWhenBrandAndSeriesAreAbsent() {
