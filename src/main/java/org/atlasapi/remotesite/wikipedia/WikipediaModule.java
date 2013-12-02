@@ -34,6 +34,7 @@ public class WikipediaModule {
     
     private final EnglishWikipediaClient ewc = new EnglishWikipediaClient();
     protected final ArticleFetcher fetcher = ewc;
+    protected final FetchMeister fetchMeister = new FetchMeister(fetcher);
     
     protected final FilmExtractor filmExtractor = new FilmExtractor();
     protected final FilmArticleTitleSource allFilmsTitleSource = ewc;
@@ -64,10 +65,10 @@ public class WikipediaModule {
     }
     
     public TvBrandHierarchyUpdater allTvBrandsUpdater() {
-        return new TvBrandHierarchyUpdater(allTvBrandsTitleSource, fetcher, tvBrandHierarchyExtractor, contentWriter);
+        return new TvBrandHierarchyUpdater(allTvBrandsTitleSource, fetchMeister, tvBrandHierarchyExtractor, contentWriter);
     }
     
     public TvBrandHierarchyUpdater tvBrandsUpdaterForTitles(TvBrandArticleTitleSource titleSource) {
-        return new TvBrandHierarchyUpdater(titleSource, fetcher, tvBrandHierarchyExtractor, contentWriter);
+        return new TvBrandHierarchyUpdater(titleSource, fetchMeister, tvBrandHierarchyExtractor, contentWriter);
     }
 }

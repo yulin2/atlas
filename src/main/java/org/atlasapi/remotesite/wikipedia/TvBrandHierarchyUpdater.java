@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.remotesite.wikipedia.FetchMeister.PreloadedArticlesQueue;
+import org.atlasapi.remotesite.wikipedia.FetchMeister.PreloadedArticlesQueue.NoMoreArticlesException;
 import org.atlasapi.remotesite.wikipedia.television.BrandInfoboxScraper;
 import org.atlasapi.remotesite.wikipedia.television.EpisodeListScraper;
 import org.atlasapi.remotesite.wikipedia.television.ScrapedFlatHierarchy;
@@ -42,15 +44,18 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
     private static final int THREADS = 2;
     
     private ListeningExecutorService executor;
+    private PreloadedArticlesQueue articleQueue;
     private final FetchMeister fetchMeister;
+    private final TvBrandArticleTitleSource titleSource;
     private final CountDownLatch countdown = new CountDownLatch(SIMULTANEOUSNESS);
     
     private final TvBrandHierarchyExtractor extractor;
     private final ContentWriter writer;
     private UpdateProgress progress = UpdateProgress.START;
     
-    public TvBrandHierarchyUpdater(TvBrandArticleTitleSource titleSource, ArticleFetcher fetcher, TvBrandHierarchyExtractor extractor, ContentWriter writer) {
-        fetchMeister = new FetchMeister(Preconditions.checkNotNull(fetcher), titleSource.getAllTvBrandArticleTitles());
+    public TvBrandHierarchyUpdater(TvBrandArticleTitleSource titleSource, FetchMeister fetchMeister, TvBrandHierarchyExtractor extractor, ContentWriter writer) {
+        this.fetchMeister = Preconditions.checkNotNull(fetchMeister);
+        this.titleSource = Preconditions.checkNotNull(titleSource);
         this.extractor = Preconditions.checkNotNull(extractor);
         this.writer = Preconditions.checkNotNull(writer);
     }
@@ -61,6 +66,7 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
     @Override
     public void runTask() {
         fetchMeister.start();
+        articleQueue = fetchMeister.queueForPreloading(titleSource.getAllTvBrandArticleTitles());
         executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(THREADS));
         for(int i=0; i<SIMULTANEOUSNESS; ++i) {
             processNext();
@@ -74,6 +80,8 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
             }
         }
         executor.shutdown();
+        fetchMeister.cancelPreloading(articleQueue);
+        articleQueue = null;
         fetchMeister.stop();
         reportStatus(String.format("Processed: %d brands (%d failed)", progress.getTotalProgress(), progress.getFailures()));
     }
@@ -90,10 +98,10 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
         try {
             if(!shouldContinue()) {
                 log.info("TvBrandHierarchyUpdater has been cancelled and is stopping.");
-                throw new FetchMeister.NoMoreArticlesException();
+                throw new NoMoreArticlesException();
             }
-            next = fetchMeister.fetchNextBaseArticle();
-        } catch (FetchMeister.NoMoreArticlesException ex) {
+            next = articleQueue.fetchNextBaseArticle();
+        } catch (NoMoreArticlesException ex) {
             countdown.countDown();
             return;
         }

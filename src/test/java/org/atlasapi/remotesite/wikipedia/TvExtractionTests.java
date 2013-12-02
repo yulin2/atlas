@@ -38,7 +38,7 @@ public class TvExtractionTests {
                     return ImmutableList.of("Buffy the Vampire Slayer");
                 }
             },
-            new FilesystemArticlesSource(Paths.get(Resources.getResource(getClass(), "tv").toURI())),
+            new FetchMeister(new FilesystemArticlesSource(Paths.get(Resources.getResource(getClass(), "tv").toURI()))),
             new TvBrandHierarchyExtractor() {
                 @Override
                 public TvBrandHierarchy extract(ScrapedFlatHierarchy source) {
