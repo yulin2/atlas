@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.wikipedia;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,6 +63,7 @@ public class FetchMeister {
         private final Iterator<String> titles;
         private final BlockingQueue<Article> preloadedArticles = new ArrayBlockingQueue<Article>(MAX_PRELOAD);
         private boolean finished = false;
+        private Optional<Integer> totalTitles = Optional.absent();
         
         private PreloadedArticlesQueue(FetchMeister fetcher, Iterator<String> titles) {
             this.fetcher = fetcher;
@@ -91,6 +93,10 @@ public class FetchMeister {
                     Thread.currentThread().interrupt();
                 }
             }
+        }
+
+        public Optional<Integer> totalTitles() {
+            return totalTitles;
         }
     }
     
@@ -191,9 +197,10 @@ public class FetchMeister {
         return f;
     }
     
-    public PreloadedArticlesQueue queueForPreloading(Iterable<String> titleSource) {
+    public PreloadedArticlesQueue queueForPreloading(Iterable<String> titles) {
         synchronized (preloaders) {
-            PreloadedArticlesQueue queue = new PreloadedArticlesQueue(this, titleSource.iterator());
+            PreloadedArticlesQueue queue = new PreloadedArticlesQueue(this, titles.iterator());
+            queue.totalTitles = (Optional<Integer>) ((titles instanceof Collection) ? Optional.of(((Collection) titles).size()) : Optional.absent());
             preloaders.add(queue);
             synchronized (fetchingThread) { fetchingThread.notify(); }
             return queue;

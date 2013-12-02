@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.wikipedia;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
+
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.wikipedia.film.FilmArticleTitleSource;
@@ -9,6 +11,7 @@ import org.atlasapi.remotesite.wikipedia.film.FilmExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
@@ -22,7 +25,8 @@ public class FilmsUpdater extends ScheduledTask {
     private FilmExtractor extractor;
     
     private ContentWriter writer;
-    private UpdateProgress progress = UpdateProgress.START;
+    private UpdateProgress progress;
+    private Optional<Integer> totalTitles = Optional.absent();
     
     public FilmsUpdater(FilmArticleTitleSource titleSource, ArticleFetcher fetcher, FilmExtractor extractor, ContentWriter writer) {
         this.titleSource = checkNotNull(titleSource);
@@ -33,7 +37,11 @@ public class FilmsUpdater extends ScheduledTask {
 
     @Override
     protected void runTask() {
+        reportStatus("Starting...");
+        progress = UpdateProgress.START;
         Iterable<String> titles = titleSource.getAllFilmArticleTitles();
+        totalTitles = (Optional<Integer>) ((titles instanceof Collection) ? Optional.of(((Collection) titles).size()) : Optional.absent());
+        
         for (String title : titles) {
             try {
                 Article article = fetcher.fetchArticle(title);
@@ -54,6 +62,10 @@ public class FilmsUpdater extends ScheduledTask {
         synchronized (this) {
             progress = progress.reduce(occurrence);
         }
-        reportStatus(String.format("Processing: %d films so far (%d failed)", progress.getTotalProgress(), progress.getFailures()));
+        if (totalTitles.isPresent()) {
+            reportStatus(String.format("Processing: %d/%d films so far (%d failed)", progress.getTotalProgress(), totalTitles.get(), progress.getFailures()));
+        } else {
+            reportStatus(String.format("Processing: %d films so far (%d failed)", progress.getTotalProgress(), progress.getFailures()));
+        }
     }
 }

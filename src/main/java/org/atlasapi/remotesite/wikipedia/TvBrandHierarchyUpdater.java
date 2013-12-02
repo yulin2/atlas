@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -44,14 +45,17 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
     private static final int THREADS = 2;
     
     private ListeningExecutorService executor;
-    private PreloadedArticlesQueue articleQueue;
+    private final CountDownLatch countdown = new CountDownLatch(SIMULTANEOUSNESS);
+    
     private final FetchMeister fetchMeister;
     private final TvBrandArticleTitleSource titleSource;
-    private final CountDownLatch countdown = new CountDownLatch(SIMULTANEOUSNESS);
+    private PreloadedArticlesQueue articleQueue;
     
     private final TvBrandHierarchyExtractor extractor;
     private final ContentWriter writer;
-    private UpdateProgress progress = UpdateProgress.START;
+    
+    private UpdateProgress progress;
+    private Optional<Integer> totalTitles = Optional.absent();
     
     public TvBrandHierarchyUpdater(TvBrandArticleTitleSource titleSource, FetchMeister fetchMeister, TvBrandHierarchyExtractor extractor, ContentWriter writer) {
         this.fetchMeister = Preconditions.checkNotNull(fetchMeister);
@@ -65,8 +69,11 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
      */
     @Override
     public void runTask() {
+        reportStatus("Starting...");
+        progress = UpdateProgress.START;
         fetchMeister.start();
         articleQueue = fetchMeister.queueForPreloading(titleSource.getAllTvBrandArticleTitles());
+        totalTitles = articleQueue.totalTitles();
         executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(THREADS));
         for(int i=0; i<SIMULTANEOUSNESS; ++i) {
             processNext();
@@ -90,7 +97,11 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
         synchronized (this) {
             progress = progress.reduce(occurrence);
         }
-        reportStatus(String.format("Processing: %d brands so far (%d failed)", progress.getTotalProgress(), progress.getFailures()));
+        if (totalTitles.isPresent()) {
+            reportStatus(String.format("Processing: %d/%d brands so far (%d failed)", progress.getTotalProgress(), totalTitles.get(), progress.getFailures()));
+        } else {
+            reportStatus(String.format("Processing: %d brands so far (%d failed)", progress.getTotalProgress(), progress.getFailures()));
+        }
     }
 
     private void processNext() {
