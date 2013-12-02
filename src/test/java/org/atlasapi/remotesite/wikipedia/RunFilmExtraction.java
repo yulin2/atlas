@@ -11,7 +11,7 @@ public class RunFilmExtraction {
         EnglishWikipediaClient ewc = new EnglishWikipediaClient();
         new FilmsUpdater(
                 ewc,
-                new LocallyCachingArticleFetcher(ewc, System.getProperty("user.home") + "/atlasTestCaches/wikipedia/films"),
+                new FetchMeister(new LocallyCachingArticleFetcher(ewc, System.getProperty("user.home") + "/atlasTestCaches/wikipedia/films")),
                 new FilmExtractor(),
                 new ContentWriter() {
                     @Override
