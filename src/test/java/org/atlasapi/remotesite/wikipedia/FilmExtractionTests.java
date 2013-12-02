@@ -27,6 +27,9 @@ public class FilmExtractionTests {
     Article article;
     
     private Article fakeArticle(final String articleText) {
+        return fakeArticle("Fake title", articleText);
+    }
+    private Article fakeArticle(final String title, final String articleText) {
         return new Article() {
             @Override
             public DateTime getLastModified() {
@@ -40,7 +43,7 @@ public class FilmExtractionTests {
 
             @Override
             public String getTitle() {
-                return "Fake title";
+                return title;
             }
         };
     }
@@ -49,6 +52,9 @@ public class FilmExtractionTests {
         public String name;
         public Role role;
         public String articleTitle;
+        public CrewMemberTestFields(String name, Role role) {
+            this(name, role, name);
+        }
         public CrewMemberTestFields(String name, Role role, String articleTitle) {
             this.name = name;
             this.role = role;
@@ -108,20 +114,46 @@ public class FilmExtractionTests {
         assertTrue(flim.getAliases().contains(new Alias("boxofficemojo:movie", "hackers")));
         
         assertAllPresentAndCorrect(flim.getPeople(), ImmutableList.of(
-                new CrewMemberTestFields("Iain Softley", Role.DIRECTOR, "Iain Softley"),
+                new CrewMemberTestFields("Iain Softley", Role.DIRECTOR),
                 new CrewMemberTestFields("Michael Peyser", Role.PRODUCER, null),
-                new CrewMemberTestFields("Rafael Moreu", Role.WRITER, "Rafael Moreu"),
-                new CrewMemberTestFields("Simon Boswell", Role.COMPOSER, "Simon Boswell"),
+                new CrewMemberTestFields("Rafael Moreu", Role.WRITER),
+                new CrewMemberTestFields("Simon Boswell", Role.COMPOSER),
                 new CrewMemberTestFields("Chris Blunden", Role.EDITOR, null),
                 new CrewMemberTestFields("Martin Walsh", Role.EDITOR, "Martin Walsh (film editor)"),
-                new CrewMemberTestFields("Jonny Lee Miller", Role.ACTOR, "Jonny Lee Miller"),
-                new CrewMemberTestFields("Angelina Jolie", Role.ACTOR, "Angelina Jolie"),
-                new CrewMemberTestFields("Jesse Bradford", Role.ACTOR, "Jesse Bradford"),
-                new CrewMemberTestFields("Matthew Lillard", Role.ACTOR, "Matthew Lillard"),
-                new CrewMemberTestFields("Fisher Stevens", Role.ACTOR, "Fisher Stevens"),
-                new CrewMemberTestFields("Lorraine Bracco", Role.ACTOR, "Lorraine Bracco"),
-                new CrewMemberTestFields("Renoly Santiago", Role.ACTOR, "Renoly Santiago"),
-                new CrewMemberTestFields("Laurence Mason", Role.ACTOR, "Laurence Mason")
+                new CrewMemberTestFields("Jonny Lee Miller", Role.ACTOR),
+                new CrewMemberTestFields("Angelina Jolie", Role.ACTOR),
+                new CrewMemberTestFields("Jesse Bradford", Role.ACTOR),
+                new CrewMemberTestFields("Matthew Lillard", Role.ACTOR),
+                new CrewMemberTestFields("Fisher Stevens", Role.ACTOR),
+                new CrewMemberTestFields("Lorraine Bracco", Role.ACTOR),
+                new CrewMemberTestFields("Renoly Santiago", Role.ACTOR),
+                new CrewMemberTestFields("Laurence Mason", Role.ACTOR)
+        ));
+    }
+    
+    @Test
+    public void testRobinHood() throws IOException {
+        Film flim = extractor.extract(fakeArticle("The Adventures of Robin Hood (film)",
+                IOUtils.toString(Resources.getResource(getClass(), "film/The Adventures of Robin Hood (film).mediawiki").openStream(), Charsets.UTF_8.name())
+        ));
+        assertEquals("The Adventures of Robin Hood", flim.getTitle());
+        
+        assertTrue(flim.getAliases().contains(new Alias("imdb:url", "http://imdb.com/title/tt0029843")));
+        assertTrue(flim.getAliases().contains(new Alias("imdb:title", "0029843")));
+        
+        assertAllPresentAndCorrect(flim.getPeople(), ImmutableList.of(
+                new CrewMemberTestFields("Michael Curtiz", Role.DIRECTOR),
+                new CrewMemberTestFields("William Keighley", Role.DIRECTOR),
+                new CrewMemberTestFields("Hal B. Wallis", Role.PRODUCER),
+                new CrewMemberTestFields("Henry Blanke", Role.PRODUCER),
+                new CrewMemberTestFields("Norman Reilly Raine", Role.ADAPTED_BY),
+                new CrewMemberTestFields("Seton I. Miller", Role.ADAPTED_BY),
+                new CrewMemberTestFields("Erich Wolfgang Korngold", Role.COMPOSER),
+                new CrewMemberTestFields("Ralph Dawson", Role.EDITOR),
+                new CrewMemberTestFields("Errol Flynn", Role.ACTOR),
+                new CrewMemberTestFields("Olivia de Havilland", Role.ACTOR),
+                new CrewMemberTestFields("Basil Rathbone", Role.ACTOR),
+                new CrewMemberTestFields("Claude Rains", Role.ACTOR)
         ));
     }
 }

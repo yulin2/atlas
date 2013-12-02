@@ -124,42 +124,34 @@ public final class FilmInfoboxScraper {
                 return;
             }
             TemplateArgument a = (TemplateArgument) n;
-
             final String key = SwebleHelper.flattenTextNodeList(a.getName());
-            String unparsed = SwebleHelper.unparse(a.getValue()).trim();
-            AstNode reparsedValue = null;
-            try {
-                reparsedValue = SwebleHelper.parse(unparsed);
-            } catch (Exception e) {
-                log.warn("Failed to reparse: " + unparsed, e);
-            }
             
             if ("name".equalsIgnoreCase(key)) {
-                attrs.name = SwebleHelper.extractList(reparsedValue);
+                attrs.name = SwebleHelper.extractList(a.getValue());
             } else if ("director".equalsIgnoreCase(key)) {
-                attrs.directors = SwebleHelper.extractList(reparsedValue);
+                attrs.directors = SwebleHelper.extractList(a.getValue());
             } else if ("producer".equalsIgnoreCase(key)) {
-                attrs.producers = SwebleHelper.extractList(reparsedValue);
+                attrs.producers = SwebleHelper.extractList(a.getValue());
             } else if ("writer".equalsIgnoreCase(key)) {
-                attrs.writers = SwebleHelper.extractList(reparsedValue);
+                attrs.writers = SwebleHelper.extractList(a.getValue());
             } else if ("screenplay".equalsIgnoreCase(key)) {
-                attrs.screenplayWriters = SwebleHelper.extractList(reparsedValue);
+                attrs.screenplayWriters = SwebleHelper.extractList(a.getValue());
             } else if ("story".equalsIgnoreCase(key)) {
-                attrs.storyWriters = SwebleHelper.extractList(reparsedValue);
+                attrs.storyWriters = SwebleHelper.extractList(a.getValue());
             } else if ("narrator".equalsIgnoreCase(key)) {
-                attrs.narrators = SwebleHelper.extractList(reparsedValue);
+                attrs.narrators = SwebleHelper.extractList(a.getValue());
             } else if ("starring".equalsIgnoreCase(key)) {
-                attrs.starring = SwebleHelper.extractList(reparsedValue);
+                attrs.starring = SwebleHelper.extractList(a.getValue());
             } else if ("music".equalsIgnoreCase(key)) {
-                attrs.composers = SwebleHelper.extractList(reparsedValue);
+                attrs.composers = SwebleHelper.extractList(a.getValue());
             } else if ("cinematography".equalsIgnoreCase(key)) {
-                attrs.cinematographers = SwebleHelper.extractList(reparsedValue);
+                attrs.cinematographers = SwebleHelper.extractList(a.getValue());
             } else if ("editing".equalsIgnoreCase(key)) {
-                attrs.editors = SwebleHelper.extractList(reparsedValue);
+                attrs.editors = SwebleHelper.extractList(a.getValue());
             } else if ("studio".equalsIgnoreCase(key)) {
-                attrs.productionStudios = SwebleHelper.extractList(reparsedValue);
+                attrs.productionStudios = SwebleHelper.extractList(a.getValue());
             } else if ("distributor".equalsIgnoreCase(key)) {
-                attrs.distributors = SwebleHelper.extractList(reparsedValue);
+                attrs.distributors = SwebleHelper.extractList(a.getValue());
             } else if ("released".equalsIgnoreCase(key)) {
                 // TODO extract release dates
             } else if ("runtime".equalsIgnoreCase(key)) {
@@ -173,9 +165,9 @@ public final class FilmInfoboxScraper {
                     if (! runtimeText.isEmpty()) { log.warn("Failed to extract running time from weird string \"" + runtimeText + "\""); }
                 }
             } else if ("country".equalsIgnoreCase(key)) {
-                attrs.countries = SwebleHelper.extractList(reparsedValue);
+                attrs.countries = SwebleHelper.extractList(a.getValue());
             } else if ("language".equalsIgnoreCase(key)) {
-                attrs.language = SwebleHelper.extractList(reparsedValue);
+                attrs.language = SwebleHelper.extractList(a.getValue());
             }
         }
     }
