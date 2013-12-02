@@ -66,6 +66,7 @@ public class ContentMerger {
         current.setSpecialization(extracted.getSpecialization());
         current.setLastUpdated(extracted.getLastUpdated());
         current.setClips(extracted.getClips());
+        current.setEquivalentTo(extracted.getEquivalentTo());
         return current;
     }
 
