@@ -11,7 +11,7 @@ public class RunTvExtraction {
         EnglishWikipediaClient ewc = new EnglishWikipediaClient();
         new TvBrandHierarchyUpdater(
                 ewc,
-                new LocallyCachingArticleFetcher(ewc, System.getProperty("user.home") + "/atlasTestCaches/wikipedia/tv"),
+                new FetchMeister(new LocallyCachingArticleFetcher(ewc, System.getProperty("user.home") + "/atlasTestCaches/wikipedia/tv")),
                 new TvBrandHierarchyExtractor(),
                 new ContentWriter() {
                     @Override
