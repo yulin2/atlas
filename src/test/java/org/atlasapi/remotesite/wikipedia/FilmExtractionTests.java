@@ -103,6 +103,9 @@ public class FilmExtractionTests {
         
         assertTrue(flim.getAliases().contains(new Alias("imdb:url", "http://imdb.com/title/tt0113243")));
         assertTrue(flim.getAliases().contains(new Alias("imdb:title", "0113243")));
+        assertTrue(flim.getAliases().contains(new Alias("rottentomatoes:movie", "hackers")));
+        assertTrue(flim.getAliases().contains(new Alias("metacritic:movie", "hackers")));
+        assertTrue(flim.getAliases().contains(new Alias("boxofficemojo:movie", "hackers")));
         
         assertAllPresentAndCorrect(flim.getPeople(), ImmutableList.of(
                 new CrewMemberTestFields("Iain Softley", Role.DIRECTOR, "Iain Softley"),

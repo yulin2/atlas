@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.wikipedia.film;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.atlasapi.remotesite.wikipedia.SwebleHelper;
 import org.atlasapi.remotesite.wikipedia.SwebleHelper.ListItemResult;
@@ -17,7 +19,6 @@ import xtc.parser.ParseException;
 import com.google.common.collect.ImmutableList;
 
 import de.fau.cs.osr.ptk.common.ast.AstNode;
-import de.fau.cs.osr.ptk.common.ast.NodeList;
 
 /**
  * This utility class extracts information from the Film infobox in a Wikipedia article.
@@ -43,7 +44,7 @@ public final class FilmInfoboxScraper {
         public Integer runtimeInMins;
         public ImmutableList<ListItemResult> countries;
         public ImmutableList<ListItemResult> language;
-        public String imdbID;
+        public Map<String,String> externalAliases = new TreeMap<>();
     }
 
     /**
@@ -80,11 +81,40 @@ public final class FilmInfoboxScraper {
                     consumeAttribute(children.next());
                 }
             } else if ("IMDb title".equalsIgnoreCase(name)) {
-                NodeList args = t.getArgs();
                 try {
-                    attrs.imdbID = SwebleHelper.flattenTextNodeList(((TemplateArgument) args.get(0)).getValue());
+                    String imdbID = SwebleHelper.extractArgument(t, 0);
+                    attrs.externalAliases.put("imdb:title", imdbID);
+                    attrs.externalAliases.put("imdb:url", "http://imdb.com/title/tt" + imdbID);
                 } catch (Exception e) {
-                    log.warn("Failed to extract IMDB id from \""+ SwebleHelper.unparse(t) +"\"");
+                    log.warn("Failed to extract IMDB ID from \""+ SwebleHelper.unparse(t) +"\"", e);
+                }
+            } else if ("AllRovi movie".equalsIgnoreCase(name)) {
+                try {
+                    String id = SwebleHelper.extractArgument(t, 0);
+                    attrs.externalAliases.put("allrovi:movie", id);
+                } catch (Exception e) {
+                    log.warn("Failed to extract AllMovie ID from \""+ SwebleHelper.unparse(t) +"\"", e);
+                }
+            } else if ("rotten-tomatoes".equalsIgnoreCase(name)) {
+                try {
+                    String id = SwebleHelper.extractArgument(t, 0);
+                    attrs.externalAliases.put("rottentomatoes:movie", id);
+                } catch (Exception e) {
+                    log.warn("Failed to extract Rotten Tomatoes ID from \""+ SwebleHelper.unparse(t) +"\"", e);
+                }
+            } else if ("Mojo title".equalsIgnoreCase(name)) {
+                try {
+                    String id = SwebleHelper.extractArgument(t, 0);
+                    attrs.externalAliases.put("boxofficemojo:movie", id);
+                } catch (Exception e) {
+                    log.warn("Failed to extract Box Office Mojo ID from \""+ SwebleHelper.unparse(t) +"\"", e);
+                }
+            } else if ("Metacritic film".equalsIgnoreCase(name)) {
+                try {
+                    String id = SwebleHelper.extractArgument(t, 0);
+                    attrs.externalAliases.put("metacritic:movie", id);
+                } catch (Exception e) {
+                    log.warn("Failed to extract Metacritic ID from \""+ SwebleHelper.unparse(t) +"\"", e);
                 }
             }
         }

@@ -118,6 +118,14 @@ public class SwebleHelper {
     }
     
     /**
+     * Returns a positional template argument, passed through {@link #flattenTextNodeList(NodeList)}.
+     */
+    public static String extractArgument(Template t, int pos) throws IndexOutOfBoundsException {
+        NodeList args = t.getArgs();
+        return flattenTextNodeList(((TemplateArgument) args.get(pos)).getValue());
+    }
+    
+    /**
      * Tries to interpret the given AST as a {@link LocalDate}. The AST should be of the preprocessed (not parsed) type, and should contain no other dubious content.
      */
     public static LocalDate extractDate(AstNode node) {

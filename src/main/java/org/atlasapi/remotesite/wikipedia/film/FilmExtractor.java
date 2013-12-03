@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.wikipedia.film;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.CrewMember;
@@ -56,9 +57,10 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
             crewify(info.screenplayWriters, Role.ADAPTED_BY, people);  // TODO is this the right role?
             crewify(info.starring, Role.ACTOR, people);
             
-            if (info.imdbID != null) {
-                flim.addAlias(new Alias("imdb:title", info.imdbID));
-                flim.addAlias(new Alias("imdb:url", "http://imdb.com/title/tt" + info.imdbID));
+            if (info.externalAliases != null) {
+                for (Map.Entry<String, String> a : info.externalAliases.entrySet()) {
+                    flim.addAlias(new Alias(a.getKey(), a.getValue()));
+                }
             }
             
             return flim;
