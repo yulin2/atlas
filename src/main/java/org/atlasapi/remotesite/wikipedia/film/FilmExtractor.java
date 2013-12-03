@@ -40,7 +40,7 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
             if (title != null && title.size() == 1) {
                 flim.setTitle(title.get(0).name);
             } else {
-                log.warn("Film in Wikipedia article \"" + article.getTitle() + "\" has " + (title == null || title.isEmpty() ? "no title." : "multiple titles.") + " Falling back to guessing from article title.");
+                log.info("Film in Wikipedia article \"" + article.getTitle() + "\" has " + (title == null || title.isEmpty() ? "no title." : "multiple titles.") + " Falling back to guessing from article title.");
                 flim.setTitle(guessFilmNameFromArticleTitle(article.getTitle()));
             }
             

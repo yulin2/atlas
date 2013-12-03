@@ -96,7 +96,13 @@ public final class FilmInfoboxScraper {
             TemplateArgument a = (TemplateArgument) n;
 
             final String key = SwebleHelper.flattenTextNodeList(a.getName());
-            final AstNode reparsedValue = SwebleHelper.parse(SwebleHelper.unparse(a.getValue()));
+            String unparsed = SwebleHelper.unparse(a.getValue()).trim();
+            AstNode reparsedValue = null;
+            try {
+                reparsedValue = SwebleHelper.parse(unparsed);
+            } catch (Exception e) {
+                log.warn("Failed to reparse: " + unparsed, e);
+            }
             
             if ("name".equalsIgnoreCase(key)) {
                 attrs.name = SwebleHelper.extractList(reparsedValue);
@@ -127,7 +133,15 @@ public final class FilmInfoboxScraper {
             } else if ("released".equalsIgnoreCase(key)) {
                 // TODO extract release dates
             } else if ("runtime".equalsIgnoreCase(key)) {
-                attrs.runtimeInMins = Integer.parseInt(SwebleHelper.flattenTextNodeList(a.getValue()).split(" ", 2)[0]);
+                String runtimeText = SwebleHelper.flattenTextNodeList(a.getValue());;
+                try {
+                    attrs.runtimeInMins = Integer.parseInt(runtimeText.split(" ", 2)[0]);
+                    if (attrs.runtimeInMins < 10 || attrs.runtimeInMins > 300) {
+                        log.warn("Suspicious running time: " + attrs.runtimeInMins);
+                    }
+                } catch (NumberFormatException e) {
+                    if (! runtimeText.isEmpty()) { log.warn("Failed to extract running time from weird string \"" + runtimeText + "\""); }
+                }
             } else if ("country".equalsIgnoreCase(key)) {
                 attrs.countries = SwebleHelper.extractList(reparsedValue);
             } else if ("language".equalsIgnoreCase(key)) {
