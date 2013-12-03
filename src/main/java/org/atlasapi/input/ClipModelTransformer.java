@@ -2,14 +2,17 @@ package org.atlasapi.input;
 
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
+
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.time.Clock;
 
 public class ClipModelTransformer extends ItemModelTransformer  {
-    public ClipModelTransformer(ContentResolver resolver, TopicStore topicStore, Clock clock) {
-        super(resolver, topicStore, null, clock);
+    public ClipModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, 
+            NumberToShortStringCodec idCodec, Clock clock) {
+        super(lookupStore, topicStore, idCodec, null, clock);
     }
 
     @Override
