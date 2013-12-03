@@ -35,7 +35,6 @@ import de.fau.cs.osr.ptk.common.ast.Text;
 public class SwebleHelper {
     private static final Logger log = LoggerFactory.getLogger(SwebleHelper.class);
     private static final ParserConfigInterface cfg = new SimpleParserConfig();
-    private static final LazyParser parser = new LazyParser(cfg);
     private static final LazyPreprocessor preprocessor = new LazyPreprocessor(cfg);
 
     /**
@@ -59,7 +58,7 @@ public class SwebleHelper {
      */
     public static LazyParsedPage parse(String mediaWikiSource) {
         try {
-            return (LazyParsedPage) parser.parseArticle(mediaWikiSource, "");
+            return (LazyParsedPage) new LazyParser(cfg).parseArticle(mediaWikiSource, "");
         } catch (IOException|ParseException ex) {
             throw new RuntimeException(ex);
         }
