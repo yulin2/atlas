@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.atlasapi.remotesite.wikipedia.ArticleFetcher.FetchFailedException;
 import org.joda.time.DateTime;
@@ -14,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -21,10 +24,11 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * A helper class that tries to smooth the process of fetching pages from Wikipedia.
  * <p>
- * Rather than using an {@link ArticleFetcher} directly, updaters may go through this class. Benefits include:
+ * Rather than using a simple {@link ArticleFetcher} directly, updaters may go through this class. Benefits include:
  * <ul>
  *   <li>The certainty that only one article is being fetched from Wikipedia at a time. (i.e. throttling)</li>
  *   <li>Automatic preloading of articles from the prespecified source of titles (during the time when no specific articles have been requested for immediate loading), so they can hopefully be available more quickly more often.</li>
+ *   <li>Automatic redirect following!</li>
  * </ul>
  */
 public class FetchMeister {
@@ -34,6 +38,11 @@ public class FetchMeister {
      * The maximum number of articles to preload from the title source.
      */
     private static final int MAX_PRELOAD = 20;
+    
+    /**
+     * The maximum number of times to follow redirects for a single initial title.
+     */
+    private static final int MAX_REDIRECTS = 5;
 
     /**
      * Special poison value to put on the PreloadedArticlesQueues' BlockingQueue, indicating there's no more titles left to load.
@@ -89,7 +98,7 @@ public class FetchMeister {
                         throw new NoMoreArticlesException();
                     }
                     log.info("Base article \""+ a.getTitle() +"\" was fetched for processing");
-                    return Futures.immediateFuture(a);
+                    return fetcher.followRedirects(Futures.immediateFuture(a), MAX_REDIRECTS);
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
@@ -199,14 +208,38 @@ public class FetchMeister {
         }
     }
     
+    private static final Pattern redirectPattern = Pattern.compile("^\\s*\\#REDIRECT\\s*\\[\\[([^\\]]*)\\]\\]", Pattern.CASE_INSENSITIVE);
+    
+    private ListenableFuture<Article> followRedirects(ListenableFuture<Article> articleThatMightBeARedirect, final int redirectLimit) {
+        return Futures.transform(articleThatMightBeARedirect, new AsyncFunction<Article, Article>() {
+            public ListenableFuture<Article> apply(Article article) {
+                Matcher matcher = redirectPattern.matcher(article.getMediaWikiSource());
+                if (matcher.matches()) {
+                    String toTitle = matcher.group(1);
+                    log.info("Following redirect ["+ article.getTitle() +" => "+ toTitle +"]");
+                    if (redirectLimit < 2) {
+                        String errorMsg = "Too many redirects on article \""+ article.getTitle() +"\"";
+                        log.error(errorMsg);
+                        throw new RuntimeException(errorMsg);
+                    }
+                    return fetchChildArticle(toTitle, redirectLimit-1);
+                }
+                return Futures.immediateFuture(article);
+            }
+        });
+    }
+    
     /**
      * Queues up a specified article for priority fetching (i.e. prioritized above preloading more from the TitleSource). Returns a Future of that article.
      */
     public ListenableFuture<Article> fetchChildArticle(String title) {
+        return fetchChildArticle(title, MAX_REDIRECTS);
+    }
+    private ListenableFuture<Article> fetchChildArticle(String title, int redirectLimit) {
         SettableFuture<Article> f = SettableFuture.create();
         childArticleRequests.add(new Request(title, f));
         synchronized (fetchingThread) { fetchingThread.notify(); }
-        return f;
+        return followRedirects(f, redirectLimit);
     }
     
     public PreloadedArticlesQueue queueForPreloading(Iterable<String> titles) {
