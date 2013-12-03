@@ -8,6 +8,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.atlasapi.remotesite.wikipedia.ArticleFetcher.FetchFailedException;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,7 +158,13 @@ public class FetchMeister {
                 if (r != null) {
                     didNothingThisTime = false;
                     log.debug("Fetching child article \""+ r.title +"\"");
-                    r.future.set(fetcher.fetchArticle(r.title));
+                    try {
+                        Article article = fetcher.fetchArticle(r.title);
+                        r.future.set(article);
+                    } catch (FetchFailedException e) {
+                        log.error("Fetching child article \""+ r.title +"\" failed", e);
+                        r.future.setException(e);
+                    }
                 } else {
                   // otherwise, if no child articles are waiting to be fetched...
                     // preload another base article if we want one
@@ -168,7 +175,12 @@ public class FetchMeister {
                         if (queue.titles.hasNext()) {
                             String title = queue.titles.next();
                             log.debug("Prefetching \""+ title +"\"...");
-                            queue.preloadedArticles.offer(fetcher.fetchArticle(title));
+                            try {
+                                Article article = fetcher.fetchArticle(title);
+                                queue.preloadedArticles.offer(article);
+                            } catch (FetchFailedException e) {
+                                log.error("Fetching article \""+ title +"\" failed", e);
+                            }
                         } else {
                             queue.preloadedArticles.offer(NO_MORE_ARTICLES);
                             cancelPreloading(queue);
