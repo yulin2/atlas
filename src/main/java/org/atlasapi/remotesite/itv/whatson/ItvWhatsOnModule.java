@@ -80,5 +80,10 @@ public class ItvWhatsOnModule {
                 .withLookBack(7)
                 .withLookAhead(7)
                 .build();
-    }   
+    }
+
+    @Bean
+    public ItvWhatsOnController itvWhatsOnController() {
+        return new ItvWhatsOnController(feedUrl, itvWhatsOnClient(), processor());
+    }
 }

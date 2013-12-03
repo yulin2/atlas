@@ -6,6 +6,7 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.joda.time.LocalDate;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 import com.metabroadcast.common.time.Clock;
@@ -17,23 +18,17 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
     private final String feedUrl;
     private final RemoteSiteClient<List<ItvWhatsOnEntry>> itvWhatsOnClient;
     private final ItvWhatsOnEntryProcessor processor;
-    private final int lookAhead;
-    private final int lookBack;
-    private Clock clock;
+    private final DayRange dayRange;
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     private ItvWhatsOnUpdater(String feedUrl, 
             RemoteSiteClient<List<ItvWhatsOnEntry>> itvWhatsOnClient, 
             ItvWhatsOnEntryProcessor processor, 
-            int lookAhead,
-            int lookBack, 
-            Clock clock) {
+            DayRange dayRange) {
         this.feedUrl = feedUrl;
         this.itvWhatsOnClient = itvWhatsOnClient;
         this.processor = processor;
-        this.lookBack = lookBack;
-        this.lookAhead = lookAhead;
-        this.clock = clock;
+        this.dayRange = dayRange;
     }
     
     public UpdateProgress ingestFeedEntries(List<ItvWhatsOnEntry> entries) {
@@ -52,10 +47,6 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
 
     @Override
     protected void runTask() {
-        DayRangeGenerator dateRangeGenerator = new DayRangeGenerator()
-        .withLookBack(lookBack)
-        .withLookAhead(lookAhead);
-        DayRange dayRange = dateRangeGenerator.generate(clock.now().toLocalDate());
 
         UpdateProgress feedLevelProgress = UpdateProgress.START;
         UpdateProgress itemLevelProgress = UpdateProgress.START;
@@ -87,8 +78,9 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
         private String feedUrl;
         private RemoteSiteClient<List<ItvWhatsOnEntry>> itvWhatsOnClient;
         private ItvWhatsOnEntryProcessor processor;
-        private int lookAhead;
-        private int lookBack;
+        private Integer lookAhead;
+        private Integer lookBack;
+        private LocalDate day;
         private Clock clock = new SystemClock();
         
         public Builder withFeedUrl(String feedUrl) {
@@ -116,18 +108,43 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
             return this;
         }
         
+        public Builder withDay(LocalDate day) {
+            this.day = day;
+            return this;
+        }
+        
         public Builder withClock(Clock clock) {
             this.clock = clock;
             return this;
         }
         
         public ItvWhatsOnUpdater build() {
+            Preconditions.checkNotNull(feedUrl);
+            Preconditions.checkNotNull(itvWhatsOnClient);
+            Preconditions.checkNotNull(processor);
+            
+            DayRange dayRange;
+                        
+            if (day == null) {
+                Preconditions.checkNotNull(lookBack);
+                Preconditions.checkNotNull(lookAhead);
+                DayRangeGenerator dateRangeGenerator = new DayRangeGenerator()
+                .withLookBack(lookBack)
+                .withLookAhead(lookAhead);
+                dayRange = dateRangeGenerator.generate(clock.now().toLocalDate());
+            } else {
+                Preconditions.checkArgument(lookBack == null && lookAhead == null, 
+                        "Cannot specify day when lookBack or lookAhead values have been set");
+                DayRangeGenerator dateRangeGenerator = new DayRangeGenerator()
+                .withLookBack(0)
+                .withLookAhead(0);
+                dayRange = dateRangeGenerator.generate(day);
+            }
+            
             return new ItvWhatsOnUpdater(feedUrl, 
                     itvWhatsOnClient, 
                     processor, 
-                    lookAhead,
-                    lookBack, 
-                    clock);
+                    dayRange);
         }
     }
 }
