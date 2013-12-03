@@ -2,6 +2,7 @@ package org.atlasapi.query;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.input.BrandModelTransformer;
+import org.atlasapi.input.ClipModelTransformer;
 import org.atlasapi.input.DefaultGsonModelReader;
 import org.atlasapi.input.DelegatingModelTransformer;
 import org.atlasapi.input.ItemModelTransformer;
@@ -204,12 +205,16 @@ public class QueryWebModule {
         return new QueryController(queryExecutor, configFetcher, log, contentModelOutputter(), contentWriteController());
     }
     
+    ClipModelTransformer clipTransformer() {
+        return new ClipModelTransformer(contentResolver, topicStore, new SystemClock());
+    }
+    
     BrandModelTransformer brandTransformer() {
-    	return new BrandModelTransformer(contentResolver, topicStore, new SystemClock());
+    	return new BrandModelTransformer(contentResolver, topicStore, clipTransformer(), new SystemClock());
     }
     
     ItemModelTransformer itemTransformer() {
-    	return new ItemModelTransformer(contentResolver, topicStore, new SystemClock());
+    	return new ItemModelTransformer(contentResolver, topicStore, clipTransformer(), new SystemClock());
     }
     
     ContentWriteController contentWriteController() {
