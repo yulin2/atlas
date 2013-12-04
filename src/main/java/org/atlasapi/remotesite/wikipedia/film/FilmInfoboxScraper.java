@@ -7,7 +7,6 @@ import java.util.TreeMap;
 
 import org.atlasapi.remotesite.wikipedia.SwebleHelper;
 import org.atlasapi.remotesite.wikipedia.SwebleHelper.ListItemResult;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
@@ -17,14 +16,26 @@ import org.sweble.wikitext.lazy.preprocessor.TemplateArgument;
 import xtc.parser.ParseException;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
+import de.fau.cs.osr.ptk.common.AstVisitor;
 import de.fau.cs.osr.ptk.common.ast.AstNode;
+import de.fau.cs.osr.ptk.common.ast.NodeList;
 
 /**
  * This utility class extracts information from the Film infobox in a Wikipedia article.
  */
 public final class FilmInfoboxScraper {
     private final static Logger log = LoggerFactory.getLogger(FilmInfoboxScraper.class);
+    
+    public static class ReleaseDateResult {
+        public String year;
+        public String month;
+        public String day;
+        public ListItemResult location;
+        
+        private static enum Field {YEAR, MONTH, DAY, LOCATION};
+    }
     
     public static class Result {
         public ImmutableList<ListItemResult> name;
@@ -40,7 +51,7 @@ public final class FilmInfoboxScraper {
         public ImmutableList<ListItemResult> editors;
         public ImmutableList<ListItemResult> productionStudios;
         public ImmutableList<ListItemResult> distributors;
-        public ImmutableList<LocalDate> releaseDates;  // TODO oh dear, this is mildly complicated
+        public ImmutableList<ReleaseDateResult> releaseDates;
         public Integer runtimeInMins;
         public ImmutableList<ListItemResult> countries;
         public ImmutableList<ListItemResult> language;
@@ -153,7 +164,7 @@ public final class FilmInfoboxScraper {
             } else if ("distributor".equalsIgnoreCase(key)) {
                 attrs.distributors = SwebleHelper.extractList(a.getValue());
             } else if ("released".equalsIgnoreCase(key)) {
-                // TODO extract release dates
+                attrs.releaseDates = extractFilmReleaseDates(a.getValue());
             } else if ("runtime".equalsIgnoreCase(key)) {
                 String runtimeText = SwebleHelper.flattenTextNodeList(a.getValue());;
                 try {
@@ -170,6 +181,65 @@ public final class FilmInfoboxScraper {
                 attrs.language = SwebleHelper.extractList(a.getValue());
             }
         }
+    }
+    
+    private static ImmutableList<ReleaseDateResult> extractFilmReleaseDates(NodeList a) {
+        ImmutableList.Builder<ReleaseDateResult> builder = ImmutableList.builder();
+        (new FilmDateVisitor(builder)).go(a);
+        return builder.build();
+    }
+    
+    protected static class FilmDateVisitor extends AstVisitor {
+        private final ImmutableList.Builder<ReleaseDateResult> builder;
+        // State:
+        private ReleaseDateResult.Field nextField = ReleaseDateResult.Field.YEAR;
+        private ReleaseDateResult currentResult;
+        
+        public FilmDateVisitor(Builder<ReleaseDateResult> builder) {
+            super();
+            this.builder = builder;
+        }
+
+        public void visit(NodeList l) {
+            iterate(l);
+        }
+        
+        public void visit(Template t) {
+            String name = SwebleHelper.flattenTextNodeList(t.getName());
+            if (! "Film date".equalsIgnoreCase(name)) { return; }
+            for (AstNode n : t.getArgs()) {
+                if (!(n instanceof TemplateArgument)) {
+                    log.warn("Encountered a non-TemplateArgument; ignoring");
+                    continue;
+                }
+                TemplateArgument a = (TemplateArgument) n;
+                if (a.getHasName()) { continue; }  // skip named arguments as they're only going to be 'ref=' which we don't care about
+                
+                if (nextField == ReleaseDateResult.Field.YEAR) {
+                    currentResult = new ReleaseDateResult();
+                    builder.add(currentResult);
+                    currentResult.year = SwebleHelper.flattenTextNodeList(a.getValue());
+                    nextField = ReleaseDateResult.Field.MONTH;
+                } else if (nextField == ReleaseDateResult.Field.MONTH) {
+                    currentResult.month = SwebleHelper.flattenTextNodeList(a.getValue());
+                    nextField = ReleaseDateResult.Field.DAY;
+                } else if (nextField == ReleaseDateResult.Field.DAY) {
+                    currentResult.day = SwebleHelper.flattenTextNodeList(a.getValue());
+                    nextField = ReleaseDateResult.Field.LOCATION;
+                } else if (nextField == ReleaseDateResult.Field.LOCATION) {
+                    try {
+                        ImmutableList<ListItemResult> list = SwebleHelper.extractList(a.getValue());
+                        if (! list.isEmpty()) { currentResult.location = list.get(0); }
+                    } catch (Exception e) {
+                        log.warn("Extracting release date location failed: " + SwebleHelper.unparse(a.getValue()), e);
+                    }
+                    nextField = ReleaseDateResult.Field.YEAR;
+                }
+            }
+        }
+        
+        @Override
+        protected Object visitNotFound(AstNode node) { return null; }
     }
 
 }

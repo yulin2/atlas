@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -12,14 +13,19 @@ import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.ReleaseDate;
+import org.atlasapi.media.entity.ReleaseDate.ReleaseType;
 import org.atlasapi.remotesite.wikipedia.film.FilmExtractor;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
+import com.metabroadcast.common.intl.Countries;
 
 public class FilmExtractionTests {
     FilmExtractor extractor;
@@ -95,6 +101,21 @@ public class FilmExtractionTests {
         }
     }
     
+    private void assertReleaseDatesEqual(Collection<ReleaseDate> extracted, Collection<ReleaseDate> expected) {
+        try {
+            assertEquals(expected.size(), extracted.size());
+            for (ReleaseDate r : expected) {
+                assertTrue(extracted.contains(r));
+            }
+        } catch (AssertionError e) {
+            System.out.println("Actually extracted these:");
+            for (ReleaseDate d : extracted) {
+                System.out.println(d);
+            }
+            throw e;
+        }
+    }
+    
     @Before
     public void setUp() throws IOException {
         extractor = new FilmExtractor();
@@ -154,6 +175,10 @@ public class FilmExtractionTests {
                 new CrewMemberTestFields("Olivia de Havilland", Role.ACTOR),
                 new CrewMemberTestFields("Basil Rathbone", Role.ACTOR),
                 new CrewMemberTestFields("Claude Rains", Role.ACTOR)
+        ));
+        
+        assertReleaseDatesEqual(flim.getReleaseDates(), ImmutableSet.of(
+                new ReleaseDate(new LocalDate(1938, 5, 14), Countries.US, ReleaseType.GENERAL)
         ));
     }
 }
