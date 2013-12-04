@@ -111,7 +111,9 @@ public class ContentBuffer implements ContentResolver {
                 if (!hierarchy.getBrand().isPresent()) {
                     hierarchy.getItem().setContainer(series);
                 } else {
-                    ((Episode) hierarchy.getItem()).setSeries(series);
+                    if (hierarchy.getItem() instanceof Episode) {
+                        ((Episode) hierarchy.getItem()).setSeries(series);
+                    }
                 }
             }
             

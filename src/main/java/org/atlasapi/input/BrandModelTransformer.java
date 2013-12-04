@@ -12,8 +12,9 @@ import com.metabroadcast.common.time.Clock;
 public class BrandModelTransformer extends ContentModelTransformer<org.atlasapi.media.entity.simple.Playlist, Brand> {
 
 	public BrandModelTransformer(LookupEntryStore lookupStore, 
-			TopicStore topicStore, NumberToShortStringCodec idCodec, ClipModelTransformer clipsModelTransformer, Clock clock) {
-	    super(lookupStore, topicStore, idCodec, clipsModelTransformer, clock);
+			TopicStore topicStore, NumberToShortStringCodec idCodec, 
+			ClipModelTransformer clipsModelTransformer, Clock clock) {
+		super(lookupStore, topicStore, idCodec, clipsModelTransformer, clock);
 	}
 
 	@Override

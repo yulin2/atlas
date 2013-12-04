@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.youview;
 
+import java.util.Map;
+
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Elements;
@@ -25,6 +27,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
+import com.metabroadcast.common.collect.ImmutableOptionalMap;
+import com.metabroadcast.common.collect.OptionalMap;
 import com.metabroadcast.common.intl.Countries;
 
 public class YouViewContentExtractor implements ContentExtractor<Element, Item> {
@@ -52,6 +57,16 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private static final String END_KEY = "end";
     private static final String SCHEDULE_EVENT_PREFIX = "http://youview.com/scheduleevent/";
 
+    private static final OptionalMap<Publisher, Platform> BROADCASTER_TO_PLATFORM = 
+            ImmutableOptionalMap.fromMap(ImmutableMap.of(
+                Publisher.BBC, Platform.YOUVIEW_IPLAYER,
+                Publisher.ITV, Platform.YOUVIEW_ITVPLAYER,
+                Publisher.C4, Platform.YOUVIEW_4OD,
+                Publisher.FIVE, Platform.YOUVIEW_DEMAND5
+            ));
+            
+            
+            
     private final YouViewChannelResolver channelResolver;
     
     private final DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeNoMillis();
@@ -82,7 +97,7 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         return item;
     }
     
-    private Optional<Location> getLocation(Element source) {
+    private Optional<Location> getLocation(Element source, Channel channel) {
 
         Element available = source.getFirstChildElement(AVAILABLE_KEY, source.getNamespaceURI(YV_PREFIX));
         if (available == null) {
@@ -96,7 +111,7 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         }
         
         Policy policy = new Policy();
-        policy.setPlatform(Platform.YOUVIEW);
+        policy.setPlatform(getPlatformFor(channel));
         policy.addAvailableCountry(Countries.GB);
         policy.setAvailabilityStart(dateFormatter.parseDateTime(start.getValue()));
         policy.setAvailabilityEnd(dateFormatter.parseDateTime(end.getValue()));
@@ -107,14 +122,18 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         return Optional.of(location);
     }
 
-    private Broadcast getBroadcast(Element source) {
+    private Platform getPlatformFor(Channel channel) {
+        return BROADCASTER_TO_PLATFORM.get(channel.getBroadcaster()).or(Platform.YOUVIEW);
+    }
+
+    private Broadcast getBroadcast(Element source, Channel channel) {
         String id = getBroadcastId(source);
-        String broadcastOn = getBroadcastOn(source);
+        
         String eventLocator = getEventLocator(source);
         DateTime transmissionTime = getTransmissionTime(source);
         Duration broadcastDuration = getBroadcastDuration(source);
         
-        Broadcast broadcast = new Broadcast(broadcastOn, transmissionTime, transmissionTime.plus(broadcastDuration));
+        Broadcast broadcast = new Broadcast(channel.getUri(), transmissionTime, transmissionTime.plus(broadcastDuration));
         broadcast.withId(id);
         broadcast.addAliasUrl(eventLocator);
         broadcast.addAlias(new Alias("dvb:event-locator", eventLocator));
@@ -140,12 +159,12 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         return YOUVIEW_PREFIX + broadcastId.getValue();
     }
 
-    private String getBroadcastOn(Element source) {
+    private Optional<Channel> getChannel(Element source) {
         Element serviceId = source.getFirstChildElement(SERVICE_ID_KEY, source.getNamespaceURI(YV_PREFIX));
         if (serviceId == null) {
             throw new ElementNotFoundException(source, YV_PREFIX + ":" + SERVICE_ID_KEY);
         }
-        return channelResolver.getChannelUri(Integer.parseInt(serviceId.getValue()));
+        return channelResolver.getChannel(Integer.parseInt(serviceId.getValue()));
     }
 
     private Duration getBroadcastDuration(Element source) {
@@ -177,12 +196,13 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     }
 
     private Version getVersion(Element source) {
-        Optional<Location> location = getLocation(source);
+        Channel channel = getChannel(source).get();
+        Optional<Location> location = getLocation(source, channel);
         
         Version version = new Version();
         version.setDuration(getBroadcastDuration(source));
         version.setPublishedDuration(version.getDuration());
-        version.addBroadcast(getBroadcast(source));
+        version.addBroadcast(getBroadcast(source, channel));
         if (location.isPresent()) {
             Encoding encoding = new Encoding();
             encoding.addAvailableAt(location.get());

@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Actor;
+import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
-import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
@@ -31,6 +31,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -50,7 +51,7 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
 
         @Override
         public boolean apply(SameAs input) {
-            return !input.getId().isEmpty();
+            return !Strings.isNullOrEmpty(input.getId());
         }
         
     };
@@ -59,7 +60,7 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
 
         @Override
         public boolean apply(SameAs input) {
-            return input.getId().isEmpty();
+            return Strings.isNullOrEmpty(input.getId());
         }
         
     };
@@ -80,7 +81,8 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         }
     };
 
-    public ContentModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, NumberToShortStringCodec idCodec, ClipModelTransformer clipsModelTransformer, Clock clock) {
+    public ContentModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, 
+            NumberToShortStringCodec idCodec, ClipModelTransformer clipsModelTransformer, Clock clock) {
         super(clock);
         this.lookupStore = lookupStore;
         this.topicStore = topicStore;
@@ -106,6 +108,9 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
     }
 
     private Iterable<Clip> transformClips(Description inputContent) {
+        if (inputContent.getClips() == null) {
+            return ImmutableList.<Clip>of();
+        }
         List<Clip> clips = Lists.newArrayListWithCapacity(inputContent.getClips().size());
         for (org.atlasapi.media.entity.simple.Item inputClip : inputContent.getClips()) {
             Clip clip = (Clip) this.clipsModelTransformer.transform(inputClip);

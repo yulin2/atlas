@@ -11,11 +11,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Certificate;
+import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Policy.Platform;
@@ -23,6 +26,8 @@ import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.ContentCategory;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.talktalk.vod.bindings.AvailabilityType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.GenreListType;
@@ -40,6 +45,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.DateTimeZones;
 
@@ -51,6 +57,8 @@ import com.metabroadcast.common.time.DateTimeZones;
  */
 public class TalkTalkItemDetailItemExtractor {
 
+    private static Map<String, String> EXPLICIT_EQUIVALENCES = ImmutableMap.of();
+    
     private static final Pattern NUMBERED_EPISODE_TITLE = Pattern.compile("^Ep\\s*(\\d+)\\s*:\\s*(.*)");
     private static final String MOVIE_CHANNEL_GENRE_CODE = "CHMOVIES";
     private static final String CHANNEL_URI_PREFIX = "http://talktalk.net/channels/";
@@ -76,6 +84,12 @@ public class TalkTalkItemDetailItemExtractor {
     private static final TalkTalkImagesExtractor imagesExtractor = new TalkTalkImagesExtractor();
     private static final TalkTalkUriCompiler uriCompiler = new TalkTalkUriCompiler();
 
+    private final ContentResolver contentResolver;
+
+    public TalkTalkItemDetailItemExtractor(ContentResolver contentResolver) {
+        this.contentResolver = contentResolver;
+    }
+    
     public Item extract(ItemDetailType detail, Optional<Brand> brand, Optional<Series> series) {
         checkArgument(ItemTypeType.EPISODE.equals(detail.getItemType()), 
                 "Can't extract Item from non-EPISODE Item type");
@@ -137,6 +151,14 @@ public class TalkTalkItemDetailItemExtractor {
         item.setGenres(genresExtractor.extract(detail));
         item.setImages(imagesExtractor.extract(detail));
         item.setVersions(extractVersions(detail));
+        
+        String explicitEquiv = EXPLICIT_EQUIVALENCES.get(item.getCanonicalUri());
+        if (explicitEquiv != null) {
+            Described equiv = (Described) Iterables.getOnlyElement(
+                        contentResolver.findByCanonicalUris(ImmutableSet.of(explicitEquiv))
+                                       .getAllResolvedResults());
+            item.setEquivalentTo(ImmutableSet.of(LookupRef.from(equiv)));
+        }
         return item;
     }
 

@@ -204,21 +204,21 @@ public class QueryWebModule {
         return new QueryController(queryExecutor, configFetcher, log, contentModelOutputter(), contentWriteController());
     }
     
-    ClipModelTransformer clipTransformer() {
-        return new ClipModelTransformer(lookupStore, topicStore, idCodec(), new SystemClock());
-    }
-    
     NumberToShortStringCodec idCodec() {
         return SubstitutionTableNumberCodec.lowerCaseOnly();
     }
     
+    ClipModelTransformer clipTransformer() {
+        return new ClipModelTransformer(lookupStore, topicStore, idCodec(), new SystemClock());
+    }
+    
     BrandModelTransformer brandTransformer() {
-    	return new BrandModelTransformer(lookupStore, topicStore, idCodec(), clipTransformer(), new SystemClock());
+        return new BrandModelTransformer(lookupStore, topicStore, idCodec(), clipTransformer(), new SystemClock());
     }
     
     ItemModelTransformer itemTransformer() {
-    	return new ItemModelTransformer(lookupStore, topicStore, idCodec(), clipTransformer(), new SystemClock());
-    }
+        return new ItemModelTransformer(lookupStore, topicStore, idCodec(), clipTransformer(), new SystemClock());
+    }  
     
     ContentWriteController contentWriteController() {
         return new ContentWriteController(configFetcher, contentResolver, contentWriter, new DefaultGsonModelReader(), new DelegatingModelTransformer(brandTransformer(), itemTransformer()));

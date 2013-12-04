@@ -13,7 +13,8 @@ import com.google.common.collect.ImmutableSet;
 
 public class NitroGenresExtractor implements ContentExtractor<List<NitroGenreGroup>, Set<String>> {
 
-    private static final String PREFIX = "http://www.bbc.co.uk/programmes/genres/"; 
+    private static final String PREFIX = "http://www.bbc.co.uk/programmes/genres/";
+    private static final String ID_PREFIX = "http://nitro.bbc.co.uk/genres/";
     
     @Override
     public Set<String> extract(List<NitroGenreGroup> genreGroups) {
@@ -30,6 +31,7 @@ public class NitroGenresExtractor implements ContentExtractor<List<NitroGenreGro
         for (NitroGenre nitroGenre : groupGenres.subList(0, Math.min(groupGenres.size(), 2))) {
             parent = extractGenre(nitroGenre, parent);
             genres.add(PREFIX + parent);
+            genres.add(ID_PREFIX + nitroGenre.getId());
         }
         return null;
     }

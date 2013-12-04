@@ -596,31 +596,30 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return repeat;
     }
 
-    private void addBroadcast(Version version, Broadcast broadcast) {
-        if (! Strings.isNullOrEmpty(broadcast.getSourceId())) {
-            Set<Broadcast> broadcasts = Sets.newHashSet();
-            Maybe<Interval> broadcastInterval = broadcast.transmissionInterval();
-            
-            for (Broadcast currentBroadcast: version.getBroadcasts()) {
-                // I know this is ugly, but it's easier to read.
-                if (Strings.isNullOrEmpty(currentBroadcast.getSourceId())) {
-                    continue;
-                }
-                if (broadcast.getSourceId().equals(currentBroadcast.getSourceId())) {
-                    continue;
-                }
-                if (currentBroadcast.transmissionInterval().hasValue() && broadcastInterval.hasValue()) {
-                    Interval currentInterval = currentBroadcast.transmissionInterval().requireValue();
-                    if (currentBroadcast.getBroadcastOn().equals(broadcast.getBroadcastOn()) && currentInterval.overlaps(broadcastInterval.requireValue())) {
-                        continue;
-                    }
-                }
-                broadcasts.add(currentBroadcast);
-            }
-            broadcasts.add(broadcast);
-            
-            version.setBroadcasts(broadcasts);
+    private void addBroadcast(Version version, Broadcast newBroadcast) {
+        if (Strings.isNullOrEmpty(newBroadcast.getSourceId())) {
+            return;
         }
+        
+        Set<Broadcast> broadcasts = Sets.newHashSet();
+        Interval newBroadcastInterval = newBroadcast.transmissionInterval().requireValue();
+        
+        for (Broadcast existingBroadcast: version.getBroadcasts()) {
+            if (newBroadcast.getSourceId().equals(existingBroadcast.getSourceId())) {
+                continue;
+            }
+            if (existingBroadcast.transmissionInterval().hasValue()) {
+                Interval currentInterval = existingBroadcast.transmissionInterval().requireValue();
+                if (existingBroadcast.getBroadcastOn().equals(newBroadcast.getBroadcastOn()) 
+                        && currentInterval.overlaps(newBroadcastInterval)) {
+                    continue;
+                }
+            }
+            broadcasts.add(existingBroadcast);
+        }
+        broadcasts.add(newBroadcast);
+        
+        version.setBroadcasts(broadcasts);
     }
     
     private List<CrewMember> people(ProgData progData) {

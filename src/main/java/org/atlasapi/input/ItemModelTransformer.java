@@ -11,13 +11,13 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.Location;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
@@ -37,7 +37,8 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
 
     private final BroadcastModelTransformer broadcastTransformer;
     
-    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, NumberToShortStringCodec idCodec, ClipModelTransformer clipsModelTransformer, Clock clock) {
+    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, NumberToShortStringCodec idCodec, 
+            ClipModelTransformer clipsModelTransformer, Clock clock) {
         super(lookupStore, topicStore, idCodec, clipsModelTransformer, clock);
         this.broadcastTransformer = new BroadcastModelTransformer();
     }

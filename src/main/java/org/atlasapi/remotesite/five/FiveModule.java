@@ -34,7 +34,12 @@ private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 30, 0)
     
     @Bean
     public FiveUpdater fiveUpdater() {
-        Integer soTimeout = Configurer.get("five.timeout.socket", "60").toInt();
+        Integer soTimeout = Configurer.get("five.timeout.socket", "180").toInt();
         return new FiveUpdater(contentWriter, channelResolver, log, soTimeout);
+    }
+    
+    @Bean
+    public FiveBrandUpdateController fiveBrandUpdateController() {
+        return new FiveBrandUpdateController(fiveUpdater());
     }
 }

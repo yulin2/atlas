@@ -45,14 +45,15 @@ public class ContentUpdatingTalkTalkVodEntityProcessor implements
     private final TalkTalkClient client;
     private final ContentResolver resolver;
     private final ContentWriter writer;
+    private final TalkTalkItemDetailItemExtractor itemExtractor;
     
-    private final TalkTalkItemDetailItemExtractor itemExtractor = new TalkTalkItemDetailItemExtractor();
     private final TalkTalkItemDetailContainerExtractor containerExtractor = new TalkTalkItemDetailContainerExtractor();
 
     public ContentUpdatingTalkTalkVodEntityProcessor(TalkTalkClient client, ContentResolver resolver, ContentWriter writer) {
         this.client = checkNotNull(client);
         this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(writer);
+        this.itemExtractor = new TalkTalkItemDetailItemExtractor(resolver);
     }
 
     private void logProcessing(VODEntityType entity) {

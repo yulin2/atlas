@@ -8,6 +8,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.google.common.base.Optional;
 import com.metabroadcast.common.http.HttpStatusCode;
 
 /**
@@ -39,7 +41,7 @@ public class TalkTalkContentUpdateController {
         try {
             ChannelType channel = new ChannelType();
             channel.setId(cid);
-            Object result = channelProcessor.process(channel);
+            Object result = channelProcessor.process(channel, Optional.<ContentGroup>absent());
             sendResult(response, result);
         } catch (TalkTalkException e) {
             sendError(response, e);

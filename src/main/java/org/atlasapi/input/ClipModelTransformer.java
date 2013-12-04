@@ -10,7 +10,8 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.time.Clock;
 
 public class ClipModelTransformer extends ItemModelTransformer  {
-    public ClipModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, NumberToShortStringCodec idCodec, Clock clock) {
+    public ClipModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, 
+            NumberToShortStringCodec idCodec, Clock clock) {
         super(lookupStore, topicStore, idCodec, null, clock);
     }
 
