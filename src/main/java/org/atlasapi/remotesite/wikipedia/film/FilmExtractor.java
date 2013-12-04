@@ -12,11 +12,13 @@ import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ReleaseDate;
 import org.atlasapi.media.entity.ReleaseDate.ReleaseType;
+import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.wikipedia.Article;
 import org.atlasapi.remotesite.wikipedia.SwebleHelper.ListItemResult;
 import org.atlasapi.remotesite.wikipedia.film.FilmInfoboxScraper.ReleaseDateResult;
 import org.atlasapi.remotesite.wikipedia.film.FilmInfoboxScraper.Result;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +84,12 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
                     }
                 }
                 flim.setReleaseDates(releaseDates.build());
+            }
+            
+            if (info.runtimeInMins != null && info.runtimeInMins > 0) {
+                Version v = new Version();
+                v.setDuration(new Duration(info.runtimeInMins * 60000));
+                flim.addVersion(v);
             }
             
             return flim;
