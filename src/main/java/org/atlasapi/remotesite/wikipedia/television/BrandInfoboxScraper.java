@@ -70,7 +70,7 @@ public final class BrandInfoboxScraper extends AstVisitor {
 
     public void visit(TemplateArgument a) {
         String name = SwebleHelper.flattenTextNodeList(a.getName());
-        // TODO: alt titles? and other stuff http://en.wikipedia.org/wiki/Template:Infobox_television
+        // http://en.wikipedia.org/wiki/Template:Infobox_television
         if ("show_name".equalsIgnoreCase(name)) {
             result.title = SwebleHelper.flattenTextNodeList(a.getValue());
         } else if ("creator".equalsIgnoreCase(name)) {

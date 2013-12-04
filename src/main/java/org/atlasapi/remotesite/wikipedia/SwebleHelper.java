@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.wikipedia;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -11,7 +12,11 @@ import org.sweble.wikitext.lazy.LazyParser;
 import org.sweble.wikitext.lazy.LazyPreprocessor;
 import org.sweble.wikitext.lazy.ParserConfigInterface;
 import org.sweble.wikitext.lazy.parser.InternalLink;
+import org.sweble.wikitext.lazy.parser.Itemization;
+import org.sweble.wikitext.lazy.parser.ItemizationItem;
 import org.sweble.wikitext.lazy.parser.LazyParsedPage;
+import org.sweble.wikitext.lazy.parser.SemiPre;
+import org.sweble.wikitext.lazy.parser.SemiPreLine;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
 import org.sweble.wikitext.lazy.preprocessor.Template;
 import org.sweble.wikitext.lazy.preprocessor.TemplateArgument;
@@ -33,7 +38,6 @@ import de.fau.cs.osr.ptk.common.ast.Text;
 public class SwebleHelper {
     private static final Logger log = LoggerFactory.getLogger(SwebleHelper.class);
     private static final ParserConfigInterface cfg = new SimpleParserConfig();
-    private static final LazyParser parser = new LazyParser(cfg);
     private static final LazyPreprocessor preprocessor = new LazyPreprocessor(cfg);
 
     /**
@@ -57,7 +61,7 @@ public class SwebleHelper {
      */
     public static LazyParsedPage parse(String mediaWikiSource) {
         try {
-            return (LazyParsedPage) parser.parseArticle(mediaWikiSource, "");
+            return (LazyParsedPage) new LazyParser(cfg).parseArticle(mediaWikiSource, "");
         } catch (IOException|ParseException ex) {
             throw new RuntimeException(ex);
         }
@@ -114,6 +118,14 @@ public class SwebleHelper {
             }
         }
         return b.toString().trim();
+    }
+    
+    /**
+     * Returns a positional template argument, passed through {@link #flattenTextNodeList(NodeList)}.
+     */
+    public static String extractArgument(Template t, int pos) throws IndexOutOfBoundsException {
+        NodeList args = t.getArgs();
+        return flattenTextNodeList(((TemplateArgument) args.get(pos)).getValue());
     }
     
     /**
@@ -177,11 +189,21 @@ public class SwebleHelper {
         }
     }
     
+    /**
+     * Attempts to extract a 'list of string/link values'-style template argument in a highly generic way.
+     * @param node A preprocessed (not parsed) AST of said argument.
+     */
     public static ImmutableList<ListItemResult> extractList(AstNode node) {
         ImmutableList.Builder<ListItemResult> builder = ImmutableList.builder();
-        new ListVisitor(builder).go(node);
+        String unparsed = unparse(node);
+        unparsed = plainlistTemplatePattern.matcher(unparsed).replaceAll("");  // Basically since {{plainlist}} is just a wrapper for a normal itemization, we can throw it away.
+        unparsed = stupidBracesPattern.matcher(unparsed).replaceAll("");       // See: http://en.wikipedia.org/wiki/Template:Plainlist
+        new ListVisitor(builder).go(parse(unparsed));
         return builder.build();
     }
+    
+    private static final Pattern plainlistTemplatePattern = Pattern.compile("\\s*\\{\\{\\s*(end)?plainlist\\s*(\\}\\}|\\|)\\s*", Pattern.CASE_INSENSITIVE);
+    private static final Pattern stupidBracesPattern = Pattern.compile("\\s*\\}\\}\\s*");
     
     protected static class ListVisitor extends AstVisitor {
         private final ImmutableList.Builder<ListItemResult> builder;
@@ -192,6 +214,18 @@ public class SwebleHelper {
         
         public void visit(LazyParsedPage value) {
             iterate(value.getContent());
+        }
+        public void visit(SemiPre wtf) {
+            iterate(wtf.getContent());
+        }
+        public void visit(SemiPreLine wtf) {
+            iterate(wtf.getContent());
+        }
+        public void visit(Itemization i) {
+            iterate(i.getContent());
+        }
+        public void visit(ItemizationItem i) {
+            iterate(i.getContent());
         }
         public void visit(InternalLink link) {
             NodeList titleContent = link.getTitle().getContent();

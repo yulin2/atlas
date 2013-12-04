@@ -15,9 +15,7 @@ public abstract class Article {
     }
     
     /**
-     * Calculates the English Wikipedia URL for a given article title 
-     * <p>
-     * TODO: This probably ought to be moved elsewhere if I'm honest...
+     * Calculates the English Wikipedia URL for a given article title.
      */
     public static String urlFromTitle(String title) {
         String safeTitle = title.replaceAll(" ", "_")

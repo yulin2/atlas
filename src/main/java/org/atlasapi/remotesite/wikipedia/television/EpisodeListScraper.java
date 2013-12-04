@@ -29,7 +29,6 @@ public final class EpisodeListScraper extends AstVisitor {
         public LocalDate originalAirDate;
         public String prodCode;
         public String summary;
-        public String episodePageLinkTarget;  // TODO scrape link!
 
         @Override
         public String toString() {
@@ -91,7 +90,7 @@ public final class EpisodeListScraper extends AstVisitor {
 
     public void visit(TemplateArgument a) {
         String name = SwebleHelper.flattenTextNodeList(a.getName());
-        // TODO: alt titles? http://en.wikipedia.org/wiki/Template:Episode_list
+        // http://en.wikipedia.org/wiki/Template:Episode_list
         if ("Title".equalsIgnoreCase(name)) {
             currentResult.title = SwebleHelper.flattenTextNodeList(a.getValue());
         } else if ("RTitle".equalsIgnoreCase(name) && currentResult.title == null) {

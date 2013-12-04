@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.atlasapi.remotesite.wikipedia.Article;
+import org.atlasapi.remotesite.wikipedia.ArticleFetcher.FetchFailedException;
 import org.atlasapi.remotesite.wikipedia.EnglishWikipediaClient;
 
 import com.google.api.client.util.Charsets;
@@ -19,9 +20,14 @@ public class ArticleDownloader {
         List<String> readLines = Files.readLines(titleList, Charsets.UTF_8);
         for (String title : readLines) {
             System.out.println(title);
-            Article fetchArticle = ewc.fetchArticle(title);
-            String safeTitle = title.replaceAll("/", "-");
-            Files.write(fetchArticle.getMediaWikiSource(), new File(outputDir + "/" + safeTitle + ".mediawiki"), Charsets.UTF_8);
+            Article fetchArticle;
+            try {
+                fetchArticle = ewc.fetchArticle(title);
+                String safeTitle = title.replaceAll("/", "-");
+                Files.write(fetchArticle.getMediaWikiSource(), new File(outputDir + "/" + safeTitle + ".mediawiki"), Charsets.UTF_8);
+            } catch (FetchFailedException e) {
+                System.err.println("Failed to download \""+ title +"\"");
+            }
         }
     }
 }

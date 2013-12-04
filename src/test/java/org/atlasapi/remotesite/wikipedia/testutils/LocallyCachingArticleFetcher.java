@@ -23,8 +23,8 @@ public class LocallyCachingArticleFetcher implements ArticleFetcher {
         return title.replaceAll("/", "-") + ".mediawiki";
     }
     
-    private void downloadArticle(String title) throws IOException {
-        System.out.println(title);
+    private void downloadArticle(String title) throws IOException, FetchFailedException {
+        System.out.println("¡¡ DOWNLOADING " + title + " !!");
         Article fetchArticle = fetcher.fetchArticle(title);
         Files.write(fetchArticle.getMediaWikiSource(), new File(outputDirPath + "/" + titleToFilename(title)), Charsets.UTF_8);
     }
@@ -34,7 +34,14 @@ public class LocallyCachingArticleFetcher implements ArticleFetcher {
         File path = new File(outputDirPath + "/" + titleToFilename(title));
         try {
             if (! path.isFile()) {
-                downloadArticle(title);
+                while (true) {
+                    try {
+                        downloadArticle(title);
+                        break;
+                    } catch (FetchFailedException e) {
+                        System.err.println("Failed to download \""+ title +"\", trying again...");
+                    }
+                }
             }
             final String source = Files.toString(path, Charsets.UTF_8);
             return new Article() {
