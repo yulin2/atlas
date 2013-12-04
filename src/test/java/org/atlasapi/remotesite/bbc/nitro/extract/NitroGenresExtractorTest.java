@@ -20,9 +20,11 @@ public class NitroGenresExtractorTest {
     @Test
     public void testExtractsGenresFromGroups() {
         
-        ImmutableList<NitroGenreGroup> ggs = ImmutableList.of(genreGroup(genre("Factual"),genre("Life Stories")),
-            genreGroup(genre("Factual"), genre("Families &amp; Relationships")), 
-            genreGroup(genre("Factual"), genre("History")));
+        ImmutableList<NitroGenreGroup> ggs = ImmutableList.of(
+            genreGroup(genre("100005","Factual"),genre("200045", "Life Stories")),
+            genreGroup(genre("100005","Factual"), genre("200051", "Families &amp; Relationships")), 
+            genreGroup(genre("100005","Factual"), genre("200055", "History"))
+        );
      
         Set<String> extracted = extractor.extract(ggs);
         
@@ -30,7 +32,12 @@ public class NitroGenresExtractorTest {
             "http://www.bbc.co.uk/programmes/genres/factual/lifestories",
             "http://www.bbc.co.uk/programmes/genres/factual/history",
             "http://www.bbc.co.uk/programmes/genres/factual",
-            "http://www.bbc.co.uk/programmes/genres/factual/familiesandrelationships");
+            "http://www.bbc.co.uk/programmes/genres/factual/familiesandrelationships",
+            "http://nitro.bbc.co.uk/genres/100005",
+            "http://nitro.bbc.co.uk/genres/200045",
+            "http://nitro.bbc.co.uk/genres/200051",
+            "http://nitro.bbc.co.uk/genres/200055"
+        );
         
         assertEquals(expected, extracted);
     }
@@ -41,9 +48,9 @@ public class NitroGenresExtractorTest {
         return nitroGenreGroup;
     }
 
-    private NitroGenre genre(String title) {
+    private NitroGenre genre(String id, String title) {
         NitroGenre nitroGenre = new NitroGenre();
-        nitroGenre.setId(title);
+        nitroGenre.setId(id);
         nitroGenre.setTitle(title);
         return nitroGenre;
     }
