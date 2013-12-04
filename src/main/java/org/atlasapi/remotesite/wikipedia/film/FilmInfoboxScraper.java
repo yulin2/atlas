@@ -2,11 +2,16 @@ package org.atlasapi.remotesite.wikipedia.film;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.atlasapi.remotesite.wikipedia.SwebleHelper;
 import org.atlasapi.remotesite.wikipedia.SwebleHelper.ListItemResult;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
@@ -29,6 +34,11 @@ public final class FilmInfoboxScraper {
     private final static Logger log = LoggerFactory.getLogger(FilmInfoboxScraper.class);
     
     public static class ReleaseDateResult {
+        public ReleaseDateResult(String year, String month, String day) {
+            this.year = year; this.month = month; this.day = day;
+        }
+        public ReleaseDateResult(){}
+
         public String year;
         public String month;
         public String day;
@@ -183,10 +193,43 @@ public final class FilmInfoboxScraper {
         }
     }
     
+    private static final Pattern britishDatePattern = Pattern.compile("(\\d{1,2}) ([A-Z]?[a-z]+),? (\\d{4})");
+    private static final Pattern americanDatePattern = Pattern.compile("([A-Z]?[a-z]+) (\\d{1,2}),? (\\d{4})");
+    
     private static ImmutableList<ReleaseDateResult> extractFilmReleaseDates(NodeList a) {
         ImmutableList.Builder<ReleaseDateResult> builder = ImmutableList.builder();
         (new FilmDateVisitor(builder)).go(a);
-        return builder.build();
+        ImmutableList<ReleaseDateResult> templateResults = builder.build();
+        if (! templateResults.isEmpty()) {
+            return templateResults;
+        }
+        
+        // Otherwise, we fall back on the plain text method...
+        //
+        String maybeDateText = SwebleHelper.flattenTextNodeList(a);
+        String y, m, d;
+        Matcher americanMatcher = americanDatePattern.matcher(maybeDateText);
+        if (americanMatcher.find()) {
+            m = americanMatcher.group(1);
+            d = americanMatcher.group(2);
+            y = americanMatcher.group(3);
+        } else {
+            Matcher britishMatcher = britishDatePattern.matcher(maybeDateText);
+            if (britishMatcher.find()) {
+                d = britishMatcher.group(1);
+                m = britishMatcher.group(2);
+                y = britishMatcher.group(3);
+            } else {
+                return ImmutableList.of();
+            }
+        }
+        try {
+            m = Integer.toString(LocalDate.parse(m, DateTimeFormat.forPattern("MMM").withLocale(Locale.ENGLISH)).getMonthOfYear());
+            return ImmutableList.of(new ReleaseDateResult(y,m,d));
+        } catch (Exception e) {
+            log.warn("Couldn't interpret month \"" + m + "\" – skipping release date \"" + maybeDateText + "\"");
+            return ImmutableList.of();
+        }
     }
     
     protected static class FilmDateVisitor extends AstVisitor {

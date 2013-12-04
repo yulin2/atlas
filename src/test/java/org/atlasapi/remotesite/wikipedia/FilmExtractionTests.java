@@ -110,7 +110,7 @@ public class FilmExtractionTests {
         } catch (AssertionError e) {
             System.out.println("Actually extracted these:");
             for (ReleaseDate d : extracted) {
-                System.out.println(d);
+                System.out.println("  " + d.date() + " (" + d.country().code() + ")");
             }
             throw e;
         }
@@ -149,6 +149,10 @@ public class FilmExtractionTests {
                 new CrewMemberTestFields("Lorraine Bracco", Role.ACTOR),
                 new CrewMemberTestFields("Renoly Santiago", Role.ACTOR),
                 new CrewMemberTestFields("Laurence Mason", Role.ACTOR)
+        ));
+        
+        assertReleaseDatesEqual(flim.getReleaseDates(), ImmutableSet.of(
+                new ReleaseDate(new LocalDate(1995, 9, 15), Countries.ALL, ReleaseType.GENERAL)
         ));
     }
     
