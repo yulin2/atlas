@@ -60,6 +60,26 @@ public class NitroEpisodeExtractorTest {
     }
 
     @Test
+    public void testParentRefsForExtractedSeriesEpisodeAreSeriesOnly() {
+        
+        Episode brandEpisode = new Episode();
+        brandEpisode.setPid("b012cl84");
+        brandEpisode.setTitle("Destiny");
+        brandEpisode.setEpisodeOf(pidRef("series", "b00zdhtg"));
+        brandEpisode.setAncestorsTitles(ancestorsTitles(null, null,
+            ImmutableMap.of("b00zdhtg", "Wonders of the Universe")
+        ));
+        
+        Item extracted = extractor.extract(NitroItemSource.valueOf(brandEpisode, noAvailability));
+        
+        org.atlasapi.media.entity.Episode episode
+        = (org.atlasapi.media.entity.Episode) extracted;
+        assertThat(episode.getContainer().getUri(), endsWith("b00zdhtg"));
+        assertThat(episode.getSeriesRef().getUri(), endsWith("b00zdhtg"));
+        assertThat(episode.getTitle(), is(brandEpisode.getTitle()));
+    }
+
+    @Test
     public void testParentRefsForExtractedBrandSeriesEpisodeAreBrandAndSeries() {
         
         Episode brandSeriesEpisode = new Episode();

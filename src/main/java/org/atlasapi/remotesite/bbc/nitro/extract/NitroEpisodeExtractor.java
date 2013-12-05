@@ -93,7 +93,7 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
         if (item.getTitle() == null) {
             item.setTitle(episode.getPresentationTitle());
         } 
-        if (isHasMoreThanOneSeriesAncestor(episode)) {
+        if (hasMoreThanOneSeriesAncestor(episode)) {
             item.setTitle(compileTitleForSeriesSeriesEpisode(episode));
         }
         if (episode.getEpisodeOf() != null) {
@@ -108,7 +108,7 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
         item.setGenres(genresExtractor.extract(source.getGenres()));
     }
 
-    private boolean isHasMoreThanOneSeriesAncestor(Episode episode) {
+    private boolean hasMoreThanOneSeriesAncestor(Episode episode) {
         AncestorsTitles titles = episode.getAncestorsTitles();
         return titles != null && titles.getSeries().size() > 1;
     }
@@ -131,7 +131,7 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
             brandRef = new ParentRef(BbcFeeds.nitroUriForPid(episode.getEpisodeOf().getPid()));
         } else if (isBrandSeriesEpisode(episode)) {
             brandRef = getRefFromBrandAncestor(episode);
-        } else if (isSeriesSeriesEpisode(episode)) {
+        } else if (isTopLevelSeriesEpisode(episode)) {
            Series topSeries = episode.getAncestorsTitles().getSeries().get(0);
            brandRef = new ParentRef(BbcFeeds.nitroUriForPid(topSeries.getPid()));
         }
@@ -145,7 +145,7 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
 
     private ParentRef getSeriesRef(Episode episode) {
         ParentRef seriesRef = null;
-        if (isBrandSeriesEpisode(episode) || isSeriesSeriesEpisode(episode)){
+        if (isBrandSeriesEpisode(episode) || isTopLevelSeriesEpisode(episode)){
             Series topSeries = episode.getAncestorsTitles().getSeries().get(0);
             seriesRef = new ParentRef(BbcFeeds.nitroUriForPid(topSeries.getPid()));
         }
@@ -170,8 +170,7 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
             && episode.getAncestorsTitles().getBrand() != null;
     }
 
-    //Episode is in a Series with sub-Series.
-    private boolean isSeriesSeriesEpisode(Episode episode) {
+    private boolean isTopLevelSeriesEpisode(Episode episode) {
         PidReference episodeOf = episode.getEpisodeOf();
         return episodeOf != null
                 && "series".equals(episodeOf.getResultType())
