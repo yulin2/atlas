@@ -74,6 +74,7 @@ public class EquivTaskModule {
     private static final RepetitionRule YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(13, 00));
     private static final RepetitionRule BBC_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
     private static final RepetitionRule ITV_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(11, 00));
+    private static final RepetitionRule ITV_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(12, 00));
     private static final RepetitionRule C4_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(15, 00));
     private static final RepetitionRule FIVE_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(17, 00));
     private static final RepetitionRule REDUX_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(7, 00));
@@ -97,7 +98,7 @@ public class EquivTaskModule {
             taskScheduler.schedule(publisherUpdateTask(PA).withName("PA Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(BBC).withName("BBC Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(C4).withName("C4 Equivalence Updater"), RepetitionRules.NEVER);
-            taskScheduler.schedule(publisherUpdateTask(ITV).withName("ITV Equivalence Updater"), RepetitionRules.NEVER);
+            taskScheduler.schedule(publisherUpdateTask(ITV).withName("ITV Equivalence Updater"), ITV_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(FIVE).withName("Five Equivalence Updater"), FIVE_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(BBC_REDUX).withName("Redux Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(ITUNES).withName("Itunes Equivalence Updater"), RepetitionRules.NEVER);
