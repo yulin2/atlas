@@ -13,9 +13,13 @@ import org.atlasapi.remotesite.bbc.nitro.v1.NitroFormat;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
 import org.joda.time.DateTime;
 
+import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
+import com.metabroadcast.atlas.glycerin.model.AncestorsTitles.Brand;
+import com.metabroadcast.atlas.glycerin.model.AncestorsTitles.Series;
 import com.metabroadcast.atlas.glycerin.model.Episode;
 import com.metabroadcast.atlas.glycerin.model.Image;
+import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.atlas.glycerin.model.Synopses;
 import com.metabroadcast.common.time.Clock;
 
@@ -88,31 +92,91 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
         Episode episode = source.getProgramme();
         if (item.getTitle() == null) {
             item.setTitle(episode.getPresentationTitle());
+        } 
+        if (hasMoreThanOneSeriesAncestor(episode)) {
+            item.setTitle(compileTitleForSeriesSeriesEpisode(episode));
         }
         if (episode.getEpisodeOf() != null) {
-            BigInteger position = episode.getEpisodeOf().getPosition();
             org.atlasapi.media.entity.Episode episodeContent = (org.atlasapi.media.entity.Episode) item;
+            BigInteger position = episode.getEpisodeOf().getPosition();
             if (position != null) {
                 episodeContent.setEpisodeNumber(position.intValue());
             }
-            if ("series".equals(episode.getEpisodeOf().getResultType())) {
-                ParentRef parent = new ParentRef(
-                    BbcFeeds.nitroUriForPid(episode.getEpisodeOf().getPid())
-                );
-                episodeContent.setSeriesRef(parent);
-                episodeContent.setParentRef(parent);
-            }
+            episodeContent.setSeriesRef(getSeriesRef(episode));
         }
-        if (episode.getAncestorsTitles() != null) {
-            AncestorsTitles ancestors = episode.getAncestorsTitles();
-            if (ancestors.getBrand() != null) {
-                String brandUri = BbcFeeds.nitroUriForPid(ancestors.getBrand().getPid());
-                item.setParentRef(new ParentRef(brandUri));
-            }
-        }
+        item.setParentRef(getBrandRef(episode));
         item.setGenres(genresExtractor.extract(source.getGenres()));
     }
+
+    private boolean hasMoreThanOneSeriesAncestor(Episode episode) {
+        AncestorsTitles titles = episode.getAncestorsTitles();
+        return titles != null && titles.getSeries().size() > 1;
+    }
+
+    private String compileTitleForSeriesSeriesEpisode(Episode episode) {
+        List<Series> series = episode.getAncestorsTitles().getSeries();
+        String ssTitle = Iterables.getLast(series).getTitle();
+        String suffix = "";
+        if (episode.getPresentationTitle() != null) {
+            suffix = " " + episode.getPresentationTitle();
+        } else if (episode.getTitle() != null) {
+            suffix = " " + episode.getTitle();
+        }
+        return ssTitle + suffix;
+    }
+
+    private ParentRef getBrandRef(Episode episode) {
+        ParentRef brandRef = null;
+        if (isBrandEpisode(episode)) {
+            brandRef = new ParentRef(BbcFeeds.nitroUriForPid(episode.getEpisodeOf().getPid()));
+        } else if (isBrandSeriesEpisode(episode)) {
+            brandRef = getRefFromBrandAncestor(episode);
+        } else if (isTopLevelSeriesEpisode(episode)) {
+           Series topSeries = episode.getAncestorsTitles().getSeries().get(0);
+           brandRef = new ParentRef(BbcFeeds.nitroUriForPid(topSeries.getPid()));
+        }
+        return brandRef;
+    }
+
+    private ParentRef getRefFromBrandAncestor(Episode episode) {
+        Brand brandAncestor = episode.getAncestorsTitles().getBrand();
+        return new ParentRef(BbcFeeds.nitroUriForPid(brandAncestor.getPid()));
+    }
+
+    private ParentRef getSeriesRef(Episode episode) {
+        ParentRef seriesRef = null;
+        if (isBrandSeriesEpisode(episode) || isTopLevelSeriesEpisode(episode)){
+            Series topSeries = episode.getAncestorsTitles().getSeries().get(0);
+            seriesRef = new ParentRef(BbcFeeds.nitroUriForPid(topSeries.getPid()));
+        }
+        return seriesRef;
+    }
     
+    private boolean isBrandEpisode(Episode episode) {
+        PidReference episodeOf = episode.getEpisodeOf();
+        return episodeOf != null
+            && "brand".equals(episodeOf.getResultType());
+    }
+    
+    private boolean isBrandSeriesEpisode(Episode episode) {
+        PidReference episodeOf = episode.getEpisodeOf();
+        return episodeOf != null
+                && "series".equals(episodeOf.getResultType())
+                && hasBrandAncestor(episode);
+    }
+
+    private boolean hasBrandAncestor(Episode episode) {
+        return episode.getAncestorsTitles() != null
+            && episode.getAncestorsTitles().getBrand() != null;
+    }
+
+    private boolean isTopLevelSeriesEpisode(Episode episode) {
+        PidReference episodeOf = episode.getEpisodeOf();
+        return episodeOf != null
+                && "series".equals(episodeOf.getResultType())
+                && !hasBrandAncestor(episode);
+    }
+
     @Override
     protected String extractMediaType(NitroItemSource<Episode> source) {
         return source.getProgramme().getMediaType();
