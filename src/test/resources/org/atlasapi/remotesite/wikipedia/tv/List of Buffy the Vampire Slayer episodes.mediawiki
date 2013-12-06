@@ -1,0 +1,139 @@
+{{DISPLAYTITLE:List of ''Buffy the Vampire Slayer'' episodes}}
+''[[Buffy the Vampire Slayer]]'' is an American television series created by [[Joss Whedon]], which premiered on March 10, 1997. It concluded on May 20, 2003, after seven seasons with 144 episodes in total, plus an unaired pilot episode.
+
+The first five seasons aired on [[The WB Television Network|The WB]], and in 2001, it transferred to the [[UPN]] for its final two seasons.<ref>{{cite web|url=http://www.cesnur.org/2001/buffy_april01.htm|title='Buffy,' Moving to UPN, Tries to Be WB Slayer|accessdate=October 20, 2006|work=cesnur.org}}</ref> In the United Kingdom, the entire series aired on [[Sky1]] and [[BBC Two]], and on [[TV3 (Ireland)|TV3]] in Ireland. The story line is continued in comic book form in [[Buffy the Vampire Slayer Season Eight|Season 8]] and [[Buffy the Vampire Slayer Season Nine|Season 9]].
+
+All seven seasons of the series are available on individual DVD box sets for Regions 1, 2 and 4. Two [[Buffy the Vampire Slayer DVDs#Collections|complete series collections]] (''The Chosen Collection'' and ''The Complete DVD Collection'') have been released separately for these regions.
+
+== Series overview ==
+{| class="wikitable" width="100%"
+|-
+! colspan="2" rowspan="2"| Season 
+!! rowspan="2"| Episodes 
+!! rowspan="2"| [[Season premiere]]
+!! rowspan="2"| [[Season finale]]
+!! colspan="4"| DVD release date
+|-
+! [[DVD region code|Region 1]]
+! [[DVD region code|Region 2]]
+! [[DVD region code|Region 4]]
+|-
+| width="5" bgcolor="#365BA2" height="10px"|
+| align="center" | '''[[#Season 1 (1997)|1]]'''
+| align="center" | 12
+| align="center" | {{Start date|1997|3|10}}
+| align="center" | {{End date|1997|6|2}}
+| align="center" | {{Start date|2002|1|15}}<ref>{{Cite web |url=http://www.amazon.com/dp/B00005221I |title=Buffy The Vampire Slayer - The Complete First Season (1997) |work=[[Amazon.com]] |accessdate=July 29, 2010}}</ref>
+| align="center" | {{Start date|2000|11|27}}<ref name="DVDs_R2">{{Cite web |url=http://www.bbc.co.uk/cult/buffy/buffystuff/dvdvideo/index.shtml |title=Buffy DVD and VHS |publisher=[[BBC]] |accessdate=July 30, 2010}}</ref>
+| align="center" | {{Start date|2000|11|20}}
+|-
+| width="5" bgcolor="#E34234" height="10px"|
+| align="center" | '''[[#Season 2 (1997–98)|2]]'''
+| align="center" | 22
+| align="center" | {{Start date|1997|9|15}}
+| align="center" | {{End date|1998|5|19}}
+| align="center" | {{Start date|2002|6|11}}<ref>{{Cite web |url=http://www.amazon.com/dp/B000063IOT |title=Buffy the Vampire Slayer - The Complete Second Season (1997) |work=[[Amazon.com]] |accessdate=July 29, 2010}}</ref>
+| align="center" | {{Start date|2001|5|21}}<ref name="DVDs_R2"/>
+| align="center" | {{Start date|2001|6|15}}
+|-
+| width="5" bgcolor="#679267" height="10px"|
+| align="center" | '''[[#Season 3 (1998–99)|3]]'''
+| align="center" | 22
+| align="center" | {{Start date|1998|9|29}}
+| align="center" | {{End date|1999|7|13}}
+| align="center" | {{Start date|2003|1|7}}<ref>{{Cite web |url=http://www.amazon.com/dp/B00006RCNX |title=Buffy the Vampire Slayer - The Complete Third Season (1997) |work=[[Amazon.com]] |accessdate=July 29, 2010}}</ref>
+| align="center" | {{Start date|2001|10|29}}<ref name="DVDs_R2"/>
+| align="center" | {{Start date|2001|11|22}}
+|-
+| width="5" bgcolor="#A9A9A9" height="10px"|
+| align="center" | '''[[#Season 4 (1999–2000)|4]]'''
+| align="center" | 22
+| align="center" | {{Start date|1999|10|5}}
+| align="center" | {{End date|2000|5|23}}
+| align="center" | {{Start date|2003|6|10}}<ref>{{Cite web |url=http://www.amazon.com/dp/B00008K2XP |title=Buffy the Vampire Slayer - The Complete Fourth Season (1997) |work=[[Amazon.com]] |accessdate=July 30, 2010}}</ref>
+| align="center" | {{Start date|2002|5|13}}<ref name="DVDs_R2"/>
+| align="center" | {{Start date|2002|5|20}}
+|-
+| width="5" bgcolor="#890e22" height="10px"|
+| align="center" | '''[[#Season 5 (2000–01)|5]]'''
+| align="center" | 22
+| align="center" | {{Start date|2000|9|26}}
+| align="center" | {{End date|2001|5|22}}
+| align="center" | {{Start date|2003|12|9}}<ref>{{Cite web |url=http://www.amazon.com/dp/B0000AQS18 |title=Buffy the Vampire Slayer - The Complete Fifth Season (1997) |work=[[Amazon.com]] |accessdate=July 30, 2010}}</ref>
+| align="center" | {{Start date|2002|10|28}}<ref name="DVDs_R2"/>
+| align="center" | {{Start date|2002|11|29}}
+|-
+| width="5" bgcolor="#7A4901" height="10px"|
+| align="center" | '''[[#Season 6 (2001–02)|6]]'''
+| align="center" | 22
+| align="center" | {{Start date|2001|10|2}}
+| align="center" | {{End date|2002|5|21}}
+| align="center" | {{Start date|2004|5|25}}<ref>{{Cite web |url=http://www.amazon.com/dp/B0000DANYD |title=Buffy The Vampire Slayer - The Complete Sixth Season (1997) |work=[[Amazon.com]] |accessdate=July 30, 2010}}</ref>
+| align="center" | {{Start date|2003|5|12}}<ref name="DVDs_R2"/>
+| align="center" | {{Start date|2003|4|20}}
+|-
+| width="5" bgcolor="#056B70" height="10px"|
+| align="center" | '''[[#Season 7 (2002–03)|7]]'''
+| align="center" | 22
+| align="center" | {{Start date|2002|9|24}}
+| align="center" | {{End date|2003|5|20}}
+| align="center" | {{Start date|2004|11|16}}<ref>{{Cite web |url=http://www.amazon.com/dp/B0002XVKMC |title=Buffy the Vampire Slayer - The Complete Seventh Season (1997) |work=[[Amazon.com]] |accessdate=July 30, 2010}}</ref>
+| align="center" | {{Start date|2004|4|5}}<ref name="DVDs_R2"/>
+| align="center" | {{Start date|2004|5|15}}
+|-
+|}
+
+== Episode list ==
+=== Season 1 (1997) ===
+{{Main|Buffy the Vampire Slayer (season 1)}}
+{{:Buffy the Vampire Slayer (season 1)}}
+
+=== Season 2 (1997–98) ===
+{{Main|Buffy the Vampire Slayer (season 2)}}
+{{:Buffy the Vampire Slayer (season 2)}}
+
+=== Season 3 (1998–99) ===
+{{Main|Buffy the Vampire Slayer (season 3)}}
+{{:Buffy the Vampire Slayer (season 3)}}
+
+=== Season 4 (1999–2000) ===
+{{Main|Buffy the Vampire Slayer (season 4)}}
+{{:Buffy the Vampire Slayer (season 4)}}
+
+=== Season 5 (2000–01) ===
+{{Main|Buffy the Vampire Slayer (season 5)}}
+{{:Buffy the Vampire Slayer (season 5)}}
+
+=== Season 6 (2001–02) ===
+{{Main|Buffy the Vampire Slayer (season 6)}}
+{{:Buffy the Vampire Slayer (season 6)}}
+
+=== Season 7 (2002–03) ===
+{{Main|Buffy the Vampire Slayer (season 7)}}
+{{:Buffy the Vampire Slayer (season 7)}}
+
+== See also ==
+* [[Buffy the Vampire Slayer (film)|''Buffy the Vampire Slayer'' (film)]]
+* [[Buffy the Vampire Slayer DVDs|''Buffy the Vampire Slayer'' DVDs]]
+* ''[[Buffy the Vampire Slayer Season Eight]]''
+* [[List of Angel episodes|List of ''Angel'' episodes]]
+
+== References ==
+{{Reflist|2}}
+
+== External links ==
+* {{Imdb episodes|0118276|Buffy the Vampire Slayer}}
+* {{Tv.com episodes|buffy-the-vampire-slayer|10|Buffy the Vampire Slayer}}
+* List of [http://www.buffyguide.com/episodes.shtml ''Buffy the Vampire Slayer'' episodes] at [http://www.buffyguide.com BuffyGuide.com]
+* {{Epguides|BuffytheVampireSlayer|Buffy the Vampire Slayer}}
+
+{{Buffynav}}
+{{BuffyEpisodes}}
+
+{{DEFAULTSORT:Buffy The Vampire Slayer}}
+[[Category:Buffy the Vampire Slayer|List of episodes]]
+[[Category:Buffy the Vampire Slayer episodes| ]]
+[[Category:Lists of comedy-drama television series episodes]]
+[[Category:Lists of fantasy television series episodes]]
+
+{{Link FL|tr}}

@@ -5,29 +5,24 @@ import de.fau.cs.osr.ptk.common.ast.AstNode;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
-import org.sweble.wikitext.lazy.LazyParser;
-import org.sweble.wikitext.lazy.ParserConfigInterface;
+import org.atlasapi.remotesite.wikipedia.SwebleHelper;
 import org.sweble.wikitext.lazy.parser.InternalLink;
 import org.sweble.wikitext.lazy.parser.Itemization;
 import org.sweble.wikitext.lazy.parser.ItemizationItem;
 import org.sweble.wikitext.lazy.parser.LazyParsedPage;
 import org.sweble.wikitext.lazy.parser.Section;
-import org.sweble.wikitext.lazy.utils.SimpleParserConfig;
 import xtc.parser.ParseException;
 
 /**
  * This class returns a list of article titles that correspond to film pages, given one of the alphabetical index articles.
  */
-public class FilmIndexScraper {
-    
-    private static final ParserConfigInterface cfg = new SimpleParserConfig();
-    private static final LazyParser parser = new LazyParser(cfg);
+public class IndexScraper {
 
     /**
      * Returns a list of film article names (link targets) from the given Mediawiki source code of an alphabetical film index page.
      */
     public static Collection<String> extractNames(String indexText) throws IOException, ParseException {
-        AstNode indexAST = parser.parseArticle(indexText, "");
+        AstNode indexAST = SwebleHelper.parse(indexText);
         
         Visitor v = new Visitor();
         v.go(indexAST);
@@ -58,7 +53,9 @@ public class FilmIndexScraper {
         
         public void visit(InternalLink l) {
             String target = l.getTarget();
-            if (target.startsWith("List of films:")) {  // then it's another list! we skip it!
+            if (target.startsWith("List of films:")
+             || target.startsWith("Category:")  // then it's another list! we skip it!
+             || target.equalsIgnoreCase("Television")) {  // also this special case...
                 return;
             }
             if (target.contains("#")) {  // then it's not a proper page! we skip it!
