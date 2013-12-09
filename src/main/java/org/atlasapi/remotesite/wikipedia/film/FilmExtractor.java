@@ -138,17 +138,17 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
 
         LocalDate date;
         try {
-            date = new LocalDate(Integer.parseInt(result.year), Integer.parseInt(result.month), Integer.parseInt(result.day));
+            date = new LocalDate(Integer.parseInt(result.year()), Integer.parseInt(result.month()), Integer.parseInt(result.day()));
         } catch (Exception e) {
-            log.warn("Failed to interpret release date \"" + result.year + "|" + result.month + "|" + result.day + "\" – ignoring release date");
+            log.warn("Failed to interpret release date \"" + result.year() + "|" + result.month() + "|" + result.day() + "\" – ignoring release date");
             return Optional.absent();
         }
 
         Country country;
-        if (result.location == null || Strings.isNullOrEmpty(result.location.name)) {
+        if (result.location() == null || Strings.isNullOrEmpty(result.location().name)) {
             country = Countries.ALL;
         } else {
-            String location = result.location.name.trim().toLowerCase();
+            String location = result.location().name.trim().toLowerCase();
             country = countryNames.get(location);
             if (country == null) {  // If we can't recognize it, a) it can't be represented, and b) it's probably a festival or something.
                 log.warn("Failed to interpret release location \"" + location + "\" – ignoring release date");

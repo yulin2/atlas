@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.wikipedia;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
@@ -131,17 +133,17 @@ public class SwebleHelper {
     /**
      * Tries to interpret the given AST as a {@link LocalDate}. The AST should be of the preprocessed (not parsed) type, and should contain no other dubious content.
      */
-    public static LocalDate extractDate(AstNode node) {
+    public static Optional<LocalDate> extractDate(AstNode node) {
         try {
             Object result = new DateVisitor().go(node);
             if (result != null && result instanceof LocalDate) {
-                return (LocalDate) result;
+                return Optional.of((LocalDate) result);
             }
         } catch (Exception e) {
             log.warn("Failed to extract date from node \""+ unparse(node) +"\"");
         }
         
-        return null;
+        return Optional.absent();
     }
     
     protected static class DateVisitor extends AstVisitor {
@@ -180,7 +182,7 @@ public class SwebleHelper {
         public final String name;
         public final Optional<String> articleTitle;
         public ListItemResult(String name, Optional<String> articleTitle) {
-            this.name = name;
+            this.name = checkNotNull(name);
             this.articleTitle = articleTitle;
         }
         @Override
@@ -207,7 +209,9 @@ public class SwebleHelper {
     
     protected static class ListVisitor extends AstVisitor {
         private final ImmutableList.Builder<ListItemResult> builder;
-        public ListVisitor(ImmutableList.Builder<ListItemResult> builder) { this.builder = builder; }
+        public ListVisitor(ImmutableList.Builder<ListItemResult> builder) {
+            this.builder = checkNotNull(builder);
+        }
         
         // State:
         public String linkTargetTitle = null;
@@ -239,7 +243,9 @@ public class SwebleHelper {
         }
         public void visit(Text t) {
             String name = t.getContent().trim();
-            if (name.isEmpty() || name.startsWith("(")) { return; }  // Things that start with brackets are probably extraneous annotations, not names -- skip them.
+            if (name.isEmpty() || name.startsWith("(")) {  // Things that start with brackets are probably extraneous annotations, not names -- skip them.
+                return;
+            }
             builder.add(new ListItemResult(name, Optional.fromNullable(linkTargetTitle)));
         }
 

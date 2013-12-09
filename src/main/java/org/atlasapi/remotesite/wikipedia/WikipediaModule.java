@@ -27,7 +27,13 @@ public class WikipediaModule {
     static final Publisher SOURCE = Publisher.WIKIPEDIA;
 
     private @Autowired SimpleScheduler scheduler;
-    private @Value("${updaters.wikipedia.enabled}") Boolean tasksEnabled;
+    private @Value("${updaters.wikipedia.films.enabled}") Boolean filmTaskEnabled;
+    private @Value("${updaters.wikipedia.tv.enabled}") Boolean tvTaskEnabled;
+    
+    private @Value("${updaters.wikipedia.films.simultaneousness}") int filmsSimultaneousness;
+    private @Value("${updaters.wikipedia.films.threads}") int filmsThreads;
+    private @Value("${updaters.wikipedia.tv.simultaneousness}") int tvSimultaneousness;
+    private @Value("${updaters.wikipedia.tv.threads}") int tvThreads;
 
 	private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
 	private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
@@ -44,10 +50,13 @@ public class WikipediaModule {
     
     @PostConstruct
     public void setUp() {
-        if(tasksEnabled) {
-            scheduler.schedule(allFilmsUpdater().withName("Wikipedia film scanner"), RepetitionRules.daily(new LocalTime(4,0,0)));
-            scheduler.schedule(allTvBrandsUpdater().withName("Wikipedia TV brands scanner"), RepetitionRules.daily(new LocalTime(4,0,0)));
-            log.info("Wikipedia update scheduled tasks installed");
+        if(filmTaskEnabled) {
+            scheduler.schedule(allFilmsUpdater().withName("Wikipedia films updater"), RepetitionRules.daily(new LocalTime(4,0,0)));
+            log.info("Wikipedia film update scheduled task installed");
+        }
+        if(tvTaskEnabled) {
+            scheduler.schedule(allTvBrandsUpdater().withName("Wikipedia TV updater"), RepetitionRules.daily(new LocalTime(4,0,0)));
+            log.info("Wikipedia TV update scheduled task installed");
         }
     }
     
@@ -57,18 +66,18 @@ public class WikipediaModule {
     }
     
     public FilmsUpdater allFilmsUpdater() {
-        return new FilmsUpdater(allFilmsTitleSource, fetchMeister, filmExtractor, contentWriter);
+        return new FilmsUpdater(allFilmsTitleSource, fetchMeister, filmExtractor, contentWriter, filmsSimultaneousness, filmsThreads);
     }
     
     public FilmsUpdater filmsUpdaterForTitles(FilmArticleTitleSource titleSource) {
-        return new FilmsUpdater(titleSource, fetchMeister, filmExtractor, contentWriter);
+        return new FilmsUpdater(titleSource, fetchMeister, filmExtractor, contentWriter, filmsSimultaneousness, filmsThreads);
     }
     
     public TvBrandHierarchyUpdater allTvBrandsUpdater() {
-        return new TvBrandHierarchyUpdater(allTvBrandsTitleSource, fetchMeister, tvBrandHierarchyExtractor, contentWriter);
+        return new TvBrandHierarchyUpdater(allTvBrandsTitleSource, fetchMeister, tvBrandHierarchyExtractor, contentWriter, tvSimultaneousness, tvThreads);
     }
     
     public TvBrandHierarchyUpdater tvBrandsUpdaterForTitles(TvBrandArticleTitleSource titleSource) {
-        return new TvBrandHierarchyUpdater(titleSource, fetchMeister, tvBrandHierarchyExtractor, contentWriter);
+        return new TvBrandHierarchyUpdater(titleSource, fetchMeister, tvBrandHierarchyExtractor, contentWriter, tvSimultaneousness, tvThreads);
     }
 }

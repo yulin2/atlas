@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.wikipedia.television;
 
 import org.atlasapi.remotesite.wikipedia.Callback;
 import org.atlasapi.remotesite.wikipedia.SwebleHelper;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sweble.wikitext.lazy.parser.LazyParsedPage;
@@ -16,30 +15,18 @@ import de.fau.cs.osr.ptk.common.ast.NodeList;
 
 public final class BrandInfoboxScraper extends AstVisitor {
     private static final Logger log = LoggerFactory.getLogger(BrandInfoboxScraper.class);
-    public static class Result {
-        public String title;
-        public String creator;
-        public String episodeListLinkTarget;
-        public LocalDate firstAired;
-        public LocalDate lastAired;
-        public String imdbID;
-
-        @Override
-        public String toString() {
-            return "BrandInfoboxScraper.Result{" + "title=" + title + ", creator=" + creator + ", episodeListLinkTarget=" + episodeListLinkTarget + ", firstAired=" + firstAired + ", lastAired=" + lastAired + '}';
-        }
-    }
-    
-    private final Callback<Result> callback;
-    private final Result result;
-    public BrandInfoboxScraper(Callback<Result> callback) {
+    private final Callback<ScrapedBrandInfobox> callback;
+    private final ScrapedBrandInfobox result;
+    public BrandInfoboxScraper(Callback<ScrapedBrandInfobox> callback) {
         this.callback = callback;
-        this.result = new Result();
+        this.result = new ScrapedBrandInfobox();
     }
     
     @Override
     protected Object after(AstNode node, Object irrelevantResult) {
-        if (this.callback != null) { callback.have(this.result); }
+        if (this.callback != null) {
+            callback.have(this.result);
+        }
         return this.result;
     }
 

@@ -11,23 +11,13 @@ import org.atlasapi.remotesite.wikipedia.television.TvBrandArticleTitleSource;
 import org.atlasapi.remotesite.wikipedia.television.TvBrandHierarchy;
 import org.atlasapi.remotesite.wikipedia.television.TvBrandHierarchyExtractor;
 import org.atlasapi.remotesite.wikipedia.testutils.FilesystemArticlesSource;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 
 public class TvExtractionTests {
-
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
 
     @Test
     public void testBuffy() throws URISyntaxException {
@@ -58,7 +48,9 @@ public class TvExtractionTests {
                 public void createOrUpdate(Item item) {
                     // TODO mock
                 }
-            }
+            },
+            5,
+            2
         ).run();
     }
 

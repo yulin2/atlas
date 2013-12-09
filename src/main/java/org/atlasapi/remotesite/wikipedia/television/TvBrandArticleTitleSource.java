@@ -1,5 +1,12 @@
 package org.atlasapi.remotesite.wikipedia.television;
 
 public interface TvBrandArticleTitleSource {
-    Iterable<String> getAllTvBrandArticleTitles();
+    
+    public class TvIndexingException extends Exception {
+        public TvIndexingException(Exception ex) {
+            super(ex);
+        }
+    }
+    
+    Iterable<String> getAllTvBrandArticleTitles() throws TvIndexingException;
 }

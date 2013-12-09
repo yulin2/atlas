@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 public class TvBrandHierarchyExtractor implements ContentExtractor<ScrapedFlatHierarchy, TvBrandHierarchy> {
@@ -28,7 +28,7 @@ public class TvBrandHierarchyExtractor implements ContentExtractor<ScrapedFlatHi
         Article brandArticle = source.getBrandArticle();
         Brand brand = extractBrand(brandArticle, source.getBrandInfo());
         
-        for(EpisodeListScraper.Result scrapedEpisode : source.getEpisodes()) {
+        for(ScrapedEpisode scrapedEpisode : source.getEpisodes()) {
             String seasonName = scrapedEpisode.season == null ? null : Strings.emptyToNull(scrapedEpisode.season.name);
             Series season = seasonName == null ? null : getSeason(seasons, seasonName, brand);
             
@@ -52,10 +52,10 @@ public class TvBrandHierarchyExtractor implements ContentExtractor<ScrapedFlatHi
             episode.setTitle(Strings.emptyToNull(scrapedEpisode.title));
         }
         
-        return new TvBrandHierarchy(brand, ImmutableList.copyOf(seasons.values()), ImmutableList.copyOf(episodes.values()));
+        return new TvBrandHierarchy(brand, ImmutableSet.copyOf(seasons.values()), ImmutableSet.copyOf(episodes.values()));
     }
 
-    private Brand extractBrand(Article brandArticle, BrandInfoboxScraper.Result info) {
+    private Brand extractBrand(Article brandArticle, ScrapedBrandInfobox info) {
         String url = brandArticle.getUrl();
         String title = null;
         Brand brand = new Brand(url, null, Publisher.WIKIPEDIA);
@@ -72,8 +72,8 @@ public class TvBrandHierarchyExtractor implements ContentExtractor<ScrapedFlatHi
         }
         brand.setTitle(title);
         
-        if (info.firstAired != null) {
-            brand.setYear(info.firstAired.getYear());
+        if (info.firstAired.isPresent()) {
+            brand.setYear(info.firstAired.get().getYear());
         }
         if (info.imdbID != null) {
             brand.addAlias(new Alias("imdb:title", info.imdbID));

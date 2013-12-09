@@ -39,11 +39,24 @@ public final class FilmInfoboxScraper {
         }
         public ReleaseDateResult(){}
 
-        public String year;
-        public String month;
-        public String day;
-        public ListItemResult location;
+        private String year;
+        private String month;
+        private String day;
+        private ListItemResult location;
         
+        public String year() {
+            return year;
+        }
+        public String month() {
+            return month;
+        }
+        public String day() {
+            return day;
+        }
+        public ListItemResult location() {
+            return location;
+        }
+
         private static enum Field {YEAR, MONTH, DAY, LOCATION};
     }
     
@@ -183,7 +196,9 @@ public final class FilmInfoboxScraper {
                         log.warn("Suspicious running time: " + attrs.runtimeInMins);
                     }
                 } catch (NumberFormatException e) {
-                    if (! runtimeText.isEmpty()) { log.warn("Failed to extract running time from weird string \"" + runtimeText + "\""); }
+                    if (! runtimeText.isEmpty()) {
+                        log.warn("Failed to extract running time from weird string \"" + runtimeText + "\"");
+                    }
                 }
             } else if ("country".equalsIgnoreCase(key)) {
                 attrs.countries = SwebleHelper.extractList(a.getValue());
@@ -249,14 +264,18 @@ public final class FilmInfoboxScraper {
         
         public void visit(Template t) {
             String name = SwebleHelper.flattenTextNodeList(t.getName());
-            if (! "Film date".equalsIgnoreCase(name)) { return; }
+            if (! "Film date".equalsIgnoreCase(name)) {
+                return;
+            }
             for (AstNode n : t.getArgs()) {
                 if (!(n instanceof TemplateArgument)) {
                     log.warn("Encountered a non-TemplateArgument; ignoring");
                     continue;
                 }
                 TemplateArgument a = (TemplateArgument) n;
-                if (a.getHasName()) { continue; }  // skip named arguments as they're only going to be 'ref=' which we don't care about
+                if (a.getHasName()) {
+                    continue;  // skip named arguments as they're only going to be 'ref=' which we don't care about
+                }
                 
                 if (nextField == ReleaseDateResult.Field.YEAR) {
                     currentResult = new ReleaseDateResult();
@@ -272,7 +291,9 @@ public final class FilmInfoboxScraper {
                 } else if (nextField == ReleaseDateResult.Field.LOCATION) {
                     try {
                         ImmutableList<ListItemResult> list = SwebleHelper.extractList(a.getValue());
-                        if (! list.isEmpty()) { currentResult.location = list.get(0); }
+                        if (! list.isEmpty()) {
+                            currentResult.location = list.get(0);
+                        }
                     } catch (Exception e) {
                         log.warn("Extracting release date location failed: " + SwebleHelper.unparse(a.getValue()), e);
                     }

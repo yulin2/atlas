@@ -9,12 +9,14 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.wikipedia.FetchMeister.PreloadedArticlesQueue;
-import org.atlasapi.remotesite.wikipedia.FetchMeister.PreloadedArticlesQueue.NoMoreArticlesException;
 import org.atlasapi.remotesite.wikipedia.television.BrandInfoboxScraper;
 import org.atlasapi.remotesite.wikipedia.television.EpisodeListScraper;
+import org.atlasapi.remotesite.wikipedia.television.ScrapedBrandInfobox;
+import org.atlasapi.remotesite.wikipedia.television.ScrapedEpisode;
 import org.atlasapi.remotesite.wikipedia.television.ScrapedFlatHierarchy;
 import org.atlasapi.remotesite.wikipedia.television.SeasonSectionScraper;
 import org.atlasapi.remotesite.wikipedia.television.TvBrandArticleTitleSource;
+import org.atlasapi.remotesite.wikipedia.television.TvBrandArticleTitleSource.TvIndexingException;
 import org.atlasapi.remotesite.wikipedia.television.TvBrandHierarchy;
 import org.atlasapi.remotesite.wikipedia.television.TvBrandHierarchyExtractor;
 import org.slf4j.Logger;
@@ -26,6 +28,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FutureCallback;
@@ -40,12 +43,12 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
     private static final Logger log = LoggerFactory.getLogger(TvBrandHierarchyUpdater.class);
     
     /** How many brands we try to process at once. */
-    private static final int SIMULTANEOUSNESS = 4;
+    private int simultaneousness;
     /** How many threads we use for all the deferred processing. */
-    private static final int THREADS = 2;
+    private int threadsToStart;
     
     private ListeningExecutorService executor;
-    private final CountDownLatch countdown = new CountDownLatch(SIMULTANEOUSNESS);
+    private final CountDownLatch countdown;
     
     private final FetchMeister fetchMeister;
     private final TvBrandArticleTitleSource titleSource;
@@ -55,13 +58,29 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
     private final ContentWriter writer;
     
     private UpdateProgress progress;
-    private Optional<Integer> totalTitles = Optional.absent();
+    private int totalTitles;
     
-    public TvBrandHierarchyUpdater(TvBrandArticleTitleSource titleSource, FetchMeister fetchMeister, TvBrandHierarchyExtractor extractor, ContentWriter writer) {
+    public TvBrandHierarchyUpdater(TvBrandArticleTitleSource titleSource, FetchMeister fetchMeister, TvBrandHierarchyExtractor extractor, ContentWriter writer, int simultaneousness, int threadsToStart) {
         this.fetchMeister = Preconditions.checkNotNull(fetchMeister);
         this.titleSource = Preconditions.checkNotNull(titleSource);
         this.extractor = Preconditions.checkNotNull(extractor);
         this.writer = Preconditions.checkNotNull(writer);
+        this.simultaneousness = simultaneousness;
+        this.threadsToStart = threadsToStart;
+        this.countdown = new CountDownLatch(simultaneousness);
+    }
+    
+    private Iterable<String> fetchTitles(int attempts) throws TvIndexingException {
+        TvIndexingException failure = null;
+        for(int i=0; i < attempts; ++i) {
+            try {
+                return titleSource.getAllTvBrandArticleTitles();
+            } catch (TvIndexingException e) {
+                log.warn("Failed once to fetch TV article titles; " + (attempts-i) + " attempts left,", e);
+                failure = e;
+            }
+        }
+        throw failure;
     }
     
     /**
@@ -72,10 +91,17 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
         reportStatus("Starting...");
         progress = UpdateProgress.START;
         fetchMeister.start();
-        articleQueue = fetchMeister.queueForPreloading(titleSource.getAllTvBrandArticleTitles());
-        totalTitles = articleQueue.totalTitles();
-        executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(THREADS));
-        for(int i=0; i<SIMULTANEOUSNESS; ++i) {
+        Iterable<String> titles;
+        try {
+            titles = fetchTitles(3);
+        } catch (TvIndexingException e) {
+            log.error("Failed to fetch TV article titles, aborting :(");
+            return;
+        }
+        articleQueue = fetchMeister.queueForPreloading(titles);
+        totalTitles = Iterables.size(titles);
+        executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(threadsToStart));
+        for(int i=0; i<simultaneousness; ++i) {
             processNext();
         }
         while(true) {
@@ -97,26 +123,16 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
         synchronized (this) {
             progress = progress.reduce(occurrence);
         }
-        if (totalTitles.isPresent()) {
-            reportStatus(String.format("Processing: %d/%d brands so far (%d failed)", progress.getTotalProgress(), totalTitles.get(), progress.getFailures()));
-        } else {
-            reportStatus(String.format("Processing: %d brands so far (%d failed)", progress.getTotalProgress(), progress.getFailures()));
-        }
+        reportStatus(String.format("Processing: %d/%d brands so far (%d failed)", progress.getTotalProgress(), totalTitles, progress.getFailures()));
     }
 
     private void processNext() {
-        ListenableFuture<Article> next;
-        try {
-            if(!shouldContinue()) {
-                log.info("TvBrandHierarchyUpdater has been cancelled and is stopping.");
-                throw new NoMoreArticlesException();
-            }
-            next = articleQueue.fetchNextBaseArticle();
-        } catch (NoMoreArticlesException ex) {
+        Optional<ListenableFuture<Article>> next = articleQueue.fetchNextBaseArticle();
+        if(!shouldContinue() || !next.isPresent()) {
             countdown.countDown();
             return;
         }
-        Futures.addCallback(updateBrand(next), new FutureCallback<Void>() {
+        Futures.addCallback(updateBrand(next.get()), new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 reduceProgress(UpdateProgress.SUCCESS);
@@ -134,10 +150,10 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
     /**
      * A useful function to feed to {@link Futures#transform} -- converts a bunch of immutable lists of {@link EpisodeListScraper#Result} into one long list, by concatting them.
      */
-    private static final Function<List<ImmutableCollection<EpisodeListScraper.Result>>, ImmutableCollection<EpisodeListScraper.Result>> CONCAT = new Function<List<ImmutableCollection<EpisodeListScraper.Result>>, ImmutableCollection<EpisodeListScraper.Result>>() {
-        public ImmutableCollection<EpisodeListScraper.Result> apply(List<ImmutableCollection<EpisodeListScraper.Result>> input) {
-            ImmutableList.Builder<EpisodeListScraper.Result> b = ImmutableList.builder();
-            for(ImmutableCollection<EpisodeListScraper.Result> c : input) {
+    private static final Function<List<ImmutableCollection<ScrapedEpisode>>, ImmutableCollection<ScrapedEpisode>> CONCAT = new Function<List<ImmutableCollection<ScrapedEpisode>>, ImmutableCollection<ScrapedEpisode>>() {
+        public ImmutableCollection<ScrapedEpisode> apply(List<ImmutableCollection<ScrapedEpisode>> input) {
+            ImmutableList.Builder<ScrapedEpisode> b = ImmutableList.builder();
+            for(ImmutableCollection<ScrapedEpisode> c : input) {
                 if(c != null) {
                     b.addAll(c);
                 }
@@ -149,10 +165,10 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
     /**
      * Scrapes out all the episodes listed in {@code epList}, making sure each knows (where possible and appropriate) the season from which it came.
      */
-    private ListenableFuture<ImmutableCollection<EpisodeListScraper.Result>> extractSeasons(ListenableFuture<Article> epList) {
-        return Futures.transform(epList, new AsyncFunction<Article, ImmutableCollection<EpisodeListScraper.Result>>() {
-                public ListenableFuture<ImmutableCollection<EpisodeListScraper.Result>> apply(final Article epList) {
-                    final ImmutableList.Builder<ListenableFuture<ImmutableCollection<EpisodeListScraper.Result>>> builder = ImmutableList.builder();
+    private ListenableFuture<ImmutableCollection<ScrapedEpisode>> extractSeasons(ListenableFuture<Article> epList) {
+        return Futures.transform(epList, new AsyncFunction<Article, ImmutableCollection<ScrapedEpisode>>() {
+                public ListenableFuture<ImmutableCollection<ScrapedEpisode>> apply(final Article epList) {
+                    final ImmutableList.Builder<ListenableFuture<ImmutableCollection<ScrapedEpisode>>> builder = ImmutableList.builder();
                     log.debug("Commencing seasonSectionScraping on \""+ epList.getTitle() +"\"");
                     
                     final Boolean[] foundASection = {false};
@@ -180,26 +196,26 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
      * @param includeOnly Is this being called on an article that was included as a template? If so, we choose to only parse the {@code includeOnly} section of the source.
      * @param context For logging/debug purposes, some explanation of the text on which this is being called.
      */
-    private ListenableFuture<ImmutableCollection<EpisodeListScraper.Result>> extractFlatEpisodes(String source, final SeasonSectionScraper.Result season, boolean includeOnly, final String context) {
-        final ImmutableList.Builder<ListenableFuture<ImmutableCollection<EpisodeListScraper.Result>>> laters = ImmutableList.builder();
-        final ImmutableList.Builder<EpisodeListScraper.Result> immediates = ImmutableList.builder();
+    private ListenableFuture<ImmutableCollection<ScrapedEpisode>> extractFlatEpisodes(String source, final SeasonSectionScraper.Result season, boolean includeOnly, final String context) {
+        final ImmutableList.Builder<ListenableFuture<ImmutableCollection<ScrapedEpisode>>> laters = ImmutableList.builder();
+        final ImmutableList.Builder<ScrapedEpisode> immediates = ImmutableList.builder();
 
         LazyPreprocessedPage section = SwebleHelper.preprocess(source, includeOnly);
-        new EpisodeListScraper(new Callback<EpisodeListScraper.Result>() {
-            public void have(EpisodeListScraper.Result result) {
+        new EpisodeListScraper(new Callback<ScrapedEpisode>() {
+            public void have(ScrapedEpisode result) {
                 immediates.add(result);
             }
         }, new Callback<String>() {
             public void have(String includeTitle) {
                 log.debug("Queueing fetch of \""+ includeTitle +"\" as child list for " + context);
-                laters.add(Futures.transform(fetchMeister.fetchChildArticle(includeTitle), new AsyncFunction<Article, ImmutableCollection<EpisodeListScraper.Result>>() {
-                    public ListenableFuture<ImmutableCollection<EpisodeListScraper.Result>> apply(Article childArticle) {
+                laters.add(Futures.transform(fetchMeister.fetchChildArticle(includeTitle), new AsyncFunction<Article, ImmutableCollection<ScrapedEpisode>>() {
+                    public ListenableFuture<ImmutableCollection<ScrapedEpisode>> apply(Article childArticle) {
                         return extractFlatEpisodes(childArticle.getMediaWikiSource(), season, true, childArticle.getTitle());
                     }
                 }, executor));
             }
         }).withSeason(season).go(section);
-        ImmutableCollection<EpisodeListScraper.Result> immeds = immediates.build();
+        ImmutableCollection<ScrapedEpisode> immeds = immediates.build();
         laters.add(Futures.immediateFuture(immeds));
         return Futures.transform(Futures.successfulAsList(laters.build()), CONCAT);
     }
@@ -209,13 +225,13 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
      */
     private ListenableFuture<Void> updateBrand(final ListenableFuture<Article> baseArticle) {
 
-        ListenableFuture<BrandInfoboxScraper.Result> brandInfobox = Futures.transform(baseArticle, new Function<Article,BrandInfoboxScraper.Result>() {
-            public BrandInfoboxScraper.Result apply(final Article baseArticle) {
+        ListenableFuture<ScrapedBrandInfobox> brandInfobox = Futures.transform(baseArticle, new Function<Article,ScrapedBrandInfobox>() {
+            public ScrapedBrandInfobox apply(final Article baseArticle) {
                 LazyPreprocessedPage preprocess = SwebleHelper.preprocess(baseArticle.getMediaWikiSource(), true);
-                BrandInfoboxScraper.Result res;
-                final LinkedList<BrandInfoboxScraper.Result> it = Lists.newLinkedList();
-                new BrandInfoboxScraper(new Callback<BrandInfoboxScraper.Result>() {
-                    public void have(BrandInfoboxScraper.Result thing) {
+                ScrapedBrandInfobox res;
+                final LinkedList<ScrapedBrandInfobox> it = Lists.newLinkedList();
+                new BrandInfoboxScraper(new Callback<ScrapedBrandInfobox>() {
+                    public void have(ScrapedBrandInfobox thing) {
                         it.add(thing);
                     }
                 }).go(preprocess);
@@ -223,11 +239,11 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
             }
         }, executor);
 
-        ListenableFuture<ImmutableCollection<EpisodeListScraper.Result>> externalListedEpisodes;
-        externalListedEpisodes = Futures.transform(brandInfobox, new AsyncFunction<BrandInfoboxScraper.Result, ImmutableCollection<EpisodeListScraper.Result>>() {
-            public ListenableFuture<ImmutableCollection<EpisodeListScraper.Result>> apply(BrandInfoboxScraper.Result input) {
+        ListenableFuture<ImmutableCollection<ScrapedEpisode>> externalListedEpisodes;
+        externalListedEpisodes = Futures.transform(brandInfobox, new AsyncFunction<ScrapedBrandInfobox, ImmutableCollection<ScrapedEpisode>>() {
+            public ListenableFuture<ImmutableCollection<ScrapedEpisode>> apply(ScrapedBrandInfobox input) {
                 if(input.episodeListLinkTarget == null || input.episodeListLinkTarget.isEmpty()) {
-                    ImmutableCollection<EpisodeListScraper.Result> none = ImmutableList.of();
+                    ImmutableCollection<ScrapedEpisode> none = ImmutableList.of();
                     return Futures.immediateFuture(none);
                 }
                 log.debug("Queueing fetch of \""+ input.episodeListLinkTarget +"\" as season list for \""+ input.title +"\"");
@@ -235,9 +251,9 @@ public final class TvBrandHierarchyUpdater extends ScheduledTask {
             }
         }, executor);
 
-        ListenableFuture<ImmutableCollection<EpisodeListScraper.Result>> mainPageEpisodes = extractSeasons(baseArticle);
+        ListenableFuture<ImmutableCollection<ScrapedEpisode>> mainPageEpisodes = extractSeasons(baseArticle);
         
-        ListenableFuture<ImmutableCollection<EpisodeListScraper.Result>> allEpisodes = Futures.transform(Futures.successfulAsList(mainPageEpisodes, externalListedEpisodes), CONCAT);
+        ListenableFuture<ImmutableCollection<ScrapedEpisode>> allEpisodes = Futures.transform(Futures.successfulAsList(mainPageEpisodes, externalListedEpisodes), CONCAT);
         
         ListenableFuture<Void> doIt = Futures.transform(new ScrapedFlatHierarchy.Collector(baseArticle, brandInfobox, allEpisodes).collect(), new Function<ScrapedFlatHierarchy, Void>() {
             public Void apply(ScrapedFlatHierarchy input) {

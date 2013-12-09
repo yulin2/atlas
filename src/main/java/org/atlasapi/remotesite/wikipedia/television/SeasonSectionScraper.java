@@ -1,9 +1,8 @@
 package org.atlasapi.remotesite.wikipedia.television;
 
-import de.fau.cs.osr.ptk.common.AstVisitor;
-import de.fau.cs.osr.ptk.common.ast.AstNode;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.atlasapi.remotesite.wikipedia.Callback;
 import org.atlasapi.remotesite.wikipedia.SwebleHelper;
 import org.slf4j.Logger;
@@ -11,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.sweble.wikitext.lazy.parser.LazyParsedPage;
 import org.sweble.wikitext.lazy.parser.Section;
 import org.sweble.wikitext.lazy.preprocessor.LazyPreprocessedPage;
+
+import de.fau.cs.osr.ptk.common.AstVisitor;
+import de.fau.cs.osr.ptk.common.ast.AstNode;
 
 /**
  * Pulls out sections of an episode list article which correspond to seasons.
@@ -22,7 +24,7 @@ public final class SeasonSectionScraper extends AstVisitor {
         public String name;
         public String content;
     }
-        
+    
     private final Callback<Result> resultCallback;
     /**
      * @param resultCallback Will be called for each found section.

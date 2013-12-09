@@ -22,7 +22,9 @@ public class RunFilmExtraction {
                     public void createOrUpdate(Item item) {
                         System.out.println(item);
                     }
-                }
+                },
+                5,
+                2
         ).run();
     }
 }

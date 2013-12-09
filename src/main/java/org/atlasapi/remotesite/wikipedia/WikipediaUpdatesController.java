@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.wikipedia;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.remotesite.wikipedia.film.FilmArticleTitleSource;
@@ -16,7 +18,7 @@ public class WikipediaUpdatesController {
     private final WikipediaModule module;
     
     public WikipediaUpdatesController(WikipediaModule module) {
-        this.module = module;
+        this.module = checkNotNull(module);
     }
     
     @RequestMapping(value="/system/update/wikipedia/film", method=RequestMethod.POST)

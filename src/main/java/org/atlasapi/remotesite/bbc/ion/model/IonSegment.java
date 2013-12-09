@@ -18,7 +18,9 @@ public class IonSegment {
     private Integer duration;
     private String catalogue_number;
     private String title;
-    private String contributions;
+    //Disabled because this is unused 
+    //and now an array in the supplied JSON
+    //private String contributions;
 
     public String getMediumSynopsis() {
         return this.mediumSynopsis;
@@ -84,8 +86,8 @@ public class IonSegment {
         return this.title;
     }
 
-    public String getContributions() {
-        return this.contributions;
-    }
+//    public String getContributions() {
+//        return this.contributions;
+//    }
 
 }

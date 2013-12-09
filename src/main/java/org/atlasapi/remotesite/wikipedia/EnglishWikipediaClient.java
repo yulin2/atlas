@@ -53,13 +53,12 @@ public class EnglishWikipediaClient implements ArticleFetcher, FilmArticleTitleS
     }
 
     @Override
-    public Iterable<String> getAllTvBrandArticleTitles() {
+    public Iterable<String> getAllTvBrandArticleTitles() throws TvIndexingException {
         try {
             return IndexScraper.extractNames(fetchArticle("List of television programs by name").getMediaWikiSource());
         } catch (Exception ex) {
-            log.error("Failed to load the TV article names – they'll all be skipped! D:", ex);
+            throw new TvIndexingException(ex);
         }
-        return ImmutableList.of();
     }
 
 }

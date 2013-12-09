@@ -23,7 +23,9 @@ public class RunTvExtraction {
                     public void createOrUpdate(Container container) {
                         System.out.println(container.toSummary());
                     }
-                }
+                },
+                5,
+                2
         ).run();
     }
 }

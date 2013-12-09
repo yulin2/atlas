@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.wikipedia.FetchMeister.PreloadedArticlesQueue;
-import org.atlasapi.remotesite.wikipedia.FetchMeister.PreloadedArticlesQueue.NoMoreArticlesException;
 import org.atlasapi.remotesite.wikipedia.film.FilmArticleTitleSource;
 import org.atlasapi.remotesite.wikipedia.film.FilmExtractor;
 import org.slf4j.Logger;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -31,12 +31,12 @@ public class FilmsUpdater extends ScheduledTask {
     private static Logger log = LoggerFactory.getLogger(FilmsUpdater.class);
 
     /** How many films we try to process at once. */
-    private static final int SIMULTANEOUSNESS = 4;
+    private int simultaneousness;
     /** How many threads we use for all the deferred processing. */
-    private static final int THREADS = 2;
+    private int threadsToStart;
 
     private ListeningExecutorService executor;
-    private final CountDownLatch countdown = new CountDownLatch(SIMULTANEOUSNESS);
+    private final CountDownLatch countdown;
 
     private FetchMeister fetchMeister;
     private FilmArticleTitleSource titleSource;
@@ -46,13 +46,16 @@ public class FilmsUpdater extends ScheduledTask {
     private ContentWriter writer;
     
     private UpdateProgress progress;
-    private Optional<Integer> totalTitles = Optional.absent();
+    private int totalTitles;
     
-    public FilmsUpdater(FilmArticleTitleSource titleSource, FetchMeister fetcher, FilmExtractor extractor, ContentWriter writer) {
+    public FilmsUpdater(FilmArticleTitleSource titleSource, FetchMeister fetcher, FilmExtractor extractor, ContentWriter writer, int simultaneousness, int threadsToStart) {
         this.titleSource = checkNotNull(titleSource);
         this.fetchMeister = checkNotNull(fetcher);
         this.extractor = checkNotNull(extractor);
         this.writer = checkNotNull(writer);
+        this.simultaneousness = simultaneousness;
+        this.threadsToStart = threadsToStart;
+        this.countdown = new CountDownLatch(simultaneousness);
     }
 
     @Override
@@ -60,10 +63,11 @@ public class FilmsUpdater extends ScheduledTask {
         reportStatus("Starting...");
         progress = UpdateProgress.START;
         fetchMeister.start();
-        articleQueue = fetchMeister.queueForPreloading(titleSource.getAllFilmArticleTitles());
-        totalTitles = articleQueue.totalTitles();
-        executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(THREADS));
-        for(int i=0; i<SIMULTANEOUSNESS; ++i) {
+        Iterable<String> titles = titleSource.getAllFilmArticleTitles();
+        articleQueue = fetchMeister.queueForPreloading(titles);
+        totalTitles = Iterables.size(titles);
+        executor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(threadsToStart));
+        for(int i=0; i<simultaneousness; ++i) {
             processNext();
         }
         while(true) {
@@ -86,26 +90,16 @@ public class FilmsUpdater extends ScheduledTask {
         synchronized (this) {
             progress = progress.reduce(occurrence);
         }
-        if (totalTitles.isPresent()) {
-            reportStatus(String.format("Processing: %d/%d films so far (%d failed)", progress.getTotalProgress(), totalTitles.get(), progress.getFailures()));
-        } else {
-            reportStatus(String.format("Processing: %d films so far (%d failed)", progress.getTotalProgress(), progress.getFailures()));
-        }
+        reportStatus(String.format("Processing: %d/%d films so far (%d failed)", progress.getTotalProgress(), totalTitles, progress.getFailures()));
     }
 
     private void processNext() {
-        ListenableFuture<Article> next;
-        try {
-            if(!shouldContinue()) {
-                log.info("FilmsUpdater has been cancelled and is stopping.");
-                throw new NoMoreArticlesException();
-            }
-            next = articleQueue.fetchNextBaseArticle();
-        } catch (NoMoreArticlesException ex) {
+        Optional<ListenableFuture<Article>> next = articleQueue.fetchNextBaseArticle();
+        if(!shouldContinue() || !next.isPresent()) {
             countdown.countDown();
             return;
         }
-        Futures.addCallback(updateFilm(next), new FutureCallback<Void>() {
+        Futures.addCallback(updateFilm(next.get()), new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 reduceProgress(UpdateProgress.SUCCESS);

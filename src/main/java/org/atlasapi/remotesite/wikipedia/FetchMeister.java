@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.wikipedia;
 
-import java.util.Collection;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,30 +65,24 @@ public class FetchMeister {
      * A representation of a queue of articles, to be handed out to things that want to preload from a list of titles. 
      */
     public static class PreloadedArticlesQueue {
-        /**
-         * Thrown when the next article is requested but there are no more.
-         */
-        public static class NoMoreArticlesException extends Exception {};
-        
         private final FetchMeister fetcher;
         private final Iterator<String> titles;
         private final BlockingQueue<Article> preloadedArticles = new ArrayBlockingQueue<Article>(MAX_PRELOAD);
         private boolean finished = false;
-        private Optional<Integer> totalTitles = Optional.absent();
         
         private PreloadedArticlesQueue(FetchMeister fetcher, Iterator<String> titles) {
-            this.fetcher = fetcher;
-            this.titles = titles;
+            this.fetcher = checkNotNull(fetcher);
+            this.titles = checkNotNull(titles);
         }
         
         /**
-         * Returns the next article from the prespecified list of titles.
+         * Returns the next article from the prespecified list of titles. Or doesn't, if there aren't any.
          * <p>
          * Note: even though it returns a Future, this is somewhat pointless as it currently just blocks while loading hasn't finished.
          */
-        public ListenableFuture<Article> fetchNextBaseArticle() throws NoMoreArticlesException {
+        public Optional<ListenableFuture<Article>> fetchNextBaseArticle() {
             if (finished) {
-                throw new NoMoreArticlesException();
+                return Optional.absent();
             }
             while (true) {
                 try {
@@ -95,18 +90,14 @@ public class FetchMeister {
                     synchronized (fetcher.fetchingThread) { fetcher.fetchingThread.notify(); }  // notify in case we just created space to fetch more
                     if(a == NO_MORE_ARTICLES) {
                         finished = true;
-                        throw new NoMoreArticlesException();
+                        return Optional.absent();
                     }
                     log.info("Base article \""+ a.getTitle() +"\" was fetched for processing");
-                    return fetcher.followRedirects(Futures.immediateFuture(a), MAX_REDIRECTS);
+                    return Optional.of(fetcher.followRedirects(Futures.immediateFuture(a), MAX_REDIRECTS));
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
             }
-        }
-
-        public Optional<Integer> totalTitles() {
-            return totalTitles;
         }
     }
     
@@ -122,14 +113,14 @@ public class FetchMeister {
         public SettableFuture<Article> future;
 
         public Request(String title, SettableFuture<Article> future) {
-            this.title = title;
-            this.future = future;
+            this.title = checkNotNull(title);
+            this.future = checkNotNull(future);
         }
     }
     private final BlockingQueue<Request> childArticleRequests = new LinkedBlockingQueue<Request>();
     
     public FetchMeister(final ArticleFetcher fetcher) {
-        this.fetcher = fetcher;
+        this.fetcher = checkNotNull(fetcher);
     }
 
     private PreloadedArticlesQueue lastQueue = null;  // state: the last queue that was served
@@ -139,17 +130,29 @@ public class FetchMeister {
      */
     private Optional<PreloadedArticlesQueue> nextQueue() {
         synchronized (preloaders) {
-            if (preloaders.isEmpty()) { return Optional.absent(); }
+            if (preloaders.isEmpty()) {
+                return Optional.absent();
+            }
             
             boolean lastQueueHasBeenSeen = false;
             while (true) {
                 for (PreloadedArticlesQueue q : preloaders) {
-                    if (lastQueue == null) { lastQueue = q; lastQueueHasBeenSeen = true; continue; }
-                    if (lastQueueHasBeenSeen) {
-                        if (q.preloadedArticles.remainingCapacity() > 0) { return Optional.of(q); }
-                        if (q == lastQueue) { return Optional.absent(); }
+                    if (lastQueue == null) {
+                        lastQueue = q;
+                        lastQueueHasBeenSeen = true;
+                        continue;
                     }
-                    if (q == lastQueue) { lastQueueHasBeenSeen = true; }
+                    if (lastQueueHasBeenSeen) {
+                        if (q.preloadedArticles.remainingCapacity() > 0) {
+                            return Optional.of(q);
+                        }
+                        if (q == lastQueue) {
+                            return Optional.absent();
+                        }
+                    }
+                    if (q == lastQueue) {
+                        lastQueueHasBeenSeen = true;
+                    }
                 }
             }
         }
@@ -210,19 +213,19 @@ public class FetchMeister {
     
     private static final Pattern redirectPattern = Pattern.compile("^\\s*\\#REDIRECT\\s*\\[\\[([^\\]]*)\\]\\]", Pattern.CASE_INSENSITIVE);
     
-    private ListenableFuture<Article> followRedirects(ListenableFuture<Article> articleThatMightBeARedirect, final int redirectLimit) {
+    private ListenableFuture<Article> followRedirects(ListenableFuture<Article> articleThatMightBeARedirect, final int maxRemainingRedirects) {
         return Futures.transform(articleThatMightBeARedirect, new AsyncFunction<Article, Article>() {
             public ListenableFuture<Article> apply(Article article) {
                 Matcher matcher = redirectPattern.matcher(article.getMediaWikiSource());
                 if (matcher.matches()) {
                     String toTitle = matcher.group(1);
                     log.info("Following redirect ["+ article.getTitle() +" => "+ toTitle +"]");
-                    if (redirectLimit < 2) {
+                    if (maxRemainingRedirects <= 1) {
                         String errorMsg = "Too many redirects on article \""+ article.getTitle() +"\"";
                         log.error(errorMsg);
                         throw new RuntimeException(errorMsg);
                     }
-                    return fetchChildArticle(toTitle, redirectLimit-1);
+                    return fetchChildArticle(toTitle, maxRemainingRedirects-1);
                 }
                 return Futures.immediateFuture(article);
             }
@@ -235,17 +238,16 @@ public class FetchMeister {
     public ListenableFuture<Article> fetchChildArticle(String title) {
         return fetchChildArticle(title, MAX_REDIRECTS);
     }
-    private ListenableFuture<Article> fetchChildArticle(String title, int redirectLimit) {
+    private ListenableFuture<Article> fetchChildArticle(String title, int maxRemainingRedirects) {
         SettableFuture<Article> f = SettableFuture.create();
         childArticleRequests.add(new Request(title, f));
         synchronized (fetchingThread) { fetchingThread.notify(); }
-        return followRedirects(f, redirectLimit);
+        return followRedirects(f, maxRemainingRedirects);
     }
     
     public PreloadedArticlesQueue queueForPreloading(Iterable<String> titles) {
         synchronized (preloaders) {
             PreloadedArticlesQueue queue = new PreloadedArticlesQueue(this, titles.iterator());
-            queue.totalTitles = (Optional<Integer>) ((titles instanceof Collection) ? Optional.of(((Collection) titles).size()) : Optional.absent());
             preloaders.add(queue);
             synchronized (fetchingThread) { fetchingThread.notify(); }
             return queue;
@@ -254,7 +256,9 @@ public class FetchMeister {
     
     public void cancelPreloading(PreloadedArticlesQueue queue) {
         synchronized (preloaders) {
-            if (lastQueue == queue) { lastQueue = null; }
+            if (lastQueue == queue) {
+                lastQueue = null;
+            }
             preloaders.remove(queue);
         }
     }
@@ -271,7 +275,7 @@ public class FetchMeister {
         --users;
         if (users == 0) {
             fetchingThread.shouldEndSelf = true;
-            synchronized(fetchingThread) { fetchingThread.notify(); }
+            synchronized (fetchingThread) { fetchingThread.notify(); }
             fetchingThread = null;
         }
     }

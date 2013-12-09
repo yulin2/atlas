@@ -6,11 +6,14 @@ import java.io.IOException;
 import org.atlasapi.remotesite.wikipedia.Article;
 import org.atlasapi.remotesite.wikipedia.ArticleFetcher;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.api.client.util.Charsets;
 import com.google.common.io.Files;
 
 public class LocallyCachingArticleFetcher implements ArticleFetcher {
+    private final static Logger log = LoggerFactory.getLogger(LocallyCachingArticleFetcher.class);
     private final ArticleFetcher fetcher;
     private final String outputDirPath;
     
@@ -24,7 +27,7 @@ public class LocallyCachingArticleFetcher implements ArticleFetcher {
     }
     
     private void downloadArticle(String title) throws IOException, FetchFailedException {
-        System.out.println("¡¡ DOWNLOADING " + title + " !!");
+        log.info("¡¡ DOWNLOADING " + title + " !!");
         Article fetchArticle = fetcher.fetchArticle(title);
         Files.write(fetchArticle.getMediaWikiSource(), new File(outputDirPath + "/" + titleToFilename(title)), Charsets.UTF_8);
     }
@@ -39,7 +42,7 @@ public class LocallyCachingArticleFetcher implements ArticleFetcher {
                         downloadArticle(title);
                         break;
                     } catch (FetchFailedException e) {
-                        System.err.println("Failed to download \""+ title +"\", trying again...");
+                        log.warn("Failed to download \""+ title +"\", trying again...");
                     }
                 }
             }
