@@ -34,6 +34,7 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.messaging.v3.AtlasMessagingModule;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
@@ -53,17 +54,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.hp.hpl.jena.rdf.model.Container;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
-@Import(EquivModule.class)
+@Import({EquivModule.class, AtlasMessagingModule.class})
 public class EquivTaskModule {
 
     private static final Set<String> ignored = ImmutableSet.of("http://www.bbc.co.uk/programmes/b006mgyl"); 
@@ -79,6 +86,8 @@ public class EquivTaskModule {
     private static final RepetitionRule REDUX_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(7, 00));
     
     private @Value("${equiv.updater.enabled}") String updaterEnabled;
+    private @Value("${equiv.stream-updater.enabled}") Boolean streamedChangesUpdateEquiv;
+    private @Value("${messaging.destination.content.changes}") String contentChanges;
     
     private @Autowired ContentLister contentLister;
     private @Autowired SimpleScheduler taskScheduler;
@@ -90,6 +99,8 @@ public class EquivTaskModule {
     
     private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
     private @Autowired RecentEquivalenceResultStore equivalenceResultStore;
+    
+    private @Autowired AtlasMessagingModule messaging;
     
     @PostConstruct
     public void scheduleUpdater() {
@@ -213,6 +224,36 @@ public class EquivTaskModule {
 
     private Iterable<Channel> bbcReduxChannels() {
         return new ReduxServices(channelResolver).channelMap().values();
+    }
+    
+    private EquivalenceUpdatingWorker equivUpdatingWorker() {
+        return new EquivalenceUpdatingWorker(contentResolver, equivUpdater,
+            Predicates.or(ImmutableList.<Predicate<? super Content>>of(
+                sourceIsIn(Publisher.BBC_REDUX),
+                Predicates.instanceOf(Container.class)
+            ))
+        );
+    }
+
+    private Predicate<Content> sourceIsIn(Publisher... srcs) {
+        final ImmutableSet<Publisher> sources = ImmutableSet.copyOf(srcs);
+        return new Predicate<Content>(){
+            @Override
+            public boolean apply(Content input) {
+                return sources.contains(input.getPublisher());
+            }
+        };
+    }
+
+    @Bean
+    @Lazy(true)
+    public DefaultMessageListenerContainer contentIndexerMessageListener() {
+        if (streamedChangesUpdateEquiv) {
+            return messaging.queueHelper().makeVirtualTopicConsumer(
+                    equivUpdatingWorker(), "EquivUpdater", contentChanges, 1, 1);
+        } else {
+            return messaging.queueHelper().noopContainer();
+        }
     }
     
 }
