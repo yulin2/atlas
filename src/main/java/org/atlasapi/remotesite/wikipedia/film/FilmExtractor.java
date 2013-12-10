@@ -15,9 +15,9 @@ import org.atlasapi.media.entity.ReleaseDate.ReleaseType;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.wikipedia.Article;
+import org.atlasapi.remotesite.wikipedia.ExtractionHelper;
 import org.atlasapi.remotesite.wikipedia.SwebleHelper.ListItemResult;
 import org.atlasapi.remotesite.wikipedia.film.FilmInfoboxScraper.ReleaseDateResult;
-import org.atlasapi.remotesite.wikipedia.film.FilmInfoboxScraper.Result;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
     public Film extract(Article article) {
         String source = article.getMediaWikiSource();
         try {
-            Result info = FilmInfoboxScraper.getInfoboxAttrs(source);
+            ScrapedFilmInfobox info = FilmInfoboxScraper.getInfoboxAttrs(source);
             
             String url = article.getUrl();
             Film flim = new Film(url, url, Publisher.WIKIPEDIA);
@@ -59,15 +59,15 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
             
             List<CrewMember> people = flim.getPeople();
 //            crewify(info.cinematographers, Role., people);  // TODO do we have / do we want a role for cinematographers?
-            crewify(info.composers, Role.COMPOSER, people);
-            crewify(info.directors, Role.DIRECTOR, people);
-            crewify(info.editors, Role.EDITOR, people);
-            crewify(info.narrators, Role.NARRATOR, people);
-            crewify(info.producers, Role.PRODUCER, people);
-            crewify(info.writers, Role.WRITER, people);
-            crewify(info.storyWriters, Role.SOURCE_WRITER, people);  // TODO is this the right role?
-            crewify(info.screenplayWriters, Role.ADAPTED_BY, people);  // TODO is this the right role?
-            crewify(info.starring, Role.ACTOR, people);
+            ExtractionHelper.extractCrewMembers(info.composers, Role.COMPOSER, people);
+            ExtractionHelper.extractCrewMembers(info.directors, Role.DIRECTOR, people);
+            ExtractionHelper.extractCrewMembers(info.editors, Role.EDITOR, people);
+            ExtractionHelper.extractCrewMembers(info.narrators, Role.NARRATOR, people);
+            ExtractionHelper.extractCrewMembers(info.producers, Role.PRODUCER, people);
+            ExtractionHelper.extractCrewMembers(info.writers, Role.WRITER, people);
+            ExtractionHelper.extractCrewMembers(info.storyWriters, Role.SOURCE_WRITER, people);  // TODO is this the right role?
+            ExtractionHelper.extractCrewMembers(info.screenplayWriters, Role.ADAPTED_BY, people);  // TODO is this the right role?
+            ExtractionHelper.extractCrewMembers(info.starring, Role.ACTOR, people);
             
             if (info.externalAliases != null) {
                 for (Map.Entry<String, String> a : info.externalAliases.entrySet()) {
@@ -104,19 +104,6 @@ public class FilmExtractor implements ContentExtractor<Article, Film> {
             return title;
         } else {
             return title.substring(0, indexOfBracketedStuffWeDontWant);
-        }
-    }
-
-    private void crewify(ImmutableList<ListItemResult> from, Role role, List<CrewMember> into) {
-        if (from == null) {
-            return;
-        }
-        for (ListItemResult person : from) {
-            if (person.articleTitle.isPresent()) {
-                into.add(new CrewMember(Article.urlFromTitle(person.articleTitle.get()), null, Publisher.WIKIPEDIA).withRole(role).withName(person.name));
-            } else {
-                into.add(new CrewMember().withRole(role).withName(person.name).withPublisher(Publisher.WIKIPEDIA));
-            }
         }
     }
     

@@ -75,17 +75,17 @@ public final class EpisodeListScraper extends AstVisitor {
         String name = SwebleHelper.flattenTextNodeList(a.getName());
         // http://en.wikipedia.org/wiki/Template:Episode_list
         if ("Title".equalsIgnoreCase(name)) {
-            currentResult.title = SwebleHelper.flattenTextNodeList(a.getValue());
+            currentResult.title = SwebleHelper.extractList(a.getValue());
         } else if ("RTitle".equalsIgnoreCase(name) && currentResult.title == null) {
-            currentResult.title = SwebleHelper.flattenTextNodeList(a.getValue());
+            currentResult.title = SwebleHelper.extractList(a.getValue());
         } else if ("EpisodeNumber".equalsIgnoreCase(name)) {
             currentResult.numberInShow = Integer.parseInt(SwebleHelper.flattenTextNodeList(a.getValue()));
         } else if ("EpisodeNumber2".equalsIgnoreCase(name)) {
             currentResult.numberInSeason = Integer.parseInt(SwebleHelper.flattenTextNodeList(a.getValue()));
         } else if ("DirectedBy".equalsIgnoreCase(name)) {
-            currentResult.director = SwebleHelper.flattenTextNodeList(a.getValue());
+            currentResult.director = SwebleHelper.extractList(a.getValue());
         } else if ("WrittenBy".equalsIgnoreCase(name)) {
-            currentResult.writer = SwebleHelper.flattenTextNodeList(a.getValue());
+            currentResult.writer = SwebleHelper.extractList(a.getValue());
         } else if ("OriginalAirDate".equalsIgnoreCase(name) && currentResult.originalAirDate == null) {
             currentResult.originalAirDate = SwebleHelper.extractDate(a.getValue());
         } else if ("ProdCode".equalsIgnoreCase(name)) {

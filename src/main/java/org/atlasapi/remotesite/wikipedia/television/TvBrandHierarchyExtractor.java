@@ -1,19 +1,25 @@
 package org.atlasapi.remotesite.wikipedia.television;
 
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.wikipedia.Article;
+import org.atlasapi.remotesite.wikipedia.ExtractionHelper;
+import org.atlasapi.remotesite.wikipedia.SwebleHelper.ListItemResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
@@ -49,7 +55,17 @@ public class TvBrandHierarchyExtractor implements ContentExtractor<ScrapedFlatHi
             if (season != null) {  // in case we scraped the same episode both within and without a season, we don't want to stupidly wipe out the series ref during this merge!
                 episode.setSeries(season);  // TODO this should be done only after writing and re-resolving the season
             }
-            episode.setTitle(Strings.emptyToNull(scrapedEpisode.title));
+
+            ImmutableList<ListItemResult> title = scrapedEpisode.title;
+            if (title != null && title.size() == 1) {
+                episode.setTitle(title.get(0).name);
+            } else {
+                log.info("An episode of \"" + brand.getTitle() + "\" has " + (title == null || title.isEmpty() ? "no title." : "multiple titles."));
+            }
+            
+            List<CrewMember> people = episode.getPeople();
+            ExtractionHelper.extractCrewMembers(scrapedEpisode.director, Role.DIRECTOR, people);
+            ExtractionHelper.extractCrewMembers(scrapedEpisode.writer, Role.WRITER, people);
         }
         
         return new TvBrandHierarchy(brand, ImmutableSet.copyOf(seasons.values()), ImmutableSet.copyOf(episodes.values()));
