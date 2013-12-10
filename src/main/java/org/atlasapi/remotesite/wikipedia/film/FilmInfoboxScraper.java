@@ -3,8 +3,6 @@ package org.atlasapi.remotesite.wikipedia.film;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,31 +58,10 @@ public final class FilmInfoboxScraper {
         private static enum Field {YEAR, MONTH, DAY, LOCATION};
     }
     
-    public static class Result {
-        public ImmutableList<ListItemResult> name;
-        public ImmutableList<ListItemResult> directors;
-        public ImmutableList<ListItemResult> producers;
-        public ImmutableList<ListItemResult> writers;
-        public ImmutableList<ListItemResult> screenplayWriters;
-        public ImmutableList<ListItemResult> storyWriters;
-        public ImmutableList<ListItemResult> narrators;
-        public ImmutableList<ListItemResult> starring;
-        public ImmutableList<ListItemResult> composers;
-        public ImmutableList<ListItemResult> cinematographers;
-        public ImmutableList<ListItemResult> editors;
-        public ImmutableList<ListItemResult> productionStudios;
-        public ImmutableList<ListItemResult> distributors;
-        public ImmutableList<ReleaseDateResult> releaseDates;
-        public Integer runtimeInMins;
-        public ImmutableList<ListItemResult> countries;
-        public ImmutableList<ListItemResult> language;
-        public Map<String,String> externalAliases = new TreeMap<>();
-    }
-
     /**
      * Returns the information given to the Film infobox template in the given Mediawiki page source.
      */
-    public static Result getInfoboxAttrs(String articleText) throws IOException, ParseException {
+    public static ScrapedFilmInfobox getInfoboxAttrs(String articleText) throws IOException, ParseException {
         LazyPreprocessedPage ast = SwebleHelper.preprocess(articleText, false);
 
         InfoboxVisitor v = new InfoboxVisitor();
@@ -100,7 +77,7 @@ public final class FilmInfoboxScraper {
      * This thing looks at a preprocessor-generated AST of a Mediawiki page, finds the Film infobox, and gathers key-value pairs from it.
      */
     private static final class InfoboxVisitor {
-        final Result attrs = new Result();
+        final ScrapedFilmInfobox attrs = new ScrapedFilmInfobox();
 
         void consumeInfobox(AstNode n) throws IOException, ParseException {
             if (!(n instanceof Template)) {
