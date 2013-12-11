@@ -37,6 +37,7 @@ public class EquivalenceUpdatingWorker extends AbstractWorker {
         Content content = resolve(uri);
         if (content == null) {
             log.warn("Resolved null for {}", uri);
+            return;
         }
         if (filter.apply(content)) {
             log.debug("Updating equivalence: {}", uri);
