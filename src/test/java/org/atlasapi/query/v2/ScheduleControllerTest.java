@@ -74,8 +74,8 @@ public class ScheduleControllerTest {
     
     @Before
     public void setup() {
-        to = new DateTime(DateTimeZones.UTC);
         from = new DateTime(DateTimeZones.UTC);
+        to = new DateTime(DateTimeZones.UTC);
         request = new StubHttpServletRequest();
         response = new StubHttpServletResponse();
         channel = new Channel.Builder().build();
