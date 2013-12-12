@@ -18,6 +18,7 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
+import org.atlasapi.remotesite.channel4.pmlsd.ContentFactory;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -44,12 +45,14 @@ public class C4EpgChannelDayUpdater {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final Optional<String> platform;
     
-    public C4EpgChannelDayUpdater(RemoteSiteClient<List<C4EpgEntry>> scheduleClient, ContentWriter writer, ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer, 
-            Optional<String> platform) {
+    public C4EpgChannelDayUpdater(RemoteSiteClient<List<C4EpgEntry>> scheduleClient, ContentWriter writer, 
+            ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer, 
+            Publisher publisher, ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, Optional<String> platform) {
         this.scheduleClient = scheduleClient;
         this.writer = writer;
         this.platform = platform;
-        this.epgEntryContentExtractor = new C4EpgEntryContentExtractor(resolver, brandUpdater);
+        this.epgEntryContentExtractor = new C4EpgEntryContentExtractor(resolver, brandUpdater, 
+                contentFactory, publisher);
         this.trimmer = trimmer;
     }
     
@@ -145,13 +148,13 @@ public class C4EpgChannelDayUpdater {
     }
 
     private void checkUri(Content c) {
-        checkArgument(c.getCanonicalUri().startsWith(C4AtomApi.PROGRAMMES_BASE),
-            "%s doesn't start with %s", c, C4AtomApi.PROGRAMMES_BASE);
+//        checkArgument(c.getCanonicalUri().startsWith(C4AtomApi.PROGRAMMES_BASE),
+//            "%s doesn't start with %s", c, C4AtomApi.PROGRAMMES_BASE);
     }
 
     private void checkSource(Content c) {
-        checkArgument(c.getPublisher().equals(Publisher.C4_PMLSD),
-            "%s not %s", c, Publisher.C4_PMLSD);
+//        checkArgument(c.getPublisher().equals(Publisher.C4_PMLSD),
+//            "%s not %s", c, Publisher.C4_PMLSD);
     }
 
 }

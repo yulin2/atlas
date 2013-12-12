@@ -66,7 +66,10 @@ public class C4AtomApiClient {
             log.debug("Fetching {}", uri);
             feed = client.get(uri);
         } catch (HttpException e) {
-            if (HttpStatusCode.NOT_FOUND.code() == e.getResponse().statusCode()) {
+            if (HttpStatusCode.NOT_FOUND.code() == e.getResponse().statusCode()
+                    // C4 have started returning 400 instead of 404. We have asked them
+                    // to change back but in the meantime, we'll treat 400s as content not found.
+                    || HttpStatusCode.BAD_REQUEST.code() == e.getResponse().statusCode()) {
                 log.warn(uri + " not found");
             } else {
                 log.error(e.getResponse().statusCode() + " exception fetching " + uri, e);

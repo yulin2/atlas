@@ -20,12 +20,16 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.Platform;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApiClient;
 import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.atlasapi.remotesite.channel4.pmlsd.C4OdEpisodesAdapter;
 import org.joda.time.DateTime;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
@@ -42,9 +46,15 @@ import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
+import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
 
+@RunWith( MockitoJUnitRunner.class )
 public class C4FourOdEpisodesExtractorTest extends TestCase {
 
+    private ContentFactory<Feed, Feed, Entry> contentFactory
+        = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());; 
+    
     private String fileContentsFromResource(String resourceName)  {
         try {
             return Files.toString(new File(Resources.getResource(getClass(), resourceName).getFile()), Charsets.UTF_8);
@@ -58,9 +68,12 @@ public class C4FourOdEpisodesExtractorTest extends TestCase {
             ImmutableMap.<String, String>of("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/4od.atom", fileContentsFromResource("ramsays-kitchen-nightmares-4od.atom")));
     private final C4AtomApiClient atomApiClient = new C4AtomApiClient(httpClient, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
 
+    @Test
 	public void testExtractingEpisodes() throws Exception {
 		
-		List<Episode> episodes = new C4OdEpisodesAdapter(atomApiClient, Optional.<Platform>absent(), new SystemClock()).fetch("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
+		List<Episode> episodes = new C4OdEpisodesAdapter(atomApiClient, Optional.<Platform>absent(), 
+		                                contentFactory, Publisher.C4_PMLSD, new SystemClock())
+		    .fetch("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
 
 		Episode firstEpisode = (Episode) Iterables.get(episodes, 0);
 		

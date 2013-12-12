@@ -16,7 +16,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
-import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
+import org.atlasapi.remotesite.channel4.pmlsd.ContentFactory;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
 
@@ -26,11 +26,12 @@ import com.metabroadcast.common.time.Clock;
 
 public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemSource, Item> {
 
-    private final C4EpgEntryUriExtractor uriExtractor = new C4EpgEntryUriExtractor();
     private final C4EpgEntryBroadcastExtractor broadcastExtractor = new C4EpgEntryBroadcastExtractor();
     private final Clock clock;
+    private final ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory;
     
-    public C4EpgEntryItemExtractor(Clock clock) {
+    public C4EpgEntryItemExtractor(ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, Clock clock) {
+        this.contentFactory = contentFactory;
         this.clock = clock;
     }
     
@@ -40,19 +41,19 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
 
         Item item;
         if (source.getBrand().isPresent()) {
-            Episode episode = C4PmlsdModule.contentFactory().createEpisode();
+            Episode episode = contentFactory.createEpisode(entry).get();
             episode.setEpisodeNumber(episodeNumberFrom(source));
             episode.setSeriesNumber(seriesNumberFrom(source));
             item = episode;
         } else {
-            item = C4PmlsdModule.contentFactory().createItem();
+            item = contentFactory.createItem(entry).get();
         }
         
         DateTime now = clock.now();
         
         item.setLastUpdated(now);
         
-        item.setCanonicalUri(uriExtractor.uriForItemId(entry));
+        //TODO aliases
         item.addAliasUrl(C4AtomApi.hierarchyUriFromCanonical(item.getCanonicalUri()));
         
         item.setTitle(entry.title());

@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.TypedLink;
 import org.junit.Test;
@@ -34,7 +35,7 @@ public class C4EpgEntryUriExtractorTest {
     }
     
     private void extractBrand(String input, String output) {
-        assertThat(extractor.uriForBrand(entryWithRelatedLink(input)), is(Optional.of(output)));
+        assertThat(extractor.uriForBrand(Publisher.C4_PMLSD, entryWithRelatedLink(input)), is(Optional.of(output)));
     }
 
     @Test
@@ -51,11 +52,11 @@ public class C4EpgEntryUriExtractorTest {
     
     @Test
     public void testDoesntResolveSeriesFromBrandOnlyAtomUriWhenSeriesNumberIsAbsent() {
-        assertFalse(extractor.uriForSeries(entryWithRelatedLink("http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")).isPresent());
+        assertFalse(extractor.uriForSeries(Publisher.C4_PMLSD, entryWithRelatedLink("http://pmlsc.channel4.com/pmlsd/the-hoobs.atom")).isPresent());
     }
     
     private void extractSeries(C4EpgEntry input, String output) {
-        assertThat(extractor.uriForSeries(input), is(Optional.of(output)));
+        assertThat(extractor.uriForSeries(Publisher.C4_PMLSD, input), is(Optional.of(output)));
     }
     
     @Test
@@ -63,7 +64,7 @@ public class C4EpgEntryUriExtractorTest {
         C4EpgEntry entry = entryWithoutRelatedLink("tag:pmlsc.channel4.com,2009:slot/26424438")
                 .withProgrammeId("40635/014")
                 .withTitle("The Treacle People");
-        assertThat(extractor.uriForItemId(entry), is("http://pmlsc.channel4.com/pmlsd/40635/014"));
+        assertThat(extractor.uriForItem(Publisher.C4_PMLSD, entry), is(Optional.of("http://pmlsc.channel4.com/pmlsd/40635/014")));
     }
 
     private C4EpgEntry entryWithRelatedLink(String uri) {

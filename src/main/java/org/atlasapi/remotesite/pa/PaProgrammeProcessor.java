@@ -32,11 +32,9 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.channel4.pmlsd.epg.ContentHierarchyAndBroadcast;
 import org.atlasapi.remotesite.pa.listings.bindings.Attr;
 import org.atlasapi.remotesite.pa.listings.bindings.Billing;
 import org.atlasapi.remotesite.pa.listings.bindings.CastMember;
@@ -72,8 +70,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     static final String PA_PICTURE_TYPE_BRAND   = "series";  // Counter-intuitively PA use 'series' where we use 'brand'
     static final String PA_PICTURE_TYPE_SERIES  = "season";  // .. and 'season' where we use 'series'
     
-    static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
-    static final String NEW_IMAGE_BASE_IMAGE_URL = "http://images.atlas.metabroadcast.com/pressassociation.com/";
+    static final String IMAGE_URL_BASE = "http://images.atlas.metabroadcast.com/pressassociation.com/";
     public static final String BROADCAST_ID_PREFIX = "pa:";
     
     private static final DateTimeFormatter PA_DATE_FORMAT = DateTimeFormat.forPattern("dd/MM/yyyy");
@@ -295,11 +292,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         // The image URL is set to the "legacy" URL of http://images.../pa/image.jpg since there
         // are external dependencies on it. The new image block moves to the new URL scheme of
         // http://images.../pressassociation.com/image.jpg
-        described.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+        described.setImage(IMAGE_URL_BASE + picture.getvalue());
     }
     
     private Image createImage(PictureUsage pictureUsage) {
-        String imageUri = PA_BASE_IMAGE_URL + pictureUsage.getvalue();
+        String imageUri = IMAGE_URL_BASE + pictureUsage.getvalue();
         Image image = new Image(imageUri);
         
         image.setHeight(576);
@@ -307,7 +304,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         image.setType(ImageType.ADDITIONAL); 
         image.setAspectRatio(ImageAspectRatio.SIXTEEN_BY_NINE);
         image.setMimeType(MimeType.IMAGE_JPG);
-        image.setCanonicalUri(NEW_IMAGE_BASE_IMAGE_URL + pictureUsage.getvalue());
         image.setAvailabilityStart(fromPaDate(pictureUsage.getStartDate()));
         DateTime expiry = fromPaDate(pictureUsage.getExpiryDate());
         if (expiry != null) {

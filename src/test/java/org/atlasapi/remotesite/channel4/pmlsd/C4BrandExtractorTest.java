@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -38,6 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Charsets;
@@ -50,11 +52,12 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
 
 @RunWith(MockitoJUnitRunner.class)
 public class C4BrandExtractorTest extends TestCase {
     
-
 	private final SimpleHttpClient httpClient = new FixedResponseHttpClient(
 	    ImmutableMap.<String, String>builder()
 	    .put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", fileContentsFromResource("ramsays-kitchen-nightmares.atom"))
@@ -75,8 +78,12 @@ public class C4BrandExtractorTest extends TestCase {
 		
 	private final C4AtomApiClient atomApiClient = new C4AtomApiClient(httpClient, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
 	
-	private final ContentWriter writer = mock(ContentWriter.class);
-	private final ContentResolver resolver = mock(ContentResolver.class);
+	@Mock private ContentWriter writer;
+	@Mock private ContentResolver resolver;
+	
+	private ContentFactory<Feed, Feed, Entry> contentFactory 
+	        = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());
+	
 	private final ChannelResolver channelResolver = new C4DummyChannelResolver();
 	
 	private C4BrandExtractor pcExtractor;
@@ -93,7 +100,8 @@ public class C4BrandExtractorTest extends TestCase {
 	
 	@Before
 	public void setUp() {
-		pcExtractor = new C4BrandExtractor(atomApiClient, Optional.<Platform> absent(), channelResolver);
+		pcExtractor = new C4BrandExtractor(atomApiClient, Optional.<Platform> absent(), Publisher.C4_PMLSD, 
+		        channelResolver, contentFactory);
 		pcUpdater = new C4AtomBackedBrandUpdater(atomApiClient, Optional.<Platform> absent(), resolver, writer, pcExtractor);
 	}
 
@@ -120,11 +128,10 @@ public class C4BrandExtractorTest extends TestCase {
 		assertThat(firstItem.getCanonicalUri(), is("http://pmlsc.channel4.com/pmlsd/36423/001"));
 
 		// TODO new alias
-		assertThat(firstItem.getAliasUrls().size(), is(4));
+		assertThat(firstItem.getAliasUrls().size(), is(3));
 		assertThat(firstItem.getAliasUrls(), is((Set<String>) ImmutableSet.of(
 	        "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045", 
 	        "http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-1/episode-1",
-	        "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1/episode-1",
 	        "tag:pmlsc.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/episode-guide/series-1/episode-1"
         )));
 		
@@ -180,7 +187,7 @@ public class C4BrandExtractorTest extends TestCase {
 	public void testOldEpisodeWithBroadcast() throws Exception {
         when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
 		
-	    Episode episode = C4PmlsdModule.contentFactory().createEpisode();
+	    Episode episode = new Episode();
 	    episode.setCanonicalUri("http://pmlsc.channel4.com/pmlsd/43065/005");
 	    Version version = new Version();
 	    episode.addVersion(version);
@@ -221,96 +228,6 @@ public class C4BrandExtractorTest extends TestCase {
         assertTrue(foundOld);
 	}
 
-    /* The API no longer exhibits this behavior; leaving these tests here for a record of the behaviour temporarily
-      but they can be removed in July 2012
-     
-     
-    @Test
-	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries1IsAssumed() throws Exception {
-		
-	    SimpleHttpClient client = new FixedResponseHttpClient(
-	        ImmutableMap.<String, String>builder()	
-			.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", fileContentsFromResource("ramsays-kitchen-nightmares.atom"))
-			.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-1.atom", fileContentsFromResource("ramsays-kitchen-nightmares-series-1.atom"))
-			.build(),
-			ImmutableMap.<String, Integer>of("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", 403));
-
-	    C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
-		RecordingContentWriter recordingWriter = new RecordingContentWriter();
-		new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), contentResolver, recordingWriter, channelResolver).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
-		assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
-	}
-
-    @Test
-	public void testThatWhenTheEpisodeGuide404sSeries1IsAssumed() throws Exception {
-        SimpleHttpClient client = new FixedResponseHttpClient(
-                ImmutableMap.<String, String>builder()  
-                .put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", fileContentsFromResource("ramsays-kitchen-nightmares.atom"))
-                .put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-1.atom", fileContentsFromResource("ramsays-kitchen-nightmares-series-1.atom"))
-                .build(),
-                ImmutableMap.<String, Integer>of("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", 404));
-
-        C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
-
-		RecordingContentWriter recordingWriter = new RecordingContentWriter();
-		new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), contentResolver, recordingWriter, channelResolver).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
-		assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
-	}
-
-    @Test
-	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries3IsReturned() throws Exception {
-	    HttpResponsePrologue response = new HttpResponsePrologue(403, "error").withFinalUrl("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-3.atom");
-        RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
-            .respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", rknBrandFeed.build())
-            .respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response, "403"))
-            .respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-3.atom", rknSeries4Feed.build());
-
-		RecordingContentWriter recordingWriter = new RecordingContentWriter();
-        new C4AtomBackedBrandUpdater(feedClient, Optional.<Platform>absent(), contentResolver, recordingWriter, channelResolver).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
-        assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
-    }
-    
-    @Test
-    public void testThatWhenTheEpisodeGuideRedirectsToSeries1TheSeriesIsRead() throws Exception {
-        
-        SimpleHttpClient client = new FixedResponseHttpClient(
-                ImmutableMap.<String,String>of(
-                        "https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", fileContentsFromResource("ramsays-kitchen-nightmares.atom"), 
-                        "https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", fileContentsFromResource("ramsays-kitchen-nightmares-series-3.atom")));
-
-        C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
-
-        RecordingContentWriter recordingWriter = new RecordingContentWriter();
-        new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), contentResolver, recordingWriter, channelResolver).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
-        assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
-    }
-    
-    @Test
-    public void testThatWhenTheEpisodeGuideRedirectsToAnEpisodeFeedTheSeriesIsFetched() throws Exception {
-       
-        Feed episodeFeed = new Feed();
-        episodeFeed.setFeedType("atom_1.0");
-        episodeFeed.setId("tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-5");
-        WireFeedOutput output = new WireFeedOutput();
-        StringWriter os = new StringWriter();
-        output.output(episodeFeed, os);
-        String redirectingFeed = os.getBuffer().toString();
-        
-        SimpleHttpClient client = new FixedResponseHttpClient(
-                ImmutableMap.<String,String>of(
-                        "https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", fileContentsFromResource("ramsays-kitchen-nightmares.atom"), 
-                        "https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", redirectingFeed,
-                        "https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-3.atom", fileContentsFromResource("ramsays-kitchen-nightmares-series-3.atom")));
-        
-        C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
-
-        RecordingContentWriter recordingWriter = new RecordingContentWriter();
-        new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), contentResolver, recordingWriter, channelResolver).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
-        assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
-    }
-
-    */
-	
     @Test
 	public void testFlattenedBrandsItemsAreNotPutIntoSeries() throws Exception {
         when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
@@ -333,8 +250,10 @@ public class C4BrandExtractorTest extends TestCase {
 
         C4AtomApiClient apiClient = new C4AtomApiClient(httpClient, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
         
-		C4BrandExtractor extractor = new C4BrandExtractor(atomApiClient, Optional.<Platform>absent(), channelResolver);
-		new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), resolver, writer, extractor).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
+		C4BrandExtractor extractor = new C4BrandExtractor(atomApiClient, Optional.<Platform>absent(), 
+		        Publisher.C4_PMLSD, channelResolver, contentFactory);
+		new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), resolver, writer, extractor)
+		        .createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
 		
 		ArgumentCaptor<Container> containerCapturer = ArgumentCaptor.forClass(Container.class);
         verify(writer, atLeast(1)).createOrUpdate(containerCapturer.capture());
@@ -366,8 +285,10 @@ public class C4BrandExtractorTest extends TestCase {
         C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.of("xbox"));
 
         RecordingContentWriter recordingWriter = new RecordingContentWriter();
-        C4BrandExtractor extractor = new C4BrandExtractor(apiClient, Optional.of(Platform.XBOX), channelResolver);
-        new C4AtomBackedBrandUpdater(apiClient, Optional.of(Platform.XBOX), resolver, recordingWriter, extractor).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/jamie-does");
+        C4BrandExtractor extractor = new C4BrandExtractor(apiClient, Optional.of(Platform.XBOX), 
+                Publisher.C4_PMLSD, channelResolver, contentFactory);
+        new C4AtomBackedBrandUpdater(apiClient, Optional.of(Platform.XBOX), resolver, recordingWriter, extractor)
+                .createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/jamie-does");
         
         Item item = findLast("http://pmlsc.channel4.com/pmlsd/48367/006", recordingWriter.updatedItems);
         Episode episode = (Episode) item;
@@ -403,14 +324,16 @@ public class C4BrandExtractorTest extends TestCase {
         C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
 
         RecordingContentWriter recordingWriter = new RecordingContentWriter();
-        C4BrandExtractor extractor = new C4BrandExtractor(xboxApiClient, Optional.of(Platform.XBOX), channelResolver);
+        C4BrandExtractor extractor = new C4BrandExtractor(xboxApiClient, Optional.of(Platform.XBOX), 
+                Publisher.C4_PMLSD, channelResolver, contentFactory);
         StubContentResolver stubResolver = new StubContentResolver();
         new C4AtomBackedBrandUpdater(xboxApiClient, Optional.of(Platform.XBOX), stubResolver, recordingWriter, extractor)
             .createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/jamie-does");
         
         stubResolver.respondTo(findLast("http://pmlsc.channel4.com/pmlsd/48367/006", recordingWriter.updatedItems));
         
-        extractor = new C4BrandExtractor(apiClient, Optional.<Platform>absent(), channelResolver);
+        extractor = new C4BrandExtractor(apiClient, Optional.<Platform>absent(), Publisher.C4_PMLSD, 
+                channelResolver, contentFactory);
         new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), stubResolver, recordingWriter, extractor)
             .createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/jamie-does");
         
@@ -442,50 +365,6 @@ public class C4BrandExtractorTest extends TestCase {
         assertTrue(foundPCLocation);
         assertTrue(foundXboxLocation);
       
-    }
-
-    @Test 
-    /**
-     * The description may differ on a platform-by-platform basis. Therefore 
-     * we only ingest the description from a platform feed if we don't have
-     * a description already.
-     */
-    public void testPlatformDoesNotUpdateDescription() {
-        SimpleHttpClient xboxClient = new FixedResponseHttpClient(
-                ImmutableMap.<String, String>builder()  
-                .put("https://pmlsc.channel4.com/pmlsd/jamie-does.atom?platform=xbox", fileContentsFromResource("jamie-does-xbox.atom"))
-                .put("https://pmlsc.channel4.com/pmlsd/jamie-does/4od.atom?platform=xbox", fileContentsFromResource("jamie-does-4od-xbox.atom"))
-                .put("https://pmlsc.channel4.com/pmlsd/jamie-does/epg.atom?platform=xbox", fileContentsFromResource("jamie-does-epg-xbox.atom"))
-                .put("https://pmlsc.channel4.com/pmlsd/jamie-does/episode-guide.atom?platform=xbox", fileContentsFromResource("jamie-does-episode-guide-xbox.atom"))
-                .put("https://pmlsc.channel4.com/pmlsd/jamie-does/episode-guide/series-1.atom?platform=xbox", fileContentsFromResource("jamie-does-series-1-xbox-dummy-description.atom"))
-                .build());
-        
-        SimpleHttpClient client = new FixedResponseHttpClient(
-                ImmutableMap.<String, String>builder()
-                .put("https://pmlsc.channel4.com/pmlsd/jamie-does.atom", fileContentsFromResource("jamie-does.atom"))
-                .put("https://pmlsc.channel4.com/pmlsd/jamie-does/4od.atom", fileContentsFromResource("jamie-does-4od.atom"))
-                .put("https://pmlsc.channel4.com/pmlsd/jamie-does/epg.atom", fileContentsFromResource("jamie-does-epg.atom"))             
-                .put("https://pmlsc.channel4.com/pmlsd/jamie-does/episode-guide.atom", fileContentsFromResource("jamie-does-episode-guide.atom"))
-                .put("https://pmlsc.channel4.com/pmlsd/jamie-does/episode-guide/series-1.atom", fileContentsFromResource("jamie-does-series-1.atom"))
-                .build());
-
-        C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
-        C4AtomApiClient xboxApiClient = new C4AtomApiClient(xboxClient, "https://pmlsc.channel4.com/pmlsd/", Optional.of("xbox"));
-
-        RecordingContentWriter recordingWriter = new RecordingContentWriter();
-        C4BrandExtractor extractor = new C4BrandExtractor(apiClient, Optional.<Platform>absent(), channelResolver);
-        StubContentResolver stubResolver = new StubContentResolver();
-        new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), stubResolver, recordingWriter, extractor).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/jamie-does");
-
-        stubResolver.respondTo(findLast("http://pmlsc.channel4.com/pmlsd/48367/001", recordingWriter.updatedItems));
-
-        extractor = new C4BrandExtractor(xboxApiClient, Optional.of(Platform.XBOX), channelResolver);
-        new C4AtomBackedBrandUpdater(xboxApiClient, Optional.of(Platform.XBOX), stubResolver, recordingWriter, extractor).createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/jamie-does");
-        
-        Item item = findLast("http://pmlsc.channel4.com/pmlsd/48367/001", recordingWriter.updatedItems);
-        Episode episode = (Episode) item;
-         
-        assertThat(episode.getDescription(), is("Jamie's in Morocco, dodging snake charmers to try out the street food of Marrakesh, like slow-roasted lamb in cumin, and almond and rose water cakes. Later he joins a family for some Moroccan home cooking, and makes his own versions of chicken and lemon tagine, Moroccan roast lamb, and a `snakey cake' made of filo pastry, almonds and rose petals."));
     }
 	
     private <C extends Content> C findLast(String uri, List<C> content) {

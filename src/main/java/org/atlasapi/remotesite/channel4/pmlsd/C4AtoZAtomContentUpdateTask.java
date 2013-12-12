@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.channel4.pmlsd;
 import java.util.Iterator;
 import java.util.List;
 
+import org.atlasapi.media.entity.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,15 +21,20 @@ public class C4AtoZAtomContentUpdateTask extends ScheduledTask {
     
     private final Iterable<Optional<Feed>> atozFeeds;
     private final C4BrandUpdater brandUpdater;
+    private final Publisher publisher;
 	
 	private final C4LinkBrandNameExtractor linkExtractor = new C4LinkBrandNameExtractor();
 
-	public C4AtoZAtomContentUpdateTask(SimpleHttpClient client, String apiBaseUrl, C4BrandUpdater brandUpdater) {
-	    this(client, apiBaseUrl, Optional.<String>absent(), brandUpdater);
+
+	public C4AtoZAtomContentUpdateTask(SimpleHttpClient client, String apiBaseUrl, C4BrandUpdater brandUpdater,
+	        Publisher publisher) {
+	    this(client, apiBaseUrl, Optional.<String>absent(), brandUpdater, publisher);
 	}
 	
-    public C4AtoZAtomContentUpdateTask(SimpleHttpClient client, String apiBaseUrl, Optional<String> platform, C4BrandUpdater brandUpdater) {
+    public C4AtoZAtomContentUpdateTask(SimpleHttpClient client, String apiBaseUrl, Optional<String> platform, 
+            C4BrandUpdater brandUpdater, Publisher publisher) {
         this.brandUpdater = brandUpdater;
+        this.publisher = publisher;
 		this.atozFeeds = feedSource(client, apiBaseUrl, platform);
     }
 
@@ -65,7 +71,7 @@ public class C4AtoZAtomContentUpdateTask extends ScheduledTask {
     @SuppressWarnings("unchecked")
     private String extractUriFromLinks(Entry entry) {
         for (Object link : Iterables.concat(entry.getAlternateLinks(), entry.getOtherLinks())) {
-            Optional<String> extracted = linkExtractor.canonicalBrandUriFrom(((Link)link).getHref());
+            Optional<String> extracted = linkExtractor.c4CanonicalUriFrom(((Link)link).getHref());
             if (extracted.isPresent()) {
                 return extracted.get();
             }

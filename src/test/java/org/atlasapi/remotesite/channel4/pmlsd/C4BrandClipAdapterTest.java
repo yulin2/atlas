@@ -1,10 +1,14 @@
 package org.atlasapi.remotesite.channel4.pmlsd;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
@@ -12,9 +16,13 @@ import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApiClient;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandClipAdapter;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
@@ -25,8 +33,11 @@ import com.google.common.io.Resources;
 import com.metabroadcast.common.http.FixedResponseHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.time.SystemClock;
+import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
 
-public class C4BrandClipAdapterTest extends TestCase {
+@RunWith( MockitoJUnitRunner.class )
+public class C4BrandClipAdapterTest {
     
     SimpleHttpClient client = new FixedResponseHttpClient(
             ImmutableMap.<String, String>builder()  
@@ -34,6 +45,9 @@ public class C4BrandClipAdapterTest extends TestCase {
             .build());
 
     C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
+    
+    private final ContentFactory<Feed, Feed, Entry> contentFactory 
+        = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());;
 
     
 	private String fileContentsFromResource(String resourceName)  {
@@ -44,10 +58,12 @@ public class C4BrandClipAdapterTest extends TestCase {
         }
         return null;
     }
-	   
+	
+	@Test
 	public void testExtractingClips() throws Exception {
 		
-		List<Clip> clips = new C4BrandClipAdapter(apiClient, new SystemClock()).fetch("http://pmlsc.channel4.com/pmlsd/hestons-mission-impossible");
+		List<Clip> clips = new C4BrandClipAdapter(apiClient, Publisher.C4_PMLSD, new SystemClock(), contentFactory)
+		                        .fetch("http://pmlsc.channel4.com/pmlsd/hestons-mission-impossible");
 		assertEquals(5, clips.size());
 		
 		for (Clip clip: clips) {

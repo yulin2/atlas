@@ -28,9 +28,10 @@ public class C4EpisodeGuideAdapter implements SiteSpecificAdapter<SetMultimap<Se
     private final C4AtomApiClient client;
     private final ContentExtractor<Feed, SetMultimap<Series,Episode>> seriesAndEpisodeExtractor;
     
-    public C4EpisodeGuideAdapter(C4AtomApiClient client, Clock clock) {
+    public C4EpisodeGuideAdapter(C4AtomApiClient client, ContentFactory<Feed, Feed, Entry> contentFactory, 
+            Clock clock) {
         this.client = client;
-        this.seriesAndEpisodeExtractor = new C4SeriesAndEpisodesExtractor(clock);
+        this.seriesAndEpisodeExtractor = new C4SeriesAndEpisodesExtractor(contentFactory, clock);
     }
 
     @Override
