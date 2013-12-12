@@ -8,28 +8,35 @@ import junit.framework.TestCase;
 
 import org.atlasapi.genres.AtlasGenre;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.io.Resources;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
+import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 
 @RunWith(MockitoJUnitRunner.class)
 public class C4BrandBasicDetailsExtractorTest extends TestCase {
 
     private final Clock clock = new TimeMachine(new DateTime(DateTimeZones.UTC));
+    private final ContentFactory<Feed, Feed, Entry> contentFactory 
+        = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());;
     
     private C4BrandBasicDetailsExtractor extractor;
 	
     @Before
     public void setUp() {
-        extractor = new C4BrandBasicDetailsExtractor(new C4AtomApi(new C4DummyChannelResolver()), clock);
+        extractor = new C4BrandBasicDetailsExtractor(new C4AtomApi(new C4DummyChannelResolver()), 
+                contentFactory,
+                clock);
     }
 
     @Test
@@ -43,7 +50,7 @@ public class C4BrandBasicDetailsExtractorTest extends TestCase {
 		// TODO new alias
 		assertThat(brand.getAliasUrls(), hasItems(
 	        "tag:pmlsc.channel4.com,2009:/programmes/ramsays-kitchen-nightmares",
-	        "http://www.channel4.com/programmes/ramsays-kitchen-nightmares"
+	        "http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares"
         ));
 		assertThat(brand.getTitle(), is("Ramsay's Kitchen Nightmares"));
 		assertThat(brand.getLastUpdated(), is(clock.now()));
@@ -67,7 +74,7 @@ public class C4BrandBasicDetailsExtractorTest extends TestCase {
         assertThat(brand.getCanonicalUri(), is("http://pmlsc.channel4.com/pmlsd/brass-eye"));
         assertThat(brand.getAliasUrls(), hasItems(
             "tag:pmlsc.channel4.com,2009:/programmes/brass-eye",
-            "http://www.channel4.com/programmes/brass-eye"
+            "http://pmlsc.channel4.com/pmlsd/brass-eye"
         ));
         assertThat(brand.getTitle(), is("Brass Eye"));
         assertThat(brand.getLastUpdated(), is(clock.now()));

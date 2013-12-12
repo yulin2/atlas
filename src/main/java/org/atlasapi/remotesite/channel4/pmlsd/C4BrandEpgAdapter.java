@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.google.common.base.Optional;
@@ -20,9 +21,12 @@ public class C4BrandEpgAdapter implements SiteSpecificAdapter<List<Episode>> {
     private final C4AtomApiClient client;
     private final C4EpgEpisodeExtractor extractor;
 
-    public C4BrandEpgAdapter(C4AtomApiClient client, Clock clock, C4AtomApi atomApi) {
+    public C4BrandEpgAdapter(C4AtomApiClient client, Clock clock, C4AtomApi atomApi, 
+            Publisher publisher) {
         this.client = client;
-        this.extractor = new C4EpgEpisodeExtractor(atomApi, clock);
+        this.extractor = new C4EpgEpisodeExtractor(atomApi, 
+                new SourceSpecificContentFactory<>(publisher, new C4BrandEpgUriExtractor()), 
+                clock);
     }
     
     @Override
@@ -49,6 +53,5 @@ public class C4BrandEpgAdapter implements SiteSpecificAdapter<List<Episode>> {
     @Override
     public boolean canFetch(String uri) {
         return C4AtomApi.isACanonicalBrandUri(uri);
-    }
-
+    };
 }

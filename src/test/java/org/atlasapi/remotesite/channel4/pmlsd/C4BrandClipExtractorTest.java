@@ -11,22 +11,29 @@ import org.atlasapi.remotesite.channel4.pmlsd.C4BrandClipExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.joda.time.DateTime;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.io.Resources;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
 import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
 
+@RunWith( MockitoJUnitRunner.class )
 public class C4BrandClipExtractorTest {
 
     private final AtomFeedBuilder feed = new AtomFeedBuilder(Resources.getResource(getClass(), "green-wing-video.atom"));
+    
+    private final ContentFactory<Feed, Feed, Entry> contentFactory
+        = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());;
     
     @Test
     public void testExtract() {
         
         Clock clock = new TimeMachine(new DateTime(DateTimeZones.UTC));
-        C4BrandClipExtractor clipExtractor = new C4BrandClipExtractor(clock);
+        C4BrandClipExtractor clipExtractor = new C4BrandClipExtractor(contentFactory, Publisher.C4_PMLSD, clock);
         
         Clip clip = clipExtractor.extract((Entry)feed.build().getEntries().get(0));
         

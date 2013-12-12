@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.jdom.Element;
@@ -16,6 +17,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.time.Clock;
 import com.sun.syndication.feed.atom.Category;
+import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
 
@@ -30,11 +32,12 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 	
 	private final C4AtomApi c4AtomApi;
     private final Clock clock;
+    private final ContentFactory<Feed, Feed, Entry> contentFactory;
     
-    private final C4LinkBrandNameExtractor linkExtractor = new C4LinkBrandNameExtractor();
-
-	public C4BrandBasicDetailsExtractor(C4AtomApi c4AtomApi, Clock clock) {
+	public C4BrandBasicDetailsExtractor(C4AtomApi c4AtomApi, 
+	        ContentFactory<Feed, Feed, Entry> contentFactory, Clock clock) {
         this.c4AtomApi = c4AtomApi;
+        this.contentFactory = contentFactory;
         this.clock = clock;
 	}
 	
@@ -42,17 +45,12 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 	public Brand extract(Feed source) {
         Preconditions.checkArgument(C4AtomApi.isABrandFeed(source), "Not a brand feed");
 		
-		String brandUri = brandUriFrom(source);
-		
-		Preconditions.checkArgument(brandUri != null && C4AtomApi.isACanonicalBrandUri(brandUri), "URI of feed is not a canonical Brand URI, got: " + brandUri);
-
-		Brand brand = C4PmlsdModule.contentFactory().createBrand();
-		brand.setCanonicalUri(brandUri);
+        Brand brand = contentFactory.createBrand(source).get();
 		brand.setLastUpdated(clock.now());
 
 		// TODO new alias
 		brand.addAliasUrl(canonicalIdTag(source));
-		brand.addAliasUrl(C4AtomApi.hierarchyUriFromCanonical(brandUri));
+		brand.addAliasUrl(C4AtomApi.hierarchyUriFromCanonical(brand.getCanonicalUri()));
 
 		brand.setTitle(source.getTitle());
 		brand.setDescription(source.getSubtitle().getValue());
@@ -104,14 +102,4 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
         return null;
     }
 
-    @SuppressWarnings("unchecked")
-    private String brandUriFrom(Feed source) {
-		for (Object link : Iterables.concat(source.getAlternateLinks(), source.getOtherLinks())) {
-            Optional<String> uri = linkExtractor.canonicalBrandUriFrom(((Link)link).getHref());
-            if (uri.isPresent()) {
-                return uri.get();
-            }
-        }
-		return null;
-	}
 }

@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
@@ -15,6 +17,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -24,6 +27,8 @@ import com.google.common.collect.SetMultimap;
 class C4ContentLinker {
     
     private static final Series PLACEHOLDER = new Series();
+    private static final CharSequence PMLSC_URI_PREFIX = "http://pmlsc.channel4.com/pmlsd/";
+    private static final CharSequence TAG_URI_PREFIX = "tag:pmlsc.channel4.com,2009:/programmes/";
 
     public SetMultimap<Series, Episode> link4odToEpg(SetMultimap<Series, Episode> epiosodeGuide, List<Episode> fourOd) {
 
@@ -46,7 +51,7 @@ class C4ContentLinker {
 
     public SetMultimap<Series, Episode> populateBroadcasts(SetMultimap<Series, Episode> episodeGuideContent, List<Episode> epgContent) {
 
-        Multimap<String, Episode> indexedEpg = Multimaps.index(epgContent, TO_URI);
+        Multimap<String, Episode> indexedEpg = Multimaps.index(epgContent, TO_TAG_URI);
 
         for (Episode episode : episodeGuideContent.values()) {
             for (String alias : episode.getAliasUrls()) {
@@ -141,4 +146,13 @@ class C4ContentLinker {
         return seriesNumber + "-" + episodeNumber;
 
     }
+    
+    private static Function<Episode, String> TO_TAG_URI = new Function<Episode, String>() {
+
+        @Override
+        public String apply(Episode episode) {
+            return episode.getCanonicalUri().replace(PMLSC_URI_PREFIX, TAG_URI_PREFIX);
+        }
+        
+    };
 }

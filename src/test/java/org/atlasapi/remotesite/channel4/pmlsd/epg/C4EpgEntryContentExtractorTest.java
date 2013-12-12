@@ -13,9 +13,12 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.testing.BrandTestDataBuilder;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
+import org.atlasapi.remotesite.channel4.pmlsd.ContentFactory;
+import org.atlasapi.remotesite.channel4.pmlsd.SourceSpecificContentFactory;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgMedia;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.TypedLink;
@@ -42,11 +45,14 @@ public class C4EpgEntryContentExtractorTest {
     private final Mockery context = new Mockery();
     private final ContentResolver resolver = context.mock(ContentResolver.class);
     private final C4BrandUpdater brandUpdater = context.mock(C4BrandUpdater.class);
+    private final ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory 
+        = context.mock(ContentFactory.class);
     
     private final DateTime now = new DateTime(DateTimeZones.UTC);
     private final Clock clock = new TimeMachine(now );
     
-    private final C4EpgEntryContentExtractor extractor = new C4EpgEntryContentExtractor(resolver, brandUpdater, clock );
+    private final C4EpgEntryContentExtractor extractor = new C4EpgEntryContentExtractor(resolver, brandUpdater, 
+            contentFactory, Publisher.C4_PMLSD, clock );
 
     private final Channel channel = Channel.builder()
         .withSource(Publisher.METABROADCAST)
@@ -56,7 +62,7 @@ public class C4EpgEntryContentExtractorTest {
     
     @Test
     public void testCreatesBrandSeriesItemAndBroadcastForRelatedLinkEntryWhenNothingResolved() {
-        C4EpgEntry entry = linkedEntry();
+        final C4EpgEntry entry = linkedEntry();
         C4EpgChannelEntry source = new C4EpgChannelEntry(entry, channel);
         
         final String idUri = "http://pmlsc.channel4.com/pmlsd/30630/003";
@@ -64,6 +70,15 @@ public class C4EpgEntryContentExtractorTest {
         final String brandUri = "http://pmlsc.channel4.com/pmlsd/the-hoobs";
         
         context.checking(new Expectations(){{
+            one(contentFactory).createBrand(with(entry));
+            will(returnValue(Optional.of(new Brand(brandUri, null, Publisher.C4_PMLSD))));
+            
+            one(contentFactory).createEpisode(with(entry));
+            will(returnValue(Optional.of(new Episode(idUri, null, Publisher.C4_PMLSD))));
+            
+            one(contentFactory).createSeries(with(entry));
+            will(returnValue(Optional.of(new Series(seriesUri, null, Publisher.C4_PMLSD))));
+            
             one(resolver).findByCanonicalUris(with(hasItems(idUri)));
             will(returnValue(ResolvedContent.builder().build()));
             

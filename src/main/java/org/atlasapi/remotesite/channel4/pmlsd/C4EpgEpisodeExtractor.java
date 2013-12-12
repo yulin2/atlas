@@ -18,6 +18,7 @@ import com.google.common.collect.Sets;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
 
 public class C4EpgEpisodeExtractor extends BaseC4EpisodeExtractor {
     
@@ -27,17 +28,13 @@ public class C4EpgEpisodeExtractor extends BaseC4EpisodeExtractor {
     private static final DateTimeFormatter fmt = DateTimeFormat.forPattern("EEEE dd MMMM yyyy hh:mm aa").withZone(DateTimeZones.LONDON);
     private final Map<String, String> channelLookup;
 
-    public C4EpgEpisodeExtractor(C4AtomApi atomApi, Clock clock) {
-        super(clock);
+    public C4EpgEpisodeExtractor(C4AtomApi atomApi, ContentFactory<Feed, Feed, Entry> contentFactory, 
+            Clock clock) {
+        super(contentFactory, clock);
         this.channelLookup = ImmutableMap.copyOf(
                 Maps.transformValues(atomApi.getChannelMap(), Identified.TO_URI));
     }
     
-    @Override
-    protected String getUri(Entry source, Map<String, String> lookup) {
-        return C4AtomApi.canonicalUri(source);
-    }
-
     @Override // epg.atom entries don't have media groups/content, so no images.
     protected Element getMedia(Entry source) {
         return null;

@@ -7,14 +7,18 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Policy.Platform;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.ContentExtractor;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.SetMultimap;
 import com.metabroadcast.common.time.SystemClock;
+import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
+import com.sun.syndication.feed.atom.Link;
 
 public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEpisodes>{
 
@@ -25,15 +29,17 @@ public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEp
     private final C4BrandClipAdapter clipAdapter;
     
     private final C4ContentLinker linker = new C4ContentLinker();
+    private final C4LinkBrandNameExtractor brandNameExtractor = new C4LinkBrandNameExtractor();
     
-    public C4BrandExtractor(C4AtomApiClient feedClient, Optional<Platform> platform, ChannelResolver channelResolver) {
+    public C4BrandExtractor(C4AtomApiClient feedClient, Optional<Platform> platform, Publisher publisher, 
+            ChannelResolver channelResolver, ContentFactory<Feed, Feed, Entry> contentFactory) {
         SystemClock clock = new SystemClock();
         C4AtomApi c4AtomApi = new C4AtomApi(channelResolver);
-        this.basicDetailsExtractor = new C4BrandBasicDetailsExtractor(c4AtomApi, clock);
-        this.episodeGuideAdapter = new C4EpisodeGuideAdapter(feedClient, clock);
-        this.fourOditemAdapter = new C4OdEpisodesAdapter(feedClient, platform, clock);
-        this.brandEpgAdatper = new C4BrandEpgAdapter(feedClient, clock, c4AtomApi);
-        this.clipAdapter = new C4BrandClipAdapter(feedClient, clock);
+        this.basicDetailsExtractor = new C4BrandBasicDetailsExtractor(c4AtomApi, contentFactory, clock);
+        this.episodeGuideAdapter = new C4EpisodeGuideAdapter(feedClient, contentFactory, clock);
+        this.fourOditemAdapter = new C4OdEpisodesAdapter(feedClient, platform, contentFactory, publisher, clock);
+        this.brandEpgAdatper = new C4BrandEpgAdapter(feedClient, clock, c4AtomApi, publisher);
+        this.clipAdapter = new C4BrandClipAdapter(feedClient, publisher, clock, contentFactory);
     }
 
     /*
@@ -47,15 +53,16 @@ public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEp
         
         SetMultimap<Series, Episode> seriesAndEpisodes = HashMultimap.create();
         
-        seriesAndEpisodes.putAll(episodeGuideAdapter.fetch(brand.getCanonicalUri()));
+        String c4CanonicalUri = c4CanonicalBrandUri(source);
+        seriesAndEpisodes.putAll(episodeGuideAdapter.fetch(c4CanonicalUri));
 
-        List<Episode> fourOdContent = fourOditemAdapter.fetch(brand.getCanonicalUri());
+        List<Episode> fourOdContent = fourOditemAdapter.fetch(c4CanonicalUri);
         seriesAndEpisodes = linker.link4odToEpg(seriesAndEpisodes, fourOdContent);
         
-        List<Episode> epgContent = brandEpgAdatper.fetch(brand.getCanonicalUri());
+        List<Episode> epgContent = brandEpgAdatper.fetch(c4CanonicalUri);
         seriesAndEpisodes = linker.populateBroadcasts(seriesAndEpisodes, epgContent);
         
-        List<Clip> clips = clipAdapter.fetch(brand.getCanonicalUri());
+        List<Clip> clips = clipAdapter.fetch(c4CanonicalUri);
         seriesAndEpisodes = linker.linkClipsToContent(seriesAndEpisodes, clips, brand);
         
         seriesAndEpisodes = setBrandProperties(seriesAndEpisodes, brand);
@@ -88,5 +95,15 @@ public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEp
 		String notAlphanumeric = "[^\\d\\w]";
 		return episode.getTitle().replaceAll(notAlphanumeric, "").equals(brand.getTitle().replaceAll(notAlphanumeric, ""));
 	}
+    
+    private String c4CanonicalBrandUri(Feed feed) {
+        for (Object link : Iterables.concat(feed.getAlternateLinks(), feed.getOtherLinks())) {
+            Optional<String> uri = brandNameExtractor.c4CanonicalUriFrom(((Link)link).getHref());
+            if (uri.isPresent()) {
+                return uri.get();
+            }
+        }
+        return null;
+    }
 
 }

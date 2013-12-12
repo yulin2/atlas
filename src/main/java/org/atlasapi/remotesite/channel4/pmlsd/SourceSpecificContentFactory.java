@@ -4,43 +4,66 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 
-public class SourceSpecificContentFactory {
+import com.google.common.base.Objects;
+import com.google.common.base.Optional;
+
+public class SourceSpecificContentFactory<B, S, I> implements ContentFactory<B, S, I> {
 
     private final Publisher source;
+    private final C4UriExtractor<B, S, I> uriExtractor;
 
-    public SourceSpecificContentFactory(Publisher source) {
+    public SourceSpecificContentFactory(Publisher source, C4UriExtractor<B, S, I> uriExtractor) {
         this.source = checkNotNull(source);
+        this.uriExtractor = checkNotNull(uriExtractor);
     }
     
-    public Brand createBrand() {
-        return setSource(new Brand());
+    @Override
+    public Optional<Brand> createBrand(B remote) {
+        return defaulted(new Brand(), uriExtractor.uriForBrand(source, remote));        
     }
     
-    public Clip createClip() {
-        return setSource(new Clip());
+    @Override
+    public Optional<Episode> createEpisode(I remote) {
+        return defaulted(new Episode(), uriExtractor.uriForItem(source, remote));
     }
     
-    public Episode createEpisode() {
-        return setSource(new Episode());
+    @Override
+    public Optional<Item> createItem(I remote) {
+        return defaulted(new Item(), uriExtractor.uriForItem(source, remote));
     }
     
-    public Item createItem() {
-        return setSource(new Item());
+    @Override
+    public Optional<Series> createSeries(S remote) {
+        return defaulted(new Series(), uriExtractor.uriForSeries(source, remote));
     }
     
-    public Series createSeries() {
-        return setSource(new Series());
+    @Override
+    public Optional<Clip> createClip(I remote) {
+        return defaulted(new Clip(), uriExtractor.uriForClip(source, remote));
     }
-
-    private <C extends Content> C setSource(C c) {
-        c.setPublisher(source);
-        return c;
+    
+    /**
+     * If a URI is present, then a defaulted {@link Described} can be created. Otherwise,
+     * it's not possible to create one.
+     * 
+     * @param described
+     * @param uri
+     * @return
+     */
+    private <A extends Described> Optional<A> defaulted(A described, Optional<String> uri) {
+        if (!uri.isPresent()) {
+            return Optional.absent();
+        }
+        
+        described.setCanonicalUri(uri.get());
+        described.setPublisher(source);
+        return Optional.of(described);
     }
     
     @Override
@@ -49,15 +72,16 @@ public class SourceSpecificContentFactory {
             return true;
         }
         if (that instanceof SourceSpecificContentFactory) {
-            SourceSpecificContentFactory other = (SourceSpecificContentFactory) that;
-            return source.equals(other.source);
+            SourceSpecificContentFactory<?, ?, ?> other = (SourceSpecificContentFactory<?, ?, ?>) that;
+            return Objects.equal(source, other.source) 
+                    && Objects.equal(uriExtractor, other.uriExtractor);
         }
         return false;
     }
     
     @Override
     public int hashCode() {
-        return source.hashCode();
+        return Objects.hashCode(source, uriExtractor);
     }
     
     @Override

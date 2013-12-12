@@ -1,26 +1,30 @@
 package org.atlasapi.remotesite.channel4.pmlsd.epg;
 
-import static org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi.PROGRAMMES_BASE;
-
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
+import org.atlasapi.remotesite.channel4.pmlsd.C4UriExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 
 import com.google.common.base.Optional;
 
-public class C4EpgEntryUriExtractor {
+public class C4EpgEntryUriExtractor implements C4UriExtractor<C4EpgEntry, C4EpgEntry, C4EpgEntry>{
     
     private final Pattern uriPattern = Pattern.compile(
         "https?://(.+).channel4.com/([^/]+)/([^./]+)(.atom|/4od.atom|/episode-guide/series-(\\d+)(.atom|/episode-(\\d+).atom))"
     );
+    private final String ATLAS_URI_FORMAT = "http://%s/pmlsd/%s";
     
     private final int seriesNumberGroup = 5;
     private final int brandNameGroup = 3;
     
     private final String seriesUriInfix = "/episode-guide/series-";
 
-    public Optional<String> uriForBrand(C4EpgEntry entry){
+    @Override
+    public Optional<String> uriForBrand(Publisher publisher, C4EpgEntry entry){
         if (!entry.hasRelatedLink()) {
             return Optional.absent();
         }
@@ -29,11 +33,12 @@ public class C4EpgEntryUriExtractor {
         if (!matcher.matches()) {
             return Optional.absent();
         } else {
-            return Optional.of(PROGRAMMES_BASE + matcher.group(3));
+            return Optional.of(String.format(ATLAS_URI_FORMAT, publisherHost(publisher), matcher.group(3)));
         }
     }
     
-    public Optional<String> uriForSeries(C4EpgEntry entry){
+    @Override
+    public Optional<String> uriForSeries(Publisher publisher, C4EpgEntry entry){
         if (!entry.hasRelatedLink()) {
             return Optional.absent();
         }
@@ -41,13 +46,27 @@ public class C4EpgEntryUriExtractor {
         Matcher matcher = uriPattern.matcher(linkUri);
         if (matcher.matches() && matcher.group(seriesNumberGroup) != null) {
             String seriesNumber = matcher.group(seriesNumberGroup);
-            return Optional.of(PROGRAMMES_BASE + matcher.group(brandNameGroup) + seriesUriInfix + seriesNumber);
+            return Optional.of(String.format(ATLAS_URI_FORMAT, publisherHost(publisher), matcher.group(brandNameGroup) + seriesUriInfix + seriesNumber));
         }
         return Optional.absent();
     }
     
-    public String uriForItemId(C4EpgEntry entry){
-        return PROGRAMMES_BASE + entry.programmeId();
+    @Override
+    public Optional<String> uriForItem(Publisher publisher, C4EpgEntry entry){
+        return Optional.of(String.format(ATLAS_URI_FORMAT, publisherHost(publisher), entry.programmeId()));
+    }
+
+    @Override
+    public Optional<String> uriForClip(Publisher publisher, C4EpgEntry remote) {
+        throw new UnsupportedOperationException("Clips not supported as not ingested from EPG");
+    }
+    
+    private String publisherHost(Publisher publisher) {
+        String host = C4PmlsdModule.PUBLISHER_TO_CANONICAL_URI_HOST_MAP.get(publisher);
+        if (host == null) {
+            throw new IllegalArgumentException("Could not map publisher " + publisher.key() + " to a canonical URI host");
+        }
+        return host;
     }
 
 }

@@ -27,18 +27,20 @@ public class C4SeriesAndEpisodesExtractor implements ContentExtractor<Feed, SetM
     private static final Pattern SERIES_ID = Pattern.compile("series-(\\d+)");
 
     private final C4EpisodeGuideEpisodeExtractor episodeExtractor;
+    private final ContentFactory<Feed, Feed, Entry> contentFactory;
     private final Clock clock;
 
-    public C4SeriesAndEpisodesExtractor(Clock clock) {
-        this.episodeExtractor = new C4EpisodeGuideEpisodeExtractor(clock);
+    public C4SeriesAndEpisodesExtractor(ContentFactory<Feed, Feed, Entry> contentFactory, Clock clock) {
+        this.contentFactory = contentFactory;
+        this.episodeExtractor = new C4EpisodeGuideEpisodeExtractor(contentFactory, clock);
+        
         this.clock = clock;
     }
 
     @Override
     public SetMultimap<Series,Episode> extract(Feed source) {
 
-        String seriesUri = C4AtomApi.canonicalSeriesUri(source);
-        Series series = createSeriesFromFeed(seriesUri, source);
+        Series series = createSeriesFromFeed(source);
         
         Builder<Series, Episode> result = ImmutableSetMultimap.builder();
         for (Object entry : source.getEntries()) {
@@ -48,11 +50,11 @@ public class C4SeriesAndEpisodesExtractor implements ContentExtractor<Feed, SetM
         return result.build();
     }
 
-    private Series createSeriesFromFeed(String uri, Feed source) {
-        Series series = C4PmlsdModule.contentFactory().createSeries();
-        series.setCanonicalUri(uri);
+    private Series createSeriesFromFeed(Feed source) {
+        Series series = contentFactory.createSeries(source).get();
+        
         series.addAliasUrl(C4AtomApi.canonicalizeSeriesFeedId(source));
-        series.addAliasUrl(C4AtomApi.hierarchySeriesUri(source));
+        series.addAliasUrl(C4AtomApi.hierarchyUriFromCanonical(series.getCanonicalUri()));
 
         series.setLastUpdated(clock.now());
         

@@ -11,21 +11,33 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.time.SystemClock;
+import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
 
-public class C4SeriesAndEpisodesExtractorTest extends TestCase {
+@RunWith( MockitoJUnitRunner.class )
+public class C4SeriesAndEpisodesExtractorTest {
 
+    private ContentFactory<Feed, Feed, Entry> contentFactory 
+        = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());;
+    
 	private final AtomFeedBuilder seriesFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares-series-3.atom"));
 	
+	@Test
 	public void testParsingASeries() throws Exception {
 		
-		SetMultimap<Series, Episode> seriesAndEpisodes = new C4SeriesAndEpisodesExtractor(new SystemClock())
+		SetMultimap<Series, Episode> seriesAndEpisodes = new C4SeriesAndEpisodesExtractor(contentFactory, new SystemClock())
 		    .extract(seriesFeed.build());
 		Series series = Iterables.getOnlyElement(seriesAndEpisodes.keySet());
 		
@@ -33,7 +45,7 @@ public class C4SeriesAndEpisodesExtractorTest extends TestCase {
 		// TODO new alias
 		assertThat(series.getAliasUrls(), hasItems(
 	        "tag:pmlsc.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/episode-guide/series-3",
-	        "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3"
+	        "http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-3"
         ));
 
 		assertThat(series.getImage(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/series-3/ramsays-kitchen-nightmares-s3-20090617160853_625x352.jpg"));

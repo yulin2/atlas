@@ -6,30 +6,33 @@ import java.util.Map;
 
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Policy.Platform;
+import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Optional;
 import com.metabroadcast.common.time.Clock;
 import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
 
 public class C4BrandClipExtractor extends C4MediaItemExtractor<Clip> {
 
+    private final ContentFactory<Feed, Feed, Entry> contentFactory;
     private final C4AtomEntryVersionExtractor versionExtractor;
+    private final C4AtomFeedUriExtractor uriExtractor = new C4AtomFeedUriExtractor();
+    private final Publisher publisher;
 
-    public C4BrandClipExtractor(Clock clock) {
+    public C4BrandClipExtractor(ContentFactory<Feed, Feed, Entry> contentFactory, Publisher publisher, 
+            Clock clock) {
         super(clock);
+        this.contentFactory = contentFactory;
+        this.publisher = publisher;
         // TODO: Do we have platform-specific clips?
         versionExtractor = new C4AtomEntryVersionExtractor(Optional.<Platform>absent());
     }
 
     @Override
     protected Clip createItem(Entry entry, Map<String, String> lookup) {
-        return C4PmlsdModule.contentFactory().createClip();
-    }
-    
-    @Override
-    protected String getUri(Entry entry, Map<String, String> lookup) {
-        return C4AtomApi.clipUri(entry);
+        return contentFactory.createClip(entry).get();
     }
     
     @Override
@@ -44,7 +47,7 @@ public class C4BrandClipExtractor extends C4MediaItemExtractor<Clip> {
     }
 
     private C4VersionData data(Entry entry, String fourOdUri, Map<String, String> lookup, DateTime lastUpdated) {
-        String uri = fourOdUri != null ? fourOdUri : C4AtomApi.clipUri(entry);
+        String uri = fourOdUri != null ? fourOdUri : uriExtractor.uriForClip(publisher, entry).get();
         checkNotNull(uri, "No version URI extracted for %s", entry.getId());
         return new C4VersionData(entry.getId(), uri, getMedia(entry), lookup, lastUpdated);
     }

@@ -6,36 +6,39 @@ import java.util.regex.Pattern;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
-import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
+import org.atlasapi.remotesite.channel4.pmlsd.ContentFactory;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 
 import com.google.common.base.Optional;
 
 public class C4EpgEntrySeriesExtractor implements ContentExtractor<C4EpgEntry, Optional<Series>> {
 
-    private final C4EpgEntryUriExtractor uriExtractor = new C4EpgEntryUriExtractor();
+    private final ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory;
+    
+    public C4EpgEntrySeriesExtractor(ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory) {
+        this.contentFactory = contentFactory;
+    }
     
     @Override
     public Optional<Series> extract(C4EpgEntry source) {
-        Optional<String> possibleSeriesUri = uriExtractor.uriForSeries(source);
-        if (possibleSeriesUri.isPresent()) {
-            
-            String seriesUri = possibleSeriesUri.get();
-            Series series = C4PmlsdModule.contentFactory().createSeries();
-            series.setCanonicalUri(seriesUri);
-            series.addAliasUrl(seriesUri.replace(C4AtomApi.PROGRAMMES_BASE, C4AtomApi.WEB_BASE));
+        Optional<Series> possibleSeries = contentFactory.createSeries(source);
+        
+        if (possibleSeries.isPresent()) {
+            Series series = possibleSeries.get();
+            //TODO set alias URI based on publisher
+            series.addAliasUrl(C4AtomApi.hierarchyUriFromCanonical(series.getCanonicalUri()));
             
             if (source.seriesNumber() != null) {
                 series.withSeriesNumber(source.seriesNumber());
             } else {
-                series.withSeriesNumber(extractUriFrom(seriesUri));
+                series.withSeriesNumber(extractSeriesNumberFrom(series.getCanonicalUri()));
             }
             return Optional.of(series);
         }
         return Optional.absent();
     }
 
-    private Integer extractUriFrom(String seriesUri) {
+    private Integer extractSeriesNumberFrom(String seriesUri) {
         Pattern pattern = Pattern.compile("(\\d+)$");
         Matcher matcher = pattern.matcher(seriesUri);
         if (matcher.matches()) {
