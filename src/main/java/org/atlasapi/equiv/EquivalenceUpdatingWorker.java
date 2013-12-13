@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 
 public class EquivalenceUpdatingWorker extends AbstractWorker {
@@ -62,8 +63,9 @@ public class EquivalenceUpdatingWorker extends AbstractWorker {
 
     private Content resolveId(Long id) {
         Iterable<LookupEntry> entries = entryStore.entriesForIds(ImmutableSet.of(id));
-        LookupEntry entry = entries.iterator().next();
-        return resolveUri(entry.uri());
+        LookupEntry entry = Iterables.getOnlyElement(entries, null);
+        return entry != null ? resolveUri(entry.uri())
+                             : null;
     }
 
     private Content resolveUri(String uri) {
