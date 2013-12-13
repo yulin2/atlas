@@ -76,7 +76,6 @@ public class RemoteSiteModuleConfigurer {
         .put("emipub", EmiPubModule.class)
         .put("metabroadcast", MetaBroadcastModule.class)
         .put("btfeatured", BtFeaturedContentModule.class)
-        .put("thesuntvpicks", TheSunModule.class)
         .put("talktalk", TalkTalkModule.class)
         .put("itvwhatson", ItvWhatsOnModule.class)
         .put("wikipedia", WikipediaModule.class)
