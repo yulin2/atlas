@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.thesun;
 
+import java.util.Set;
+
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Publisher;
@@ -13,17 +15,15 @@ import com.google.common.collect.ImmutableList;
 public class TheSunTvPicksContentGroupUpdater {
     private final ContentGroupResolver contentGroupResolver;
     private final ContentGroupWriter contentGroupWriter;
-    private final String contentGroupUri; 
     
     public TheSunTvPicksContentGroupUpdater(ContentGroupResolver contentGroupResolver,
-            ContentGroupWriter contentGroupWriter, String contentGroupUri) {
+            ContentGroupWriter contentGroupWriter) {
         super();
         this.contentGroupResolver = contentGroupResolver;
         this.contentGroupWriter = contentGroupWriter;
-        this.contentGroupUri = contentGroupUri;
     }
 
-    public ContentGroup createOrRetrieveGroup() {
+    public ContentGroup createOrRetrieveGroup(String contentGroupUri) {
         ContentGroup contentGroup;
         ResolvedContent resolvedContent = contentGroupResolver.findByCanonicalUris(ImmutableList.of(contentGroupUri));
         if (resolvedContent.get(contentGroupUri).hasValue()) {
@@ -37,6 +37,12 @@ public class TheSunTvPicksContentGroupUpdater {
     
     public void saveGroup(ContentGroup contentGroup) {
         contentGroupWriter.createOrUpdate(contentGroup);
+    }
+    
+    public void updateGroup(String contentGroupUri, Set<ChildRef> groupContents) {
+        ContentGroup contentGroup = this.createOrRetrieveGroup(contentGroupUri);
+        contentGroup.setContents(groupContents);
+        this.saveGroup(contentGroup);
     }
 
 }

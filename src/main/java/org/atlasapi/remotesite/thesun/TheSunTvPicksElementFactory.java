@@ -8,7 +8,7 @@ public class TheSunTvPicksElementFactory extends NodeFactory {
     @Override
     public Element startMakingElement(String name, String namespace) {
         if (name.equals("item")) {
-            return new TheSunRSSItemElement(name, namespace);
+            return new TheSunRssItemElement(name, namespace);
         }
         if (name.equals("enclosure") || name.equals("tol-text:enclosure")) {
             return new TheSunRssEnclosureElement(name, namespace);

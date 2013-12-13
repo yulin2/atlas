@@ -10,26 +10,26 @@ import nu.xom.Element;
 import nu.xom.Elements;
 import nu.xom.Node;
 
-public class TheSunRSSItemElement extends Element { 
+public class TheSunRssItemElement extends Element { 
     private static final String TOL_TEXT_NS = "http://www.timesonline.co.uk/rss-full-text";
     
     private DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZones.UTC);
 
-    public TheSunRSSItemElement(Element element) {
+    public TheSunRssItemElement(Element element) {
         super(element);
     }
     
-    public TheSunRSSItemElement(String namespace, String name) {
+    public TheSunRssItemElement(String namespace, String name) {
         super(namespace, name);
     }
     
-    public TheSunRSSItemElement(String name) {
+    public TheSunRssItemElement(String name) {
         super(name);
     }
     
     @Override
     public Node copy() {
-        return new TheSunRSSItemElement(this);
+        return new TheSunRssItemElement(this);
     }
     
     private String getElementValue(String elementName) {

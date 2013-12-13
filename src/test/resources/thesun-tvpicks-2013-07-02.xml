@@ -6,6 +6,7 @@ xmlns:tol-text="http://www.timesonline.co.uk/rss-full-text">
 <source><![CDATA[Sol]]></source>
 <title><![CDATA[New section]]></title>
 <item>
+<<<<<<< HEAD
 <title><![CDATA[Lawrence Dallaglio: The new Range Rover is so agile – like a top sportsman]]></title>
 <shortTitle><![CDATA[New Range Rover agile like top sportsman]]></shortTitle>
 <articleTypeName>standardArticle</articleTypeName>
@@ -171,10 +172,34 @@ especially its road handling and comfort. It is the ultimate allrounder.
 <p>
 <i>And, just like the Lions, it has taken everything Australia could throw at 
 it.</i>
+=======
+<title><![CDATA[Programme 1 is a great programme]]></title>
+<shortTitle><![CDATA[Programme 1 is a great programme]]></shortTitle>
+<articleTypeName>standardArticle</articleTypeName>
+<articleTypeVariant></articleTypeVariant>
+<sections>400</sections>
+<section-l1><![CDATA[ Television ]]></section-l1>
+<author><![CDATA[http://pressassociation.com/programmes/abc1234]]></author>
+<pubDate>2013-06-28T11:07Z</pubDate>
+<link><![CDATA[http://www.example.com/programme1isgreat.html]]></link>
+<guid>4988220</guid>
+<description><![CDATA[Programme 1 is a great programme ]]></description>
+<standfirst><![CDATA[VIDEO: Programme 1 is a great programme]]></standfirst>
+<enclosure caption="Image caption" tol-text:imagecredit="" url="http://example.com/image123.jpg" length="72182" type="image/jpeg" />
+<tol-text:ooyalaVideo id="1234"> 
+<tol-text:headline><![CDATA[Programme 1 is a great programme ]]></tol-text:headline>
+<tol-text:teaser><![CDATA[Programme 1 is good]]></tol-text:teaser>
+<tol-text:enclosure caption="TV pick by A Person" tol-text:imagecredit="" url="http://example.com/image124.jpg" length="92868" type="image/jpeg" />
+</tol-text:ooyalaVideo>
+<tol-text:story>
+<![CDATA[<p>
+Content appears here
+>>>>>>> content-msg-id
 </p>]]>
 </tol-text:story>
 </item>
 <item>
+<<<<<<< HEAD
 <title><![CDATA[Kick asso Picasso]]></title>
 <shortTitle><![CDATA[Kick asso Picasso on Top Gear (test)! ]]></shortTitle>
 <articleTypeName>standardArticle</articleTypeName>
@@ -919,5 +944,31 @@ get a few hundred off &#8211; with the 360 starting at &#163;19,945 and going up
 </tol-text:story>
 </item>
 
+=======
+<title><![CDATA[Programme 2 is a great programme]]></title>
+<shortTitle><![CDATA[Programme 2 is a great programme]]></shortTitle>
+<articleTypeName>standardArticle</articleTypeName>
+<articleTypeVariant></articleTypeVariant>
+<sections>400</sections>
+<section-l1><![CDATA[ Television ]]></section-l1>
+<author><![CDATA[http://pressassociation.com/programmes/abc1235]]></author>
+<pubDate>2013-06-28T11:07Z</pubDate>
+<link><![CDATA[http://www.example.com/programme2isgreat.html]]></link>
+<guid>4968490</guid>
+<description><![CDATA[Programme 2 is a great programme ]]></description>
+<standfirst><![CDATA[VIDEO: Programme 2 is a great programme]]></standfirst>
+<enclosure caption="Image caption" tol-text:imagecredit="" url="http://example.com/image125.jpg" length="72182" type="image/jpeg" />
+<tol-text:ooyalaVideo id="1234"> 
+<tol-text:headline><![CDATA[Programme 2 is a great programme ]]></tol-text:headline>
+<tol-text:teaser><![CDATA[Programme 2 is good]]></tol-text:teaser>
+<tol-text:enclosure caption="TV pick by A Person" tol-text:imagecredit="" url="http://example.com/image126.jpg" length="92868" type="image/jpeg" />
+</tol-text:ooyalaVideo>
+<tol-text:story>
+<![CDATA[<p>
+Content appears here
+</p>]]>
+</tol-text:story>
+</item>
+>>>>>>> content-msg-id
 </channel>
 </rss>

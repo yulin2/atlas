@@ -36,14 +36,12 @@ public class TheSunModule {
     private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
-    private @Autowired AdapterLog log;
     private @Value("${thesuntvpicks.rss.url}") String feedUrl;
     private @Value("${thesuntvpicks.contentgroup.uri}") String contentGroupUri;
     
     @PostConstruct
     public void startBackgroundTasks() {
         scheduler.schedule(theSunTvPicksUpdater() , ONCE_DAILY);
-        log.record(new AdapterLogEntry(Severity.INFO).withDescription("The Sun TV Picks scheduled task installed").withSource(getClass()));
     }
     
     @Bean 
@@ -58,8 +56,8 @@ public class TheSunModule {
     
     @Bean
     public TheSunTvPicksUpdater theSunTvPicksUpdater() {
-        TheSunTvPicksEntryProcessor entryProcessor = new TheSunTvPicksEntryProcessor(contentWriter, contentResolver, log);
-        TheSunTvPicksContentGroupUpdater groupUpdater = new TheSunTvPicksContentGroupUpdater(contentGroupResolver, contentGroupWriter, contentGroupUri);
-        return new TheSunTvPicksUpdater(feedUrl, theSunTvPicksClient(), entryProcessor, groupUpdater, log);
+        TheSunTvPicksEntryProcessor entryProcessor = new TheSunTvPicksEntryProcessor(contentWriter, contentResolver);
+        TheSunTvPicksContentGroupUpdater groupUpdater = new TheSunTvPicksContentGroupUpdater(contentGroupResolver, contentGroupWriter);
+        return new TheSunTvPicksUpdater(feedUrl, contentGroupUri, theSunTvPicksClient(), entryProcessor, groupUpdater);
     }
 }
