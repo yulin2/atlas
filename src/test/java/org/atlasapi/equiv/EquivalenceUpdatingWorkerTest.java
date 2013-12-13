@@ -15,24 +15,29 @@ import org.atlasapi.media.entity.Topic;
 import org.atlasapi.messaging.v3.EntityUpdatedMessage;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.lookup.entry.LookupEntry;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EquivalenceUpdatingWorkerTest {
 
     private final ContentResolver resolver = mock(ContentResolver.class);
+    private final LookupEntryStore entryStore = mock(LookupEntryStore.class);
     @SuppressWarnings("unchecked")
     private final EquivalenceUpdater<Content> updater = mock(EquivalenceUpdater.class);
     private final Predicate<Object> filter = Predicates.instanceOf(Item.class);
     @SuppressWarnings("unchecked")
     private final EquivalenceUpdatingWorker workerThatOnlyUpdatesItems
-        = new EquivalenceUpdatingWorker(resolver, updater, Predicates.<Content>and(filter));
+        = new EquivalenceUpdatingWorker(resolver, 
+                entryStore, updater, Predicates.<Content>and(filter));
     
     @Test
     public void testWorkerThatOnlyUpdatesItemsUpdatesAnItem() {
@@ -87,6 +92,24 @@ public class EquivalenceUpdatingWorkerTest {
         workerThatOnlyUpdatesItems.process(msg);
         
         verify(updater, never()).updateEquivalences(any(Content.class));
+    }
+    
+    @Test
+    public void testWorkerThatOnlyUpdatesItemsHandlesResolvingById() {
+        
+        String uri = "uri";
+        Item item = new Item(uri, uri, BBC);
+        item.setId(2L);
+        when(entryStore.entriesForIds(ImmutableSet.of(item.getId())))
+            .thenReturn(ImmutableList.of(LookupEntry.lookupEntryFrom(item)));
+        when(resolver.findByCanonicalUris(ImmutableSet.of(uri)))
+            .thenReturn(ResolvedContent.builder().put(uri, item).build());
+        
+        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", 1L, "2", "item", "bbc.co.uk");
+        workerThatOnlyUpdatesItems.process(msg);
+        
+        verify(updater).updateEquivalences(item);
+        
     }
     
 }
