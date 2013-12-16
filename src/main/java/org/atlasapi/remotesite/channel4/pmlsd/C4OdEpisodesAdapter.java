@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Policy.Platform;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +22,11 @@ public class C4OdEpisodesAdapter implements SiteSpecificAdapter<List<Episode>> {
 
     private final C4AtomApiClient feedClient;
     private final C4OnDemandEpisodeExtractor itemExtractor;
-    private final Optional<Platform> platform;
 
-    public C4OdEpisodesAdapter(C4AtomApiClient feedClient, Optional<Platform> platform, Clock clock) {
+    public C4OdEpisodesAdapter(C4AtomApiClient feedClient, Optional<Platform> platform, 
+            ContentFactory<Feed, Feed, Entry> contentFactory, Publisher publisher, Clock clock) {
         this.feedClient = feedClient;
-        this.platform = platform;
-        this.itemExtractor = new C4OnDemandEpisodeExtractor(platform, clock);
+        this.itemExtractor = new C4OnDemandEpisodeExtractor(platform, publisher, contentFactory, clock);
     }
 
     @Override

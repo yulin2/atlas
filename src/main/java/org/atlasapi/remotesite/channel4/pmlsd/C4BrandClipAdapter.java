@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.channel4.pmlsd;
 import java.util.List;
 
 import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.google.common.base.Optional;
@@ -17,9 +18,10 @@ public class C4BrandClipAdapter implements SiteSpecificAdapter<List<Clip>> {
     private C4AtomApiClient client;
     private C4BrandClipExtractor extractor;
 
-    public C4BrandClipAdapter(C4AtomApiClient client, Clock clock) {
+    public C4BrandClipAdapter(C4AtomApiClient client, Publisher publisher, Clock clock, 
+            ContentFactory<Feed, Feed, Entry> contentFactory) {
         this.client = client;
-        this.extractor = new C4BrandClipExtractor(clock);
+        this.extractor = new C4BrandClipExtractor(contentFactory, publisher, clock);
     }
     
     @Override

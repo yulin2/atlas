@@ -56,10 +56,6 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 	private final ContentWriter writer;
 	private final ContentExtractor<Feed, BrandSeriesAndEpisodes> extractor;
 	private final Optional<Platform> platform;
-	private final boolean canUpdateDescriptions;
-	private boolean canUpdateClips;
-
-
 	
 	public C4AtomBackedBrandUpdater(C4AtomApiClient feedClient, Optional<Platform> platform, ContentResolver contentResolver, ContentWriter contentWriter, ContentExtractor<Feed, BrandSeriesAndEpisodes> extractor) {
 		this.feedClient = feedClient;
@@ -67,8 +63,6 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 		this.resolver = new C4AtomContentResolver(contentResolver);
 		this.writer = contentWriter;
 		this.extractor = extractor;
-		this.canUpdateDescriptions = !platform.isPresent();
-		this.canUpdateClips = !platform.isPresent();
 	}
 	
 	@Override
@@ -130,13 +124,15 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
     }
     
     private void checkUri(Content c) {
-        checkArgument(c.getCanonicalUri().startsWith(C4AtomApi.PROGRAMMES_BASE),
-            "%s doesn't start with %s", c, C4AtomApi.PROGRAMMES_BASE);
+        String expectedPrefix = "http://" + C4PmlsdModule.PUBLISHER_TO_CANONICAL_URI_HOST_MAP.get(c.getPublisher()); 
+        checkArgument(c.getCanonicalUri().startsWith(expectedPrefix),
+            "%s doesn't start with %s", c, expectedPrefix);
     }
 
     private void checkSource(Content c) {
-        checkArgument(c.getPublisher().equals(Publisher.C4_PMLSD),
-            "%s not %s", c, Publisher.C4_PMLSD);
+        checkArgument(c.getPublisher().equals(Publisher.C4_PMLSD)
+                        || c.getPublisher().equals(Publisher.C4_PMLSD_P06),
+                      "%s not %s", c, Publisher.C4_PMLSD);
     }
 
     private Episode resolveAndUpdate(Episode episode) {
@@ -221,13 +217,11 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
     private <T extends Content> T updateContent(T existing, T fetched) {
         existing = updateDescribed(existing, fetched);
         
-        if (canUpdateClips) {
-            Set<Clip> mergedClips = mergeClips(existing, fetched);
-            existing.setClips(mergedClips);
-        
-            if (!Objects.equal(mergedClips, existing.getClips())) {
-                copyLastUpdated(fetched, existing);
-            }
+        Set<Clip> mergedClips = mergeClips(existing, fetched);
+        existing.setClips(mergedClips);
+    
+        if (!Objects.equal(mergedClips, existing.getClips())) {
+            copyLastUpdated(fetched, existing);
         }
 
         return existing;
@@ -402,8 +396,7 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
             copyLastUpdated(fetched, existing);
         }
         
-        return canUpdateDescriptions ? updateDescriptions(existing, fetched)
-                                     : existing;
+        return updateDescriptions(existing, fetched);
     }
 
     private <T extends Described> T updateDescriptions(T existing, T fetched) {

@@ -28,7 +28,6 @@ public abstract class BaseC4ItemExtractor<I extends Item> implements ContentExtr
     public final I extract(Entry entry) {
         Map<String, String> lookup = C4AtomApi.foreignElementLookup(entry);
         I item = createItem(entry, lookup);
-        item.setCanonicalUri(checkNotNull(getUri(entry, lookup), entry.getId()));
         item.setLastUpdated(clock.now());
         item.setTitle(entry.getTitle());
         Content summary = entry.getSummary();
@@ -43,7 +42,6 @@ public abstract class BaseC4ItemExtractor<I extends Item> implements ContentExtr
 
 
     protected abstract I createItem(Entry source, Map<String, String> lookup);
-    protected abstract String getUri(Entry source, Map<String, String> lookup);
     protected abstract I setAdditionalItemFields(Entry source, Map<String, String> lookup, I item);
 
     private final void addImages(Entry source, Item item) {

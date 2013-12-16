@@ -7,12 +7,15 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
+import org.atlasapi.remotesite.channel4.pmlsd.ContentFactory;
+import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
@@ -30,19 +33,25 @@ public class C4EpgEntryContentExtractor implements
     private final Clock clock;
 
     private final C4EpgEntryBroadcastExtractor broadcastExtractor = new C4EpgEntryBroadcastExtractor();
-    private final C4EpgEntryBrandExtractor brandExtractor = new C4EpgEntryBrandExtractor();
-    private final C4EpgEntrySeriesExtractor seriesExtractor = new C4EpgEntrySeriesExtractor();
+    private final C4EpgEntryBrandExtractor brandExtractor;
+    private final C4EpgEntrySeriesExtractor seriesExtractor;
     private final C4EpgEntryItemExtractor itemExtractor;
     
-    public C4EpgEntryContentExtractor(ContentResolver resolver, C4BrandUpdater updater, Clock clock) {
-        this.resolver =  new C4EpgEntryContentResolver(resolver);
+    public C4EpgEntryContentExtractor(ContentResolver resolver, C4BrandUpdater updater, 
+            ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, 
+            Publisher publisher, Clock clock) {
+        this.resolver =  new C4EpgEntryContentResolver(resolver, publisher);
         this.brandUpdater = new C4EpgRelatedLinkBrandUpdater(updater);
-        this.itemExtractor = new C4EpgEntryItemExtractor(clock);
+        this.brandExtractor = new C4EpgEntryBrandExtractor(contentFactory);
+        this.itemExtractor = new C4EpgEntryItemExtractor(contentFactory, clock);
+        this.seriesExtractor = new C4EpgEntrySeriesExtractor(contentFactory);
         this.clock = clock;
     }
 
-    public C4EpgEntryContentExtractor(ContentResolver contentStore, C4BrandUpdater brandUpdater) {
-        this(contentStore, brandUpdater, new SystemClock());
+    public C4EpgEntryContentExtractor(ContentResolver contentStore, C4BrandUpdater brandUpdater, 
+            ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, 
+            Publisher publisher) {
+        this(contentStore, brandUpdater, contentFactory, publisher, new SystemClock());
     }
 
     @Override

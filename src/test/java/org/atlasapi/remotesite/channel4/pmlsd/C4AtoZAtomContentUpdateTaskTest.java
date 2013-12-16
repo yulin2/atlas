@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -30,15 +30,6 @@ public class C4AtoZAtomContentUpdateTaskTest extends TestCase {
 	private C4BrandUpdater brandAdapter = mock(C4BrandUpdater.class);
 	private SimpleHttpClient client = mock(SimpleHttpClient.class);
 	
-	Brand brand101 = brand("http://www.channel4.com/programmes/a-bipolar-expedition");
-	Brand brand202 = brand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2");
-
-    private Brand brand(String uri) {
-        Brand brand = C4PmlsdModule.contentFactory().createBrand();
-        brand.setCanonicalUri(uri);
-        return brand;
-    }
-	
 	private final AtomFeedBuilder atoza = new AtomFeedBuilder(Resources.getResource(getClass(), "a.atom"));
 	private final AtomFeedBuilder atoza2 = new AtomFeedBuilder(Resources.getResource(getClass(), "a2.atom"));
 
@@ -47,7 +38,7 @@ public class C4AtoZAtomContentUpdateTaskTest extends TestCase {
     @Test
 	public void testRequestsFeedsAndPassesExtractedUrisToAdapter() throws Exception {
         
-        C4AtoZAtomContentUpdateTask adapter = new C4AtoZAtomContentUpdateTask(client, apiBase, brandAdapter);
+        C4AtoZAtomContentUpdateTask adapter = new C4AtoZAtomContentUpdateTask(client, apiBase, brandAdapter, Publisher.C4_PMLSD);
 	
 		when(client.get(requestFor("http://pmlsc.channel4.com/pmlsd/atoz/a.atom"))).thenReturn(atoza.build());
 		when(client.get(requestFor("http://pmlsc.channel4.com/pmlsd/atoz/a/page-2.atom"))).thenReturn(atoza2.build());
@@ -65,7 +56,7 @@ public class C4AtoZAtomContentUpdateTaskTest extends TestCase {
     @Test
     public void testRequestsFeedsAndPassesExtractedUrisToAdapterWithPlatform() throws Exception {
         
-        C4AtoZAtomContentUpdateTask adapter = new C4AtoZAtomContentUpdateTask(client, apiBase, Optional.of(Platform.XBOX.key().toLowerCase()), brandAdapter);
+        C4AtoZAtomContentUpdateTask adapter = new C4AtoZAtomContentUpdateTask(client, apiBase, Optional.of(Platform.XBOX.key().toLowerCase()), brandAdapter, Publisher.C4_PMLSD);
     
         when(client.get(requestFor("http://pmlsc.channel4.com/pmlsd/atoz/a.atom?platform=xbox"))).thenReturn(ps3atoza.build());
         when(brandAdapter.canFetch(anyString())).thenReturn(true);

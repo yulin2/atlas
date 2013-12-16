@@ -6,18 +6,24 @@ import java.util.Map;
 
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Policy.Platform;
+import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Optional;
 import com.metabroadcast.common.time.Clock;
 import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
 
 final class C4OnDemandEpisodeExtractor extends BaseC4EpisodeExtractor {
 
     private final C4AtomEntryVersionExtractor versionExtractor;
+    private final C4AtomFeedUriExtractor uriExtractor = new C4AtomFeedUriExtractor();
+    private final Publisher publisher;
 
-    public C4OnDemandEpisodeExtractor(Optional<Platform> platform, Clock clock) {
-        super(clock);
+    public C4OnDemandEpisodeExtractor(Optional<Platform> platform, Publisher publisher,
+            ContentFactory<Feed, Feed, Entry> contentFactory, Clock clock) {
+        super(contentFactory, clock);
+        this.publisher = publisher;
         versionExtractor = new C4AtomEntryVersionExtractor(platform);
     }
 
@@ -28,16 +34,18 @@ final class C4OnDemandEpisodeExtractor extends BaseC4EpisodeExtractor {
         if (fourOdUri != null) {
             episode.addAliasUrl(fourOdUri);
         }
-        String seriesEpisodeUri = C4AtomApi.canonicalUri(entry);
+        
+        String seriesEpisodeUri = C4AtomApi.canonicalizeEpisodeFeedId(entry);
         if(seriesEpisodeUri != null) {
             episode.addAliasUrl(seriesEpisodeUri);
         }
+        
         episode.addVersion(versionExtractor.extract(data(entry, fourOdUri, lookup, episode.getLastUpdated())));
         return episode;
     }
     
     private C4VersionData data(Entry entry, String fourOdUri, Map<String, String> lookup, DateTime lastUpdated) {
-        String uri = fourOdUri != null ? fourOdUri : C4AtomApi.clipUri(entry);
+        String uri = fourOdUri != null ? fourOdUri : uriExtractor.uriForClip(publisher, entry).get();
         checkNotNull(uri, "No version URI extracted for %s", entry.getId());
         return new C4VersionData(entry.getId(), uri, getMedia(entry), lookup, lastUpdated);
     }

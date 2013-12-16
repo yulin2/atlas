@@ -1,25 +1,35 @@
 package org.atlasapi.remotesite.channel4.pmlsd;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4EpgEpisodeExtractor;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.io.Resources;
 import com.metabroadcast.common.time.SystemClock;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 
-public class C4BrandEpgExtractorTest extends TestCase {
+@RunWith( MockitoJUnitRunner.class )
+public class C4BrandEpgExtractorTest {
+    
+    private final ContentFactory<Feed, Feed, Entry> contentFactory
+        =  new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4BrandEpgUriExtractor());;
     
     private final AtomFeedBuilder gleeAtom = new AtomFeedBuilder(Resources.getResource(getClass(), "glee-epg.atom"));
     private final Feed gleeFeed = gleeAtom.build();
     
-    private final C4EpgEpisodeExtractor extractor = new C4EpgEpisodeExtractor(new C4AtomApi(new C4DummyChannelResolver()), new SystemClock());
+    private final C4EpgEpisodeExtractor extractor = new C4EpgEpisodeExtractor(new C4AtomApi(new C4DummyChannelResolver()), 
+            contentFactory, new SystemClock());
     
     @Test
     public void testShouldExtractBroadcast() throws Exception {

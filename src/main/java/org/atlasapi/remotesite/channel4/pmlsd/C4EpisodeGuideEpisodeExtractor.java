@@ -10,31 +10,23 @@ import org.jdom.Element;
 
 import com.metabroadcast.common.time.Clock;
 import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
+import com.sun.syndication.feed.atom.Link;
 
 final class C4EpisodeGuideEpisodeExtractor extends BaseC4EpisodeExtractor {
 
-    public C4EpisodeGuideEpisodeExtractor(Clock clock) {
-        super(clock);
+    public C4EpisodeGuideEpisodeExtractor(ContentFactory<Feed, Feed, Entry> contentFactory, Clock clock) {
+        super(contentFactory, clock);
     }
-    
-    private static final Pattern EPISODE_PAGE_ID_PATTERN = Pattern.compile("^.*/([^\\/]+/episode-guide/series-\\d+/episode-\\d+)$");
     
     @Override
     protected Episode setAdditionalEpisodeFields(Entry entry, Map<String, String> lookup,
             Episode episode) {
-        episode.addAliasUrl(hierarchyEpisodeUri(entry));
+        episode.addAliasUrl(C4AtomApi.canonicalizeEpisodeFeedId(entry));
         episode.addAliasUrl(entry.getId());
         return episode;
     }
     
-    private String hierarchyEpisodeUri(Entry source) {
-        Matcher matcher = EPISODE_PAGE_ID_PATTERN.matcher(source.getId());
-        if (matcher.matches()) {
-            return C4AtomApi.WEB_BASE + matcher.group(1);
-        }
-        return null;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     protected Element getMedia(Entry source) {
