@@ -88,6 +88,8 @@ public class EquivTaskModule {
     
     private @Value("${equiv.updater.enabled}") String updaterEnabled;
     private @Value("${equiv.stream-updater.enabled}") Boolean streamedChangesUpdateEquiv;
+    private @Value("${equiv.stream-updater.consumers.default}") Integer defaultStreamedEquivUpdateConsumers;
+    private @Value("${equiv.stream-updater.consumers.max}") Integer maxStreamedEquivUpdateConsumers;
     private @Value("${messaging.destination.content.changes}") String contentChanges;
     
     private @Autowired ContentLister contentLister;
@@ -253,7 +255,8 @@ public class EquivTaskModule {
     public DefaultMessageListenerContainer contentIndexerMessageListener() {
         if (streamedChangesUpdateEquiv) {
             return messaging.queueHelper().makeVirtualTopicConsumer(
-                    equivUpdatingWorker(), "EquivUpdater", contentChanges, 1, 1);
+                    equivUpdatingWorker(), "EquivUpdater", contentChanges, 
+                    defaultStreamedEquivUpdateConsumers, maxStreamedEquivUpdateConsumers);
         } else {
             return messaging.queueHelper().noopContainer();
         }
