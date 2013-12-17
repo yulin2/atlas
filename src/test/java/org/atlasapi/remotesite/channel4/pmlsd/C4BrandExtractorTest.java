@@ -188,6 +188,7 @@ public class C4BrandExtractorTest extends TestCase {
         when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
 		
 	    Episode episode = new Episode();
+	    episode.setPublisher(Publisher.C4_PMLSD);
 	    episode.setCanonicalUri("http://pmlsc.channel4.com/pmlsd/43065/005");
 	    Version version = new Version();
 	    episode.addVersion(version);

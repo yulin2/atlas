@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.nullValue;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.testing.BrandTestDataBuilder;
@@ -113,14 +114,20 @@ public class C4EpgEntryContentExtractorTest {
     
     @Test
     public void testCreatesItemAndBroadcastForNoRelatedLinkEntryWhenNothingResolved() {
-        C4EpgEntry entry = unlinkedEntry();
+        final C4EpgEntry entry = unlinkedEntry();
         C4EpgChannelEntry source = new C4EpgChannelEntry(entry, channel);
         
         final String idUri = "http://pmlsc.channel4.com/pmlsd/40635/014";
         
         context.checking(new Expectations(){{
             one(resolver).findByCanonicalUris(with(hasItems(idUri)));
-            will(returnValue(ResolvedContent.builder().build()));
+                will(returnValue(ResolvedContent.builder().build()));
+            
+            one(contentFactory).createItem(with(entry));
+                will(returnValue(Optional.of(new Item(idUri, null, Publisher.C4_PMLSD))));
+
+            one(contentFactory).createSeries(with(entry));
+                will(returnValue(Optional.absent()));
             
             never(brandUpdater).createOrUpdateBrand(with(any(String.class)));
         }});
@@ -138,7 +145,7 @@ public class C4EpgEntryContentExtractorTest {
     
     @Test
     public void testDoesntAddEncodingWhereNoOnDemand() {
-        C4EpgEntry entry = entryWithThumbnailNoOnDemand();
+        final C4EpgEntry entry = entryWithThumbnailNoOnDemand();
         C4EpgChannelEntry source = new C4EpgChannelEntry(entry, channel);
         
         final String idUri = "http://pmlsc.channel4.com/pmlsd/30630/003";
@@ -157,6 +164,16 @@ public class C4EpgEntryContentExtractorTest {
             
             one(brandUpdater).createOrUpdateBrand(brandUri);
             will(returnValue(null));
+            
+            one(contentFactory).createBrand(with(entry));
+            will(returnValue(Optional.of(new Brand(brandUri, null, Publisher.C4_PMLSD))));
+            
+            one(contentFactory).createEpisode(with(entry));
+            will(returnValue(Optional.of(new Episode(idUri, null, Publisher.C4_PMLSD))));
+            
+            one(contentFactory).createSeries(with(entry));
+            will(returnValue(Optional.of(new Series(seriesUri, null, Publisher.C4_PMLSD))));
+            
         }});
 
         ContentHierarchyAndBroadcast extracted = extractor.extract(source);
