@@ -9,11 +9,14 @@ import org.atlasapi.messaging.v3.EntityUpdatedMessage;
 import org.atlasapi.messaging.worker.v3.AbstractWorker;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.lookup.entry.LookupEntry;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 
 public class EquivalenceUpdatingWorker extends AbstractWorker {
@@ -21,33 +24,51 @@ public class EquivalenceUpdatingWorker extends AbstractWorker {
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     private final ContentResolver contentResolver;
+    private final LookupEntryStore entryStore;
     private final EquivalenceUpdater<Content> equivUpdater;
     private final Predicate<Content> filter;
 
     public EquivalenceUpdatingWorker(ContentResolver contentResolver,
+            LookupEntryStore entryStore,
             EquivalenceUpdater<Content> equivUpdater, Predicate<Content> filter) {
         this.contentResolver = checkNotNull(contentResolver);
+        this.entryStore = checkNotNull(entryStore);
         this.equivUpdater = checkNotNull(equivUpdater);
         this.filter = checkNotNull(filter);
     }
 
     @Override
     public void process(EntityUpdatedMessage message) {
-        String uri = message.getEntityId();
-        Content content = resolve(uri);
+        String eid = message.getEntityId();
+        Content content;
+        try {
+            content = resolveId(Long.valueOf(eid));
+        } catch (NumberFormatException nfe) {
+            content = resolveUri(eid);
+        }
         if (content == null) {
-            log.warn("Resolved null/not Content for {}", uri);
+            log.warn("Resolved null/not Content for {} {} {}", 
+                new Object[]{message.getEntitySource(), message.getEntityType(), eid});
             return;
         }
         if (filter.apply(content)) {
-            log.debug("Updating equivalence: {}", uri);
+            log.debug("Updating equivalence: {} {} {}", 
+                new Object[]{message.getEntitySource(), message.getEntityType(), eid});
             equivUpdater.updateEquivalences(content);
         } else {
-            log.trace("Skipping equiv update: {}", uri);
+            log.trace("Skipping equiv update: {} {} {}", 
+                new Object[]{message.getEntitySource(), message.getEntityType(), eid});
         }
     }
 
-    private Content resolve(String uri) {
+    private Content resolveId(Long id) {
+        Iterable<LookupEntry> entries = entryStore.entriesForIds(ImmutableSet.of(id));
+        LookupEntry entry = Iterables.getOnlyElement(entries, null);
+        return entry != null ? resolveUri(entry.uri())
+                             : null;
+    }
+
+    private Content resolveUri(String uri) {
         ImmutableSet<String> contentUri = ImmutableSet.of(uri);
         ResolvedContent resolved = contentResolver.findByCanonicalUris(contentUri);
         Maybe<Identified> possibleContent = resolved.get(uri);
