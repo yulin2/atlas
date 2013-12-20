@@ -226,6 +226,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         brand.setTitle(progData.getTitle());
         brand.setDescription(Strings.emptyToNull(progData.getSeriesSynopsis()));
         brand.setSpecialization(specialization(progData, channel));
+        brand.setMediaType(channel.getMediaType());
         setCertificate(progData, brand);
         setGenres(progData, brand);
 
