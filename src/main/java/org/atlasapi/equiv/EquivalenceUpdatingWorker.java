@@ -2,6 +2,7 @@ package org.atlasapi.equiv;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.atlasapi.equiv.results.persistence.EquivalenceResultStore;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
@@ -25,14 +26,18 @@ public class EquivalenceUpdatingWorker extends AbstractWorker {
     
     private final ContentResolver contentResolver;
     private final LookupEntryStore entryStore;
+    private final EquivalenceResultStore resultStore;
     private final EquivalenceUpdater<Content> equivUpdater;
     private final Predicate<Content> filter;
 
     public EquivalenceUpdatingWorker(ContentResolver contentResolver,
             LookupEntryStore entryStore,
-            EquivalenceUpdater<Content> equivUpdater, Predicate<Content> filter) {
+            EquivalenceResultStore resultStore, 
+            EquivalenceUpdater<Content> equivUpdater, 
+            Predicate<Content> filter) {
         this.contentResolver = checkNotNull(contentResolver);
         this.entryStore = checkNotNull(entryStore);
+        this.resultStore = checkNotNull(resultStore);
         this.equivUpdater = checkNotNull(equivUpdater);
         this.filter = checkNotNull(filter);
     }
@@ -51,7 +56,7 @@ public class EquivalenceUpdatingWorker extends AbstractWorker {
                 new Object[]{message.getEntitySource(), message.getEntityType(), eid});
             return;
         }
-        if (filter.apply(content)) {
+        if (filter.apply(content) && noPreviousResult(content)) {
             log.debug("Updating equivalence: {} {} {}", 
                 new Object[]{message.getEntitySource(), message.getEntityType(), eid});
             equivUpdater.updateEquivalences(content);
@@ -59,6 +64,10 @@ public class EquivalenceUpdatingWorker extends AbstractWorker {
             log.trace("Skipping equiv update: {} {} {}", 
                 new Object[]{message.getEntitySource(), message.getEntityType(), eid});
         }
+    }
+
+    private boolean noPreviousResult(Content content) {
+        return resultStore.forId(content.getCanonicalUri()) == null;
     }
 
     private Content resolveId(Long id) {
