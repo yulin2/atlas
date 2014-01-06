@@ -54,6 +54,7 @@ import org.atlasapi.equiv.handlers.EpisodeMatchingEquivalenceHandler;
 import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.EquivalenceSummaryWritingHandler;
 import org.atlasapi.equiv.handlers.LookupWritingEquivalenceHandler;
+import org.atlasapi.equiv.handlers.MessageQueueingResultHandler;
 import org.atlasapi.equiv.handlers.ResultWritingEquivalenceHandler;
 import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
 import org.atlasapi.equiv.results.combining.RequiredScoreFilteringCombiner;
@@ -91,6 +92,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Song;
+import org.atlasapi.messaging.v3.AtlasMessagingModule;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
@@ -100,6 +102,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.jms.core.JmsTemplate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -107,9 +111,11 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 @Configuration
+@Import({AtlasMessagingModule.class})
 public class EquivModule {
 
 	private @Value("${equiv.results.directory}") String equivResultsDirectory;
+	private @Value("${messaging.destination.equiv.assert}") String equivAssertDest;
     
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired SearchResolver searchResolver;
@@ -117,6 +123,8 @@ public class EquivModule {
     private @Autowired ChannelResolver channelResolver;
     private @Autowired EquivalenceSummaryStore equivSummaryStore;
     private @Autowired LookupWriter lookupWriter;
+    
+    private @Autowired AtlasMessagingModule messaging;
 
     public @Bean RecentEquivalenceResultStore equivalenceResultStore() {
         return new RecentEquivalenceResultStore(new FileEquivalenceResultStore(new File(equivResultsDirectory)));
@@ -127,8 +135,14 @@ public class EquivModule {
             new LookupWritingEquivalenceHandler<Container>(lookupWriter, publishers),
             new EpisodeMatchingEquivalenceHandler(contentResolver, equivSummaryStore, lookupWriter, publishers),
             new ResultWritingEquivalenceHandler<Container>(equivalenceResultStore()),
-            new EquivalenceSummaryWritingHandler<Container>(equivSummaryStore)
+            new EquivalenceSummaryWritingHandler<Container>(equivSummaryStore),
+            new MessageQueueingResultHandler<Container>(equivAssertDestination(), publishers)
         ));
+    }
+
+    @Bean 
+    protected JmsTemplate equivAssertDestination() {
+        return messaging.queueHelper().makeVirtualTopicProducer(equivAssertDest);
     }
     
     private <T extends Content> EquivalenceFilter<T> standardFilter() {
@@ -160,7 +174,8 @@ public class EquivModule {
                     equivSummaryStore
                 ),
                 new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
-                new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore)
+                new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore),
+                new MessageQueueingResultHandler<Item>(equivAssertDestination(), acceptablePublishers)
             )))
             .build();
     }

@@ -71,7 +71,6 @@ public class PreviewFilmProcessor {
         Element productElement = regionElement.getFirstChildElement("products").getFirstChildElement("product");
         
         film.setTitle(get(productElement, "product_title"));
-        film.setDescription(get(productElement, "description"));
         
         Version version = new Version();
         version.setDuration(Duration.standardMinutes(duration));

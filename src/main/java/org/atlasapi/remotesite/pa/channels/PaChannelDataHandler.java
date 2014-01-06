@@ -172,6 +172,7 @@ public class PaChannelDataHandler {
             Channel existingChannel = existing.requireValue();
 
             existingChannel.setTitles(newChannel.getAllTitles());
+            existingChannel.setAdult(newChannel.getAdult());
             existingChannel.setImages(newChannel.getAllImages());
             existingChannel.setStartDate(newChannel.getStartDate());
             existingChannel.setEndDate(newChannel.getEndDate());
