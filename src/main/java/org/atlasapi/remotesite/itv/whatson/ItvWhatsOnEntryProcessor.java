@@ -28,30 +28,41 @@ public class ItvWhatsOnEntryProcessor {
         this.contentWriter = contentWriter;
     }
     
-    private void createOrUpdate(Content content) {
+    private Content createOrUpdate(Content content) {
         ResolvedContent resolved = contentResolver.findByCanonicalUris(ImmutableList.of(content.getCanonicalUri()));
         if (!resolved.resolved(content.getCanonicalUri())) {
-            if (content instanceof Item) {
-                contentWriter.createOrUpdate((Item) content);
-            } else {
-                contentWriter.createOrUpdate((Container) content); 
-            }
+            return create(content);
         } else {
-            Content resolvedContent = (Content)resolved.get(content.getCanonicalUri()).requireValue();
-            if (content instanceof Item) {
-                Item resolvedItem = (Item)resolvedContent;
-                Item contentItem = (Item)content;
-                
-                // The API sometimes fails to return a container for an episode.
-                // If that happens we don't want to remove an existing reference.
-                if (resolvedItem.getContainer() != null) {
-                    contentItem.setParentRef(resolvedItem.getContainer());
-                }
-                contentWriter.createOrUpdate(ContentMerger.merge(resolvedItem, contentItem));
-            } else {
-                ContentMerger.merge((Container)resolvedContent, (Container) content);
-                contentWriter.createOrUpdate((Container)resolvedContent);
+           return update(content, resolved);
+        }
+    }
+    
+    public Content create(Content content) {
+        if (content instanceof Item) {
+            contentWriter.createOrUpdate((Item) content);
+        } else {
+            contentWriter.createOrUpdate((Container) content); 
+        }
+        return content;
+    }
+    
+    public Content update(Content content, ResolvedContent resolved) {
+        Content resolvedContent = (Content)resolved.get(content.getCanonicalUri()).requireValue();
+        if (content instanceof Item) {
+            Item resolvedItem = (Item)resolvedContent;
+            Item contentItem = (Item)content;
+            
+            // The API sometimes fails to return a container for an episode.
+            // If that happens we don't want to remove an existing reference.
+            if (resolvedItem.getContainer() != null) {
+                contentItem.setParentRef(resolvedItem.getContainer());
             }
+            contentWriter.createOrUpdate(ContentMerger.merge(resolvedItem, contentItem));
+            return resolvedItem;
+        } else {
+            ContentMerger.merge((Container)resolvedContent, (Container) content);
+            contentWriter.createOrUpdate((Container)resolvedContent);
+            return resolvedContent;
         }
     }
     
@@ -59,15 +70,15 @@ public class ItvWhatsOnEntryProcessor {
         Item item = new Item();
         Optional<Series> series = extractor.toSeries(entry);
         if (series.isPresent()) {
-            createOrUpdate(series.get());
+            Series resolvedSeries = (Series) createOrUpdate(series.get());
             Episode epsiode = new Episode();
-            epsiode.setSeries(series.get());
+            epsiode.setSeries(resolvedSeries);
             item = epsiode;
         }
         Optional<Brand> brand = extractor.toBrand(entry);
         if (brand.isPresent()) {
-            createOrUpdate(brand.get());
-            item.setContainer(brand.get());
+            Brand resolvedBrand = (Brand) createOrUpdate(brand.get());
+            item.setContainer(resolvedBrand);
         }
         extractor.setCommonItemAttributes(item, entry);
         createOrUpdate(item);
