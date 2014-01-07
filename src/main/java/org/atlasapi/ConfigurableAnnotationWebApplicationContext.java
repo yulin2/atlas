@@ -23,6 +23,7 @@ import org.atlasapi.remotesite.bbc.nitro.BbcNitroModule;
 import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
 import org.atlasapi.remotesite.metabroadcast.picks.PicksModule;
+import org.atlasapi.remotesite.metabroadcast.similar.SimilarContentModule;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import com.google.common.base.Function;
@@ -78,7 +79,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 C4PmlsdModule.class,
                 WikipediaModule.class,
                 BbcNitroModule.class,
-                PicksModule.class
+                PicksModule.class,
+                SimilarContentModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(
