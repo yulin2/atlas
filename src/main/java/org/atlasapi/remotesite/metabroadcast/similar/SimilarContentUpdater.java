@@ -42,8 +42,8 @@ public class SimilarContentUpdater extends ScheduledTask {
                                                     .forContent(ContentCategory.TOP_LEVEL_CONTENT)
                                                     .build();
         Iterator<Content> content = contentLister.listContent(criteria);
+        UpdateProgress progress = UpdateProgress.START;
         while (content.hasNext()) {
-            UpdateProgress progress = UpdateProgress.START;
             Content c = content.next();
             try {
                 List<Described> similar = similarContentProvider.similarTo(c);
