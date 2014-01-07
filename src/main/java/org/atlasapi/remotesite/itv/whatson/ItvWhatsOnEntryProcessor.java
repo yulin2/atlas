@@ -13,6 +13,7 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.ContentMerger;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 
@@ -60,8 +61,13 @@ public class ItvWhatsOnEntryProcessor {
             contentWriter.createOrUpdate(ContentMerger.merge(resolvedItem, contentItem));
             return resolvedItem;
         } else {
-            ContentMerger.merge((Container)resolvedContent, (Container) content);
-            contentWriter.createOrUpdate((Container)resolvedContent);
+            // Only update brand or series if description or image array have changed
+            if (!Strings.nullToEmpty(resolvedContent.getDescription())
+                       .equals(Strings.nullToEmpty(resolvedContent.getDescription()))
+                   || !resolvedContent.getImages().equals(resolvedContent.getImages())) {
+                ContentMerger.merge((Container)resolvedContent, (Container) content);
+                contentWriter.createOrUpdate((Container)resolvedContent);
+            }
             return resolvedContent;
         }
     }
