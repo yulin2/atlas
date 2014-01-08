@@ -41,15 +41,16 @@ public class SimilarContentUpdater extends ScheduledTask {
                                                     .forPublisher(publisher)
                                                     .forContent(ContentCategory.TOP_LEVEL_CONTENT)
                                                     .build();
+        similarContentProvider.initialise();
         Iterator<Content> content = contentLister.listContent(criteria);
         UpdateProgress progress = UpdateProgress.START;
         while (content.hasNext()) {
             Content c = content.next();
             try {
-                List<Described> similar = similarContentProvider.similarTo(c);
+                List<Long> similar = similarContentProvider.similarTo(c);
                 log.trace("Similar to [{} : {}] are the following:", c.getCanonicalUri(), c.getTitle());
-                for (Described d : similar) {
-                    log.trace("{} : {}", d.getCanonicalUri(), d.getTitle());
+                for (Long d : similar) {
+                    log.trace("{}", d);
                 }
                 progress = progress.reduce(UpdateProgress.SUCCESS);
             } catch (Exception e) {
