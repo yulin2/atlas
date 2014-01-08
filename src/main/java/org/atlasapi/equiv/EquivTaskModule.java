@@ -252,7 +252,7 @@ public class EquivTaskModule {
 
     @Bean
     @Lazy(true)
-    public DefaultMessageListenerContainer contentIndexerMessageListener() {
+    public DefaultMessageListenerContainer equivalenceUpdatingMessageListener() {
         if (streamedChangesUpdateEquiv) {
             return messaging.queueHelper().makeVirtualTopicConsumer(
                     equivUpdatingWorker(), "EquivUpdater", contentChanges, 
