@@ -19,6 +19,7 @@ import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
@@ -70,7 +71,8 @@ public class DefaultSimilarContentProvider implements SimilarContentProvider {
         hashes.addAll(Iterables.transform(c.getGenres(), GENRE_HASH));
         
         if (c instanceof Item) {
-            hashes.addAll(Iterables.transform(((Item) c).getPeople(), CREW_HASH));
+            hashes.addAll(Iterables.filter(Iterables.transform(((Item) c).getPeople(), CREW_HASH), 
+                                           Predicates.notNull()));
         }
         return hashes.build();
     }
@@ -134,6 +136,9 @@ public class DefaultSimilarContentProvider implements SimilarContentProvider {
 
         @Override
         public Integer apply(CrewMember c) {
+            if (c.getCanonicalUri() == null) {
+                return null;
+            }
             return hash.hashString(c.getCanonicalUri(), Charsets.UTF_8).asInt();
         }
         
