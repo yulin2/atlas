@@ -136,8 +136,8 @@ public class HttpBackedReduxClient implements ReduxClient {
     @Override
     public List<BaseReduxProgramme> programmesForDay(LocalDate date) throws HttpException, Exception {
         String formattedDate = date.toString(ISODateTimeFormat.date());
-        List<BaseReduxProgramme> programmes = getAsType(String.format("%sday/%s", requestBase, formattedDate), new TypeToken<List<BaseReduxProgramme>>() {});
-        return ImmutableList.copyOf(programmes);
+        PaginatedBaseProgrammes programmes = getAsType(String.format("%sday/%s", requestBase, formattedDate), TypeToken.get(PaginatedBaseProgrammes.class));
+        return ImmutableList.copyOf(programmes.getResults());
     }
 
     @Override
