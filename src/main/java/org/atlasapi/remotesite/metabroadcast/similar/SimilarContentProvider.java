@@ -7,6 +7,7 @@ import org.atlasapi.media.entity.Described;
 
 public interface SimilarContentProvider {
 
-    List<Described> similarTo(Described described);
+    void initialise();
+    List<Long> similarTo(Described described);
 
 }
