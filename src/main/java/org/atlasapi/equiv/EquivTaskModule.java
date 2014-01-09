@@ -230,7 +230,7 @@ public class EquivTaskModule {
     }
     
     private EquivalenceUpdatingWorker equivUpdatingWorker() {
-        return new EquivalenceUpdatingWorker(contentResolver, lookupStore, equivUpdater,
+        return new EquivalenceUpdatingWorker(contentResolver, lookupStore, equivalenceResultStore, equivUpdater,
             Predicates.or(ImmutableList.<Predicate<? super Content>>of(
                 sourceIsIn(BBC_REDUX),
                 Predicates.and(Predicates.instanceOf(Container.class),
