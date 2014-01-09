@@ -9,6 +9,7 @@ import java.util.Set;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.application.v3.SourceStatus;
 import org.atlasapi.equiv.results.description.ResultDescription;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
@@ -18,6 +19,7 @@ import org.atlasapi.search.model.SearchQuery;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -55,6 +57,10 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
 
     @Override
     public ScoredCandidates<T> generate(T content, ResultDescription desc) {
+        if (Strings.isNullOrEmpty(content.getTitle())) {
+            desc.appendText("subject has no title");
+            return DefaultScoredCandidates.<T>fromSource(NAME).build();
+        }
         Iterable<? extends T> candidates = searchForCandidates(content, desc);
         return titleScorer.scoreCandidates(content, candidates, desc);
     }
