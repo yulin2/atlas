@@ -7,6 +7,7 @@ import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -28,10 +29,10 @@ public class SeparateSourceSimilarContentWriter implements SimilarContentWriter 
     }
     
     @Override
-    public void write(String sourceUri, Iterable<ChildRef> similar) {
-        checkState(sourceUri != null);
+    public void write(Content sourceContent, Iterable<ChildRef> similar) {
+        checkState(sourceContent != null);
         
-        String writeUri = similarContentPublisherUriFor(sourceUri);
+        String writeUri = similarContentPublisherUriFor(sourceContent.getCanonicalUri());
         Maybe<Identified> content = contentResolver.findByCanonicalUris(ImmutableSet.of(writeUri)).getFirstValue();
         
         Item writeContent;
@@ -41,6 +42,7 @@ public class SeparateSourceSimilarContentWriter implements SimilarContentWriter 
             writeContent = create(writeUri);
         }
         writeContent.setSimilarContent(similar);
+        writeContent.setEquivalentTo(ImmutableSet.of(LookupRef.from(sourceContent)));
         contentWriter.createOrUpdate(writeContent);
     }
     
@@ -49,6 +51,6 @@ public class SeparateSourceSimilarContentWriter implements SimilarContentWriter 
     }
 
     private String similarContentPublisherUriFor(String sourceUri) {
-        return String.format("http://%s/%s", publisher.name(), sourceUri.replaceFirst("(http(s?)://)", ""));
+        return String.format("http://%s/%s", publisher.key(), sourceUri.replaceFirst("(http(s?)://)", ""));
     }
 }
