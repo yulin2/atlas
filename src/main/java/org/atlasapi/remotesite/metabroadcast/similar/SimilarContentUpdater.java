@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentCategory;
 import org.atlasapi.persistence.content.listing.ContentLister;
@@ -14,7 +13,6 @@ import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Iterators;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 

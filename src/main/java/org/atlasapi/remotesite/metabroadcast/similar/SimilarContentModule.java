@@ -23,13 +23,13 @@ public class SimilarContentModule {
     private static RepetitionRule SIMILAR_CONTENT_UPDATER_REPETITION = RepetitionRules.daily(LocalTime.parse("15:00"));
     
     @Autowired 
-    private ContentLister contentLister;
+    ContentLister contentLister;
     
     @Autowired
-    private SimpleScheduler scheduler;
+    SimpleScheduler scheduler;
     
     @Value("${updaters.similarcontent.enabled}") 
-    private Boolean tasksEnabled;
+    Boolean tasksEnabled;
     
     @PostConstruct
     public void scheduleTasks() {
@@ -43,11 +43,8 @@ public class SimilarContentModule {
         return new SimilarContentUpdater(contentLister, Publisher.PA, similarContentProvider());
     }
     
-    private SimilarContentProvider similarContentProvider() {
-        return new DefaultSimilarContentProvider(contentLister, Publisher.PA, similarityScorer(), 10);
+    SimilarContentProvider similarContentProvider() {
+        return new DefaultSimilarContentProvider(contentLister, Publisher.PA, 10, new GenreAndPeopleTraitHashCalculator());
     }
     
-    private SimilarityScorer similarityScorer() {
-        return new GenreAndPeopleSimilarityScorer();
-    }
 }
