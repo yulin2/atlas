@@ -9,7 +9,6 @@ import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentCategory;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.slf4j.Logger;
@@ -52,7 +51,7 @@ public class SimilarContentUpdater extends ScheduledTask {
             try {
                 List<ChildRef> similar = similarContentProvider.similarTo(c);
                 log.trace("Similar to [{} : {}] are the following:", c.getCanonicalUri(), c.getTitle());
-                similarContentWriter.write(c.getCanonicalUri(), similar);
+                similarContentWriter.write(c, similar);
                 for (ChildRef d : similar) {
                     log.trace("{}", d);
                 }
