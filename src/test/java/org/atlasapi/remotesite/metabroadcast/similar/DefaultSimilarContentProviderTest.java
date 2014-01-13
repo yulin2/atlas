@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.metabroadcast.similar;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -9,7 +9,10 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.testing.BrandTestDataBuilder;
@@ -19,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -89,8 +93,8 @@ public class DefaultSimilarContentProviderTest {
         }
         similarContentProvider.initialise();
         
-        List<Long> expected = ImmutableList.copyOf(Iterables.transform(expectedBrands, Content.TO_ID));
-        assertThat(similarContentProvider.similarTo(target), containsInAnyOrder(expected.toArray()));
+        Set<ChildRef> expected = ImmutableSet.copyOf(Iterables.transform(expectedBrands, TO_CHILD_REF));
+        assertThat(ImmutableSet.copyOf(similarContentProvider.similarTo(target)), is(expected));
         
     }
     
@@ -112,5 +116,14 @@ public class DefaultSimilarContentProviderTest {
                     .withId(id)
                     .build();
     }
+    
+    private static Function<Content, ChildRef> TO_CHILD_REF = new Function<Content, ChildRef>() {
+
+        @Override
+        public ChildRef apply(Content c) {
+            return c.childRef();
+        }
+        
+    };
     
 }

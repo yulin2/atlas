@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.metabroadcast.similar;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.testing.BrandTestDataBuilder;
@@ -17,7 +18,7 @@ import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -49,9 +50,9 @@ public class SimilarContentIntegrationTest {
         List<Content> testBrands = testBrands();
         when(contentLister.listContent(expectedCriteria)).thenReturn(testBrands.iterator());
         similarContentProvider.initialise();
-        List<Long> similar = similarContentProvider.similarTo(testBrands.get(0));
-        ImmutableList<Long> expectedIds = ImmutableList.copyOf(Iterables.transform(testBrands.subList(1, 11), Content.TO_ID));
-        assertThat(similar, containsInAnyOrder(expectedIds.toArray()));
+        List<ChildRef> similar = similarContentProvider.similarTo(testBrands.get(0));
+        Set<ChildRef> expectedIds = ImmutableSet.copyOf(Iterables.transform(testBrands.subList(1, 11), TO_CHILD_REF));
+        assertThat(ImmutableSet.copyOf(similar), is(expectedIds));
     }
     
     private List<Content> testBrands() {
@@ -70,4 +71,13 @@ public class SimilarContentIntegrationTest {
                     .withId(id)
                     .build();
     }
+    
+    private static Function<Content, ChildRef> TO_CHILD_REF = new Function<Content, ChildRef>() {
+
+        @Override
+        public ChildRef apply(Content c) {
+            return c.childRef();
+        }
+        
+    };
 }

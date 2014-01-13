@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Publisher;
@@ -30,7 +31,7 @@ public class DefaultSimilarContentProvider implements SimilarContentProvider {
     private final ContentLister contentLister;
     private final Publisher publisher;
     private final int similarItemLimit;
-    private Map<Long, Set<Integer>> similarHashes;
+    private Map<ChildRef, Set<Integer>> similarHashes;
     private final TraitHashCalculator traitHashCalculator;
     
     public DefaultSimilarContentProvider (ContentLister contentLister, Publisher publisher, 
@@ -48,17 +49,17 @@ public class DefaultSimilarContentProvider implements SimilarContentProvider {
                                                     .build();
         
         Iterator<Content> content = contentLister.listContent(criteria);
-        ImmutableMap.Builder<Long, Set<Integer>> similarHashes = ImmutableMap.builder();
+        ImmutableMap.Builder<ChildRef, Set<Integer>> similarHashes = ImmutableMap.builder();
         
         while (content.hasNext()) {
             Content c = content.next();
-            similarHashes.put(c.getId(), traitHashCalculator.traitHashesFor(c));
+            similarHashes.put(c.childRef(), traitHashCalculator.traitHashesFor(c));
         }
         this.similarHashes = similarHashes.build();
     }
 
     @Override
-    public List<Long> similarTo(Described described) {
+    public List<ChildRef> similarTo(Described described) {
         checkState(similarHashes != null, "Must call initialise() first");
         MinMaxPriorityQueue<ScoredContent> similarContent = MinMaxPriorityQueue
                 .maximumSize(similarItemLimit)
@@ -66,26 +67,25 @@ public class DefaultSimilarContentProvider implements SimilarContentProvider {
         
         Set<Integer> candidateHashes = traitHashCalculator.traitHashesFor(described);
         
-        for (Entry<Long, Set<Integer>> entry : similarHashes.entrySet()) {
-            if (entry.getKey() != described.getId()) {
+        for (Entry<ChildRef, Set<Integer>> entry : similarHashes.entrySet()) {
+            if (entry.getKey().getId() != described.getId()) {
                 int score = Sets.intersection(candidateHashes, entry.getValue()).size();
                 similarContent.add(new ScoredContent(entry.getKey(), score));
             }
         }
         
-        return ImmutableList.copyOf(
-                FluentIterable.from(similarContent)
-                              .transform(TO_CONTENT)
-       );
+        return FluentIterable.from(similarContent)
+                             .transform(TO_CHILDREF)
+                             .toList();
     }
 
     private static class ScoredContent implements Comparable<ScoredContent> {
         
-        private final long id;
+        private final ChildRef ref;
         private final int score;
         
-        public ScoredContent(long id, int score) {
-            this.id = id;
+        public ScoredContent(ChildRef ref, int score) {
+            this.ref = ref;
             this.score = score;
         }
 
@@ -93,16 +93,16 @@ public class DefaultSimilarContentProvider implements SimilarContentProvider {
         public int compareTo(ScoredContent o) {
             return ComparisonChain.start()
                     .compare(o.score, this.score)
-                    .compare(this.id, o.id)
+                    .compare(this.ref, o.ref)
                     .result();
         }
     }
     
-    private static final Function<ScoredContent, Long> TO_CONTENT = new Function<ScoredContent, Long>() {
+    private static final Function<ScoredContent, ChildRef> TO_CHILDREF = new Function<ScoredContent, ChildRef>() {
 
         @Override
-        public Long apply(ScoredContent sc) {
-            return sc.id;
+        public ChildRef apply(ScoredContent sc) {
+            return sc.ref;
         }
     };
     
