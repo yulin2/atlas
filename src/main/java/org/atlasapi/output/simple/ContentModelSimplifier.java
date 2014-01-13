@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.Certificate;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
@@ -17,6 +18,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.KeyPhrase;
 import org.atlasapi.media.entity.simple.Language;
@@ -127,6 +129,20 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
                 }
             }), Predicates.notNull()));
         }
+        
+        if (annotations.contains(Annotation.SIMILAR)) {
+            
+            simpleDescription.setSimilarContent(Iterables.transform(content.getSimilarContent(), new Function<ChildRef, ContentIdentifier>() {
+
+                @Override
+                public ContentIdentifier apply(ChildRef childRef) {
+                    return ContentIdentifier.identifierFor(childRef, idCodec);
+                }
+            }
+            ));
+        }
+          
+        
     }
     
     private List<CrewMemberAndPerson> resolve(List<CrewMember> crews, ApplicationConfiguration config) {

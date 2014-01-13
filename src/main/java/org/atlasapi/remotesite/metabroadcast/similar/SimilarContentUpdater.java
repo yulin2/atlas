@@ -5,16 +5,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Iterator;
 import java.util.List;
 
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentCategory;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Iterators;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
@@ -26,13 +26,16 @@ public class SimilarContentUpdater extends ScheduledTask {
     private final ContentLister contentLister;
     private final Publisher publisher;
     private final SimilarContentProvider similarContentProvider;
+    private final SimilarContentWriter similarContentWriter;
+    
 
     public SimilarContentUpdater(ContentLister contentLister, Publisher publisher, 
-            SimilarContentProvider similarContentProvider) {
+            SimilarContentProvider similarContentProvider, SimilarContentWriter similarContentWriter) {
         
         this.contentLister = checkNotNull(contentLister);
         this.publisher = checkNotNull(publisher);
         this.similarContentProvider = checkNotNull(similarContentProvider);
+        this.similarContentWriter = checkNotNull(similarContentWriter);
     }
     
     @Override
@@ -47,9 +50,10 @@ public class SimilarContentUpdater extends ScheduledTask {
         while (content.hasNext()) {
             Content c = content.next();
             try {
-                List<Long> similar = similarContentProvider.similarTo(c);
+                List<ChildRef> similar = similarContentProvider.similarTo(c);
                 log.trace("Similar to [{} : {}] are the following:", c.getCanonicalUri(), c.getTitle());
-                for (Long d : similar) {
+                similarContentWriter.write(c.getCanonicalUri(), similar);
+                for (ChildRef d : similar) {
                     log.trace("{}", d);
                 }
                 progress = progress.reduce(UpdateProgress.SUCCESS);

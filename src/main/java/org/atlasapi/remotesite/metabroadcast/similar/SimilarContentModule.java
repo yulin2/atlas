@@ -4,6 +4,8 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.MongoContentPersistenceModule;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +24,13 @@ public class SimilarContentModule {
 
     private static RepetitionRule SIMILAR_CONTENT_UPDATER_REPETITION = RepetitionRules.daily(LocalTime.parse("15:00"));
     
-    @Autowired 
-    private ContentLister contentLister;
-    
-    @Autowired
-    private SimpleScheduler scheduler;
+    @Autowired ContentLister contentLister;
+    @Autowired ContentWriter contentWriter;
+    @Autowired ContentResolver contentResolver;
+    @Autowired SimpleScheduler scheduler;
     
     @Value("${updaters.similarcontent.enabled}") 
-    private Boolean tasksEnabled;
+    Boolean tasksEnabled;
     
     @PostConstruct
     public void scheduleTasks() {
@@ -40,14 +41,18 @@ public class SimilarContentModule {
     
     @Bean
     public SimilarContentUpdater similarContentUpdater() {
-        return new SimilarContentUpdater(contentLister, Publisher.PA, similarContentProvider());
+        return new SimilarContentUpdater(contentLister, Publisher.PA, similarContentProvider(), 
+                similarContentWriter());
     }
     
-    private SimilarContentProvider similarContentProvider() {
-        return new DefaultSimilarContentProvider(contentLister, Publisher.PA, similarityScorer(), 10);
+    SimilarContentProvider similarContentProvider() {
+        return new DefaultSimilarContentProvider(contentLister, Publisher.PA, 10, 
+                new GenreAndPeopleTraitHashCalculator());
     }
     
-    private SimilarityScorer similarityScorer() {
-        return new GenreAndPeopleSimilarityScorer();
+    SeparateSourceSimilarContentWriter similarContentWriter() {
+        return new SeparateSourceSimilarContentWriter(Publisher.METABROADCAST_SIMILAR_CONTENT, contentResolver, 
+                contentWriter);
     }
+    
 }
