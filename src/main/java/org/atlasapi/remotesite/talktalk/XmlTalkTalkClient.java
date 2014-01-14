@@ -4,9 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.InputStreamReader;
 
-import javax.annotation.Nullable;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.Unmarshaller.Listener;
 
 import org.atlasapi.http.AbstractHttpResponseTransformer;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
@@ -14,8 +12,6 @@ import org.atlasapi.remotesite.talktalk.vod.bindings.ItemDetailType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.TVDataInterfaceResponse;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
 
-import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.net.HostSpecifier;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
@@ -29,8 +25,8 @@ public class XmlTalkTalkClient implements TalkTalkClient {
 
     private static final int DEFAULT_ITEMS_PER_PAGE = 500;
 
-    private final <T> AbstractHttpResponseTransformer<T> transformer(Unmarshaller.Listener listener, Function<? super TVDataInterfaceResponse, ? extends T> continuation) {
-        return new JaxbListeningTalkTalkResponseTransformer<T>(listener, continuation);
+    private final <T> AbstractHttpResponseTransformer<T> transformer(TvDataInterfaceResponseListener<T> listener) {
+        return new JaxbListeningTalkTalkResponseTransformer<T>(listener);
     }
     
     /*
@@ -41,18 +37,23 @@ public class XmlTalkTalkClient implements TalkTalkClient {
     private final class JaxbListeningTalkTalkResponseTransformer<T> extends
             AbstractHttpResponseTransformer<T> {
         
-        private final Listener listener;
-        private final Function<? super TVDataInterfaceResponse, ? extends T> continuation;
+        private final TvDataInterfaceResponseListener<T> listener;
         
-        private JaxbListeningTalkTalkResponseTransformer(Unmarshaller.Listener listener, Function<? super TVDataInterfaceResponse, ? extends T> continuation) {
+        private JaxbListeningTalkTalkResponseTransformer(TvDataInterfaceResponseListener<T> listener) {
             this.listener = checkNotNull(listener);
-            this.continuation = checkNotNull(continuation);
         }
         
         @Override
         protected T transform(InputStreamReader bodyReader) throws Exception {
-            return continuation.apply(parser.parse(bodyReader, listener));
+            parser.parse(bodyReader, listener);
+            return listener.getResult();
         }
+        
+    }
+    
+    private static abstract class TvDataInterfaceResponseListener<T> extends Unmarshaller.Listener {
+        
+        abstract T getResult(); 
         
     }
 
@@ -81,7 +82,7 @@ public class XmlTalkTalkClient implements TalkTalkClient {
         try {
             client.get(SimpleHttpRequest.httpRequestFrom(
                 url,
-                transformer(toUnmarshallListener(callback), Functions.<Void>constant(null))
+                transformer(toStructureUnmarshallListener(callback))
             ));
             return callback.getResult();
         } catch (Exception e) {
@@ -89,13 +90,20 @@ public class XmlTalkTalkClient implements TalkTalkClient {
         }
     }
     
-    private Unmarshaller.Listener toUnmarshallListener(final TalkTalkTvStructureCallback<?> callback) {
-        return new Unmarshaller.Listener() {
+    private TvDataInterfaceResponseListener<Void> toStructureUnmarshallListener(
+            final TalkTalkTvStructureCallback<?> callback) {
+        return new TvDataInterfaceResponseListener<Void>() {
+
             @Override
             public void afterUnmarshal(Object target, Object parent) {
                 if (target instanceof ChannelType) {
-                    callback.process((ChannelType)target);
+                    callback.process((ChannelType) target);
                 }
+            }
+
+            @Override
+            Void getResult() {
+                return null;
             }
         };
     }
@@ -113,21 +121,13 @@ public class XmlTalkTalkClient implements TalkTalkClient {
         return callback.getResult();
     }
 
-    private static final Function<TVDataInterfaceResponse, Integer> VOD_LIST_ENTITY_COUNT
-        = new Function<TVDataInterfaceResponse, Integer>() {
-            @Override
-            public Integer apply(@Nullable TVDataInterfaceResponse input) {
-                return input.getVodList().getTotalEntityCount();
-            }
-        };
-
     private Integer getVodPage(String url,
             TalkTalkVodListCallback<?> callback, int itemsPerPage, int page)
             throws TalkTalkException {
         String paginatedUrl = Urls.appendParameters(url, selection(page, itemsPerPage));
         try {
             return client.get(new SimpleHttpRequest<Integer>(
-                paginatedUrl, transformer(toUnmarshallListener(callback), VOD_LIST_ENTITY_COUNT)
+                paginatedUrl, transformer(toListUnmarshallListener(callback))
             ));
         } catch (Exception e) {
             throw new TalkTalkException(paginatedUrl, e);
@@ -146,13 +146,25 @@ public class XmlTalkTalkClient implements TalkTalkClient {
                 .add("itemsPerPage", String.valueOf(itemsPerPage));
     }
 
-    private Unmarshaller.Listener toUnmarshallListener(final TalkTalkVodListCallback<?> callback) {
-        return new Unmarshaller.Listener() {
+    private TvDataInterfaceResponseListener<Integer> toListUnmarshallListener(final TalkTalkVodListCallback<?> callback) {
+        return new TvDataInterfaceResponseListener<Integer>() {
+            
+            Integer result = null;
+            
             @Override
             public void afterUnmarshal(Object target, Object parent) {
                 if (target instanceof VODEntityType) {
                     callback.process((VODEntityType)target);
                 }
+                if (target instanceof TVDataInterfaceResponse) {
+                    TVDataInterfaceResponse resp = (TVDataInterfaceResponse) target;
+                    result = resp.getVodList().getTotalEntityCount();
+                }
+            }
+
+            @Override
+            Integer getResult() {
+                return result;
             }
         };
     }
@@ -165,20 +177,30 @@ public class XmlTalkTalkClient implements TalkTalkClient {
                 parameters(type, identifier).add("hdEnabled", "false"));
         try {
             return client.get(SimpleHttpRequest.httpRequestFrom(
-                url, transformer(NOOP_LISTENER, RESPONSE_ITEM_DETAIL)
+                url, transformer(ITEM_DETAIL_LISTENER)
             ));
         } catch (Exception e) {
             throw new TalkTalkException(url, e);
         }
     }
-    
-    private final static Unmarshaller.Listener NOOP_LISTENER = new Unmarshaller.Listener() {};
-    
-    private final static Function<TVDataInterfaceResponse, ItemDetailType> RESPONSE_ITEM_DETAIL
-        = new Function<TVDataInterfaceResponse, ItemDetailType>() {
-            @Override
-            public ItemDetailType apply(@Nullable TVDataInterfaceResponse input) {
-                return input.getItemDetail();
+
+    private final static TvDataInterfaceResponseListener<ItemDetailType> ITEM_DETAIL_LISTENER
+        = new TvDataInterfaceResponseListener<ItemDetailType>() {
+
+        private ItemDetailType result;
+
+        @Override
+            public void afterUnmarshal(Object target, Object parent) {
+                if (target instanceof TVDataInterfaceResponse) {
+                    TVDataInterfaceResponse resp = (TVDataInterfaceResponse) target;
+                    result = resp.getItemDetail();
+                }
             }
-        };
+        
+        @Override
+        ItemDetailType getResult() {
+            return result;
+        }
+    };
+
 }

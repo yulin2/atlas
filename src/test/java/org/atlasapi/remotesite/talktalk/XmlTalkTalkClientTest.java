@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,6 +15,7 @@ import java.net.URL;
 import java.util.Map;
 
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.Unmarshaller.Listener;
 
 import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkTvStructureCallback;
 import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkVodListCallback;
@@ -24,7 +26,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
@@ -35,6 +39,22 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 @RunWith(MockitoJUnitRunner.class)
 public class XmlTalkTalkClientTest {
     
+    private final class PassResponseToListener implements Answer<Void> {
+
+        private final TVDataInterfaceResponse response;
+
+        private PassResponseToListener(TVDataInterfaceResponse response) {
+            this.response = response;
+        }
+
+        @Override
+        public Void answer(InvocationOnMock invocation) throws Throwable {
+            Listener listener = (Unmarshaller.Listener)invocation.getArguments()[1];
+            listener.afterUnmarshal(response, null);
+            return null;
+        }
+    }
+
     private HostSpecifier host;
     private SimpleHttpClient client;
     private TalkTalkTvDataInterfaceResponseParser parser;
@@ -70,9 +90,6 @@ public class XmlTalkTalkClientTest {
     @Test
     public void testProcessTvStructure() throws HttpException, Exception {
 
-        final TVDataInterfaceResponse response = new TVDataInterfaceResponse();
-        when(parser.parse(any(Reader.class), any(Unmarshaller.Listener.class)))
-            .thenReturn(response);
         when(structureProcessor.getResult())
             .thenReturn(42);
         
@@ -92,8 +109,8 @@ public class XmlTalkTalkClientTest {
         vodList.setTotalEntityCount(4);
         response.setVodList(vodList);
 
-        when(parser.parse(any(Reader.class), any(Unmarshaller.Listener.class)))
-            .thenReturn(response);
+        doAnswer(new PassResponseToListener(response)).when(parser)
+            .parse(any(Reader.class), any(Unmarshaller.Listener.class));
         when(vodEntityProcessor.getResult())
             .thenReturn(42);
         
@@ -114,10 +131,10 @@ public class XmlTalkTalkClientTest {
         vodList.setTotalEntityCount(4);
         response.setVodList(vodList);
         
-        when(parser.parse(any(Reader.class), any(Unmarshaller.Listener.class)))
-            .thenReturn(response);
-        when(parser.parse(any(Reader.class), any(Unmarshaller.Listener.class)))
-            .thenReturn(response);
+        doAnswer(new PassResponseToListener(response)).when(parser)
+            .parse(any(Reader.class), any(Unmarshaller.Listener.class));
+        doAnswer(new PassResponseToListener(response)).when(parser)
+            .parse(any(Reader.class), any(Unmarshaller.Listener.class));
         when(vodEntityProcessor.getResult())
             .thenReturn(42);
         
@@ -135,13 +152,13 @@ public class XmlTalkTalkClientTest {
     @Test
     public void testGetItemDetail() throws HttpException, Exception {
         
-        TVDataInterfaceResponse response = new TVDataInterfaceResponse();
+        final TVDataInterfaceResponse response = new TVDataInterfaceResponse();
         ItemDetailType detail = new ItemDetailType();
         detail.setTitle("title");
         response.setItemDetail(detail);
         
-        when(parser.parse(any(Reader.class), any(Unmarshaller.Listener.class)))
-            .thenReturn(response);
+        doAnswer(new PassResponseToListener(response)).when(parser)
+            .parse(any(Reader.class), any(Unmarshaller.Listener.class));
         
         ItemDetailType fetchedDetail = ttClient.getItemDetail(GroupType.EPISODE, "397212");
         
