@@ -68,7 +68,7 @@ public class DefaultSimilarContentProvider implements SimilarContentProvider {
         Set<Integer> candidateHashes = traitHashCalculator.traitHashesFor(described);
         
         for (Entry<ChildRef, Set<Integer>> entry : similarHashes.entrySet()) {
-            if (entry.getKey().getId() != described.getId()) {
+            if (!entry.getKey().getId().equals(described.getId())) {
                 int score = Sets.intersection(candidateHashes, entry.getValue()).size();
                 similarContent.add(new ScoredContent(entry.getKey(), score));
             }
