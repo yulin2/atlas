@@ -78,7 +78,7 @@ public class XmlTalkTalkClient implements TalkTalkClient {
 
     @Override
     public <R> R processTvStructure(final TalkTalkTvStructureCallback<R> callback) throws TalkTalkException {
-        String url = String.format("http://%s/TVDataInterface/TVStructure/Structure/1", host.toString());
+        String url = String.format("http://%s/TVDataInterface/TVStructure/Structure/4", host.toString());
         try {
             client.get(SimpleHttpRequest.httpRequestFrom(
                 url,
