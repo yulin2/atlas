@@ -9,14 +9,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-<<<<<<< HEAD
 import org.atlasapi.media.entity.ChildRef;
-=======
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.application.v3.SourceStatus;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
->>>>>>> similar-available-content
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Item;
