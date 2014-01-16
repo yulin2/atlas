@@ -72,7 +72,7 @@ public class XmlTalkTalkClientTest {
         Map<String, URL> resourceMap = Maps.newHashMap();
         resourceMap.put("http://localhost.com/TVDataInterface/VOD/List/2?groupType=IMAGE&groupIdentifier=COMPAPP2&page=0&itemsPerPage=5",
                 Resources.getResource(getClass(), "vod-picks.xml"));
-        resourceMap.put("http://localhost.com/TVDataInterface/TVStructure/Structure/1",
+        resourceMap.put("http://localhost.com/TVDataInterface/TVStructure/Structure/4",
                 Resources.getResource(getClass(), "structure.xml"));
         resourceMap.put("http://localhost.com/TVDataInterface/VOD/List/2?groupType=BRAND&groupIdentifier=ABCCASTL&page=0&itemsPerPage=5",
                 Resources.getResource(getClass(), "vod-list.xml"));
