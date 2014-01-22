@@ -87,7 +87,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         contentWriter = new MongoContentWriter(db, lookupStore, clock);
         programmeProcessor = new PaProgrammeProcessor(contentWriter, resolver, log);
         EquivalentContentResolver equivContentResolver = context.mock(EquivalentContentResolver.class);
-        scheduleWriter = new MongoScheduleStore(db, resolver, channelResolver, equivContentResolver);
+        scheduleWriter = new MongoScheduleStore(db, channelResolver, equivContentResolver);
         contentBuffer = new ContentBuffer(resolver, contentWriter, new DummyItemsPeopleWriter());
     }
 
