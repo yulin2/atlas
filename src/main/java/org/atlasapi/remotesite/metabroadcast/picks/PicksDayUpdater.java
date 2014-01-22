@@ -5,6 +5,7 @@ import static com.google.common.collect.Iterables.*;
 import java.util.List;
 
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -66,7 +67,12 @@ public class PicksDayUpdater implements ChannelDayProcessor {
     
     private void addPicksToContentGroup(Iterable<Item> items) {
         ContentGroup contentGroup = resolveOrCreateContentGroup();
-        contentGroup.addContents(transform(items, Item.TO_CHILD_REF));
+        Iterable<ChildRef> childRefs = transform(items, Item.TO_CHILD_REF);
+        for (ChildRef childRef : childRefs) {
+            if (!contentGroup.getContents().contains(childRef)) {
+                contentGroup.addContent(childRef);
+            }
+        }
         contentGroupWriter.createOrUpdate(contentGroup);
     }
     
