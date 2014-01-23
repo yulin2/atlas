@@ -11,12 +11,13 @@ import java.util.Set;
 
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.application.v3.SourceStatus;
-import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Described;
+import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.SimilarContentRef;
 import org.atlasapi.persistence.content.ContentCategory;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
@@ -27,7 +28,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.MinMaxPriorityQueue;
 import com.google.common.collect.Sets;
@@ -35,11 +35,11 @@ import com.google.common.collect.Sets;
 
 public class DefaultSimilarContentProvider implements SimilarContentProvider {
 
-    private static final int AVAILABLE_UPCOMING_BOOST_FACTOR = 10;
+    private static final int AVAILABLE_UPCOMING_BOOST_FACTOR = 3;
     private final ContentLister contentLister;
     private final Publisher publisher;
     private final int similarItemLimit;
-    private Map<ChildRef, ContentSummary> similarHashes;
+    private Map<SimilarContentRef, Set<Integer>> similarHashes;
     private final TraitHashCalculator traitHashCalculator;
     private final AvailableItemsResolver availableItemsResolver;
     private final UpcomingItemsResolver upcomingItemsResolver;
@@ -72,35 +72,44 @@ public class DefaultSimilarContentProvider implements SimilarContentProvider {
                                                     .build();
         
         Iterator<Content> content = contentLister.listContent(criteria);
-        ImmutableMap.Builder<ChildRef, ContentSummary> similarHashes = ImmutableMap.builder();
+        ImmutableMap.Builder<SimilarContentRef, Set<Integer>> similarHashes = ImmutableMap.builder();
         
         while (content.hasNext()) {
             Content c = content.next();
-            similarHashes.put(c.childRef(), new ContentSummary(traitHashCalculator.traitHashesFor(c), 
-                    isUpcomingOrAvailable(c)));
+            similarHashes.put(similarContentRefFrom(c), traitHashCalculator.traitHashesFor(c));
         }
         this.similarHashes = similarHashes.build();
     }
 
-    private boolean isUpcomingOrAvailable(Content content) {
+    private SimilarContentRef similarContentRefFrom(Content content) {
+        Set<Publisher> availableFromPublishers;
+        Set<Publisher> upcomingPublishers;
+        
         if (content instanceof Container) {
             Container container = (Container) content;
-            return availableItemsResolver.availableItemsFor(container, appConfig).iterator().hasNext()
-                    || upcomingItemsResolver.upcomingItemsFor(container).iterator().hasNext();
+            availableFromPublishers = availableItemsResolver.availableItemsByPublisherFor(container, appConfig).keySet();
+            upcomingPublishers = upcomingItemsResolver.upcomingItemsByPublisherFor(container).keySet();
         } else if (content instanceof Item) {
             Item item = (Item) content;
-            return availableItemsResolver.isAvailable(item, appConfig)
-                    || upcomingItemsResolver.hasUpcomingBroadcasts(item, appConfig);
+            availableFromPublishers = availableItemsResolver.availableItemsByPublisherFor(item, appConfig).keySet();
+            upcomingPublishers = upcomingItemsResolver.upcomingItemsByPublisherFor(item, appConfig).keySet();
         } else {
             throw new IllegalArgumentException("Can't deal with Content of type " + 
                             content.getClass().getSimpleName());
         }
         
-        
+        return SimilarContentRef.builder()
+                    .withEntityType(EntityType.from(content))
+                    .withId(content.getId())
+                    .withUri(content.getCanonicalUri())
+                    .withScore(0)
+                    .withPublishersWithAvailableContent(availableFromPublishers)
+                    .withPublishersWithUpcomingContent(upcomingPublishers)
+                    .build();
     }
 
     @Override
-    public List<ChildRef> similarTo(Described described) {
+    public List<SimilarContentRef> similarTo(Described described) {
         checkState(similarHashes != null, "Must call initialise() first");
         MinMaxPriorityQueue<ScoredContent> similarContent = MinMaxPriorityQueue
                 .maximumSize(similarItemLimit)
@@ -108,27 +117,28 @@ public class DefaultSimilarContentProvider implements SimilarContentProvider {
         
         Set<Integer> candidateHashes = traitHashCalculator.traitHashesFor(described);
         
-        for (Entry<ChildRef, ContentSummary> entry : similarHashes.entrySet()) {
-            if (!entry.getKey().getId().equals(described.getId())) {
-                int score = Sets.intersection(candidateHashes, entry.getValue().traits).size();
-                if (entry.getValue().isUpcomingOrAvailable) {
-                    score *= AVAILABLE_UPCOMING_BOOST_FACTOR;
+        for (Entry<SimilarContentRef, Set<Integer>> entry : similarHashes.entrySet()) {
+            if (entry.getKey().getId() != described.getId()) {
+                int score = Sets.intersection(candidateHashes, entry.getValue()).size();
+                if (!entry.getKey().getPublishersWithAvailableContent().isEmpty()
+                        || !entry.getKey().getPublishersWithUpcomingContent().isEmpty()) {
+                    score += AVAILABLE_UPCOMING_BOOST_FACTOR;
                 }
                 similarContent.add(new ScoredContent(entry.getKey(), score));
             }
         }
         
         return FluentIterable.from(similarContent)
-                             .transform(TO_CHILDREF)
+                             .transform(TO_SIMILARREF)
                              .toList();
     }
 
     private static class ScoredContent implements Comparable<ScoredContent> {
         
-        private final ChildRef ref;
+        private final SimilarContentRef ref;
         private final int score;
         
-        public ScoredContent(ChildRef ref, int score) {
+        public ScoredContent(SimilarContentRef ref, int score) {
             this.ref = ref;
             this.score = score;
         }
@@ -137,27 +147,18 @@ public class DefaultSimilarContentProvider implements SimilarContentProvider {
         public int compareTo(ScoredContent o) {
             return ComparisonChain.start()
                     .compare(o.score, this.score)
-                    .compare(this.ref, o.ref)
+                    .compare(this.ref.getId(), o.ref.getId())
                     .result();
         }
     }
     
-    private static class ContentSummary {
-        
-        private final Set<Integer> traits;
-        private final boolean isUpcomingOrAvailable;
-        
-        public ContentSummary(Iterable<Integer> traits, boolean isUpcomingOrAvailable) {
-            this.traits = ImmutableSet.copyOf(traits);
-            this.isUpcomingOrAvailable = isUpcomingOrAvailable;
-        }
-    }
-    
-    private static final Function<ScoredContent, ChildRef> TO_CHILDREF = new Function<ScoredContent, ChildRef>() {
+    private static final Function<ScoredContent, SimilarContentRef> TO_SIMILARREF = new Function<ScoredContent, SimilarContentRef>() {
 
         @Override
-        public ChildRef apply(ScoredContent sc) {
-            return sc.ref;
+        public SimilarContentRef apply(ScoredContent sc) {
+            return SimilarContentRef.Builder.from(sc.ref)
+                        .withScore(sc.score)
+                        .build();
         }
     };
     
