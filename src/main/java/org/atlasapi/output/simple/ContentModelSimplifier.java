@@ -19,6 +19,7 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
+import org.atlasapi.media.entity.SimilarContentRef;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
@@ -33,6 +34,7 @@ import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.output.AvailableItemsResolver;
 import org.atlasapi.persistence.output.UpcomingItemsResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
+import org.joda.time.DateTime;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -136,11 +138,12 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         
         if (annotations.contains(Annotation.SIMILAR)) {
             
-            simpleDescription.setSimilarContent(Iterables.transform(content.getSimilarContent(), new Function<ChildRef, ContentIdentifier>() {
+            simpleDescription.setSimilarContent(Iterables.transform(content.getSimilarContent(), new Function<SimilarContentRef, ContentIdentifier>() {
 
                 @Override
-                public ContentIdentifier apply(ChildRef childRef) {
-                    return ContentIdentifier.identifierFor(childRef, idCodec);
+                public ContentIdentifier apply(SimilarContentRef s) {
+                    // TODO temporary creation of ChildRef - we'll be changing output when we filter based on API key shortly
+                    return ContentIdentifier.identifierFor(new ChildRef(s.getId(), s.getUri(), "0", new DateTime(), s.getEntityType()), idCodec);
                 }
             }
             ));

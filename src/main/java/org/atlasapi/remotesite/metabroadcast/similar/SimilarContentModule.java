@@ -23,7 +23,7 @@ import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
-@Import({ MongoContentPersistenceModule.class, MongoContentPersistenceModule.class })
+@Import({ MongoContentPersistenceModule.class })
 public class SimilarContentModule {
 
     private static RepetitionRule SIMILAR_CONTENT_UPDATER_REPETITION = RepetitionRules.daily(LocalTime.parse("15:00"));
