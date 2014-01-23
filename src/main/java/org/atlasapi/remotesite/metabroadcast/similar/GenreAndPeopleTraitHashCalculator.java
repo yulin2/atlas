@@ -17,7 +17,7 @@ import com.google.common.hash.Hashing;
 
 public class GenreAndPeopleTraitHashCalculator implements TraitHashCalculator {
 
-    private static final HashFunction hash = Hashing.goodFastHash(32);
+    static final HashFunction hash = Hashing.goodFastHash(32);
     
     @Override
     public Set<Integer> traitHashesFor(Described d) {
