@@ -1,9 +1,7 @@
 package org.atlasapi.remotesite.metabroadcast.similar;
 
-import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -16,7 +14,9 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.SimilarContentRef;
 import org.atlasapi.media.entity.testing.BrandTestDataBuilder;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -93,17 +94,17 @@ public class DefaultSimilarContentProviderTest {
         when(contentLister.listContent(expectedCriteria)).thenReturn(brands.iterator());
         
         //TODO make these mocks better
-        when(upcomingItemsResolver.upcomingItemsFor((Container) anyObject()))
-                .thenReturn(ImmutableSet.<ChildRef>of());
-        when(availableItemsResolver.availableItemsFor((Container) anyObject(), (ApplicationConfiguration) anyObject()))
-                .thenReturn(ImmutableSet.<ChildRef>of());
+        when(upcomingItemsResolver.upcomingItemsByPublisherFor((Container) anyObject()))
+                .thenReturn(ImmutableMultimap.<Publisher, ChildRef>of());
+        when(availableItemsResolver.availableItemsByPublisherFor((Container) anyObject(), (ApplicationConfiguration) anyObject()))
+                .thenReturn(ImmutableMultimap.<Publisher, ChildRef>of());
         
         for (Content c : brands) {
             when(traitHashCalculator.traitHashesFor(c)).thenReturn(hashesFor(c));
         }
         similarContentProvider.initialise();
         
-        Set<ChildRef> expected = ImmutableSet.copyOf(Iterables.transform(expectedBrands, TO_CHILD_REF));
+        Set<SimilarContentRef> expected = ImmutableSet.copyOf(Iterables.transform(expectedBrands, TO_SIMILAR_CONTENT_REF));
         assertThat(ImmutableSet.copyOf(similarContentProvider.similarTo(target)), is(expected));
         
     }
@@ -127,11 +128,16 @@ public class DefaultSimilarContentProviderTest {
                     .build();
     }
     
-    private static Function<Content, ChildRef> TO_CHILD_REF = new Function<Content, ChildRef>() {
+    private static Function<Content, SimilarContentRef> TO_SIMILAR_CONTENT_REF = new Function<Content, SimilarContentRef>() {
 
         @Override
-        public ChildRef apply(Content c) {
-            return c.childRef();
+        public SimilarContentRef apply(Content c) {
+            return SimilarContentRef.builder()
+                                    .withEntityType(EntityType.from(c))
+                                    .withId(c.getId())
+                                    .withUri(c.getCanonicalUri())
+                                    .withScore(3)
+                                    .build();
         }
         
     };
