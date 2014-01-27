@@ -50,7 +50,7 @@ public class ScheduleLivenessHealthProbe implements HealthProbe {
 			
 			for(Channel channel : channels) {
 				try {
-					Schedule schedule = scheduleResolver.schedule(startTime, endTime, ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<ApplicationConfiguration>absent());
+					Schedule schedule = scheduleResolver.unmergedSchedule(startTime, endTime, ImmutableSet.of(channel), ImmutableSet.of(publisher));
 					int itemCount = Iterables.getOnlyElement(schedule.scheduleChannels()).items().size();
 							
 					result.add(channel.getTitle(), String.format("%d items in schedule from %s to %s", itemCount, startTime.toString("dd/MM/yy HH:mm"), endTime.toString("dd/MM/yy HH:mm")), itemCount > 0);
