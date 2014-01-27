@@ -2,19 +2,16 @@ package org.atlasapi.remotesite.pa;
 
 import java.util.List;
 
-import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.remotesite.channel4.pmlsd.epg.ContentHierarchyAndBroadcast;
 import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.time.Timestamp;
@@ -45,7 +42,7 @@ public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
         DateTime transmissionTime = PaProgrammeProcessor.getTransmissionTime(progData.getDate(), progData.getTime(), zone);
         DateTime transmissionEndTime = transmissionTime.plus(duration);
         
-        Schedule schedule = scheduleResolver.schedule(transmissionTime, transmissionEndTime, ImmutableSet.of(channel), ImmutableSet.of(Publisher.PA), Optional.<ApplicationConfiguration>absent());
+        Schedule schedule = scheduleResolver.unmergedSchedule(transmissionTime, transmissionEndTime, ImmutableSet.of(channel), ImmutableSet.of(Publisher.PA));
         if (schedule.scheduleChannels().isEmpty()) {
             return true;
         }

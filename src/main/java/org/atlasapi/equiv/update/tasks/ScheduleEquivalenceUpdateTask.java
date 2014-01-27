@@ -6,7 +6,6 @@ import static com.metabroadcast.common.scheduling.UpdateProgress.SUCCESS;
 import java.util.Iterator;
 import java.util.List;
 
-import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Content;
@@ -19,7 +18,6 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
@@ -81,12 +79,11 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
                     return progress;
                 }
                 
-                Schedule schedule = scheduleResolver.schedule(
+                Schedule schedule = scheduleResolver.unmergedSchedule(
                         start.toDateTimeAtStartOfDay(),
                         end.toDateTimeAtStartOfDay(),
                         ImmutableList.of(channel),
-                        ImmutableList.of(publisher),
-                        Optional.<ApplicationConfiguration>absent());
+                        ImmutableList.of(publisher));
                 
                 Iterator<ScheduleChannel> channelItr = schedule.scheduleChannels().iterator();
                 if (!channelItr.hasNext()) {

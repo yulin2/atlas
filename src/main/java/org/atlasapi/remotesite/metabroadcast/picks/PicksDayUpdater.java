@@ -1,10 +1,11 @@
 package org.atlasapi.remotesite.metabroadcast.picks;
 
-import static com.google.common.collect.Iterables.*;
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.transform;
 
 import java.util.List;
 
-import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
@@ -21,7 +22,6 @@ import org.atlasapi.remotesite.bbc.nitro.ChannelDayProcessor;
 import org.joda.time.DateTimeZone;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.scheduling.UpdateProgress;
@@ -46,11 +46,11 @@ public class PicksDayUpdater implements ChannelDayProcessor {
     @Override
     public UpdateProgress process(ChannelDay channelDay) throws Exception {
         try {
-            Iterable<Item> picks = findPicks(scheduleResolver.schedule(
+            Iterable<Item> picks = findPicks(scheduleResolver.unmergedSchedule(
                     channelDay.getDay().toDateTimeAtStartOfDay(DateTimeZone.UTC), 
                     channelDay.getDay().plusDays(1).toDateTimeAtStartOfDay(DateTimeZone.UTC), 
                     ImmutableSet.of(channelDay.getChannel()), 
-                    ImmutableSet.of(Publisher.PA), Optional.<ApplicationConfiguration>absent()));
+                    ImmutableSet.of(Publisher.PA)));
             
             addPicksToContentGroup(picks);
             
