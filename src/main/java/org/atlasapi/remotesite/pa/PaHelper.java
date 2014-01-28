@@ -6,6 +6,7 @@ public class PaHelper {
     
     private static final String PA_BASE_URL = "http://pressassociation.com/";
     private static final String PA_BASE_ALIAS = "pa:";
+    private static final String RT_FILM_ALIAS = "rt:filmid";
     
     public static String getFilmUri(String id) {
         return PA_BASE_URL + "films/" + id;
@@ -13,6 +14,10 @@ public class PaHelper {
     
     public static Alias getFilmAlias(String id) {
         return new Alias(PA_BASE_ALIAS + "film", id);
+    }
+    
+    public static Alias getRtFilmAlias(String id) {
+        return new Alias(RT_FILM_ALIAS, id);
     }
     
     public static String getEpisodeUri(String id) {
