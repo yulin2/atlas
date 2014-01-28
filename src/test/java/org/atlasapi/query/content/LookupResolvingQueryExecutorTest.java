@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.application.v3.SourceStatus;
 
 @RunWith(JMock.class)
 public class LookupResolvingQueryExecutorTest extends TestCase {
@@ -65,7 +66,13 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
             never(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
         }});
         
-        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), MatchesNothing.asQuery());
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), 
+            MatchesNothing.asQuery().copyWithApplicationConfiguration(
+                ApplicationConfiguration.defaultConfiguration()
+                .withSource(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED)
+                .withSource(Publisher.YOUTUBE, SourceStatus.AVAILABLE_ENABLED)
+            )
+        );
         
         assertEquals(2, result.get(query).size());
         ImmutableSet<LookupRef> expectedEquivs = ImmutableSet.of(
@@ -104,7 +111,12 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
             never(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
         }});
         
-        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), MatchesNothing.asQuery());
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), 
+            MatchesNothing.asQuery().copyWithApplicationConfiguration(
+                    ApplicationConfiguration.defaultConfiguration()
+                        .withSource(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED)
+            )
+        );
         
         assertEquals(1, result.get(query).size());
         
@@ -124,7 +136,11 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
             will(returnValue(ResolvedContent.builder().put(queryItem.getCanonicalUri(), queryItem).build()));
         }});
         
-        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), MatchesNothing.asQuery());
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), 
+                MatchesNothing.asQuery().copyWithApplicationConfiguration(
+                ApplicationConfiguration.defaultConfiguration()
+                .withSource(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED)
+    ));
         
         assertEquals(1, result.get(query).size());
         
@@ -222,6 +238,7 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
         }});
         
         ApplicationConfiguration configWithoutPaEnabled = ApplicationConfiguration.defaultConfiguration()
+                .withSource(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED)
                 .copyWithPrecedence(ImmutableList.of(Publisher.BBC));
         Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), 
                 MatchesNothing.asQuery().copyWithApplicationConfiguration(configWithoutPaEnabled));
