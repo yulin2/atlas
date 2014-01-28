@@ -10,7 +10,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.query.ApiKeyNotFoundException;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidIpForApiKeyException;
+import org.atlasapi.application.query.RevokedApiKeyException;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ModelTransformer;
@@ -72,7 +75,12 @@ public class ContentWriteController {
 
     private Void deserializeAndUpdateContent(HttpServletRequest req, HttpServletResponse resp,
             boolean merge) {
-        Maybe<ApplicationConfiguration> possibleConfig = appConfigFetcher.configurationFor(req);
+        Maybe<ApplicationConfiguration> possibleConfig;
+        try {
+            possibleConfig = appConfigFetcher.configurationFor(req);
+        } catch (ApiKeyNotFoundException | RevokedApiKeyException | InvalidIpForApiKeyException ex) {
+            return error(resp, HttpStatusCode.FORBIDDEN.code());
+        }
         
         if (possibleConfig.isNothing()) {
             return error(resp, HttpStatus.UNAUTHORIZED.value());

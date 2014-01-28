@@ -5,7 +5,10 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.query.ApiKeyNotFoundException;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidIpForApiKeyException;
+import org.atlasapi.application.query.RevokedApiKeyException;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.product.Product;
@@ -65,7 +68,13 @@ public class ProductController extends BaseController<Iterable<Product>> {
     @RequestMapping(value={"3.0/products/{id}.*","/products/{id}.*"})
     public void topic(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
         
-        ContentQuery query = builder.build(req);
+        ContentQuery query;
+        try {
+            query = builder.build(req);
+        } catch (ApiKeyNotFoundException | RevokedApiKeyException | InvalidIpForApiKeyException e) {
+            outputter.writeError(req, resp, AtlasErrorSummary.forException(e));
+            return;
+        }
         
         Optional<Product> productForId = productResolver.productForId(idCodec.decode(id).longValue());
         
@@ -86,7 +95,13 @@ public class ProductController extends BaseController<Iterable<Product>> {
     
     @RequestMapping(value={"3.0/products/{id}/content.*", "/products/{id}/content"})
     public void topicContents(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
-        ContentQuery query = builder.build(req);
+        ContentQuery query;
+        try {
+            query = builder.build(req);
+        } catch (ApiKeyNotFoundException | RevokedApiKeyException | InvalidIpForApiKeyException e) {
+            outputter.writeError(req, resp, AtlasErrorSummary.forException(e));
+            return;
+        }
 
         long decodedId = idCodec.decode(id).longValue();
         Optional<Product> productForId = productResolver.productForId(decodedId);

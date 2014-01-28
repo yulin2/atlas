@@ -11,7 +11,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
+import org.atlasapi.application.query.ApiKeyNotFoundException;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidIpForApiKeyException;
+import org.atlasapi.application.query.RevokedApiKeyException;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.input.ModelReader;
 import org.atlasapi.input.ModelTransformer;
@@ -57,7 +60,7 @@ public class PeopleControllerTest {
     private ApplicationConfiguration appConfig;
     
     @Before
-    public void setup() {
+    public void setup() throws ApiKeyNotFoundException, RevokedApiKeyException, InvalidIpForApiKeyException {
         request = new StubHttpServletRequest();
         response = new StubHttpServletResponse();
         appConfig = ApplicationConfiguration.defaultConfiguration();
