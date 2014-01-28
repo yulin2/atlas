@@ -19,7 +19,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.query.ApiKeyNotFoundException;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidIpForApiKeyException;
+import org.atlasapi.application.query.RevokedApiKeyException;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -73,7 +76,7 @@ public class ScheduleControllerTest {
     private Channel channel;
     
     @Before
-    public void setup() {
+    public void setup() throws ApiKeyNotFoundException, RevokedApiKeyException, InvalidIpForApiKeyException {
         from = new DateTime(DateTimeZones.UTC);
         to = new DateTime(DateTimeZones.UTC);
         request = new StubHttpServletRequest();

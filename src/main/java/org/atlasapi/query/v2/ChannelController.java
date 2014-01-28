@@ -8,7 +8,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.query.ApiKeyNotFoundException;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidIpForApiKeyException;
+import org.atlasapi.application.query.RevokedApiKeyException;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelQuery;
@@ -149,6 +152,8 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
             }
         } catch (IllegalArgumentException e) {
             response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
+        } catch (ApiKeyNotFoundException | RevokedApiKeyException | InvalidIpForApiKeyException e) {
+            response.sendError(HttpStatusCode.FORBIDDEN.code(), e.getMessage());
         }
     }
     

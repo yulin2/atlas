@@ -8,7 +8,10 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.query.ApiKeyNotFoundException;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidIpForApiKeyException;
+import org.atlasapi.application.query.RevokedApiKeyException;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
@@ -24,6 +27,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.query.Selection;
+
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
@@ -49,8 +53,13 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
 
     @RequestMapping(value = {"3.0/content_groups.*", "content_groups.*"})
     public void contentGroup(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        ContentQuery query = builder.build(req);
-        modelAndViewFor(req, resp, query.getSelection().apply(Iterables.filter(contentGroupResolver.findAll(), publisherFilter(query))), query.getConfiguration());
+        ContentQuery query;
+        try {
+            query = builder.build(req);
+            modelAndViewFor(req, resp, query.getSelection().apply(Iterables.filter(contentGroupResolver.findAll(), publisherFilter(query))), query.getConfiguration());
+        } catch (ApiKeyNotFoundException | RevokedApiKeyException | InvalidIpForApiKeyException e) {
+            errorViewFor(req, resp, AtlasErrorSummary.forException(e));
+        }
     }
 
     @RequestMapping(value = {"3.0/content_groups/{id}.*", "content_groups/{id}.*"})
@@ -63,7 +72,13 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
             return;
         }
         
-        ContentQuery query = builder.build(req);
+        ContentQuery query;
+        try {
+            query = builder.build(req);
+        } catch (ApiKeyNotFoundException | RevokedApiKeyException | InvalidIpForApiKeyException e) {
+            errorViewFor(req, resp, AtlasErrorSummary.forException(e));
+            return;
+        }
         ResolvedContent resolvedContent = contentGroupResolver.findByIds(ImmutableList.of(contentGroupId));
         if (resolvedContent.isEmpty()) {
             outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " not found"));
@@ -88,7 +103,13 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
             return;
         }
         
-        ContentQuery query = builder.build(req);
+        ContentQuery query;
+        try {
+            query = builder.build(req);
+        } catch (ApiKeyNotFoundException | RevokedApiKeyException | InvalidIpForApiKeyException e) {
+            errorViewFor(req, resp, AtlasErrorSummary.forException(e));
+            return;
+        }
         ResolvedContent resolvedContent = contentGroupResolver.findByIds(ImmutableList.of(contentGroupId));
         if (resolvedContent.isEmpty()) {
             outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + id + " not found"));
