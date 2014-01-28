@@ -41,11 +41,15 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
     
     private static final Range<Integer> COUNT_RANGE = Range.closed(1, 10);
     
-    private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final ScheduleResolver scheduleResolver;
-	private ChannelResolver channelResolver;
+    private final ChannelResolver channelResolver;
+
+    private final ApplicationConfiguration defaultConfig
+        = ApplicationConfiguration.forNoApiKey();
 	
+	private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
+
     
     public ScheduleController(ScheduleResolver scheduleResolver, ChannelResolver channelResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ScheduleChannel>> outputter) {
         super(configFetcher, log, outputter);
@@ -91,7 +95,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
             if (apiKeySupplied && requestedConfig.isNothing()) {
                     throw new IllegalArgumentException("Unknown API key: " + apiKey);
             }
-            ApplicationConfiguration appConfig = requestedConfig.valueOrDefault(ApplicationConfiguration.defaultConfiguration());
+            ApplicationConfiguration appConfig = requestedConfig.valueOrDefault(defaultConfig);
             
             boolean publishersSupplied = !Strings.isNullOrEmpty(publisher);
 

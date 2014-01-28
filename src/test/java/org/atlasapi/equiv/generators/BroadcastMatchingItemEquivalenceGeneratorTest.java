@@ -74,7 +74,7 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
         final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(BBC_ONE.getUri(), utcTime(100000), utcTime(200000)));
         
         context.checking(new Expectations(){{
-            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC), Optional.<ApplicationConfiguration>absent());
+            one(resolver).unmergedSchedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC));
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});
         
@@ -99,7 +99,7 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
         final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(BBC_ONE_CAMBRIDGE.getUri(), utcTime(100000), utcTime(200000)));
         
         context.checking(new Expectations(){{
-            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE_CAMBRIDGE), ImmutableSet.of(BBC), Optional.<ApplicationConfiguration>absent());
+            one(resolver).unmergedSchedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE_CAMBRIDGE), ImmutableSet.of(BBC));
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE_CAMBRIDGE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});
         

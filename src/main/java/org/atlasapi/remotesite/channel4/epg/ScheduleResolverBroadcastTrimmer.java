@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import java.util.Map;
 
-import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Identified;
@@ -14,11 +13,9 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.Interval;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -42,7 +39,7 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
     public void trimBroadcasts(Interval scheduleInterval, Channel channel, Map<String, String> acceptableIds) {
         try {
             //Get items currently broadcast in the interval
-            Schedule schedule = scheduleResolver.schedule(scheduleInterval.getStart(), scheduleInterval.getEnd(), ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<ApplicationConfiguration>absent());
+            Schedule schedule = scheduleResolver.unmergedSchedule(scheduleInterval.getStart(), scheduleInterval.getEnd(), ImmutableSet.of(channel), ImmutableSet.of(publisher));
 
             //For each item, check that it's broadcasts are in correct in the acceptable set, set actively published false if not.
             for (Item itemEmbeddedInSchedule : Iterables.getOnlyElement(schedule.scheduleChannels()).items()) {

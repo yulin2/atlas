@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.health.ProbeResult;
+
 import org.joda.time.base.BaseSingleFieldPeriod;
 
 public class ScheduleLivenessHealthProbeTest extends TestCase {
@@ -115,8 +116,8 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		}
 
 		@Override
-		public Schedule schedule(DateTime from, DateTime to,
-				Iterable<Channel> channels, Iterable<Publisher> publisher, Optional<ApplicationConfiguration> mergeConfig) {
+		public Schedule unmergedSchedule(DateTime from, DateTime to,
+				Iterable<Channel> channels, Iterable<Publisher> publisher) {
 			
 			this.requestedStartTime = from;
 			this.requestedEndTime = to;
@@ -133,6 +134,12 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 				
 			})), schedule.interval());
 			
+		}
+		
+		@Override
+		public Schedule schedule(DateTime from, DateTime to, Iterable<Channel> channels,
+		        Iterable<Publisher> publisher, Optional<ApplicationConfiguration> mergeConfig) {
+		    return null;
 		}
 		
 		@Override

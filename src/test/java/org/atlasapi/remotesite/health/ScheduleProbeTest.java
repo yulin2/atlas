@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.health;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
@@ -26,7 +24,6 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.junit.Test;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -53,7 +50,7 @@ public class ScheduleProbeTest extends TestCase {
         ScheduleProbe probe = new ScheduleProbe(Publisher.C4, CHANNEL4, scheduleResolver, clock);
         
         context.checking(new Expectations(){{
-            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<ApplicationConfiguration>absent()));
+            one(scheduleResolver).unmergedSchedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
                     will(returnValue(schedule(CHANNEL4, ImmutableList.<Item>of(), dayIntervalAround(clock.now()))));
         }});
         
@@ -75,7 +72,7 @@ public class ScheduleProbeTest extends TestCase {
         final Item item2 = broadcastItem(22, 10);
         
         context.checking(new Expectations(){{
-            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<ApplicationConfiguration>absent()));
+            one(scheduleResolver).unmergedSchedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
             will(returnValue(schedule(CHANNEL4, ImmutableList.<Item>of(item1, item2), dayIntervalAround(clock.now()))));
         }});
         
@@ -95,7 +92,7 @@ public class ScheduleProbeTest extends TestCase {
         final Item item2 = broadcastItem(300022, 10); //starts 5mins and 2 millis after
         
         context.checking(new Expectations(){{
-            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<ApplicationConfiguration>absent()));
+            one(scheduleResolver).unmergedSchedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
             will(returnValue(schedule(CHANNEL4, ImmutableList.<Item>of(item1, item2), dayIntervalAround(clock.now()))));
         }});
         
@@ -119,7 +116,7 @@ public class ScheduleProbeTest extends TestCase {
         final Item item2 = broadcastItem(18, 10); //previous ends at 20
         
         context.checking(new Expectations(){{
-            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<ApplicationConfiguration>absent()));
+            one(scheduleResolver).unmergedSchedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
             will(returnValue(schedule(CHANNEL4, ImmutableList.<Item>of(item1, item2), dayIntervalAround(clock.now()))));
         }});
         
@@ -143,7 +140,7 @@ public class ScheduleProbeTest extends TestCase {
         final Item item2 = broadcastItem(22, 10, 10);
         
         context.checking(new Expectations(){{
-            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(Optional.<ApplicationConfiguration>absent()));
+            one(scheduleResolver).unmergedSchedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
             will(returnValue(schedule(CHANNEL4, ImmutableList.<Item>of(item1, item2), dayIntervalAround(clock.now()))));
         }});
         
