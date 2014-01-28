@@ -88,14 +88,14 @@ public class BroadcastItemTitleScorer implements EquivalenceScorer<Item> {
     }
 
     private Score score(Item subject, Optional<Container> subjectContainer, Item candidate, ResultDescription desc) {
-        String subjectItemTitle = subject.getTitle();
-        String candidateItemTitle = candidate.getTitle();
         
-        if (hasTitle(subject) && equalTitles(subject, candidate)) {
+        if (subjectAndCandidateMatch(subject, candidate)) {
             desc.appendText("%s scores %s through subject",  uriAndTitle(candidate), Score.ONE); 
             return Score.ONE;
         }
-        if (subjectContainer.isPresent() && equalTitles(subjectContainer, candidateItemTitle)) {
+        
+        if (subjectContainer.isPresent()
+                && subjectContainerAndCandidateMatch(subjectContainer.get(), candidate)) {
             desc.appendText("%s scores %s through subject container %s",
                     uriAndTitle(candidate), Score.ONE, uriAndTitle(subjectContainer.get())); 
             return Score.ONE;
@@ -103,7 +103,8 @@ public class BroadcastItemTitleScorer implements EquivalenceScorer<Item> {
         
         Optional<Container> candidateContainer = getContainerIfHasTitle(candidate);
         
-        if (candidateContainer.isPresent() && equalTitles(candidateContainer, subjectItemTitle)) {
+        if (candidateContainer.isPresent()
+                && subjectAndCandidateContainerMatch(subject, candidateContainer.get())) {
             desc.appendText("%s scores %s through candidate container %s",
                     uriAndTitle(candidate), Score.ONE, uriAndTitle(candidateContainer.get())); 
             return Score.ONE;
@@ -113,17 +114,25 @@ public class BroadcastItemTitleScorer implements EquivalenceScorer<Item> {
                 candidate.getCanonicalUri(), misMatchScore); 
         return misMatchScore;
     }
-
-    private boolean equalTitles(Content c1, Content c2) {
-        return c1.getTitle().equals(c2.getTitle());
-    }
-
-    private boolean equalTitles(Optional<Container> subjectContainer, String candidateItemTitle) {
-        return subjectContainer.get().getTitle().equals(candidateItemTitle);
-    }
-
+    
     private String uriAndTitle(Content c) {
         return String.format("'%s' (%s)", c.getTitle(), c.getCanonicalUri());
+    }
+
+    private boolean subjectAndCandidateContainerMatch(Item subject, Container candidateContainer) {
+        return equalTitles(subject, candidateContainer);
+    }
+
+    private boolean subjectContainerAndCandidateMatch(Container subjectContainer, Item candidate) {
+        return equalTitles(candidate, subjectContainer);
+    }
+
+    private boolean subjectAndCandidateMatch(Item subject, Item candidate) {
+        return equalTitles(subject, candidate);
+    }
+
+    private boolean equalTitles(Content c1, Content c2) {
+        return hasTitle(c1) && c1.getTitle().equals(c2.getTitle());
     }
 
     private boolean hasTitle(Content c) {
