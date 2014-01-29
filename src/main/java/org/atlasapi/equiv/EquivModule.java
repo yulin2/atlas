@@ -81,6 +81,7 @@ import org.atlasapi.equiv.scorers.SeriesSequenceItemScorer;
 import org.atlasapi.equiv.scorers.SongCrewMemberExtractor;
 import org.atlasapi.equiv.scorers.TitleMatchingContainerScorer;
 import org.atlasapi.equiv.scorers.TitleMatchingItemScorer;
+import org.atlasapi.equiv.scorers.TitleSubsetBroadcastItemScorer;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.equiv.update.EquivalenceUpdaters;
@@ -158,7 +159,7 @@ public class EquivModule {
         ), additional));
     }
     
-    private EquivalenceUpdater<Item> standardItemUpdater(Set<Publisher> acceptablePublishers, Set<? extends EquivalenceScorer<Item>> scorers) {
+    private ContentEquivalenceUpdater.Builder<Item> standardItemUpdater(Set<Publisher> acceptablePublishers, Set<? extends EquivalenceScorer<Item>> scorers) {
         return ContentEquivalenceUpdater.<Item> builder()
             .withGenerators(ImmutableSet.<EquivalenceGenerator<Item>> of(
                 new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, 
@@ -176,8 +177,7 @@ public class EquivModule {
                 new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
                 new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore),
                 new MessageQueueingResultHandler<Item>(equivAssertDestination(), acceptablePublishers)
-            )))
-            .build();
+            )));
     }
     
     private EquivalenceUpdater<Container> topLevelContainerUpdater(Set<Publisher> publishers) {
@@ -214,7 +214,7 @@ public class EquivModule {
         );
         
         EquivalenceUpdater<Item> standardItemUpdater = standardItemUpdater(acceptablePublishers, 
-                ImmutableSet.of(new TitleMatchingItemScorer(), new SequenceItemScorer()));
+                ImmutableSet.of(new TitleMatchingItemScorer(), new SequenceItemScorer())).build();
         EquivalenceUpdater<Container> topLevelContainerUpdater = topLevelContainerUpdater(acceptablePublishers);
 
         Set<Publisher> nonStandardPublishers = Sets.union(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, YOUVIEW, TALK_TALK, PA), musicPublishers);
@@ -230,7 +230,7 @@ public class EquivModule {
         Set<Publisher> paPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(YOUVIEW));
         
         updaters.register(PA, SourceSpecificEquivalenceUpdater.builder(PA)
-                .withItemUpdater(standardItemUpdater(paPublishers, ImmutableSet.<EquivalenceScorer<Item>>of()))
+                .withItemUpdater(standardItemUpdater(paPublishers, ImmutableSet.<EquivalenceScorer<Item>>of()).build())
                 .withTopLevelContainerUpdater(topLevelContainerUpdater(paPublishers))
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
@@ -414,8 +414,8 @@ public class EquivModule {
         return standardItemUpdater(sources, ImmutableSet.of(
             new TitleMatchingItemScorer(), 
             new SequenceItemScorer(), 
-            new BroadcastItemTitleScorer(contentResolver, titleMismatch)
-        ));
+            new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/)
+        )).build();
     }
 
     private EquivalenceUpdater<Item> rtItemEquivalenceUpdater() {
