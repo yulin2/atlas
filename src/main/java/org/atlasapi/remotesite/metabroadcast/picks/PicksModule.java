@@ -62,6 +62,7 @@ public class PicksModule {
     public DayRangeChannelDaySupplier picksDayRangeChannelDaySupplier() {
         return new DayRangeChannelDaySupplier(picksChannelsSupplier(), picksDayRangeSupplier());
     }
+    
     @Bean
     public PicksChannelsSupplier picksChannelsSupplier() {
         return new PicksChannelsSupplier(channelGroupResolver, channelResolver, 
@@ -81,6 +82,11 @@ public class PicksModule {
     @Bean
     public PicksLastProcessedStore picksLastProcessedStore() {
         return new MongoPicksLastProcessedStore(mongo);
+    }
+    
+    @Bean
+    public PicksChannelDayUpdateController picksChannelDayUpdateController() {
+        return new PicksChannelDayUpdateController(channelResolver, picksDayUpdater());
     }
     
     @PostConstruct
