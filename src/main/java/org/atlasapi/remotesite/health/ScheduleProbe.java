@@ -5,7 +5,6 @@ import static com.metabroadcast.common.health.ProbeResult.ProbeResultType.INFO;
 
 import java.util.List;
 
-import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
@@ -16,7 +15,6 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.health.HealthProbe;
@@ -51,7 +49,7 @@ public class ScheduleProbe implements HealthProbe {
         
         DateTime date = clock.now().withTime(0, 0, 0, 0);
 
-        Schedule schedule = scheduleResolver.schedule(date.minusMillis(1), date.plusDays(1), ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<ApplicationConfiguration>absent());
+        Schedule schedule = scheduleResolver.unmergedSchedule(date.minusMillis(1), date.plusDays(1), ImmutableSet.of(channel), ImmutableSet.of(publisher));
         List<Item> items = Iterables.getOnlyElement(schedule.scheduleChannels()).items();
         result.addEntry(scheduleSize(items.size()));
 

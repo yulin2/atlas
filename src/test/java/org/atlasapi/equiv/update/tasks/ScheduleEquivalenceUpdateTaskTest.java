@@ -46,6 +46,12 @@ public class ScheduleEquivalenceUpdateTaskTest {
                     Iterable<Publisher> publisher, Optional<ApplicationConfiguration> mergeConfig) {
                 return schedule;
             }
+            
+            @Override
+            public Schedule unmergedSchedule(DateTime from, DateTime to,
+                    Iterable<Channel> channels, Iterable<Publisher> publisher) {
+                return schedule;
+            }
         };
     };
     

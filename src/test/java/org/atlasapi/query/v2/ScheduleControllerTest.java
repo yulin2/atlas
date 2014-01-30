@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.application.v3.SourceStatus;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Item;
@@ -251,6 +252,7 @@ public class ScheduleControllerTest {
         
         HttpServletRequest req = request.withParam("apiKey", "key");
         ApplicationConfiguration appConfig = ApplicationConfiguration.defaultConfiguration()
+                .withSource(Publisher.BBC, SourceStatus.AVAILABLE_ENABLED)
                 .copyWithPrecedence(ImmutableList.<Publisher>of());
         
         HttpServletRequest matchRequest = req;

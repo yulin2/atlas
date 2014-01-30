@@ -12,10 +12,8 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Topic;
@@ -81,8 +79,6 @@ import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
-import org.atlasapi.query.content.schedule.ScheduleOverlapResolver;
 import org.atlasapi.query.topic.PublisherFilteringTopicContentLister;
 import org.atlasapi.query.topic.PublisherFilteringTopicResolver;
 import org.atlasapi.query.v2.ChannelController;
@@ -229,21 +225,8 @@ public class QueryWebModule {
     }
 
     @Bean
-    ScheduleOverlapListener scheduleOverlapListener() {
-        return new ScheduleOverlapListener() {
-
-            @Override
-            public void itemRemovedFromSchedule(Item item, Broadcast broadcast) {
-            }
-        };
-//        BroadcastRemovingScheduleOverlapListener broadcastRemovingListener = new BroadcastRemovingScheduleOverlapListener(contentResolver, contentWriter);
-//        return new ThreadedScheduleOverlapListener(broadcastRemovingListener, log);
-    }
-
-    @Bean
     ScheduleController schedulerController() {
-        ScheduleOverlapResolver resolver = new ScheduleOverlapResolver(scheduleResolver, scheduleOverlapListener(), log);
-        return new ScheduleController(resolver, channelResolver, configFetcher, log, scheduleChannelModelOutputter());
+        return new ScheduleController(scheduleResolver, channelResolver, configFetcher, log, scheduleChannelModelOutputter());
     }
 
     @Bean
