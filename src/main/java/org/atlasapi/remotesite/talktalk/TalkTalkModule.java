@@ -59,7 +59,7 @@ public class TalkTalkModule {
     public ScheduledTask talkTalkVodPicksUpdater() {
         return new TalkTalkVodContentListUpdateTask(talkTalkClient(),
                 contentGroupResolver, contentGroupWriter, contentResolver,
-                GroupType.IMAGE, "COMPAPP2");
+                GroupType.IMAGE, "TTIMAGE2");
     }
 
     @Bean

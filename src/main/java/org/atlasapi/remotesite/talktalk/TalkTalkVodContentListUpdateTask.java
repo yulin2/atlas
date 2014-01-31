@@ -78,15 +78,20 @@ public class TalkTalkVodContentListUpdateTask extends ScheduledTask {
                 @Override
                 public void process(VODEntityType entity) {
                     log.debug("processing entity {}", entity.getId());
-                    String uri = uriCompiler.uriFor(entity);
-                    Content content = resolve(uri);
-                    if (content != null) {
-                        refs.add(content.childRef());
-                        progress.set(progress.get().reduce(UpdateProgress.SUCCESS));
-                    } else {
+                    try {
+                        String uri = uriCompiler.uriFor(entity);
+                        Content content = resolve(uri);
+                        if (content != null) {
+                            refs.add(content.childRef());
+                            progress.set(progress.get().reduce(UpdateProgress.SUCCESS));
+                        } else {
+                            progress.set(progress.get().reduce(UpdateProgress.FAILURE));
+                        }
+                        reportStatus(progress.toString());
+                    } catch (Exception e) {
+                        log.warn(String.format("%s %s", entity.getItemType(), entity.getId()), e);
                         progress.set(progress.get().reduce(UpdateProgress.FAILURE));
                     }
-                    reportStatus(progress.toString());
                 }
             });
             

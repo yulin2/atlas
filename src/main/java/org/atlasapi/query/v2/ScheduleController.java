@@ -98,6 +98,10 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
             ApplicationConfiguration appConfig = requestedConfig.valueOrDefault(defaultConfig);
             
             boolean publishersSupplied = !Strings.isNullOrEmpty(publisher);
+            
+            if (!(publishersSupplied || apiKeySupplied)) {
+                throw new IllegalArgumentException("You must supply a publisher or API key");
+            }
 
             Set<Publisher> publishers = getPublishers(publisher, appConfig);
             
