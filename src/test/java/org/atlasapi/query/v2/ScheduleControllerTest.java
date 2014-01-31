@@ -93,8 +93,13 @@ public class ScheduleControllerTest {
         String NO_PUBLISHERS = null;
         controller.schedule(from.toString(), to.toString(), NO_COUNT, NO_ON, NO_CHANNEL_KEY, "cid", NO_PUBLISHERS, request, response);
         
-        verify(outputter).writeError(argThat(is(request)), argThat(is(response)), any(AtlasErrorSummary.class));
         verify(outputter, never()).writeTo(argThat(is(request)), argThat(is(response)), anyChannelSchedules(), anySetOfPublishers(), any(ApplicationConfiguration.class));
+
+        ArgumentCaptor<AtlasErrorSummary> summaryCaptor = ArgumentCaptor.forClass(AtlasErrorSummary.class);
+        verify(outputter).writeError(argThat(is(request)), argThat(is(response)), summaryCaptor.capture());
+        AtlasErrorSummary summary = summaryCaptor.getValue();
+        assertThat(summary.message(), is("You must supply a publisher or API key"));
+        
     }
 
     @Test
@@ -294,6 +299,23 @@ public class ScheduleControllerTest {
     public void testErrorsWhenCountIsAboveMax() throws Exception {
         
         controller.schedule(from.toString(), NO_TO, "11", NO_ON, NO_CHANNEL_KEY, "cbbh", "bbc.co.uk", request, response);
+        
+        verify(outputter, never()).writeTo(argThat(is(request)), argThat(is(response)), anyChannelSchedules(), anySetOfPublishers(), any(ApplicationConfiguration.class));
+        verifyExceptionThrownAndWrittenToUser(IllegalArgumentException.class);
+        
+    }
+    
+    @Test
+    public void testErrorsWhenConfigHasPrecedenceDisabledAndThereAreNoPublishers() throws Exception {
+        
+        HttpServletRequest req = request.withParam("apiKey", "key");
+        ApplicationConfiguration appConfig = ApplicationConfiguration.defaultConfiguration();
+        
+        when(configFetcher.configurationFor(req))
+            .thenReturn(Maybe.just(appConfig));
+        
+        String NO_PUBLISHERS = null;
+        controller.schedule(from.toString(), NO_TO, "1", NO_ON, NO_CHANNEL_KEY, "cbbh", NO_PUBLISHERS, req, response);
         
         verify(outputter, never()).writeTo(argThat(is(request)), argThat(is(response)), anyChannelSchedules(), anySetOfPublishers(), any(ApplicationConfiguration.class));
         verifyExceptionThrownAndWrittenToUser(IllegalArgumentException.class);
