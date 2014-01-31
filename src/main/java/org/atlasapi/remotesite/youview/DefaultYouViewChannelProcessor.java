@@ -9,7 +9,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
-import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,7 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
     }
     
     @Override
-    public UpdateProgress process(Channel channel, Elements elements, DateTime startTime) {
+    public UpdateProgress process(Channel channel, Elements elements, Interval schedulePeriod) {
         
         List<ItemRefAndBroadcast> broadcasts = Lists.newArrayList();
         Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
@@ -55,16 +54,18 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
             }
         }
         if (trimmer != null) {
-            trimmer.trimBroadcasts(new Interval(startTime, startTime.plusDays(1)), channel, acceptableBroadcastIds.build());
+            trimmer.trimBroadcasts(schedulePeriod, channel, acceptableBroadcastIds.build());
         }
         if (broadcasts.isEmpty()) {
-            log.info(String.format("No broadcasts for channel %s (%s) on %s", channel.getTitle(), getYouViewId(channel), startTime.toString()));
+            log.info(String.format("No broadcasts for channel %s (%s) on %s", channel.getTitle(), 
+                    getYouViewId(channel), schedulePeriod.getStart().toString()));
         } else {
             try {
                 scheduleWriter.replaceScheduleBlock(Publisher.YOUVIEW, channel, broadcasts);
             } catch (IllegalArgumentException e) {
                 log.error(String.format("Failed to update schedule for channel %s (%s) on %s: %s", 
-                        channel.getTitle(), getYouViewId(channel), startTime.toString(), e.getMessage()), e);
+                        channel.getTitle(), getYouViewId(channel), 
+                        schedulePeriod.getStart().toString(), e.getMessage()), e);
             }
         }
         

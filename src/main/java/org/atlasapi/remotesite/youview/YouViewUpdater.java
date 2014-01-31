@@ -10,9 +10,9 @@ import nu.xom.Element;
 import nu.xom.Elements;
 
 import org.atlasapi.media.channel.Channel;
-import org.joda.time.DateMidnight;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,43 +26,46 @@ public class YouViewUpdater extends ScheduledTask {
     private static final String ATOM_PREFIX = "atom";
     private static final String ENTRY_KEY = "entry";
     private final YouViewScheduleFetcher fetcher;
-    private final Duration plus;
-    private final Duration minus;
+    private final int plusDays;
+    private final int minusDays;
     private final Logger log = LoggerFactory.getLogger(YouViewUpdater.class);
     private final YouViewChannelResolver channelResolver;
     private final YouViewChannelProcessor processor;
     
-    public YouViewUpdater(YouViewChannelResolver channelResolver, YouViewScheduleFetcher fetcher, YouViewChannelProcessor processor, Duration minus, Duration plus) {
+    public YouViewUpdater(YouViewChannelResolver channelResolver, YouViewScheduleFetcher fetcher, YouViewChannelProcessor processor, int minusDays, int plusDays) {
         this.channelResolver = channelResolver;
         this.fetcher = fetcher;
         this.processor = processor;
-        this.minus = minus;
-        this.plus = plus;
+        this.minusDays = minusDays;
+        this.plusDays = plusDays;
     }
     
     // TODO report status effectively
     @Override
     protected void runTask() {
         try {
-            DateTime midnightToday = new DateTime(DateMidnight.now());
-            DateTime startTime = midnightToday.minus(minus);
-            DateTime endTime = midnightToday.plus(plus);
+            LocalDate today = LocalDate.now(DateTimeZone.UTC);
+            LocalDate start = today.minusDays(minusDays);
+            LocalDate finish = today.plusDays(plusDays);
             
             List<Channel> youViewChannels = channelResolver.getAllChannels();
             
             UpdateProgress progress = UpdateProgress.START;
             
-            while (startTime.isBefore(endTime)) {
+            while (!start.isAfter(finish)) {
+                LocalDate end = start.plusDays(1);
                 for (Channel channel : youViewChannels) {
-                    
-                    Document xml = fetcher.getSchedule(startTime, startTime.plusDays(1), getYouViewId(channel));
+                    Interval interval = new Interval(start.toDateTimeAtStartOfDay(), 
+                            end.toDateTimeAtStartOfDay());
+                    Document xml = fetcher.getSchedule(interval.getStart(), interval.getEnd(), 
+                            getYouViewId(channel));
                     Element root = xml.getRootElement();
                     Elements entries = root.getChildElements(ENTRY_KEY, root.getNamespaceURI(ATOM_PREFIX));
 
-                    progress = progress.reduce(processor.process(channel, entries, startTime));
+                    progress = progress.reduce(processor.process(channel, entries, interval));
                     reportStatus(progress.toString());
                 }
-                startTime = startTime.plusDays(1);
+                start = end;
             }
         } catch (Exception e) {
             log.error("Exception when processing YouView schedule", e);
@@ -80,4 +83,5 @@ public class YouViewUpdater extends ScheduledTask {
         }
         throw new RuntimeException("Channel " + channel.getCanonicalUri() + " does not have a YouView alias");
     }
+    
 }
