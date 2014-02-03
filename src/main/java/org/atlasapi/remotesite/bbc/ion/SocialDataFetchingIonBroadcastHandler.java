@@ -9,7 +9,6 @@ import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.util.ItemAndBroadcast;
@@ -58,8 +57,8 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
             
             Content content = extendedDataAdapter.fetch(pidUri);
            
-            if (!content.getRelatedLinks().isEmpty() || !content.getKeyPhrases().isEmpty() || !content.getTopicRefs().isEmpty()) {
-                upadteContent(pidUri, content.getRelatedLinks(), content.getKeyPhrases(), content.getTopicRefs());
+            if (!content.getRelatedLinks().isEmpty() || !content.getTopicRefs().isEmpty()) {
+                upadteContent(pidUri, content.getRelatedLinks(), content.getTopicRefs());
             }
         } catch (Exception e) {
             log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Exception fetching social data for " + pidUri));
@@ -67,12 +66,11 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
         }
     }
 
-    private void upadteContent(String pidUri, Set<RelatedLink> links, Set<KeyPhrase> phrases, List<TopicRef> topics) {
+    private void upadteContent(String pidUri, Set<RelatedLink> links, List<TopicRef> topics) {
         Maybe<Identified> possibleContent = resolver.findByCanonicalUris(ImmutableList.of(pidUri)).get(pidUri);
         if (possibleContent.hasValue()) {
             Content content = (Content) possibleContent.requireValue();
             content.setRelatedLinks(links);
-            content.setKeyPhrases(phrases);
             content.setTopicRefs(topics);
             if (content instanceof Container) {
                 writer.createOrUpdate((Container) content);
