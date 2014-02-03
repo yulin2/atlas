@@ -69,7 +69,7 @@ public abstract class BaseController<T> {
 
     protected ApplicationConfiguration appConfig(HttpServletRequest request) {
         Maybe<ApplicationConfiguration> config = possibleAppConfig(request);
-        return config.hasValue() ? config.requireValue() : ApplicationConfiguration.defaultConfiguration();
+        return config.hasValue() ? config.requireValue() : ApplicationConfiguration.forNoApiKey();
     }
 
     protected Maybe<ApplicationConfiguration> possibleAppConfig(HttpServletRequest request) {

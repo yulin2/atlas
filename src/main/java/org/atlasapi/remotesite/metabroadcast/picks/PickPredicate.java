@@ -60,8 +60,9 @@ public class PickPredicate implements Predicate<Item> {
     public boolean apply(Item item) {
         Broadcast broadcast = Iterables.getOnlyElement(item.flattenBroadcasts());
         return channelUris.contains(broadcast.getBroadcastOn()) 
-                && isPrimetime(item, broadcast)
-                && isNewEpisode(item, broadcast); 
+                && isPrimetime(item, broadcast);
+                // remove this check for now, since the flags aren't set reliably
+                //&& isNewEpisode(item, broadcast); 
     }
 
     private boolean isNewEpisode(Item item, Broadcast broadcast) {

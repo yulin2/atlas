@@ -61,7 +61,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
                 totalBroadcasts++;
                 if (broadcast.isActivelyPublished() 
                         && (!onIgnoredChannel(broadcast) || broadcastCount == 1) 
-                        && isWithinWeek(broadcast)) {
+                        && isWithinAboutAWeek(broadcast)) {
                     processedBroadcasts++;
                     findMatchesForBroadcast(scores, broadcast, validPublishers);
                 }
@@ -87,8 +87,8 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
         }
     }
 
-    private boolean isWithinWeek(Broadcast broadcast) {
-        return broadcast.getTransmissionTime().isBefore(new DateTime(DateTimeZones.UTC).plusWeeks(1));
+    private boolean isWithinAboutAWeek(Broadcast broadcast) {
+        return broadcast.getTransmissionTime().isBefore(new DateTime(DateTimeZones.UTC).plusDays(8));
     }
 
     private boolean onIgnoredChannel(Broadcast broadcast) {
