@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.Topic;
@@ -45,7 +44,7 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
     FixedResponseHttpClient httpClient = FixedResponseHttpClient.respondTo("http://www.bbc.co.uk/programmes/b015d4pt.json", Resources.getResource("bbc-topics-b015d4pt.json"));
     
     private final BbcSlashProgrammesJsonTopicsAdapter topicsAdapter = new BbcSlashProgrammesJsonTopicsAdapter(new BbcModule().jsonClient(httpClient), topicStore, new NullAdapterLog());
-    private final BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(nullAdapter((List<RelatedLink>)ImmutableList.<RelatedLink>of()), nullAdapter((List<KeyPhrase>)ImmutableList.<KeyPhrase>of()), topicsAdapter);
+    private final BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(nullAdapter((List<RelatedLink>)ImmutableList.<RelatedLink>of()), topicsAdapter);
 
     @Test
     public void testClientGetsEpisode() throws Exception {
