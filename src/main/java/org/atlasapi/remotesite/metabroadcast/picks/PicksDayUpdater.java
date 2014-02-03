@@ -66,7 +66,10 @@ public class PicksDayUpdater implements ChannelDayProcessor {
                     ImmutableSet.of(Publisher.PA)).scheduleChannels(), TO_ITEMS));
             
             // We need to resolve the content to get all broadcasts
-            final Map<String, Maybe<Identified>> resolved = contentResolver.findByCanonicalUris(Iterables.transform(picks, Identified.TO_URI)).asMap();
+            final Map<String, Maybe<Identified>> resolved = 
+                    contentResolver.findByCanonicalUris(
+                            ImmutableSet.copyOf(Iterables.transform(picks, Identified.TO_URI))
+                    ).asMap();
             
             Iterable<ItemAndBroadcast> itemsAndBroadcasts = Iterables.transform(picks, new Function<Item, ItemAndBroadcast>() {
 
