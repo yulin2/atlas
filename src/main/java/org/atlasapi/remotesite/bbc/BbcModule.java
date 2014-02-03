@@ -160,9 +160,8 @@ public class BbcModule {
         RemoteSiteClient<SlashProgrammesContainer> jsonClient = jsonClient(httpClient);
         
         BbcRelatedLinksAdapter linksAdapter = new BbcRelatedLinksAdapter(jsonClient);
-        BbcHashTagAdapter hashTagAdapter = new BbcHashTagAdapter(httpRemoteSiteClient(httpClient, htmlNavigatorTransformer()));
         BbcSlashProgrammesJsonTopicsAdapter topicsAdapter = new BbcSlashProgrammesJsonTopicsAdapter(jsonClient, topicStore, log);
-        BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(linksAdapter, hashTagAdapter, topicsAdapter);
+        BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(linksAdapter, topicsAdapter);
         return extendedDataAdapter;
     }
 
