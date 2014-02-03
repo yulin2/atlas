@@ -29,6 +29,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.simple.ContentIdentifier.FilmIdentifier;
 import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -64,7 +65,7 @@ import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.text.MoreStrings;
 import com.metabroadcast.common.time.Timestamp;
 
-public class PaProgrammeProcessor implements PaProgDataProcessor {
+public class work implements PaProgDataProcessor {
     
     static final String PA_PICTURE_TYPE_EPISODE = "episode";
     static final String PA_PICTURE_TYPE_BRAND   = "series";  // Counter-intuitively PA use 'series' where we use 'brand'
@@ -387,6 +388,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             film = getBasicFilm(progData);
         }
         film.addAlias(PaHelper.getFilmAlias(identifierFor(progData)));
+        Optional<String> rtFilmIdentifier = rtFilmIdentifierFor(progData);
+        if (rtFilmIdentifier.isPresent()) {
+            film.addAlias(PaHelper.getRtFilmAlias(rtFilmIdentifier.get()));
+        }
+        
         film.setAliasUrls(ImmutableSet.of(PaHelper.getAlias(progData.getProgId())));
         
         Broadcast broadcast = setCommonDetails(progData, channel, zone, film, updatedAt);
@@ -698,6 +704,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     protected static String identifierFor(ProgData progData) {
         return ! Strings.isNullOrEmpty(progData.getRtFilmnumber()) ? progData.getRtFilmnumber() : progData.getProgId();
+    }
+    
+    protected Optional<String> rtFilmIdentifierFor(ProgData progData) {
+        return Optional.fromNullable(Strings.emptyToNull(progData.getRtFilmnumber()));
     }
     
     private static Boolean getBooleanValue(String value) {
