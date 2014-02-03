@@ -25,6 +25,8 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.remotesite.bbc.nitro.ChannelDay;
 import org.atlasapi.remotesite.bbc.nitro.ChannelDayProcessor;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
@@ -36,6 +38,8 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class PicksDayUpdater implements ChannelDayProcessor {
 
+    private static final Logger log = LoggerFactory.getLogger(PicksDayUpdater.class);
+    
     private static final String CONTENT_GROUP = "http://picks.metabroadcast.com/schedule-picks";
     private final ScheduleResolver scheduleResolver;
     private final ContentGroupResolver contentGroupResolver;
@@ -78,6 +82,9 @@ public class PicksDayUpdater implements ChannelDayProcessor {
             
             return UpdateProgress.SUCCESS;
         } catch (Exception e) {
+            log.error("Processing " + channelDay.getChannel().getCanonicalUri() 
+                    + " [" + channelDay.getChannel().getTitle() + "] Day " 
+                    + channelDay.getDay().toString(), e);
             return UpdateProgress.FAILURE;
         }
     }
