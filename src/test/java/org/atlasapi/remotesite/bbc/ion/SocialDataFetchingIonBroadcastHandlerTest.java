@@ -47,14 +47,12 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
     @SuppressWarnings("unchecked")
     private final SiteSpecificAdapter<List<RelatedLink>> linkAdapter = context.mock(SiteSpecificAdapter.class, "link adapter");
     @SuppressWarnings("unchecked")
-    private final SiteSpecificAdapter<List<KeyPhrase>> tagAdapter = context.mock(SiteSpecificAdapter.class, "tag adapter");
-    @SuppressWarnings("unchecked")
     private final SiteSpecificAdapter<List<TopicRef>> topicsAdapter = context.mock(SiteSpecificAdapter.class, "topic adapter");
     
     private final ContentResolver resolver = context.mock(ContentResolver.class);
     private final ContentWriter writer = context.mock(ContentWriter.class);
     
-    private final BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(linkAdapter, tagAdapter, topicsAdapter);
+    private final BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(linkAdapter, topicsAdapter);
     
     private final SocialDataFetchingIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(extendedDataAdapter, resolver, writer, log);
 
@@ -83,7 +81,6 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
         final String uri = BbcFeeds.slashProgrammesUriForPid(pid);
         context.checking(new Expectations(){{
             one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.of(RelatedLink.unknownTypeLink("link url").build())));
-            one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.of(new KeyPhrase("phrase", Publisher.BBC))));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             one(resolver).findByCanonicalUris(with(hasItem(uri))); will(returnValue(builder().build()));
             never(writer).createOrUpdate(with(any(Item.class)));
@@ -137,7 +134,6 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
         final String uri = content.getCanonicalUri();
         context.checking(new Expectations(){{
             one(linkAdapter).fetch(uri);will(returnValue(links));
-            one(tagAdapter).fetch(uri);will(returnValue(tags));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             one(resolver).findByCanonicalUris(with(hasItem(uri))); will(returnValue(builder().put(uri, content).build()));
         }});
@@ -153,7 +149,6 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
         
         context.checking(new Expectations(){{
             one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
-            one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             never(resolver).findByCanonicalUris(with(any(Iterable.class)));
             never(writer).createOrUpdate(with(any(Item.class)));
