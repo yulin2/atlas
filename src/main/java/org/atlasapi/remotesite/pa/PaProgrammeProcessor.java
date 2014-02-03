@@ -65,7 +65,7 @@ import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.text.MoreStrings;
 import com.metabroadcast.common.time.Timestamp;
 
-public class work implements PaProgDataProcessor {
+public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     static final String PA_PICTURE_TYPE_EPISODE = "episode";
     static final String PA_PICTURE_TYPE_BRAND   = "series";  // Counter-intuitively PA use 'series' where we use 'brand'
