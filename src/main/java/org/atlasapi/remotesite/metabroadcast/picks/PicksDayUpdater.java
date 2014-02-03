@@ -5,6 +5,9 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 
 import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
 
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
@@ -13,8 +16,10 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.remotesite.bbc.nitro.ChannelDay;
@@ -23,6 +28,8 @@ import org.joda.time.DateTimeZone;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
@@ -32,27 +39,42 @@ public class PicksDayUpdater implements ChannelDayProcessor {
     private static final String CONTENT_GROUP = "http://picks.metabroadcast.com/schedule-picks";
     private final ScheduleResolver scheduleResolver;
     private final ContentGroupResolver contentGroupResolver;
+    private final ContentResolver contentResolver;
     private final ContentGroupWriter contentGroupWriter;
     private final PicksChannelsSupplier picksChannelsSupplier;
     
     public PicksDayUpdater(ScheduleResolver scheduleResolver, ContentGroupResolver contentGroupResolver,
-            ContentGroupWriter contentGroupWriter, PicksChannelsSupplier picksChannelsSupplier) {
+            ContentResolver contentResolver, ContentGroupWriter contentGroupWriter, PicksChannelsSupplier picksChannelsSupplier) {
         this.scheduleResolver = scheduleResolver;
         this.contentGroupResolver = contentGroupResolver;
         this.contentGroupWriter = contentGroupWriter;
+        this.contentResolver = contentResolver;
         this.picksChannelsSupplier = picksChannelsSupplier;
     }
     
     @Override
     public UpdateProgress process(ChannelDay channelDay) throws Exception {
         try {
-            Iterable<Item> picks = findPicks(scheduleResolver.unmergedSchedule(
+            Iterable<Item> picks = concat(transform(scheduleResolver.unmergedSchedule(
                     channelDay.getDay().toDateTimeAtStartOfDay(DateTimeZone.UTC), 
                     channelDay.getDay().plusDays(1).toDateTimeAtStartOfDay(DateTimeZone.UTC), 
                     ImmutableSet.of(channelDay.getChannel()), 
-                    ImmutableSet.of(Publisher.PA)));
+                    ImmutableSet.of(Publisher.PA)).scheduleChannels(), TO_ITEMS));
             
-            addPicksToContentGroup(picks);
+            // We need to resolve the content to get all broadcasts
+            final Map<String, Maybe<Identified>> resolved = contentResolver.findByCanonicalUris(Iterables.transform(picks, Identified.TO_URI)).asMap();
+            
+            Iterable<ItemAndBroadcast> itemsAndBroadcasts = Iterables.transform(picks, new Function<Item, ItemAndBroadcast>() {
+
+                @Override
+                public ItemAndBroadcast apply(Item item) {
+                    return new ItemAndBroadcast((Item) resolved.get(item.getCanonicalUri()).requireValue(), 
+                            Maybe.just(Iterables.getOnlyElement(Item.FLATTEN_BROADCASTS.apply(item))));
+                }
+                
+            });
+            
+            addPicksToContentGroup(findPicks(itemsAndBroadcasts));
             
             return UpdateProgress.SUCCESS;
         } catch (Exception e) {
@@ -60,9 +82,9 @@ public class PicksDayUpdater implements ChannelDayProcessor {
         }
     }
 
-    private Iterable<Item> findPicks(Schedule schedule) {
-        return filter(concat(transform(schedule.scheduleChannels(), TO_ITEMS)), 
-                new PickPredicate(picksChannelsSupplier.get()));
+    private Iterable<Item> findPicks(Iterable<ItemAndBroadcast> itemsAndBroadcasts) {
+        return transform(filter(itemsAndBroadcasts, 
+                new PickPredicate(picksChannelsSupplier.get())), TO_ITEM);
     }
     
     private void addPicksToContentGroup(Iterable<Item> items) {
@@ -93,5 +115,14 @@ public class PicksDayUpdater implements ChannelDayProcessor {
         public List<Item> apply(ScheduleChannel scheduleChannel) {
             return scheduleChannel.items();
         }
+    };
+    
+    private static final Function<ItemAndBroadcast, Item> TO_ITEM = new Function<ItemAndBroadcast, Item>() {
+
+        @Override
+        public Item apply(ItemAndBroadcast itemAndBroadcast) {
+            return itemAndBroadcast.getItem();
+        }
+        
     };
 }
