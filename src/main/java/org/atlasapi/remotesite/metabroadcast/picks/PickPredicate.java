@@ -3,22 +3,26 @@ package org.atlasapi.remotesite.metabroadcast.picks;
 import java.util.Map;
 import java.util.Set;
 
+
 import org.atlasapi.genres.AtlasGenre;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalTime;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Ordering;
 import com.metabroadcast.common.time.LocalTimeRange;
 
 
-public class PickPredicate implements Predicate<Item> {
+public class PickPredicate implements Predicate<ItemAndBroadcast> {
 
     private static final Set<String> PRIORITY_CHANNELS = ImmutableSet.of(
                 "http://www.bbc.co.uk/services/bbcone/london",
@@ -57,8 +61,19 @@ public class PickPredicate implements Predicate<Item> {
     }
     
     @Override
-    public boolean apply(Item item) {
-        Broadcast broadcast = Iterables.getOnlyElement(item.flattenBroadcasts());
+    public boolean apply(ItemAndBroadcast itemAndBroadcast) {
+        
+        Broadcast scheduleBroadcast = itemAndBroadcast.getBroadcast().requireValue();
+        return isInterestingBroadcast(itemAndBroadcast.getItem(), scheduleBroadcast) 
+                || isInterestingBroadcast(itemAndBroadcast.getItem(), 
+                                            firstBroadcast(itemAndBroadcast.getItem()));
+    }
+    
+    private Broadcast firstBroadcast(Item item) {
+        return TRANSMISSION_TIME_ORDERING.min(Item.FLATTEN_BROADCASTS.apply(item));
+    }
+    
+    private boolean isInterestingBroadcast(Item item, Broadcast broadcast) {
         return channelUris.contains(broadcast.getBroadcastOn()) 
                 && isPrimetime(item, broadcast);
                 // remove this check for now, since the flags aren't set reliably
@@ -104,4 +119,16 @@ public class PickPredicate implements Predicate<Item> {
     private Optional<LocalTimeRange> primetimeForChannel(String channelUri) {
         return Optional.fromNullable(CHANNEL_PRIMETIME_OVERRIDES.get(channelUri));
     }
+    
+    private static Ordering<Broadcast> TRANSMISSION_TIME_ORDERING = new Ordering<Broadcast>() {
+
+        @Override
+        public int compare(Broadcast b1, Broadcast b2) {            
+            return ComparisonChain.start()
+                                  .compare(b1.getTransmissionTime(), b2.getTransmissionEndTime(), Ordering.natural().nullsLast())
+                                  .result();
+                                  
+        }
+        
+    };
 }
