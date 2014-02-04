@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.rovi.series;
+package org.atlasapi.remotesite.rovi.program;
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.LINE_SPLITTER;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getPartAtPosition;
@@ -9,7 +9,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
 
-public class RoviTheatricalReleaseDatesLineParser implements RoviLineParser<RoviTheatricalReleaseDatesLine>{
+public class RoviReleaseDatesLineParser implements RoviLineParser<RoviReleaseDatesLine>{
 
     private static final int PROGRAM_ID_POS = 0;
     private static final int RELEASE_DATE_POS = 1;
@@ -17,10 +17,10 @@ public class RoviTheatricalReleaseDatesLineParser implements RoviLineParser<Rovi
     private static final int RELEASE_TYPE_POS = 3;
     
     @Override
-    public RoviTheatricalReleaseDatesLine parseLine(String line) {
+    public RoviReleaseDatesLine parseLine(String line) {
         Iterable<String> parts = LINE_SPLITTER.split(line);
         
-        RoviTheatricalReleaseDatesLine.Builder builder = RoviTheatricalReleaseDatesLine.builder();
+        RoviReleaseDatesLine.Builder builder = RoviReleaseDatesLine.builder();
         
         builder.withProgramId(getPartAtPosition(parts, PROGRAM_ID_POS));
         builder.withReleaseCountry(getPartAtPosition(parts, RELEASE_COUNTRY_POS));
