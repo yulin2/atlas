@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.rovi.series;
+package org.atlasapi.remotesite.rovi.program;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -7,14 +7,14 @@ import org.joda.time.DateTime;
 
 import com.google.common.base.Optional;
 
-public class RoviTheatricalReleaseDatesLine implements KeyedLine<String> {
+public class RoviReleaseDatesLine implements KeyedLine<String> {
 
     private final String programId;
     private final DateTime releaseDate;
     private final String releaseCountry;
     private final Optional<String> releaseType;
 
-    private RoviTheatricalReleaseDatesLine(String programId, DateTime releaseDate,
+    private RoviReleaseDatesLine(String programId, DateTime releaseDate,
             String releaseCountry, String releaseType) {
         this.programId = checkNotNull(programId);
         this.releaseDate = checkNotNull(releaseDate);
@@ -74,8 +74,8 @@ public class RoviTheatricalReleaseDatesLine implements KeyedLine<String> {
             return this;
         }
         
-        public RoviTheatricalReleaseDatesLine build() {
-            return new RoviTheatricalReleaseDatesLine(
+        public RoviReleaseDatesLine build() {
+            return new RoviReleaseDatesLine(
                     programId,
                     releaseDate,
                     releaseCountry,
