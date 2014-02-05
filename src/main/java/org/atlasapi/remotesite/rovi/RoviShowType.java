@@ -3,9 +3,21 @@ package org.atlasapi.remotesite.rovi;
 
 public enum RoviShowType {
 
-    MO, // Movie
-    SE, // Series Episode
-    SM, // Series Master
-    OT; // Other Programming
+    /*
+     * Movie
+     */
+    MO,
+    /*
+     * Series Episode
+     */
+    SE, 
+    /*
+     * Series Master
+     */
+    SM, 
+    /*
+     * Other Program
+     */
+    OT;
     
 }

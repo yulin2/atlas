@@ -15,7 +15,7 @@ public class RoviSeasonHistoryLine implements KeyedLine<String>{
     private final Optional<String> seasonName;
     private final String seasonHistoryId;
     
-    public RoviSeasonHistoryLine(String seriesId, String seasonProgramId, Integer seasonNumber, String seasonName, String seasonHistoryId) {
+    private RoviSeasonHistoryLine(String seriesId, String seasonProgramId, Integer seasonNumber, String seasonName, String seasonHistoryId) {
         this.seriesId = checkNotNull(seriesId);
         this.seasonProgramId = checkNotNull(seasonProgramId);
         this.seasonNumber = Optional.fromNullable(seasonNumber);

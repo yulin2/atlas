@@ -2,11 +2,9 @@ package org.atlasapi.remotesite.rovi.program;
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.LINE_SPLITTER;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getPartAtPosition;
+import static org.atlasapi.remotesite.rovi.RoviUtils.parseDate;
 
-import org.apache.commons.lang.StringUtils;
 import org.atlasapi.remotesite.rovi.RoviLineParser;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 
 
 public class RoviReleaseDatesLineParser implements RoviLineParser<RoviReleaseDatesLine>{
@@ -26,12 +24,9 @@ public class RoviReleaseDatesLineParser implements RoviLineParser<RoviReleaseDat
         builder.withReleaseCountry(getPartAtPosition(parts, RELEASE_COUNTRY_POS));
         
         String releaseDate = getPartAtPosition(parts, RELEASE_DATE_POS);
-        builder.withReleaseDate(DateTime.parse(releaseDate, DateTimeFormat.forPattern("yyyyMMdd").withZoneUTC()));
+        builder.withReleaseDate(parseDate(releaseDate));
         
-        String releaseType = getPartAtPosition(parts, RELEASE_TYPE_POS);
-        if (StringUtils.isNotBlank(releaseType) && StringUtils.isNotEmpty(releaseType)) {
-            builder.withReleaseType(releaseType);
-        }
+        builder.withReleaseType(getPartAtPosition(parts, RELEASE_TYPE_POS));
         
         return builder.build();
     }

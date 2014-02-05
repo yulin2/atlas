@@ -11,29 +11,25 @@ public class RoviProgramLine implements KeyedLine<String>{
 
     private final RoviShowType showType;
     private final String programId;
-    private final String seriesId;
-    private final String seasonId;
-    private final String variantParentId;
-    private final String groupId;
-    private final boolean isGroupLanguagePrimary;
+    private final Optional<String> seriesId;
+    private final Optional<String> seasonId;
+    private final Optional<String> titleParentId;
     private final String longTitle;
-    private final String episodeTitle;
-    private final Optional<Long> episodeNumber;
+    private final Optional<String> episodeTitle;
+    private final Optional<String> episodeNumber;
     private final Duration duration;
     private final String language;
 
     private RoviProgramLine(RoviShowType showType, String programId, String seriesId,
-            String seasonId, String variantParentId, String groupId,
-            boolean isGroupLanguagePrimary, String longTitle, String episodeTitle, Long episodeNumber, Duration duration, String language) {
+            String seasonId, String titleParentId, String longTitle, String episodeTitle,
+            String episodeNumber, Duration duration, String language) {
         this.showType = showType;
         this.programId = programId;
-        this.seriesId = seriesId;
-        this.seasonId = seasonId;
-        this.variantParentId = variantParentId;
-        this.groupId = groupId;
-        this.isGroupLanguagePrimary = isGroupLanguagePrimary;
+        this.seriesId = Optional.fromNullable(seriesId);
+        this.seasonId = Optional.fromNullable(seasonId);
+        this.titleParentId = Optional.fromNullable(titleParentId);
         this.longTitle = longTitle;
-        this.episodeTitle = episodeTitle;
+        this.episodeTitle = Optional.fromNullable(episodeTitle);
         this.episodeNumber = Optional.fromNullable(episodeNumber);
         this.duration = duration;
         this.language = language;
@@ -47,35 +43,27 @@ public class RoviProgramLine implements KeyedLine<String>{
         return programId;
     }
     
-    public String getSeriesId() {
+    public Optional<String> getSeriesId() {
         return seriesId;
     }
     
-    public String getSeasonId() {
+    public Optional<String> getSeasonId() {
         return seasonId;
     }
     
-    public String getVariantParentId() {
-        return variantParentId;
-    }
-    
-    public String getGroupId() {
-        return groupId;
-    }
-    
-    public boolean isGroupLanguagePrimary() {
-        return isGroupLanguagePrimary;
+    public Optional<String> getTitleParentId() {
+        return titleParentId;
     }
     
     public String getLongTitle() {
         return longTitle;
     }
     
-    public String getEpisodeTitle() {
+    public Optional<String> getEpisodeTitle() {
         return episodeTitle;
     }
     
-    public Optional<Long> getEpisodeNumber() {
+    public Optional<String> getEpisodeNumber() {
         return episodeNumber;
     }
     
@@ -102,12 +90,10 @@ public class RoviProgramLine implements KeyedLine<String>{
         private String programId;
         private String seriesId;
         private String seasonId;
-        private String variantParentId;
-        private String groupId;
-        private boolean isGroupLanguagePrimary;
+        private String titleParentId;
         private String longTitle;
         private String episodeTitle;
-        private Long episodeNumber;
+        private String episodeNumber;
         private Duration duration;
         private String language;
         
@@ -136,18 +122,8 @@ public class RoviProgramLine implements KeyedLine<String>{
             return this;
         }
         
-        public Builder withVariantParentId(String variantParentId) {
-            this.variantParentId = variantParentId;
-            return this;
-        }
-        
-        public Builder withGroupId(String groupId) {
-            this.groupId = groupId;
-            return this;
-        }
-        
-        public Builder withIsGroupLanguagePrimary(boolean isGroupLanguagePrimary) {
-            this.isGroupLanguagePrimary = isGroupLanguagePrimary;
+        public Builder withTitleParentId(String titleParentId) {
+            this.titleParentId = titleParentId;
             return this;
         }
         
@@ -161,7 +137,7 @@ public class RoviProgramLine implements KeyedLine<String>{
             return this;
         }
         
-        public Builder withEpisodeNumber(Long episodeNumber) {
+        public Builder withEpisodeNumber(String episodeNumber) {
             this.episodeNumber = episodeNumber;
             return this;
         }
@@ -177,9 +153,7 @@ public class RoviProgramLine implements KeyedLine<String>{
                     programId,
                     seriesId,
                     seasonId,
-                    variantParentId,
-                    groupId,
-                    isGroupLanguagePrimary,
+                    titleParentId,
                     longTitle,
                     episodeTitle,
                     episodeNumber,

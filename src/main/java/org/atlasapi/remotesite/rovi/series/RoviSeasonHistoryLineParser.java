@@ -23,15 +23,11 @@ public class RoviSeasonHistoryLineParser implements RoviLineParser<RoviSeasonHis
         builder.withSeriesId(getPartAtPosition(parts, SERIES_ID_POS));
         builder.withSeasonProgramId(getPartAtPosition(parts, SEASON_PROGRAM_ID_POS));
         builder.withSeasonHistoryId(getPartAtPosition(parts, SEASON_HISTORY_ID_POS));
+        builder.withSeasonName(getPartAtPosition(parts, SEASON_NAME_POS));
         
         String seasonNumber = getPartAtPosition(parts, SEASON_NUMBER_POS);
         if (StringUtils.isNotBlank(seasonNumber) && StringUtils.isNotEmpty(seasonNumber)) {
             builder.withSeasonNumber(Integer.valueOf(seasonNumber));
-        }
-        
-        String seasonName = getPartAtPosition(parts, SEASON_NAME_POS);
-        if (StringUtils.isNotBlank(seasonName) && StringUtils.isNotEmpty(seasonName)) {
-            builder.withSeasonName(seasonName);
         }
         
         return builder.build();

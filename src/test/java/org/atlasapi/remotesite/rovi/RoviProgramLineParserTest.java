@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.rovi;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.atlasapi.remotesite.rovi.program.RoviProgramLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramLineParser;
@@ -22,15 +21,12 @@ public class RoviProgramLineParserTest {
         assertEquals(RoviShowType.SM, roviLine.getShowType());
         assertEquals("en", roviLine.getLanguage());
         assertEquals("15343105", roviLine.getProgramId());
-        assertEquals("15343105", roviLine.getSeriesId());
-        assertEquals("SEASON1", roviLine.getSeasonId());
-        assertEquals("VARIANT1", roviLine.getVariantParentId());
-        assertEquals("10760531", roviLine.getGroupId());
-        assertTrue(roviLine.isGroupLanguagePrimary());
+        assertEquals("15343105", roviLine.getSeriesId().get());
+        assertEquals("SEASON1", roviLine.getSeasonId().get());
+        assertEquals("15343105", roviLine.getTitleParentId().get());
         assertEquals("NFL on Five Long Title", roviLine.getLongTitle());
-        assertEquals("Episode Title", roviLine.getEpisodeTitle());
-        assertTrue(roviLine.getEpisodeNumber().isPresent());
-        assertEquals(13, roviLine.getEpisodeNumber().get().longValue());
+        assertEquals("Episode Title", roviLine.getEpisodeTitle().get());
+        assertEquals("13", roviLine.getEpisodeNumber().get());
         assertEquals(1500, roviLine.getDuration().getStandardSeconds());
     }
 

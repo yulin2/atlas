@@ -40,8 +40,6 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, READ_MODE);
         Multimap<T, PointerAndSize> indexMap = buildIndex(randomAccessFile);
         
-        LOG.info("Index map size: {}", indexMap.size());
-        
         MapBasedKeyedFileIndex<T, S> index = new MapBasedKeyedFileIndex<T, S>(randomAccessFile, indexMap, charset, parser);
         
         return index;
@@ -51,7 +49,7 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
         final HashMultimap<T, PointerAndSize> indexMap = HashMultimap.create();
         final AtomicLong currentPointer = new AtomicLong(0);
         
-        LOG.info("Start indexing...");
+        LOG.info("Start indexing file {}", file.getAbsolutePath());
         
         RoviDataProcessingResult result = Files.readLines(file, charset, new LineProcessor<RoviDataProcessingResult>() {
             long scannedLines = 0;
@@ -76,12 +74,10 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
                     currentPointer.addAndGet(lineSize + endOfLineSize());
                     processedLines++;
                 } catch (Exception e) {
+                    LOG.error("Error occurred while indexing line ["+ line +"]", e);
                     failedLines++;
                 } finally {
                     scannedLines++;
-                    if (scannedLines % 100000 == 0) {
-                        LOG.info("Scanned {} lines", scannedLines);
-                    }
                 }
                 return true;
             }
@@ -96,7 +92,7 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
             }
         });
         
-        LOG.info("Indexing result {}", result);
+        LOG.info("File {} indexed. Result: {}", file.getAbsolutePath(), result);
 
         return indexMap;
     }
