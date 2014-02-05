@@ -510,16 +510,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         try {
             if (item instanceof Episode) {
-                Boolean special = getBooleanValue(progData.getAttr().getSpecial());
-                if (special != null && special) {
-                    ((Episode) item).setSpecial(true);
-                }
-                if (progData.getEpisodeNumber() != null) {
-                    ((Episode) item).setEpisodeNumber(Integer.valueOf(progData.getEpisodeNumber()));
-                }
-                if (progData.getSeriesNumber() != null) {
-                	 ((Episode) item).setSeriesNumber(Integer.valueOf(progData.getSeriesNumber()));
-                }
+                Episode episode = (Episode) item;
+                episode.setSpecial(getBooleanValue(progData.getAttr().getSpecial()));
+                episode.setEpisodeNumber(episodeNumber(progData));
+                episode.setSeriesNumber(seriesNumber(progData));
             }
         } catch (NumberFormatException e) {
             // sometimes we don't get valid numbers
@@ -527,6 +521,22 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
         
         return new ItemAndBroadcast(item, Maybe.just(broadcast));
+    }
+    
+    private Integer seriesNumber(ProgData progData) {
+        String seriesNumber = progData.getSeriesNumber();
+        if (seriesNumber != null) {
+            return Integer.valueOf(seriesNumber);
+        }
+        return null;
+    }
+    
+    private Integer episodeNumber(ProgData progData) {
+        String episodeNumber = progData.getEpisodeNumber();
+        if (episodeNumber != null) {
+            return Integer.valueOf(episodeNumber);
+        }
+        return null;
     }
 
     private Item convertItemToEpisode(Item item) {
