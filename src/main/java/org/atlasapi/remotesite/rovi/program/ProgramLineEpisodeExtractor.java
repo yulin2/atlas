@@ -15,7 +15,7 @@ public class ProgramLineEpisodeExtractor extends ProgramLineBaseExtractor<RoviPr
     }
 
     @Override
-    protected Episode addSpecificData(Episode content) {
+    protected Episode addSpecificData(Episode content, RoviProgramLine programLine) {
         return content;
     }
 

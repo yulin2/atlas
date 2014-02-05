@@ -15,7 +15,7 @@ public class ProgramLineFilmExtractor extends ProgramLineBaseExtractor<RoviProgr
     }
 
     @Override
-    protected Film addSpecificData(Film content) {
+    protected Film addSpecificData(Film content, RoviProgramLine programLine) {
         return content;
     }
 

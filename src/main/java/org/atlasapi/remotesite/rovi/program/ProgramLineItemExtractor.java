@@ -15,7 +15,7 @@ public class ProgramLineItemExtractor extends ProgramLineBaseExtractor<RoviProgr
     }
 
     @Override
-    protected Item addSpecificData(Item content) {
+    protected Item addSpecificData(Item content, RoviProgramLine programLine) {
         return content;
     }
 
