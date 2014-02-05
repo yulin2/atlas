@@ -1,11 +1,17 @@
 package org.atlasapi.remotesite.rovi.program;
 
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.remotesite.rovi.KeyedFileIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 public class ProgramLineFilmExtractor extends ProgramLineBaseExtractor<RoviProgramLine, Film> {
+
+    protected ProgramLineFilmExtractor(
+            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex) {
+        super(descriptionIndex);
+    }
 
     private final static Logger LOG = LoggerFactory.getLogger(ProgramLineFilmExtractor.class);
     
