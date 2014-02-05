@@ -83,6 +83,10 @@ public class RoviProgramLine implements KeyedLine<String>{
     public boolean isEnglish() {
         return getLanguage().equalsIgnoreCase(RoviConstants.ENGLISH_LANG);
     }
+    
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public static class Builder {
 

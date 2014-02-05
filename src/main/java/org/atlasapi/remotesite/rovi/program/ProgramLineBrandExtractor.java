@@ -9,6 +9,8 @@ import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Iterables;
+
 
 public class ProgramLineBrandExtractor extends ProgramLineBaseExtractor<RoviProgramLine, Brand> {
 
@@ -16,7 +18,10 @@ public class ProgramLineBrandExtractor extends ProgramLineBaseExtractor<RoviProg
     
     private final KeyedFileIndex<String, RoviSeriesLine> seriesIndex;
     
-    public ProgramLineBrandExtractor(KeyedFileIndex<String, RoviSeriesLine> seriesIndex) {
+    public ProgramLineBrandExtractor(
+            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
+            KeyedFileIndex<String, RoviSeriesLine> seriesIndex) {
+        super(descriptionIndex);
         this.seriesIndex = seriesIndex;
     }
     
@@ -30,15 +35,17 @@ public class ProgramLineBrandExtractor extends ProgramLineBaseExtractor<RoviProg
         Collection<RoviSeriesLine> seriesLines;
         try {
             seriesLines = seriesIndex.getLinesForKey(programLine.getKey());
-            if (seriesLines.size() > 0) {
-                RoviSeriesLine seriesLine = seriesLines.iterator().next();
-                content.setDescription(seriesLine.getSynopsis());
+            RoviSeriesLine firstSeriesLine = Iterables.getFirst(seriesLines, null);
+            
+            if (firstSeriesLine != null) {
+                content.setDescription(firstSeriesLine.getSynopsis());
             }
         } catch (IOException e) {
             LOG.error("Error while retrieving descriptions for brand {} from index", programLine.getKey(), e);
         }
 
-        LOG.trace("Extracted brand {} with description {}", content.getCanonicalUri(), content.getDescription());
+        LOG.trace("Extracted brand {}", content.getCanonicalUri());
+        
         return content;
     }
 

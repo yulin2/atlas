@@ -27,7 +27,7 @@ public class RoviProgramLineParser implements RoviLineParser<RoviProgramLine>{
     public RoviProgramLine parseLine(String line) {
         Iterable<String> parts = LINE_SPLITTER.split(line);
         
-        RoviProgramLine.Builder builder = new RoviProgramLine.Builder();
+        RoviProgramLine.Builder builder = RoviProgramLine.builder();
         
         builder.withShowType(RoviShowType.valueOf(getPartAtPosition(parts, SHOW_TYPE_POS)));
         builder.withProgramId(getPartAtPosition(parts, PROGRAM_ID_POS));
