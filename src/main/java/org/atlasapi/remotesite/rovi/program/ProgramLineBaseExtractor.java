@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.rovi.program;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.HAS_PARENT;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getPublisherForLanguage;
+import static org.atlasapi.remotesite.rovi.RoviUtils.getPublisherForLanguageAndCulture;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -65,7 +66,7 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
             log.error("Error while trying to populate the description for program " + roviLine.getKey(), e);
         }
         
-        content.setPublisher(RoviUtils.getPublisherForLanguageAndCulture(roviLine.getLanguage(), descriptionCulture));
+        content.setPublisher(getPublisherForLanguageAndCulture(roviLine.getLanguage(), descriptionCulture));
         setParentIfNeeded(roviLine, content);
         createVersionIfNeeded(content, roviLine);
         
