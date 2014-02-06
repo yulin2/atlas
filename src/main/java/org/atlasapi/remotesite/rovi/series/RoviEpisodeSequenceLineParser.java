@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.rovi.series;
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.LINE_SPLITTER;
+import static org.atlasapi.remotesite.rovi.RoviUtils.getIntPartAtPosition;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getPartAtPosition;
 
 import org.atlasapi.remotesite.rovi.RoviLineParser;
@@ -24,9 +25,7 @@ public class RoviEpisodeSequenceLineParser implements RoviLineParser<RoviEpisode
         builder.withSeasonProgramId(getPartAtPosition(parts, SEASON_PROGRAM_ID_POS));
         builder.withProgramId(getPartAtPosition(parts, PROGRAM_ID_POS));
         builder.withEpisodeTitle(getPartAtPosition(parts, EPISODE_TITLE_POS));
-        
-        String episodeSeasonSequence = getPartAtPosition(parts, EPISODE_SEASON_SEQUENCE_POS);
-        builder.withEpisodeSeasonSequence(Integer.valueOf(episodeSeasonSequence));
+        builder.withEpisodeSeasonSequence(getIntPartAtPosition(parts, EPISODE_SEASON_SEQUENCE_POS));
         
         return builder.build();
     }

@@ -6,6 +6,7 @@ import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
 import java.io.IOException;
 import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -42,20 +43,19 @@ public class ProgramLineEpisodeExtractor extends ProgramLineBaseExtractor<RoviPr
     protected Episode addSpecificData(Episode content, RoviProgramLine programLine) {
         try {
             Collection<RoviEpisodeSequenceLine> results = episodeSequenceIndex.getLinesForKey(programLine.getKey());
-
             RoviEpisodeSequenceLine episodeSequence = Iterables.getFirst(results, null);
+            
+            setBrandAndSeriesFromProgramLine(content, programLine);
+            setEpisodeNumberIfNumeric(content, programLine);
 
+            // If found episodeSequence from index then override some values
             if (episodeSequence != null) {
-                content.setTitle(episodeSequence.getEpisodeTitle());
-                content.setEpisodeNumber(episodeSequence.getEpisodeSeasonSequence());
-
-                String seriesCanonicalUri = canonicalUriForProgram(episodeSequence.getSeriesId());
-                content.setParentRef(new ParentRef(seriesCanonicalUri));
-
-                if (episodeSequence.getSeasonProgramId().isPresent()) {
-                    String seasonCanonicalUri = canonicalUriForSeason(episodeSequence.getSeasonProgramId()
-                            .get());
-                    content.setSeriesRef(new ParentRef(seasonCanonicalUri));
+                if (episodeSequence.getEpisodeTitle().isPresent()) {
+                    content.setTitle(episodeSequence.getEpisodeTitle().get());
+                }
+                
+                if (episodeSequence.getEpisodeSeasonSequence().isPresent()) {
+                    content.setEpisodeNumber(episodeSequence.getEpisodeSeasonSequence().get());
                 }
             }
         } catch (IOException e) {
@@ -65,6 +65,28 @@ public class ProgramLineEpisodeExtractor extends ProgramLineBaseExtractor<RoviPr
         return content;
     }
     
+    private void setEpisodeNumberIfNumeric(Episode content, RoviProgramLine programLine) {
+        if (programLine.getEpisodeNumber().isPresent() && StringUtils.isNumeric(programLine.getEpisodeNumber().get())) {
+            try {
+                content.setEpisodeNumber(Integer.valueOf(programLine.getEpisodeNumber().get()));
+            } catch (NumberFormatException e) {
+                // Ignoring episode number
+            }
+        }
+    }
+
+    private void setBrandAndSeriesFromProgramLine(Episode content, RoviProgramLine programLine) {
+        if (programLine.getSeriesId().isPresent()) {
+            String seriesCanonicalUri = canonicalUriForProgram(programLine.getSeriesId().get());
+            content.setParentRef(new ParentRef(seriesCanonicalUri));
+        }
+        
+        if (programLine.getSeasonId().isPresent()) {
+            String seasonCanonicalUri = canonicalUriForSeason(programLine.getSeasonId().get());
+            content.setSeriesRef(new ParentRef(seasonCanonicalUri));
+        }
+    }
+
     @Override
     protected Logger log() {
         return LOG;

@@ -17,7 +17,6 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
-import org.atlasapi.remotesite.rovi.RoviUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
