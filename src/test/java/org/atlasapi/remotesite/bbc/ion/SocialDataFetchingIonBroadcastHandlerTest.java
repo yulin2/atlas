@@ -10,12 +10,11 @@ import junit.framework.TestCase;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -64,8 +63,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
         
         checkingUpdateLinksAndTagsForItem(
                 new Item(BbcFeeds.slashProgrammesUriForPid(pid),"curie",Publisher.BBC),
-                ImmutableList.of(RelatedLink.unknownTypeLink("link url").build()),
-                ImmutableList.of(new KeyPhrase("phrase", Publisher.BBC))
+                ImmutableList.of(RelatedLink.unknownTypeLink("link url").build())
         );
         
         handler.handle(broadcast);
@@ -99,38 +97,35 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
         
         checkingUpdateLinksAndTagsForItem(
                 new Item(BbcFeeds.slashProgrammesUriForPid(epPid),"curie",Publisher.BBC),
-                ImmutableList.of(RelatedLink.unknownTypeLink("link url").build()),
-                ImmutableList.of(new KeyPhrase("phrase", Publisher.BBC))
+                ImmutableList.of(RelatedLink.unknownTypeLink("link url").build())
         );
         checkingUpdateLinksAndTagsForContainer(
                 new Series(BbcFeeds.slashProgrammesUriForPid(seriesPid),"curie",Publisher.BBC),
-                ImmutableList.of(RelatedLink.unknownTypeLink("link url").build()),
-                ImmutableList.of(new KeyPhrase("phrase", Publisher.BBC))
+                ImmutableList.of(RelatedLink.unknownTypeLink("link url").build())
         );
         checkingUpdateLinksAndTagsForContainer(
                 new Brand(BbcFeeds.slashProgrammesUriForPid(brandPid),"curie",Publisher.BBC),
-                ImmutableList.of(RelatedLink.unknownTypeLink("link url").build()),
-                ImmutableList.of(new KeyPhrase("phrase", Publisher.BBC))
+                ImmutableList.of(RelatedLink.unknownTypeLink("link url").build())
         );
         
         handler.handle(broadcast);
     }
 
-    public void checkingUpdateLinksAndTagsForContainer(Container content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
-        checkFetchesLinksTagsAndContent(content, links, tags);
+    public void checkingUpdateLinksAndTagsForContainer(Container content, final List<RelatedLink> links) {
+        checkFetchesLinksTagsAndContent(content, links);
         context.checking(new Expectations(){{
-            one(writer).createOrUpdate((Container)with(contentWithLinksAndTags(links, tags)));
+            one(writer).createOrUpdate((Container)with(contentWithLinksAndTags(links)));
         }});
     }
 
-    public void checkingUpdateLinksAndTagsForItem(Item content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
-        checkFetchesLinksTagsAndContent(content, links, tags);
+    public void checkingUpdateLinksAndTagsForItem(Item content, final List<RelatedLink> links) {
+        checkFetchesLinksTagsAndContent(content, links);
         context.checking(new Expectations(){{
-            one(writer).createOrUpdate((Item)with(contentWithLinksAndTags(links, tags)));
+            one(writer).createOrUpdate((Item)with(contentWithLinksAndTags(links)));
         }});
     }
 
-    public <T extends Content> void checkFetchesLinksTagsAndContent(final T content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
+    public <T extends Content> void checkFetchesLinksTagsAndContent(final T content, final List<RelatedLink> links) {
         final String uri = content.getCanonicalUri();
         context.checking(new Expectations(){{
             one(linkAdapter).fetch(uri);will(returnValue(links));
@@ -165,17 +160,17 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
         return broadcast;
     }
 
-    private Matcher<Content> contentWithLinksAndTags(final List<RelatedLink> links, final List<KeyPhrase> tags) {
+    private Matcher<Content> contentWithLinksAndTags(final List<RelatedLink> links) {
         return new TypeSafeMatcher<Content>() {
 
             @Override
             public void describeTo(Description desc) {
-                desc.appendText("Content with links and tags").appendValue(links).appendValue(tags);
+                desc.appendText("Content with links and tags").appendValue(links);
             }
 
             @Override
             public boolean matchesSafely(Content content) {
-                return content.getRelatedLinks().equals(ImmutableSet.copyOf(links)) && content.getKeyPhrases().equals(ImmutableSet.copyOf(tags));
+                return content.getRelatedLinks().equals(ImmutableSet.copyOf(links));
             }
         };
     }
