@@ -1,14 +1,16 @@
 package org.atlasapi.remotesite.rovi.program;
 
+import static org.atlasapi.remotesite.rovi.RoviConstants.ENGLISH_LANG;
+
 import org.atlasapi.remotesite.rovi.KeyedLine;
-import org.atlasapi.remotesite.rovi.RoviConstants;
 import org.atlasapi.remotesite.rovi.RoviShowType;
 import org.joda.time.Duration;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 
 public class RoviProgramLine implements KeyedLine<String>{
-
+    
     private final RoviShowType showType;
     private final String programId;
     private final Optional<String> seriesId;
@@ -19,10 +21,11 @@ public class RoviProgramLine implements KeyedLine<String>{
     private final Optional<String> episodeNumber;
     private final Duration duration;
     private final String language;
+    private final Optional<Integer> releaseYear;
 
     private RoviProgramLine(RoviShowType showType, String programId, String seriesId,
             String seasonId, String titleParentId, String longTitle, String episodeTitle,
-            String episodeNumber, Duration duration, String language) {
+            String episodeNumber, Duration duration, String language, Integer releaseYear) {
         this.showType = showType;
         this.programId = programId;
         this.seriesId = Optional.fromNullable(seriesId);
@@ -32,7 +35,8 @@ public class RoviProgramLine implements KeyedLine<String>{
         this.episodeTitle = Optional.fromNullable(episodeTitle);
         this.episodeNumber = Optional.fromNullable(episodeNumber);
         this.duration = duration;
-        this.language = language;
+        this.language = Objects.firstNonNull(language, ENGLISH_LANG);
+        this.releaseYear = Optional.fromNullable(releaseYear);
     }
 
     public RoviShowType getShowType() {
@@ -80,8 +84,8 @@ public class RoviProgramLine implements KeyedLine<String>{
         return programId;
     }
 
-    public boolean isEnglish() {
-        return getLanguage().equalsIgnoreCase(RoviConstants.ENGLISH_LANG);
+    public Optional<Integer> getReleaseYear() {
+        return releaseYear;
     }
     
     public static Builder builder() {
@@ -100,6 +104,7 @@ public class RoviProgramLine implements KeyedLine<String>{
         private String episodeNumber;
         private Duration duration;
         private String language;
+        private Integer releaseYear;
         
         public Builder withShowType(RoviShowType showType) {
             this.showType = showType;
@@ -150,6 +155,11 @@ public class RoviProgramLine implements KeyedLine<String>{
             this.duration = duration;
             return this;
         }
+        
+        public Builder withReleaseYear(Integer releaseYear) {
+            this.releaseYear = releaseYear;
+            return this;
+        }
 
         public final RoviProgramLine build() {
             return new RoviProgramLine(
@@ -162,7 +172,8 @@ public class RoviProgramLine implements KeyedLine<String>{
                     episodeTitle,
                     episodeNumber,
                     duration,
-                    language);
+                    language,
+                    releaseYear);
         }
     }
 

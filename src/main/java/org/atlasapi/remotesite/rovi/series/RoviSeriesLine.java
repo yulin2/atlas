@@ -1,18 +1,21 @@
 package org.atlasapi.remotesite.rovi.series;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.atlasapi.remotesite.rovi.KeyedLine;
 
+import com.google.common.base.Optional;
 
 public class RoviSeriesLine implements KeyedLine<String>{
 
     private final String seriesId;
     private final String fullTitle;
-    private final String synopsis;
+    private final Optional<String> synopsis;
     
     public RoviSeriesLine(String seriesId, String fullTitle, String synopsis) {
-        this.seriesId = seriesId;
-        this.fullTitle = fullTitle;
-        this.synopsis = synopsis;
+        this.seriesId = checkNotNull(seriesId);
+        this.fullTitle = checkNotNull(fullTitle);
+        this.synopsis = Optional.fromNullable(synopsis);
     }
     
     public String getSeriesId() {
@@ -23,7 +26,7 @@ public class RoviSeriesLine implements KeyedLine<String>{
         return fullTitle;
     }
     
-    public String getSynopsis() {
+    public Optional<String> getSynopsis() {
         return synopsis;
     }
 
