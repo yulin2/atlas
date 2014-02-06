@@ -4,11 +4,10 @@ import java.io.File;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLineParser;
-import org.atlasapi.remotesite.rovi.program.RoviReleaseDatesLine;
-import org.atlasapi.remotesite.rovi.program.RoviReleaseDatesLineParser;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLineParser;
 import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
@@ -25,15 +24,15 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class RoviModule {
 
-    private static final String PROGRAMS_FILE = "/Users/max/Documents/Rovi/Programs_20140115_Full/Program.txt";
-    private static final String PROGRAM_DESCRIPTION = "/Users/max/Documents/Rovi/Programs_20140115_Full/Program_Description.txt";
-    private static final String RELEASE_DATES = "/Users/max/Documents/Rovi/Programs_20140115_Full/Program_Release_Date.txt";
-    private static final String EPISODE_SEQUENCE = "/Users/max/Documents/Rovi/Series_20140115_Full 2/Episode_Sequence.txt";
-    private static final String SEASON_HISTORY_SEQUENCE = "/Users/max/Documents/Rovi/Series_20140115_Full 2/Season_History.txt";
-    private static final String SERIES = "/Users/max/Documents/Rovi/Series_20140115_Full 2/Series.txt";
+    private static final String PROGRAMS_FILE = "/data/rovi/Program.txt";
+    private static final String PROGRAM_DESCRIPTION = "/data/rovi/Program_Description.txt";
+    private static final String EPISODE_SEQUENCE = "/data/rovi/Episode_Sequence.txt";
+    private static final String SEASON_HISTORY_SEQUENCE = "/data/rovi/Season_History.txt";
+    private static final String SERIES = "/data/rovi/Series.txt";
 
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
+    private @Autowired ContentResolver contentResolver;
     
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviProgramDescriptionLine> descriptionsIndexer() {
@@ -41,14 +40,6 @@ public class RoviModule {
                 new File(PROGRAM_DESCRIPTION),
                 RoviConstants.FILE_CHARSET,
                 new RoviProgramDescriptionLineParser());
-    }
-
-    @Bean
-    public MapBasedKeyedFileIndexer<String, RoviReleaseDatesLine> releaseDatesIndexer() {
-        return new MapBasedKeyedFileIndexer<>(
-                new File(RELEASE_DATES),
-                RoviConstants.FILE_CHARSET,
-                new RoviReleaseDatesLineParser());
     }
 
     @Bean
@@ -76,24 +67,27 @@ public class RoviModule {
     }
     
     @Bean
+    public RoviContentWriter roviContentWriter() {
+        return new RoviContentWriter(contentWriter);
+    }
+    
+    @Bean
     public RoviProgramsProcessor programsProcessor() {
         return new RoviProgramsProcessor(
                 descriptionsIndexer(),
-                releaseDatesIndexer(),
                 episodeSequenceIndexer(),
-                seasonHistoryIndexer(),
                 seriesIndexer(),
-                contentWriter);
+                roviContentWriter(),
+                contentResolver);
     }
     
     @Bean
     public RoviUpdater roviUpdater() {
-        return new RoviUpdater(programsProcessor(), new File(PROGRAMS_FILE));
+        return new RoviUpdater(programsProcessor(), new File(PROGRAMS_FILE), new File(SEASON_HISTORY_SEQUENCE));
     }
     
     @PostConstruct
     public void init() {
-        // Starts processing one minute from now
         scheduler.schedule(roviUpdater(), RepetitionRules.NEVER);
     }
 

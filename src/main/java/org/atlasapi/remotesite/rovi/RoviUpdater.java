@@ -15,16 +15,18 @@ public class RoviUpdater extends ScheduledTask {
 
     private final RoviProgramsProcessor programsProcessor;
     private final File programsFile;
+    private final File seasonsFile;
     
-    public RoviUpdater(RoviProgramsProcessor programsProcessor, File programsFile) {
+    public RoviUpdater(RoviProgramsProcessor programsProcessor, File programsFile, File seriesFile) {
         this.programsProcessor = programsProcessor;
         this.programsFile = programsFile;
+        this.seasonsFile = seriesFile;
     }
     
     @Override
     protected void runTask() {
         try {
-            programsProcessor.process(programsFile);
+            programsProcessor.process(programsFile, seasonsFile);
         } catch (IOException e) {
             LOG.error("Error while processing programs", e);
         }

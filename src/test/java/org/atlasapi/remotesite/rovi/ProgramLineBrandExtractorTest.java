@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.rovi;
 
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriFor;
+import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -89,7 +89,7 @@ public class ProgramLineBrandExtractorTest {
         
         Brand brand = extractor.extract(programLine.build());
         
-        assertEquals(canonicalUriFor(PROGRAM_ID), brand.getCanonicalUri());
+        assertEquals(canonicalUriForProgram(PROGRAM_ID), brand.getCanonicalUri());
         assertEquals(LONG_DESCRIPTION, brand.getLongDescription());
         assertEquals(MEDIUM_DESCRIPTION, brand.getMediumDescription());
         assertEquals(SHORT_DESCRIPTION, brand.getShortDescription());

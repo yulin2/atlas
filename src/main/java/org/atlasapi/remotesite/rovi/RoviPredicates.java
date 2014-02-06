@@ -29,5 +29,8 @@ public class RoviPredicates {
     };
     
     public final static Predicate<RoviProgramLine> IS_BRAND_NO_PARENT = and(IS_BRAND, not(HAS_PARENT));
+    public final static Predicate<RoviProgramLine> IS_BRAND_WITH_PARENT = and(IS_BRAND, HAS_PARENT);
+    public final static Predicate<RoviProgramLine> NO_BRAND_NO_PARENT = and(not(IS_BRAND), not(HAS_PARENT));
+    public final static Predicate<RoviProgramLine> NO_BRAND_WITH_PARENT = and(not(IS_BRAND), HAS_PARENT);
     
 }

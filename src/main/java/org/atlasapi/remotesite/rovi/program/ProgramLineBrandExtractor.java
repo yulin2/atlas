@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
 import org.slf4j.Logger;
@@ -11,7 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
 
-
+/*
+ * Extracts a {@link Brand} from a {@link RoviProgramLine} with {@link RoviShowType} SM (Series Master) 
+ */
 public class ProgramLineBrandExtractor extends ProgramLineBaseExtractor<RoviProgramLine, Brand> {
 
     private final static Logger LOG = LoggerFactory.getLogger(ProgramLineBrandExtractor.class);
@@ -20,8 +23,9 @@ public class ProgramLineBrandExtractor extends ProgramLineBaseExtractor<RoviProg
     
     public ProgramLineBrandExtractor(
             KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
-            KeyedFileIndex<String, RoviSeriesLine> seriesIndex) {
-        super(descriptionIndex);
+            KeyedFileIndex<String, RoviSeriesLine> seriesIndex,
+            ContentResolver contentResolver) {
+        super(descriptionIndex, contentResolver);
         this.seriesIndex = seriesIndex;
     }
     
@@ -37,8 +41,8 @@ public class ProgramLineBrandExtractor extends ProgramLineBaseExtractor<RoviProg
             seriesLines = seriesIndex.getLinesForKey(programLine.getKey());
             RoviSeriesLine firstSeriesLine = Iterables.getFirst(seriesLines, null);
             
-            if (firstSeriesLine != null) {
-                content.setDescription(firstSeriesLine.getSynopsis());
+            if (firstSeriesLine != null && firstSeriesLine.getSynopsis().isPresent()) {
+                content.setDescription(firstSeriesLine.getSynopsis().get());
             }
         } catch (IOException e) {
             LOG.error("Error while retrieving descriptions for brand {} from index", programLine.getKey(), e);
@@ -47,6 +51,11 @@ public class ProgramLineBrandExtractor extends ProgramLineBaseExtractor<RoviProg
         LOG.trace("Extracted brand {}", content.getCanonicalUri());
         
         return content;
+    }
+    
+    @Override
+    protected Logger log() {
+        return LOG;
     }
 
 }

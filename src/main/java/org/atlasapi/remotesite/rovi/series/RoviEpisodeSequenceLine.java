@@ -4,10 +4,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.atlasapi.remotesite.rovi.KeyedLine;
 
+import com.google.common.base.Optional;
+
 public class RoviEpisodeSequenceLine implements KeyedLine<String> {
 
     private final String seriesId;
-    private final String seasonProgramId;
+    private final Optional<String> seasonProgramId;
     private final String programId;
     private final String episodeTitle;
     private final Integer episodeSeasonSequence;
@@ -16,7 +18,7 @@ public class RoviEpisodeSequenceLine implements KeyedLine<String> {
             String episodeTitle, Integer episodeSeasonSequence) {
         
         this.seriesId = checkNotNull(seriesId);
-        this.seasonProgramId = checkNotNull(seasonProgramId);
+        this.seasonProgramId = Optional.fromNullable(seasonProgramId);
         this.programId = checkNotNull(programId);
         this.episodeTitle = checkNotNull(episodeTitle);
         this.episodeSeasonSequence = checkNotNull(episodeSeasonSequence);
@@ -26,7 +28,7 @@ public class RoviEpisodeSequenceLine implements KeyedLine<String> {
         return seriesId;
     }
 
-    public String getSeasonProgramId() {
+    public Optional<String> getSeasonProgramId() {
         return seasonProgramId;
     }
 
