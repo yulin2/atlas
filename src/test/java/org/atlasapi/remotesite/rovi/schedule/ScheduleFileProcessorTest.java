@@ -35,8 +35,8 @@ public class ScheduleFileProcessorTest {
     private final ItemBroadcastUpdater itemBroadcastUpdater = new ItemBroadcastUpdater(contentResolver, contentWriter);
     private final ScheduleFileProcessor scheduleFileProcessor = new ScheduleFileProcessor(itemBroadcastUpdater, scheduleLineBroadcastExtractor);
     
-    private final Item testItem1 = testItem(RoviUtils.canonicalUriFor("1"));
-    private final Item testItem2 = testItem(RoviUtils.canonicalUriFor("2"));
+    private final Item testItem1 = testItem(RoviUtils.canonicalUriForProgram("1"));
+    private final Item testItem2 = testItem(RoviUtils.canonicalUriForProgram("2"));
     
     private final Channel channel = Channel.builder()
             .withUri("http://rovicorp.com/channels/123")
@@ -45,8 +45,8 @@ public class ScheduleFileProcessorTest {
     @Test
     public void testProcessFile() throws IOException {
         when(channelResolver.forAlias(CHANNEL_URI_PREFIX + "30863")).thenReturn(Maybe.just(channel));
-        when(contentResolver.findByCanonicalUris(ImmutableSet.of(RoviUtils.canonicalUriFor("1")))).thenReturn(resolvedContentFor(testItem1));
-        when(contentResolver.findByCanonicalUris(ImmutableSet.of(RoviUtils.canonicalUriFor("2")))).thenReturn(resolvedContentFor(testItem2));
+        when(contentResolver.findByCanonicalUris(ImmutableSet.of(RoviUtils.canonicalUriForProgram("1")))).thenReturn(resolvedContentFor(testItem1));
+        when(contentResolver.findByCanonicalUris(ImmutableSet.of(RoviUtils.canonicalUriForProgram("2")))).thenReturn(resolvedContentFor(testItem2));
         
         scheduleFileProcessor.process(new File(Resources.getResource("org/atlasapi/remotesite/rovi/schedule.txt").getFile()));
         
