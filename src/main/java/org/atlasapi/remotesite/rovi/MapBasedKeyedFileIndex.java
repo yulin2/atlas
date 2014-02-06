@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -33,6 +34,11 @@ public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedF
         }
 
         return builder.build();
+    }
+    
+    @Override
+    public Set<T> getKeys() {
+        return indexMap.keySet();
     }
     
     private String readData(T key, PointerAndSize pointerAndSize) throws IOException {
