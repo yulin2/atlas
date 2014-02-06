@@ -8,6 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.pool.PooledConnectionFactory;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.description.ReadableDescription;
@@ -37,7 +38,7 @@ public class MessageQueueingResultHandlerTest {
     @Before
     public void setup() {
         ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory("vm://localhost");
-        qf = new QueueFactory(cf, cf, "Atlas.Owl.Test");
+        qf = new QueueFactory(new PooledConnectionFactory(cf), cf, "Atlas.Owl.Test");
         JmsTemplate template = qf.makeVirtualTopicProducer("Equiv.Assert");
         handler = new MessageQueueingResultHandler<Item>(template, Publisher.all());
     }
