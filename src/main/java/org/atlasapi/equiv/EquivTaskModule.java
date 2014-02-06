@@ -10,6 +10,8 @@ import static org.atlasapi.media.entity.Publisher.LOVEFILM;
 import static org.atlasapi.media.entity.Publisher.NETFLIX;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
+import static org.atlasapi.media.entity.Publisher.ROVI_EN_GB;
+import static org.atlasapi.media.entity.Publisher.ROVI_EN_US;
 import static org.atlasapi.media.entity.Publisher.TALK_TALK;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 
@@ -85,6 +87,8 @@ public class EquivTaskModule {
     private static final RepetitionRule C4_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(15, 00));
     private static final RepetitionRule FIVE_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(17, 00));
     private static final RepetitionRule REDUX_SCHEDULE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(7, 00));
+    private static final RepetitionRule ROVI_EN_GB_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(8, 00));
+    private static final RepetitionRule ROVI_EN_US_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(10, 00));
     
     private @Value("${equiv.updater.enabled}") String updaterEnabled;
     private @Value("${equiv.stream-updater.enabled}") Boolean streamedChangesUpdateEquiv;
@@ -120,6 +124,8 @@ public class EquivTaskModule {
             taskScheduler.schedule(publisherUpdateTask(NETFLIX).withName("Netflix Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(YOUVIEW).withName("YouView Equivalence Updater"), YOUVIEW_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(TALK_TALK).withName("TalkTalk Equivalence Updater"), TALKTALK_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(ROVI_EN_GB).withName("Rovi EN-GB Equivalence Updater"), ROVI_EN_GB_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(ROVI_EN_US).withName("Rovi EN-US Equivalence Updater"), ROVI_EN_GB_EQUIVALENCE_REPETITION);
             
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_MUSIC).withName("Music Equivalence Updater"), RepetitionRules.every(Duration.standardHours(6)));
             
