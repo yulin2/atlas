@@ -59,26 +59,27 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
             
             @Override
             public boolean processLine(String line) throws IOException {
+                // Removing BOM if charset is UTF-16LE see (http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4508058)
+                if (scannedLines == 0 && charset.equals(Charsets.UTF_16LE)) {
+                    int bomLength = line.substring(0, 1).getBytes(charset).length;
+                    line = line.substring(1);
+                    currentPointer.addAndGet(bomLength);
+                }
+                
+                int lineSize = line.getBytes(charset).length;
                 
                 try {
-                    // Removing BOM if charset is UTF-16LE see (http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4508058)
-                    if (scannedLines == 0 && charset.equals(Charsets.UTF_16LE)) {
-                        int bomLength = line.substring(0, 1).getBytes(charset).length;
-                        line = line.substring(1);
-                        currentPointer.addAndGet(bomLength);
-                    }
-                    
-                    int lineSize = line.getBytes(charset).length;
                     S roviLine = parser.parseLine(line);
                     indexMap.put(roviLine.getKey(), new PointerAndSize(currentPointer.get(), lineSize));
-                    currentPointer.addAndGet(lineSize + endOfLineSize());
                     processedLines++;
                 } catch (Exception e) {
                     LOG.error("Error occurred while indexing line ["+ line +"]", e);
                     failedLines++;
                 } finally {
+                    currentPointer.addAndGet(lineSize + endOfLineSize());
                     scannedLines++;
                 }
+                
                 return true;
             }
 
