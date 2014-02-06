@@ -8,6 +8,7 @@ import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.remotesite.bbc.nitro.ChannelDayProcessingTask;
 import org.atlasapi.remotesite.bbc.nitro.DayRangeChannelDaySupplier;
@@ -40,6 +41,8 @@ public class PicksModule {
     private ScheduleResolver scheduleResolver;
     @Autowired 
     private ContentGroupResolver contentGroupResolver;
+    @Autowired 
+    private ContentResolver contentResolver;
     @Autowired
     private ContentGroupWriter contentGroupWriter;
     @Autowired
@@ -71,8 +74,8 @@ public class PicksModule {
     
     @Bean
     public PicksDayUpdater picksDayUpdater() {
-        return new PicksDayUpdater(scheduleResolver, contentGroupResolver, contentGroupWriter, 
-                picksChannelsSupplier());
+        return new PicksDayUpdater(scheduleResolver, contentGroupResolver, contentResolver, 
+                contentGroupWriter, picksChannelsSupplier());
     }
     
     @Bean
