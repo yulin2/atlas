@@ -36,6 +36,8 @@ import static org.atlasapi.media.entity.Publisher.YOUTUBE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
@@ -109,6 +111,7 @@ import org.springframework.jms.core.JmsTemplate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 @Configuration
@@ -117,6 +120,7 @@ public class EquivModule {
 
 	private @Value("${equiv.results.directory}") String equivResultsDirectory;
 	private @Value("${messaging.destination.equiv.assert}") String equivAssertDest;
+    private @Value("${messaging.enabled}") String messagingEnabled;
     
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired SearchResolver searchResolver;
@@ -132,13 +136,16 @@ public class EquivModule {
     }
 
     private EquivalenceResultHandler<Container> containerResultHandlers(Iterable<Publisher> publishers) {
-        return new BroadcastingEquivalenceResultHandler<Container>(ImmutableList.of(
-            new LookupWritingEquivalenceHandler<Container>(lookupWriter, publishers),
-            new EpisodeMatchingEquivalenceHandler(contentResolver, equivSummaryStore, lookupWriter, publishers),
-            new ResultWritingEquivalenceHandler<Container>(equivalenceResultStore()),
-            new EquivalenceSummaryWritingHandler<Container>(equivSummaryStore),
-            new MessageQueueingResultHandler<Container>(equivAssertDestination(), publishers)
-        ));
+        ImmutableList.Builder<EquivalenceResultHandler<Container>> handlers = ImmutableList.builder();
+        handlers
+            .add(new LookupWritingEquivalenceHandler<Container>(lookupWriter, publishers))
+            .add(new EpisodeMatchingEquivalenceHandler(contentResolver, equivSummaryStore, lookupWriter, publishers))
+            .add(new ResultWritingEquivalenceHandler<Container>(equivalenceResultStore()))
+            .add(new EquivalenceSummaryWritingHandler<Container>(equivSummaryStore));
+        if (Boolean.valueOf(messagingEnabled)) {
+            handlers.add(new MessageQueueingResultHandler<Container>(equivAssertDestination(), publishers));
+        }
+        return new BroadcastingEquivalenceResultHandler<Container>(handlers.build());
     }
 
     @Bean 
@@ -169,15 +176,23 @@ public class EquivModule {
             .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
             .withFilter(this.<Item>standardFilter())
             .withExtractor(PercentThresholdEquivalenceExtractor.<Item> moreThanPercent(90))
-            .withHandler(new BroadcastingEquivalenceResultHandler<Item>(ImmutableList.of(
-                EpisodeFilteringEquivalenceResultHandler.relaxed(
+            .withHandler(itemResultHandlers(acceptablePublishers));
+    }
+
+    private BroadcastingEquivalenceResultHandler<Item> itemResultHandlers(
+            Set<Publisher> acceptablePublishers) {
+        ImmutableList.Builder<EquivalenceResultHandler<Item>> handlers = ImmutableList.builder();
+        handlers
+            .add(EpisodeFilteringEquivalenceResultHandler.relaxed(
                     new LookupWritingEquivalenceHandler<Item>(lookupWriter, acceptablePublishers),
                     equivSummaryStore
-                ),
-                new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
-                new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore),
-                new MessageQueueingResultHandler<Item>(equivAssertDestination(), acceptablePublishers)
-            )));
+            ))
+            .add(new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()))
+            .add(new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore));
+        if (Boolean.valueOf(messagingEnabled)) {
+            handlers.add(new MessageQueueingResultHandler<Item>(equivAssertDestination(), acceptablePublishers));
+        }
+        return new BroadcastingEquivalenceResultHandler<Item>(handlers.build());
     }
     
     private EquivalenceUpdater<Container> topLevelContainerUpdater(Set<Publisher> publishers) {
