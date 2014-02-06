@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi;
 
+import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 
@@ -7,8 +8,12 @@ import com.google.common.collect.Iterables;
 
 public class RoviUtils {
     
+    public static Publisher getPublisherForLanguage(String language) {
+        return Publisher.valueOf("ROVI_" + language.toUpperCase());
+    }
+    
     public static String canonicalUriFor(String id) {
-        return "http://rovi.com/program/".concat(id);
+        return "http://rovicorp.com/programs/".concat(id);
     }
     
     public static String getPartAtPosition(Iterable<String> parts, int pos) {

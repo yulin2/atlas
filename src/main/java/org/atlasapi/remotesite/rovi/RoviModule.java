@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLineParser;
 import org.atlasapi.remotesite.rovi.program.RoviReleaseDatesLine;
@@ -14,7 +15,6 @@ import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLineParser;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLineParser;
-import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +33,7 @@ public class RoviModule {
     private static final String SERIES = "/Users/max/Documents/Rovi/Series_20140115_Full 2/Series.txt";
 
     private @Autowired SimpleScheduler scheduler;
+    private @Autowired ContentWriter contentWriter;
     
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviProgramDescriptionLine> descriptionsIndexer() {
@@ -81,7 +82,8 @@ public class RoviModule {
                 releaseDatesIndexer(),
                 episodeSequenceIndexer(),
                 seasonHistoryIndexer(),
-                seriesIndexer());
+                seriesIndexer(),
+                contentWriter);
     }
     
     @Bean
@@ -92,7 +94,7 @@ public class RoviModule {
     @PostConstruct
     public void init() {
         // Starts processing one minute from now
-        scheduler.schedule(roviUpdater(), RepetitionRules.daily(LocalTime.now().plusMinutes(1)));
+        scheduler.schedule(roviUpdater(), RepetitionRules.NEVER);
     }
 
 }
