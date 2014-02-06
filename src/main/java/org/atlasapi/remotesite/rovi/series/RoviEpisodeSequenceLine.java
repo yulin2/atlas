@@ -11,17 +11,17 @@ public class RoviEpisodeSequenceLine implements KeyedLine<String> {
     private final String seriesId;
     private final Optional<String> seasonProgramId;
     private final String programId;
-    private final String episodeTitle;
-    private final Integer episodeSeasonSequence;
+    private final Optional<String> episodeTitle;
+    private final Optional<Integer> episodeSeasonSequence;
 
     private RoviEpisodeSequenceLine(String seriesId, String seasonProgramId, String programId,
             String episodeTitle, Integer episodeSeasonSequence) {
         
         this.seriesId = checkNotNull(seriesId);
-        this.seasonProgramId = Optional.fromNullable(seasonProgramId);
         this.programId = checkNotNull(programId);
-        this.episodeTitle = checkNotNull(episodeTitle);
-        this.episodeSeasonSequence = checkNotNull(episodeSeasonSequence);
+        this.seasonProgramId = Optional.fromNullable(seasonProgramId);
+        this.episodeTitle = Optional.fromNullable(episodeTitle);
+        this.episodeSeasonSequence = Optional.fromNullable(episodeSeasonSequence);
     }
 
     public String getSeriesId() {
@@ -36,11 +36,11 @@ public class RoviEpisodeSequenceLine implements KeyedLine<String> {
         return programId;
     }
 
-    public String getEpisodeTitle() {
+    public Optional<String> getEpisodeTitle() {
         return episodeTitle;
     }
 
-    public Integer getEpisodeSeasonSequence() {
+    public Optional<Integer> getEpisodeSeasonSequence() {
         return episodeSeasonSequence;
     }
 
