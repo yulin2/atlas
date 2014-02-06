@@ -1,18 +1,23 @@
 package org.atlasapi.remotesite.rovi.program;
 
+import static org.atlasapi.remotesite.rovi.RoviPredicates.HAS_PARENT;
+import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriFor;
+import static org.atlasapi.remotesite.rovi.RoviUtils.getPublisherForLanguage;
+
 import java.io.IOException;
 import java.util.Collection;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
-import org.atlasapi.remotesite.rovi.RoviUtils;
+import org.atlasapi.remotesite.rovi.RoviPredicates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> implements ContentExtractor<RoviProgramLine, CONTENT> {
 
@@ -29,7 +34,14 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
         CONTENT content = createContent();
         
         content.setTitle(roviLine.getLongTitle());
-        content.setCanonicalUri(RoviUtils.canonicalUriFor(roviLine.getProgramId()));
+        content.setCanonicalUri(canonicalUriFor(roviLine.getProgramId()));
+        content.setPublisher(getPublisherForLanguage(roviLine.getLanguage()));
+        content.setLanguages(Sets.newHashSet(roviLine.getLanguage()));
+        
+        if (HAS_PARENT.apply(roviLine)) {
+            // TODO: 
+            // content.setEquivalentTo(...)
+        }
         
         try {
             setDescription(content, roviLine);

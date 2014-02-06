@@ -27,6 +27,10 @@ public class PointerAndSize {
 
     @Override
     public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        
         if (!(other instanceof PointerAndSize)) {
             return false;
         }
