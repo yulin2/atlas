@@ -13,6 +13,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.program.ProgramLineContentExtractorSupplier;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramLineParser;
+import org.atlasapi.remotesite.rovi.schedule.ScheduleFileProcessor;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLineParser;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
@@ -31,22 +32,25 @@ public class RoviProgramsProcessor {
     private final KeyedFileIndexer<String, RoviSeriesLine> seriesIndexer;
     private final RoviContentWriter contentWriter;
     private final ContentResolver contentResolver;
+    private final ScheduleFileProcessor scheduleFileProcessor;
     
     public RoviProgramsProcessor(
             KeyedFileIndexer<String, RoviProgramDescriptionLine> programDescriptionIndexer,
             KeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer,
             KeyedFileIndexer<String, RoviSeriesLine> seriesIndexer,
             RoviContentWriter contentWriter,
-            ContentResolver contentResolver) {
+            ContentResolver contentResolver,
+            ScheduleFileProcessor scheduleFileProcessor) {
 
         this.programDescriptionIndexer = programDescriptionIndexer;
         this.episodeSequenceIndexer = episodeSequenceIndexer;
         this.seriesIndexer = seriesIndexer;
         this.contentWriter = contentWriter;
         this.contentResolver = contentResolver;
+        this.scheduleFileProcessor = scheduleFileProcessor;
     }
 
-    public void process(File programFile, File seasonsFile) throws IOException {
+    public void process(File programFile, File seasonsFile, File scheduleFile) throws IOException {
         LOG.info("Indexing files");
         KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex = programDescriptionIndexer.index();
         KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex = episodeSequenceIndexer.index();
@@ -104,7 +108,11 @@ public class RoviProgramsProcessor {
                 contentWriter));
         
         LOG.info("Processing programs (no brands) with parent complete, result: {}", processingNoBrandsWithParentResult);
-
+        
+        // Step 6. Process schedule
+        scheduleFileProcessor.process(scheduleFile);
+  
+        LOG.info("Processing schedule complete");
     }
 
 }

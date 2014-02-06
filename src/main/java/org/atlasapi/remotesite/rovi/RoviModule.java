@@ -4,10 +4,14 @@ import java.io.File;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLineParser;
+import org.atlasapi.remotesite.rovi.schedule.ItemBroadcastUpdater;
+import org.atlasapi.remotesite.rovi.schedule.ScheduleFileProcessor;
+import org.atlasapi.remotesite.rovi.schedule.ScheduleLineBroadcastExtractor;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLineParser;
 import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
@@ -29,10 +33,12 @@ public class RoviModule {
     private static final String EPISODE_SEQUENCE = "/data/rovi/Episode_Sequence.txt";
     private static final String SEASON_HISTORY_SEQUENCE = "/data/rovi/Season_History.txt";
     private static final String SERIES = "/data/rovi/Series.txt";
+    private static final String SCHEDULE_FILE = "/data/rovi/Schedule.txt";
 
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
+    private @Autowired ChannelResolver channelResolver;
     
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviProgramDescriptionLine> descriptionsIndexer() {
@@ -78,12 +84,21 @@ public class RoviModule {
                 episodeSequenceIndexer(),
                 seriesIndexer(),
                 roviContentWriter(),
-                contentResolver);
+                contentResolver,
+                scheduleProcessor());
     }
     
     @Bean
     public RoviUpdater roviUpdater() {
-        return new RoviUpdater(programsProcessor(), new File(PROGRAMS_FILE), new File(SEASON_HISTORY_SEQUENCE));
+        return new RoviUpdater(programsProcessor(), new File(PROGRAMS_FILE), new File(
+                SEASON_HISTORY_SEQUENCE), new File(SCHEDULE_FILE));
+    }
+    
+    @Bean
+    public ScheduleFileProcessor scheduleProcessor() {
+        return new ScheduleFileProcessor(
+                new ItemBroadcastUpdater(contentResolver, contentWriter),
+                new ScheduleLineBroadcastExtractor(channelResolver));
     }
     
     @PostConstruct

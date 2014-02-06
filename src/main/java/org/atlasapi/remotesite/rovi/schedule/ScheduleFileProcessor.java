@@ -47,7 +47,7 @@ public class ScheduleFileProcessor {
                                                                      .filter(Maybe.HAS_VALUE)
                                                                      .transform(Maybe.<Broadcast>requireValueFunction());
                 
-                itemBroadcastUpdater.addBroadcasts(RoviUtils.canonicalUriFor(programmeId), broadcasts);
+                itemBroadcastUpdater.addBroadcasts(RoviUtils.canonicalUriForProgram(programmeId), broadcasts);
             } catch (Exception e) {
                 log.error("Rovi programme ID " + programmeId, e);
             }
