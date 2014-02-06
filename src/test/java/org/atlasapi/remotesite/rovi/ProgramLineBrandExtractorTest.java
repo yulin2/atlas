@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.program.ProgramLineBrandExtractor;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramLine;
@@ -38,6 +39,8 @@ public class ProgramLineBrandExtractorTest {
     private KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex;
     @Mock
     private KeyedFileIndex<String, RoviSeriesLine> seriesIndex;
+    @Mock
+    private ContentResolver contentResolver;
     
     private ProgramLineBrandExtractor extractor;
     
@@ -45,7 +48,7 @@ public class ProgramLineBrandExtractorTest {
     public void init() throws IOException {
         when(descriptionIndex.getLinesForKey(anyString())).thenReturn(descriptions());
         when(seriesIndex.getLinesForKey(anyString())).thenReturn(series());
-        extractor = new ProgramLineBrandExtractor(descriptionIndex, seriesIndex);
+        extractor = new ProgramLineBrandExtractor(descriptionIndex, seriesIndex, contentResolver);
     }
     
     private Collection<RoviSeriesLine> series() {
