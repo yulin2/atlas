@@ -48,8 +48,6 @@ public class ProgramLineBrandExtractor extends ProgramLineBaseExtractor<RoviProg
             LOG.error("Error while retrieving descriptions for brand {} from index", programLine.getKey(), e);
         }
 
-        LOG.trace("Extracted brand {}", content.getCanonicalUri());
-        
         return content;
     }
     

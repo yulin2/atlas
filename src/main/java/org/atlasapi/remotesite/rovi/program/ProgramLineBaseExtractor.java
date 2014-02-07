@@ -18,7 +18,6 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
@@ -33,8 +32,6 @@ import com.metabroadcast.common.base.Maybe;
  */
 public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> implements ContentExtractor<RoviProgramLine, CONTENT> {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
-    
     private final KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex;
     private final ContentResolver contentResolver;
     
@@ -60,16 +57,18 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
         
         try {
             descriptionCulture = setDescriptionAndGetCulture(content, roviLine);
-        } catch (IOException e){
-            
-            log.error("Error while trying to populate the description for program " + roviLine.getKey(), e);
+        } catch (IOException e) {
+            log().error("Error while trying to populate the description for program " + roviLine.getKey(), e);
         }
         
         content.setPublisher(getPublisherForLanguageAndCulture(roviLine.getLanguage(), descriptionCulture));
         setParentIfNeeded(roviLine, content);
         createVersionIfNeeded(content, roviLine);
         
-        return addSpecificData(content, roviLine);
+        CONTENT extracted = addSpecificData(content, roviLine);
+        log().trace("Extracted {} with canonical uri {}", extracted.getClass().getName(), extracted.getCanonicalUri());
+        
+        return extracted;
     }
 
     private void setParentIfNeeded(RoviProgramLine roviLine, CONTENT content) {
