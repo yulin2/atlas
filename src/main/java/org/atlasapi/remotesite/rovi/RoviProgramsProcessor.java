@@ -84,10 +84,13 @@ public class RoviProgramsProcessor {
         LOG.info("Processing brands with parent complete, result: {}", processingBrandsWithParentResult);
         
         // Step 3. Process series
+        SeriesFromSeasonHistoryExtractor seriesExtractor = new SeriesFromSeasonHistoryExtractor(contentResolver);
         RoviDataProcessingResult processingSeriesResult = Files.readLines(seasonsFile, FILE_CHARSET, new RoviSeasonLineProcessor(
                 new RoviSeasonHistoryLineParser(),
-                new SeriesFromSeasonHistoryExtractor(),
+                seriesExtractor,
                 contentWriter));
+        
+        seriesExtractor.clearCache();
         
         LOG.info("Processing series complete, result: {}", processingSeriesResult);
         
