@@ -71,7 +71,6 @@ import org.atlasapi.equiv.results.filters.SpecializationFilter;
 import org.atlasapi.equiv.results.persistence.FileEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.scorers.BroadcastItemTitleScorer;
 import org.atlasapi.equiv.scorers.ContainerHierarchyMatchingScorer;
 import org.atlasapi.equiv.scorers.CrewMemberScorer;
 import org.atlasapi.equiv.scorers.EquivalenceScorer;
@@ -88,6 +87,7 @@ import org.atlasapi.equiv.update.EquivalenceUpdaters;
 import org.atlasapi.equiv.update.NullEquivalenceUpdater;
 import org.atlasapi.equiv.update.SourceSpecificEquivalenceUpdater;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
@@ -106,6 +106,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.jms.core.JmsTemplate;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -160,10 +162,14 @@ public class EquivModule {
     }
     
     private ContentEquivalenceUpdater.Builder<Item> standardItemUpdater(Set<Publisher> acceptablePublishers, Set<? extends EquivalenceScorer<Item>> scorers) {
+        return standardItemUpdater(acceptablePublishers, scorers, Predicates.alwaysTrue());
+    }
+    
+    private ContentEquivalenceUpdater.Builder<Item> standardItemUpdater(Set<Publisher> acceptablePublishers, Set<? extends EquivalenceScorer<Item>> scorers, Predicate<? super Broadcast> filter) {
         return ContentEquivalenceUpdater.<Item> builder()
             .withGenerators(ImmutableSet.<EquivalenceGenerator<Item>> of(
                 new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, 
-                    channelResolver, acceptablePublishers, Duration.standardMinutes(10))
+                    channelResolver, acceptablePublishers, Duration.standardMinutes(10), filter)
             ))
             .withScorers(scorers)
             .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
