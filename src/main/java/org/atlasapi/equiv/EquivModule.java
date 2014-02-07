@@ -98,6 +98,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.lookup.LookupWriter;
+import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -112,6 +113,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.time.DateTimeZones;
 
 @Configuration
 @Import({AtlasMessagingModule.class})
@@ -248,8 +250,15 @@ public class EquivModule {
                 .build());
         
         Set<Publisher> youViewPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(YOUVIEW));
+        Predicate<Broadcast> youviewBroadcastFilter = new Predicate<Broadcast>(){
+            @Override
+            public boolean apply(Broadcast input) {
+                DateTime twoWeeksAgo = new DateTime(DateTimeZones.UTC).minusDays(15);
+                return input.getTransmissionTime().isAfter(twoWeeksAgo);
+            }
+        };
         updaters.register(YOUVIEW, SourceSpecificEquivalenceUpdater.builder(YOUVIEW)
-                .withItemUpdater(broadcastItemEquivalenceUpdater(youViewPublishers, Score.negativeOne()))
+                .withItemUpdater(broadcastItemEquivalenceUpdater(youViewPublishers, Score.negativeOne(),youviewBroadcastFilter))
                 .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(youViewPublishers))
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
@@ -257,7 +266,7 @@ public class EquivModule {
         Set<Publisher> reduxPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX));
 
         updaters.register(BBC_REDUX, SourceSpecificEquivalenceUpdater.builder(BBC_REDUX)
-                .withItemUpdater(broadcastItemEquivalenceUpdater(reduxPublishers, Score.nullScore()))
+                .withItemUpdater(broadcastItemEquivalenceUpdater(reduxPublishers, Score.nullScore(), Predicates.alwaysTrue()))
                 .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(reduxPublishers))
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
@@ -416,12 +425,13 @@ public class EquivModule {
             .build();
     }
 
-    private EquivalenceUpdater<Item> broadcastItemEquivalenceUpdater(Set<Publisher> sources, Score titleMismatch) {
+    private EquivalenceUpdater<Item> broadcastItemEquivalenceUpdater(Set<Publisher> sources, Score titleMismatch,
+            Predicate<? super Broadcast> filter) {
         return standardItemUpdater(sources, ImmutableSet.of(
             new TitleMatchingItemScorer(), 
             new SequenceItemScorer(), 
             new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/)
-        )).build();
+        ), filter).build();
     }
 
     private EquivalenceUpdater<Item> rtItemEquivalenceUpdater() {
