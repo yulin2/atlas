@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.rovi;
 
 import com.google.common.base.Objects;
+import com.google.common.primitives.Longs;
 
 
 /**
@@ -49,7 +50,7 @@ public class PointerAndSize {
     
     @Override
     public int hashCode() {
-        return Objects.hashCode(pointer, size);
+        return Longs.hashCode(pointer);
     }
 
 }
