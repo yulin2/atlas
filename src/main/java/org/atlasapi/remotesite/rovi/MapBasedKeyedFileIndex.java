@@ -9,6 +9,12 @@ import java.util.Set;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
+
+
+/**
+ * An implementation that is based on the use of {@link Multimap} for storing the index
+ *
+ */
 public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedFileIndex<T, S> {
 
     private final RandomAccessFile randomAccessFile;
