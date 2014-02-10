@@ -10,6 +10,7 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 
 public class RoviUtils {
@@ -48,11 +49,7 @@ public class RoviUtils {
     public static String getPartAtPosition(Iterable<String> parts, int pos) {
         String part = Iterables.get(parts, pos);
         
-        if (StringUtils.isNotEmpty(part)) {
-            return part;
-        }
-        
-        return null;
+        return Strings.emptyToNull(part);
     }
 
     public static Integer getIntPartAtPosition(Iterable<String> parts, int pos) {
