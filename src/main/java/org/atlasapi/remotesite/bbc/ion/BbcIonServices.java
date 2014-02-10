@@ -64,7 +64,9 @@ public class BbcIonServices {
                     }
                 }
             )
-        ).build();
+        )
+        .put("bbc_radio_fourlw", "http://www.bbc.co.uk/services/radio4/lw")
+        .build();
     
     public static BiMap<String,String> services = ImmutableBiMap.<String, String>builder().putAll(tvServices).putAll(radioServices).build();
      
