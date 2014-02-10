@@ -45,7 +45,7 @@ public class RoviSeasonHistoryLine implements KeyedLine<String>{
 
     @Override
     public String getKey() {
-        return seasonHistoryId;
+        return seasonProgramId;
     }
     
     public static Builder builder() {

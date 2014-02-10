@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ProgramLineItemExtractor extends ProgramLineBaseExtractor<RoviProgramLine, Item> {
 
-    protected ProgramLineItemExtractor(
+    public ProgramLineItemExtractor(
             KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
             ContentResolver contentResolver) {
         super(descriptionIndex, contentResolver);
