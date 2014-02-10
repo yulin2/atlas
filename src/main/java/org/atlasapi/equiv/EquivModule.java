@@ -106,6 +106,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.jms.core.JmsTemplate;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -206,18 +207,32 @@ public class EquivModule {
         
         Set<Publisher> musicPublishers = ImmutableSet.of(BBC_MUSIC, YOUTUBE, 
             SPOTIFY, SOUNDCLOUD, RDIO, AMAZON_UK);
+        Set<Publisher> roviPublishers = ImmutableSet.copyOf(Sets.filter(Publisher.all(), 
+            new Predicate<Publisher>(){
+                @Override
+                public boolean apply(Publisher input) {
+                    return input.key().endsWith("rovicorp.com");
+                }
+            }
+        ));
         
         //Generally acceptable publishers.
-        Set<Publisher> acceptablePublishers = Sets.difference(
+        Set<Publisher> acceptablePublishers = ImmutableSet.copyOf(Sets.difference(
             Publisher.all(), 
-            Sets.union(ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM, NETFLIX, YOUVIEW), musicPublishers)
-        );
+            Sets.union(
+                ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM, NETFLIX, YOUVIEW), 
+                Sets.union(musicPublishers, roviPublishers)
+            )
+        ));
         
         EquivalenceUpdater<Item> standardItemUpdater = standardItemUpdater(acceptablePublishers, 
                 ImmutableSet.of(new TitleMatchingItemScorer(), new SequenceItemScorer())).build();
         EquivalenceUpdater<Container> topLevelContainerUpdater = topLevelContainerUpdater(acceptablePublishers);
 
-        Set<Publisher> nonStandardPublishers = Sets.union(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, YOUVIEW, TALK_TALK, PA), musicPublishers);
+        Set<Publisher> nonStandardPublishers = ImmutableSet.copyOf(Sets.union(
+            ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, YOUVIEW, TALK_TALK, PA), 
+            Sets.union(musicPublishers, roviPublishers)
+        ));
         final EquivalenceUpdaters updaters = new EquivalenceUpdaters();
         for (Publisher publisher : Iterables.filter(Publisher.all(), not(in(nonStandardPublishers)))) {
             updaters.register(publisher, SourceSpecificEquivalenceUpdater.builder(publisher)
@@ -329,7 +344,48 @@ public class EquivModule {
                     .build());
         }
         
+        ImmutableSet<Publisher> roviMatchPublishers = ImmutableSet.of(
+            Publisher.BBC, Publisher.PA, Publisher.YOUVIEW, Publisher.BBC_NITRO, 
+            Publisher.BBC_REDUX, Publisher.ITV, Publisher.C4,Publisher.C4_PMLSD,
+            Publisher.C4_PMLSD_P06,Publisher.FIVE
+        );
+        updaters.register(Publisher.ROVI_EN_GB, roviUpdater(Publisher.ROVI_EN_GB, roviMatchPublishers));
+        updaters.register(Publisher.ROVI_EN_US, roviUpdater(Publisher.ROVI_EN_US, roviMatchPublishers));
+        
+        
         return updaters; 
+    }
+
+    private SourceSpecificEquivalenceUpdater roviUpdater(Publisher roviSource, ImmutableSet<Publisher> roviMatchPublishers) {
+        SourceSpecificEquivalenceUpdater roviUpdater = SourceSpecificEquivalenceUpdater.builder(roviSource)
+            .withItemUpdater(ContentEquivalenceUpdater.<Item> builder()
+                    .withGenerators(ImmutableSet.of(
+                            new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, channelResolver, roviMatchPublishers, Duration.standardMinutes(10)),
+                            new ContainerCandidatesItemEquivalenceGenerator(contentResolver, equivSummaryStore),
+                            new FilmEquivalenceGenerator(searchResolver, roviMatchPublishers, true)
+                        ))
+                        .withScorers(ImmutableSet.of(
+                            new TitleMatchingItemScorer(),
+                            new SequenceItemScorer()
+                        ))
+                        .withCombiner(new RequiredScoreFilteringCombiner<Item>(
+                            new NullScoreAwareAveragingCombiner<Item>(),
+                            TitleMatchingItemScorer.NAME
+                        ))
+                        .withFilter(this.<Item>standardFilter())
+                        .withExtractor(PercentThresholdEquivalenceExtractor.<Item> moreThanPercent(90))
+                        .withHandler(new BroadcastingEquivalenceResultHandler<Item>(ImmutableList.of(
+                            EpisodeFilteringEquivalenceResultHandler.strict(
+                                new LookupWritingEquivalenceHandler<Item>(lookupWriter, roviMatchPublishers),
+                                equivSummaryStore
+                            ),
+                            new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
+                            new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore)
+                        ))).build())
+            .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
+            .withTopLevelContainerUpdater(topLevelContainerUpdater(roviMatchPublishers))
+            .build();
+        return roviUpdater;
     }
 
     private EquivalenceUpdater<Container> facebookContainerEquivalenceUpdater(Set<Publisher> facebookAcceptablePublishers) {
