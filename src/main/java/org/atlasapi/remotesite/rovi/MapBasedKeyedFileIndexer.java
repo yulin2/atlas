@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
@@ -30,12 +31,12 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
     private final static String END_OF_LINE = "\r\n";
 
     private final File file;
-    private final RoviLineParser<S> parser;
+    private final Function<String, S> toParsedLine;
     private final Charset charset;
 
-    public MapBasedKeyedFileIndexer(File file, Charset charset, RoviLineParser<S> parser) {
+    public MapBasedKeyedFileIndexer(File file, Charset charset, Function<String, S> toParsedLine) {
         this.file = checkNotNull(file);
-        this.parser = checkNotNull(parser);
+        this.toParsedLine = checkNotNull(toParsedLine);
         this.charset = checkNotNull(charset);
     }
     
@@ -45,7 +46,7 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, READ_MODE);
         Multimap<T, PointerAndSize> indexMap = buildIndex();
         
-        MapBasedKeyedFileIndex<T, S> index = new MapBasedKeyedFileIndex<T, S>(randomAccessFile, indexMap, charset, parser);
+        MapBasedKeyedFileIndex<T, S> index = new MapBasedKeyedFileIndex<T, S>(randomAccessFile, indexMap, charset, toParsedLine);
         
         return index;
     }
@@ -74,7 +75,7 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
                 int lineSize = line.getBytes(charset).length;
                 
                 try {
-                    S roviLine = parser.parseLine(line);
+                    S roviLine = toParsedLine.apply(line);
                     indexMap.put(roviLine.getKey(), new PointerAndSize(currentPointer.get(), lineSize));
                     processedLines++;
                 } catch (Exception e) {

@@ -25,7 +25,7 @@ public class RoviProgramLineParser implements RoviLineParser<RoviProgramLine>{
     private static final int LANGUAGE_POS = 26;
     
     @Override
-    public RoviProgramLine parseLine(String line) {
+    public RoviProgramLine apply(String line) {
         Iterable<String> parts = LINE_SPLITTER.split(line);
         
         RoviProgramLine.Builder builder = RoviProgramLine.builder();

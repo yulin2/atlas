@@ -22,7 +22,7 @@ public class ScheduleLineParser implements RoviLineParser<ScheduleLine>{
                                                                .toFormatter();
     
     @Override
-    public ScheduleLine parseLine(String line) {
+    public ScheduleLine apply(String line) {
         Iterator<String> lineIt = LINE_SPLITTER.split(line).iterator();
         
         String sourceId = parseAsString(lineIt.next());

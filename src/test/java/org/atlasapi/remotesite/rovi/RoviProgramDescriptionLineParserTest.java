@@ -17,7 +17,7 @@ public class RoviProgramDescriptionLineParserTest {
     public void testParseLine() {
         String line = "3037160|1234567|English - NA|Generic Description|Former friends dispute personal property.||Ins";
         
-        RoviProgramDescriptionLine roviLine = parser.parseLine(line);
+        RoviProgramDescriptionLine roviLine = parser.apply(line);
         
         assertEquals("3037160", roviLine.getProgramId());
         assertEquals("3037160", roviLine.getKey());
@@ -31,7 +31,7 @@ public class RoviProgramDescriptionLineParserTest {
     public void testParseLineSourceAbsent() {
         String line = "3037160||English - NA|Generic Description|Former friends dispute personal property.||Ins";
         
-        RoviProgramDescriptionLine roviLine = parser.parseLine(line);
+        RoviProgramDescriptionLine roviLine = parser.apply(line);
         
         assertFalse(roviLine.getSourceId().isPresent());
     }

@@ -45,6 +45,6 @@ public class RoviProgramLineProcessor extends RoviLineProcessor<RoviProgramLine>
 
     @Override
     protected RoviProgramLine parse(String line) {
-        return programLineParser.parseLine(line);
+        return programLineParser.apply(line);
     }
 }

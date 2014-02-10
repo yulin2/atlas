@@ -38,7 +38,7 @@ public class RoviSeasonLineProcessor extends RoviLineProcessor<RoviSeasonHistory
 
     @Override
     protected RoviSeasonHistoryLine parse(String line) {
-        return lineParser.parseLine(line);
+        return lineParser.apply(line);
     }
 
 }

@@ -16,7 +16,7 @@ public class RoviProgramLineParserTest {
     public void testParseLine() {
         String line = "SM|15343105|15343105|SEASON1|VARIANT1|15343105|10760531|Y|1|NFL on Five Long Title|NFL on Five|NFL on Five|NFL on Five|NFL on F|||||NFL on Five||Sports||Episode Title|13|1500||en|N||None|None|||Color|||Ins|||1879";
 
-        RoviProgramLine roviLine = parser.parseLine(line);
+        RoviProgramLine roviLine = parser.apply(line);
         
         assertEquals(RoviShowType.SM, roviLine.getShowType());
         assertEquals("en", roviLine.getLanguage());
