@@ -358,8 +358,30 @@ public class EquivModule {
 
     private SourceSpecificEquivalenceUpdater roviUpdater(Publisher roviSource, ImmutableSet<Publisher> roviMatchPublishers) {
         SourceSpecificEquivalenceUpdater roviUpdater = SourceSpecificEquivalenceUpdater.builder(roviSource)
-            .withItemUpdater(standardItemUpdater(roviMatchPublishers,
-                ImmutableSet.of(new TitleMatchingItemScorer(), new SequenceItemScorer())).build())
+            .withItemUpdater(ContentEquivalenceUpdater.<Item> builder()
+                    .withGenerators(ImmutableSet.of(
+                            new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, channelResolver, roviMatchPublishers, Duration.standardMinutes(10)),
+                            new ContainerCandidatesItemEquivalenceGenerator(contentResolver, equivSummaryStore),
+                            new FilmEquivalenceGenerator(searchResolver, roviMatchPublishers, true)
+                        ))
+                        .withScorers(ImmutableSet.of(
+                            new TitleMatchingItemScorer(),
+                            new SequenceItemScorer()
+                        ))
+                        .withCombiner(new RequiredScoreFilteringCombiner<Item>(
+                            new NullScoreAwareAveragingCombiner<Item>(),
+                            TitleMatchingItemScorer.NAME
+                        ))
+                        .withFilter(this.<Item>standardFilter())
+                        .withExtractor(PercentThresholdEquivalenceExtractor.<Item> moreThanPercent(90))
+                        .withHandler(new BroadcastingEquivalenceResultHandler<Item>(ImmutableList.of(
+                            EpisodeFilteringEquivalenceResultHandler.strict(
+                                new LookupWritingEquivalenceHandler<Item>(lookupWriter, roviMatchPublishers),
+                                equivSummaryStore
+                            ),
+                            new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
+                            new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore)
+                        ))).build())
             .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
             .withTopLevelContainerUpdater(topLevelContainerUpdater(roviMatchPublishers))
             .build();
