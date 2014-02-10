@@ -35,5 +35,10 @@ public class RoviUtilsTest {
         assertEquals(12, date.getMonthOfYear());
         assertEquals(23, date.getDayOfMonth());
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseIncorrectDate() {
+        RoviUtils.parseDate("2010");
+    }
     
 }

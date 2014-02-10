@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
 
 import java.util.Collection;
@@ -72,7 +73,17 @@ public class RoviUtils {
         return null;
     }
     
+    /**
+     * Convert a String representing a date into an instance of LocalDate representing the same logic date. 
+     * The input string should be 8 characters long and should have the format "yyyyMMdd". 
+     * If one or more portions of the date are unknown, they should be filled with zeros (i.e. 20140000) 
+     * 
+     * @param date - The String representing the date
+     * @return an instance of LocalDate representing the same logic date
+     */
     public static LocalDate parseDate(String date) {
+        checkArgument(date.length() == 8, "Input date String should be 8 characters long");
+        
         int defaultYear = LocalDate.now(DateTimeZone.UTC).getYear();
         int defaultMonth = 01;
         int defaultDay = 01;
