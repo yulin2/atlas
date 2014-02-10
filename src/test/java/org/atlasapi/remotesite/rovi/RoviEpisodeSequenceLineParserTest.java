@@ -23,6 +23,7 @@ public class RoviEpisodeSequenceLineParserTest {
         assertEquals("3832987", roviLine.getProgramId());
         assertEquals("Amazon Redux", roviLine.getEpisodeTitle().get());
         assertEquals(10, roviLine.getEpisodeSeasonSequence().get().intValue());
+        assertEquals(6, roviLine.getEpisodeSeasonNumber().get().intValue());
     }
     
 }

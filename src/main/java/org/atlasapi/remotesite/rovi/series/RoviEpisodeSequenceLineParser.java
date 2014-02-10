@@ -13,6 +13,7 @@ public class RoviEpisodeSequenceLineParser implements RoviLineParser<RoviEpisode
     private static final int SEASON_PROGRAM_ID_POS = 1;
     private static final int PROGRAM_ID_POS = 2;
     private static final int EPISODE_TITLE_POS = 3;
+    private static final int EPISODE_SEASON_NUMBER_POS = 4;
     private static final int EPISODE_SEASON_SEQUENCE_POS = 5;
     
     @Override
@@ -25,6 +26,7 @@ public class RoviEpisodeSequenceLineParser implements RoviLineParser<RoviEpisode
         builder.withSeasonProgramId(getPartAtPosition(parts, SEASON_PROGRAM_ID_POS));
         builder.withProgramId(getPartAtPosition(parts, PROGRAM_ID_POS));
         builder.withEpisodeTitle(getPartAtPosition(parts, EPISODE_TITLE_POS));
+        builder.withEpisodeSeasonNumber(getIntPartAtPosition(parts, EPISODE_SEASON_NUMBER_POS));
         builder.withEpisodeSeasonSequence(getIntPartAtPosition(parts, EPISODE_SEASON_SEQUENCE_POS));
         
         return builder.build();
