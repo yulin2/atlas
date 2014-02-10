@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Set;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
@@ -20,13 +21,13 @@ public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedF
     private final RandomAccessFile randomAccessFile;
     private final Multimap<T, PointerAndSize> indexMap;
     private final Charset charset;
-    private final RoviLineParser<S> parser;
+    private final Function<String, S> toParsedLine;
     
-    public MapBasedKeyedFileIndex(RandomAccessFile randomAccessFile, Multimap<T, PointerAndSize> indexMap, Charset charset, RoviLineParser<S> parser) {
+    public MapBasedKeyedFileIndex(RandomAccessFile randomAccessFile, Multimap<T, PointerAndSize> indexMap, Charset charset, Function<String, S> toParsedLine) {
         this.randomAccessFile = randomAccessFile;
         this.indexMap = indexMap;
         this.charset = charset;
-        this.parser = parser;
+        this.toParsedLine = toParsedLine;
     }
     
     @Override
@@ -36,7 +37,7 @@ public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedF
         
         for (PointerAndSize pointerAndSize: pointerAndSizeList) {
             String line = readData(key, pointerAndSize);
-            builder.add(parser.parseLine(line));
+            builder.add(toParsedLine.apply(line));
         }
 
         return builder.build();

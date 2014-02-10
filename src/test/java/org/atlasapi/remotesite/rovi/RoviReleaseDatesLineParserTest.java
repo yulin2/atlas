@@ -15,7 +15,7 @@ public class RoviReleaseDatesLineParserTest {
     public void testParseLine() {
         String line = "20210035|20121004|AT|Wide|Ins|204168";
         
-        RoviReleaseDatesLine roviLine = parser.parseLine(line);
+        RoviReleaseDatesLine roviLine = parser.apply(line);
         
         assertEquals("20210035", roviLine.getProgramId());
         assertEquals("20121004", roviLine.getReleaseDate().toString("yyyyMMdd"));

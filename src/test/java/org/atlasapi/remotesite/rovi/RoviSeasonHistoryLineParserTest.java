@@ -17,7 +17,7 @@ public class RoviSeasonHistoryLineParserTest {
     public void testParseLine() {
         String line = "19423942|20391799|1|Season 1|2012|2012|NBC|This breezy sitcom centers on the relationship between Jessica Black (Jessica St. Clair) and her best friend, Lennon White (Lennon Parham).||Ins|90379";
     
-        RoviSeasonHistoryLine roviLine = parser.parseLine(line);
+        RoviSeasonHistoryLine roviLine = parser.apply(line);
         
         assertEquals("19423942", roviLine.getSeriesId());
         assertEquals("20391799", roviLine.getSeasonProgramId());

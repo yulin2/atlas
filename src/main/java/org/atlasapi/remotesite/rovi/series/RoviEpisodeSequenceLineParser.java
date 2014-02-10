@@ -17,7 +17,7 @@ public class RoviEpisodeSequenceLineParser implements RoviLineParser<RoviEpisode
     private static final int EPISODE_SEASON_SEQUENCE_POS = 5;
     
     @Override
-    public RoviEpisodeSequenceLine parseLine(String line) {
+    public RoviEpisodeSequenceLine apply(String line) {
         Iterable<String> parts = LINE_SPLITTER.split(line);
         
         RoviEpisodeSequenceLine.Builder builder = RoviEpisodeSequenceLine.builder();

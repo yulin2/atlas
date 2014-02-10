@@ -16,7 +16,7 @@ public class RoviSeasonHistoryLineParser implements RoviLineParser<RoviSeasonHis
     private static final int SEASON_HISTORY_ID_POS = 10;
     
     @Override
-    public RoviSeasonHistoryLine parseLine(String line) {
+    public RoviSeasonHistoryLine apply(String line) {
         Iterable<String> parts = LINE_SPLITTER.split(line);
         
         RoviSeasonHistoryLine.Builder builder = RoviSeasonHistoryLine.builder();
