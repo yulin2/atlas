@@ -19,6 +19,11 @@ import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
 
+
+/**
+ * @author An implementation that creates an index of type {@link MapBasedKeyedFileIndex}
+ *
+ */
 public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements KeyedFileIndexer<T, S>{
     private final static Logger LOG = LoggerFactory.getLogger(MapBasedKeyedFileIndexer.class);
     private final static String READ_MODE = "r";
@@ -38,14 +43,14 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
     public KeyedFileIndex<T, S> index()
             throws IOException {
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, READ_MODE);
-        Multimap<T, PointerAndSize> indexMap = buildIndex(randomAccessFile);
+        Multimap<T, PointerAndSize> indexMap = buildIndex();
         
         MapBasedKeyedFileIndex<T, S> index = new MapBasedKeyedFileIndex<T, S>(randomAccessFile, indexMap, charset, parser);
         
         return index;
     }
     
-    private Multimap<T, PointerAndSize> buildIndex(RandomAccessFile randomAccessFile) throws IOException {
+    private Multimap<T, PointerAndSize> buildIndex() throws IOException {
         final HashMultimap<T, PointerAndSize> indexMap = HashMultimap.create();
         final AtomicLong currentPointer = new AtomicLong(0);
         

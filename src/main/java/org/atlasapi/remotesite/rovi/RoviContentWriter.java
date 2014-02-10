@@ -9,6 +9,10 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentWriter;
 
 
+/**
+ * Is the responsible for writing a content to Atlas. It internally delegates the writing to a {@link ContentWriter}
+ *
+ */
 public class RoviContentWriter {
     
     private final ContentWriter contentWriter;

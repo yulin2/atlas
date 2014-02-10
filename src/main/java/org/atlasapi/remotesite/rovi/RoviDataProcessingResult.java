@@ -5,6 +5,10 @@ import org.joda.time.DateTime;
 import com.google.common.base.Objects;
 
 
+/**
+ * Represents the result of a file processing (i.e. indexing or ingesting)
+ *
+ */
 public class RoviDataProcessingResult {
 
     private final long processedLines;
