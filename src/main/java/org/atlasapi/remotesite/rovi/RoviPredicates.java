@@ -16,13 +16,13 @@ public class RoviPredicates {
     public final static Predicate<RoviProgramLine> IS_BRAND = new Predicate<RoviProgramLine>() {
         @Override
         public boolean apply(@Nullable RoviProgramLine input) {
-            return input.getShowType().equals(RoviShowType.SM);
+            return RoviShowType.SM.equals(input.getShowType());
         }
     };
     
     public final static Predicate<RoviProgramLine> HAS_PARENT = new Predicate<RoviProgramLine>() {
         @Override
-        public boolean apply(@Nullable RoviProgramLine input) {
+        public boolean apply(RoviProgramLine input) {
             Optional<String> titleParentId = input.getTitleParentId();
             return titleParentId.isPresent() && !titleParentId.get().equals(input.getProgramId());
         }
