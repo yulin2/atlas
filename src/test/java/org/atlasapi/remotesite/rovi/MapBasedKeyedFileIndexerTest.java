@@ -37,7 +37,7 @@ public class MapBasedKeyedFileIndexerTest {
         assertEquals(key, seriesLine.getKey());
         assertEquals(key, seriesLine.getSeriesId());
         assertEquals("Empires of Industry", seriesLine.getFullTitle());
-        assertEquals("Chronicling the trades and commodities that made America an industrial power.", seriesLine.getSynopsis());
+        assertEquals("Chronicling the trades and commodities that made America an industrial power.", seriesLine.getSynopsis().get());
     }
 
     @Test

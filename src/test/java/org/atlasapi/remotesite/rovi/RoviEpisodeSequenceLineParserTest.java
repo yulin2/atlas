@@ -19,9 +19,9 @@ public class RoviEpisodeSequenceLineParserTest {
         RoviEpisodeSequenceLine roviLine = parser.parseLine(line);
         
         assertEquals("3757920", roviLine.getSeriesId());
-        assertEquals("13376601", roviLine.getSeasonProgramId());
+        assertEquals("13376601", roviLine.getSeasonProgramId().get());
         assertEquals("3832987", roviLine.getProgramId());
-        assertEquals("Amazon Redux", roviLine.getEpisodeTitle());
+        assertEquals("Amazon Redux", roviLine.getEpisodeTitle().get());
         assertEquals(10, roviLine.getEpisodeSeasonSequence().get().intValue());
     }
     

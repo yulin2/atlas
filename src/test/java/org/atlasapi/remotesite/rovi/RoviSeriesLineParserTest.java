@@ -21,7 +21,7 @@ public class RoviSeriesLineParserTest {
         
         assertEquals("13388464", seriesLine.getSeriesId());
         assertEquals("Sharpe", seriesLine.getFullTitle());
-        assertEquals("The adventures of a British soldier in the Napoleonic Wars.", seriesLine.getSynopsis());
+        assertEquals("The adventures of a British soldier in the Napoleonic Wars.", seriesLine.getSynopsis().get());
     }
 
 }
