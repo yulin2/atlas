@@ -11,7 +11,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.rovi.RoviConstants;
 import org.atlasapi.remotesite.rovi.RoviUtils;
 
 import com.google.common.base.Optional;
@@ -52,7 +51,7 @@ public class SeriesFromSeasonHistoryExtractor implements ContentExtractor<RoviSe
         if (parentPublisher.isPresent()) {
             series.setPublisher(parentPublisher.get());
         } else {
-            series.setPublisher(RoviConstants.DEFAULT_PUBLISHER);
+            series.setPublisher(DEFAULT_PUBLISHER);
         }
         
         series.setCanonicalUri(RoviUtils.canonicalUriForSeason(season.getSeasonProgramId()));
