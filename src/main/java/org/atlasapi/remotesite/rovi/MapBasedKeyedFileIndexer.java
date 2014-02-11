@@ -10,7 +10,6 @@ import java.nio.charset.Charset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
@@ -25,10 +24,10 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
     private final static String READ_MODE = "r";
 
     private final File file;
-    private final Function<String, S> parser;
+    private final RoviLineParser<S> parser;
     private final Charset charset;
 
-    public MapBasedKeyedFileIndexer(File file, Charset charset, Function<String, S> parser) {
+    public MapBasedKeyedFileIndexer(File file, Charset charset, RoviLineParser<S> parser) {
         this.file = checkNotNull(file);
         this.parser = checkNotNull(parser);
         this.charset = checkNotNull(charset);
