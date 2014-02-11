@@ -59,7 +59,7 @@ public class ProgramLineEpisodeExtractorTest {
     private ProgramLineEpisodeExtractor extractor;
     
     @Before
-    public void init() throws IOException {
+    public void init() throws IOException, IndexAccessException {
         Mockito.reset(descriptionIndex, episodeSequenceIndex, seasonHistoryIndex, contentResolver);
         when(descriptionIndex.getLinesForKey(anyString())).thenReturn(RoviTestUtils.descriptions(EPISODE_ID));
         
@@ -71,7 +71,7 @@ public class ProgramLineEpisodeExtractorTest {
     }
     
     @Test
-    public void testExtractionWithEpisodeSequencePresent() throws IOException {
+    public void testExtractionWithEpisodeSequencePresent() throws IOException, IndexAccessException {
         when(episodeSequenceIndex.getLinesForKey(EPISODE_ID)).thenReturn(episodeSequence());
         
         Episode extracted = extractor.extract(episode());
@@ -85,7 +85,7 @@ public class ProgramLineEpisodeExtractorTest {
     }
     
     @Test
-    public void testExtractionWithEpisodeSequenceNotPresent() throws IOException {
+    public void testExtractionWithEpisodeSequenceNotPresent() throws IOException, IndexAccessException {
         when(episodeSequenceIndex.getLinesForKey(EPISODE_ID)).thenReturn(episodeSequenceNotFound());
         when(seasonHistoryIndex.getLinesForKey(SEASON_ID)).thenReturn(seasonHistory());
         

@@ -17,7 +17,7 @@ public abstract class RoviLineExtractorAndWriter<T extends KeyedLine<?>> extends
     protected abstract Content extractContent(T parsedLine) throws IndexAccessException;
     
     @Override
-    protected void process(String line, T parsedLine) {
+    protected void process(String line, T parsedLine) throws IndexAccessException {
         Content extractedContent = extractContent(parsedLine);
         contentWriter.writeContent(extractedContent);
     }

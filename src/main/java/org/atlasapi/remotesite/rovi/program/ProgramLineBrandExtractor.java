@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.remotesite.rovi.IndexAccessException;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class ProgramLineBrandExtractor extends ProgramLineBaseExtractor<RoviProg
     }
 
     @Override
-    protected Brand addSpecificData(Brand content, RoviProgramLine programLine) {
+    protected Brand addSpecificData(Brand content, RoviProgramLine programLine) throws IndexAccessException {
         Collection<RoviSeriesLine> seriesLines;
         seriesLines = seriesIndex.getLinesForKey(programLine.getKey());
         RoviSeriesLine firstSeriesLine = Iterables.getFirst(seriesLines, null);
