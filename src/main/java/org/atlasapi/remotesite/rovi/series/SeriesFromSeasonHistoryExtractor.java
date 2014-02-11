@@ -2,8 +2,6 @@ package org.atlasapi.remotesite.rovi.series;
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
 
-import java.util.concurrent.ExecutionException;
-
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.ParentRef;
@@ -43,10 +41,7 @@ public class SeriesFromSeasonHistoryExtractor implements ContentExtractor<RoviSe
         
         Optional<Publisher> parentPublisher = Optional.absent();
         
-        try {
-            parentPublisher = parentPublisherCache.get(season.getSeasonProgramId());
-        } catch (ExecutionException e) {
-        }
+        parentPublisher = parentPublisherCache.getUnchecked(season.getSeasonProgramId());
 
         if (parentPublisher.isPresent()) {
             series.setPublisher(parentPublisher.get());
