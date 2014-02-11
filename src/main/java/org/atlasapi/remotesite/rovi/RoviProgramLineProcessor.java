@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.rovi;
 
+import java.nio.charset.Charset;
+
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.rovi.program.ProgramLineContentExtractorSupplier;
@@ -10,19 +12,17 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 
-public class RoviProgramLineProcessor extends RoviLineProcessor<RoviProgramLine> {
+public class RoviProgramLineProcessor extends RoviLineExtractorAndWriter<RoviProgramLine> {
     
     private static final Logger LOG = LoggerFactory.getLogger(RoviProgramLineProcessor.class);
 
-    private final RoviProgramLineParser programLineParser;
     private final ProgramLineContentExtractorSupplier contentExtractorSupplier;
     private final Predicate<RoviProgramLine> isToProcess;
     
     public RoviProgramLineProcessor(RoviProgramLineParser programLineParser,
-            ProgramLineContentExtractorSupplier contentExtractorSupplier, Predicate<RoviProgramLine> isToProcess, RoviContentWriter contentWriter) {
+            ProgramLineContentExtractorSupplier contentExtractorSupplier, Predicate<RoviProgramLine> isToProcess, RoviContentWriter contentWriter, Charset charset) {
         
-        super(contentWriter);
-        this.programLineParser = programLineParser;
+        super(programLineParser, charset, contentWriter);
         this.contentExtractorSupplier = contentExtractorSupplier;
         this.isToProcess = isToProcess;
     }
@@ -43,8 +43,4 @@ public class RoviProgramLineProcessor extends RoviLineProcessor<RoviProgramLine>
         return isToProcess.apply(parsedLine);
     }
 
-    @Override
-    protected RoviProgramLine parse(String line) {
-        return programLineParser.apply(line);
-    }
 }
