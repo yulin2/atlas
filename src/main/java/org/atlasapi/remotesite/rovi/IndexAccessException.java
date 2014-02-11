@@ -5,7 +5,7 @@ package org.atlasapi.remotesite.rovi;
  * Exception thrown when there are issues when reading or writing the index
  *
  */
-public class IndexAccessException extends RuntimeException {
+public class IndexAccessException extends Exception {
 
     private static final long serialVersionUID = 1L;
 

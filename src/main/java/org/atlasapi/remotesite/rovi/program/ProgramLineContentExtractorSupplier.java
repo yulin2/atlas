@@ -2,8 +2,8 @@ package org.atlasapi.remotesite.rovi.program;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
+import org.atlasapi.remotesite.rovi.RoviContentExtractor;
 import org.atlasapi.remotesite.rovi.RoviShowType;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
@@ -30,7 +30,7 @@ public class ProgramLineContentExtractorSupplier {
         this.seasonHistoryIndex = seasonHistoryIndex;
     }
 
-    public ContentExtractor<RoviProgramLine, ? extends Content> getContentExtractor(
+    public RoviContentExtractor<RoviProgramLine, ? extends Content> getContentExtractor(
             RoviShowType programType) {
 
         switch (programType) {

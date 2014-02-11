@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.remotesite.rovi.IndexAccessException;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
@@ -43,7 +44,7 @@ public class ProgramLineEpisodeExtractor extends ProgramLineBaseExtractor<RoviPr
     }
 
     @Override
-    protected Episode addSpecificData(Episode content, RoviProgramLine programLine) {
+    protected Episode addSpecificData(Episode content, RoviProgramLine programLine) throws IndexAccessException {
         setBrandAndSeriesFromProgramLine(content, programLine);
         setEpisodeNumberIfNumeric(content, programLine);
         setEpisodeTitleIfPresent(content, programLine);
@@ -54,7 +55,7 @@ public class ProgramLineEpisodeExtractor extends ProgramLineBaseExtractor<RoviPr
     }
 
     private void setSeasonNumberFromSeasonHistoryIfNeeded(Episode content,
-            RoviProgramLine programLine) {
+            RoviProgramLine programLine) throws IndexAccessException {
         if (content.getSeriesNumber() == null && programLine.getSeriesId().isPresent()) {
             Collection<RoviSeasonHistoryLine> results = seasonHistoryIndex.getLinesForKey(programLine.getSeasonId()
                     .get());
@@ -67,7 +68,7 @@ public class ProgramLineEpisodeExtractor extends ProgramLineBaseExtractor<RoviPr
     }
 
     private void setDataFromEpisodeSequenceIfPossible(Episode content,
-            RoviProgramLine programLine) {
+            RoviProgramLine programLine) throws IndexAccessException {
         Collection<RoviEpisodeSequenceLine> results = episodeSequenceIndex.getLinesForKey(programLine.getKey());
         RoviEpisodeSequenceLine episodeSequence = Iterables.getFirst(results, null);
 

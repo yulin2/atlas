@@ -14,8 +14,9 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.rovi.IndexAccessException;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
+import org.atlasapi.remotesite.rovi.RoviContentExtractor;
 import org.slf4j.Logger;
 
 import com.google.common.base.Optional;
@@ -29,7 +30,7 @@ import com.metabroadcast.common.base.Maybe;
 /*
  * Base Extractor that sets common fields on a {@link Content} from a {@link RoviProgramLine}
  */
-public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> implements ContentExtractor<RoviProgramLine, CONTENT> {
+public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> implements RoviContentExtractor<RoviProgramLine, CONTENT> {
 
     private final KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex;
     private final ContentResolver contentResolver;
@@ -40,7 +41,7 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
     }
     
     @Override
-    public CONTENT extract(RoviProgramLine roviLine) {
+    public CONTENT extract(RoviProgramLine roviLine) throws IndexAccessException {
         CONTENT content = createContent();
         
         content.setTitle(roviLine.getLongTitle());
@@ -79,9 +80,9 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
     
     protected abstract Logger log();
     protected abstract CONTENT createContent();
-    protected abstract CONTENT addSpecificData(CONTENT content, RoviProgramLine roviLine);
+    protected abstract CONTENT addSpecificData(CONTENT content, RoviProgramLine roviLine) throws IndexAccessException;
     
-    private Optional<String> setDescriptionAndGetCulture(CONTENT content, RoviProgramLine roviLine) {
+    private Optional<String> setDescriptionAndGetCulture(CONTENT content, RoviProgramLine roviLine) throws IndexAccessException {
         Optional<String> descriptionCulture = Optional.absent();
         Collection<RoviProgramDescriptionLine> descriptions = descriptionIndex.getLinesForKey(roviLine.getKey());
         

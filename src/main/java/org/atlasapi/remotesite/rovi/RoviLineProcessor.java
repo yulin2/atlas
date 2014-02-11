@@ -6,7 +6,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 
-import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.io.LineProcessor;
@@ -55,9 +54,12 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
                 process(line, parsedLine);
                 processedLines++;
             }
+        } catch (IndexAccessException iae) {
+            // Throwing a RuntimeException in order to stop the processing. 
+            // It's not possible to go ahead if the index is not accessible
+            throw new RuntimeException(errorMessage(line), iae);
         } catch (Exception e) {
-            Throwables.propagateIfInstanceOf(e, IndexAccessException.class);
-            log().error("Error occurred while processing the line [" + line + "]", e);
+            log().error(errorMessage(line), e);
             failedLines++;
         } finally {
             scannedLines++;
@@ -65,6 +67,10 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
         }
 
         return true;
+    }
+
+    private String errorMessage(String line) {
+        return "Error occurred while processing the line [" + line + "]";
     }
 
     @Override

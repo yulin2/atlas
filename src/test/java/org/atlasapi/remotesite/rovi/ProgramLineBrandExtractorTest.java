@@ -45,7 +45,7 @@ public class ProgramLineBrandExtractorTest {
     private ProgramLineBrandExtractor extractor;
     
     @Before
-    public void init() throws IOException {
+    public void init() throws IOException, IndexAccessException {
         when(descriptionIndex.getLinesForKey(anyString())).thenReturn(descriptions());
         when(seriesIndex.getLinesForKey(anyString())).thenReturn(series());
         extractor = new ProgramLineBrandExtractor(descriptionIndex, seriesIndex, contentResolver);
@@ -83,7 +83,7 @@ public class ProgramLineBrandExtractorTest {
     }
 
     @Test
-    public void testExtractContent() {
+    public void testExtractContent() throws IndexAccessException {
         RoviProgramLine.Builder programLine = RoviProgramLine.builder();
         
         programLine.withShowType(RoviShowType.SM);

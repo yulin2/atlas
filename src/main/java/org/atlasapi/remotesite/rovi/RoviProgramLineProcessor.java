@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.rovi;
 import java.nio.charset.Charset;
 
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.rovi.program.ProgramLineContentExtractorSupplier;
 import org.atlasapi.remotesite.rovi.program.RoviProgramLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramLineParser;
@@ -33,8 +32,8 @@ public class RoviProgramLineProcessor extends RoviLineExtractorAndWriter<RoviPro
     }
 
     @Override
-    protected Content extractContent(RoviProgramLine programLine) {
-        ContentExtractor<RoviProgramLine, ? extends Content> contentExtractor = contentExtractorSupplier.getContentExtractor(programLine.getShowType());
+    protected Content extractContent(RoviProgramLine programLine) throws IndexAccessException {
+        RoviContentExtractor<RoviProgramLine, ? extends Content> contentExtractor = contentExtractorSupplier.getContentExtractor(programLine.getShowType());
         return contentExtractor.extract(programLine);
     }
 

@@ -20,7 +20,7 @@ public class MapBasedKeyedFileIndexerTest {
     private static final String SMALL_FILE = "org/atlasapi/remotesite/rovi/rovi_series_small.txt";
 
     @Test
-    public void testIndexing() throws IOException {
+    public void testIndexing() throws IOException, IndexAccessException {
         URL fileUrl = Resources.getResource(SMALL_FILE);
         File file = new File(fileUrl.getPath());
         MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer(file);
@@ -41,7 +41,7 @@ public class MapBasedKeyedFileIndexerTest {
     }
 
     @Test
-    public void testIndexingFirstLine() throws IOException {
+    public void testIndexingFirstLine() throws IOException, IndexAccessException {
         URL fileUrl = Resources.getResource(SMALL_FILE);
         File file = new File(fileUrl.getPath());
         MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer(file);
