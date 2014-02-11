@@ -1,6 +1,5 @@
 package org.atlasapi.remotesite.rovi;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
@@ -17,9 +16,9 @@ public interface KeyedFileIndex<T, S extends KeyedLine<T>> {
     /**
      * @param key - the key of the lines
      * @return a collection of the lines in the file identified by the key
-     * @throws IOException if it's not possible to read the file
+     * @throws IndexAccessException if it's not possible to access the index
      */
-    Collection<S> getLinesForKey(T key) throws IOException;
+    Collection<S> getLinesForKey(T key) throws IndexAccessException;
 
     /**
      * @return the set of the keys in this index
