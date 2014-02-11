@@ -21,7 +21,7 @@ import com.google.common.collect.Iterables;
 /*
  * Extracts an {@link Episode} from a {@link RoviProgramLine} with {@link RoviShowType} SE (Series Episode)
  */
-public class ProgramLineEpisodeExtractor extends ProgramLineBaseExtractor<RoviProgramLine, Episode> {
+public class ProgramLineEpisodeExtractor extends ProgramLineBaseItemExtractor<Episode> {
 
     private final KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex;
     private final KeyedFileIndex<String, RoviSeasonHistoryLine> seasonHistoryIndex;
@@ -44,14 +44,12 @@ public class ProgramLineEpisodeExtractor extends ProgramLineBaseExtractor<RoviPr
     }
 
     @Override
-    protected Episode addSpecificData(Episode content, RoviProgramLine programLine) throws IndexAccessException {
+    protected void addItemSpecificData(Episode content, RoviProgramLine programLine) throws IndexAccessException {
         setBrandAndSeriesFromProgramLine(content, programLine);
         setEpisodeNumberIfNumeric(content, programLine);
         setEpisodeTitleIfPresent(content, programLine);
         setDataFromEpisodeSequenceIfPossible(content, programLine);
         setSeasonNumberFromSeasonHistoryIfNeeded(content, programLine);
-        
-        return content;
     }
 
     private void setSeasonNumberFromSeasonHistoryIfNeeded(Episode content,
