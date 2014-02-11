@@ -76,7 +76,8 @@ public class RoviProgramsProcessor {
                 new RoviProgramLineParser(),
                 contentExtractorSupplier,
                 IS_BRAND_NO_PARENT,
-                contentWriter));
+                contentWriter,
+                FILE_CHARSET));
         
         LOG.info("Processing brands with no parent complete, result: {}", processingBrandsNoParentResult);
 
@@ -85,7 +86,8 @@ public class RoviProgramsProcessor {
                 new RoviProgramLineParser(),
                 contentExtractorSupplier,
                 IS_BRAND_WITH_PARENT,
-                contentWriter));
+                contentWriter,
+                FILE_CHARSET));
         
         LOG.info("Processing brands with parent complete, result: {}", processingBrandsWithParentResult);
         
@@ -94,7 +96,8 @@ public class RoviProgramsProcessor {
         RoviDataProcessingResult processingSeriesResult = Files.readLines(seasonsFile, FILE_CHARSET, new RoviSeasonLineProcessor(
                 new RoviSeasonHistoryLineParser(),
                 seriesExtractor,
-                contentWriter));
+                contentWriter,
+                FILE_CHARSET));
         
         seriesExtractor.clearCache();
         
@@ -105,7 +108,8 @@ public class RoviProgramsProcessor {
                 new RoviProgramLineParser(),
                 contentExtractorSupplier,
                 NO_BRAND_NO_PARENT,
-                contentWriter));
+                contentWriter,
+                FILE_CHARSET));
         
         LOG.info("Processing programs (no brands) with no parent complete, result: {}", processingNoBrandsNoParentResult);
         
@@ -114,7 +118,8 @@ public class RoviProgramsProcessor {
                 new RoviProgramLineParser(),
                 contentExtractorSupplier,
                 NO_BRAND_WITH_PARENT,
-                contentWriter));
+                contentWriter,
+                FILE_CHARSET));
         
         LOG.info("Processing programs (no brands) with parent complete, result: {}", processingNoBrandsWithParentResult);
         
