@@ -22,7 +22,7 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
     private long failedLines = 0;
     private DateTime startTime;
     
-    public RoviLineProcessor(Function<String, T> parser, Charset charset) {
+    public RoviLineProcessor(RoviLineParser<T> parser, Charset charset) {
         this.parser = parser;
         this.charset = charset;
     }
