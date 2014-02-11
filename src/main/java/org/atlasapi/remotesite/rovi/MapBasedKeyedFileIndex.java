@@ -31,7 +31,7 @@ public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedF
     }
     
     @Override
-    public Collection<S> getLinesForKey(T key) throws IOException {
+    public Collection<S> getLinesForKey(T key)  {
         Collection<PointerAndSize> pointerAndSizeList = indexMap.get(key);
         ImmutableList.Builder<S> builder = ImmutableList.builder();
         
@@ -48,12 +48,16 @@ public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedF
         return indexMap.keySet();
     }
     
-    private String readData(T key, PointerAndSize pointerAndSize) throws IOException {
-        randomAccessFile.seek(pointerAndSize.getPointer());
-        byte[] bytesBuffer = new byte[pointerAndSize.getSize()];
-        randomAccessFile.read(bytesBuffer);
-        
-        return new String(bytesBuffer, charset);
+    private String readData(T key, PointerAndSize pointerAndSize) {
+        try {
+            randomAccessFile.seek(pointerAndSize.getPointer());
+            byte[] bytesBuffer = new byte[pointerAndSize.getSize()];
+            randomAccessFile.read(bytesBuffer);
+
+            return new String(bytesBuffer, charset);
+        } catch (IOException e) {
+            throw new IndexAccessException("Error while trying to access the index - key: " + key.toString(), e);
+        }
     }
 
 }

@@ -2,13 +2,12 @@ package org.atlasapi.remotesite.rovi;
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.FILE_CHARSET;
 
-import java.io.IOException;
-
 import org.atlasapi.media.entity.Content;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.common.base.Charsets;
 import com.google.common.io.LineProcessor;
 
@@ -27,12 +26,12 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
     }
     
     protected abstract Logger log();
-    protected abstract Content extractContent(T parsedLine);
+    protected abstract Content extractContent(T parsedLine) throws IndexAccessException;
     protected abstract boolean isToProcess(T parsedLine);
     protected abstract T parse(String line);
     
     @Override
-    public boolean processLine(String line) throws IOException {
+    public boolean processLine(String line) {
         // Removing BOM if charset is UTF-16LE see (http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4508058)
         if (scannedLines == 0) {
             startTime = now();
@@ -49,6 +48,7 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
                 processedLines++;
             }
         } catch (Exception e) {
+            Throwables.propagateIfInstanceOf(e, IndexAccessException.class);
             log().error("Error occurred while processing the line [" + line + "]", e);
             failedLines++;
         } finally {

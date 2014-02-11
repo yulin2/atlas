@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.rovi.program;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
@@ -57,44 +56,35 @@ public class ProgramLineEpisodeExtractor extends ProgramLineBaseExtractor<RoviPr
     private void setSeasonNumberFromSeasonHistoryIfNeeded(Episode content,
             RoviProgramLine programLine) {
         if (content.getSeriesNumber() == null && programLine.getSeriesId().isPresent()) {
-            try {
-                Collection<RoviSeasonHistoryLine> results = seasonHistoryIndex.getLinesForKey(programLine.getSeasonId().get());
-                RoviSeasonHistoryLine seasonHistory = Iterables.getFirst(results, null);
-                
-                if (seasonHistory != null && seasonHistory.getSeasonNumber().isPresent()) {
-                    content.setSeriesNumber(seasonHistory.getSeasonNumber().get());
-                }
-                
-            } catch (IOException e) {
-                LOG.error("Error occurred while reading from Episode Sequence index", e);
+            Collection<RoviSeasonHistoryLine> results = seasonHistoryIndex.getLinesForKey(programLine.getSeasonId()
+                    .get());
+            RoviSeasonHistoryLine seasonHistory = Iterables.getFirst(results, null);
+
+            if (seasonHistory != null && seasonHistory.getSeasonNumber().isPresent()) {
+                content.setSeriesNumber(seasonHistory.getSeasonNumber().get());
             }
         }
-
     }
 
     private void setDataFromEpisodeSequenceIfPossible(Episode content,
             RoviProgramLine programLine) {
-        try {
-            Collection<RoviEpisodeSequenceLine> results = episodeSequenceIndex.getLinesForKey(programLine.getKey());
-            RoviEpisodeSequenceLine episodeSequence = Iterables.getFirst(results, null);
-            
-            // If found episodeSequence from index then override some values
-            if (episodeSequence != null) {
-                if (episodeSequence.getEpisodeTitle().isPresent()) {
-                    content.setTitle(episodeSequence.getEpisodeTitle().get());
-                }
-                
-                if (episodeSequence.getEpisodeSeasonSequence().isPresent()) {
-                    content.setEpisodeNumber(episodeSequence.getEpisodeSeasonSequence().get());
-                }
-                
-                if (episodeSequence.getEpisodeSeasonNumber().isPresent()) {
-                    content.setSeriesNumber(episodeSequence.getEpisodeSeasonNumber().get());
-                }
+        Collection<RoviEpisodeSequenceLine> results = episodeSequenceIndex.getLinesForKey(programLine.getKey());
+        RoviEpisodeSequenceLine episodeSequence = Iterables.getFirst(results, null);
 
+        // If found episodeSequence from index then override some values
+        if (episodeSequence != null) {
+            if (episodeSequence.getEpisodeTitle().isPresent()) {
+                content.setTitle(episodeSequence.getEpisodeTitle().get());
             }
-        } catch (IOException e) {
-            LOG.error("Error occurred while reading from Episode Sequence index", e);
+
+            if (episodeSequence.getEpisodeSeasonSequence().isPresent()) {
+                content.setEpisodeNumber(episodeSequence.getEpisodeSeasonSequence().get());
+            }
+
+            if (episodeSequence.getEpisodeSeasonNumber().isPresent()) {
+                content.setSeriesNumber(episodeSequence.getEpisodeSeasonNumber().get());
+            }
+
         }
     }
     

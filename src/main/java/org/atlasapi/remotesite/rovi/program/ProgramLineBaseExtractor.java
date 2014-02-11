@@ -5,7 +5,6 @@ import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getPublisherForLanguage;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getPublisherForLanguageAndCulture;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import org.atlasapi.media.entity.Content;
@@ -54,12 +53,7 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
         }
         
         Optional<String> descriptionCulture = Optional.absent();
-        
-        try {
-            descriptionCulture = setDescriptionAndGetCulture(content, roviLine);
-        } catch (IOException e) {
-            log().error("Error while trying to populate the description for program " + roviLine.getKey(), e);
-        }
+        descriptionCulture = setDescriptionAndGetCulture(content, roviLine);
         
         content.setPublisher(getPublisherForLanguageAndCulture(roviLine.getLanguage(), descriptionCulture));
         setParentIfNeeded(roviLine, content);
@@ -87,7 +81,7 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
     protected abstract CONTENT createContent();
     protected abstract CONTENT addSpecificData(CONTENT content, RoviProgramLine roviLine);
     
-    private Optional<String> setDescriptionAndGetCulture(CONTENT content, RoviProgramLine roviLine) throws IOException {
+    private Optional<String> setDescriptionAndGetCulture(CONTENT content, RoviProgramLine roviLine) {
         Optional<String> descriptionCulture = Optional.absent();
         Collection<RoviProgramDescriptionLine> descriptions = descriptionIndex.getLinesForKey(roviLine.getKey());
         
@@ -130,7 +124,7 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
         
         return descriptionCulture;
     }
-    
+
     private Optional<String> getLongestDescription(CONTENT content) {
         if (content.getLongDescription() != null) {
             return Optional.of(content.getLongDescription());
