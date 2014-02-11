@@ -7,14 +7,11 @@ import static com.google.common.collect.Iterables.transform;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentGroupResolver;
@@ -25,19 +22,25 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.remotesite.bbc.nitro.ChannelDay;
 import org.atlasapi.remotesite.bbc.nitro.ChannelDayProcessor;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
 
 public class PicksDayUpdater implements ChannelDayProcessor {
 
+    private static final int LARGE_BRAND_SIZE = 1000;
+    private static final Duration SHORT_BROADCAST_LENGTH = Duration.standardMinutes(10);
+    
     private static final Logger log = LoggerFactory.getLogger(PicksDayUpdater.class);
     
     private static final String CONTENT_GROUP = "http://picks.metabroadcast.com/schedule-picks";
@@ -45,7 +48,7 @@ public class PicksDayUpdater implements ChannelDayProcessor {
     private final ContentGroupResolver contentGroupResolver;
     private final ContentResolver contentResolver;
     private final ContentGroupWriter contentGroupWriter;
-    private final PicksChannelsSupplier picksChannelsSupplier;
+    private final Predicate<ItemAndBroadcast> picksPredicate;
     
     public PicksDayUpdater(ScheduleResolver scheduleResolver, ContentGroupResolver contentGroupResolver,
             ContentResolver contentResolver, ContentGroupWriter contentGroupWriter, PicksChannelsSupplier picksChannelsSupplier) {
@@ -53,7 +56,11 @@ public class PicksDayUpdater implements ChannelDayProcessor {
         this.contentGroupResolver = contentGroupResolver;
         this.contentGroupWriter = contentGroupWriter;
         this.contentResolver = contentResolver;
-        this.picksChannelsSupplier = picksChannelsSupplier;
+        this.picksPredicate = Predicates.and(ImmutableList.of(
+                                                new PrimetimePredicate(picksChannelsSupplier.get()), 
+                                                Predicates.not(new ItemInLargeBrandPredicate(contentResolver, LARGE_BRAND_SIZE)),
+                                                Predicates.not(new ShortBroadcastPredicate(SHORT_BROADCAST_LENGTH)))
+                                            );
     }
     
     @Override
@@ -93,8 +100,7 @@ public class PicksDayUpdater implements ChannelDayProcessor {
     }
 
     private Iterable<Item> findPicks(Iterable<ItemAndBroadcast> itemsAndBroadcasts) {
-        return transform(filter(itemsAndBroadcasts, 
-                new PickPredicate(picksChannelsSupplier.get())), TO_ITEM);
+        return transform(filter(itemsAndBroadcasts, picksPredicate), TO_ITEM);
     }
     
     private void addPicksToContentGroup(Iterable<Item> items) {
