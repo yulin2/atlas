@@ -12,9 +12,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.when;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.Map;
 
 import org.atlasapi.media.entity.Brand;
