@@ -1,10 +1,15 @@
 package org.atlasapi.remotesite.rovi;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -18,13 +23,18 @@ import com.google.common.collect.Multimap;
  */
 public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedFileIndex<T, S> {
 
+    private final static String READ_MODE = "r";
+    private final static Logger LOG = LoggerFactory.getLogger(MapBasedKeyedFileIndex.class);
+    
+    private final File file;
     private final RandomAccessFile randomAccessFile;
     private final Multimap<T, PointerAndSize> indexMap;
     private final Charset charset;
     private final Function<String, S> toParsedLine;
     
-    public MapBasedKeyedFileIndex(RandomAccessFile randomAccessFile, Multimap<T, PointerAndSize> indexMap, Charset charset, Function<String, S> toParsedLine) {
-        this.randomAccessFile = randomAccessFile;
+    public MapBasedKeyedFileIndex(File file, Multimap<T, PointerAndSize> indexMap, Charset charset, Function<String, S> toParsedLine) throws FileNotFoundException {
+        this.file = file;
+        this.randomAccessFile = new RandomAccessFile(file, READ_MODE);
         this.indexMap = indexMap;
         this.charset = charset;
         this.toParsedLine = toParsedLine;
@@ -57,6 +67,15 @@ public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedF
             return new String(bytesBuffer, charset);
         } catch (IOException e) {
             throw new IndexAccessException("Error while trying to access the index - key: " + key.toString(), e);
+        }
+    }
+
+    @Override
+    public void releaseResources() {
+        try {
+            randomAccessFile.close();
+        } catch (IOException e) {
+            LOG.error("Error while closing RandomAccessFile for file " + file.getAbsolutePath(), e);
         }
     }
 
