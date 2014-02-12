@@ -42,4 +42,10 @@ public class RoviProgramLineProcessor extends RoviLineExtractorAndWriter<RoviPro
         return isToProcess.apply(parsedLine);
     }
 
+    @Override
+    protected void handleProcessingException(Exception e, String line) {
+        // Swallow the exception and logs
+        log().error(errorMessage(line), e);
+    }
+
 }

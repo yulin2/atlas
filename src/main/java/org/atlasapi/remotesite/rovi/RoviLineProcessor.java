@@ -36,6 +36,7 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
      */
     protected abstract void doFinally(String line);
     protected abstract void handleBom(int bomLength);
+    protected abstract void handleProcessingException(Exception e, String line);
     
     @Override
     public boolean processLine(String line) {
@@ -59,8 +60,8 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
             // It's not possible to go ahead if the index is not accessible
             throw new RuntimeException(errorMessage(line), iae);
         } catch (Exception e) {
-            log().error(errorMessage(line), e);
             failedLines++;
+            handleProcessingException(e, line);
         } finally {
             scannedLines++;
             doFinally(line);
@@ -69,7 +70,7 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
         return true;
     }
 
-    private String errorMessage(String line) {
+    protected String errorMessage(String line) {
         return "Error occurred while processing the line [" + line + "]";
     }
 

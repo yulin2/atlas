@@ -55,4 +55,10 @@ public class RoviLineIndexer<T, S extends KeyedLine<T>> extends RoviLineProcesso
         return END_OF_LINE.getBytes(charset).length;
     }
 
+    @Override
+    protected void handleProcessingException(Exception e, String line) {
+        // Stops the process throwing an exception
+        throw new RuntimeException(errorMessage(line), e);
+    }
+
 }

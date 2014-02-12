@@ -43,4 +43,10 @@ public class RoviSeasonLineProcessor extends RoviLineExtractorAndWriter<RoviSeas
         return lineParser.apply(line);
     }
 
+    @Override
+    protected void handleProcessingException(Exception e, String line) {
+        // Swallow the exception and logs
+        log().error(errorMessage(line), e);
+    }
+
 }
