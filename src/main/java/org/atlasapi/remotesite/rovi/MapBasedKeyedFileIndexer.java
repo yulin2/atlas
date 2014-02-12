@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 
 import org.slf4j.Logger;
@@ -21,7 +20,7 @@ import com.google.common.io.Files;
  */
 public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements KeyedFileIndexer<T, S>{
     private final static Logger LOG = LoggerFactory.getLogger(MapBasedKeyedFileIndexer.class);
-    private final static String READ_MODE = "r";
+    
 
     private final File file;
     private final RoviLineParser<S> parser;
@@ -36,10 +35,8 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
     @Override
     public KeyedFileIndex<T, S> index()
             throws IOException {
-        RandomAccessFile randomAccessFile = new RandomAccessFile(file, READ_MODE);
         Multimap<T, PointerAndSize> indexMap = buildIndex();
-        
-        MapBasedKeyedFileIndex<T, S> index = new MapBasedKeyedFileIndex<T, S>(randomAccessFile, indexMap, charset, parser);
+        MapBasedKeyedFileIndex<T, S> index = new MapBasedKeyedFileIndex<T, S>(file, indexMap, charset, parser);
         
         return index;
     }

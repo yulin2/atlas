@@ -25,4 +25,9 @@ public interface KeyedFileIndex<T, S extends KeyedLine<T>> {
      */
     Set<T> getKeys();
     
+    /**
+     * The index releases the resources it's handling.
+     */
+    void releaseResources();
+    
 }

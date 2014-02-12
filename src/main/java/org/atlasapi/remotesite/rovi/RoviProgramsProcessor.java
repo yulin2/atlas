@@ -22,6 +22,7 @@ import org.atlasapi.remotesite.rovi.series.SeriesFromSeasonHistoryExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 
 public class RoviProgramsProcessor {
@@ -127,6 +128,17 @@ public class RoviProgramsProcessor {
         scheduleFileProcessor.process(scheduleFile);
   
         LOG.info("Processing schedule complete");
+        
+        releaseIndexResources(ImmutableSet.of(descriptionIndex,
+                episodeSequenceIndex,
+                seriesIndex,
+                seasonHistoryIndex));
+    }
+
+    private void releaseIndexResources(Iterable<KeyedFileIndex<String, ? extends KeyedLine<String>>> indexes) {
+        for (KeyedFileIndex<?, ?> index: indexes) {
+            index.releaseResources();
+        }
     }
 
 }

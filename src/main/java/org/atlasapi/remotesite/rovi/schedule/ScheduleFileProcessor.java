@@ -53,6 +53,7 @@ public class ScheduleFileProcessor {
             }
         }
         log.trace("Done processing schedule ingest of {}", scheduleFile.getCanonicalPath());
+        index.releaseResources();
     }
     
     private final Function<ScheduleLine, Maybe<Broadcast>> toBroadcast = new Function<ScheduleLine, Maybe<Broadcast>>() {
