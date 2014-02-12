@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.rovi.program;
 
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.remotesite.rovi.IndexAccessException;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

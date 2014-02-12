@@ -1,11 +1,14 @@
 package org.atlasapi.remotesite.rovi;
 
+import java.io.File;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 
 
 public class RoviTestUtils {
@@ -40,6 +43,11 @@ public class RoviTestUtils {
         descriptions.add(builderSynopsis.build());        
         
         return descriptions;
+    }
+    
+    public static File fileFromResource(String resourcePath) {
+        URL fileUrl = Resources.getResource(resourcePath);
+        return new File(fileUrl.getPath());
     }
     
 }
