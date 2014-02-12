@@ -38,22 +38,27 @@ public class ScheduleFileProcessor {
                 new ScheduleLineParser());
         
         log.trace("Start processing schedule ingest of {}", scheduleFile.getCanonicalPath());
-        KeyedFileIndex<String, ScheduleLine> index = scheduleIndexer.index() ;
-        for (String programmeId : index.getKeys()) {
-            log.trace("Processing programme ID {}", programmeId);
-            try {
-                FluentIterable<Broadcast> broadcasts = FluentIterable.from(index.getLinesForKey(programmeId))
-                                                                     .transform(toBroadcast)
-                                                                     .filter(Maybe.HAS_VALUE)
-                                                                     .transform(Maybe.<Broadcast>requireValueFunction());
-                
-                itemBroadcastUpdater.addBroadcasts(RoviUtils.canonicalUriForProgram(programmeId), broadcasts);
-            } catch (Exception e) {
-                log.error("Rovi programme ID " + programmeId, e);
+        KeyedFileIndex<String, ScheduleLine> index = scheduleIndexer.index();
+        
+        try {
+            for (String programmeId : index.getKeys()) {
+                log.trace("Processing programme ID {}", programmeId);
+                try {
+                    FluentIterable<Broadcast> broadcasts = FluentIterable.from(index.getLinesForKey(programmeId))
+                                                                         .transform(toBroadcast)
+                                                                         .filter(Maybe.HAS_VALUE)
+                                                                         .transform(Maybe.<Broadcast>requireValueFunction());
+                    
+                    itemBroadcastUpdater.addBroadcasts(RoviUtils.canonicalUriForProgram(programmeId), broadcasts);
+                } catch (Exception e) {
+                    log.error("Rovi programme ID " + programmeId, e);
+                }
             }
+            log.trace("Done processing schedule ingest of {}", scheduleFile.getCanonicalPath());
         }
-        log.trace("Done processing schedule ingest of {}", scheduleFile.getCanonicalPath());
-        index.releaseResources();
+        finally {
+            index.releaseResources();
+        }
     }
     
     private final Function<ScheduleLine, Maybe<Broadcast>> toBroadcast = new Function<ScheduleLine, Maybe<Broadcast>>() {
