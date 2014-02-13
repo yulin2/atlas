@@ -28,7 +28,7 @@ public abstract class RoviLineExtractorAndWriter<T extends KeyedLine<?>> extends
     }
     
     @Override
-    protected void handleBom(int bomLength) {
+    protected void handleBom() {
         // Do nothing
     }
 

@@ -46,7 +46,10 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
         
         LOG.info("Start indexing file {}", file.getAbsolutePath());
         
-        RoviDataProcessingResult result = Files.readLines(file, charset, new RoviLineIndexer<>(parser, charset, indexMap));
+        RoviDataProcessingResult result = Files.readLines(file, charset, new RoviLineIndexer<>(
+                parser,
+                charset,
+                indexMap));
         
         LOG.info("File {} indexed. Result: {}", file.getAbsolutePath(), result);
 
