@@ -1,5 +1,8 @@
 package org.atlasapi.remotesite.rovi;
 
+import static org.atlasapi.remotesite.rovi.RoviConstants.END_OF_LINE;
+import static org.atlasapi.remotesite.rovi.RoviConstants.UTF_16LE_BOM;
+
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -12,7 +15,6 @@ import com.google.common.collect.Multimap;
 public class RoviLineIndexer<T, S extends KeyedLine<T>> extends RoviLineProcessor<S> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RoviLineIndexer.class);
-    private final static String END_OF_LINE = "\r\n";
     
     private final Multimap<T, PointerAndSize> indexMap;
     private final AtomicLong currentPointer = new AtomicLong(0);
@@ -47,8 +49,8 @@ public class RoviLineIndexer<T, S extends KeyedLine<T>> extends RoviLineProcesso
     }
 
     @Override
-    protected void handleBom(int bomLength) {
-        currentPointer.addAndGet(bomLength);
+    protected void handleBom() {
+        currentPointer.addAndGet(UTF_16LE_BOM.length);
     }
     
     private int endOfLineSize() {

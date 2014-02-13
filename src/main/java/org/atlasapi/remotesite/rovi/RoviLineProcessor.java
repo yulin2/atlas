@@ -6,7 +6,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.io.LineProcessor;
 
@@ -35,7 +34,7 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
      * @param line
      */
     protected abstract void doFinally(String line);
-    protected abstract void handleBom(int bomLength);
+    protected abstract void handleBom();
     protected abstract void handleProcessingException(Exception e, String line);
     
     @Override
@@ -43,10 +42,9 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
         // Removing BOM if charset is UTF-16LE see (http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4508058)
         if (scannedLines == 0) {
             startTime = now();
+            line = stripBomIfNeeded(line);
         }
         
-        line = removeBom(line);
-
         try {
             T parsedLine = parse(line);
             
@@ -70,30 +68,29 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
         return true;
     }
 
-    protected String errorMessage(String line) {
-        return "Error occurred while processing the line [" + line + "]";
-    }
-
     @Override
     public RoviDataProcessingResult getResult() {
         return new RoviDataProcessingResult(processedLines, failedLines, startTime, now());
     }
     
+    protected String errorMessage(String line) {
+        return "Error occurred while processing the line [" + line + "]";
+    }
+    
+    
     protected T parse(String line) {
         return parser.apply(line);
+    }
+
+    private String stripBomIfNeeded(String line) {
+        if (RoviUtils.startsWithUTF16LEBom(line)) {
+            line = RoviUtils.stripBom(line);
+            handleBom();
+        }
+        return line;
     }
     
     private DateTime now() {
         return DateTime.now(DateTimeZone.UTC);
-    }
-    
-    private String removeBom(String line) {
-        if (scannedLines == 0 && charset.equals(Charsets.UTF_16LE)) {
-            int bomLength = line.substring(0, 1).getBytes(charset).length;
-            handleBom(bomLength);
-            line = line.substring(1);
-        }
-        
-        return line;
     }
 }
