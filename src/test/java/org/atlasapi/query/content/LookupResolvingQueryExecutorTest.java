@@ -156,7 +156,7 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
             will(returnValue(ResolvedContent.builder().put(item1.getCanonicalUri(), item1).put(item2.getCanonicalUri(), item2).build()));
         }});
         
-        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(uri1, uri2), MatchesNothing.asQuery().copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.disable(Publisher.BBC)));
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(uri1, uri2), MatchesNothing.asQuery().copyWithApplicationConfiguration(ApplicationConfiguration.defaultConfiguration()));
         
         assertEquals(0, result.size());
         context.assertIsSatisfied();
