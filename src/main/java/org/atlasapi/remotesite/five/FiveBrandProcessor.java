@@ -34,6 +34,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpResponse;
 
@@ -47,7 +48,7 @@ public class FiveBrandProcessor {
     private final String baseApiUrl;
     private final RemoteSiteClient<HttpResponse> httpClient;
 
-    public FiveBrandProcessor(ContentWriter writer, AdapterLog log, String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Map<String, Channel> channelMap) {
+    public FiveBrandProcessor(ContentWriter writer, AdapterLog log, String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Multimap<String, Channel> channelMap) {
         this.writer = writer;
         this.log = log;
         this.baseApiUrl = baseApiUrl;

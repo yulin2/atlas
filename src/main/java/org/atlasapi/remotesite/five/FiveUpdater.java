@@ -20,6 +20,7 @@ import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.channel4.RequestLimitingRemoteSiteClient;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Multimap;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.HttpResponsePrologue;
@@ -54,7 +55,7 @@ public class FiveUpdater extends ScheduledTask {
         );
     }
 
-    private Map<String, Channel>channelMap(ChannelResolver channelResolver) {
+    private Multimap<String, Channel> channelMap(ChannelResolver channelResolver) {
         return new FiveChannelMap(channelResolver); 
     }
 
