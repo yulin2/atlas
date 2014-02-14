@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.five;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import nu.xom.Builder;
@@ -13,11 +12,10 @@ import nu.xom.Elements;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.channel4.RequestLimitingRemoteSiteClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Multimap;
@@ -35,9 +33,8 @@ import com.metabroadcast.common.time.Timestamper;
 
 public class FiveUpdater extends ScheduledTask {
     
+    private static final Logger log = LoggerFactory.getLogger(FiveUpdater.class);
     private static final String BASE_API_URL = "https://pdb.five.tv/internal";
-    
-    private final AdapterLog log;
     private final FiveBrandProcessor processor;
     private final Timestamper timestamper = new SystemClock();
     private final int socketTimeout;
@@ -45,12 +42,11 @@ public class FiveUpdater extends ScheduledTask {
     private final Builder parser = new Builder();
     private SimpleHttpClient streamHttpClient;
 
-    public FiveUpdater(ContentWriter contentWriter, ChannelResolver channelResolver, AdapterLog log, int socketTimeout) {
-        this.log = log;
+    public FiveUpdater(ContentWriter contentWriter, ChannelResolver channelResolver, int socketTimeout) {
         this.socketTimeout = socketTimeout;
-        this.streamHttpClient = buildFetcher(log);
-        this.processor = new FiveBrandProcessor(contentWriter, log, BASE_API_URL, 
-            new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(buildFetcher(log)), 4), 
+        this.streamHttpClient = buildFetcher();
+        this.processor = new FiveBrandProcessor(contentWriter, BASE_API_URL, 
+            new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(buildFetcher()), 4), 
             channelMap(channelResolver)
         );
     }
@@ -59,7 +55,7 @@ public class FiveUpdater extends ScheduledTask {
         return new FiveChannelMap(channelResolver); 
     }
 
-    private SimpleHttpClient buildFetcher(final AdapterLog log) {
+    private SimpleHttpClient buildFetcher() {
         return new SimpleHttpClientBuilder()
             .withUserAgent(HttpClients.ATLAS_USER_AGENT)
             .withSocketTimeout(socketTimeout, TimeUnit.SECONDS)
@@ -74,7 +70,7 @@ public class FiveUpdater extends ScheduledTask {
             try {
                 return parser.build(in);
             } catch (Exception e) {
-                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing shows document"));
+                log.error("Exception when processing shows document",e);
                 Throwables.propagate(e);
             }
             return null;
@@ -96,15 +92,15 @@ public class FiveUpdater extends ScheduledTask {
     public void runTask() {
         try {
             Timestamp start = timestamper.timestamp();
-            log.record(new AdapterLogEntry(Severity.INFO).withDescription("Five update started from " + BASE_API_URL).withSource(getClass()));
+            log.info("Five update started from " + BASE_API_URL);
             Document document = streamHttpClient.get(new SimpleHttpRequest<Document>(BASE_API_URL + "/shows", TRANSFORMER));
             process(document.getRootElement().getFirstChildElement("shows").getChildElements());
             
             Timestamp end = timestamper.timestamp();
-            log.record(new AdapterLogEntry(Severity.INFO).withDescription("Five update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
+            log.info("Five update completed in " + start.durationTo(end).getStandardSeconds() + " seconds");
         }
         catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing shows document"));
+            log.error("Exception when processing shows document",e);
             Throwables.propagate(e);
         }
     }
@@ -120,7 +116,7 @@ public class FiveUpdater extends ScheduledTask {
                     processor.processShow(element);
                 }
                 catch (Exception e) {
-                    log.record(new AdapterLogEntry(Severity.ERROR).withSource(FiveUpdater.class).withCause(e).withDescription("Exception when processing show"));
+                    log.error("Exception when processing show", e);
                     failed++;
                 }
                 reportStatus(String.format("%s processed. %s failed", ++processed, failed));

@@ -1,15 +1,9 @@
 package org.atlasapi.remotesite.five;
 
-import java.util.Map;
-
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 
-import com.google.common.collect.ForwardingMap;
-import com.google.common.collect.ForwardingMultimap;
 import com.google.common.collect.ForwardingSetMultimap;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.SetMultimap;
 
