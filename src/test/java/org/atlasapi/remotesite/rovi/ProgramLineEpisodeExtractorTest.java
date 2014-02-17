@@ -22,7 +22,6 @@ import org.atlasapi.remotesite.rovi.program.ProgramLineEpisodeExtractor;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramLine;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
-import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
 import org.joda.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +39,8 @@ public class ProgramLineEpisodeExtractorTest {
     private static final String EPISODE_ID = "12345";
     private static final String SERIES_ID = "23456";
     private static final String SEASON_ID = "34567";
+    private static final String SEASON_CANONICAL_URI = canonicalUriForSeason(SEASON_ID);
+    private static final ImmutableList<String> SEASON_CANONICAL_URI_LIST = ImmutableList.of(SEASON_CANONICAL_URI);
     private static final String EPISODE_NUMBER = "10";
     private static final String EPISODE_TITLE = "This is the episode title";
     private static final String EPISODE_SEQUENCE_TITLE = "This is the episode title inside the episode sequence";
@@ -52,21 +53,18 @@ public class ProgramLineEpisodeExtractorTest {
     @Mock
     private KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex;
     @Mock
-    private KeyedFileIndex<String, RoviSeasonHistoryLine> seasonHistoryIndex;
-    @Mock
     private ContentResolver contentResolver;
     
     private ProgramLineEpisodeExtractor extractor;
     
     @Before
     public void init() throws IOException, IndexAccessException {
-        Mockito.reset(descriptionIndex, episodeSequenceIndex, seasonHistoryIndex, contentResolver);
+        Mockito.reset(descriptionIndex, episodeSequenceIndex, contentResolver);
         when(descriptionIndex.getLinesForKey(anyString())).thenReturn(RoviTestUtils.descriptions(EPISODE_ID));
         
         extractor = new ProgramLineEpisodeExtractor(
                 descriptionIndex,
                 episodeSequenceIndex,
-                seasonHistoryIndex,
                 contentResolver);
     }
     
@@ -79,7 +77,7 @@ public class ProgramLineEpisodeExtractorTest {
         assertEquals(EPISODE_SEQUENCE_TITLE, extracted.getTitle());
         assertEquals(EPISODE_SEQUENCE_NUMBER, extracted.getEpisodeNumber());    
         assertEquals(SEASON_NUMBER, extracted.getSeriesNumber());
-        verify(seasonHistoryIndex, never()).getLinesForKey(anyString());
+        verify(contentResolver, never()).findByCanonicalUris(SEASON_CANONICAL_URI_LIST);
         
         checkBaseEpisodeData(extracted);
     }
@@ -87,14 +85,14 @@ public class ProgramLineEpisodeExtractorTest {
     @Test
     public void testExtractionWithEpisodeSequenceNotPresent() throws IOException, IndexAccessException {
         when(episodeSequenceIndex.getLinesForKey(EPISODE_ID)).thenReturn(episodeSequenceNotFound());
-        when(seasonHistoryIndex.getLinesForKey(SEASON_ID)).thenReturn(seasonHistory());
+        when(contentResolver.findByCanonicalUris(SEASON_CANONICAL_URI_LIST)).thenReturn(RoviTestUtils.resolvedContent(SEASON_CANONICAL_URI, seasonHistory()));
         
         Episode extracted = extractor.extract(episode());
         
         assertEquals(EPISODE_TITLE, extracted.getTitle());
         assertEquals(Integer.valueOf(EPISODE_NUMBER), extracted.getEpisodeNumber());
         assertEquals(SEASON_NUMBER, extracted.getSeriesNumber());
-        verify(seasonHistoryIndex, times(1)).getLinesForKey(SEASON_ID);
+        verify(contentResolver, times(1)).findByCanonicalUris(SEASON_CANONICAL_URI_LIST);
 
         checkBaseEpisodeData(extracted);
     }
@@ -119,6 +117,7 @@ public class ProgramLineEpisodeExtractorTest {
         builder.withSeriesId(SERIES_ID);
         builder.withSeasonId(SEASON_ID);
         builder.withDuration(EPISODE_DURATION);
+        builder.withActionType(ActionType.INSERT);
         
         return builder.build();
     }
@@ -144,20 +143,18 @@ public class ProgramLineEpisodeExtractorTest {
         builder.withEpisodeSeasonSequence(EPISODE_SEQUENCE_NUMBER);
         builder.withEpisodeSeasonNumber(SEASON_NUMBER);
         builder.withProgramId(EPISODE_ID);
+        builder.withActionType(ActionType.INSERT);
         
         return ImmutableList.of(builder.build());
     }
     
-    private Collection<RoviSeasonHistoryLine> seasonHistory() {
-        RoviSeasonHistoryLine.Builder builder = RoviSeasonHistoryLine.builder();
+    private Series seasonHistory() {
+        Series series = new Series();
         
-        builder.withSeasonHistoryId("999999");
-        builder.withSeasonName("Season name");
-        builder.withSeasonProgramId(SEASON_ID);
-        builder.withSeasonNumber(SEASON_NUMBER);
-        builder.withSeriesId(SERIES_ID);
+        series.setCanonicalUri(SEASON_CANONICAL_URI);
+        series.withSeriesNumber(SEASON_NUMBER);
         
-        return ImmutableList.of(builder.build());
+        return series;
     }
 
     private Collection<RoviEpisodeSequenceLine> episodeSequenceNotFound() {

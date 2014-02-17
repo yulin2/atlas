@@ -7,16 +7,23 @@ import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.IndexAccessException;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
-import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.base.Maybe;
 
 /*
  * Extracts an {@link Episode} from a {@link RoviProgramLine} with {@link RoviShowType} SE (Series Episode)
@@ -24,16 +31,22 @@ import com.google.common.collect.Iterables;
 public class ProgramLineEpisodeExtractor extends ProgramLineBaseItemExtractor<Episode> {
 
     private final KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex;
-    private final KeyedFileIndex<String, RoviSeasonHistoryLine> seasonHistoryIndex;
+    
+    private final LoadingCache<String, Optional<Integer>> seasonNumberCache = CacheBuilder.newBuilder()
+            .maximumSize(100000)
+            .build(new CacheLoader<String, Optional<Integer>>() {
+
+                public Optional<Integer> load(String seasonId) {
+                    return getSeasonNumberResolvingSeason(seasonId);
+                }
+            });
     
     public ProgramLineEpisodeExtractor(
             KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
             KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex,
-            KeyedFileIndex<String, RoviSeasonHistoryLine> seasonHistoryIndex,
             ContentResolver contentResolver) {
         super(descriptionIndex, contentResolver);
         this.episodeSequenceIndex = episodeSequenceIndex;
-        this.seasonHistoryIndex = seasonHistoryIndex;
     }
 
     private final static Logger LOG = LoggerFactory.getLogger(ProgramLineEpisodeExtractor.class);
@@ -49,20 +62,29 @@ public class ProgramLineEpisodeExtractor extends ProgramLineBaseItemExtractor<Ep
         setEpisodeNumberIfNumeric(content, programLine);
         setEpisodeTitleIfPresent(content, programLine);
         setDataFromEpisodeSequenceIfPossible(content, programLine);
-        setSeasonNumberFromSeasonHistoryIfNeeded(content, programLine);
+        setSeasonNumberFromResolvedContentIfNeeded(content, programLine);
     }
 
-    private void setSeasonNumberFromSeasonHistoryIfNeeded(Episode content,
+    private void setSeasonNumberFromResolvedContentIfNeeded(Episode content,
             RoviProgramLine programLine) throws IndexAccessException {
-        if (content.getSeriesNumber() == null && programLine.getSeriesId().isPresent()) {
-            Collection<RoviSeasonHistoryLine> results = seasonHistoryIndex.getLinesForKey(programLine.getSeasonId()
-                    .get());
-            RoviSeasonHistoryLine seasonHistory = Iterables.getFirst(results, null);
-
-            if (seasonHistory != null && seasonHistory.getSeasonNumber().isPresent()) {
-                content.setSeriesNumber(seasonHistory.getSeasonNumber().get());
+        if (content.getSeriesNumber() == null && programLine.getSeasonId().isPresent()) {
+            Optional<Integer> seasonNumber = seasonNumberCache.getUnchecked(programLine.getSeasonId().get());
+            if (seasonNumber.isPresent()) {
+                content.setSeriesNumber(seasonNumber.get());
             }
         }
+    }
+    
+    private Optional<Integer> getSeasonNumberResolvingSeason(String seasonId) {
+        String seasonCanonicalUri = canonicalUriForSeason(seasonId);
+        Maybe<Identified> maybeSeason = contentResolver.findByCanonicalUris(ImmutableList.of(seasonCanonicalUri)).getFirstValue();
+        
+        if (maybeSeason.hasValue() && maybeSeason.requireValue() instanceof Series) {
+            Series season = (Series) maybeSeason.requireValue();
+            return Optional.fromNullable(season.getSeriesNumber());
+        }
+        
+        return Optional.absent();
     }
 
     private void setDataFromEpisodeSequenceIfPossible(Episode content,

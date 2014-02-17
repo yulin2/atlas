@@ -40,6 +40,7 @@ public class ScheduleLineBroadcastExtractor {
         DateTime startTime = scheduleLine.getStartDate()
                                          .toLocalDateTime(scheduleLine.getStartTime())
                                          .toDateTime(DateTimeZone.forID(EUROPE_LONDON_TIMEZONE));
+        
         DateTime endTime = startTime.plusSeconds(scheduleLine.getDuration());
         
         Broadcast broadcast = new Broadcast(channel.requireValue().getCanonicalUri(), startTime, endTime);
@@ -49,6 +50,10 @@ public class ScheduleLineBroadcastExtractor {
     }
     
     private Maybe<Channel> getChannel(ScheduleLine scheduleLine) {
-        return channelResolver.forAlias(CHANNEL_URI_PREFIX + scheduleLine.getSourceId());
+        if (scheduleLine.getSourceId() != null) {
+            return channelResolver.forAlias(CHANNEL_URI_PREFIX + scheduleLine.getSourceId());
+        }
+        
+        return Maybe.nothing();
     }
 }

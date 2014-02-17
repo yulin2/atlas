@@ -33,7 +33,7 @@ import com.metabroadcast.common.base.Maybe;
 public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> implements RoviContentExtractor<RoviProgramLine, CONTENT> {
 
     private final KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex;
-    private final ContentResolver contentResolver;
+    protected final ContentResolver contentResolver;
     
     protected ProgramLineBaseExtractor(KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex, ContentResolver contentResolver) {
         this.descriptionIndex = descriptionIndex;
@@ -44,8 +44,12 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
     public CONTENT extract(RoviProgramLine roviLine) throws IndexAccessException {
         CONTENT content = createContent();
         
-        content.setTitle(roviLine.getLongTitle());
+        if (roviLine.getLongTitle().isPresent()) {
+            content.setTitle(roviLine.getLongTitle().get());
+        }
+        
         content.setCanonicalUri(canonicalUriForProgram(roviLine.getProgramId()));
+        
         content.setPublisher(getPublisherForLanguage(roviLine.getLanguage()));
         content.setLanguages(Sets.newHashSet(roviLine.getLanguage()));
         
@@ -107,13 +111,13 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
             
             Collection<RoviProgramDescriptionLine> specificDescriptions = descriptionsByCulture.get(firstCulture);
         
-            for (RoviProgramDescriptionLine description: specificDescriptions) {
-                if (description.getDescriptionType().equals("Generic Description")) {
-                    content.setShortDescription(description.getDescription());
-                } else if (description.getDescriptionType().equals("Plot Synopsis")){
-                    content.setMediumDescription(description.getDescription());
-                } else if (description.getDescriptionType().equals("Synopsis") || description.getDescriptionType().equals("Short Synopsis")) {
-                    content.setLongDescription(description.getDescription());
+            for (RoviProgramDescriptionLine description : specificDescriptions) {
+                if (description.isOfTypeAndDescriptionPresent("Generic Description")) {
+                    content.setShortDescription(description.getDescription().get());
+                } else if (description.isOfTypeAndDescriptionPresent("Plot Synopsis")) {
+                    content.setMediumDescription(description.getDescription().get());
+                } else if (description.isOfTypeAndDescriptionPresent("Synopsis") || description.isOfTypeAndDescriptionPresent("Short Synopsis")) {
+                    content.setLongDescription(description.getDescription().get());
                 }
             }
         }
@@ -146,7 +150,11 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
         if (content instanceof Item) {
             Item item = (Item) content;
             Version version = new Version();
-            version.setDuration(roviLine.getDuration());
+            
+            if (roviLine.getDuration().isPresent()) {
+                version.setDuration(roviLine.getDuration().get());
+            }
+            
             item.setVersions(Sets.newHashSet(version));
         }
     }

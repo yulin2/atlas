@@ -83,7 +83,6 @@ public class RoviModule {
                 descriptionsIndexer(),
                 episodeSequenceIndexer(),
                 seriesIndexer(),
-                seasonHistoryIndexer(),
                 roviContentWriter(),
                 contentResolver,
                 scheduleProcessor());

@@ -1,45 +1,53 @@
 package org.atlasapi.remotesite.rovi.program;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviConstants.ENGLISH_LANG;
 
-import org.atlasapi.remotesite.rovi.KeyedLine;
+import org.atlasapi.remotesite.rovi.ActionType;
+import org.atlasapi.remotesite.rovi.KeyedActionLine;
 import org.atlasapi.remotesite.rovi.RoviShowType;
 import org.joda.time.Duration;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 
-public class RoviProgramLine implements KeyedLine<String>{
+public class RoviProgramLine implements KeyedActionLine<String> {
     
-    private final RoviShowType showType;
     private final String programId;
+    private final String language;
+    private final ActionType actionType;
+    
+    private final Optional<RoviShowType> showType;
     private final Optional<String> seriesId;
     private final Optional<String> seasonId;
     private final Optional<String> titleParentId;
-    private final String longTitle;
+    private final Optional<String> longTitle;
     private final Optional<String> episodeTitle;
     private final Optional<String> episodeNumber;
-    private final Duration duration;
-    private final String language;
+    private final Optional<Duration> duration;
     private final Optional<Integer> releaseYear;
 
     private RoviProgramLine(RoviShowType showType, String programId, String seriesId,
             String seasonId, String titleParentId, String longTitle, String episodeTitle,
-            String episodeNumber, Duration duration, String language, Integer releaseYear) {
-        this.showType = showType;
-        this.programId = programId;
+            String episodeNumber, Duration duration, String language, Integer releaseYear, ActionType actionType) {
+        this.programId = checkNotNull(programId);
+        this.actionType = checkNotNull(actionType);
+        this.language = Objects.firstNonNull(language, ENGLISH_LANG);
+
+        this.showType = Optional.fromNullable(showType);
         this.seriesId = Optional.fromNullable(seriesId);
         this.seasonId = Optional.fromNullable(seasonId);
         this.titleParentId = Optional.fromNullable(titleParentId);
-        this.longTitle = longTitle;
+        this.longTitle = Optional.fromNullable(longTitle);
         this.episodeTitle = Optional.fromNullable(episodeTitle);
         this.episodeNumber = Optional.fromNullable(episodeNumber);
-        this.duration = duration;
-        this.language = Objects.firstNonNull(language, ENGLISH_LANG);
+        this.duration = Optional.fromNullable(duration);
         this.releaseYear = Optional.fromNullable(releaseYear);
     }
 
-    public RoviShowType getShowType() {
+
+
+    public Optional<RoviShowType> getShowType() {
         return showType;
     }
     
@@ -59,7 +67,7 @@ public class RoviProgramLine implements KeyedLine<String>{
         return titleParentId;
     }
     
-    public String getLongTitle() {
+    public Optional<String> getLongTitle() {
         return longTitle;
     }
     
@@ -71,7 +79,7 @@ public class RoviProgramLine implements KeyedLine<String>{
         return episodeNumber;
     }
     
-    public Duration getDuration() {
+    public Optional<Duration> getDuration() {
         return duration;
     }
 
@@ -86,6 +94,11 @@ public class RoviProgramLine implements KeyedLine<String>{
 
     public Optional<Integer> getReleaseYear() {
         return releaseYear;
+    }
+    
+    @Override
+    public ActionType getActionType() {
+        return actionType;
     }
     
     public static Builder builder() {
@@ -105,6 +118,7 @@ public class RoviProgramLine implements KeyedLine<String>{
         private Duration duration;
         private String language;
         private Integer releaseYear;
+        private ActionType actionType;
         
         public Builder withShowType(RoviShowType showType) {
             this.showType = showType;
@@ -160,6 +174,11 @@ public class RoviProgramLine implements KeyedLine<String>{
             this.releaseYear = releaseYear;
             return this;
         }
+        
+        public Builder withActionType(ActionType actionType) {
+            this.actionType = actionType;
+            return this;
+        }
 
         public final RoviProgramLine build() {
             return new RoviProgramLine(
@@ -173,7 +192,8 @@ public class RoviProgramLine implements KeyedLine<String>{
                     episodeNumber,
                     duration,
                     language,
-                    releaseYear);
+                    releaseYear,
+                    actionType);
         }
     }
 

@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.rovi.program;
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.LINE_SPLITTER;
+import static org.atlasapi.remotesite.rovi.RoviUtils.getActionTypeAtPosition;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getIntPartAtPosition;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getLongPartAtPosition;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getPartAtPosition;
@@ -23,6 +24,7 @@ public class RoviProgramLineParser implements RoviLineParser<RoviProgramLine>{
     private static final int DURATION_POS = 24;
     private static final int RELEASE_YEAR_POS = 25;
     private static final int LANGUAGE_POS = 26;
+    private static final int ACTION_TYPE_POS = 36;
     
     @Override
     public RoviProgramLine apply(String line) {
@@ -30,7 +32,12 @@ public class RoviProgramLineParser implements RoviLineParser<RoviProgramLine>{
         
         RoviProgramLine.Builder builder = RoviProgramLine.builder();
         
-        builder.withShowType(RoviShowType.valueOf(getPartAtPosition(parts, SHOW_TYPE_POS)));
+        String showTypePart = getPartAtPosition(parts, SHOW_TYPE_POS);
+        
+        if (showTypePart != null) {
+            builder.withShowType(RoviShowType.valueOf(showTypePart));
+        }
+        
         builder.withProgramId(getPartAtPosition(parts, PROGRAM_ID_POS));
         builder.withLongTitle(getPartAtPosition(parts, LONG_TITLE_POS));
         builder.withTitleParentId(getPartAtPosition(parts, TITLE_PARENT_ID_POS));
@@ -38,9 +45,15 @@ public class RoviProgramLineParser implements RoviLineParser<RoviProgramLine>{
         builder.withSeasonId(getPartAtPosition(parts, SEASON_ID_POS));
         builder.withEpisodeTitle(getPartAtPosition(parts, EPISODE_TITLE_POS));
         builder.withEpisodeNumber(getPartAtPosition(parts, EPISODE_NUMBER_POS));
-        builder.withDuration(Duration.standardSeconds(getLongPartAtPosition(parts, DURATION_POS)));
+        
+        Long durationPart = getLongPartAtPosition(parts, DURATION_POS);
+        if (durationPart != null) {
+            builder.withDuration(Duration.standardSeconds(durationPart));
+        }
+        
         builder.withLanguage(getPartAtPosition(parts, LANGUAGE_POS));
         builder.withReleaseYear(getIntPartAtPosition(parts, RELEASE_YEAR_POS));
+        builder.withActionType(getActionTypeAtPosition(parts, ACTION_TYPE_POS));
         
         return builder.build();
     }

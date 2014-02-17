@@ -24,7 +24,8 @@ public class RoviProgramDescriptionLineParserTest {
         assertEquals("1234567", roviLine.getSourceId().get());
         assertEquals("English - NA", roviLine.getDescriptionCulture());
         assertEquals("Generic Description", roviLine.getDescriptionType());
-        assertEquals("Former friends dispute personal property.", roviLine.getDescription());
+        assertEquals("Former friends dispute personal property.", roviLine.getDescription().get());
+        assertEquals(ActionType.INSERT, roviLine.getActionType());
     }
 
     @Test
@@ -34,6 +35,18 @@ public class RoviProgramDescriptionLineParserTest {
         RoviProgramDescriptionLine roviLine = parser.apply(line);
         
         assertFalse(roviLine.getSourceId().isPresent());
+    }
+    
+    @Test
+    public void testParseDeleteLine() {
+        String line = "22400116||German Generic|Generic Description|||Del";
+        
+        RoviProgramDescriptionLine roviLine = parser.apply(line);
+        
+        assertEquals("22400116", roviLine.getProgramId());
+        assertEquals("German Generic", roviLine.getDescriptionCulture());
+        assertEquals("Generic Description", roviLine.getDescriptionType());
+        assertEquals(ActionType.DELETE, roviLine.getActionType());
     }
     
 }

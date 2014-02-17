@@ -2,25 +2,29 @@ package org.atlasapi.remotesite.rovi.program;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.atlasapi.remotesite.rovi.KeyedLine;
+import org.atlasapi.remotesite.rovi.ActionType;
+import org.atlasapi.remotesite.rovi.KeyedActionLine;
 
 import com.google.common.base.Optional;
 
-public class RoviProgramDescriptionLine implements KeyedLine<String>{
+public class RoviProgramDescriptionLine implements KeyedActionLine<String>{
 
     private final String programId;
     private final Optional<String> sourceId;
     private final String descriptionCulture;
     private final String descriptionType;
-    private final String description;
+    private final Optional<String> description;
+    private final ActionType actionType;
 
     private RoviProgramDescriptionLine(String programId, String sourceId,
-            String descriptionCulture, String descriptionType, String description) {
+            String descriptionCulture, String descriptionType, String description, ActionType actionType) {
         this.programId = checkNotNull(programId);
-        this.sourceId = Optional.fromNullable(sourceId);
         this.descriptionCulture = checkNotNull(descriptionCulture);
         this.descriptionType = checkNotNull(descriptionType);
-        this.description = checkNotNull(description);
+        this.actionType = checkNotNull(actionType);
+
+        this.sourceId = Optional.fromNullable(sourceId);
+        this.description = Optional.fromNullable(description);
     }
 
     public String getProgramId() {
@@ -39,13 +43,22 @@ public class RoviProgramDescriptionLine implements KeyedLine<String>{
         return descriptionType;
     }
 
-    public String getDescription() {
+    public Optional<String> getDescription() {
         return description;
     }
     
     @Override
     public String getKey() {
         return programId;
+    }
+    
+    @Override
+    public ActionType getActionType() {
+        return actionType;
+    }
+    
+    public boolean isOfTypeAndDescriptionPresent(String descriptionType) {
+        return descriptionType.equals(this.descriptionType) && this.description.isPresent();
     }
     
     public static Builder builder() {
@@ -59,6 +72,7 @@ public class RoviProgramDescriptionLine implements KeyedLine<String>{
         private String descriptionCulture;
         private String descriptionType;
         private String description;
+        private ActionType actionType;
 
         public Builder withProgramId(String programId) {
             this.programId = programId;
@@ -84,6 +98,11 @@ public class RoviProgramDescriptionLine implements KeyedLine<String>{
             this.description = description;
             return this;
         }
+        
+        public Builder withActionType(ActionType actionType) {
+            this.actionType = actionType;
+            return this;
+        }
 
         public RoviProgramDescriptionLine build() {
             return new RoviProgramDescriptionLine(
@@ -91,7 +110,8 @@ public class RoviProgramDescriptionLine implements KeyedLine<String>{
                     sourceId,
                     descriptionCulture,
                     descriptionType,
-                    description);
+                    description,
+                    actionType);
         }
 
     }

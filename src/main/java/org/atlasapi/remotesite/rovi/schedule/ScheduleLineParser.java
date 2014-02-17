@@ -4,6 +4,7 @@ import static org.atlasapi.remotesite.rovi.RoviConstants.LINE_SPLITTER;
 
 import java.util.Iterator;
 
+import org.atlasapi.remotesite.rovi.ActionType;
 import org.atlasapi.remotesite.rovi.RoviLineParser;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -57,7 +58,7 @@ public class ScheduleLineParser implements RoviLineParser<ScheduleLine>{
                 programmeId, seriesId, tvRating, tvRatingReason, showingType, captionType, 
                 audioLevel, threeDLevel, sap, colorType, airingType, subtitled, joinedInProgress, 
                 subjectToBlackout, aspectRatio, descriptiveVideoService, partNumber, 
-                totalNumberOfParts, hdtvLevel, syndicated, delta, scheduleId);
+                totalNumberOfParts, hdtvLevel, syndicated, ActionType.fromRoviType(delta), scheduleId);
     }
     
     private AudioLevel parseAsAudioLevel(String s) {
