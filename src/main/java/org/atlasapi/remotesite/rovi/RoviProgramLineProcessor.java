@@ -33,7 +33,7 @@ public class RoviProgramLineProcessor extends RoviLineExtractorAndWriter<RoviPro
 
     @Override
     protected Content extractContent(RoviProgramLine programLine) throws IndexAccessException {
-        RoviContentExtractor<RoviProgramLine, ? extends Content> contentExtractor = contentExtractorSupplier.getContentExtractor(programLine.getShowType());
+        RoviContentExtractor<RoviProgramLine, ? extends Content> contentExtractor = contentExtractorSupplier.getContentExtractor(programLine.getShowType().get());
         return contentExtractor.extract(programLine);
     }
 

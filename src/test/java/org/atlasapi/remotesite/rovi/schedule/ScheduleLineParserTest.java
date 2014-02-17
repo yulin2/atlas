@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.rovi.schedule;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import org.atlasapi.remotesite.rovi.ActionType;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -22,6 +23,16 @@ public class ScheduleLineParserTest {
         assertThat(parsedLine.getStartDate(), is(new LocalDate(2014, DateTimeConstants.JANUARY, 18)));
         assertThat(parsedLine.getStartTime(), is(new LocalTime(4, 55)));
         assertThat(parsedLine.getDuration(), is(1500));
+        assertThat(parsedLine.getActionType(), is(ActionType.INSERT));
         
+    }
+    
+    @Test
+    public void testParseDeleteLine() {
+        String testLine = "26501|20140115|20:00|||||||||||||||||||||||Del|1721560885";
+        ScheduleLine parsedLine = scheduleLineParser.apply(testLine);
+        
+        assertThat(parsedLine.getScheduleId(), is("1721560885"));
+        assertThat(parsedLine.getActionType(), is(ActionType.DELETE));
     }
 }

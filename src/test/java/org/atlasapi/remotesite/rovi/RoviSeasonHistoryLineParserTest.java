@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.rovi;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLineParser;
@@ -19,12 +18,21 @@ public class RoviSeasonHistoryLineParserTest {
     
         RoviSeasonHistoryLine roviLine = parser.apply(line);
         
-        assertEquals("19423942", roviLine.getSeriesId());
-        assertEquals("20391799", roviLine.getSeasonProgramId());
-        assertTrue(roviLine.getSeasonNumber().isPresent());
+        assertEquals("19423942", roviLine.getSeriesId().get());
+        assertEquals("20391799", roviLine.getSeasonProgramId().get());
         assertEquals(1, roviLine.getSeasonNumber().get().intValue());
-        assertTrue(roviLine.getSeasonName().isPresent());
         assertEquals("Season 1", roviLine.getSeasonName().get());
+        assertEquals(ActionType.INSERT, roviLine.getActionType());
+    }
+    
+    @Test
+    public void testParseDeleteLine() {
+        String line = "15779545|||||||||Del|149987";
+        
+        RoviSeasonHistoryLine roviLine = parser.apply(line);
+        
+        assertEquals("149987", roviLine.getSeasonHistoryId());
+        assertEquals(ActionType.DELETE, roviLine.getActionType());    
     }
     
 }

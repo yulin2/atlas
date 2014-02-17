@@ -2,12 +2,13 @@ package org.atlasapi.remotesite.rovi.schedule;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.atlasapi.remotesite.rovi.KeyedLine;
+import org.atlasapi.remotesite.rovi.ActionType;
+import org.atlasapi.remotesite.rovi.KeyedActionLine;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 
 
-public class ScheduleLine implements KeyedLine<String> {
+public class ScheduleLine implements KeyedActionLine<String> {
     
     private final String sourceId;
     private final LocalDate startDate;
@@ -34,7 +35,7 @@ public class ScheduleLine implements KeyedLine<String> {
     private final Integer totalNumberOfParts;
     private final String hdtvLevel;
     private final Boolean syndicated;
-    private final String delta;
+    private final ActionType delta;
     private final String scheduleId;
     
     public ScheduleLine(String sourceId, LocalDate startDate, LocalTime startTime,
@@ -44,14 +45,17 @@ public class ScheduleLine implements KeyedLine<String> {
             String colorType, String airingType, Boolean subtitled, Boolean joinedInProgress,
             Boolean subjectToBlackout, String aspectRatio, Boolean descriptiveVideoService,
             Integer partNumber, Integer totalNumberOfParts, String hdtvLevel, Boolean syndicated,
-            String delta, String scheduleId) {
+            ActionType delta, String scheduleId) {
         
-        this.sourceId = checkNotNull(sourceId);
-        this.startDate = checkNotNull(startDate);
-        this.startTime = checkNotNull(startTime);
+        this.delta = checkNotNull(delta);
+        this.scheduleId = checkNotNull(scheduleId);
+        
+        this.sourceId = sourceId;
+        this.startDate = startDate;
+        this.startTime = startTime;
         this.isTimeApproximate = isTimeApproximate;
-        this.duration = checkNotNull(duration);
-        this.programmeId = checkNotNull(programmeId);
+        this.duration = duration;
+        this.programmeId = programmeId;
         this.seriesId = seriesId;
         this.tvRating = tvRating;
         this.tvRatingReason = tvRatingReason;
@@ -71,8 +75,6 @@ public class ScheduleLine implements KeyedLine<String> {
         this.totalNumberOfParts = totalNumberOfParts;
         this.hdtvLevel = hdtvLevel;
         this.syndicated = syndicated;
-        this.delta = delta;
-        this.scheduleId = checkNotNull(scheduleId);
     }
 
     @Override
@@ -205,7 +207,7 @@ public class ScheduleLine implements KeyedLine<String> {
     }
 
     
-    public String getDelta() {
+    public ActionType getActionType() {
         return delta;
     }
 

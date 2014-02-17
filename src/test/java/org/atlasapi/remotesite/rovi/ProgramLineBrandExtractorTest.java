@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -32,7 +31,6 @@ public class ProgramLineBrandExtractorTest {
     private static final String MEDIUM_DESCRIPTION = "This is the medium description";
     private static final String LONG_DESCRIPTION = "This is the long description";
     private static final String PROGRAM_ID = "12345";
-    private static final String ENGLISH_UK_CULTURE = "English - UK";
     private static final String TITLE = "This is a brand";
     
     @Mock
@@ -46,40 +44,13 @@ public class ProgramLineBrandExtractorTest {
     
     @Before
     public void init() throws IOException, IndexAccessException {
-        when(descriptionIndex.getLinesForKey(anyString())).thenReturn(descriptions());
+        when(descriptionIndex.getLinesForKey(anyString())).thenReturn(RoviTestUtils.descriptions(PROGRAM_ID));
         when(seriesIndex.getLinesForKey(anyString())).thenReturn(series());
         extractor = new ProgramLineBrandExtractor(descriptionIndex, seriesIndex, contentResolver);
     }
     
     private Collection<RoviSeriesLine> series() {
-        return Lists.newArrayList(new RoviSeriesLine(PROGRAM_ID, TITLE, SYNOPSIS));
-    }
-
-    private Collection<RoviProgramDescriptionLine> descriptions() {
-        List<RoviProgramDescriptionLine> descriptions = Lists.newArrayList();
-        
-        RoviProgramDescriptionLine.Builder builderGenericDesc = RoviProgramDescriptionLine.builder();
-        builderGenericDesc.withProgramId(PROGRAM_ID);
-        builderGenericDesc.withDescription(SHORT_DESCRIPTION);
-        builderGenericDesc.withDescriptionCulture(ENGLISH_UK_CULTURE);
-        builderGenericDesc.withDescriptionType("Generic Description");
-        descriptions.add(builderGenericDesc.build());
-
-        RoviProgramDescriptionLine.Builder builderPlotSynopsis = RoviProgramDescriptionLine.builder();
-        builderPlotSynopsis.withProgramId(PROGRAM_ID);
-        builderPlotSynopsis.withDescription(MEDIUM_DESCRIPTION);
-        builderPlotSynopsis.withDescriptionCulture(ENGLISH_UK_CULTURE);
-        builderPlotSynopsis.withDescriptionType("Plot Synopsis");
-        descriptions.add(builderPlotSynopsis.build());
-        
-        RoviProgramDescriptionLine.Builder builderSynopsis = RoviProgramDescriptionLine.builder();
-        builderSynopsis.withProgramId(PROGRAM_ID);
-        builderSynopsis.withDescription(LONG_DESCRIPTION);
-        builderSynopsis.withDescriptionCulture(ENGLISH_UK_CULTURE);
-        builderSynopsis.withDescriptionType("Synopsis");
-        descriptions.add(builderSynopsis.build());        
-        
-        return descriptions;
+        return Lists.newArrayList(new RoviSeriesLine(PROGRAM_ID, TITLE, SYNOPSIS, ActionType.INSERT));
     }
 
     @Test
@@ -89,6 +60,7 @@ public class ProgramLineBrandExtractorTest {
         programLine.withShowType(RoviShowType.SM);
         programLine.withProgramId(PROGRAM_ID);
         programLine.withLongTitle("This is a brand");
+        programLine.withActionType(ActionType.INSERT);
         
         Brand brand = extractor.extract(programLine.build());
         

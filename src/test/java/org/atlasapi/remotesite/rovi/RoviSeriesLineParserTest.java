@@ -20,8 +20,20 @@ public class RoviSeriesLineParserTest {
         RoviSeriesLine seriesLine = parser.apply(line);
         
         assertEquals("13388464", seriesLine.getSeriesId());
-        assertEquals("Sharpe", seriesLine.getFullTitle());
+        assertEquals("Sharpe", seriesLine.getFullTitle().get());
         assertEquals("The adventures of a British soldier in the Napoleonic Wars.", seriesLine.getSynopsis().get());
+        assertEquals(ActionType.INSERT, seriesLine.getActionType());
+    }
+
+    @Test
+    public void testParseDeleteLine() {
+        
+        String line = "20949148|Amy Winehouse - Live at Shepherds Bush Empire||Del";
+        
+        RoviSeriesLine seriesLine = parser.apply(line);
+        
+        assertEquals("20949148", seriesLine.getSeriesId());
+        assertEquals(ActionType.DELETE, seriesLine.getActionType());
     }
 
 }

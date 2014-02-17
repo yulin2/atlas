@@ -61,6 +61,11 @@ public class RoviUtils {
         
         return Strings.emptyToNull(part);
     }
+    
+    public static ActionType getActionTypeAtPosition(Iterable<String> parts, int pos) {
+        String part = Iterables.get(parts, pos);
+        return ActionType.fromRoviType(part);
+    }
 
     public static Integer getIntPartAtPosition(Iterable<String> parts, int pos) {
         String part = getPartAtPosition(parts, pos);

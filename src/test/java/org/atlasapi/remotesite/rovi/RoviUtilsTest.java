@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.io.Files;

@@ -18,16 +18,27 @@ public class RoviProgramLineParserTest {
 
         RoviProgramLine roviLine = parser.apply(line);
         
-        assertEquals(RoviShowType.SM, roviLine.getShowType());
+        assertEquals(RoviShowType.SM, roviLine.getShowType().get());
         assertEquals("en", roviLine.getLanguage());
         assertEquals("15343105", roviLine.getProgramId());
         assertEquals("15343105", roviLine.getSeriesId().get());
         assertEquals("SEASON1", roviLine.getSeasonId().get());
         assertEquals("15343105", roviLine.getTitleParentId().get());
-        assertEquals("NFL on Five Long Title", roviLine.getLongTitle());
+        assertEquals("NFL on Five Long Title", roviLine.getLongTitle().get());
         assertEquals("Episode Title", roviLine.getEpisodeTitle().get());
         assertEquals("13", roviLine.getEpisodeNumber().get());
-        assertEquals(1500, roviLine.getDuration().getStandardSeconds());
+        assertEquals(1500, roviLine.getDuration().get().getStandardSeconds());
+        assertEquals(ActionType.INSERT, roviLine.getActionType());
+    }
+    
+    @Test
+    public void testParseDeleteLine() {
+        String line = "|19491968|||||||||||||||||||||||||||||||||||Del|||";
+
+        RoviProgramLine roviLine = parser.apply(line);
+        
+        assertEquals("19491968", roviLine.getProgramId());
+        assertEquals(ActionType.DELETE, roviLine.getActionType());
     }
 
 }

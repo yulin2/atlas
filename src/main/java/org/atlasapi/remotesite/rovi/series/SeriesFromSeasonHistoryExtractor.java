@@ -42,7 +42,7 @@ public class SeriesFromSeasonHistoryExtractor implements ContentExtractor<RoviSe
         
         Optional<Publisher> parentPublisher = Optional.absent();
         
-        String parentCanonicalUri = canonicalUriForProgram(season.getSeriesId());
+        String parentCanonicalUri = canonicalUriForProgram(season.getSeriesId().get());
         parentPublisher = parentPublisherCache.getUnchecked(parentCanonicalUri);
 
         if (parentPublisher.isPresent()) {
@@ -51,7 +51,7 @@ public class SeriesFromSeasonHistoryExtractor implements ContentExtractor<RoviSe
             series.setPublisher(DEFAULT_PUBLISHER);
         }
         
-        series.setCanonicalUri(canonicalUriForSeason(season.getSeasonProgramId()));
+        series.setCanonicalUri(canonicalUriForSeason(season.getSeasonProgramId().get()));
         series.setParentRef(new ParentRef(parentCanonicalUri));
         
         if (season.getSeasonName().isPresent()) {

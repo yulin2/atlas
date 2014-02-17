@@ -15,7 +15,6 @@ import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramLineParser;
 import org.atlasapi.remotesite.rovi.schedule.ScheduleFileProcessor;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
-import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLineParser;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
 import org.atlasapi.remotesite.rovi.series.SeriesFromSeasonHistoryExtractor;
@@ -32,7 +31,6 @@ public class RoviProgramsProcessor {
     private final KeyedFileIndexer<String, RoviProgramDescriptionLine> programDescriptionIndexer;
     private final KeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer;
     private final KeyedFileIndexer<String, RoviSeriesLine> seriesIndexer;
-    private final KeyedFileIndexer<String, RoviSeasonHistoryLine> seasonHistoryIndexer;
     private final RoviContentWriter contentWriter;
     private final ContentResolver contentResolver;
     private final ScheduleFileProcessor scheduleFileProcessor;
@@ -41,7 +39,6 @@ public class RoviProgramsProcessor {
             KeyedFileIndexer<String, RoviProgramDescriptionLine> programDescriptionIndexer,
             KeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer,
             KeyedFileIndexer<String, RoviSeriesLine> seriesIndexer,
-            KeyedFileIndexer<String, RoviSeasonHistoryLine> seasonHistoryIndexer,
             RoviContentWriter contentWriter,
             ContentResolver contentResolver,
             ScheduleFileProcessor scheduleFileProcessor) {
@@ -49,7 +46,6 @@ public class RoviProgramsProcessor {
         this.programDescriptionIndexer = programDescriptionIndexer;
         this.episodeSequenceIndexer = episodeSequenceIndexer;
         this.seriesIndexer = seriesIndexer;
-        this.seasonHistoryIndexer = seasonHistoryIndexer;
         this.contentWriter = contentWriter;
         this.contentResolver = contentResolver;
         this.scheduleFileProcessor = scheduleFileProcessor;
@@ -59,21 +55,18 @@ public class RoviProgramsProcessor {
         KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex = null;
         KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex = null;
         KeyedFileIndex<String, RoviSeriesLine> seriesIndex = null;
-        KeyedFileIndex<String, RoviSeasonHistoryLine> seasonHistoryIndex = null;
 
         try {
             LOG.info("Indexing files");
             descriptionIndex = programDescriptionIndexer.index();
             episodeSequenceIndex = episodeSequenceIndexer.index();
             seriesIndex = seriesIndexer.index();
-            seasonHistoryIndex = seasonHistoryIndexer.index();
             LOG.info("Indexing completed");
             
             ProgramLineContentExtractorSupplier contentExtractorSupplier = new ProgramLineContentExtractorSupplier(
                     descriptionIndex,
                     seriesIndex,
                     episodeSequenceIndex,
-                    seasonHistoryIndex,
                     contentResolver);
     
             LOG.info("Start processing programs");
@@ -137,12 +130,11 @@ public class RoviProgramsProcessor {
         } finally {
             releaseIndexResources(ImmutableSet.of(descriptionIndex,
                     episodeSequenceIndex,
-                    seriesIndex,
-                    seasonHistoryIndex));
+                    seriesIndex));
         }
     }
 
-    private void releaseIndexResources(Iterable<KeyedFileIndex<String, ? extends KeyedLine<String>>> indexes) {
+    private void releaseIndexResources(Iterable<KeyedFileIndex<String, ? extends KeyedActionLine<String>>> indexes) {
         for (KeyedFileIndex<?, ?> index: indexes) {
             if (index != null) {
                 index.releaseResources();

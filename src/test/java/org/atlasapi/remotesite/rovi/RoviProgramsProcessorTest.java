@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.rovi;
 
 import static org.atlasapi.remotesite.rovi.RoviTestUtils.fileFromResource;
+import static org.atlasapi.remotesite.rovi.RoviTestUtils.resolvedContent;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
@@ -25,15 +25,11 @@ import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.content.ResolvedContent.ResolvedContentBuilder;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLineParser;
 import org.atlasapi.remotesite.rovi.schedule.ScheduleFileProcessor;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLineParser;
-import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
-import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLineParser;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLineParser;
 import org.junit.Before;
@@ -83,7 +79,6 @@ public class RoviProgramsProcessorTest {
                 descriptionsIndexer(),
                 episodeSequenceIndexer(),
                 seriesIndexer(),
-                seasonHistoryIndexer(),
                 contentWriter,
                 contentResolver,
                 scheduleProcessor);
@@ -188,13 +183,6 @@ public class RoviProgramsProcessorTest {
                 new RoviEpisodeSequenceLineParser());
     }
 
-    private MapBasedKeyedFileIndexer<String, RoviSeasonHistoryLine> seasonHistoryIndexer() {
-        return new MapBasedKeyedFileIndexer<>(
-                fileFromResource(SEASON_HISTORY_SEQUENCE),
-                RoviConstants.FILE_CHARSET,
-                new RoviSeasonHistoryLineParser());
-    }
-
     private MapBasedKeyedFileIndexer<String, RoviSeriesLine> seriesIndexer() {
         return new MapBasedKeyedFileIndexer<>(
                 fileFromResource(SERIES),
@@ -243,17 +231,6 @@ public class RoviProgramsProcessorTest {
         series.setCanonicalUri(canonicalUriForSeason(id));
         series.setPublisher(publisher);
         return series;
-    }
-
-    private <T extends Content>  ResolvedContent resolvedContent(String id, T content) {
-        Map<String, T> map = Maps.newHashMap();
-        map.put(canonicalUriForProgram(id), content);
-
-        ResolvedContentBuilder resolvedContentBuilder = ResolvedContent.builder();
-        resolvedContentBuilder.putAll(map);
-        
-        ResolvedContent resolvedContent = resolvedContentBuilder.build();
-        return resolvedContent;
     }
 
 }

@@ -2,32 +2,37 @@ package org.atlasapi.remotesite.rovi.series;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.atlasapi.remotesite.rovi.KeyedLine;
+import org.atlasapi.remotesite.rovi.ActionType;
+import org.atlasapi.remotesite.rovi.KeyedActionLine;
 
 import com.google.common.base.Optional;
 
 
-public class RoviSeasonHistoryLine implements KeyedLine<String>{
+public class RoviSeasonHistoryLine implements KeyedActionLine<String>{
 
-    private final String seriesId;
-    private final String seasonProgramId;
+    private final String seasonHistoryId;
+    private final ActionType actionType;
+
+    private final Optional<String> seriesId;
+    private final Optional<String> seasonProgramId;
     private final Optional<Integer> seasonNumber;
     private final Optional<String> seasonName;
-    private final String seasonHistoryId;
     
-    private RoviSeasonHistoryLine(String seriesId, String seasonProgramId, Integer seasonNumber, String seasonName, String seasonHistoryId) {
-        this.seriesId = checkNotNull(seriesId);
-        this.seasonProgramId = checkNotNull(seasonProgramId);
+    private RoviSeasonHistoryLine(String seriesId, String seasonProgramId, Integer seasonNumber, String seasonName, String seasonHistoryId, ActionType actionType) {
+        this.seasonHistoryId = checkNotNull(seasonHistoryId);
+        this.actionType = checkNotNull(actionType);
+        
+        this.seriesId = Optional.fromNullable(seriesId);
+        this.seasonProgramId = Optional.fromNullable(seasonProgramId);
         this.seasonNumber = Optional.fromNullable(seasonNumber);
         this.seasonName = Optional.fromNullable(seasonName);
-        this.seasonHistoryId = checkNotNull(seasonHistoryId);
     }
     
-    public String getSeriesId() {
+    public Optional<String> getSeriesId() {
         return seriesId;
     }
     
-    public String getSeasonProgramId() {
+    public Optional<String> getSeasonProgramId() {
         return seasonProgramId;
     }
     
@@ -45,8 +50,14 @@ public class RoviSeasonHistoryLine implements KeyedLine<String>{
 
     @Override
     public String getKey() {
-        return seasonProgramId;
+        return seasonProgramId.get();
     }
+    
+    @Override
+    public ActionType getActionType() {
+        return actionType;
+    }
+
     
     public static Builder builder() {
         return new Builder();
@@ -58,6 +69,7 @@ public class RoviSeasonHistoryLine implements KeyedLine<String>{
         private Integer seasonNumber;
         private String seasonName;
         private String seasonHistoryId;
+        private ActionType actionType;
         
         public Builder withSeriesId(String seriesId) {
             this.seriesId = seriesId;
@@ -84,13 +96,19 @@ public class RoviSeasonHistoryLine implements KeyedLine<String>{
             return this;
         }  
         
+        public Builder withActionType(ActionType actionType) {
+            this.actionType = actionType;
+            return this;
+        }
+        
         public RoviSeasonHistoryLine build() {
             return new RoviSeasonHistoryLine(
                     seriesId,
                     seasonProgramId,
                     seasonNumber,
                     seasonName,
-                    seasonHistoryId);
+                    seasonHistoryId,
+                    actionType);
         }
         
     }
