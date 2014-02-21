@@ -6,7 +6,6 @@ import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.remotesite.rovi.RoviUtils;
 import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
@@ -41,10 +40,6 @@ public class EpisodePopulator extends ItemPopulator<Episode> {
     }
 
     private void populateFromProgram(Episode episode, RoviProgramLine program) {
-        if (program.getEpisodeNumber().isPresent() && RoviUtils.isEpisodeNumberValid(program.getEpisodeNumber().get())) {
-            episode.setEpisodeNumber(Integer.valueOf(program.getEpisodeNumber().get()));
-        } 
-        
         if (program.getEpisodeTitle().isPresent()) {
             episode.setTitle(program.getEpisodeTitle().get());
         }

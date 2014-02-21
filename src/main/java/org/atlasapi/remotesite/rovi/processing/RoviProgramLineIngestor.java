@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi.processing;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 
 import java.nio.charset.Charset;
@@ -13,6 +14,7 @@ import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndex;
 import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
+import org.atlasapi.remotesite.rovi.model.RoviShowType;
 import org.atlasapi.remotesite.rovi.parsers.RoviLineParser;
 import org.atlasapi.remotesite.rovi.populators.ContentPopulatorSupplier;
 import org.slf4j.Logger;
@@ -57,6 +59,9 @@ public class RoviProgramLineIngestor extends RoviActionLineIngestor<RoviProgramL
 
     @Override
     protected void populateContent(Content content, RoviProgramLine parsedLine) throws IndexAccessException {
+        // Breaking if the type of the program is different from the one we already have in the database
+        RoviShowType showType = parsedLine.getShowType().get();
+        checkArgument(ContentCreator.hasCorrectType(content, showType), "The content type [" + content.getClass().getName() + "] doesn't match with the show type [" + showType + "]");
         contentPopulator.populateFromProgramAndAuxiliary(content, parsedLine);
     }
 

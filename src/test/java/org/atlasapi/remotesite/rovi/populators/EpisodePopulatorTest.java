@@ -37,7 +37,6 @@ public class EpisodePopulatorTest {
     private static final String EPISODE_ID = "12345";
     private static final String SERIES_ID = "23456";
     private static final String SEASON_ID = "34567";
-    private static final String EPISODE_NUMBER = "10";
     private static final String EPISODE_TITLE = "This is the episode title";
     private static final String EPISODE_SEQUENCE_TITLE = "This is the episode title inside the episode sequence";
     private static final Integer EPISODE_SEQUENCE_NUMBER = 15;
@@ -87,7 +86,6 @@ public class EpisodePopulatorTest {
         populator.populateContent(episode);
         
         assertEquals(EPISODE_TITLE, episode.getTitle());
-        assertEquals(Integer.valueOf(EPISODE_NUMBER), episode.getEpisodeNumber());
         assertEquals(SEASON_NUMBER, episode.getSeriesNumber());
 
         checkBaseEpisodeData(episode);
@@ -110,7 +108,6 @@ public class EpisodePopulatorTest {
         builder.withShowType(RoviShowType.SERIES_EPISODE);
         builder.withProgramId(EPISODE_ID);
         builder.withLongTitle("This is the program title");
-        builder.withEpisodeNumber(EPISODE_NUMBER);
         builder.withEpisodeTitle(EPISODE_TITLE);
         builder.withSeriesId(SERIES_ID);
         builder.withSeasonId(SEASON_ID);

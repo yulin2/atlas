@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
+import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeasonHistory;
 import static org.atlasapi.remotesite.rovi.model.ActionType.DELETE;
 
 import org.atlasapi.media.entity.ParentRef;
@@ -13,6 +14,7 @@ import org.atlasapi.remotesite.rovi.model.RoviSeasonHistoryLine;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 
 
 public class SeriesPopulator implements ContentPopulator<Series> {
@@ -51,6 +53,8 @@ public class SeriesPopulator implements ContentPopulator<Series> {
         if (season.getSeasonNumber().isPresent()) {
             series.withSeriesNumber(season.getSeasonNumber().get());
         }
+        
+        series.setAliasUrls(ImmutableList.of(canonicalUriForSeasonHistory(season.getSeasonHistoryId())));
     }
 
 }
