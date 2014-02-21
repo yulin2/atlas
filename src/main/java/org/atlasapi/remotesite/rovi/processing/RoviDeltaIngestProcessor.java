@@ -45,7 +45,6 @@ public class RoviDeltaIngestProcessor implements RoviIngestProcessor {
     private final KeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer;
     private final RoviContentWriter contentWriter;
     private final ContentResolver contentResolver;
-    // TODO: Implement a DeltaScheduleFileProcessor
     private final ScheduleFileProcessor scheduleFileProcessor;
     private final AuxiliaryCacheSupplier auxCacheSupplier;
     
@@ -186,7 +185,7 @@ public class RoviDeltaIngestProcessor implements RoviIngestProcessor {
             
             auxiliaryActionsProcessor.process(programsWithOnlyAuxiliaryActions);
 
-            LOG.info("Processing auxiliary actions only, result: {}", processingNoBrandsWithParentResult);
+            LOG.info("Processing auxiliary actions only, result: {}", programsWithOnlyAuxiliaryActions);
             
             // Step 8. Process schedule
             scheduleFileProcessor.process(scheduleFile);
