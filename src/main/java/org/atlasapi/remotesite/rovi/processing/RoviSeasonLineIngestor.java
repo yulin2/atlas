@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.rovi.processing;
 
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
+import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeasonHistory;
 
 import java.nio.charset.Charset;
 
@@ -58,9 +59,15 @@ public class RoviSeasonLineIngestor extends RoviActionLineIngestor<RoviSeasonHis
 
     @Override
     protected Optional<Series> resolveContent(RoviSeasonHistoryLine parsedLine) {
-        // TODO: change this using aliases (seasonHistoryId > seasonProgramId)
-        String canonicalUri = canonicalUriForSeason(parsedLine.getSeasonProgramId().get());
-        Maybe<Identified> maybeResolved = contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUri)).getFirstValue();
+        // Using alias for resolving here because for deletion records the seasonId is not present
+        ImmutableList.Builder<String> uris = ImmutableList.builder();
+        uris.add(canonicalUriForSeasonHistory(parsedLine.getSeasonHistoryId()));
+        
+        if (parsedLine.getSeasonProgramId().isPresent()) {
+            uris.add(canonicalUriForSeason(parsedLine.getSeasonProgramId().get()));
+        }
+        
+        Maybe<Identified> maybeResolved = contentResolver.findByUris(uris.build()).getFirstValue();
         
         if (maybeResolved.isNothing()) {
             return Optional.absent();
@@ -73,7 +80,5 @@ public class RoviSeasonLineIngestor extends RoviActionLineIngestor<RoviSeasonHis
     protected Series createContent(RoviSeasonHistoryLine parsedLine) {
         return new Series();
     }
-
-
 
 }

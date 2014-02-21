@@ -14,6 +14,10 @@ import com.google.common.base.Optional;
 import com.google.common.cache.LoadingCache;
 
 
+/**
+ * This class populates the content after having picked the proper ContentPopulator for it
+ */
+// TODO: Better name!
 public class ContentPopulatorSupplier {
 
     private final KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex;

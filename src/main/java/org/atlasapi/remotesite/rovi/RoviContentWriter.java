@@ -1,11 +1,8 @@
 package org.atlasapi.remotesite.rovi;
 
-import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentWriter;
 
 
@@ -21,16 +18,10 @@ public class RoviContentWriter {
         this.contentWriter = contentWriter;
     }
     
-    // TODO: merge content if instance of item, in order to keep broadcasts
+    // TODO: merge content if instance of item, in order to keep broadcasts when re-ingesting items
     public void writeContent(Content content) {
-        if (content instanceof Brand) {
-            contentWriter.createOrUpdate((Brand) content);
-        } else if (content instanceof Series) {
-            contentWriter.createOrUpdate((Series) content);
-        } else if (content instanceof Episode) {
-            contentWriter.createOrUpdate((Episode) content);
-        } else if (content instanceof Film) {
-            contentWriter.createOrUpdate((Film) content);
+        if (content instanceof Container) {
+            contentWriter.createOrUpdate((Container) content);
         } else if (content instanceof Item) {
             contentWriter.createOrUpdate((Item) content);
         } else {
