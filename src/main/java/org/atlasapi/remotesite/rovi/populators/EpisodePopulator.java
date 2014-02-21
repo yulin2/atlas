@@ -1,0 +1,87 @@
+package org.atlasapi.remotesite.rovi.populators;
+
+import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
+
+import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.remotesite.rovi.RoviUtils;
+import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
+import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
+import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
+
+import com.google.common.base.Optional;
+import com.google.common.cache.LoadingCache;
+
+
+public class EpisodePopulator extends ItemPopulator<Episode> {
+    
+    private final Optional<RoviEpisodeSequenceLine> episodeSequence;
+    private final LoadingCache<String, Optional<Integer>> seasonNumberCache;
+
+    public EpisodePopulator(Optional<RoviProgramLine> program,
+            Iterable<RoviProgramDescriptionLine> descriptions, ContentResolver contentResolver,
+            Optional<RoviEpisodeSequenceLine> episodeSequence,
+            LoadingCache<String, Optional<Integer>> seasonNumberCache) {
+        super(program, descriptions, contentResolver);
+        this.episodeSequence = episodeSequence;
+        this.seasonNumberCache = seasonNumberCache;
+    }
+
+    @Override
+    protected void addItemSpecificData(Episode episode) {
+        if (optionalProgram.isPresent()) {
+            populateFromProgram(episode, optionalProgram.get());
+        }
+        
+        if (episodeSequence.isPresent()) {
+            populateFromEpisodeSequence(episode, episodeSequence.get());
+        }
+    }
+
+    private void populateFromProgram(Episode episode, RoviProgramLine program) {
+        if (program.getEpisodeNumber().isPresent() && RoviUtils.isEpisodeNumberValid(program.getEpisodeNumber().get())) {
+            episode.setEpisodeNumber(Integer.valueOf(program.getEpisodeNumber().get()));
+        } 
+        
+        if (program.getEpisodeTitle().isPresent()) {
+            episode.setTitle(program.getEpisodeTitle().get());
+        }
+        
+        setSeasonNumberIfNeeded(episode, program);
+        setBrandAndSeriesFromProgramLine(episode, program);
+    }
+
+    private void populateFromEpisodeSequence(Episode episode, RoviEpisodeSequenceLine episodeSequence) {
+        if (episodeSequence.getEpisodeSeasonSequence().isPresent()) {
+            episode.setEpisodeNumber(episodeSequence.getEpisodeSeasonSequence().get());
+        } 
+        
+        if (episodeSequence.getEpisodeTitle().isPresent()) {
+            episode.setTitle(episodeSequence.getEpisodeTitle().get());
+        }        
+    }
+    
+    private void setSeasonNumberIfNeeded(Episode episode, RoviProgramLine program)  {
+        if (program.getSeasonId().isPresent()) {
+            Optional<Integer> seasonNumber = seasonNumberCache.getUnchecked(program.getSeasonId().get());
+            if (seasonNumber.isPresent()) {
+                episode.setSeriesNumber(seasonNumber.get());
+            }
+        }
+    }
+    
+    private void setBrandAndSeriesFromProgramLine(Episode episode, RoviProgramLine program) {
+        if (program.getSeriesId().isPresent()) {
+            String seriesCanonicalUri = canonicalUriForProgram(program.getSeriesId().get());
+            episode.setParentRef(new ParentRef(seriesCanonicalUri));
+        }
+        
+        if (program.getSeasonId().isPresent()) {
+            String seasonCanonicalUri = canonicalUriForSeason(program.getSeasonId().get());
+            episode.setSeriesRef(new ParentRef(seasonCanonicalUri));
+        }
+    }
+
+}

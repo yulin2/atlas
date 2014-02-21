@@ -11,7 +11,8 @@ import java.util.Map;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.ResolvedContent.ResolvedContentBuilder;
-import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
+import org.atlasapi.remotesite.rovi.model.ActionType;
+import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -20,9 +21,9 @@ import com.google.common.io.Resources;
 
 public class RoviTestUtils {
     
-    protected static final String SHORT_DESCRIPTION = "This is the short description";
-    protected static final String MEDIUM_DESCRIPTION = "This is the medium description";
-    protected static final String LONG_DESCRIPTION = "This is the long description";
+    public static final String SHORT_DESCRIPTION = "This is the short description";
+    public static final String MEDIUM_DESCRIPTION = "This is the medium description";
+    public static final String LONG_DESCRIPTION = "This is the long description";
     private static final String ENGLISH_UK_CULTURE = "English - UK";
 
     public static Collection<RoviProgramDescriptionLine> descriptions(String programId) {
