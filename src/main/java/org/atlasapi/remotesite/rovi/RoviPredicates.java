@@ -41,4 +41,11 @@ public class RoviPredicates {
         }
     };    
 
+    public final static Predicate<ActionLine> IS_DELETE = new Predicate<ActionLine>() {
+        @Override
+        public boolean apply(ActionLine input) {
+            return input.getActionType().equals(ActionType.DELETE);
+        }
+    };    
+
 }

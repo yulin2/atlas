@@ -11,14 +11,10 @@ import java.net.URL;
 import java.util.Collection;
 
 import org.atlasapi.remotesite.rovi.RoviPredicates;
-import org.atlasapi.remotesite.rovi.indexing.IndexAccessException;
-import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndex;
-import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.model.RoviSeriesLine;
 import org.atlasapi.remotesite.rovi.parsers.RoviEpisodeSequenceLineParser;
 import org.atlasapi.remotesite.rovi.parsers.RoviSeriesLineParser;
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.io.Resources;
@@ -33,10 +29,10 @@ public class MapBasedKeyedFileIndexerTest {
     public void testIndexing() throws IOException, IndexAccessException {
         URL fileUrl = Resources.getResource(SMALL_FILE);
         File file = new File(fileUrl.getPath());
-        MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer(file);
+        MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer();
 
         String key = "919489";
-        KeyedFileIndex<String, RoviSeriesLine> index = indexer.index();
+        KeyedFileIndex<String, RoviSeriesLine> index = indexer.index(file);
         
         Collection<RoviSeriesLine> seriesLines = index.getLinesForKey(key);
         
@@ -54,10 +50,10 @@ public class MapBasedKeyedFileIndexerTest {
     public void testIndexingWithPredicate() throws IOException, IndexAccessException {
         URL fileUrl = Resources.getResource(SMALL_FILE);
         File file = new File(fileUrl.getPath());
-        MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer(file);
+        MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer();
         
         String key = "20521012";
-        KeyedFileIndex<String, RoviSeriesLine> index = indexer.indexWithPredicate(RoviPredicates.IS_INSERT);
+        KeyedFileIndex<String, RoviSeriesLine> index = indexer.indexWithPredicate(file, RoviPredicates.IS_INSERT);
         
         Collection<RoviSeriesLine> seriesLines = index.getLinesForKey(key);
         
@@ -68,10 +64,10 @@ public class MapBasedKeyedFileIndexerTest {
     public void testIndexingFirstLine() throws IOException, IndexAccessException {
         URL fileUrl = Resources.getResource(SMALL_FILE);
         File file = new File(fileUrl.getPath());
-        MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer(file);
+        MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer();
         
         String key = "99";
-        KeyedFileIndex<String, RoviSeriesLine> index = indexer.index();
+        KeyedFileIndex<String, RoviSeriesLine> index = indexer.index(file);
         
         Collection<RoviSeriesLine> lines = index.getLinesForKey(key);
         
@@ -82,13 +78,13 @@ public class MapBasedKeyedFileIndexerTest {
     public void testStopProcessIfErrorWhileIndexing() throws IOException {
         File file = fileFromResource(NOT_PARSABLE_FILE);
         
-        MapBasedKeyedFileIndexer<String, RoviEpisodeSequenceLine> indexer = new MapBasedKeyedFileIndexer<>(file, FILE_CHARSET, new RoviEpisodeSequenceLineParser());
-        indexer.index();
+        MapBasedKeyedFileIndexer<String, RoviEpisodeSequenceLine> indexer = new MapBasedKeyedFileIndexer<>(FILE_CHARSET, new RoviEpisodeSequenceLineParser());
+        indexer.index(file);
     }
     
-    public MapBasedKeyedFileIndexer<String, RoviSeriesLine> createIndexer(File file) {
+    public MapBasedKeyedFileIndexer<String, RoviSeriesLine> createIndexer() {
         RoviSeriesLineParser parser = new RoviSeriesLineParser();
-        return new MapBasedKeyedFileIndexer<>(file, FILE_CHARSET, parser);
+        return new MapBasedKeyedFileIndexer<>(FILE_CHARSET, parser);
     }
     
 }

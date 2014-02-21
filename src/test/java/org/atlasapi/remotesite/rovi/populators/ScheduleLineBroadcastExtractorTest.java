@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.remotesite.rovi.model.ActionType;
 import org.atlasapi.remotesite.rovi.model.ScheduleLine;
 import org.atlasapi.remotesite.rovi.populators.ScheduleLineBroadcastExtractor;
 import org.joda.time.DateTime;
@@ -55,7 +56,7 @@ public class ScheduleLineBroadcastExtractorTest {
     private ScheduleLine scheduleLine(String sourceId) {
         return new ScheduleLine(sourceId, new LocalDate(2014, DateTimeConstants.JANUARY, 1), 
                 new LocalTime(15, 0), false, 600, "12345", null, null, null, null, null, null, 
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, 
+                null, null, null, null, null, null, null, null, null, null, null, null, null, ActionType.INSERT, 
                 SCHEDULE_ID);
     }
 }

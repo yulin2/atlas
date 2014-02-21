@@ -34,7 +34,7 @@ import com.google.common.collect.Sets.SetView;
 import com.google.common.io.Files;
 
 
-public class RoviDeltaIngestProcessor {
+public class RoviDeltaIngestProcessor implements RoviIngestProcessor {
     
     private static final int MAX_CACHE_SIZE = 100000;
 
@@ -67,16 +67,17 @@ public class RoviDeltaIngestProcessor {
         this.auxCacheSupplier = auxCacheSupplier;
     }
 
-    public void process(File programFile, File seasonsFile, File scheduleFile) throws IOException {
+    @Override
+    public void process(File programFile, File seasonsFile, File scheduleFile, File programDescriptionsFile, File episodeSequenceFile) throws IOException {
         KeyedFileIndex<String, RoviProgramLine> programIndex = null;
         KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex = null;
         KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex = null;
 
         try {
             LOG.info("Indexing files");
-            programIndex = programIndexer.index();
-            descriptionIndex = programDescriptionIndexer.index();
-            episodeSequenceIndex = episodeSequenceIndexer.index();
+            programIndex = programIndexer.index(programFile);
+            descriptionIndex = programDescriptionIndexer.index(programDescriptionsFile);
+            episodeSequenceIndex = episodeSequenceIndexer.index(episodeSequenceFile);
             LOG.info("Indexing completed");
             
             ContentPopulatorSupplier contentPopulator = new ContentPopulatorSupplier(

@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 
 
-public class RoviFullIngestProcessor {
+public class RoviFullIngestProcessor implements RoviIngestProcessor {
     private final static Logger LOG = LoggerFactory.getLogger(RoviFullIngestProcessor.class);
     private static final int MAX_CACHE_SIZE = 100000;
 
@@ -53,14 +53,15 @@ public class RoviFullIngestProcessor {
         this.auxCacheSupplier = auxCacheSupplier;
     }
 
-    public void process(File programFile, File seasonsFile, File scheduleFile) throws IOException {
+    @Override
+    public void process(File programFile, File seasonsFile, File scheduleFile, File programDescriptionsFile, File episodeSequenceFile) throws IOException {
         KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex = null;
         KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex = null;
 
         try {
             LOG.info("Indexing files");
-            descriptionIndex = programDescriptionIndexer.index();
-            episodeSequenceIndex = episodeSequenceIndexer.index();
+            descriptionIndex = programDescriptionIndexer.index(programDescriptionsFile);
+            episodeSequenceIndex = episodeSequenceIndexer.index(episodeSequenceFile);
             LOG.info("Indexing completed");
             
             LOG.info("Start processing programs");

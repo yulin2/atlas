@@ -90,7 +90,9 @@ public class RoviFullIngestProcessorTest {
     public void testProcessing() throws IOException {
         processor.process(fileFromResource(PROGRAM_FILE),
                 fileFromResource(SEASON_HISTORY_SEQUENCE),
-                fileFromResource(SCHEDULE));
+                fileFromResource(SCHEDULE),
+                fileFromResource(PROGRAM_DESCRIPTION),
+                fileFromResource(EPISODE_SEQUENCE));
 
         Mockito.verify(contentWriter, atLeastOnce()).writeContent(argument.capture());
 
@@ -176,14 +178,12 @@ public class RoviFullIngestProcessorTest {
 
     private MapBasedKeyedFileIndexer<String, RoviProgramDescriptionLine> descriptionsIndexer() {
         return new MapBasedKeyedFileIndexer<>(
-                fileFromResource(PROGRAM_DESCRIPTION),
                 RoviConstants.FILE_CHARSET,
                 new RoviProgramDescriptionLineParser());
     }
 
     private MapBasedKeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer() {
         return new MapBasedKeyedFileIndexer<>(
-                fileFromResource(EPISODE_SEQUENCE),
                 RoviConstants.FILE_CHARSET,
                 new RoviEpisodeSequenceLineParser());
     }
