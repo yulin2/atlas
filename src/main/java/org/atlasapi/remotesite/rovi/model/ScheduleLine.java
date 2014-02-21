@@ -13,7 +13,7 @@ public class ScheduleLine implements KeyedActionLine<String> {
     private final LocalDate startDate;
     private final LocalTime startTime;
     private final Boolean isTimeApproximate;
-    private final int duration;
+    private final Integer duration;
     private final String programmeId;
     private final String seriesId;
     private final String tvRating;
@@ -38,7 +38,7 @@ public class ScheduleLine implements KeyedActionLine<String> {
     private final String scheduleId;
     
     public ScheduleLine(String sourceId, LocalDate startDate, LocalTime startTime,
-            Boolean isTimeApproximate, int duration, String programmeId, String seriesId,
+            Boolean isTimeApproximate, Integer duration, String programmeId, String seriesId,
             String tvRating, String tvRatingReason, SheduleShowingType showingType,
             CaptionType captionType, AudioLevel audioLevel, String threeDLevel, Boolean sap,
             String colorType, String airingType, Boolean subtitled, Boolean joinedInProgress,

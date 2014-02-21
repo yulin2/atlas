@@ -46,6 +46,7 @@ public class ScheduleLineBroadcastExtractor {
         
         Broadcast broadcast = new Broadcast(channel.requireValue().getCanonicalUri(), startTime, endTime);
         broadcast.setCanonicalUri(BROADCAST_URI_PREFIX + scheduleLine.getScheduleId());
+        broadcast.withId(scheduleLine.getScheduleId());
         
         return Maybe.just(broadcast);
     }

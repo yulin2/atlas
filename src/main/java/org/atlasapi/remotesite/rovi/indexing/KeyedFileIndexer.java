@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi.indexing;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.google.common.base.Predicate;
@@ -18,13 +19,13 @@ public interface KeyedFileIndexer<T, S extends KeyedLine<T>> {
      * @return the index for a text file
      * @throws IOException if it's not possible to read the file
      */
-    KeyedFileIndex<T, S> index() throws IOException;
+    KeyedFileIndex<T, S> index(File file) throws IOException;
 
     /**
      * @param predicate - a predicate that defines if the record must be indexed or not
      * @return the index for a text file
      * @throws IOException if it's not possible to read the file
      */
-    KeyedFileIndex<T, S> indexWithPredicate(Predicate<? super S> isToIndex) throws IOException;
+    KeyedFileIndex<T, S> indexWithPredicate(File file, Predicate<? super S> isToIndex) throws IOException;
     
 }

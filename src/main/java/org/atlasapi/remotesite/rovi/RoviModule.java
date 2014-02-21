@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.rovi;
 
-import java.io.File;
-
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.channel.ChannelResolver;
@@ -22,8 +20,7 @@ import org.atlasapi.remotesite.rovi.processing.ItemBroadcastUpdater;
 import org.atlasapi.remotesite.rovi.processing.RoviDeltaIngestProcessor;
 import org.atlasapi.remotesite.rovi.processing.RoviFullIngestProcessor;
 import org.atlasapi.remotesite.rovi.processing.ScheduleFileProcessor;
-import org.atlasapi.remotesite.rovi.tasks.RoviDeltaIngestTask;
-import org.atlasapi.remotesite.rovi.tasks.RoviFullIngestTask;
+import org.atlasapi.remotesite.rovi.tasks.RoviIngestTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,12 +31,6 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class RoviModule {
 
-    private static final String PROGRAMS_FILE = "/data/rovi/Program.txt";
-    private static final String PROGRAM_DESCRIPTION = "/data/rovi/Program_Description.txt";
-    private static final String EPISODE_SEQUENCE = "/data/rovi/Episode_Sequence.txt";
-    private static final String SEASON_HISTORY_SEQUENCE = "/data/rovi/Season_History.txt";
-    private static final String SCHEDULE_FILE = "/data/rovi/Schedule.txt";
-
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
@@ -48,7 +39,6 @@ public class RoviModule {
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviProgramDescriptionLine> descriptionsIndexer() {
         return new MapBasedKeyedFileIndexer<>(
-                new File(PROGRAM_DESCRIPTION),
                 RoviConstants.FILE_CHARSET,
                 new RoviProgramDescriptionLineParser());
     }
@@ -56,7 +46,6 @@ public class RoviModule {
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer() {
         return new MapBasedKeyedFileIndexer<>(
-                new File(EPISODE_SEQUENCE),
                 RoviConstants.FILE_CHARSET,
                 new RoviEpisodeSequenceLineParser());
     }
@@ -64,7 +53,6 @@ public class RoviModule {
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviSeasonHistoryLine> seasonHistoryIndexer() {
         return new MapBasedKeyedFileIndexer<>(
-                new File(SEASON_HISTORY_SEQUENCE),
                 RoviConstants.FILE_CHARSET,
                 new RoviSeasonHistoryLineParser());
     }
@@ -72,7 +60,6 @@ public class RoviModule {
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviProgramLine> programIndexer() {
         return new MapBasedKeyedFileIndexer<>(
-                new File(SEASON_HISTORY_SEQUENCE),
                 RoviConstants.FILE_CHARSET,
                 new RoviProgramLineParser());
     }
@@ -110,15 +97,26 @@ public class RoviModule {
         return new AuxiliaryCacheSupplier(contentResolver);
     }
     
-    @Bean RoviFullIngestTask roviFullIngestTask() {
-        return new RoviFullIngestTask(fullIngestProcessor(), new File(PROGRAMS_FILE), new File(
-                SEASON_HISTORY_SEQUENCE),  new File(SCHEDULE_FILE));
+    @Bean
+    public RoviIngestTask roviFullIngestTask() {
+        return new RoviIngestTask(
+                fullIngestProcessor(),
+                FileSupplier.fullProgramFile(),
+                FileSupplier.fullSeasonHistoryFile(),
+                FileSupplier.fullScheduleFile(),
+                FileSupplier.fullProgramDescriptionsFile(),
+                FileSupplier.fullEpisodeSequenceFile());
     }
     
     @Bean
-    public RoviDeltaIngestTask roviDeltaIngestTask() {
-        return new RoviDeltaIngestTask(deltaIngestProcessor(), new File(PROGRAMS_FILE), new File(
-                SEASON_HISTORY_SEQUENCE),  new File(SCHEDULE_FILE));        
+    public RoviIngestTask roviDeltaIngestTask() {
+        return new RoviIngestTask(
+                deltaIngestProcessor(),
+                FileSupplier.deltaProgramFile(),
+                FileSupplier.deltaSeasonHistoryFile(),
+                FileSupplier.deltaScheduleFile(),
+                FileSupplier.deltaProgramDescriptionsFile(),
+                FileSupplier.deltaEpisodeSequenceFile());      
     }
     
     @Bean
@@ -131,6 +129,7 @@ public class RoviModule {
     @PostConstruct
     public void init() {
         scheduler.schedule(roviFullIngestTask(), RepetitionRules.NEVER);
+        scheduler.schedule(roviDeltaIngestTask(), RepetitionRules.NEVER);
     }
 
 }

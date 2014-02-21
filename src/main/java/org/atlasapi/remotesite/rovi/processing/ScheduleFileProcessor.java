@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.rovi.processing;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_INSERT;
+import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_DELETE;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.metabroadcast.common.base.Maybe;
 
@@ -37,12 +38,11 @@ public class ScheduleFileProcessor {
     
     public void process(File scheduleFile) throws IOException {
         MapBasedKeyedFileIndexer<String, ScheduleLine> scheduleIndexer = new MapBasedKeyedFileIndexer<>(
-                scheduleFile,
                 RoviConstants.FILE_CHARSET,
                 new ScheduleLineParser());
         
         log.trace("Start processing schedule ingest of {}", scheduleFile.getCanonicalPath());
-        KeyedFileIndex<String, ScheduleLine> index = scheduleIndexer.indexWithPredicate(IS_INSERT);
+        KeyedFileIndex<String, ScheduleLine> index = scheduleIndexer.indexWithPredicate(scheduleFile, Predicates.not(IS_DELETE));
         
         try {
             for (String programmeId : index.getKeys()) {

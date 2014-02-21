@@ -27,36 +27,34 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
     private final static Logger LOG = LoggerFactory.getLogger(MapBasedKeyedFileIndexer.class);
     
 
-    private final File file;
     private final RoviLineParser<S> parser;
     private final Charset charset;
 
-    public MapBasedKeyedFileIndexer(File file, Charset charset, RoviLineParser<S> parser) {
-        this.file = checkNotNull(file);
+    public MapBasedKeyedFileIndexer(Charset charset, RoviLineParser<S> parser) {
         this.parser = checkNotNull(parser);
         this.charset = checkNotNull(charset);
     }
     
     @Override
-    public KeyedFileIndex<T, S> index()
+    public KeyedFileIndex<T, S> index(File file)
             throws IOException {
-        return indexWithOptionalPredicate(Optional.<Predicate<? super S>>absent());
+        return indexWithOptionalPredicate(file, Optional.<Predicate<? super S>>absent());
     }
     
     @Override
-    public KeyedFileIndex<T, S> indexWithPredicate(Predicate<? super S> isToIndex) throws IOException {
-        return indexWithOptionalPredicate(Optional.<Predicate<? super S>>of(isToIndex));
+    public KeyedFileIndex<T, S> indexWithPredicate(File file, Predicate<? super S> isToIndex) throws IOException {
+        return indexWithOptionalPredicate(file, Optional.<Predicate<? super S>>of(isToIndex));
     }
 
-    private KeyedFileIndex<T, S> indexWithOptionalPredicate(Optional<Predicate<? super S>> isToIndex)
+    private KeyedFileIndex<T, S> indexWithOptionalPredicate(File file, Optional<Predicate<? super S>> isToIndex)
             throws IOException, FileNotFoundException {
-        Multimap<T, PointerAndSize> indexMap = buildIndex(isToIndex);
+        Multimap<T, PointerAndSize> indexMap = buildIndex(file, isToIndex);
         MapBasedKeyedFileIndex<T, S> index = new MapBasedKeyedFileIndex<T, S>(file, indexMap, charset, parser);
         
         return index;
     }
     
-    private Multimap<T, PointerAndSize> buildIndex(Optional<Predicate<? super S>> isToIndex) throws IOException {
+    private Multimap<T, PointerAndSize> buildIndex(File file, Optional<Predicate<? super S>> isToIndex) throws IOException {
         final HashMultimap<T, PointerAndSize> indexMap = HashMultimap.create();
         
         LOG.info("Start indexing file {}", file.getAbsolutePath());
