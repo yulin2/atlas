@@ -3,7 +3,10 @@ package org.atlasapi.remotesite.rovi;
 import static com.google.common.base.Predicates.and;
 import static com.google.common.base.Predicates.not;
 
-import org.atlasapi.remotesite.rovi.program.RoviProgramLine;
+import org.atlasapi.remotesite.rovi.model.ActionLine;
+import org.atlasapi.remotesite.rovi.model.ActionType;
+import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
+import org.atlasapi.remotesite.rovi.model.RoviShowType;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;

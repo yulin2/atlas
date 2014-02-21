@@ -3,7 +3,8 @@ package org.atlasapi.remotesite.rovi;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.atlasapi.remotesite.rovi.program.RoviProgramLine;
+import org.atlasapi.remotesite.rovi.model.ActionType;
+import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
 import org.junit.Test;
 
 
