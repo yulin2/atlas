@@ -1,27 +1,49 @@
 package org.atlasapi.remotesite.rovi;
 
 import java.util.Collection;
-import java.util.Map;
 
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 
 
 public class CultureToPublisherMap {
     
     private static final String ENGLISH_LANG = "en";
     private static final String FRENCH_LANG = "fr";
-    private static final String ENGLISH_UK_CULTURE = "English - UK";
-    private static final String ENGLISH_NA_CULTURE = "English - NA";
-    private static final String FRENCH_FR_CULTURE = "French Generic";
-    private static final String FRENCH_CA_CULTURE = "French - Québec";
+    protected static final String ENGLISH_UK_CULTURE = "English - UK";
+    protected static final String ENGLISH_NA_CULTURE = "English - NA";
+    protected static final String FRENCH_FR_CULTURE = "French Generic";
+    protected static final String FRENCH_CA_CULTURE = "French - Québec";
 
     private static final Multimap<String, String> languageToCultures = HashMultimap.create();
-    private static final Map<String, Publisher> cultureToPublisher = Maps.newHashMap();
+    private static final BiMap<String, Publisher> cultureToPublisher = HashBiMap.create();
+    
+    private static final Ordering<String> CULTURES_ORDERING = Ordering.natural()
+            .onResultOf(new Function<String, Integer>() {
+                public Integer apply(String culture) {
+                    if (culture.equals(ENGLISH_UK_CULTURE)) {
+                        return 1;
+                    }
+                    if (culture.equals(ENGLISH_NA_CULTURE)) {
+                        return 2;
+                    }
+                    if (culture.equals(FRENCH_FR_CULTURE)) {
+                        return 3;
+                    }
+                    if (culture.equals(FRENCH_CA_CULTURE)) {
+                        return 4;
+                    }
+
+                    return 5;
+                }
+            });
     
     static {
         languageToCultures.put(ENGLISH_LANG, ENGLISH_UK_CULTURE);
@@ -53,6 +75,26 @@ public class CultureToPublisherMap {
     
     public static Publisher getPublisher(String culture) {
         return cultureToPublisher.get(culture);
+    }
+    
+    public static String getCulture(Publisher publisher) {
+        return cultureToPublisher.inverse().get(publisher);
+    }
+    
+    public static boolean isCultureGoodForPublisher(String culture, Publisher publisher) {
+        if (cultureToPublisher.containsValue(publisher)) {
+            if (cultureToPublisher.containsKey(culture)) {
+                return cultureToPublisher.get(culture).equals(publisher);
+            }
+            
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public static Ordering<String> culturesOrdering() {
+        return CULTURES_ORDERING;
     }
     
 }

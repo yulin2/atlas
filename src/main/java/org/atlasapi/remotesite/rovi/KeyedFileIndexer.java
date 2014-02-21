@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.rovi;
 
 import java.io.IOException;
 
+import com.google.common.base.Predicate;
+
 
 /**
  * Instances of this class are able to create a {@link KeyedFileIndex} for a text file
@@ -17,5 +19,12 @@ public interface KeyedFileIndexer<T, S extends KeyedLine<T>> {
      * @throws IOException if it's not possible to read the file
      */
     KeyedFileIndex<T, S> index() throws IOException;
+
+    /**
+     * @param predicate - a predicate that defines if the record must be indexed or not
+     * @return the index for a text file
+     * @throws IOException if it's not possible to read the file
+     */
+    KeyedFileIndex<T, S> indexWithPredicate(Predicate<? super S> isToIndex) throws IOException;
     
 }

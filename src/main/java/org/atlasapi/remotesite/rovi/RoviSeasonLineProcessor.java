@@ -9,6 +9,9 @@ import org.atlasapi.remotesite.rovi.series.SeriesFromSeasonHistoryExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+
 
 public class RoviSeasonLineProcessor extends RoviLineExtractorAndWriter<RoviSeasonHistoryLine> {
 
@@ -16,11 +19,13 @@ public class RoviSeasonLineProcessor extends RoviLineExtractorAndWriter<RoviSeas
 
     private final RoviSeasonHistoryLineParser lineParser;
     private final SeriesFromSeasonHistoryExtractor extractor;
+    private final Optional<Predicate<ActionLine>> predicate;
 
-    public RoviSeasonLineProcessor(RoviSeasonHistoryLineParser lineParser, SeriesFromSeasonHistoryExtractor extractor, RoviContentWriter contentWriter, Charset charset) {
+    public RoviSeasonLineProcessor(RoviSeasonHistoryLineParser lineParser, SeriesFromSeasonHistoryExtractor extractor, RoviContentWriter contentWriter, Charset charset, Optional<Predicate<ActionLine>> predicate) {
         super(lineParser, charset, contentWriter);
         this.lineParser = lineParser;
         this.extractor = extractor;
+        this.predicate = predicate;
     }
     
     @Override
@@ -35,6 +40,9 @@ public class RoviSeasonLineProcessor extends RoviLineExtractorAndWriter<RoviSeas
 
     @Override
     protected boolean isToProcess(RoviSeasonHistoryLine parsedLine) {
+        if (predicate.isPresent()) {
+            return predicate.get().apply(parsedLine);
+        }
         return true;
     }
 

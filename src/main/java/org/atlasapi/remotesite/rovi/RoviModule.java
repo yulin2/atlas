@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.rovi;
 
+import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_INSERT;
+
 import java.io.File;
 
 import javax.annotation.PostConstruct;
@@ -85,13 +87,35 @@ public class RoviModule {
                 seriesIndexer(),
                 roviContentWriter(),
                 contentResolver,
-                scheduleProcessor());
+                scheduleProcessor(),
+                IS_INSERT);
+    }
+    
+    @Bean
+    public RoviFullIngestProcessor fullIngestProcessor() {
+        return new RoviFullIngestProcessor(
+                descriptionsIndexer(),
+                episodeSequenceIndexer(),
+                roviContentWriter(),
+                contentResolver,
+                scheduleProcessor(),
+                auxCacheSupplier());
+    }
+    
+    @Bean
+    public AuxiliaryCacheSupplier auxCacheSupplier() {
+        return new AuxiliaryCacheSupplier(contentResolver);
     }
     
     @Bean
     public RoviUpdater roviUpdater() {
         return new RoviUpdater(programsProcessor(), new File(PROGRAMS_FILE), new File(
                 SEASON_HISTORY_SEQUENCE), new File(SCHEDULE_FILE));
+    }
+    
+    @Bean RoviFullIngestTask roviFullIngestTask() {
+        return new RoviFullIngestTask(fullIngestProcessor(), new File(PROGRAMS_FILE), new File(
+                SEASON_HISTORY_SEQUENCE),  new File(SCHEDULE_FILE));
     }
     
     @Bean
@@ -104,6 +128,7 @@ public class RoviModule {
     @PostConstruct
     public void init() {
         scheduler.schedule(roviUpdater(), RepetitionRules.NEVER);
+        scheduler.schedule(roviFullIngestTask(), RepetitionRules.NEVER);
     }
 
 }

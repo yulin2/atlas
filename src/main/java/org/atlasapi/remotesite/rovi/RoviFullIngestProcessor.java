@@ -10,134 +10,127 @@ import java.io.File;
 import java.io.IOException;
 
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.remotesite.rovi.program.ProgramLineContentExtractorSupplier;
+import org.atlasapi.remotesite.rovi.deltas.ContentPopulatorSupplier;
 import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.program.RoviProgramLineParser;
 import org.atlasapi.remotesite.rovi.schedule.ScheduleFileProcessor;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLineParser;
-import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
-import org.atlasapi.remotesite.rovi.series.SeriesFromSeasonHistoryExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 
-public class RoviProgramsProcessor {
 
+public class RoviFullIngestProcessor {
     private final static Logger LOG = LoggerFactory.getLogger(RoviProgramsProcessor.class);
+    private static final int MAX_CACHE_SIZE = 100000;
 
     private final KeyedFileIndexer<String, RoviProgramDescriptionLine> programDescriptionIndexer;
     private final KeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer;
-    private final KeyedFileIndexer<String, RoviSeriesLine> seriesIndexer;
     private final RoviContentWriter contentWriter;
     private final ContentResolver contentResolver;
     private final ScheduleFileProcessor scheduleFileProcessor;
-    private final Optional<Predicate<ActionLine>> actionPredicate;
+    private final AuxiliaryCacheSupplier auxCacheSupplier;
     
-    public RoviProgramsProcessor(
+    public RoviFullIngestProcessor(
             KeyedFileIndexer<String, RoviProgramDescriptionLine> programDescriptionIndexer,
             KeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer,
-            KeyedFileIndexer<String, RoviSeriesLine> seriesIndexer,
-            RoviContentWriter contentWriter,
-            ContentResolver contentResolver,
-            ScheduleFileProcessor scheduleFileProcessor) {
-        this(programDescriptionIndexer, episodeSequenceIndexer, seriesIndexer, contentWriter,
-                contentResolver, scheduleFileProcessor, null);
-    }
-    
-    public RoviProgramsProcessor(
-            KeyedFileIndexer<String, RoviProgramDescriptionLine> programDescriptionIndexer,
-            KeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer,
-            KeyedFileIndexer<String, RoviSeriesLine> seriesIndexer,
             RoviContentWriter contentWriter,
             ContentResolver contentResolver,
             ScheduleFileProcessor scheduleFileProcessor,
-            Predicate<ActionLine> globalProgramPredicate) {
+            AuxiliaryCacheSupplier auxCacheSupplier) {
 
         this.programDescriptionIndexer = programDescriptionIndexer;
         this.episodeSequenceIndexer = episodeSequenceIndexer;
-        this.seriesIndexer = seriesIndexer;
         this.contentWriter = contentWriter;
         this.contentResolver = contentResolver;
         this.scheduleFileProcessor = scheduleFileProcessor;
-        this.actionPredicate = Optional.fromNullable(globalProgramPredicate);
+        this.auxCacheSupplier = auxCacheSupplier;
     }
 
     public void process(File programFile, File seasonsFile, File scheduleFile) throws IOException {
         KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex = null;
         KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex = null;
-        KeyedFileIndex<String, RoviSeriesLine> seriesIndex = null;
 
         try {
             LOG.info("Indexing files");
             descriptionIndex = programDescriptionIndexer.index();
             episodeSequenceIndex = episodeSequenceIndexer.index();
-            seriesIndex = seriesIndexer.index();
             LOG.info("Indexing completed");
             
-            ProgramLineContentExtractorSupplier contentExtractorSupplier = new ProgramLineContentExtractorSupplier(
+            ContentPopulatorSupplier contentPopulator = new ContentPopulatorSupplier(
                     descriptionIndex,
-                    seriesIndex,
                     episodeSequenceIndex,
-                    contentResolver);
-    
+                    contentResolver,
+                    auxCacheSupplier.seasonNumberCache(MAX_CACHE_SIZE));
+            
             LOG.info("Start processing programs");
             
             // Step 1. Process brands with no parent
-            RoviDataProcessingResult processingBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineProcessor(
+            RoviDataProcessingResult processingBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
                     new RoviProgramLineParser(),
-                    contentExtractorSupplier,
-                    predicate(IS_BRAND_NO_PARENT),
+                    FILE_CHARSET,
+                    descriptionIndex,
+                    episodeSequenceIndex,
+                    IS_BRAND_NO_PARENT,
                     contentWriter,
-                    FILE_CHARSET));
+                    contentResolver,
+                    contentPopulator
+                    ));
             
             LOG.info("Processing brands with no parent complete, result: {}", processingBrandsNoParentResult);
     
             // Step 2. Process brands with  parent
-            RoviDataProcessingResult processingBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineProcessor(
+            RoviDataProcessingResult processingBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
                     new RoviProgramLineParser(),
-                    contentExtractorSupplier,
-                    predicate(IS_BRAND_WITH_PARENT),
+                    FILE_CHARSET,
+                    descriptionIndex,
+                    episodeSequenceIndex,
+                    IS_BRAND_WITH_PARENT,
                     contentWriter,
-                    FILE_CHARSET));
+                    contentResolver,
+                    contentPopulator
+                    ));
             
             LOG.info("Processing brands with parent complete, result: {}", processingBrandsWithParentResult);
             
             // Step 3. Process series
-            SeriesFromSeasonHistoryExtractor seriesExtractor = new SeriesFromSeasonHistoryExtractor(contentResolver);
-            RoviDataProcessingResult processingSeriesResult = Files.readLines(seasonsFile, FILE_CHARSET, new RoviSeasonLineProcessor(
+            RoviDataProcessingResult processingSeriesResult = Files.readLines(seasonsFile, FILE_CHARSET, new RoviSeasonLineIngestor(
                     new RoviSeasonHistoryLineParser(),
-                    seriesExtractor,
-                    contentWriter,
                     FILE_CHARSET,
-                    actionPredicate));
-            
-            seriesExtractor.clearCache();
+                    contentResolver,
+                    contentWriter,
+                    auxCacheSupplier.parentPublisherCache(MAX_CACHE_SIZE)));
             
             LOG.info("Processing series complete, result: {}", processingSeriesResult);
             
             // Step 4. Process programs without parent
-            RoviDataProcessingResult processingNoBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineProcessor(
+            RoviDataProcessingResult processingNoBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
                     new RoviProgramLineParser(),
-                    contentExtractorSupplier,
+                    FILE_CHARSET,
+                    descriptionIndex,
+                    episodeSequenceIndex,
                     NO_BRAND_NO_PARENT,
                     contentWriter,
-                    FILE_CHARSET));
+                    contentResolver,
+                    contentPopulator
+                    ));
             
             LOG.info("Processing programs (no brands) with no parent complete, result: {}", processingNoBrandsNoParentResult);
             
             // Step 5. Process programs with parent
-            RoviDataProcessingResult processingNoBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineProcessor(
+            RoviDataProcessingResult processingNoBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
                     new RoviProgramLineParser(),
-                    contentExtractorSupplier,
+                    FILE_CHARSET,
+                    descriptionIndex,
+                    episodeSequenceIndex,
                     NO_BRAND_WITH_PARENT,
                     contentWriter,
-                    FILE_CHARSET));
+                    contentResolver,
+                    contentPopulator
+                    ));
             
             LOG.info("Processing programs (no brands) with parent complete, result: {}", processingNoBrandsWithParentResult);
             
@@ -146,20 +139,10 @@ public class RoviProgramsProcessor {
       
             LOG.info("Processing schedule complete");
         } finally {
-            releaseIndexResources(ImmutableSet.of(descriptionIndex,
-                    episodeSequenceIndex,
-                    seriesIndex));
+            releaseIndexResources(ImmutableSet.of(descriptionIndex, episodeSequenceIndex));
         }
     }
     
-    
-    private <T extends ActionLine> Predicate<T> predicate(Predicate<T> predicate) {
-        if (actionPredicate.isPresent()) {
-            return Predicates.and(predicate, actionPredicate.get());
-        }
-        
-        return predicate;
-    }
 
     private void releaseIndexResources(Iterable<KeyedFileIndex<String, ? extends KeyedActionLine<String>>> indexes) {
         for (KeyedFileIndex<?, ?> index: indexes) {
