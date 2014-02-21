@@ -12,7 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
 
@@ -42,12 +46,19 @@ public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedF
     
     @Override
     public Collection<S> getLinesForKey(T key) throws IndexAccessException  {
+        return getLinesForKey(key, Predicates.<S>alwaysTrue());
+    }
+    
+    @Override
+    public Collection<S> getLinesForKey(T key, Predicate<? super S> predicate) throws IndexAccessException {
         Collection<PointerAndSize> pointerAndSizeList = indexMap.get(key);
         ImmutableList.Builder<S> builder = ImmutableList.builder();
         
         for (PointerAndSize pointerAndSize: pointerAndSizeList) {
-            String line = readData(key, pointerAndSize);
-            builder.add(toParsedLine.apply(line));
+            S parsed = getParsed(key, pointerAndSize);
+            if (predicate.apply(parsed)) {
+                builder.add(parsed);
+            }
         }
 
         return builder.build();
@@ -56,6 +67,11 @@ public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedF
     @Override
     public Set<T> getKeys() {
         return indexMap.keySet();
+    }
+    
+    private S getParsed(T key, PointerAndSize pointerAndSize) throws IndexAccessException {
+        String line = readData(key, pointerAndSize);
+        return toParsedLine.apply(line);
     }
     
     private String readData(T key, PointerAndSize pointerAndSize) throws IndexAccessException {
@@ -77,6 +93,22 @@ public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedF
         } catch (IOException e) {
             LOG.error("Error while closing RandomAccessFile for file " + file.getAbsolutePath(), e);
         }
+    }
+
+    @Override
+    public Optional<S> getFirstForKey(T key) throws IndexAccessException {
+        if (!indexMap.containsKey(key)) {
+            return Optional.absent();
+        }
+        
+        Collection<PointerAndSize> pointerAndSizeList = indexMap.get(key);
+        PointerAndSize pointerAndSize = Iterables.getFirst(pointerAndSizeList, null);
+
+        if (pointerAndSize != null) {
+            return Optional.of(getParsed(key, pointerAndSize));
+        }
+
+        return Optional.absent();
     }
 
 }

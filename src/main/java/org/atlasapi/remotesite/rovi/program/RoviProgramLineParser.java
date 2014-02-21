@@ -35,7 +35,7 @@ public class RoviProgramLineParser implements RoviLineParser<RoviProgramLine>{
         String showTypePart = getPartAtPosition(parts, SHOW_TYPE_POS);
         
         if (showTypePart != null) {
-            builder.withShowType(RoviShowType.valueOf(showTypePart));
+            builder.withShowType(RoviShowType.fromRoviType(showTypePart));
         }
         
         builder.withProgramId(getPartAtPosition(parts, PROGRAM_ID_POS));

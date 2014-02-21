@@ -1,8 +1,8 @@
 package org.atlasapi.remotesite.rovi.program;
 
 import static org.atlasapi.remotesite.rovi.RoviPredicates.HAS_PARENT;
+import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_INSERT;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
-import static org.atlasapi.remotesite.rovi.RoviUtils.getPublisherForLanguage;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getPublisherForLanguageAndCulture;
 
 import java.util.Collection;
@@ -10,9 +10,7 @@ import java.util.Collection;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.LookupRef;
-import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.IndexAccessException;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
@@ -49,8 +47,6 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
         }
         
         content.setCanonicalUri(canonicalUriForProgram(roviLine.getProgramId()));
-        
-        content.setPublisher(getPublisherForLanguage(roviLine.getLanguage()));
         content.setLanguages(Sets.newHashSet(roviLine.getLanguage()));
         
         if (roviLine.getReleaseYear().isPresent()) {
@@ -62,7 +58,6 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
         
         content.setPublisher(getPublisherForLanguageAndCulture(roviLine.getLanguage(), descriptionCulture));
         setParentIfNeeded(roviLine, content);
-        createVersionIfNeeded(content, roviLine);
         
         CONTENT extracted = addSpecificData(content, roviLine);
         log().trace("Extracted {} with canonical uri {}", extracted.getClass().getName(), extracted.getCanonicalUri());
@@ -88,7 +83,7 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
     
     private Optional<String> setDescriptionAndGetCulture(CONTENT content, RoviProgramLine roviLine) throws IndexAccessException {
         Optional<String> descriptionCulture = Optional.absent();
-        Collection<RoviProgramDescriptionLine> descriptions = descriptionIndex.getLinesForKey(roviLine.getKey());
+        Collection<RoviProgramDescriptionLine> descriptions = descriptionIndex.getLinesForKey(roviLine.getKey(), IS_INSERT);
         
         Multimap<Optional<String>, RoviProgramDescriptionLine> descriptionsBySource = HashMultimap.create();
         
@@ -145,19 +140,5 @@ public abstract class ProgramLineBaseExtractor<SOURCE, CONTENT extends Content> 
         
         return Optional.absent();
     }
-    
-    private void createVersionIfNeeded(CONTENT content, RoviProgramLine roviLine) {
-        if (content instanceof Item) {
-            Item item = (Item) content;
-            Version version = new Version();
-            
-            if (roviLine.getDuration().isPresent()) {
-                version.setDuration(roviLine.getDuration().get());
-            }
-            
-            item.setVersions(Sets.newHashSet(version));
-        }
-    }
-    
     
 }

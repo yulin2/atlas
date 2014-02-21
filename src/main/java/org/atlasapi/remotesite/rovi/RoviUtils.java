@@ -182,5 +182,11 @@ public class RoviUtils {
     private static int toUnsignedInt(byte b) {
         return (int) b & 0xFF;
     }
+
+
+    public static boolean isEpisodeNumberValid(String episodeNumber) {
+        // Restricting to numeric strings and less than 8 character strings (we found some episode numbers that were actually dates)
+        return StringUtils.isNumeric(episodeNumber) && episodeNumber.length() < 8;
+    }
     
 }

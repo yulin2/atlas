@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.rovi;
 import static org.atlasapi.remotesite.rovi.RoviConstants.FILE_CHARSET;
 import static org.atlasapi.remotesite.rovi.RoviTestUtils.fileFromResource;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLineParser;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLineParser;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.io.Resources;
@@ -42,6 +44,20 @@ public class MapBasedKeyedFileIndexerTest {
         assertEquals(key, seriesLine.getSeriesId());
         assertEquals("Empires of Industry", seriesLine.getFullTitle().get());
         assertEquals("Chronicling the trades and commodities that made America an industrial power.", seriesLine.getSynopsis().get());
+    }
+
+    @Test
+    public void testIndexingWithPredicate() throws IOException, IndexAccessException {
+        URL fileUrl = Resources.getResource(SMALL_FILE);
+        File file = new File(fileUrl.getPath());
+        MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer(file);
+        
+        String key = "20521012";
+        KeyedFileIndex<String, RoviSeriesLine> index = indexer.indexWithPredicate(RoviPredicates.IS_INSERT);
+        
+        Collection<RoviSeriesLine> seriesLines = index.getLinesForKey(key);
+        
+        assertTrue(seriesLines.isEmpty());
     }
 
     @Test

@@ -3,12 +3,15 @@ package org.atlasapi.remotesite.rovi;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
@@ -35,13 +38,23 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
     @Override
     public KeyedFileIndex<T, S> index()
             throws IOException {
-        Multimap<T, PointerAndSize> indexMap = buildIndex();
+        return indexWithOptionalPredicate(Optional.<Predicate<? super S>>absent());
+    }
+    
+    @Override
+    public KeyedFileIndex<T, S> indexWithPredicate(Predicate<? super S> isToIndex) throws IOException {
+        return indexWithOptionalPredicate(Optional.<Predicate<? super S>>of(isToIndex));
+    }
+
+    private KeyedFileIndex<T, S> indexWithOptionalPredicate(Optional<Predicate<? super S>> isToIndex)
+            throws IOException, FileNotFoundException {
+        Multimap<T, PointerAndSize> indexMap = buildIndex(isToIndex);
         MapBasedKeyedFileIndex<T, S> index = new MapBasedKeyedFileIndex<T, S>(file, indexMap, charset, parser);
         
         return index;
     }
     
-    private Multimap<T, PointerAndSize> buildIndex() throws IOException {
+    private Multimap<T, PointerAndSize> buildIndex(Optional<Predicate<? super S>> isToIndex) throws IOException {
         final HashMultimap<T, PointerAndSize> indexMap = HashMultimap.create();
         
         LOG.info("Start indexing file {}", file.getAbsolutePath());
@@ -49,7 +62,8 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
         RoviDataProcessingResult result = Files.readLines(file, charset, new RoviLineIndexer<>(
                 parser,
                 charset,
-                indexMap));
+                indexMap,
+                isToIndex));
         
         LOG.info("File {} indexed. Result: {}", file.getAbsolutePath(), result);
 

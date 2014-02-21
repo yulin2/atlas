@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.rovi.schedule;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_INSERT;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class ScheduleFileProcessor {
                 new ScheduleLineParser());
         
         log.trace("Start processing schedule ingest of {}", scheduleFile.getCanonicalPath());
-        KeyedFileIndex<String, ScheduleLine> index = scheduleIndexer.index();
+        KeyedFileIndex<String, ScheduleLine> index = scheduleIndexer.indexWithPredicate(IS_INSERT);
         
         try {
             for (String programmeId : index.getKeys()) {

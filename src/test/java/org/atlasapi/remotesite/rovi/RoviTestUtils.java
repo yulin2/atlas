@@ -20,9 +20,9 @@ import com.google.common.io.Resources;
 
 public class RoviTestUtils {
     
-    private static final String SHORT_DESCRIPTION = "This is the short description";
-    private static final String MEDIUM_DESCRIPTION = "This is the medium description";
-    private static final String LONG_DESCRIPTION = "This is the long description";
+    protected static final String SHORT_DESCRIPTION = "This is the short description";
+    protected static final String MEDIUM_DESCRIPTION = "This is the medium description";
+    protected static final String LONG_DESCRIPTION = "This is the long description";
     private static final String ENGLISH_UK_CULTURE = "English - UK";
 
     public static Collection<RoviProgramDescriptionLine> descriptions(String programId) {

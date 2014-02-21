@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi.program;
 
+import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_INSERT;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
 
@@ -89,7 +90,7 @@ public class ProgramLineEpisodeExtractor extends ProgramLineBaseItemExtractor<Ep
 
     private void setDataFromEpisodeSequenceIfPossible(Episode content,
             RoviProgramLine programLine) throws IndexAccessException {
-        Collection<RoviEpisodeSequenceLine> results = episodeSequenceIndex.getLinesForKey(programLine.getKey());
+        Collection<RoviEpisodeSequenceLine> results = episodeSequenceIndex.getLinesForKey(programLine.getKey(), IS_INSERT);
         RoviEpisodeSequenceLine episodeSequence = Iterables.getFirst(results, null);
 
         // If found episodeSequence from index then override some values

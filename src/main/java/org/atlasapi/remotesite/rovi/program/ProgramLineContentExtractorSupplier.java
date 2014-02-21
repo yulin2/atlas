@@ -11,7 +11,6 @@ import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
 public class ProgramLineContentExtractorSupplier {
 
     private final KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex;
-    private final KeyedFileIndex<String, RoviSeriesLine> seriesIndex;
     private final KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex;
     private final ContentResolver contentResolver;
 
@@ -21,7 +20,6 @@ public class ProgramLineContentExtractorSupplier {
             KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex,
             ContentResolver contentResolver) {
         this.descriptionIndex = descriptionIndex;
-        this.seriesIndex = seriesIndex;
         this.episodeSequenceIndex = episodeSequenceIndex;
         this.contentResolver = contentResolver;
     }
@@ -30,16 +28,16 @@ public class ProgramLineContentExtractorSupplier {
             RoviShowType programType) {
 
         switch (programType) {
-        case MO:
-            return new ProgramLineFilmExtractor(descriptionIndex, contentResolver);
-        case SE:
-            return new ProgramLineEpisodeExtractor(descriptionIndex, episodeSequenceIndex, contentResolver);
-        case SM:
-            return new ProgramLineBrandExtractor(descriptionIndex, seriesIndex, contentResolver);
-        case OT:
-            return new ProgramLineItemExtractor(descriptionIndex, contentResolver);
-        default:
-            throw new RuntimeException("Program type not supported");
+            case MOVIE:
+                return new ProgramLineFilmExtractor(descriptionIndex, contentResolver);
+            case SERIES_EPISODE:
+                return new ProgramLineEpisodeExtractor(descriptionIndex, episodeSequenceIndex, contentResolver);
+            case SERIES_MASTER:
+                return new ProgramLineBrandExtractor(descriptionIndex, contentResolver);
+            case OTHER:
+                return new ProgramLineItemExtractor(descriptionIndex, contentResolver);
+            default:
+                throw new RuntimeException("Program type not supported");
         }
 
     }

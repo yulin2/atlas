@@ -18,7 +18,7 @@ public class RoviProgramLineParserTest {
 
         RoviProgramLine roviLine = parser.apply(line);
         
-        assertEquals(RoviShowType.SM, roviLine.getShowType().get());
+        assertEquals(RoviShowType.SERIES_MASTER, roviLine.getShowType().get());
         assertEquals("en", roviLine.getLanguage());
         assertEquals("15343105", roviLine.getProgramId());
         assertEquals("15343105", roviLine.getSeriesId().get());

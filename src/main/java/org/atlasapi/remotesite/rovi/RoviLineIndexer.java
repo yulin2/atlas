@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
 
 
@@ -18,10 +20,12 @@ public class RoviLineIndexer<T, S extends KeyedLine<T>> extends RoviLineProcesso
     
     private final Multimap<T, PointerAndSize> indexMap;
     private final AtomicLong currentPointer = new AtomicLong(0);
+    private final Optional<Predicate<? super S>> isToIndex;
     
-    public RoviLineIndexer(RoviLineParser<S> parser, Charset charset, Multimap<T, PointerAndSize> indexMap) {
+    public RoviLineIndexer(RoviLineParser<S> parser, Charset charset, Multimap<T, PointerAndSize> indexMap, Optional<Predicate<? super S>> isToIndex) {
         super(parser, charset);
         this.indexMap = indexMap;
+        this.isToIndex = isToIndex;
     }
     
     @Override
@@ -31,12 +35,19 @@ public class RoviLineIndexer<T, S extends KeyedLine<T>> extends RoviLineProcesso
 
     @Override
     protected boolean isToProcess(S parsedLine) {
+        if (isToIndex.isPresent()) {
+            return isToIndex.get().apply(parsedLine);
+        }
+        
         return true;
     }
 
     @Override
     protected void process(String line, S parsedLine) throws IndexAccessException {
-        indexMap.put(parsedLine.getKey(), new PointerAndSize(currentPointer.get(), getSizeInBytes(line)));
+        // Can happen that a field used as a key is null, for example for Rovi Delete records
+        if (parsedLine.getKey() != null) {
+            indexMap.put(parsedLine.getKey(), new PointerAndSize(currentPointer.get(), getSizeInBytes(line)));
+        }
     }
 
     private int getSizeInBytes(String line) {
