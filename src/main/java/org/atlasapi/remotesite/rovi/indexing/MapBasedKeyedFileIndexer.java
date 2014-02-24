@@ -42,7 +42,7 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
     }
     
     @Override
-    public KeyedFileIndex<T, S> indexWithPredicate(File file, Predicate<? super S> isToIndex) throws IOException {
+    public KeyedFileIndex<T, S> index(File file, Predicate<? super S> isToIndex) throws IOException {
         return indexWithOptionalPredicate(file, Optional.<Predicate<? super S>>of(isToIndex));
     }
 

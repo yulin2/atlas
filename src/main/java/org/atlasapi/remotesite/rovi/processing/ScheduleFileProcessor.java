@@ -42,7 +42,7 @@ public class ScheduleFileProcessor {
                 new ScheduleLineParser());
         
         log.trace("Start processing schedule ingest of {}", scheduleFile.getCanonicalPath());
-        KeyedFileIndex<String, ScheduleLine> index = scheduleIndexer.indexWithPredicate(scheduleFile, Predicates.not(IS_DELETE));
+        KeyedFileIndex<String, ScheduleLine> index = scheduleIndexer.index(scheduleFile, Predicates.not(IS_DELETE));
         
         try {
             for (String programmeId : index.getKeys()) {

@@ -53,7 +53,7 @@ public class MapBasedKeyedFileIndexerTest {
         MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer();
         
         String key = "20521012";
-        KeyedFileIndex<String, RoviSeriesLine> index = indexer.indexWithPredicate(file, RoviPredicates.IS_INSERT);
+        KeyedFileIndex<String, RoviSeriesLine> index = indexer.index(file, RoviPredicates.IS_INSERT);
         
         Collection<RoviSeriesLine> seriesLines = index.getLinesForKey(key);
         
