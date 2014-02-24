@@ -45,8 +45,9 @@ public class EpisodePopulator extends ItemPopulator<Episode> {
             episode.setTitle(program.getEpisodeTitle().get());
         }
         
-        setSeasonNumberIfNeeded(episode, program);
-        setBrandAndSeriesFromProgramLine(episode, program);
+        setSeasonNumber(episode, program);
+        setBrandRef(episode, program);
+        setSeriesRef(episode, program);
     }
 
     private void populateFromEpisodeSequence(Episode episode, RoviEpisodeSequenceLine episodeSequence) {
@@ -59,31 +60,36 @@ public class EpisodePopulator extends ItemPopulator<Episode> {
         }        
     }
     
-    private void setSeasonNumberIfNeeded(Episode episode, RoviProgramLine program)  {
-        if (program.getSeasonId().isPresent()) {
-            Optional<Integer> seasonNumber = seasonNumberCache.getUnchecked(program.getSeasonId().get());
-            if (seasonNumber.isPresent()) {
-                episode.setSeriesNumber(seasonNumber.get());
-            }
-        } else {
+    private void setSeasonNumber(Episode episode, RoviProgramLine program)  {
+        if (!program.getSeasonId().isPresent()) {
             episode.setSeriesNumber(null);
+            return;
+        }
+        
+        Optional<Integer> seasonNumber = seasonNumberCache.getUnchecked(program.getSeasonId().get());
+        if (seasonNumber.isPresent()) {
+            episode.setSeriesNumber(seasonNumber.get());
         }
     }
     
-    private void setBrandAndSeriesFromProgramLine(Episode episode, RoviProgramLine program) {
-        if (program.getSeriesId().isPresent()) {
-            String seriesCanonicalUri = canonicalUriForProgram(program.getSeriesId().get());
-            episode.setParentRef(new ParentRef(seriesCanonicalUri));
-        } else {
+    
+    private void setBrandRef(Episode episode, RoviProgramLine program) {
+        if (!program.getSeriesId().isPresent()) {
             episode.setParentRef(null);
+            return;
+        }
+
+        String seriesCanonicalUri = canonicalUriForProgram(program.getSeriesId().get());
+        episode.setParentRef(new ParentRef(seriesCanonicalUri));
+    }
+    
+    private void setSeriesRef(Episode episode, RoviProgramLine program) {
+        if (!program.getSeasonId().isPresent()) {
+            episode.setSeriesRef(null);
+            return;
         }
         
-        if (program.getSeasonId().isPresent()) {
-            String seasonCanonicalUri = canonicalUriForSeason(program.getSeasonId().get());
-            episode.setSeriesRef(new ParentRef(seasonCanonicalUri));
-        } else {
-            episode.setSeriesRef(null);
-        }
+        String seasonCanonicalUri = canonicalUriForSeason(program.getSeasonId().get());
+        episode.setSeriesRef(new ParentRef(seasonCanonicalUri));
     }
-
 }
