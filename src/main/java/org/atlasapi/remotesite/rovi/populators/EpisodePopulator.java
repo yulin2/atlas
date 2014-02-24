@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.rovi.populators;
 
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
 
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.ParentRef;

@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.rovi.processing;
 
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeasonHistory;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeasonHistory;
 
 import java.nio.charset.Charset;
 

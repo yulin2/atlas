@@ -1,11 +1,11 @@
 package org.atlasapi.remotesite.rovi.processing;
 
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeasonHistory;
 import static org.atlasapi.remotesite.rovi.RoviTestUtils.fileFromResource;
 import static org.atlasapi.remotesite.rovi.RoviTestUtils.resolvedContent;
 import static org.atlasapi.remotesite.rovi.RoviTestUtils.unresolvedContent;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeasonHistory;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -28,7 +28,6 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.RoviConstants;
 import org.atlasapi.remotesite.rovi.RoviContentWriter;
-import org.atlasapi.remotesite.rovi.RoviTestUtils;
 import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;

@@ -1,14 +1,15 @@
 package org.atlasapi.remotesite.rovi.processing;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_DELETE;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator;
 import org.atlasapi.remotesite.rovi.RoviConstants;
-import org.atlasapi.remotesite.rovi.RoviUtils;
 import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndex;
 import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.model.ScheduleLine;
@@ -53,7 +54,7 @@ public class ScheduleFileProcessor {
                                                                          .filter(Maybe.HAS_VALUE)
                                                                          .transform(Maybe.<Broadcast>requireValueFunction());
                     
-                    itemBroadcastUpdater.addBroadcasts(RoviUtils.canonicalUriForProgram(programmeId), broadcasts);
+                    itemBroadcastUpdater.addBroadcasts(canonicalUriForProgram(programmeId), broadcasts);
                 } catch (Exception e) {
                     log.error("Rovi programme ID " + programmeId, e);
                 }

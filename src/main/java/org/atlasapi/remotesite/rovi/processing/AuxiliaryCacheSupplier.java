@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.rovi.processing;
 
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;

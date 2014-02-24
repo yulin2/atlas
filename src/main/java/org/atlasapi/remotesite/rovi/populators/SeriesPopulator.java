@@ -2,9 +2,9 @@ package org.atlasapi.remotesite.rovi.populators;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeasonHistory;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeasonHistory;
 import static org.atlasapi.remotesite.rovi.model.ActionType.DELETE;
 
 import org.atlasapi.media.entity.ParentRef;

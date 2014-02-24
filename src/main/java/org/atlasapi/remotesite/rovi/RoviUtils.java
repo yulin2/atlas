@@ -48,18 +48,6 @@ public class RoviUtils {
         return DEFAULT_PUBLISHER;
     }
     
-    public static String canonicalUriForProgram(String id) {
-        return "http://rovicorp.com/programs/".concat(id);
-    }
-
-    public static String canonicalUriForSeason(String id) {
-        return "http://rovicorp.com/seasons/".concat(id);
-    }
-
-    public static String canonicalUriForSeasonHistory(String id) {
-        return "http://rovicorp.com/season-histories/".concat(id);
-    }
-    
     public static String getPartAtPosition(Iterable<String> parts, int pos) {
         String part = Iterables.get(parts, pos);
         

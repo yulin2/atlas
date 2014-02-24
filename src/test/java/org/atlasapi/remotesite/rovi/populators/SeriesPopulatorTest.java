@@ -1,8 +1,9 @@
 package org.atlasapi.remotesite.rovi.populators;
 
 
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeasonHistory;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeasonHistory;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
@@ -12,7 +13,6 @@ import java.util.Set;
 
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
-import org.atlasapi.remotesite.rovi.RoviUtils;
 import org.atlasapi.remotesite.rovi.model.ActionType;
 import org.atlasapi.remotesite.rovi.model.RoviSeasonHistoryLine;
 import org.junit.Before;
@@ -57,10 +57,10 @@ public class SeriesPopulatorTest {
         Series series = new Series();
         populator.populateContent(series);
         
-        assertEquals(RoviUtils.canonicalUriForSeason(SEASON_ID), series.getCanonicalUri());
+        assertEquals(canonicalUriForSeason(SEASON_ID), series.getCanonicalUri());
         assertEquals(SEASON_NUMBER, series.getSeriesNumber().intValue());
         assertEquals(SEASON_NAME, series.getTitle());
-        assertEquals(RoviUtils.canonicalUriForProgram(SERIES_ID), series.getParent().getUri());
+        assertEquals(canonicalUriForProgram(SERIES_ID), series.getParent().getUri());
         
         Set<String> aliasUrls = series.getAliasUrls();
         assertThat(aliasUrls, hasItem(canonicalUriForSeasonHistory(SEASON_HISTORY_ID)));
