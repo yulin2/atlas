@@ -105,7 +105,8 @@ public class RoviModule {
                 FileSupplier.fullSeasonHistoryFile(),
                 FileSupplier.fullScheduleFile(),
                 FileSupplier.fullProgramDescriptionsFile(),
-                FileSupplier.fullEpisodeSequenceFile());
+                FileSupplier.fullEpisodeSequenceFile(),
+                "Rovi Full Ingest Task");
     }
     
     @Bean
@@ -116,7 +117,8 @@ public class RoviModule {
                 FileSupplier.deltaSeasonHistoryFile(),
                 FileSupplier.deltaScheduleFile(),
                 FileSupplier.deltaProgramDescriptionsFile(),
-                FileSupplier.deltaEpisodeSequenceFile());      
+                FileSupplier.deltaEpisodeSequenceFile(),
+                "Rovi Delta Ingest Task");      
     }
     
     @Bean
