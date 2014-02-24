@@ -14,7 +14,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 
-public class ContentCreator {
+public class ContentFactory {
     
     private static final BiMap<RoviShowType, Class<? extends Content>> showTypeToClass = HashBiMap.create();
     
