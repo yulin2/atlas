@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi.processing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviConstants.FILE_CHARSET;
 import static org.atlasapi.remotesite.rovi.RoviConstants.UTF_16LE_BOM;
 
@@ -28,8 +29,8 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
     private DateTime startTime;
     
     public RoviLineProcessor(RoviLineParser<T> parser, Charset charset) {
-        this.parser = parser;
-        this.charset = charset;
+        this.parser = checkNotNull(parser);
+        this.charset = checkNotNull(charset);
     }
     
     protected abstract Logger log();

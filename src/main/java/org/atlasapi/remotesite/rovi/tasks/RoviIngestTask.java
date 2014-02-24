@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.rovi.tasks;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -21,12 +23,12 @@ public class RoviIngestTask extends ScheduledTask {
     public RoviIngestTask(RoviIngestProcessor ingestProcessor, File programsFile,
             File seasonsFile, File scheduleFile, File programDescriptionsFile,
             File episodeSequenceFile) {
-        this.ingestProcessor = ingestProcessor;
-        this.programsFile = programsFile;
-        this.seasonsFile = seasonsFile;
-        this.scheduleFile = scheduleFile;
-        this.programDescriptionsFile = programDescriptionsFile;
-        this.episodeSequenceFile = episodeSequenceFile;
+        this.ingestProcessor = checkNotNull(ingestProcessor);
+        this.programsFile = checkNotNull(programsFile);
+        this.seasonsFile = checkNotNull(seasonsFile);
+        this.scheduleFile = checkNotNull(scheduleFile);
+        this.programDescriptionsFile = checkNotNull(programDescriptionsFile);
+        this.episodeSequenceFile = checkNotNull(episodeSequenceFile);
     }
     
     @Override

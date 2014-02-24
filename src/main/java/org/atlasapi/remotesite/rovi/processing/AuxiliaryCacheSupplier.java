@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi.processing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
 
 import org.atlasapi.media.entity.Content;
@@ -21,7 +22,7 @@ public class AuxiliaryCacheSupplier {
     private final ContentResolver contentResolver;
     
     public AuxiliaryCacheSupplier(ContentResolver contentResolver) {
-        this.contentResolver = contentResolver;
+        this.contentResolver = checkNotNull(contentResolver);
     }
 
     public LoadingCache<String, Optional<Publisher>> parentPublisherCache(int maximumSize) {

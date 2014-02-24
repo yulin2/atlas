@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.rovi.indexing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,11 +39,12 @@ public class MapBasedKeyedFileIndex<T, S extends KeyedLine<T>> implements KeyedF
     private final Function<String, S> toParsedLine;
     
     public MapBasedKeyedFileIndex(File file, Multimap<T, PointerAndSize> indexMap, Charset charset, Function<String, S> toParsedLine) throws FileNotFoundException {
-        this.file = file;
+        this.file = checkNotNull(file);
+        this.indexMap = checkNotNull(indexMap);
+        this.charset = checkNotNull(charset);
+        this.toParsedLine = checkNotNull(toParsedLine);
+
         this.randomAccessFile = new RandomAccessFile(file, READ_MODE);
-        this.indexMap = indexMap;
-        this.charset = charset;
-        this.toParsedLine = toParsedLine;
     }
     
     @Override

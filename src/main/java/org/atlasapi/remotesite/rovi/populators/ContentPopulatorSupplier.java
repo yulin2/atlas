@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.rovi.populators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -30,10 +32,10 @@ public class ContentPopulatorSupplier {
             KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex,
             ContentResolver contentResolver,
             LoadingCache<String, Optional<Integer>> seasonNumberCache) {
-        this.descriptionIndex = descriptionIndex;
-        this.episodeSequenceIndex = episodeSequenceIndex;
-        this.contentResolver = contentResolver;
-        this.seasonNumberCache = seasonNumberCache;
+        this.descriptionIndex = checkNotNull(descriptionIndex);
+        this.episodeSequenceIndex = checkNotNull(episodeSequenceIndex);
+        this.contentResolver = checkNotNull(contentResolver);
+        this.seasonNumberCache = checkNotNull(seasonNumberCache);
     }
 
     public void populateFromProgramAndAuxiliary(Content content, RoviProgramLine program) throws IndexAccessException {

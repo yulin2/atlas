@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi.processing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.and;
 import static org.atlasapi.remotesite.rovi.RoviConstants.FILE_CHARSET;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_BRAND_NO_PARENT;
@@ -55,13 +56,13 @@ public class RoviDeltaIngestProcessor implements RoviIngestProcessor {
             ScheduleFileProcessor scheduleFileProcessor,
             AuxiliaryCacheSupplier auxCacheSupplier) {
 
-        this.programIndexer = programIndexer;
-        this.programDescriptionIndexer = programDescriptionIndexer;
-        this.episodeSequenceIndexer = episodeSequenceIndexer;
-        this.contentWriter = contentWriter;
-        this.contentResolver = contentResolver;
-        this.scheduleFileProcessor = scheduleFileProcessor;
-        this.auxCacheSupplier = auxCacheSupplier;
+        this.programIndexer = checkNotNull(programIndexer);
+        this.programDescriptionIndexer = checkNotNull(programDescriptionIndexer);
+        this.episodeSequenceIndexer = checkNotNull(episodeSequenceIndexer);
+        this.contentWriter = checkNotNull(contentWriter);
+        this.contentResolver = checkNotNull(contentResolver);
+        this.scheduleFileProcessor = checkNotNull(scheduleFileProcessor);
+        this.auxCacheSupplier = checkNotNull(auxCacheSupplier);
     }
 
     @Override

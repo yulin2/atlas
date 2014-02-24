@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.rovi.processing;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 
 import java.nio.charset.Charset;
@@ -40,9 +41,9 @@ public class RoviProgramLineIngestor extends RoviActionLineIngestor<RoviProgramL
             ContentResolver contentResolver,
             ContentPopulatorSupplier contentPopulator) {
         super(parser, charset, contentWriter);
-        this.isToProcess = isToProcess;
-        this.contentResolver = contentResolver;
-        this.contentPopulator = contentPopulator;
+        this.isToProcess = checkNotNull(isToProcess);
+        this.contentResolver = checkNotNull(contentResolver);
+        this.contentPopulator = checkNotNull(contentPopulator);
     }
 
     @Override

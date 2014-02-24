@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi.processing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 
 import java.util.Set;
@@ -31,9 +32,9 @@ public class AuxiliaryActionsProcessor {
             ContentPopulatorSupplier populator,
             ContentResolver contentResolver,
             RoviContentWriter contentWriter) {
-        this.contentResolver = contentResolver;
-        this.populator = populator;
-        this.contentWriter = contentWriter;
+        this.contentResolver = checkNotNull(contentResolver);
+        this.populator = checkNotNull(populator);
+        this.contentWriter = checkNotNull(contentWriter);
     }
     
     public RoviDataProcessingResult process(Set<String> programIds) {

@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.rovi.processing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
@@ -19,8 +21,8 @@ public class RoviDataProcessingResult {
     public RoviDataProcessingResult(long processedLines, long failedLines, DateTime startTime, DateTime endTime) {
         this.processedLines = processedLines;
         this.failedLines = failedLines;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.startTime = checkNotNull(startTime);
+        this.endTime = checkNotNull(endTime);
     }
     
     @Override
