@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.IOException;
 
 import org.atlasapi.remotesite.rovi.processing.RoviIngestProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
 
 public class RoviIngestTask extends ScheduledTask {
-
-    private final static Logger LOG = LoggerFactory.getLogger(RoviIngestTask.class); 
 
     private final RoviIngestProcessor ingestProcessor;
     private final File programsFile;
@@ -41,7 +38,7 @@ public class RoviIngestTask extends ScheduledTask {
                     programDescriptionsFile,
                     episodeSequenceFile);
         } catch (IOException e) {
-            LOG.error("Error while processing programs", e);
+            throw Throwables.propagate(e);
         }
     }
 
