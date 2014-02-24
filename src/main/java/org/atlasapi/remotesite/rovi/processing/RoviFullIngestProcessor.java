@@ -11,7 +11,6 @@ import java.io.IOException;
 
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.RoviContentWriter;
-import org.atlasapi.remotesite.rovi.indexing.KeyedActionLine;
 import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndex;
 import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
@@ -22,7 +21,6 @@ import org.atlasapi.remotesite.rovi.populators.ContentPopulatorSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 
 
@@ -137,7 +135,7 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
       
             LOG.info("Processing schedule complete");
         } finally {
-            releaseIndexResources(ImmutableSet.of(descriptionIndex, episodeSequenceIndex));
+            releaseIndexResources(descriptionIndex, episodeSequenceIndex);
         }
     }
 
@@ -153,7 +151,7 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
     }
     
 
-    private void releaseIndexResources(Iterable<KeyedFileIndex<String, ? extends KeyedActionLine<String>>> indexes) {
+    private void releaseIndexResources(KeyedFileIndex<?, ?>... indexes) {
         for (KeyedFileIndex<?, ?> index: indexes) {
             if (index != null) {
                 index.releaseResources();

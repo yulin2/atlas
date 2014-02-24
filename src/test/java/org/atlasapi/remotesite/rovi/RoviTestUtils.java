@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.rovi;
 
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
-
 import java.io.File;
 import java.net.URL;
 import java.util.Collection;
@@ -61,9 +59,9 @@ public class RoviTestUtils {
         return new File(fileUrl.getPath());
     }
     
-    public static <T extends Content>  ResolvedContent resolvedContent(String id, T content) {
+    public static <T extends Content>  ResolvedContent resolvedContent(T content) {
         Map<String, T> map = Maps.newHashMap();
-        map.put(canonicalUriForProgram(id), content);
+        map.put(content.getCanonicalUri(), content);
 
         ResolvedContentBuilder resolvedContentBuilder = ResolvedContent.builder();
         resolvedContentBuilder.putAll(map);

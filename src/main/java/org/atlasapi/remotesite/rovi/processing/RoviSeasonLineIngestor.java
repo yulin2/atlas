@@ -61,10 +61,11 @@ public class RoviSeasonLineIngestor extends RoviActionLineIngestor<RoviSeasonHis
     protected Optional<Series> resolveContent(RoviSeasonHistoryLine parsedLine) {
         // Using alias for resolving here because for deletion records the seasonId is not present
         ImmutableList.Builder<String> uris = ImmutableList.builder();
-        uris.add(canonicalUriForSeasonHistory(parsedLine.getSeasonHistoryId()));
         
         if (parsedLine.getSeasonProgramId().isPresent()) {
             uris.add(canonicalUriForSeason(parsedLine.getSeasonProgramId().get()));
+        } else {
+            uris.add(canonicalUriForSeasonHistory(parsedLine.getSeasonHistoryId()));
         }
         
         Maybe<Identified> maybeResolved = contentResolver.findByUris(uris.build()).getFirstValue();

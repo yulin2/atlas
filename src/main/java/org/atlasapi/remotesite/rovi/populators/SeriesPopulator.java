@@ -39,7 +39,7 @@ public class SeriesPopulator implements ContentPopulator<Series> {
 
         if (parentPublisher.isPresent()) {
             series.setPublisher(parentPublisher.get());
-        } else {
+        } else if (series.getPublisher() == null) {
             series.setPublisher(DEFAULT_PUBLISHER);
         }
 

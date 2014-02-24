@@ -189,18 +189,16 @@ public class RoviFullIngestProcessorTest {
     }
 
     private void instructContentResolver() {
-        Brand brand = parentBrand();
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PARENT_BRAND_ID))))
-                .thenReturn(resolvedContent(PARENT_BRAND_ID, brand));
+                .thenReturn(resolvedContent(parentBrand()));
 
-        Film film = parentFilm();
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PARENT_FILM_ID))))
-                .thenReturn(resolvedContent(PARENT_FILM_ID, film));
+                .thenReturn(resolvedContent(parentFilm()));
         
         Series series = parentSeries();
         series.withSeriesNumber(SEASON_NUMBER);
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForSeason(PARENT_SERIES_ID))))
-                .thenReturn(resolvedContent(PARENT_SERIES_ID, series));     
+                .thenReturn(resolvedContent(series));     
     }
 
     private Brand parentBrand() {
