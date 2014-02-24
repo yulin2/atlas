@@ -5,17 +5,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.HAS_PARENT;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_DELETE;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
-import static org.atlasapi.remotesite.rovi.RoviUtils.getPublisherForLanguageAndCulture;
+import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
 import static org.atlasapi.remotesite.rovi.model.CultureToPublisherMap.culturesOrdering;
 import static org.atlasapi.remotesite.rovi.model.CultureToPublisherMap.isCultureGoodForPublisher;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.LookupRef;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.remotesite.rovi.model.CultureToPublisherMap;
 import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
 
@@ -156,6 +159,29 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
         }
         
         return Optional.absent();
+    }
+    
+    public static Publisher getPublisherForLanguage(String language) {
+        return getPublisherForLanguageAndCulture(language, Optional.<String>absent());
+    }
+    
+    
+    public static Publisher getPublisherForLanguageAndCulture(String language, Optional<String> descriptionCulture) {
+        if (CultureToPublisherMap.getCultures(language).isEmpty()) {
+            return Publisher.valueOf("ROVI_" + language.toUpperCase());
+        }
+        
+        if (!descriptionCulture.isPresent()) {
+            Optional<String> defaultCulture = CultureToPublisherMap.getDefaultCultureForLanguage(language);
+            return CultureToPublisherMap.getPublisher(defaultCulture.get());
+        }
+        
+        Collection<String> cultures = CultureToPublisherMap.getCultures(language);
+        if (cultures.contains(descriptionCulture.get())) {
+            return CultureToPublisherMap.getPublisher(descriptionCulture.get());
+        }
+        
+        return DEFAULT_PUBLISHER;
     }
     
 }

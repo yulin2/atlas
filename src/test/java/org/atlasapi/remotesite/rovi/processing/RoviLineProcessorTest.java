@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.rovi;
+package org.atlasapi.remotesite.rovi.processing;
 
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.FILE_CHARSET;
@@ -11,37 +11,27 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 
+import org.atlasapi.remotesite.rovi.processing.RoviLineProcessor;
 import org.junit.Test;
 
 import com.google.common.io.Files;
 
 
-public class RoviUtilsTest {
+public class RoviLineProcessorTest {
 
     private static final String PATH_FILE_WITHOUT_BOM = "org/atlasapi/remotesite/rovi/without_bom.txt";
     private static final String PATH_FILE_WITH_BOM = "org/atlasapi/remotesite/rovi/program.txt";
 
     @Test
-    public void testDetectBomInFile() throws IOException {
-        String path = PATH_FILE_WITH_BOM;
-        boolean startsWithBom = RoviUtils.startsWithUTF16LEBom(fileFromResource(path));
-        assertTrue(startsWithBom);
-        
-        path = PATH_FILE_WITHOUT_BOM;
-        startsWithBom = RoviUtils.startsWithUTF16LEBom(fileFromResource(path));
-        assertFalse(startsWithBom);        
-    }
-    
-    @Test
     public void testDetectBomInLine() throws IOException {
         String path = PATH_FILE_WITH_BOM;
         String line = Files.readLines(fileFromResource(path), FILE_CHARSET).get(0);
-        boolean startsWithBom = RoviUtils.startsWithUTF16LEBom(line);
+        boolean startsWithBom = RoviLineProcessor.startsWithUTF16LEBom(line);
         assertTrue(startsWithBom);
         
         path = PATH_FILE_WITHOUT_BOM;
         line = Files.readLines(fileFromResource(path), FILE_CHARSET).get(0);
-        startsWithBom = RoviUtils.startsWithUTF16LEBom(line);
+        startsWithBom = RoviLineProcessor.startsWithUTF16LEBom(line);
         assertFalse(startsWithBom);  
     }
     
@@ -53,7 +43,7 @@ public class RoviUtilsTest {
         String firstLine = lines.get(0);
         
         int sizeWithBom = firstLine.getBytes(FILE_CHARSET).length;
-        int sizeWithoutBom = RoviUtils.stripBom(firstLine).getBytes(FILE_CHARSET).length;
+        int sizeWithoutBom = RoviLineProcessor.stripBom(firstLine).getBytes(FILE_CHARSET).length;
         
         assertEquals(UTF_16LE_BOM.length, sizeWithBom - sizeWithoutBom);
     }
