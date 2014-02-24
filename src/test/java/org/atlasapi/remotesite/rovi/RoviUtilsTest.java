@@ -11,7 +11,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 
-import org.joda.time.LocalDate;
+import org.joda.time.DateTimeFieldType;
+import org.joda.time.ReadablePartial;
 import org.junit.Test;
 
 import com.google.common.io.Files;
@@ -24,34 +25,34 @@ public class RoviUtilsTest {
 
     @Test
     public void testParseDateWithYearOnly() {
-        LocalDate date = RoviUtils.parseDate("20100000");
+        ReadablePartial date = RoviUtils.parsePotentiallyPartialDate("20100000");
         
-        assertEquals(2010, date.getYear());
-        assertEquals(01, date.getMonthOfYear());
-        assertEquals(01, date.getDayOfMonth());
+        assertEquals(2010, date.get(DateTimeFieldType.year()));
+        assertFalse(date.isSupported(DateTimeFieldType.monthOfYear()));
+        assertFalse(date.isSupported(DateTimeFieldType.dayOfMonth()));
     }
 
     @Test
     public void testParseDateWithYearAndMonth() {
-        LocalDate date = RoviUtils.parseDate("20101200");
+        ReadablePartial date = RoviUtils.parsePotentiallyPartialDate("20101200");
         
-        assertEquals(2010, date.getYear());
-        assertEquals(12, date.getMonthOfYear());
-        assertEquals(01, date.getDayOfMonth());
+        assertEquals(2010, date.get(DateTimeFieldType.year()));
+        assertEquals(12, date.get(DateTimeFieldType.monthOfYear()));
+        assertFalse(date.isSupported(DateTimeFieldType.dayOfMonth()));
     }
 
     @Test
     public void testParseFullDate() {
-        LocalDate date = RoviUtils.parseDate("20101223");
+        ReadablePartial date = RoviUtils.parsePotentiallyPartialDate("20101223");
         
-        assertEquals(2010, date.getYear());
-        assertEquals(12, date.getMonthOfYear());
-        assertEquals(23, date.getDayOfMonth());
+        assertEquals(2010, date.get(DateTimeFieldType.year()));
+        assertEquals(12, date.get(DateTimeFieldType.monthOfYear()));
+        assertEquals(23, date.get(DateTimeFieldType.dayOfMonth()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testParseIncorrectDate() {
-        RoviUtils.parseDate("2010");
+        RoviUtils.parsePotentiallyPartialDate("2010");
     }
     
     @Test

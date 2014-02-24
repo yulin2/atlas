@@ -15,16 +15,14 @@ import org.apache.commons.lang.StringUtils;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.rovi.model.ActionType;
 import org.atlasapi.remotesite.rovi.model.CultureToPublisherMap;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
+import org.joda.time.DateTimeFieldType;
+import org.joda.time.Partial;
+import org.joda.time.ReadablePartial;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 
-/**
- *
- */
 public class RoviUtils {
     
     public static Publisher getPublisherForLanguage(String language) {
@@ -94,37 +92,35 @@ public class RoviUtils {
     }
     
     /**
-     * Convert a String representing a date into an instance of LocalDate representing the same logic date. 
+     * Convert a String representing a potentially partial date into an instance of ReadablePartial representing the same logic date. 
      * The input string should be 8 characters long and should have the format "yyyyMMdd". 
      * If one or more portions of the date are unknown, they should be filled with zeros (i.e. 20140000) 
      * 
      * @param date - The String representing the date
-     * @return an instance of LocalDate representing the same logic date
+     * @return an instance of ReadablePartial representing the same logic date
      */
-    public static LocalDate parseDate(String date) {
+    public static ReadablePartial parsePotentiallyPartialDate(String date) {
         checkArgument(date.length() == 8, "Input date String should be 8 characters long");
-        
-        int defaultYear = LocalDate.now(DateTimeZone.UTC).getYear();
-        int defaultMonth = 01;
-        int defaultDay = 01;
         
         int year = Integer.parseInt(date.substring(0, 4));
         int month = Integer.parseInt(date.substring(4, 6));
         int day = Integer.parseInt(date.substring(6, 8));
         
-        if (year == 0) {
-            year = defaultYear;
+        Partial partial = new Partial();
+        
+        if (year != 0) {
+            partial = partial.with(DateTimeFieldType.year(), year);
         }
         
-        if (month == 0) {
-            month = defaultMonth;
+        if (month != 0) {
+            partial = partial.with(DateTimeFieldType.monthOfYear(), month);
         }
         
-        if (day == 0) {
-            day = defaultDay;
+        if (day != 0) {
+            partial = partial.with(DateTimeFieldType.dayOfMonth(), day);
         }
         
-        return new LocalDate(year, month, day);
+        return partial;
     }
 
     /**
