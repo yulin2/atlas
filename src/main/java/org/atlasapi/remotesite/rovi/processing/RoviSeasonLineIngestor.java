@@ -43,7 +43,7 @@ public class RoviSeasonLineIngestor extends RoviActionLineIngestor<RoviSeasonHis
     }
 
     @Override
-    protected boolean isToProcess(RoviSeasonHistoryLine parsedLine) {
+    protected boolean shouldProcess(RoviSeasonHistoryLine parsedLine) {
         return true;
     }
 

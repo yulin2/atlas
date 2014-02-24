@@ -36,7 +36,7 @@ public class RoviLineIndexer<T, S extends KeyedLine<T>> extends RoviLineProcesso
     }
 
     @Override
-    protected boolean isToProcess(S parsedLine) {
+    protected boolean shouldProcess(S parsedLine) {
         if (isToIndex.isPresent()) {
             return isToIndex.get().apply(parsedLine);
         }

@@ -33,7 +33,7 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
     }
     
     protected abstract Logger log();
-    protected abstract boolean isToProcess(T parsedLine);
+    protected abstract boolean shouldProcess(T parsedLine);
     protected abstract void process(String line, T parsedLine) throws IndexAccessException;
     
     /**
@@ -55,7 +55,7 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
         try {
             T parsedLine = parse(line);
             
-            if (isToProcess(parsedLine)) {
+            if (shouldProcess(parsedLine)) {
                 log().trace("Processing line of type {} with id: {}", parsedLine.getClass().getName(), parsedLine.getKey().toString());
                 process(line, parsedLine);
                 processedLines++;

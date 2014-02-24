@@ -51,7 +51,7 @@ public class RoviProgramLineIngestor extends RoviActionLineIngestor<RoviProgramL
     }
 
     @Override
-    protected boolean isToProcess(RoviProgramLine parsedLine) {
+    protected boolean shouldProcess(RoviProgramLine parsedLine) {
         return isToProcess.apply(parsedLine);
     }
 
