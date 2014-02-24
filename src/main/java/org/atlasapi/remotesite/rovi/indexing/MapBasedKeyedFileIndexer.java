@@ -54,7 +54,7 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
         return index;
     }
     
-    private Multimap<T, PointerAndSize> buildIndex(File file, Optional<Predicate<? super S>> isToIndex) throws IOException {
+    private Multimap<T, PointerAndSize> buildIndex(File file, Optional<Predicate<? super S>> shouldIndex) throws IOException {
         final HashMultimap<T, PointerAndSize> indexMap = HashMultimap.create();
         
         LOG.info("Start indexing file {}", file.getAbsolutePath());
@@ -63,7 +63,7 @@ public class MapBasedKeyedFileIndexer<T, S extends KeyedLine<T>> implements Keye
                 parser,
                 charset,
                 indexMap,
-                isToIndex));
+                shouldIndex));
         
         LOG.info("File {} indexed. Result: {}", file.getAbsolutePath(), result);
 

@@ -26,6 +26,6 @@ public interface KeyedFileIndexer<T, S extends KeyedLine<T>> {
      * @return the index for a text file
      * @throws IOException if it's not possible to read the file
      */
-    KeyedFileIndex<T, S> index(File file, Predicate<? super S> isToIndex) throws IOException;
+    KeyedFileIndex<T, S> index(File file, Predicate<? super S> shouldIndex) throws IOException;
     
 }

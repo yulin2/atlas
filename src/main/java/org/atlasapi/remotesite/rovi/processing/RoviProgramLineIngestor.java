@@ -31,17 +31,17 @@ public class RoviProgramLineIngestor extends RoviActionLineIngestor<RoviProgramL
     
     private final static Logger LOG = LoggerFactory.getLogger(RoviProgramLineIngestor.class); 
     
-    private final Predicate<? super RoviProgramLine> isToProcess;
+    private final Predicate<? super RoviProgramLine> shouldProcess;
     private final ContentResolver contentResolver;
     private final ContentPopulatorSupplier contentPopulator;
 
     public RoviProgramLineIngestor(RoviLineParser<RoviProgramLine> parser, Charset charset,
-            Predicate<? super RoviProgramLine> isToProcess,
+            Predicate<? super RoviProgramLine> shouldProcess,
             RoviContentWriter contentWriter,
             ContentResolver contentResolver,
             ContentPopulatorSupplier contentPopulator) {
         super(parser, charset, contentWriter);
-        this.isToProcess = checkNotNull(isToProcess);
+        this.shouldProcess = checkNotNull(shouldProcess);
         this.contentResolver = checkNotNull(contentResolver);
         this.contentPopulator = checkNotNull(contentPopulator);
     }
@@ -53,7 +53,7 @@ public class RoviProgramLineIngestor extends RoviActionLineIngestor<RoviProgramL
 
     @Override
     protected boolean shouldProcess(RoviProgramLine parsedLine) {
-        return isToProcess.apply(parsedLine);
+        return shouldProcess.apply(parsedLine);
     }
 
     @Override
