@@ -14,22 +14,22 @@ import org.atlasapi.remotesite.rovi.model.RoviShowType;
 import org.junit.Test;
 
 
-public class ContentCreatorTest {
+public class ContentFactoryTest {
 
     @Test
     public void testContentCreation() {
         Content content;
         
-        content = ContentCreator.createContent(RoviShowType.MOVIE);
+        content = ContentFactory.createContent(RoviShowType.MOVIE);
         assertThat(content, is(Film.class));
         
-        content = ContentCreator.createContent(RoviShowType.OTHER);
+        content = ContentFactory.createContent(RoviShowType.OTHER);
         assertThat(content, is(Item.class));
         
-        content = ContentCreator.createContent(RoviShowType.SERIES_EPISODE);
+        content = ContentFactory.createContent(RoviShowType.SERIES_EPISODE);
         assertThat(content, is(Episode.class));
 
-        content = ContentCreator.createContent(RoviShowType.SERIES_MASTER);
+        content = ContentFactory.createContent(RoviShowType.SERIES_MASTER);
         assertThat(content, is(Brand.class));
     }
     
@@ -38,22 +38,22 @@ public class ContentCreatorTest {
         Content content;
         
         content = new Film();
-        assertTrue(ContentCreator.hasCorrectType(content, RoviShowType.MOVIE));
+        assertTrue(ContentFactory.hasCorrectType(content, RoviShowType.MOVIE));
         
         content = new Brand();
-        assertTrue(ContentCreator.hasCorrectType(content, RoviShowType.SERIES_MASTER));
+        assertTrue(ContentFactory.hasCorrectType(content, RoviShowType.SERIES_MASTER));
         
         content = new Episode();
-        assertTrue(ContentCreator.hasCorrectType(content, RoviShowType.SERIES_EPISODE));
+        assertTrue(ContentFactory.hasCorrectType(content, RoviShowType.SERIES_EPISODE));
 
         content = new Item();
-        assertTrue(ContentCreator.hasCorrectType(content, RoviShowType.OTHER));
+        assertTrue(ContentFactory.hasCorrectType(content, RoviShowType.OTHER));
         
         content = new Episode();
-        assertFalse(ContentCreator.hasCorrectType(content, RoviShowType.MOVIE));
+        assertFalse(ContentFactory.hasCorrectType(content, RoviShowType.MOVIE));
         
         content = new Episode();
-        assertFalse(ContentCreator.hasCorrectType(content, RoviShowType.OTHER));
+        assertFalse(ContentFactory.hasCorrectType(content, RoviShowType.OTHER));
     }
     
 }

@@ -66,12 +66,12 @@ public class RoviProgramLineIngestor extends RoviActionLineIngestor<RoviProgramL
 
     private void ensureContentMatchesShowType(Content content, RoviProgramLine parsedLine) {
         RoviShowType showType = parsedLine.getShowType().get();
-        checkArgument(ContentCreator.hasCorrectType(content, showType), "The content type [" + content.getClass().getName() + "] doesn't match with the show type [" + showType + "]");
+        checkArgument(ContentFactory.hasCorrectType(content, showType), "The content type [" + content.getClass().getName() + "] doesn't match with the show type [" + showType + "]");
     }
 
     @Override
     protected Content createContent(RoviProgramLine parsedLine) {
-        Content created = ContentCreator.createContent(parsedLine.getShowType().get());
+        Content created = ContentFactory.createContent(parsedLine.getShowType().get());
         
         if (created instanceof Item) {
             setExistentVersionIfItemExists(created, parsedLine);
