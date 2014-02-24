@@ -1,8 +1,8 @@
 package org.atlasapi.remotesite.rovi.series;
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
-
-import java.util.concurrent.ExecutionException;
+import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
@@ -11,8 +11,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.rovi.RoviConstants;
-import org.atlasapi.remotesite.rovi.RoviUtils;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
@@ -44,21 +42,17 @@ public class SeriesFromSeasonHistoryExtractor implements ContentExtractor<RoviSe
         
         Optional<Publisher> parentPublisher = Optional.absent();
         
-        try {
-            parentPublisher = parentPublisherCache.get(season.getSeasonProgramId());
-        } catch (ExecutionException e) {
-        }
+        String parentCanonicalUri = canonicalUriForProgram(season.getSeriesId());
+        parentPublisher = parentPublisherCache.getUnchecked(parentCanonicalUri);
 
         if (parentPublisher.isPresent()) {
             series.setPublisher(parentPublisher.get());
         } else {
-            series.setPublisher(RoviConstants.DEFAULT_PUBLISHER);
+            series.setPublisher(DEFAULT_PUBLISHER);
         }
         
-        series.setCanonicalUri(RoviUtils.canonicalUriForSeason(season.getSeasonProgramId()));
-        
-        String brandCanonicalUri = RoviUtils.canonicalUriForProgram(season.getSeriesId());
-        series.setParentRef(new ParentRef(brandCanonicalUri));
+        series.setCanonicalUri(canonicalUriForSeason(season.getSeasonProgramId()));
+        series.setParentRef(new ParentRef(parentCanonicalUri));
         
         if (season.getSeasonName().isPresent()) {
             series.setTitle(season.getSeasonName().get());
@@ -71,8 +65,7 @@ public class SeriesFromSeasonHistoryExtractor implements ContentExtractor<RoviSe
         return series;
     }
     
-    private Optional<Publisher> getParentPublisher(String parentId) {
-        String parentCanonicalUri = RoviUtils.canonicalUriForProgram(parentId);
+    private Optional<Publisher> getParentPublisher(String parentCanonicalUri) {
         Maybe<Identified> maybeParent = contentResolver.findByCanonicalUris(ImmutableList.of(parentCanonicalUri)).getFirstValue();
         
         if (maybeParent.hasValue()) {

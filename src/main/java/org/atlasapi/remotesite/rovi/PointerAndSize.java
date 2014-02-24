@@ -1,7 +1,15 @@
 package org.atlasapi.remotesite.rovi;
 
 import com.google.common.base.Objects;
+import com.google.common.primitives.Longs;
 
+
+/**
+ * Represent a pair of pointer and size of a line into a file. 
+ * The pointer is the offset where the line starts, measured in bytes, from the beginning of this file. 
+ * The size is the number of bytes that form the line.
+ *
+ */
 public class PointerAndSize {
 
     private final long pointer;
@@ -42,7 +50,7 @@ public class PointerAndSize {
     
     @Override
     public int hashCode() {
-        return Objects.hashCode(pointer, size);
+        return Longs.hashCode(pointer);
     }
 
 }

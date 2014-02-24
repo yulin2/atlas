@@ -17,11 +17,11 @@ public class RoviSeriesLineParserTest {
         
         String line = "13388464|Sharpe|The adventures of a British soldier in the Napoleonic Wars.|Ins";
         
-        RoviSeriesLine seriesLine = parser.parseLine(line);
+        RoviSeriesLine seriesLine = parser.apply(line);
         
         assertEquals("13388464", seriesLine.getSeriesId());
         assertEquals("Sharpe", seriesLine.getFullTitle());
-        assertEquals("The adventures of a British soldier in the Napoleonic Wars.", seriesLine.getSynopsis());
+        assertEquals("The adventures of a British soldier in the Napoleonic Wars.", seriesLine.getSynopsis().get());
     }
 
 }

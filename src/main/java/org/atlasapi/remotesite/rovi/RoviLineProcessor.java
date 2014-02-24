@@ -1,58 +1,68 @@
 package org.atlasapi.remotesite.rovi;
 
-import static org.atlasapi.remotesite.rovi.RoviConstants.FILE_CHARSET;
+import java.nio.charset.Charset;
 
-import java.io.IOException;
-
-import org.atlasapi.media.entity.Content;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 
-import com.google.common.base.Charsets;
+import com.google.common.base.Function;
 import com.google.common.io.LineProcessor;
 
 
 public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineProcessor<RoviDataProcessingResult> {
 
-    private final RoviContentWriter contentWriter;
+    private final Function<String, T> parser;
+    protected final Charset charset;
     
     private long scannedLines = 0;
     private long processedLines = 0;
     private long failedLines = 0;
     private DateTime startTime;
     
-    public RoviLineProcessor(RoviContentWriter contentWriter) {
-        this.contentWriter = contentWriter;
+    public RoviLineProcessor(RoviLineParser<T> parser, Charset charset) {
+        this.parser = parser;
+        this.charset = charset;
     }
     
     protected abstract Logger log();
-    protected abstract Content extractContent(T parsedLine);
     protected abstract boolean isToProcess(T parsedLine);
-    protected abstract T parse(String line);
+    protected abstract void process(String line, T parsedLine) throws IndexAccessException;
+    
+    /**
+     * Execute actions that have to be done even in case of exceptions
+     * @param line
+     */
+    protected abstract void doFinally(String line);
+    protected abstract void handleBom();
+    protected abstract void handleProcessingException(Exception e, String line);
     
     @Override
-    public boolean processLine(String line) throws IOException {
+    public boolean processLine(String line) {
         // Removing BOM if charset is UTF-16LE see (http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4508058)
         if (scannedLines == 0) {
             startTime = now();
+            line = stripBomIfNeeded(line);
         }
         
         try {
-            line = removeBom(line);
             T parsedLine = parse(line);
             
             if (isToProcess(parsedLine)) {
                 log().trace("Processing line of type {} with id: {}", parsedLine.getClass().getName(), parsedLine.getKey().toString());
-                Content extractedContent = extractContent(parsedLine);
-                contentWriter.writeContent(extractedContent);
+                process(line, parsedLine);
                 processedLines++;
             }
+        } catch (IndexAccessException iae) {
+            // Throwing a RuntimeException in order to stop the processing. 
+            // It's not possible to go ahead if the index is not accessible
+            throw new RuntimeException(errorMessage(line), iae);
         } catch (Exception e) {
-            log().error("Error occurred while processing the line [" + line + "]", e);
             failedLines++;
+            handleProcessingException(e, line);
         } finally {
             scannedLines++;
+            doFinally(line);
         }
 
         return true;
@@ -63,15 +73,24 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
         return new RoviDataProcessingResult(processedLines, failedLines, startTime, now());
     }
     
-    private DateTime now() {
-        return DateTime.now(DateTimeZone.UTC);
+    protected String errorMessage(String line) {
+        return "Error occurred while processing the line [" + line + "]";
     }
     
-    private String removeBom(String line) {
-        if (scannedLines == 0 && FILE_CHARSET.equals(Charsets.UTF_16LE)) {
-            line = line.substring(1);
+    
+    protected T parse(String line) {
+        return parser.apply(line);
+    }
+
+    private String stripBomIfNeeded(String line) {
+        if (RoviUtils.startsWithUTF16LEBom(line)) {
+            line = RoviUtils.stripBom(line);
+            handleBom();
         }
         return line;
     }
     
+    private DateTime now() {
+        return DateTime.now(DateTimeZone.UTC);
+    }
 }

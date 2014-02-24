@@ -15,7 +15,7 @@ public class RoviReleaseDatesLineParser implements RoviLineParser<RoviReleaseDat
     private static final int RELEASE_TYPE_POS = 3;
     
     @Override
-    public RoviReleaseDatesLine parseLine(String line) {
+    public RoviReleaseDatesLine apply(String line) {
         Iterable<String> parts = LINE_SPLITTER.split(line);
         
         RoviReleaseDatesLine.Builder builder = RoviReleaseDatesLine.builder();

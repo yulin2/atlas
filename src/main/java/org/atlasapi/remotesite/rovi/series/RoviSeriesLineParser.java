@@ -13,7 +13,7 @@ public class RoviSeriesLineParser implements RoviLineParser<RoviSeriesLine> {
     private final static int SYNOPSIS_POS = 2;
     
     @Override
-    public RoviSeriesLine parseLine(String line) {
+    public RoviSeriesLine apply(String line) {
         Iterable<String> parts = LINE_SPLITTER.split(line);
         
         String seriesId = getPartAtPosition(parts, SERIES_ID_POS);

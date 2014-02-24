@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.rovi;
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.FILE_CHARSET;
+import static org.atlasapi.remotesite.rovi.RoviTestUtils.fileFromResource;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -8,6 +9,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 
+import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
+import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLineParser;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLineParser;
 import org.junit.Test;
@@ -18,9 +21,10 @@ import com.google.common.io.Resources;
 public class MapBasedKeyedFileIndexerTest {
      
     private static final String SMALL_FILE = "org/atlasapi/remotesite/rovi/rovi_series_small.txt";
+    private static final String NOT_PARSABLE_FILE = "org/atlasapi/remotesite/rovi/not_parsable_episode_sequence.txt";
 
     @Test
-    public void testIndexing() throws IOException {
+    public void testIndexing() throws IOException, IndexAccessException {
         URL fileUrl = Resources.getResource(SMALL_FILE);
         File file = new File(fileUrl.getPath());
         MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer(file);
@@ -37,11 +41,11 @@ public class MapBasedKeyedFileIndexerTest {
         assertEquals(key, seriesLine.getKey());
         assertEquals(key, seriesLine.getSeriesId());
         assertEquals("Empires of Industry", seriesLine.getFullTitle());
-        assertEquals("Chronicling the trades and commodities that made America an industrial power.", seriesLine.getSynopsis());
+        assertEquals("Chronicling the trades and commodities that made America an industrial power.", seriesLine.getSynopsis().get());
     }
 
     @Test
-    public void testIndexingFirstLine() throws IOException {
+    public void testIndexingFirstLine() throws IOException, IndexAccessException {
         URL fileUrl = Resources.getResource(SMALL_FILE);
         File file = new File(fileUrl.getPath());
         MapBasedKeyedFileIndexer<String, RoviSeriesLine> indexer = createIndexer(file);
@@ -52,6 +56,14 @@ public class MapBasedKeyedFileIndexerTest {
         Collection<RoviSeriesLine> lines = index.getLinesForKey(key);
         
         assertEquals(1, lines.size());
+    }
+    
+    @Test(expected=RuntimeException.class) 
+    public void testStopProcessIfErrorWhileIndexing() throws IOException {
+        File file = fileFromResource(NOT_PARSABLE_FILE);
+        
+        MapBasedKeyedFileIndexer<String, RoviEpisodeSequenceLine> indexer = new MapBasedKeyedFileIndexer<>(file, FILE_CHARSET, new RoviEpisodeSequenceLineParser());
+        indexer.index();
     }
     
     public MapBasedKeyedFileIndexer<String, RoviSeriesLine> createIndexer(File file) {

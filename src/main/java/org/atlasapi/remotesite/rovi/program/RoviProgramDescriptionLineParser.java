@@ -16,7 +16,7 @@ public class RoviProgramDescriptionLineParser implements RoviLineParser<RoviProg
     private static final int DESCRIPTION_POS = 4;
     
     @Override
-    public RoviProgramDescriptionLine parseLine(String line) {
+    public RoviProgramDescriptionLine apply(String line) {
         Iterable<String> parts = RoviConstants.LINE_SPLITTER.split(line);
         RoviProgramDescriptionLine.Builder builder = RoviProgramDescriptionLine.builder();
         

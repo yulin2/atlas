@@ -16,13 +16,14 @@ public class RoviEpisodeSequenceLineParserTest {
     public void testParseLine() {
         String line = "3757920|13376601|3832987|Amazon Redux|6|10|10|Ins";
         
-        RoviEpisodeSequenceLine roviLine = parser.parseLine(line);
+        RoviEpisodeSequenceLine roviLine = parser.apply(line);
         
         assertEquals("3757920", roviLine.getSeriesId());
-        assertEquals("13376601", roviLine.getSeasonProgramId());
+        assertEquals("13376601", roviLine.getSeasonProgramId().get());
         assertEquals("3832987", roviLine.getProgramId());
-        assertEquals("Amazon Redux", roviLine.getEpisodeTitle());
+        assertEquals("Amazon Redux", roviLine.getEpisodeTitle().get());
         assertEquals(10, roviLine.getEpisodeSeasonSequence().get().intValue());
+        assertEquals(6, roviLine.getEpisodeSeasonNumber().get().intValue());
     }
     
 }

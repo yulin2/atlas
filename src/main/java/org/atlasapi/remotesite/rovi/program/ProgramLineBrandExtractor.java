@@ -1,10 +1,10 @@
 package org.atlasapi.remotesite.rovi.program;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.remotesite.rovi.IndexAccessException;
 import org.atlasapi.remotesite.rovi.KeyedFileIndex;
 import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
 import org.slf4j.Logger;
@@ -35,17 +35,13 @@ public class ProgramLineBrandExtractor extends ProgramLineBaseExtractor<RoviProg
     }
 
     @Override
-    protected Brand addSpecificData(Brand content, RoviProgramLine programLine) {
+    protected Brand addSpecificData(Brand content, RoviProgramLine programLine) throws IndexAccessException {
         Collection<RoviSeriesLine> seriesLines;
-        try {
-            seriesLines = seriesIndex.getLinesForKey(programLine.getKey());
-            RoviSeriesLine firstSeriesLine = Iterables.getFirst(seriesLines, null);
-            
-            if (firstSeriesLine != null && firstSeriesLine.getSynopsis().isPresent()) {
-                content.setDescription(firstSeriesLine.getSynopsis().get());
-            }
-        } catch (IOException e) {
-            LOG.error("Error while retrieving descriptions for brand {} from index", programLine.getKey(), e);
+        seriesLines = seriesIndex.getLinesForKey(programLine.getKey());
+        RoviSeriesLine firstSeriesLine = Iterables.getFirst(seriesLines, null);
+
+        if (firstSeriesLine != null && firstSeriesLine.getSynopsis().isPresent()) {
+            content.setDescription(firstSeriesLine.getSynopsis().get());
         }
 
         return content;

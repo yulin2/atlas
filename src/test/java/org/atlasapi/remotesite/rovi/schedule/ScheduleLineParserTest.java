@@ -16,7 +16,7 @@ public class ScheduleLineParserTest {
     @Test
     public void testParse() {
         String testLine = "30863|20140118|04:55|N|1500|12291654||FSK: 12|||None|Dolby 5.1||Y|Color||N|N|N|4:3 Fullscreen|N||||N|Ins|1774482180";
-        ScheduleLine parsedLine = scheduleLineParser.parseLine(testLine);
+        ScheduleLine parsedLine = scheduleLineParser.apply(testLine);
         
         assertThat(parsedLine.getSourceId(), is("30863"));
         assertThat(parsedLine.getStartDate(), is(new LocalDate(2014, DateTimeConstants.JANUARY, 18)));
