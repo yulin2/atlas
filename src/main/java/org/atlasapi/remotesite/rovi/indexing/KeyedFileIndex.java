@@ -7,11 +7,17 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
 /**
- * Represents the index of a text file. Every line should contain a key that identifies the line, even if not uniquely (multiple lines could have the same key). 
- * The index maps a key of type {@code T} with one more lines of type {@code S}. {@code S} is the type of the line already parsed into the specific model.
- *
- * @param <T> The type of the key
- * @param <S> The type of the parsed line
+ * Represents the index of a text file. Every line should contain a key that
+ * identifies the line, even if not uniquely (multiple lines could have the same
+ * key). 
+ * The index maps a key of type {@code T} with one more lines of type
+ * {@code S}. {@code S} is the type of the line already parsed into the specific
+ * model.
+ * 
+ * @param <T>
+ *            The type of the key
+ * @param <S>
+ *            The type of the parsed line
  */
 public interface KeyedFileIndex<T, S extends KeyedLine<T>> {
 
