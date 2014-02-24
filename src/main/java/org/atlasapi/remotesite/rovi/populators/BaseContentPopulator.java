@@ -40,12 +40,10 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
     public BaseContentPopulator(Optional<RoviProgramLine> program,
             Iterable<RoviProgramDescriptionLine> descriptions, ContentResolver contentResolver) {
         checkArgument(!isDelete(program), "It's not possible to populate from a program delete action");
-        checkNotNull(descriptions);
-        checkNotNull(contentResolver);
         
-        this.optionalProgram = program;
-        this.descriptions = descriptions;
-        this.contentResolver = contentResolver;
+        this.optionalProgram = checkNotNull(program);
+        this.descriptions = checkNotNull(descriptions);
+        this.contentResolver = checkNotNull(contentResolver);
     }
     
     private boolean isDelete(Optional<RoviProgramLine> program) {
