@@ -22,4 +22,16 @@ public class RoviReleaseDatesLineParserTest {
         assertEquals("AT", roviLine.getReleaseCountry());
         assertEquals("Wide", roviLine.getReleaseType().get());
     }
+
+    @Test
+    public void testParseLineWithIncompleteDate() {
+        String line = "20210035|20121000|AT|Wide|Ins|204168";
+        
+        RoviReleaseDatesLine roviLine = parser.apply(line);
+        
+        assertEquals("20210035", roviLine.getProgramId());
+        assertEquals("20121001", roviLine.getReleaseDate().toString("yyyyMMdd"));
+        assertEquals("AT", roviLine.getReleaseCountry());
+        assertEquals("Wide", roviLine.getReleaseType().get());
+    }
 }
