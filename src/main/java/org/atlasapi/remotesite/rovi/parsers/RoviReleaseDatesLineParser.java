@@ -1,8 +1,8 @@
 package org.atlasapi.remotesite.rovi.parsers;
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.LINE_SPLITTER;
-import static org.atlasapi.remotesite.rovi.RoviUtils.getPartAtPosition;
-import static org.atlasapi.remotesite.rovi.RoviUtils.parsePotentiallyPartialDate;
+import static org.atlasapi.remotesite.rovi.parsers.RoviParsers.getPartAtPosition;
+import static org.atlasapi.remotesite.rovi.parsers.RoviParsers.parsePotentiallyPartialDate;
 
 import org.atlasapi.remotesite.rovi.model.RoviReleaseDatesLine;
 import org.joda.time.DateTimeFieldType;

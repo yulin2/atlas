@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator;
 import org.atlasapi.remotesite.rovi.RoviConstants;
 import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndex;
 import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
