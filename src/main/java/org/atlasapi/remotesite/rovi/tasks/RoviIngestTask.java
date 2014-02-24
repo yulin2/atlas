@@ -19,16 +19,18 @@ public class RoviIngestTask extends ScheduledTask {
     private final File scheduleFile;
     private final File programDescriptionsFile;
     private final File episodeSequenceFile;
+    private final String name;
     
     public RoviIngestTask(RoviIngestProcessor ingestProcessor, File programsFile,
             File seasonsFile, File scheduleFile, File programDescriptionsFile,
-            File episodeSequenceFile) {
+            File episodeSequenceFile, String name) {
         this.ingestProcessor = checkNotNull(ingestProcessor);
         this.programsFile = checkNotNull(programsFile);
         this.seasonsFile = checkNotNull(seasonsFile);
         this.scheduleFile = checkNotNull(scheduleFile);
         this.programDescriptionsFile = checkNotNull(programDescriptionsFile);
         this.episodeSequenceFile = checkNotNull(episodeSequenceFile);
+        this.name = checkNotNull(name);
     }
     
     @Override
@@ -42,6 +44,11 @@ public class RoviIngestTask extends ScheduledTask {
         } catch (IOException e) {
             throw Throwables.propagate(e);
         }
+    }
+    
+    @Override
+    public String getName() {
+        return name;
     }
 
 }
