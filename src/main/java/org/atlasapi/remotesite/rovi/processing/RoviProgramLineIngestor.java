@@ -4,15 +4,15 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 
 import java.nio.charset.Charset;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.RoviContentWriter;
 import org.atlasapi.remotesite.rovi.indexing.IndexAccessException;
-import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndex;
-import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
-import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
 import org.atlasapi.remotesite.rovi.model.RoviShowType;
 import org.atlasapi.remotesite.rovi.parsers.RoviLineParser;
@@ -35,8 +35,6 @@ public class RoviProgramLineIngestor extends RoviActionLineIngestor<RoviProgramL
     private final ContentPopulatorSupplier contentPopulator;
 
     public RoviProgramLineIngestor(RoviLineParser<RoviProgramLine> parser, Charset charset,
-            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
-            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex,
             Predicate<? super RoviProgramLine> isToProcess,
             RoviContentWriter contentWriter,
             ContentResolver contentResolver,
@@ -72,7 +70,30 @@ public class RoviProgramLineIngestor extends RoviActionLineIngestor<RoviProgramL
 
     @Override
     protected Content createContent(RoviProgramLine parsedLine) {
-        return ContentCreator.createContent(parsedLine.getShowType().get());
+        Content created = ContentCreator.createContent(parsedLine.getShowType().get());
+        
+        if (created instanceof Item) {
+            setExistentVersionIfItemExists(created, parsedLine);
+        }
+            
+        return created;
+    }
+
+    
+    /**
+     * This method make sure that if we're re-ingesting a program that already exists in our database, 
+     * it keeps its original Version and therefore all the broadcasts attached to it 
+     * 
+     * @param created - the empty content just created
+     * @param parsedLine - the line containing program infos
+     */
+    private void setExistentVersionIfItemExists(Content created, RoviProgramLine parsedLine) {
+        Optional<Content> existent = resolveContent(parsedLine);
+        
+        if (existent.isPresent() && existent.get() instanceof Item) {
+            Set<Version> existentVersions = ((Item) existent.get()).getVersions();
+            ((Item) created).setVersions(existentVersions);
+        }
     }
 
     @Override

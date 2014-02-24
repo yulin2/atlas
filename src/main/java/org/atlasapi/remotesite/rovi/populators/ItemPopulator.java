@@ -31,13 +31,17 @@ public class ItemPopulator<T extends Item> extends BaseContentPopulator<T>{
     }
     
     private void createVersionIfNeeded(T item, RoviProgramLine program) {
-        Version version = new Version();
-
-        if (program.getDuration().isPresent()) {
-            version.setDuration(program.getDuration().get());
+        // Creating a new Version only if the item to populate doesn't have one
+        // This is done in order to keep existent broadcasts when reingesting an Item
+        if (item.getVersions().isEmpty()) {
+            Version version = new Version();
+    
+            if (program.getDuration().isPresent()) {
+                version.setDuration(program.getDuration().get());
+            }
+    
+            item.setVersions(Sets.newHashSet(version));
         }
-
-        item.setVersions(Sets.newHashSet(version));
     }
 
 }

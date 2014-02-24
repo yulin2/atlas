@@ -18,7 +18,6 @@ public class RoviContentWriter {
         this.contentWriter = contentWriter;
     }
     
-    // TODO: merge content if instance of item, in order to keep broadcasts when re-ingesting items
     public void writeContent(Content content) {
         if (content instanceof Container) {
             contentWriter.createOrUpdate((Container) content);
