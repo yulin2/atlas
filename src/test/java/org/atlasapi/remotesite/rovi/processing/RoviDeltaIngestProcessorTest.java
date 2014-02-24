@@ -61,6 +61,7 @@ public class RoviDeltaIngestProcessorTest {
     private static final String PROGRAM_TO_DELETE = "19232006";
     
     private static final String SEASON_ID_TO_UPDATE = "22487447";
+    private static final String SEASON_HISTORY_ID_TO_UPDATE = "141406";
     private static final String SEASON_HISTORY_ID_TO_DELETE = "149987";
     private static final String SEASON_ID_TO_DELETE = "2222222";
 
@@ -88,7 +89,6 @@ public class RoviDeltaIngestProcessorTest {
     
     @Before
     public void init() {
-
         instructContentResolver();
 
         processor = new RoviDeltaIngestProcessor(
@@ -100,7 +100,6 @@ public class RoviDeltaIngestProcessorTest {
                 scheduleProcessor,
                 new AuxiliaryCacheSupplier(contentResolver));
     }
-    
 
     @Test
     public void testDeltaIngest() throws IOException {
@@ -243,7 +242,7 @@ public class RoviDeltaIngestProcessorTest {
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PROGRAM_TO_DELETE))))
             .thenReturn(resolvedContent(new Film(canonicalUriForProgram(PROGRAM_TO_DELETE), "", Publisher.ROVI_EN_GB)));
 
-        when(contentResolver.findByUris(ImmutableList.of(canonicalUriForSeason(SEASON_ID_TO_UPDATE))))
+        when(contentResolver.findByUris(ImmutableList.of(canonicalUriForSeasonHistory(SEASON_HISTORY_ID_TO_UPDATE))))
             .thenReturn(resolvedContent(new Series(canonicalUriForSeason(SEASON_ID_TO_UPDATE), "", Publisher.ROVI_EN_GB)));
 
         when(contentResolver.findByUris(ImmutableList.of(canonicalUriForSeasonHistory(SEASON_HISTORY_ID_TO_DELETE))))
