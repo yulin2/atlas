@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.HAS_PARENT;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_DELETE;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getPublisherForLanguageAndCulture;
 import static org.atlasapi.remotesite.rovi.model.CultureToPublisherMap.culturesOrdering;
 import static org.atlasapi.remotesite.rovi.model.CultureToPublisherMap.isCultureGoodForPublisher;

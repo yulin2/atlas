@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.rovi.populators;
 
 import static org.atlasapi.remotesite.rovi.RoviTestUtils.resolvedContent;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;

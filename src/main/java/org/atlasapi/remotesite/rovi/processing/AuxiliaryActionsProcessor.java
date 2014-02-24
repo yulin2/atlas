@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.rovi.processing;
 
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 
 import java.util.Set;
 

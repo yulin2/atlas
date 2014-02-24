@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.rovi.processing;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 
 import java.nio.charset.Charset;
 import java.util.Set;

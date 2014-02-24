@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.rovi.populators;
 
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
-import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
