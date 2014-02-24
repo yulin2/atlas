@@ -1,11 +1,10 @@
 package org.atlasapi.remotesite.rovi;
 
-import org.atlasapi.media.entity.Brand;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentWriter;
 
 
@@ -18,18 +17,12 @@ public class RoviContentWriter {
     private final ContentWriter contentWriter;
     
     public RoviContentWriter(ContentWriter contentWriter) {
-        this.contentWriter = contentWriter;
+        this.contentWriter = checkNotNull(contentWriter);
     }
     
     public void writeContent(Content content) {
-        if (content instanceof Brand) {
-            contentWriter.createOrUpdate((Brand) content);
-        } else if (content instanceof Series) {
-            contentWriter.createOrUpdate((Series) content);
-        } else if (content instanceof Episode) {
-            contentWriter.createOrUpdate((Episode) content);
-        } else if (content instanceof Film) {
-            contentWriter.createOrUpdate((Film) content);
+        if (content instanceof Container) {
+            contentWriter.createOrUpdate((Container) content);
         } else if (content instanceof Item) {
             contentWriter.createOrUpdate((Item) content);
         } else {

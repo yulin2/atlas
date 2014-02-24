@@ -1,23 +1,26 @@
 package org.atlasapi.remotesite.rovi;
 
-import java.io.File;
-
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLine;
-import org.atlasapi.remotesite.rovi.program.RoviProgramDescriptionLineParser;
-import org.atlasapi.remotesite.rovi.schedule.ItemBroadcastUpdater;
-import org.atlasapi.remotesite.rovi.schedule.ScheduleFileProcessor;
-import org.atlasapi.remotesite.rovi.schedule.ScheduleLineBroadcastExtractor;
-import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLine;
-import org.atlasapi.remotesite.rovi.series.RoviEpisodeSequenceLineParser;
-import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLine;
-import org.atlasapi.remotesite.rovi.series.RoviSeasonHistoryLineParser;
-import org.atlasapi.remotesite.rovi.series.RoviSeriesLine;
-import org.atlasapi.remotesite.rovi.series.RoviSeriesLineParser;
+import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
+import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
+import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
+import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
+import org.atlasapi.remotesite.rovi.model.RoviSeasonHistoryLine;
+import org.atlasapi.remotesite.rovi.parsers.RoviEpisodeSequenceLineParser;
+import org.atlasapi.remotesite.rovi.parsers.RoviProgramDescriptionLineParser;
+import org.atlasapi.remotesite.rovi.parsers.RoviProgramLineParser;
+import org.atlasapi.remotesite.rovi.parsers.RoviSeasonHistoryLineParser;
+import org.atlasapi.remotesite.rovi.populators.ScheduleLineBroadcastExtractor;
+import org.atlasapi.remotesite.rovi.processing.AuxiliaryCacheSupplier;
+import org.atlasapi.remotesite.rovi.processing.ItemBroadcastUpdater;
+import org.atlasapi.remotesite.rovi.processing.RoviDeltaIngestProcessor;
+import org.atlasapi.remotesite.rovi.processing.RoviFullIngestProcessor;
+import org.atlasapi.remotesite.rovi.processing.ScheduleFileProcessor;
+import org.atlasapi.remotesite.rovi.tasks.RoviIngestTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,13 +31,6 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class RoviModule {
 
-    private static final String PROGRAMS_FILE = "/data/rovi/Program.txt";
-    private static final String PROGRAM_DESCRIPTION = "/data/rovi/Program_Description.txt";
-    private static final String EPISODE_SEQUENCE = "/data/rovi/Episode_Sequence.txt";
-    private static final String SEASON_HISTORY_SEQUENCE = "/data/rovi/Season_History.txt";
-    private static final String SERIES = "/data/rovi/Series.txt";
-    private static final String SCHEDULE_FILE = "/data/rovi/Schedule.txt";
-
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
@@ -43,7 +39,6 @@ public class RoviModule {
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviProgramDescriptionLine> descriptionsIndexer() {
         return new MapBasedKeyedFileIndexer<>(
-                new File(PROGRAM_DESCRIPTION),
                 RoviConstants.FILE_CHARSET,
                 new RoviProgramDescriptionLineParser());
     }
@@ -51,7 +46,6 @@ public class RoviModule {
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer() {
         return new MapBasedKeyedFileIndexer<>(
-                new File(EPISODE_SEQUENCE),
                 RoviConstants.FILE_CHARSET,
                 new RoviEpisodeSequenceLineParser());
     }
@@ -59,40 +53,70 @@ public class RoviModule {
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviSeasonHistoryLine> seasonHistoryIndexer() {
         return new MapBasedKeyedFileIndexer<>(
-                new File(SEASON_HISTORY_SEQUENCE),
                 RoviConstants.FILE_CHARSET,
                 new RoviSeasonHistoryLineParser());
     }
 
     @Bean
-    public MapBasedKeyedFileIndexer<String, RoviSeriesLine> seriesIndexer() {
+    public MapBasedKeyedFileIndexer<String, RoviProgramLine> programIndexer() {
         return new MapBasedKeyedFileIndexer<>(
-                new File(SERIES),
                 RoviConstants.FILE_CHARSET,
-                new RoviSeriesLineParser());
+                new RoviProgramLineParser());
     }
-    
+
     @Bean
     public RoviContentWriter roviContentWriter() {
         return new RoviContentWriter(contentWriter);
     }
     
     @Bean
-    public RoviProgramsProcessor programsProcessor() {
-        return new RoviProgramsProcessor(
+    public RoviFullIngestProcessor fullIngestProcessor() {
+        return new RoviFullIngestProcessor(
                 descriptionsIndexer(),
                 episodeSequenceIndexer(),
-                seriesIndexer(),
-                seasonHistoryIndexer(),
                 roviContentWriter(),
                 contentResolver,
-                scheduleProcessor());
+                scheduleProcessor(),
+                auxCacheSupplier());
+    }
+
+    @Bean
+    public RoviDeltaIngestProcessor deltaIngestProcessor() {
+        return new RoviDeltaIngestProcessor(
+                programIndexer(),
+                descriptionsIndexer(),
+                episodeSequenceIndexer(),
+                roviContentWriter(),
+                contentResolver,
+                scheduleProcessor(),
+                auxCacheSupplier());
     }
     
     @Bean
-    public RoviUpdater roviUpdater() {
-        return new RoviUpdater(programsProcessor(), new File(PROGRAMS_FILE), new File(
-                SEASON_HISTORY_SEQUENCE), new File(SCHEDULE_FILE));
+    public AuxiliaryCacheSupplier auxCacheSupplier() {
+        return new AuxiliaryCacheSupplier(contentResolver);
+    }
+    
+    @Bean
+    public RoviIngestTask roviFullIngestTask() {
+        return new RoviIngestTask(
+                fullIngestProcessor(),
+                FileSupplier.fullProgramFile(),
+                FileSupplier.fullSeasonHistoryFile(),
+                FileSupplier.fullScheduleFile(),
+                FileSupplier.fullProgramDescriptionsFile(),
+                FileSupplier.fullEpisodeSequenceFile());
+    }
+    
+    @Bean
+    public RoviIngestTask roviDeltaIngestTask() {
+        return new RoviIngestTask(
+                deltaIngestProcessor(),
+                FileSupplier.deltaProgramFile(),
+                FileSupplier.deltaSeasonHistoryFile(),
+                FileSupplier.deltaScheduleFile(),
+                FileSupplier.deltaProgramDescriptionsFile(),
+                FileSupplier.deltaEpisodeSequenceFile());      
     }
     
     @Bean
@@ -104,7 +128,8 @@ public class RoviModule {
     
     @PostConstruct
     public void init() {
-        scheduler.schedule(roviUpdater(), RepetitionRules.NEVER);
+        scheduler.schedule(roviFullIngestTask(), RepetitionRules.NEVER);
+        scheduler.schedule(roviDeltaIngestTask(), RepetitionRules.NEVER);
     }
 
 }
