@@ -49,7 +49,7 @@ public class RoviSeasonHistoryLine implements KeyedActionLine<String>{
 
     @Override
     public String getKey() {
-        return seasonProgramId.get();
+        return seasonHistoryId;
     }
     
     @Override

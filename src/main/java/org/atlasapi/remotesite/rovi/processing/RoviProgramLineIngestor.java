@@ -60,9 +60,14 @@ public class RoviProgramLineIngestor extends RoviActionLineIngestor<RoviProgramL
     @Override
     protected void populateContent(Content content, RoviProgramLine parsedLine) throws IndexAccessException {
         // Breaking if the type of the program is different from the one we already have in the database
+        ensureContentMatchesShowType(content, parsedLine);
+        
+        contentPopulator.populateFromProgramAndAuxiliary(content, parsedLine);
+    }
+
+    private void ensureContentMatchesShowType(Content content, RoviProgramLine parsedLine) {
         RoviShowType showType = parsedLine.getShowType().get();
         checkArgument(ContentCreator.hasCorrectType(content, showType), "The content type [" + content.getClass().getName() + "] doesn't match with the show type [" + showType + "]");
-        contentPopulator.populateFromProgramAndAuxiliary(content, parsedLine);
     }
 
     @Override

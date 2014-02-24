@@ -3,9 +3,9 @@ package org.atlasapi.remotesite.rovi.populators;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.HAS_PARENT;
+import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_DELETE;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviUtils.getPublisherForLanguageAndCulture;
-import static org.atlasapi.remotesite.rovi.model.ActionType.DELETE;
 import static org.atlasapi.remotesite.rovi.model.CultureToPublisherMap.culturesOrdering;
 import static org.atlasapi.remotesite.rovi.model.CultureToPublisherMap.isCultureGoodForPublisher;
 
@@ -36,7 +36,7 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
     
     public BaseContentPopulator(Optional<RoviProgramLine> program,
             Iterable<RoviProgramDescriptionLine> descriptions, ContentResolver contentResolver) {
-        checkArgument(isNotDelete(program), "It's not possible to populate from a program delete action");
+        checkArgument(!isDelete(program), "It's not possible to populate from a program delete action");
         checkNotNull(descriptions);
         checkNotNull(contentResolver);
         
@@ -45,8 +45,8 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
         this.contentResolver = contentResolver;
     }
     
-    private boolean isNotDelete(Optional<RoviProgramLine> program) {
-        return program.isPresent() && !program.get().getActionType().equals(DELETE);
+    private boolean isDelete(Optional<RoviProgramLine> program) {
+        return program.isPresent() && IS_DELETE.apply(program.get());
     }
 
     @Override
@@ -137,10 +137,7 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
         }
         
         Optional<String> longestDescription = getLongestDescription(content);
-        if (longestDescription.isPresent()) {
-            content.setDescription(longestDescription.get());
-        }
-        
+        content.setDescription(longestDescription.orNull());
     }
     
     private Optional<String> getLongestDescription(CONTENT content) {
