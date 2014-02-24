@@ -89,8 +89,6 @@ public class RoviDeltaIngestProcessor implements RoviIngestProcessor {
             RoviDataProcessingResult processingBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
                     new RoviProgramLineParser(),
                     FILE_CHARSET,
-                    descriptionIndex,
-                    episodeSequenceIndex,
                     and(IS_INSERT, IS_BRAND_NO_PARENT),
                     contentWriter,
                     contentResolver,
@@ -103,8 +101,6 @@ public class RoviDeltaIngestProcessor implements RoviIngestProcessor {
             RoviDataProcessingResult processingBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
                     new RoviProgramLineParser(),
                     FILE_CHARSET,
-                    descriptionIndex,
-                    episodeSequenceIndex,
                     and(IS_INSERT, IS_BRAND_WITH_PARENT),
                     contentWriter,
                     contentResolver,
@@ -127,8 +123,6 @@ public class RoviDeltaIngestProcessor implements RoviIngestProcessor {
             RoviDataProcessingResult processingNoBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
                     new RoviProgramLineParser(),
                     FILE_CHARSET,
-                    descriptionIndex,
-                    episodeSequenceIndex,
                     and(IS_INSERT, NO_BRAND_NO_PARENT),
                     contentWriter,
                     contentResolver,
@@ -141,8 +135,6 @@ public class RoviDeltaIngestProcessor implements RoviIngestProcessor {
             RoviDataProcessingResult processingNoBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
                     new RoviProgramLineParser(),
                     FILE_CHARSET,
-                    descriptionIndex,
-                    episodeSequenceIndex,
                     and(IS_INSERT, NO_BRAND_WITH_PARENT),
                     contentWriter,
                     contentResolver,
@@ -155,8 +147,6 @@ public class RoviDeltaIngestProcessor implements RoviIngestProcessor {
             RoviDataProcessingResult processingUpdatesAndDeletesResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
                     new RoviProgramLineParser(),
                     FILE_CHARSET,
-                    descriptionIndex,
-                    episodeSequenceIndex,
                     Predicates.not(RoviPredicates.IS_INSERT),
                     contentWriter,
                     contentResolver,

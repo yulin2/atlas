@@ -64,6 +64,8 @@ public class EpisodePopulator extends ItemPopulator<Episode> {
             if (seasonNumber.isPresent()) {
                 episode.setSeriesNumber(seasonNumber.get());
             }
+        } else {
+            episode.setSeriesNumber(null);
         }
     }
     
@@ -71,11 +73,15 @@ public class EpisodePopulator extends ItemPopulator<Episode> {
         if (program.getSeriesId().isPresent()) {
             String seriesCanonicalUri = canonicalUriForProgram(program.getSeriesId().get());
             episode.setParentRef(new ParentRef(seriesCanonicalUri));
+        } else {
+            episode.setParentRef(null);
         }
         
         if (program.getSeasonId().isPresent()) {
             String seasonCanonicalUri = canonicalUriForSeason(program.getSeasonId().get());
             episode.setSeriesRef(new ParentRef(seasonCanonicalUri));
+        } else {
+            episode.setSeriesRef(null);
         }
     }
 

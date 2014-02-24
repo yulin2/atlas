@@ -85,7 +85,7 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
             content.setYear(program.getReleaseYear().get());
         }       
         
-        setParentIfNeeded(content, program);
+        setExplicitEquivalence(content, program);
         
         if (content.getPublisher() == null) {
             content.setPublisher(getPublisherForLanguageAndCulture(program.getLanguage(), calculateCulture(descriptions)));
@@ -97,7 +97,7 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
             || content.getCanonicalUri().equals(canonicalUriForProgram(line.getProgramId()));
     }
     
-    private void setParentIfNeeded(CONTENT content, RoviProgramLine program) {
+    private void setExplicitEquivalence(CONTENT content, RoviProgramLine program) {
         if (HAS_PARENT.apply(program)) {
             String parentCanonicalUri = canonicalUriForProgram(program.getTitleParentId().get());
             Maybe<Identified> maybeParent = contentResolver.findByCanonicalUris(ImmutableList.of(parentCanonicalUri)).getFirstValue();
@@ -106,6 +106,8 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
                 LookupRef parentLookupRef = LookupRef.from((Described) maybeParent.requireValue());
                 content.setEquivalentTo(ImmutableSet.of(parentLookupRef));
             }
+        } else {
+            content.setEquivalentTo(ImmutableSet.<LookupRef>of());
         }
     }
     

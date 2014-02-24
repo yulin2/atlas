@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.rovi.processing;
 
 import static org.atlasapi.remotesite.rovi.RoviTestUtils.fileFromResource;
 import static org.atlasapi.remotesite.rovi.RoviTestUtils.resolvedContent;
+import static org.atlasapi.remotesite.rovi.RoviTestUtils.unresolvedContent;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeason;
 import static org.atlasapi.remotesite.rovi.RoviUtils.canonicalUriForSeasonHistory;
@@ -27,6 +28,7 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.RoviConstants;
 import org.atlasapi.remotesite.rovi.RoviContentWriter;
+import org.atlasapi.remotesite.rovi.RoviTestUtils;
 import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
@@ -221,6 +223,9 @@ public class RoviDeltaIngestProcessorTest {
     }
     
     private void instructContentResolver() {
+        when(contentResolver.findByCanonicalUris(Mockito.anyCollectionOf(String.class)))
+            .thenReturn(unresolvedContent());
+        
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(EPISODE_PARENT_BRAND_ID))))
                 .thenReturn(resolvedContent(parentBrand(EPISODE_PARENT_BRAND_ID)));
 
@@ -256,7 +261,7 @@ public class RoviDeltaIngestProcessorTest {
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(EPISODE_WITH_SEQ_TO_DEL))))
             .thenReturn(resolvedContent(episodeWithDescToDelete()));
-
+        
     }
 
 

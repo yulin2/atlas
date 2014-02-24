@@ -70,4 +70,10 @@ public class RoviTestUtils {
         return resolvedContent;
     }
     
+    public static ResolvedContent unresolvedContent() {
+        ResolvedContentBuilder resolvedContentBuilder = ResolvedContent.builder();
+        ResolvedContent resolvedContent = resolvedContentBuilder.build();
+        return resolvedContent;
+    }
+    
 }

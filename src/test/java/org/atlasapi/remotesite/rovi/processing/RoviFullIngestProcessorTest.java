@@ -27,14 +27,12 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.RoviConstants;
 import org.atlasapi.remotesite.rovi.RoviContentWriter;
+import org.atlasapi.remotesite.rovi.RoviTestUtils;
 import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.parsers.RoviEpisodeSequenceLineParser;
 import org.atlasapi.remotesite.rovi.parsers.RoviProgramDescriptionLineParser;
-import org.atlasapi.remotesite.rovi.processing.AuxiliaryCacheSupplier;
-import org.atlasapi.remotesite.rovi.processing.RoviFullIngestProcessor;
-import org.atlasapi.remotesite.rovi.processing.ScheduleFileProcessor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -189,6 +187,9 @@ public class RoviFullIngestProcessorTest {
     }
 
     private void instructContentResolver() {
+        when(contentResolver.findByCanonicalUris(Mockito.anyCollectionOf(String.class)))
+            .thenReturn(RoviTestUtils.unresolvedContent());
+        
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PARENT_BRAND_ID))))
                 .thenReturn(resolvedContent(parentBrand()));
 
