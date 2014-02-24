@@ -1,10 +1,10 @@
 package org.atlasapi.remotesite.rovi.parsers;
 
 import static org.atlasapi.remotesite.rovi.RoviConstants.LINE_SPLITTER;
-import static org.atlasapi.remotesite.rovi.RoviUtils.getActionTypeAtPosition;
-import static org.atlasapi.remotesite.rovi.RoviUtils.getIntPartAtPosition;
-import static org.atlasapi.remotesite.rovi.RoviUtils.getLongPartAtPosition;
-import static org.atlasapi.remotesite.rovi.RoviUtils.getPartAtPosition;
+import static org.atlasapi.remotesite.rovi.parsers.RoviParsers.getActionTypeAtPosition;
+import static org.atlasapi.remotesite.rovi.parsers.RoviParsers.getIntPartAtPosition;
+import static org.atlasapi.remotesite.rovi.parsers.RoviParsers.getLongPartAtPosition;
+import static org.atlasapi.remotesite.rovi.parsers.RoviParsers.getPartAtPosition;
 
 import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
 import org.atlasapi.remotesite.rovi.model.RoviShowType;
