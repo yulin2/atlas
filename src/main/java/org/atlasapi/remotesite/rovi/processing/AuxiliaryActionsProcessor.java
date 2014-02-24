@@ -5,7 +5,6 @@ import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUr
 
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -14,6 +13,8 @@ import org.atlasapi.remotesite.rovi.indexing.IndexAccessException;
 import org.atlasapi.remotesite.rovi.populators.ContentPopulatorSupplier;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -22,7 +23,7 @@ import com.metabroadcast.common.base.Maybe;
 
 public class AuxiliaryActionsProcessor {
     
-    private final static Logger LOG = Logger.getLogger(AuxiliaryActionsProcessor.class);
+    private final static Logger LOG = LoggerFactory.getLogger(AuxiliaryActionsProcessor.class);
 
     private final ContentResolver contentResolver;
     private final ContentPopulatorSupplier populator;
