@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.rovi.processing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.nio.charset.Charset;
 
 import org.atlasapi.media.entity.Content;
@@ -17,7 +19,7 @@ public abstract class RoviActionLineIngestor<T extends KeyedActionLine<?>, CONTE
 
     public RoviActionLineIngestor(RoviLineParser<T> parser, Charset charset, RoviContentWriter contentWriter) {
         super(parser, charset);
-        this.contentWriter = contentWriter;
+        this.contentWriter = checkNotNull(contentWriter);
     }
 
     @Override

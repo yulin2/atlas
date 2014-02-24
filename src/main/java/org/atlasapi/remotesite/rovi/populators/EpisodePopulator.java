@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi.populators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
 
@@ -24,8 +25,8 @@ public class EpisodePopulator extends ItemPopulator<Episode> {
             Optional<RoviEpisodeSequenceLine> episodeSequence,
             LoadingCache<String, Optional<Integer>> seasonNumberCache) {
         super(program, descriptions, contentResolver);
-        this.episodeSequence = episodeSequence;
-        this.seasonNumberCache = seasonNumberCache;
+        this.episodeSequence = checkNotNull(episodeSequence);
+        this.seasonNumberCache = checkNotNull(seasonNumberCache);
     }
 
     @Override

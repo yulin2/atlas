@@ -1,10 +1,11 @@
 package org.atlasapi.remotesite.rovi.populators;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeasonHistory;
+import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
 import static org.atlasapi.remotesite.rovi.model.ActionType.DELETE;
 
 import org.atlasapi.media.entity.ParentRef;
@@ -26,8 +27,8 @@ public class SeriesPopulator implements ContentPopulator<Series> {
             LoadingCache<String, Optional<Publisher>> parentPublisherCache) {
         checkArgument(!season.getActionType().equals(DELETE), "It's not possible to populate a Series from a deletion");
         
-        this.season = season;
-        this.parentPublisherCache = parentPublisherCache;
+        this.season = checkNotNull(season);
+        this.parentPublisherCache = checkNotNull(parentPublisherCache);
     }
 
     @Override

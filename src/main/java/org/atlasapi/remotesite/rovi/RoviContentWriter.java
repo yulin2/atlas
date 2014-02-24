@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.rovi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
@@ -15,7 +17,7 @@ public class RoviContentWriter {
     private final ContentWriter contentWriter;
     
     public RoviContentWriter(ContentWriter contentWriter) {
-        this.contentWriter = contentWriter;
+        this.contentWriter = checkNotNull(contentWriter);
     }
     
     public void writeContent(Content content) {

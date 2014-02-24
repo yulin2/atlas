@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi.processing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeasonHistory;
 
@@ -33,8 +34,8 @@ public class RoviSeasonLineIngestor extends RoviActionLineIngestor<RoviSeasonHis
     public RoviSeasonLineIngestor(RoviSeasonHistoryLineParser parser, Charset charset,
             ContentResolver contentResolver, RoviContentWriter contentWriter, LoadingCache<String, Optional<Publisher>> parentPublisherCache) {
         super(parser, charset, contentWriter);
-        this.contentResolver = contentResolver;
-        this.parentPublisherCache = parentPublisherCache;
+        this.contentResolver = checkNotNull(contentResolver);
+        this.parentPublisherCache = checkNotNull(parentPublisherCache);
     }
     
     @Override
