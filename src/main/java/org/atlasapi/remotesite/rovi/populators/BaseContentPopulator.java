@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.rovi.populators;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.not;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.HAS_PARENT;
@@ -97,16 +98,18 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
     }
     
     private void setExplicitEquivalence(CONTENT content, RoviProgramLine program) {
-        if (HAS_PARENT.apply(program)) {
-            String parentCanonicalUri = canonicalUriForProgram(program.getTitleParentId().get());
-            Maybe<Identified> maybeParent = contentResolver.findByCanonicalUris(ImmutableList.of(parentCanonicalUri)).getFirstValue();
-            
-            if (maybeParent.hasValue()) {
-                LookupRef parentLookupRef = LookupRef.from((Described) maybeParent.requireValue());
-                content.setEquivalentTo(ImmutableSet.of(parentLookupRef));
-            }
-        } else {
+        if (not(HAS_PARENT).apply(program)) {
             content.setEquivalentTo(ImmutableSet.<LookupRef>of());
+            return;
+        } 
+
+        String parentCanonicalUri = canonicalUriForProgram(program.getTitleParentId().get());
+        Maybe<Identified> maybeParent = contentResolver.findByCanonicalUris(ImmutableList.of(parentCanonicalUri))
+                .getFirstValue();
+
+        if (maybeParent.hasValue()) {
+            LookupRef parentLookupRef = LookupRef.from((Described) maybeParent.requireValue());
+            content.setEquivalentTo(ImmutableSet.of(parentLookupRef));
         }
     }
     
