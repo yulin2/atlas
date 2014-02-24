@@ -2,10 +2,10 @@ package org.atlasapi.remotesite.rovi.populators;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.atlasapi.remotesite.rovi.RoviPredicates.HAS_PARENT;
-import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_DELETE;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
+import static org.atlasapi.remotesite.rovi.RoviPredicates.HAS_PARENT;
+import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_DELETE;
 import static org.atlasapi.remotesite.rovi.model.CultureToPublisherMap.culturesOrdering;
 import static org.atlasapi.remotesite.rovi.model.CultureToPublisherMap.isCultureGoodForPublisher;
 
@@ -73,7 +73,10 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
     }
 
     private void populateFromProgram(CONTENT content, RoviProgramLine program) {
-        checkArgument(checkIdCompatibility(content, program), "Mapping a line to a content with a different identifier (canonicalUri) is not permitted");
+        if (content.getCanonicalUri() != null) {
+            checkArgument(canonicalUriForProgram(program.getProgramId()).equals(content.getCanonicalUri()),
+                    "Mapping a line to a content with a different identifier (canonicalUri) is not permitted");
+        }
         
         if (program.getLongTitle().isPresent()) {
             content.setTitle(program.getLongTitle().get());
@@ -91,11 +94,6 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
         if (content.getPublisher() == null) {
             content.setPublisher(getPublisherForLanguageAndCulture(program.getLanguage(), calculateCulture(descriptions)));
         }
-    }
-    
-    private boolean checkIdCompatibility(CONTENT content, RoviProgramLine line) {
-        return content.getCanonicalUri() == null
-            || content.getCanonicalUri().equals(canonicalUriForProgram(line.getProgramId()));
     }
     
     private void setExplicitEquivalence(CONTENT content, RoviProgramLine program) {
