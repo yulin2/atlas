@@ -65,71 +65,99 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
             
             LOG.info("Start processing programs");
             
-            // Step 1. Process brands with no parent
-            RoviDataProcessingResult processingBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
-                    new RoviProgramLineParser(),
-                    FILE_CHARSET,
-                    IS_BRAND_NO_PARENT,
-                    contentWriter,
-                    contentResolver,
-                    contentPopulator(descriptionIndex, episodeSequenceIndex)
-                    ));
+            processBrandsWithoutParent(programFile, descriptionIndex, episodeSequenceIndex);
+            processBrandsWithParent(programFile, descriptionIndex, episodeSequenceIndex);
+            processSeries(seasonsFile);
+            processItemsWithoutParent(programFile, descriptionIndex, episodeSequenceIndex);
+            processItemsWithParent(programFile, descriptionIndex, episodeSequenceIndex);
+            processBroadcasts(scheduleFile);
             
-            LOG.info("Processing brands with no parent complete, result: {}", processingBrandsNoParentResult);
-    
-            // Step 2. Process brands with  parent
-            RoviDataProcessingResult processingBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
-                    new RoviProgramLineParser(),
-                    FILE_CHARSET,
-                    IS_BRAND_WITH_PARENT,
-                    contentWriter,
-                    contentResolver,
-                    contentPopulator(descriptionIndex, episodeSequenceIndex)
-                    ));
+            LOG.info("Processing programs complete");
             
-            LOG.info("Processing brands with parent complete, result: {}", processingBrandsWithParentResult);
-            
-            // Step 3. Process series
-            RoviDataProcessingResult processingSeriesResult = Files.readLines(seasonsFile, FILE_CHARSET, new RoviSeasonLineIngestor(
-                    new RoviSeasonHistoryLineParser(),
-                    FILE_CHARSET,
-                    contentResolver,
-                    contentWriter,
-                    auxCacheSupplier.parentPublisherCache(MAX_CACHE_SIZE)));
-            
-            LOG.info("Processing series complete, result: {}", processingSeriesResult);
-            
-            // Step 4. Process programs without parent
-            RoviDataProcessingResult processingNoBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
-                    new RoviProgramLineParser(),
-                    FILE_CHARSET,
-                    NO_BRAND_NO_PARENT,
-                    contentWriter,
-                    contentResolver,
-                    contentPopulator(descriptionIndex, episodeSequenceIndex)
-                    ));
-            
-            LOG.info("Processing programs (no brands) with no parent complete, result: {}", processingNoBrandsNoParentResult);
-            
-            // Step 5. Process programs with parent
-            RoviDataProcessingResult processingNoBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
-                    new RoviProgramLineParser(),
-                    FILE_CHARSET,
-                    NO_BRAND_WITH_PARENT,
-                    contentWriter,
-                    contentResolver,
-                    contentPopulator(descriptionIndex, episodeSequenceIndex)
-                    ));
-            
-            LOG.info("Processing programs (no brands) with parent complete, result: {}", processingNoBrandsWithParentResult);
-            
-            // Step 6. Process schedule
-            scheduleFileProcessor.process(scheduleFile);
-      
-            LOG.info("Processing schedule complete");
         } finally {
             releaseIndexResources(descriptionIndex, episodeSequenceIndex);
         }
+    }
+
+    private void processBroadcasts(File scheduleFile) throws IOException {
+        scheduleFileProcessor.process(scheduleFile);
+        
+        LOG.info("Processing schedule complete");
+    }
+
+    private void processItemsWithParent(File programFile,
+            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
+            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex)
+            throws IOException {
+        RoviDataProcessingResult processingNoBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
+                new RoviProgramLineParser(),
+                FILE_CHARSET,
+                NO_BRAND_WITH_PARENT,
+                contentWriter,
+                contentResolver,
+                contentPopulator(descriptionIndex, episodeSequenceIndex)
+                ));
+        
+        LOG.info("Processing programs (no brands) with parent complete, result: {}", processingNoBrandsWithParentResult);
+    }
+
+    private void processItemsWithoutParent(File programFile,
+            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
+            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex)
+            throws IOException {
+        RoviDataProcessingResult processingNoBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
+                new RoviProgramLineParser(),
+                FILE_CHARSET,
+                NO_BRAND_NO_PARENT,
+                contentWriter,
+                contentResolver,
+                contentPopulator(descriptionIndex, episodeSequenceIndex)
+                ));
+        
+        LOG.info("Processing programs (no brands) with no parent complete, result: {}", processingNoBrandsNoParentResult);
+    }
+
+    private void processSeries(File seasonsFile) throws IOException {
+        RoviDataProcessingResult processingSeriesResult = Files.readLines(seasonsFile, FILE_CHARSET, new RoviSeasonLineIngestor(
+                new RoviSeasonHistoryLineParser(),
+                FILE_CHARSET,
+                contentResolver,
+                contentWriter,
+                auxCacheSupplier.parentPublisherCache(MAX_CACHE_SIZE)));
+        
+        LOG.info("Processing series complete, result: {}", processingSeriesResult);
+    }
+
+    private void processBrandsWithParent(File programFile,
+            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
+            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex)
+            throws IOException {
+        RoviDataProcessingResult processingBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
+                new RoviProgramLineParser(),
+                FILE_CHARSET,
+                IS_BRAND_WITH_PARENT,
+                contentWriter,
+                contentResolver,
+                contentPopulator(descriptionIndex, episodeSequenceIndex)
+                ));
+        
+        LOG.info("Processing brands with parent complete, result: {}", processingBrandsWithParentResult);
+    }
+
+    private void processBrandsWithoutParent(File programFile,
+            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
+            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex)
+            throws IOException {
+        RoviDataProcessingResult processingBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
+                new RoviProgramLineParser(),
+                FILE_CHARSET,
+                IS_BRAND_NO_PARENT,
+                contentWriter,
+                contentResolver,
+                contentPopulator(descriptionIndex, episodeSequenceIndex)
+                ));
+        
+        LOG.info("Processing brands with no parent complete, result: {}", processingBrandsNoParentResult);
     }
 
     private ContentPopulatorSupplier contentPopulator(
