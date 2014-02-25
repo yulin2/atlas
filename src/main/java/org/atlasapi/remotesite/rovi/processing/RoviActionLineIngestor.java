@@ -56,6 +56,7 @@ public abstract class RoviActionLineIngestor<T extends KeyedActionLine<?>, CONTE
             log().error("Received an update action of type {} for a not existent content with key {}",
                     parsedLine.getClass().getName(),
                     parsedLine.getKey());
+            return;
         }
         
         CONTENT content = resolved.get();
