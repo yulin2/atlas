@@ -1,6 +1,8 @@
 package org.atlasapi.query;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.feeds.utils.DescriptionWatermarker;
+import org.atlasapi.feeds.utils.WatermarkModule;
 import org.atlasapi.input.BrandModelTransformer;
 import org.atlasapi.input.ClipModelTransformer;
 import org.atlasapi.input.DefaultGsonModelReader;
@@ -98,6 +100,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
@@ -106,6 +109,7 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.SystemClock;
 
 @Configuration
+@Import( { WatermarkModule.class } )
 public class QueryWebModule {
     
     private @Value("${local.host.name}") String localHostName;
@@ -129,6 +133,7 @@ public class QueryWebModule {
     private @Autowired PeopleQueryResolver peopleQueryResolver;
     private @Autowired PersonStore personStore;
     private @Autowired LookupEntryStore lookupStore;
+    private @Autowired DescriptionWatermarker descriptionWatermarker;
 
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
@@ -261,8 +266,8 @@ public class QueryWebModule {
     @Bean
     AtlasModelWriter<QueryResult<Identified, ? extends Identified>> contentModelOutputter() {
         return this.<QueryResult<Identified, ? extends Identified>>standardWriter(
-                new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier(), personSimplifier()),
-                new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier(), personSimplifier()));
+                new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), contentItemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier(), personSimplifier()),
+                new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), contentItemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier(), personSimplifier()));
     }
 
     @Bean
@@ -270,7 +275,7 @@ public class QueryWebModule {
         RecentlyBroadcastChildrenResolver recentChildren = new MongoRecentlyBroadcastChildrenResolver(mongo);
         NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo, idCodec);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableItemsResolver(), upcomingItemsResolver(), productResolver, recentChildren, imageSimplifier(),peopleQueryResolver,containerSummary);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(contentItemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableItemsResolver(), upcomingItemsResolver(), productResolver, recentChildren, imageSimplifier(),peopleQueryResolver,containerSummary);
         containerSimplier.exposeIds(Boolean.valueOf(exposeIds));
         return containerSimplier;
     }
@@ -291,11 +296,24 @@ public class QueryWebModule {
     }
 
     @Bean
-    ItemModelSimplifier itemModelSimplifier() {
+    ItemModelSimplifier contentItemModelSimplifier() {
+        return itemModelSimplifier(false);
+    }
+    
+    @Bean
+    ItemModelSimplifier scheduleItemModelSimplifier() {
+        return itemModelSimplifier(true);
+    }
+    
+    private ItemModelSimplifier itemModelSimplifier(boolean withWatermark) {
         NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
         NumberToShortStringCodec channelIdCodec = new SubstitutionTableNumberCodec();
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo, idCodec);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, idCodec, channelIdCodec, imageSimplifier(),peopleQueryResolver, upcomingItemsResolver(), availableItemsResolver());
+        DescriptionWatermarker watermarker = withWatermark ? descriptionWatermarker : null;
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, 
+                topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, 
+                idCodec, channelIdCodec, imageSimplifier(),peopleQueryResolver, upcomingItemsResolver(), 
+                availableItemsResolver(), watermarker);
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }
@@ -310,8 +328,8 @@ public class QueryWebModule {
     @Bean
     AtlasModelWriter<Iterable<ScheduleChannel>> scheduleChannelModelOutputter() {
         return this.<Iterable<ScheduleChannel>>standardWriter(
-                new SimpleScheduleModelWriter(new JsonTranslator<ScheduleQueryResult>(), itemModelSimplifier(), channelSimplifier()),
-                new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleQueryResult>(), itemModelSimplifier(), channelSimplifier()));
+                new SimpleScheduleModelWriter(new JsonTranslator<ScheduleQueryResult>(), scheduleItemModelSimplifier(), channelSimplifier()),
+                new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleQueryResult>(), scheduleItemModelSimplifier(), channelSimplifier()));
     }
 
     @Bean
