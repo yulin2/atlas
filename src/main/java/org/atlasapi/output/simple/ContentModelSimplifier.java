@@ -5,7 +5,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.feeds.utils.DescriptionWatermarker;
 import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Clip;
@@ -56,8 +59,9 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     private final PeopleQueryResolver peopleQueryResolver;
     private final CrewMemberAndPersonSimplifier crewMemberAndPersonSimplifier;
 
-    public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver, UpcomingItemsResolver upcomingResolver, AvailableItemsResolver availableResolver) {
-        super(imageSimplifier, SubstitutionTableNumberCodec.lowerCaseOnly());
+    public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
+            TopicQueryResolver topicResolver, ProductResolver productResolver, ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver, UpcomingItemsResolver upcomingResolver, AvailableItemsResolver availableResolver, @Nullable DescriptionWatermarker descriptionWatermarker) {
+        super(imageSimplifier, SubstitutionTableNumberCodec.lowerCaseOnly(), descriptionWatermarker);
         this.contentGroupResolver = contentGroupResolver;
         this.topicResolver = topicResolver;
         this.productResolver = productResolver;

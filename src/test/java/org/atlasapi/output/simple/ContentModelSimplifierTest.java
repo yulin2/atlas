@@ -55,7 +55,8 @@ public class ContentModelSimplifierTest {
         Mockito.mock(ImageSimplifier.class),
         Mockito.mock(PeopleQueryResolver.class),
         Mockito.mock(UpcomingItemsResolver.class),
-        Mockito.mock(AvailableItemsResolver.class)
+        Mockito.mock(AvailableItemsResolver.class),
+        null
     );
 
     @Test

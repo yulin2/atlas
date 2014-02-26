@@ -79,7 +79,8 @@ public class FullToSimpleModelTranslatorTest {
             imageSimplifier,
             peopleResolver,
             upcomingResolver,
-            availableResolver
+            availableResolver,
+            null
     );
     private final SimpleContentModelWriter translator = new SimpleContentModelWriter(
             xmlOutputter, 
