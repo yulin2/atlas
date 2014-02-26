@@ -3,7 +3,12 @@ package org.atlasapi.output.simple;
 import java.math.BigInteger;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
+import org.atlasapi.feeds.utils.DescriptionWatermarker;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Described;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Specialization;
@@ -26,14 +31,18 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     private final ImageSimplifier imageSimplifier;
+    private final DescriptionWatermarker descriptionWatermarker;
     
     protected DescribedModelSimplifier(ImageSimplifier imageSimplifier) {
         this.imageSimplifier = imageSimplifier;
+        this.descriptionWatermarker = null;
     }
     
-    protected DescribedModelSimplifier(ImageSimplifier imageSimplifier, NumberToShortStringCodec codec) {
+    protected DescribedModelSimplifier(ImageSimplifier imageSimplifier, NumberToShortStringCodec codec, 
+            @Nullable DescriptionWatermarker descriptionWatermarker) {
         super(codec);
         this.imageSimplifier = imageSimplifier;
+        this.descriptionWatermarker = descriptionWatermarker;
     }
     
     protected void copyBasicDescribedAttributes(F content, T simpleDescription, Set<Annotation> annotations) {
@@ -44,7 +53,7 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleDescription.setPublisher(toPublisherDetails(content.getPublisher()));
             
             simpleDescription.setTitle(content.getTitle());
-            simpleDescription.setDescription(content.getDescription());
+            simpleDescription.setDescription(getDescription(content, content.getDescription()));
             simpleDescription.setImage(content.getImage());
             simpleDescription.setThumbnail(content.getThumbnail());
             simpleDescription.setShortDescription(content.getShortDescription());
@@ -66,8 +75,8 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleDescription.setSameAs(Iterables.transform(content.getEquivalentTo(),LookupRef.TO_URI));
             simpleDescription.setEquivalents(Iterables.transform(content.getEquivalentTo(), TO_SAME_AS));
             simpleDescription.setPresentationChannel(content.getPresentationChannel());
-            simpleDescription.setMediumDescription(content.getMediumDescription());
-            simpleDescription.setLongDescription(content.getLongDescription());
+            simpleDescription.setMediumDescription(getDescription(content, content.getMediumDescription()));
+            simpleDescription.setLongDescription(getDescription(content, content.getLongDescription()));
             
         }
         
@@ -79,6 +88,17 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         }
     }
 
+    private String getDescription(F described, String description) {
+        if (!(described instanceof Item) || descriptionWatermarker == null) {
+            return description;
+        }
+        
+        Item item = (Item) described;
+        Broadcast firstBroadcast = Iterables.getFirst(Item.FLATTEN_BROADCASTS.apply(item), null);
+        
+        return descriptionWatermarker.watermark(firstBroadcast, description);
+    }
+    
     private Iterable<Image> toImages(Iterable<org.atlasapi.media.entity.Image> images, Set<Annotation> annotations) {
         Builder<Image> simpleImages = ImmutableSet.builder();
         for(org.atlasapi.media.entity.Image image : images) {
