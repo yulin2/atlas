@@ -4,10 +4,9 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.joda.time.LocalTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,23 +18,24 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
 public class FiveModule {
-private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 30, 0));
+    
+    private static final Logger log = LoggerFactory.getLogger(FiveUpdater.class);
+    private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 30, 0));
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ChannelResolver channelResolver;
-    private @Autowired AdapterLog log;
 
     @PostConstruct
     public void startBackgroundTasks() {
         scheduler.schedule(fiveUpdater().withName("Five Updater"), DAILY);
-        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("Installed Five updater"));
+        log.info("Installed Five updater");
     }
     
     @Bean
     public FiveUpdater fiveUpdater() {
         Integer soTimeout = Configurer.get("five.timeout.socket", "180").toInt();
-        return new FiveUpdater(contentWriter, channelResolver, log, soTimeout);
+        return new FiveUpdater(contentWriter, channelResolver, soTimeout);
     }
     
     @Bean

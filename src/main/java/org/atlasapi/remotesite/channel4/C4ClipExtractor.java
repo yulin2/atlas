@@ -27,7 +27,7 @@ class C4ClipExtractor {
 	
 	private List<Clip> clipsFrom(Brand brand) {
 		try {
-			Feed feed = client.get(C4AtomApi.requestForBrand(brand.getCanonicalUri(), "/video.atom"));
+			Feed feed = client.get(C4AtomApi.requestForBrand(brand.getCanonicalUri(), "/videos/all.atom"));
 			return clipsFrom(feed);
 		} catch (HttpStatusCodeException e) {
 			if (e.wasResourceNotFound()) {

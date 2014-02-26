@@ -4,7 +4,6 @@ import static org.atlasapi.media.entity.Specialization.FILM;
 
 import java.io.StringReader;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,31 +24,31 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpResponse;
 
 public class FiveBrandProcessor {
-
+    
+    private static final Logger log = LoggerFactory.getLogger(FiveBrandProcessor.class);
+    
     private final static String WATCHABLES_URL_SUFFIX = "/watchables?expand=season%7Ctransmissions";
     private final ContentWriter writer;
     private final GenreMap genreMap = new FiveGenreMap();
-    private final AdapterLog log;
     private final FiveEpisodeProcessor episodeProcessor;
     private final String baseApiUrl;
     private final RemoteSiteClient<HttpResponse> httpClient;
 
-    public FiveBrandProcessor(ContentWriter writer, AdapterLog log, String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Map<String, Channel> channelMap) {
+    public FiveBrandProcessor(ContentWriter writer, String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Multimap<String, Channel> channelMap) {
         this.writer = writer;
-        this.log = log;
         this.baseApiUrl = baseApiUrl;
         this.httpClient = httpClient;
         this.episodeProcessor = new FiveEpisodeProcessor(baseApiUrl, httpClient, channelMap);
@@ -81,10 +80,10 @@ public class FiveBrandProcessor {
         
         EpisodeProcessingNodeFactory nodeFactory = new EpisodeProcessingNodeFactory(episodeProcessor, specialization);
         try {
-        	String responseBody = httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body();
+        	    String responseBody = httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body();
             new Builder(nodeFactory).build(new StringReader(responseBody));
         } catch(Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception while trying to parse episodes for brand " + brand.getTitle()));
+            log.error("Exception parsing episodes for brand " + brand.getTitle(), e);
             return;
         }
         
@@ -187,7 +186,7 @@ public class FiveBrandProcessor {
                     items.add(episodeProcessor.processEpisode(element, specialization));
                 }
                 catch (Exception e) {
-                    log.record(new AdapterLogEntry(Severity.ERROR).withSource(FiveEpisodeProcessor.class).withCause(e).withDescription("Exception when processing episode"));
+                    log.error("Exception when processing episode", e);
                 }
                 
                 return new Nodes();

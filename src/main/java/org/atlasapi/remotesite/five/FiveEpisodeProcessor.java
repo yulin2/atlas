@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.five;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,10 +28,13 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpResponse;
@@ -38,16 +42,17 @@ import com.metabroadcast.common.intl.Countries;
 
 public class FiveEpisodeProcessor {
 
+    private static final Logger log = LoggerFactory.getLogger(FiveEpisodeProcessor.class);
 
     private final GenreMap genreMap = new FiveGenreMap();
     private final DateTimeFormatter dateParser = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZZ");
 
     private final String baseApiUrl;
     private final RemoteSiteClient<HttpResponse> httpClient;
-    private final Map<String, Channel> channelMap;
+    private final Multimap<String, Channel> channelMap;
     private final Map<String, Series> seriesMap = Maps.newHashMap();
 
-    public FiveEpisodeProcessor(String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Map<String, Channel> channelMap) {
+    public FiveEpisodeProcessor(String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Multimap<String, Channel> channelMap) {
         this.baseApiUrl = baseApiUrl;
         this.httpClient = httpClient;
         this.channelMap = channelMap;
@@ -115,7 +120,7 @@ public class FiveEpisodeProcessor {
         
         Set<Broadcast> broadcasts = Sets.newHashSet();
         for (int i = 0; i < transmissionElements.size(); i++) {
-            broadcasts.add(createBroadcast((Element) transmissionElements.get(i)));
+            broadcasts.addAll(createBroadcasts((Element) transmissionElements.get(i)));
         }
         return broadcasts;
     }
@@ -191,14 +196,25 @@ public class FiveEpisodeProcessor {
         }
     }
 
-    private Broadcast createBroadcast(Element element) {
+    private Set<Broadcast> createBroadcasts(Element element) {
 
         String channelUri = element.getFirstChildElement("channel_link").getAttributeValue("href");
+        Collection<Channel> channels = channelMap.get(channelUri);
 
-        Broadcast broadcast = new Broadcast(channelMap.get(channelUri).getUri(), dateParser.parseDateTime(childValue(element, "transmission_start")), dateParser.parseDateTime(childValue(element,
-                "transmission_end")));
+        if (channels.isEmpty()) {
+            log.warn("No channels for " + channelUri);
+        }
         
-        return broadcast;
+        ImmutableSet.Builder<Broadcast> broadcasts = ImmutableSet.builder(); 
+        for (Channel channel : channels) {
+            broadcasts.add(new Broadcast(
+                channel.getUri(), 
+                dateParser.parseDateTime(childValue(element, "transmission_start")), 
+                dateParser.parseDateTime(childValue(element, "transmission_end"))
+            ));
+        }
+        
+        return broadcasts.build();
     }
 
     private String getEpisodeUri(String id) {

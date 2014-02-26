@@ -3,7 +3,10 @@ package org.atlasapi.output.simple;
 import java.math.BigInteger;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.feeds.utils.DescriptionWatermarker;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
@@ -69,10 +72,10 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
             NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, 
             ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver, UpcomingItemsResolver upcomingResolver, 
-            AvailableItemsResolver availableResolver) {
+            AvailableItemsResolver availableResolver, @Nullable DescriptionWatermarker descriptionWatermarker) {
         this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, 
                 containerSummaryResolver, channelResolver, idCodec, channelIdCodec, new SystemClock(), 
-                imageSimplifier, personResolver, upcomingResolver, availableResolver);
+                imageSimplifier, personResolver, upcomingResolver, availableResolver, descriptionWatermarker);
     }
 
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
@@ -80,9 +83,10 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
             NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, Clock clock, 
             ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver, UpcomingItemsResolver upcomingResolver, 
-            AvailableItemsResolver availableResolver) {
+            AvailableItemsResolver availableResolver, @Nullable DescriptionWatermarker descriptionWatermarker) {
         
-        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, personResolver, upcomingResolver, availableResolver);
+        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, 
+                personResolver, upcomingResolver, availableResolver, descriptionWatermarker);
         
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;

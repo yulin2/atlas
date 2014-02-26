@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.metabroadcast.picks;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.atlasapi.genres.AtlasGenre;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
@@ -21,8 +20,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 import com.metabroadcast.common.time.LocalTimeRange;
 
-
-public class PickPredicate implements Predicate<ItemAndBroadcast> {
+/**
+ * A predicate to decide whether a given {@link ItemAndBroadcast} is for an item on
+ * in primetime
+ * 
+ * @author tom
+ *
+ */
+public class PrimetimePredicate implements Predicate<ItemAndBroadcast> {
 
     private static final Set<String> PRIORITY_CHANNELS = ImmutableSet.of(
                 "http://www.bbc.co.uk/services/bbcone/london",
@@ -42,9 +47,7 @@ public class PickPredicate implements Predicate<ItemAndBroadcast> {
             );
     
     private static final LocalTimeRange CHILDRENS_PRIMETIME = new LocalTimeRange(new LocalTime(15, 0, 0), new LocalTime(19, 15, 0));
-    private static final Map<String, LocalTimeRange> CHANNEL_PRIMETIME_OVERRIDES = ImmutableMap.of(
-            
-    );
+    private static final Map<String, LocalTimeRange> CHANNEL_PRIMETIME_OVERRIDES = ImmutableMap.of();
     
     private static final Map<String, LocalTimeRange> GENRE_OVERRIDES = ImmutableMap.of(
             AtlasGenre.CHILDRENS.getUri(), CHILDRENS_PRIMETIME,
@@ -53,18 +56,21 @@ public class PickPredicate implements Predicate<ItemAndBroadcast> {
     private static final DateTimeZone UK_TIMEZONE = DateTimeZone.forID("Europe/London");
     private static final LocalTimeRange PRIMETIME = new LocalTimeRange(
             new LocalTime(19, 0, 0), new LocalTime(23, 15, 0));
+
     
     private final Set<String> channelUris;
     
-    public PickPredicate(Iterable<Channel> channels) {
+    public PrimetimePredicate(Iterable<Channel> channels) {
         this.channelUris = ImmutableSet.copyOf(Iterables.transform(channels, Channel.TO_URI));
     }
     
     @Override
     public boolean apply(ItemAndBroadcast itemAndBroadcast) {
         
-        Broadcast scheduleBroadcast = itemAndBroadcast.getBroadcast().requireValue();
-        return isInterestingBroadcast(itemAndBroadcast.getItem(), scheduleBroadcast) 
+       
+        Broadcast broadcast = itemAndBroadcast.getBroadcast().requireValue();
+        
+        return isInterestingBroadcast(itemAndBroadcast.getItem(), broadcast) 
                 || isInterestingBroadcast(itemAndBroadcast.getItem(), 
                                             firstBroadcast(itemAndBroadcast.getItem()));
     }

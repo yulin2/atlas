@@ -64,7 +64,7 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
             ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, AvailableItemsResolver availableResovler, 
             UpcomingItemsResolver upcomingResolver, ProductResolver productResolver, RecentlyBroadcastChildrenResolver recentChildren,
             ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver, ContainerSummaryResolver containerSummaryResolver) {
-        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, peopleResolver, upcomingResolver, availableResovler);
+        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, peopleResolver, upcomingResolver, availableResovler, null);
         this.itemSimplifier = itemSimplifier;
         this.availableItemsResolver = availableResovler;
         this.upcomingItemsResolver = upcomingResolver;
