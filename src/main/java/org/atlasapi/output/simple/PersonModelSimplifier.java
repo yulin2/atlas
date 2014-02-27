@@ -26,7 +26,7 @@ public class PersonModelSimplifier extends DescribedModelSimplifier<Person, org.
     private final AvailableItemsResolver availableResolver;
 
     public PersonModelSimplifier(ImageSimplifier imageSimplifier, UpcomingItemsResolver upcomingResolver, AvailableItemsResolver availableResolver) {
-        super(imageSimplifier, SubstitutionTableNumberCodec.lowerCaseOnly());
+        super(imageSimplifier, SubstitutionTableNumberCodec.lowerCaseOnly(), null);
         this.upcomingResolver = checkNotNull(upcomingResolver);
         this.availableResolver = checkNotNull(availableResolver);
     }
