@@ -6,7 +6,10 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.query.ApiKeyNotFoundException;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidIpForApiKeyException;
+import org.atlasapi.application.query.RevokedApiKeyException;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
@@ -61,7 +64,13 @@ public class TopicController extends BaseController<Iterable<Topic>> {
     @RequestMapping(value={"3.0/topics/{id}.*","/topics/{id}.*"})
     public void topic(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
         
-        ContentQuery query = builder.build(req);
+        ContentQuery query;
+        try {
+            query = builder.build(req);
+        } catch (ApiKeyNotFoundException | RevokedApiKeyException | InvalidIpForApiKeyException e) {
+            outputter.writeError(req, resp, AtlasErrorSummary.forException(e));
+            return;
+        }
         
         Maybe<Topic> topicForUri = topicResolver.topicForId(idCodec.decode(id).longValue());
         
@@ -83,7 +92,13 @@ public class TopicController extends BaseController<Iterable<Topic>> {
     
     @RequestMapping(value={"3.0/topics/{id}/content.*", "/topics/{id}/content"})
     public void topicContents(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
-        ContentQuery query = builder.build(req);
+        ContentQuery query;
+        try {
+            query = builder.build(req);
+        } catch (ApiKeyNotFoundException | RevokedApiKeyException | InvalidIpForApiKeyException e) {
+            outputter.writeError(req, resp, AtlasErrorSummary.forException(e));
+            return;
+        }
 
         long decodedId = idCodec.decode(id).longValue();
         Maybe<Topic> topicForUri = topicResolver.topicForId(decodedId);

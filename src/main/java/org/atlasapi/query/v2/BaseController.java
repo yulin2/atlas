@@ -8,7 +8,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.query.ApiKeyNotFoundException;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidIpForApiKeyException;
+import org.atlasapi.application.query.RevokedApiKeyException;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.AtlasErrorSummary;
@@ -28,6 +31,7 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.time.DateTimeZones;
+
 import org.atlasapi.media.entity.Specialization;
 
 public abstract class BaseController<T> {
@@ -67,12 +71,12 @@ public abstract class BaseController<T> {
         }
     }
 
-    protected ApplicationConfiguration appConfig(HttpServletRequest request) {
+    protected ApplicationConfiguration appConfig(HttpServletRequest request) throws ApiKeyNotFoundException, RevokedApiKeyException, InvalidIpForApiKeyException {
         Maybe<ApplicationConfiguration> config = possibleAppConfig(request);
         return config.hasValue() ? config.requireValue() : ApplicationConfiguration.forNoApiKey();
     }
 
-    protected Maybe<ApplicationConfiguration> possibleAppConfig(HttpServletRequest request) {
+    protected Maybe<ApplicationConfiguration> possibleAppConfig(HttpServletRequest request) throws ApiKeyNotFoundException, RevokedApiKeyException, InvalidIpForApiKeyException {
         return configFetcher.configurationFor(request);
     }
 
