@@ -150,6 +150,20 @@ public class FiveEpisodeProcessor {
                 policy.setAvailabilityEnd(dateParser.parseDateTime(availabilityEnd));
             }
         }
+        
+        String scheduledAvailabilityStart = childValue(element, "scheduled_vod_start");
+        String scheduledAvailabilityEnd = childValue(element, "scheduled_vod_end");
+        
+        if (!Strings.isNullOrEmpty(scheduledAvailabilityStart)
+                && policy.getAvailabilityStart() == null) {
+            policy.setAvailabilityStart(dateParser.parseDateTime(scheduledAvailabilityStart));
+        }
+        
+        if (!Strings.isNullOrEmpty(scheduledAvailabilityEnd)
+                && policy.getAvailabilityEnd() == null) {
+            policy.setAvailabilityEnd(dateParser.parseDateTime(scheduledAvailabilityEnd));
+        }
+        
         location.setPolicy(policy);
         return location;
     }
