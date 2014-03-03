@@ -3,12 +3,12 @@ package org.atlasapi.remotesite.metabroadcast.similar;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.SimilarContentRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 
@@ -29,7 +29,7 @@ public class SeparateSourceSimilarContentWriter implements SimilarContentWriter 
     }
     
     @Override
-    public void write(Content sourceContent, Iterable<ChildRef> similar) {
+    public void write(Content sourceContent, Iterable<SimilarContentRef> similar) {
         checkState(sourceContent != null);
         
         String writeUri = similarContentPublisherUriFor(sourceContent.getCanonicalUri());
