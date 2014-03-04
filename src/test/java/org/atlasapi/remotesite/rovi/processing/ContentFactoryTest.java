@@ -13,6 +13,8 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.remotesite.rovi.model.RoviShowType;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+
 
 public class ContentFactoryTest {
 
@@ -54,6 +56,14 @@ public class ContentFactoryTest {
         
         content = new Episode();
         assertFalse(ContentFactory.hasCorrectType(content, RoviShowType.OTHER));
+    }
+    
+    @Test
+    public void testConsistency() {
+        for (RoviShowType showType: RoviShowType.values()) {
+            Content content = ContentFactory.createContent(showType);
+            assertTrue(ContentFactory.hasCorrectType(content, showType));
+        }
     }
     
 }
