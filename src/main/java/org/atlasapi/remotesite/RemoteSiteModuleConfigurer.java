@@ -26,11 +26,13 @@ import org.atlasapi.remotesite.netflix.NetflixModule;
 import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.preview.PreviewNetworksModule;
 import org.atlasapi.remotesite.redux.ReduxModule;
+import org.atlasapi.remotesite.rovi.RoviModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
 import org.atlasapi.remotesite.talktalk.TalkTalkModule;
 import org.atlasapi.remotesite.thesun.TheSunModule;
 import org.atlasapi.remotesite.tvblob.TVBlobModule;
 import org.atlasapi.remotesite.voila.VoilaModule;
+import org.atlasapi.remotesite.wikipedia.WikipediaModule;
 import org.atlasapi.remotesite.worldservice.WorldServicesModule;
 import org.atlasapi.remotesite.youview.YouViewModule;
 
@@ -38,7 +40,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
-import org.atlasapi.remotesite.wikipedia.WikipediaModule;
 
 public class RemoteSiteModuleConfigurer {
 
@@ -77,6 +78,7 @@ public class RemoteSiteModuleConfigurer {
         .put("itvwhatson", ItvWhatsOnModule.class)
         .put("wikipedia", WikipediaModule.class)
         .put("thesuntvpicks", TheSunModule.class)
+        .put("rovi", RoviModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
