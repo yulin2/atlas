@@ -4,30 +4,29 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.not;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
-import static org.atlasapi.remotesite.rovi.RoviConstants.DEFAULT_PUBLISHER;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.HAS_PARENT;
 import static org.atlasapi.remotesite.rovi.RoviPredicates.IS_DELETE;
-import static org.atlasapi.remotesite.rovi.model.CultureToPublisherMap.culturesOrdering;
-import static org.atlasapi.remotesite.rovi.model.CultureToPublisherMap.isCultureGoodForPublisher;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.Locale;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.LocalizedDescription;
+import org.atlasapi.media.entity.LocalizedTitle;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.remotesite.rovi.model.CultureToPublisherMap;
+import org.atlasapi.remotesite.rovi.model.RoviCulture;
 import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Optional;
-import com.google.common.collect.HashMultimap;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 
@@ -35,7 +34,7 @@ import com.metabroadcast.common.base.Maybe;
 public class BaseContentPopulator<CONTENT extends Content> implements ContentPopulator<CONTENT> {
 
     protected final Optional<RoviProgramLine> optionalProgram;
-    private final Iterable<RoviProgramDescriptionLine> descriptions;
+    private final Iterable<RoviProgramDescriptionLine> roviDescriptions;
     private final ContentResolver contentResolver;
     
     public BaseContentPopulator(Optional<RoviProgramLine> program,
@@ -43,7 +42,7 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
         checkArgument(!isDelete(program), "It's not possible to populate from a program delete action");
         
         this.optionalProgram = checkNotNull(program);
-        this.descriptions = checkNotNull(descriptions);
+        this.roviDescriptions = checkNotNull(descriptions);
         this.contentResolver = checkNotNull(contentResolver);
     }
     
@@ -66,11 +65,28 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
     }
 
     private void handleDescriptions(CONTENT content) {
-        for (RoviProgramDescriptionLine description: descriptions) {
-            if (!description.getSourceId().isPresent() && isCultureGoodForPublisher(description.getDescriptionCulture(), content.getPublisher())) {
-                setContentDescription(content, description);
+        for (RoviProgramDescriptionLine roviDescription: roviDescriptions) {
+            if (!roviDescription.getSourceId().isPresent()) {
+                setLocalizedDescription(content, roviDescription);
             }
         }
+        
+        cleanEmptyDescriptions(content);
+    }
+
+    private void cleanEmptyDescriptions(CONTENT content) {
+        Predicate<LocalizedDescription> hasAtLeastOneDescription = new Predicate<LocalizedDescription>() {
+            @Override
+            public boolean apply(LocalizedDescription description) {
+                return 
+                    !Strings.isNullOrEmpty(description.getShortDescription()) ||
+                    !Strings.isNullOrEmpty(description.getMediumDescription()) ||
+                    !Strings.isNullOrEmpty(description.getLongDescription());
+            }
+        };
+        
+        content.setLocalizedDescriptions(Iterables.filter(content.getLocalizedDescriptions(),
+                hasAtLeastOneDescription));
     }
 
     private void populateFromProgram(CONTENT content, RoviProgramLine program) {
@@ -80,7 +96,7 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
         }
         
         if (program.getLongTitle().isPresent()) {
-            content.setTitle(program.getLongTitle().get());
+            setTitle(content, program.getLongTitle().get(), program.getLanguage());
         }
         
         content.setCanonicalUri(canonicalUriForProgram(program.getProgramId()));
@@ -93,8 +109,18 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
         setExplicitEquivalence(content, program);
         
         if (content.getPublisher() == null) {
-            content.setPublisher(getPublisherForLanguageAndCulture(program.getLanguage(), calculateCulture(descriptions)));
+            content.setPublisher(getPublisherForLanguage(program.getLanguage()));
         }
+    }
+
+    private void setTitle(CONTENT content, String title, String language) {
+        content.setTitle(title);
+        
+        LocalizedTitle localizedTitle = new LocalizedTitle();
+        localizedTitle.setLocale(new Locale(language));
+        localizedTitle.setTitle(title);
+        
+        content.setLocalizedTitles(ImmutableSet.of(localizedTitle));
     }
     
     private void setExplicitEquivalence(CONTENT content, RoviProgramLine program) {
@@ -113,74 +139,58 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
         }
     }
     
-    private Optional<String> calculateCulture(Iterable<RoviProgramDescriptionLine> descriptions) {
-        Multimap<String, RoviProgramDescriptionLine> descriptionsByCulture = HashMultimap.create();
+    private void setLocalizedDescription(CONTENT content, RoviProgramDescriptionLine roviDescription) {
+        Locale descriptionLocale = RoviCulture.localeFromCulture(roviDescription.getDescriptionCulture());
+        Optional<LocalizedDescription> localizedDescription = content.getLocalizedDescription(descriptionLocale);
         
-        for (RoviProgramDescriptionLine description: descriptions) {
-            if (!description.getSourceId().isPresent()) {
-                descriptionsByCulture.put(description.getDescriptionCulture(), description);
-            }
-        }      
-        
-        if (!descriptionsByCulture.isEmpty()) {
-            List<String> sortedCultures = culturesOrdering().sortedCopy(descriptionsByCulture.keys());
-            String firstCulture = sortedCultures.iterator().next();
-            return Optional.of(firstCulture);
+        if (localizedDescription.isPresent()) {
+            setRoviDescription(localizedDescription.get(), roviDescription);
+        } else {
+            content.addLocalizedDescription(createLocalizedDescription(roviDescription));
         }
-        
-        return Optional.absent();
     }
     
-    private void setContentDescription(CONTENT content, RoviProgramDescriptionLine description) {
-        if (description.getDescriptionType().equals("Generic Description")) {
-            content.setShortDescription(description.getDescription().orNull());
-        } else if (description.getDescriptionType().equals("Plot Synopsis")) {
-            content.setMediumDescription(description.getDescription().orNull());
-        } else if (description.getDescriptionType().equals("Synopsis")) {
-            content.setLongDescription(description.getDescription().orNull());
-        }
+    private void setRoviDescription(LocalizedDescription localizedDescription,
+            RoviProgramDescriptionLine roviDescription) {
         
-        Optional<String> longestDescription = getLongestDescription(content);
-        content.setDescription(longestDescription.orNull());
+        if (roviDescription.getDescriptionType().equals("Generic Description")) {
+            localizedDescription.setShortDescription(roviDescription.getDescription().orNull());
+        } else if (roviDescription.getDescriptionType().equals("Plot Synopsis")) {
+            localizedDescription.setMediumDescription(roviDescription.getDescription().orNull());
+        } else if (roviDescription.getDescriptionType().equals("Synopsis")) {
+            localizedDescription.setLongDescription(roviDescription.getDescription().orNull());
+        }
+
+        Optional<String> longestDescription = getLongestDescription(localizedDescription);
+        localizedDescription.setDescription(longestDescription.orNull());
     }
     
-    private Optional<String> getLongestDescription(CONTENT content) {
-        if (content.getLongDescription() != null) {
-            return Optional.of(content.getLongDescription());
+    private LocalizedDescription createLocalizedDescription(RoviProgramDescriptionLine roviDescription) {
+        LocalizedDescription localizedDescription = new LocalizedDescription();
+        localizedDescription.setLocale(RoviCulture.localeFromCulture(roviDescription.getDescriptionCulture()));
+        setRoviDescription(localizedDescription, roviDescription);
+        
+        return localizedDescription;
+    }
+    
+    private Optional<String> getLongestDescription(LocalizedDescription localizedDescription) {
+        if (localizedDescription.getLongDescription() != null) {
+            return Optional.of(localizedDescription.getLongDescription());
         } 
         
-        if (content.getMediumDescription() != null) {
-            return Optional.of(content.getMediumDescription());
+        if (localizedDescription.getMediumDescription() != null) {
+            return Optional.of(localizedDescription.getMediumDescription());
         }
         
-        if (content.getShortDescription() != null) {
-            return Optional.of(content.getShortDescription());
+        if (localizedDescription.getShortDescription() != null) {
+            return Optional.of(localizedDescription.getShortDescription());
         }
         
         return Optional.absent();
     }
     
     public static Publisher getPublisherForLanguage(String language) {
-        return getPublisherForLanguageAndCulture(language, Optional.<String>absent());
-    }
-    
-    
-    public static Publisher getPublisherForLanguageAndCulture(String language, Optional<String> descriptionCulture) {
-        if (CultureToPublisherMap.getCultures(language).isEmpty()) {
-            return Publisher.valueOf("ROVI_" + language.toUpperCase());
-        }
-        
-        if (!descriptionCulture.isPresent()) {
-            Optional<String> defaultCulture = CultureToPublisherMap.getDefaultCultureForLanguage(language);
-            return CultureToPublisherMap.getPublisher(defaultCulture.get());
-        }
-        
-        Collection<String> cultures = CultureToPublisherMap.getCultures(language);
-        if (cultures.contains(descriptionCulture.get())) {
-            return CultureToPublisherMap.getPublisher(descriptionCulture.get());
-        }
-        
-        return DEFAULT_PUBLISHER;
+        return Publisher.valueOf("ROVI_" + language.toUpperCase());
     }
     
 }

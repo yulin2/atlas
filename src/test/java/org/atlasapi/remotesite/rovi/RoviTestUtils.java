@@ -4,12 +4,14 @@ import java.io.File;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.ResolvedContent.ResolvedContentBuilder;
 import org.atlasapi.remotesite.rovi.model.ActionType;
+import org.atlasapi.remotesite.rovi.model.RoviCulture;
 import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 
 import com.google.common.collect.Lists;
@@ -22,7 +24,8 @@ public class RoviTestUtils {
     public static final String SHORT_DESCRIPTION = "This is the short description";
     public static final String MEDIUM_DESCRIPTION = "This is the medium description";
     public static final String LONG_DESCRIPTION = "This is the long description";
-    private static final String ENGLISH_UK_CULTURE = "English - UK";
+    public static final String DESCRIPTION_CULTURE = "English - UK";
+    public static final Locale DESCRIPTION_LOCALE = RoviCulture.localeFromCulture(DESCRIPTION_CULTURE);
 
     public static Collection<RoviProgramDescriptionLine> descriptions(String programId) {
         List<RoviProgramDescriptionLine> descriptions = Lists.newArrayList();
@@ -30,7 +33,7 @@ public class RoviTestUtils {
         RoviProgramDescriptionLine.Builder builderGenericDesc = RoviProgramDescriptionLine.builder();
         builderGenericDesc.withProgramId(programId);
         builderGenericDesc.withDescription(SHORT_DESCRIPTION);
-        builderGenericDesc.withDescriptionCulture(ENGLISH_UK_CULTURE);
+        builderGenericDesc.withDescriptionCulture(DESCRIPTION_CULTURE);
         builderGenericDesc.withDescriptionType("Generic Description");
         builderGenericDesc.withActionType(ActionType.INSERT);
         descriptions.add(builderGenericDesc.build());
@@ -38,7 +41,7 @@ public class RoviTestUtils {
         RoviProgramDescriptionLine.Builder builderPlotSynopsis = RoviProgramDescriptionLine.builder();
         builderPlotSynopsis.withProgramId(programId);
         builderPlotSynopsis.withDescription(MEDIUM_DESCRIPTION);
-        builderPlotSynopsis.withDescriptionCulture(ENGLISH_UK_CULTURE);
+        builderPlotSynopsis.withDescriptionCulture(DESCRIPTION_CULTURE);
         builderPlotSynopsis.withDescriptionType("Plot Synopsis");
         builderPlotSynopsis.withActionType(ActionType.INSERT);
         descriptions.add(builderPlotSynopsis.build());
@@ -46,7 +49,7 @@ public class RoviTestUtils {
         RoviProgramDescriptionLine.Builder builderSynopsis = RoviProgramDescriptionLine.builder();
         builderSynopsis.withProgramId(programId);
         builderSynopsis.withDescription(LONG_DESCRIPTION);
-        builderSynopsis.withDescriptionCulture(ENGLISH_UK_CULTURE);
+        builderSynopsis.withDescriptionCulture(DESCRIPTION_CULTURE);
         builderSynopsis.withDescriptionType("Synopsis");
         builderSynopsis.withActionType(ActionType.INSERT);
         descriptions.add(builderSynopsis.build());        
