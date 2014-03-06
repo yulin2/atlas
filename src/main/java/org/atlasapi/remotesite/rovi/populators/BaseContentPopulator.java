@@ -33,6 +33,10 @@ import com.metabroadcast.common.base.Maybe;
 
 public class BaseContentPopulator<CONTENT extends Content> implements ContentPopulator<CONTENT> {
 
+    private static final String GENERIC_DESCRIPTION_TYPE = "Generic Description";
+    private static final String PLOT_SYNOPSIS_TYPE = "Plot Synopsis";
+    private static final String SYNOPSIS_TYPE = "Synopsis";
+    
     protected final Optional<RoviProgramLine> optionalProgram;
     private final Iterable<RoviProgramDescriptionLine> roviDescriptions;
     private final ContentResolver contentResolver;
@@ -66,6 +70,7 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
 
     private void handleDescriptions(CONTENT content) {
         for (RoviProgramDescriptionLine roviDescription: roviDescriptions) {
+            // Not considering channel specific descriptions (a source is a channel for Rovi)
             if (!roviDescription.getSourceId().isPresent()) {
                 setLocalizedDescription(content, roviDescription);
             }
@@ -153,11 +158,11 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
     private void setRoviDescription(LocalizedDescription localizedDescription,
             RoviProgramDescriptionLine roviDescription) {
         
-        if (roviDescription.getDescriptionType().equals("Generic Description")) {
+        if (roviDescription.getDescriptionType().equals(GENERIC_DESCRIPTION_TYPE)) {
             localizedDescription.setShortDescription(roviDescription.getDescription().orNull());
-        } else if (roviDescription.getDescriptionType().equals("Plot Synopsis")) {
+        } else if (roviDescription.getDescriptionType().equals(PLOT_SYNOPSIS_TYPE)) {
             localizedDescription.setMediumDescription(roviDescription.getDescription().orNull());
-        } else if (roviDescription.getDescriptionType().equals("Synopsis")) {
+        } else if (roviDescription.getDescriptionType().equals(SYNOPSIS_TYPE)) {
             localizedDescription.setLongDescription(roviDescription.getDescription().orNull());
         }
 
@@ -189,7 +194,7 @@ public class BaseContentPopulator<CONTENT extends Content> implements ContentPop
         return Optional.absent();
     }
     
-    public static Publisher getPublisherForLanguage(String language) {
+    private static Publisher getPublisherForLanguage(String language) {
         return Publisher.valueOf("ROVI_" + language.toUpperCase());
     }
     
