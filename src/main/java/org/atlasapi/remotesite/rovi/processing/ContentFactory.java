@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.rovi.processing;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.Map;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
@@ -9,14 +11,13 @@ import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.remotesite.rovi.model.RoviShowType;
 
-import com.google.api.client.repackaged.com.google.common.base.Throwables;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 
 
 public class ContentFactory {
     
-    private static final BiMap<RoviShowType, Class<? extends Content>> showTypeToClass = HashBiMap.create();
+
+    private static final Map<RoviShowType, Class<? extends Content>> showTypeToClass = Maps.newHashMap();
     
     static {
         showTypeToClass.put(RoviShowType.MOVIE, Film.class);
@@ -26,13 +27,18 @@ public class ContentFactory {
     }
     
     public static Content createContent(RoviShowType showType) {
-        checkShowType(showType);
-        
-        try {
-            return showTypeToClass.get(showType).newInstance();
-        } catch (Exception e) {
-            throw Throwables.propagate(e);
-        } 
+        switch(showType) {
+            case MOVIE:
+                return new Film();
+            case SERIES_EPISODE:
+                return new Episode();
+            case SERIES_MASTER:
+                return new Brand();
+            case OTHER:
+                return new Item();
+            default:
+                throw new IllegalArgumentException("Unexpected show type: " + showType);
+        }
     }
 
     public static boolean hasCorrectType(Content content, RoviShowType showType) {

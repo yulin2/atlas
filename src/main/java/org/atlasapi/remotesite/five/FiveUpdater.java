@@ -46,7 +46,7 @@ public class FiveUpdater extends ScheduledTask {
         this.socketTimeout = socketTimeout;
         this.streamHttpClient = buildFetcher();
         this.processor = new FiveBrandProcessor(contentWriter, BASE_API_URL, 
-            new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(buildFetcher()), 4), 
+            new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(buildFetcher()), 20), 
             channelMap(channelResolver)
         );
     }

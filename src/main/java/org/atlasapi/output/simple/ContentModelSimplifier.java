@@ -143,7 +143,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
                 @Override
                 public ContentIdentifier apply(SimilarContentRef s) {
                     // TODO temporary creation of ChildRef - we'll be changing output when we filter based on API key shortly
-                    // this is to compile
+
                     return ContentIdentifier.identifierFor(new ChildRef(s.getId(), s.getUri(), "0", new DateTime(), s.getEntityType()), idCodec);
                 }
             }

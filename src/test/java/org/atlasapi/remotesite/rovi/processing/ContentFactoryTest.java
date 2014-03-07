@@ -56,4 +56,12 @@ public class ContentFactoryTest {
         assertFalse(ContentFactory.hasCorrectType(content, RoviShowType.OTHER));
     }
     
+    @Test
+    public void testConsistency() {
+        for (RoviShowType showType: RoviShowType.values()) {
+            Content content = ContentFactory.createContent(showType);
+            assertTrue(ContentFactory.hasCorrectType(content, showType));
+        }
+    }
+    
 }
