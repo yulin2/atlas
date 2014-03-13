@@ -120,6 +120,7 @@ public class ContentBuffer implements ContentResolver {
             
             if ( ! (hierarchy.getSeries().isPresent() || hierarchy.getBrand().isPresent())) {
                 item = ensureItem(item);
+                item.setContainer(null);
             }
             
             if (!written.contains(hierarchy.getItem())) {
