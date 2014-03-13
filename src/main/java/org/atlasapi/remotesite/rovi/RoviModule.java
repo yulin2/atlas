@@ -124,7 +124,7 @@ public class RoviModule {
     
     @Bean
     public RoviScheduleIngestTask roviScheduleIngestTask() {
-        return new RoviScheduleIngestTask(scheduleProcessor(), FileSupplier.onlyScheduleFile());
+        return new RoviScheduleIngestTask(scheduleProcessor(), FileSupplier.scheduleFolder());
     }
     
     @Bean
