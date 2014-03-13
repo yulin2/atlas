@@ -89,14 +89,13 @@ public class ContentBuffer implements ContentResolver {
         Set<Identified> written = Sets.newHashSet();
         
         for(ContentHierarchyAndBroadcast hierarchy : ImmutableList.copyOf(hierarchies.get()).reverse()) {
-            Item item = hierarchy.getItem();
             if (hierarchy.getBrand().isPresent()) {
                 Brand brand = hierarchy.getBrand().get();
                 if (!written.contains(brand)) {
                     writer.createOrUpdate(brand);
                     written.add(brand);
                 }
-                item.setContainer(brand);
+                hierarchy.getItem().setContainer(brand);
             }
             
             if (hierarchy.getSeries().isPresent()) {
@@ -110,20 +109,17 @@ public class ContentBuffer implements ContentResolver {
                 }
                 
                 if (!hierarchy.getBrand().isPresent()) {
-                    item.setContainer(series);
+                    hierarchy.getItem().setContainer(series);
                 } else {
-                    if (item instanceof Episode) {
-                        ((Episode) item).setSeries(series);
+                    if (hierarchy.getItem() instanceof Episode) {
+                        ((Episode) hierarchy.getItem()).setSeries(series);
                     }
                 }
-            } 
-            
-            if ( ! (hierarchy.getSeries().isPresent() || hierarchy.getBrand().isPresent())) {
-                item = ensureItem(item);
-                item.setContainer(null);
             }
             
-            if (!written.contains(item)) {
+            if (!written.contains(hierarchy.getItem())) {
+                Item item = hierarchy.getItem();
+                
                 writer.createOrUpdate(item);
                 peopleWriter.createOrUpdatePeople(item);
                 written.add(item);
@@ -132,16 +128,6 @@ public class ContentBuffer implements ContentResolver {
         
         hierarchies.get().clear();
         contentCache.get().clear();
-    }
-    
-    private Item ensureItem(Item possibleItem) {
-        if (possibleItem.getClass().equals(Item.class)) { 
-            return possibleItem;
-        }
-        
-        Item item = new Item();
-        Item.copyTo(possibleItem, item);
-        return item;
     }
     
 }
