@@ -19,7 +19,9 @@ public class FileSupplier {
     private static final String DELTA_PROGRAM_DESCRIPTION = "/data/rovi/delta/Program_Description.txt";
     private static final String DELTA_EPISODE_SEQUENCE = "/data/rovi/delta/Episode_Sequence.txt";
     private static final String DELTA_SEASON_HISTORY = "/data/rovi/delta/Season_History.txt";
-    private static final String DELTA_SCHEDULE_FILE = "/data/rovi/delta/Schedule.txt";   
+    private static final String DELTA_SCHEDULE_FILE = "/data/rovi/delta/Schedule.txt";  
+    
+    private static final String ONLY_SCHEDULE_FILE = "/data/rovi/schedule/Schedule.txt";
     
     // Return files for full ingest
     public static File fullProgramFile() {
@@ -57,6 +59,10 @@ public class FileSupplier {
     
     public static File deltaScheduleFile() {
         return new File(DELTA_SCHEDULE_FILE);
+    }
+    
+    public static File onlyScheduleFile() {
+        return new File(ONLY_SCHEDULE_FILE);
     }
 
 }
