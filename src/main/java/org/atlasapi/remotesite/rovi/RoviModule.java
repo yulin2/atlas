@@ -21,6 +21,7 @@ import org.atlasapi.remotesite.rovi.processing.RoviDeltaIngestProcessor;
 import org.atlasapi.remotesite.rovi.processing.RoviFullIngestProcessor;
 import org.atlasapi.remotesite.rovi.processing.ScheduleFileProcessor;
 import org.atlasapi.remotesite.rovi.tasks.RoviIngestTask;
+import org.atlasapi.remotesite.rovi.tasks.RoviScheduleIngestTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -122,6 +123,11 @@ public class RoviModule {
     }
     
     @Bean
+    public RoviScheduleIngestTask roviScheduleIngestTask() {
+        return new RoviScheduleIngestTask(scheduleProcessor(), FileSupplier.onlyScheduleFile());
+    }
+    
+    @Bean
     public ScheduleFileProcessor scheduleProcessor() {
         return new ScheduleFileProcessor(
                 new ItemBroadcastUpdater(contentResolver, contentWriter),
@@ -132,6 +138,7 @@ public class RoviModule {
     public void init() {
         scheduler.schedule(roviFullIngestTask(), RepetitionRules.NEVER);
         scheduler.schedule(roviDeltaIngestTask(), RepetitionRules.NEVER);
+        scheduler.schedule(roviScheduleIngestTask(), RepetitionRules.NEVER);
     }
 
 }
