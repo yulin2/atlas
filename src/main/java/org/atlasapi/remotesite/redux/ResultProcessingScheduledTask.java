@@ -63,21 +63,24 @@ public class ResultProcessingScheduledTask<T, R extends Reducible<R>> extends Sc
     private void produceTasks(CompletionService<T> completer, Semaphore available, List<Future<T>> tasks, AtomicBoolean producing) {
         Iterator<Callable<T>> taskIterator = producer.iterator();
 
-        while (true) {
-            try {
-                tasks.add(completer.submit(taskIterator.next()));
-                if (!taskIterator.hasNext() || !shouldContinue()) {
-                    producing.set(false);
+
+        if (!taskIterator.hasNext() || !shouldContinue()) {
+            while (true) {
+                try {
+                    tasks.add(completer.submit(taskIterator.next()));
+                    if (!taskIterator.hasNext() || !shouldContinue()) {
+                        producing.set(false);
+                        available.release();
+                        reporter.addSubmission();
+                        break;
+                    }
                     available.release();
                     reporter.addSubmission();
-                    break;
+                } catch (RejectedExecutionException rje) {
+                    reporter.addRejection();
                 }
-                available.release();
-                reporter.addSubmission();
-            } catch (RejectedExecutionException rje) {
-                reporter.addRejection();
+                reporter.setProducerStatus("Submitting tasks.");
             }
-            reporter.setProducerStatus("Submitting tasks.");
         }
 
         if (!shouldContinue()) {
