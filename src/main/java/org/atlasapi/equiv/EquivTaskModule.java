@@ -3,6 +3,7 @@ package org.atlasapi.equiv;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
 import static org.atlasapi.media.entity.Publisher.C4;
+import static org.atlasapi.media.entity.Publisher.C4_PMLSD;
 import static org.atlasapi.media.entity.Publisher.FIVE;
 import static org.atlasapi.media.entity.Publisher.ITUNES;
 import static org.atlasapi.media.entity.Publisher.ITV;
@@ -115,6 +116,7 @@ public class EquivTaskModule {
             taskScheduler.schedule(publisherUpdateTask(PA).withName("PA Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(BBC).withName("BBC Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(C4).withName("C4 Equivalence Updater"), RepetitionRules.NEVER);
+            taskScheduler.schedule(publisherUpdateTask(C4_PMLSD).withName("C4 PMLSD Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(ITV).withName("ITV Equivalence Updater"), ITV_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(FIVE).withName("Five Equivalence Updater"), FIVE_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(BBC_REDUX).withName("Redux Equivalence Updater"), RepetitionRules.NEVER);
@@ -146,6 +148,11 @@ public class EquivTaskModule {
                 ITV_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(C4)
+                    .withChannels(c4Channels())
+                    .build().withName("C4 Schedule Equivalence (8 day) Updater"), 
+                C4_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(C4_PMLSD)
                     .withChannels(c4Channels())
                     .build().withName("C4 Schedule Equivalence (8 day) Updater"), 
                 C4_SCHEDULE_EQUIVALENCE_REPETITION);
@@ -240,7 +247,7 @@ public class EquivTaskModule {
             Predicates.or(ImmutableList.<Predicate<? super Content>>of(
                 sourceIsIn(BBC_REDUX, YOUVIEW),
                 Predicates.and(Predicates.instanceOf(Container.class),
-                    sourceIsIn(BBC, C4, ITV, FIVE, BBC_REDUX, ITUNES, 
+                    sourceIsIn(BBC, C4, C4_PMLSD, ITV, FIVE, BBC_REDUX, ITUNES, 
                         RADIO_TIMES, LOVEFILM, TALK_TALK, YOUVIEW,NETFLIX))
             ))
         );
