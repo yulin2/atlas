@@ -380,6 +380,7 @@ public class EquivModule {
         );
         updaters.register(Publisher.ROVI_EN_GB, roviUpdater(Publisher.ROVI_EN_GB, roviMatchPublishers));
         updaters.register(Publisher.ROVI_EN_US, roviUpdater(Publisher.ROVI_EN_US, roviMatchPublishers));
+        updaters.register(Publisher.ROVI_EN, roviUpdater(Publisher.ROVI_EN, roviMatchPublishers));
         
         
         return updaters; 
