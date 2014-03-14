@@ -38,7 +38,7 @@ public class ContentEquivalenceUpdateController {
     public ContentEquivalenceUpdateController(EquivalenceUpdater<Content> contentUpdater, ContentResolver contentResolver) {
         this.contentUpdater = new RootEquivalenceUpdater(contentResolver, contentUpdater);
         this.contentResolver = contentResolver;
-        this.executor = Executors.newFixedThreadPool(5);
+        this.executor = Executors.newFixedThreadPool(10);
     }
 
     @RequestMapping(value = "/system/equivalence/update", method = RequestMethod.POST)
