@@ -17,7 +17,7 @@ public class RoviPredicates {
     public final static Predicate<RoviProgramLine> IS_BRAND = new Predicate<RoviProgramLine>() {
         @Override
         public boolean apply(RoviProgramLine input) {
-            return RoviShowType.SERIES_MASTER.equals(input.getShowType());
+            return RoviShowType.SERIES_MASTER.equals(input.getShowType().orNull());
         }
     };
     

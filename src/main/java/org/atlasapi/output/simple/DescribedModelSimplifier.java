@@ -14,6 +14,8 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Image;
+import org.atlasapi.media.entity.simple.LocalizedDescription;
+import org.atlasapi.media.entity.simple.LocalizedTitle;
 import org.atlasapi.media.entity.simple.RelatedLink;
 import org.atlasapi.media.entity.simple.SameAs;
 import org.atlasapi.output.Annotation;
@@ -32,6 +34,7 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
     
     private final ImageSimplifier imageSimplifier;
     private final DescriptionWatermarker descriptionWatermarker;
+    private final DescribedImageExtractor imageExtractor = new DescribedImageExtractor();
     
     protected DescribedModelSimplifier(ImageSimplifier imageSimplifier) {
         this.imageSimplifier = imageSimplifier;
@@ -53,6 +56,7 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleDescription.setPublisher(toPublisherDetails(content.getPublisher()));
             
             simpleDescription.setTitle(content.getTitle());
+            simpleDescription.setTitles(simplifyLocalizedTitles(content));
             simpleDescription.setDescription(applyWatermark(content, content.getDescription()));
             simpleDescription.setImage(content.getImage());
             simpleDescription.setThumbnail(content.getThumbnail());
@@ -77,7 +81,7 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleDescription.setPresentationChannel(content.getPresentationChannel());
             simpleDescription.setMediumDescription(applyWatermark(content, content.getMediumDescription()));
             simpleDescription.setLongDescription(applyWatermark(content, content.getLongDescription()));
-            
+            simpleDescription.setDescriptions(simplifyLocalizedDescriptions(content));
         }
         
         if (annotations.contains(Annotation.IMAGES)) {
@@ -139,6 +143,45 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             }
         });
     }
+    
+    private Set<LocalizedDescription> simplifyLocalizedDescriptions(F content) {
+        return ImmutableSet.copyOf(Iterables.transform(content.getLocalizedDescriptions(),
+                TO_SIMPLE_LOCALISED_DESCRIPTION));
+    }
 
-    private final DescribedImageExtractor imageExtractor = new DescribedImageExtractor();
+    private Set<LocalizedTitle> simplifyLocalizedTitles(F content) {
+        return ImmutableSet.copyOf(Iterables.transform(content.getLocalizedTitles(),
+                TO_SIMPLE_LOCALIZED_TITLE));
+    }
+    
+    private static final Function<org.atlasapi.media.entity.LocalizedDescription, LocalizedDescription> TO_SIMPLE_LOCALISED_DESCRIPTION = new Function<org.atlasapi.media.entity.LocalizedDescription, LocalizedDescription>() {
+
+        @Override
+        public LocalizedDescription apply(org.atlasapi.media.entity.LocalizedDescription complex) {
+            LocalizedDescription simple = new LocalizedDescription();
+
+            simple.setLanguage(complex.getLanguageTag());
+            simple.setDescription(complex.getDescription());
+            simple.setLongDescription(complex.getLongDescription());
+            simple.setMediumDescription(complex.getMediumDescription());
+            simple.setShortDescription(complex.getShortDescription());
+
+            return simple;
+        }
+    };
+
+    private static final Function<org.atlasapi.media.entity.LocalizedTitle, LocalizedTitle> TO_SIMPLE_LOCALIZED_TITLE = new Function<org.atlasapi.media.entity.LocalizedTitle, LocalizedTitle>() {
+
+        @Override
+        public LocalizedTitle apply(org.atlasapi.media.entity.LocalizedTitle complex) {
+            LocalizedTitle simple = new LocalizedTitle();
+
+            simple.setLanguage(complex.getLanguageTag());
+            simple.setTitle(complex.getTitle());
+
+            return simple;
+        }
+    };
+
+    
 }

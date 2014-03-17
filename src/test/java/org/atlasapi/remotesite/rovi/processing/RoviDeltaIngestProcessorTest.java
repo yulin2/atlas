@@ -16,11 +16,13 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.LocalizedDescription;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
@@ -30,6 +32,7 @@ import org.atlasapi.remotesite.rovi.RoviConstants;
 import org.atlasapi.remotesite.rovi.RoviContentWriter;
 import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
+import org.atlasapi.remotesite.rovi.model.RoviCulture;
 import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
@@ -76,6 +79,10 @@ public class RoviDeltaIngestProcessorTest {
     private static final String EPISODE_SEQUENCE = "org/atlasapi/remotesite/rovi/deltas/episode_sequence.txt";
     private static final String SEASON_HISTORY_SEQUENCE = "org/atlasapi/remotesite/rovi/deltas/season_history.txt";
     private static final String SCHEDULE = "org/atlasapi/remotesite/rovi/deltas/schedule.txt";
+    
+    private static final Locale GERMAN_LOCALE = RoviCulture.localeFromCulture("German Generic");
+    private static final Locale ENGLISH_NA_LOCALE = RoviCulture.localeFromCulture("English - NA");
+    private static final Locale SPANISH_LOCALE = RoviCulture.localeFromCulture("Spanish Generic");
     
     private RoviDeltaIngestProcessor processor;
 
@@ -126,7 +133,8 @@ public class RoviDeltaIngestProcessorTest {
         assertThat(filmToInsert.getTitle(), equalTo("Ikarus"));
         assertThat(filmToInsert.getPublisher(), equalTo(Publisher.ROVI_DE));
         assertThat(filmToInsert.getEquivalentTo().isEmpty(), is(true));
-        assertThat(filmToInsert.getDescription(), equalTo("Lena ist heimatlos. In der Großstadt konnte sie nicht Fuß fassen, am Land ist sie längst nicht mehr zu Hause und die große, weite Welt, die sie angeblich als Kellnerin auf einem Kreuzfahrtschiff bereist hat, kennt sie nur vom Hörensagen. Das Begräbnis des Großvaters ist ihr nun Anlass und Vorwand zugleich, ins Dorf zurückzukehren, in der Hoffnung vielleicht doch hier ihren Platz im Leben zu finden."));
+        assertThat(filmToInsert.getLocalizedDescription(GERMAN_LOCALE).get().getDescription(),
+                equalTo("Lena ist heimatlos. In der Großstadt konnte sie nicht Fuß fassen, am Land ist sie längst nicht mehr zu Hause und die große, weite Welt, die sie angeblich als Kellnerin auf einem Kreuzfahrtschiff bereist hat, kennt sie nur vom Hörensagen. Das Begräbnis des Großvaters ist ihr nun Anlass und Vorwand zugleich, ins Dorf zurückzukehren, in der Hoffnung vielleicht doch hier ihren Platz im Leben zu finden."));
 
         Content filmToUpdate = items.get(canonicalUriForProgram(FILM_ID_TO_UPDATE));
         assertThat(filmToUpdate, notNullValue());
@@ -182,14 +190,13 @@ public class RoviDeltaIngestProcessorTest {
         Content filmWithDescToUpd = items.get(canonicalUriForProgram(PROGRAM_ID_WITH_DESC_TO_UPD));
         assertThat(filmWithDescToUpd, notNullValue());
         assertThat(filmWithDescToUpd, is(Film.class));
-        assertThat(filmWithDescToUpd.getShortDescription(), equalTo("Discussing the Premier League."));
-        assertThat(filmWithDescToUpd.getDescription(), equalTo("Discussing the Premier League."));
+        assertThat(filmWithDescToUpd.getLocalizedDescription(ENGLISH_NA_LOCALE).get().getShortDescription(), equalTo("Discussing the Premier League."));
+        assertThat(filmWithDescToUpd.getLocalizedDescription(ENGLISH_NA_LOCALE).get().getDescription(), equalTo("Discussing the Premier League."));
 
         Content filmWithDescToDel = items.get(canonicalUriForProgram(PROGRAM_ID_WITH_DESC_TO_DEL));
         assertThat(filmWithDescToDel, notNullValue());
         assertThat(filmWithDescToDel, is(Film.class));
-        assertThat(filmWithDescToDel.getLongDescription(), nullValue());
-        assertThat(filmWithDescToDel.getDescription(), nullValue());
+        assertThat(filmWithDescToDel.getLocalizedDescriptions().isEmpty(), is(true));
         
         Content episodeWithSeqToUpd = items.get(canonicalUriForProgram(EPISODE_WITH_SEQ_TO_UPD));
         assertThat(episodeWithSeqToUpd, notNullValue());
@@ -255,40 +262,50 @@ public class RoviDeltaIngestProcessorTest {
             .thenReturn(resolvedContent(filmWithDescToUpdate()));
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(EPISODE_WITH_SEQ_TO_UPD))))
-            .thenReturn(resolvedContent(episodeWithDescToUpdate()));
+            .thenReturn(resolvedContent(episodeWithSeqToUpdate()));
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(EPISODE_WITH_SEQ_TO_DEL))))
-            .thenReturn(resolvedContent(episodeWithDescToDelete()));
+            .thenReturn(resolvedContent(episodeWithSeqToDelete()));
         
     }
 
 
-    private Episode episodeWithDescToDelete() {
-        Episode episodeWithSeqToDel = new Episode(canonicalUriForProgram(EPISODE_WITH_SEQ_TO_DEL), "", Publisher.ROVI_EN_GB);
+    private Episode episodeWithSeqToDelete() {
+        Episode episodeWithSeqToDel = new Episode(canonicalUriForProgram(EPISODE_WITH_SEQ_TO_DEL), "", Publisher.ROVI_EN);
         episodeWithSeqToDel.setTitle("This title has to remain the same");
         return episodeWithSeqToDel;
     }
 
 
-    private Episode episodeWithDescToUpdate() {
-        Episode episodeWithSeqToUpd = new Episode(canonicalUriForProgram(EPISODE_WITH_SEQ_TO_UPD), "", Publisher.ROVI_EN_GB);
+    private Episode episodeWithSeqToUpdate() {
+        Episode episodeWithSeqToUpd = new Episode(canonicalUriForProgram(EPISODE_WITH_SEQ_TO_UPD), "", Publisher.ROVI_EN);
         episodeWithSeqToUpd.setTitle("This title has to be updated");
         return episodeWithSeqToUpd;
     }
 
 
     private Film filmWithDescToUpdate() {
-        Film filmWithDescToUpdate = new Film(canonicalUriForProgram(PROGRAM_ID_WITH_DESC_TO_UPD), "", Publisher.ROVI_EN_US);
-        filmWithDescToUpdate.setShortDescription("This description must be updated");
-        filmWithDescToUpdate.setDescription("This description must be updated");
+        Film filmWithDescToUpdate = new Film(canonicalUriForProgram(PROGRAM_ID_WITH_DESC_TO_UPD), "", Publisher.ROVI_EN);
+        
+        LocalizedDescription description = new LocalizedDescription();
+        description.setLocale(ENGLISH_NA_LOCALE);
+        description.setLongDescription("This description must be updated");
+        description.setDescription("This description must be updated");
+
         return filmWithDescToUpdate;
     }
 
 
     private Film filmWithDescToDelete() {
         Film filmWithDescToDelete = new Film(canonicalUriForProgram(PROGRAM_ID_WITH_DESC_TO_DEL), "", Publisher.ROVI_ES);
-        filmWithDescToDelete.setLongDescription("This description must be deleted");
-        filmWithDescToDelete.setDescription("This description must be deleted");
+        
+        LocalizedDescription description = new LocalizedDescription();
+        description.setLocale(SPANISH_LOCALE);
+        description.setLongDescription("This description must be deleted");
+        description.setDescription("This description must be deleted");
+        
+        filmWithDescToDelete.addLocalizedDescription(description);
+        
         return filmWithDescToDelete;
     }
 

@@ -1,14 +1,17 @@
 package org.atlasapi.remotesite.rovi.populators;
 
-import static org.atlasapi.remotesite.rovi.RoviTestUtils.resolvedContent;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
+import static org.atlasapi.remotesite.rovi.RoviTestUtils.resolvedContent;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.util.Locale;
+
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.LocalizedDescription;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -60,10 +63,15 @@ public class BaseContentPopulatorTest {
         populator.populateContent(brand);
         
         assertEquals(canonicalUriForProgram(PROGRAM_ID), brand.getCanonicalUri());
-        assertEquals(RoviTestUtils.LONG_DESCRIPTION, brand.getLongDescription());
-        assertEquals(RoviTestUtils.MEDIUM_DESCRIPTION, brand.getMediumDescription());
-        assertEquals(RoviTestUtils.SHORT_DESCRIPTION, brand.getShortDescription());
-        assertEquals(RoviTestUtils.LONG_DESCRIPTION, brand.getDescription());
+        
+        Locale descriptionLocale = RoviTestUtils.DESCRIPTION_LOCALE;
+        Optional<LocalizedDescription> localizedDescription = brand.getLocalizedDescription(descriptionLocale);
+        
+        assertTrue(localizedDescription.isPresent());
+        assertEquals(RoviTestUtils.LONG_DESCRIPTION, localizedDescription.get().getLongDescription());
+        assertEquals(RoviTestUtils.MEDIUM_DESCRIPTION, localizedDescription.get().getMediumDescription());
+        assertEquals(RoviTestUtils.SHORT_DESCRIPTION, localizedDescription.get().getShortDescription());
+        assertEquals(RoviTestUtils.LONG_DESCRIPTION, localizedDescription.get().getDescription());
         assertThat(brand.getEquivalentTo(), hasItem(LookupRef.from(parentBrand())));
     }
     
