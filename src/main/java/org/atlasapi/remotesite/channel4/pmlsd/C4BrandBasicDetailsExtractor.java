@@ -59,12 +59,14 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 		brand.setSpecialization(Specialization.TV);
 		
 		Set<String> genres = Sets.newHashSet();
-		for (Object cat : source.getCategories()) {
-            String category = canonicalise((Category) cat);
-            if (category != null) {
-                genres.add(category);
+		if (source.getCategories() != null) {
+    		for (Object cat : source.getCategories()) {
+                String category = canonicalise((Category) cat);
+                if (category != null) {
+                    genres.add(category);
+                }
             }
-        }
+		}
 		brand.setGenres(new C4CategoryGenreMap().mapRecognised(genres));
 		
 		String presentationBrand = getPresentationBrand(source);
