@@ -17,6 +17,7 @@ import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.query.SearchModule;
+import org.atlasapi.remotesite.CreateYouTubeContentGroupModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.atlasapi.remotesite.bbc.nitro.BbcNitroModule;
@@ -80,7 +81,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 WikipediaModule.class,
                 BbcNitroModule.class,
                 PicksModule.class,
-                SimilarContentModule.class
+                SimilarContentModule.class,
+                CreateYouTubeContentGroupModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(
