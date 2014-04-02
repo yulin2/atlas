@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.QueryResult;
@@ -44,6 +45,8 @@ import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 public class QueryController extends BaseController<QueryResult<Identified, ? extends Identified>> {
 	
 	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
+	private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException())
+	                                                            .withStatusCode(HttpStatusCode.FORBIDDEN);
 
 	private final KnownTypeQueryExecutor executor;
 
@@ -78,20 +81,39 @@ public class QueryController extends BaseController<QueryResult<Identified, ? ex
 			List<String> uris = getUriList(request);
 			if(!uris.isEmpty()) {
 			    modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()),Identified.class)),filter.getConfiguration());
-			} else {
-			    List<String> ids = getIdList(request);
-			    if(!ids.isEmpty()) {
-			        modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeIdQuery(decode(ids), filter).values()),Identified.class)),filter.getConfiguration());
-			    } else {
-			        List<String> values = getAliasValueList(request);
-			        if (values != null) {
-			            String namespace = getAliasNamespace(request);
-			            modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeAliasQuery(Optional.fromNullable(namespace), values, filter).values()),Identified.class)),filter.getConfiguration());
-			        } else {
-			            throw new IllegalArgumentException("Must specify content uri(s) or id(s) or alias(es)");
-			        }
-			    }
+			    return;
 			}
+			
+		    List<String> ids = getIdList(request);
+		    if(!ids.isEmpty()) {
+		        modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeIdQuery(decode(ids), filter).values()),Identified.class)),filter.getConfiguration());
+		        return;
+		    }
+		    
+	        List<String> values = getAliasValueList(request);
+	        if (!values.isEmpty()) {
+	            String namespace = getAliasNamespace(request);
+	            modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeAliasQuery(Optional.fromNullable(namespace), values, filter).values()),Identified.class)),filter.getConfiguration());
+	            return;
+	        }
+	        
+	        String publisher = request.getParameter("publisher");
+	        
+	        if (publisher != null) {
+    	        List<Publisher> publishers = Publisher.fromCsv(publisher);
+    	        
+                for (Publisher pub : publishers) {
+                    if (!filter.getConfiguration().isEnabled(pub)) {
+                        errorViewFor(request, response, FORBIDDEN);
+                        return;
+                    }
+                }
+                modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executePublisherQuery(publishers, filter).values()),Identified.class)),filter.getConfiguration());
+                return;
+	        }
+	            
+	        throw new IllegalArgumentException("Must specify content uri(s) or id(s) or alias(es)");
+			
 		} catch (Exception e) {
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));
 		}
