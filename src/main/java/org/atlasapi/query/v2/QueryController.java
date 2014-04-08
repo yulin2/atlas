@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.HttpStatusCode;
@@ -100,7 +101,9 @@ public class QueryController extends BaseController<QueryResult<Identified, ? ex
 	        String publisher = request.getParameter("publisher");
 	        
 	        if (publisher != null) {
-    	        List<Publisher> publishers = Publisher.fromCsv(publisher);
+	            // Only a single publisher is supported, since it's the requirement and 
+	            // is the most efficient index to build
+    	        List<Publisher> publishers = ImmutableList.of(Publisher.fromKey(publisher).requireValue());
     	        
                 for (Publisher pub : publishers) {
                     if (!filter.getConfiguration().isEnabled(pub)) {
