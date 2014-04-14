@@ -107,14 +107,10 @@ class C4ContentLinker {
             Episode episode = findEpisode(lookup, clip);
             if (episode != null) {
                 // This is a temporary container of the series/episode number until we have
-<<<<<<< HEAD
-                // episode IDs in the clip API
-=======
                 // episode IDs in the clip API.
                 // 
                 // The clipOf field should be unset, since it's not actually a reference to
                 // another item
->>>>>>> purge-content
                 clip.setClipOf(null);
                 episode.addClip(clip);
             } else {
