@@ -20,6 +20,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.cassandra.thrift.Cassandra.login_args;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
 import org.atlasapi.equiv.results.probe.EquivalenceResultProbeController;
@@ -38,7 +39,9 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.messaging.v3.AtlasMessagingModule;
+import org.atlasapi.messaging.v3.KafkaMessagingModule;
+import org.atlasapi.messaging.v3.EntityUpdatedMessage;
+import org.atlasapi.messaging.v3.JacksonMessageSerializer;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
@@ -52,6 +55,8 @@ import org.atlasapi.remotesite.youview.DefaultYouViewChannelResolver;
 import org.atlasapi.remotesite.youview.YouViewChannelResolver;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,14 +72,20 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.Service.Listener;
+import com.google.common.util.concurrent.Service.State;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.queue.kafka.KafkaConsumer;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
-@Import({EquivModule.class, AtlasMessagingModule.class})
+@Import({EquivModule.class, KafkaMessagingModule.class})
 public class EquivTaskModule {
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final Set<String> ignored = ImmutableSet.of("http://www.bbc.co.uk/programmes/b006mgyl"); 
 //  private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
@@ -108,7 +119,7 @@ public class EquivTaskModule {
     private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
     private @Autowired RecentEquivalenceResultStore equivalenceResultStore;
     
-    private @Autowired AtlasMessagingModule messaging;
+    private @Autowired KafkaMessagingModule messaging;
     
     @PostConstruct
     public void scheduleUpdater() {
@@ -265,13 +276,35 @@ public class EquivTaskModule {
 
     @Bean
     @Lazy(true)
-    public DefaultMessageListenerContainer equivalenceUpdatingMessageListener() {
+    public KafkaConsumer equivalenceUpdatingMessageListener() {
         if (streamedChangesUpdateEquiv) {
-            return messaging.queueHelper().makeVirtualTopicConsumer(
-                    equivUpdatingWorker(), "EquivUpdater", contentChanges, 
-                    defaultStreamedEquivUpdateConsumers, maxStreamedEquivUpdateConsumers);
+            return messaging.messageConsumerFactory().createConsumer(
+                    equivUpdatingWorker(), JacksonMessageSerializer.forType(EntityUpdatedMessage.class), 
+                    contentChanges, "EquivUpdater")
+                .withDefaultConsumers(defaultStreamedEquivUpdateConsumers)
+                .withMaxConsumers(maxStreamedEquivUpdateConsumers)
+                .build();
         } else {
-            return messaging.queueHelper().noopContainer();
+            return null;
+        }
+    }
+    
+    @PostConstruct
+    public void startConsumer() {
+        KafkaConsumer consumer = equivalenceUpdatingMessageListener();
+        if (consumer != null) {
+            consumer.addListener(new Listener() {
+                @Override
+                public void failed(State from, Throwable failure) {
+                    log.warn("equiv update listener failed to transition from " + from, failure);
+                }
+                @Override
+                public void running() {
+                    log.info("equiv update listener running");
+                }
+                
+            }, MoreExecutors.sameThreadExecutor());
+            consumer.startAsync();
         }
     }
     

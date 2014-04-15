@@ -7,7 +7,6 @@ import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.messaging.v3.EntityUpdatedMessage;
-import org.atlasapi.messaging.worker.v3.AbstractWorker;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.lookup.entry.LookupEntry;
@@ -19,8 +18,9 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.queue.Worker;
 
-public class EquivalenceUpdatingWorker extends AbstractWorker {
+public class EquivalenceUpdatingWorker implements Worker<EntityUpdatedMessage> {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     

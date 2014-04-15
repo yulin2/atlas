@@ -4,10 +4,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
+import kafka.admin.AdminUtils;
+import kafka.utils.TestUtils;
+import kafka.zk.EmbeddedZookeeper;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.description.ReadableDescription;
@@ -18,28 +24,45 @@ import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.messaging.v3.ContentEquivalenceAssertionMessage;
-import org.atlasapi.messaging.v3.QueueFactory;
-import org.atlasapi.messaging.worker.v3.AbstractWorker;
-import org.atlasapi.messaging.worker.v3.Worker;
+import org.atlasapi.messaging.v3.JacksonMessageSerializer;
+import org.atlasapi.messaging.v3.KafkaMessagingModule;
+import org.atlasapi.messaging.v3.MessagingModule;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
+
+import scala.Option;
+import scala.collection.JavaConversions;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.metabroadcast.common.queue.MessageSender;
+import com.metabroadcast.common.queue.MessageSerializer;
+import com.metabroadcast.common.queue.Worker;
+import com.metabroadcast.common.queue.kafka.KafkaConsumer;
+import com.metabroadcast.common.queue.kafka.KafkaTestBase;
 
-public class MessageQueueingResultHandlerTest {
+public class MessageQueueingResultHandlerTest extends KafkaTestBase {
 
     private MessageQueueingResultHandler<Item> handler;
-    private QueueFactory qf;
+    private MessagingModule mm;
+    private MessageSerializer<ContentEquivalenceAssertionMessage> serializer;
+    
+    private String topic = "EquivAssert";
+    private String system = "AtlasOwlTest";
+    private String namespacedTopic = system + topic;
 
     @Before
-    public void setup() {
-        ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory("vm://localhost");
-        qf = new QueueFactory(cf, cf, "Atlas.Owl.Test");
-        JmsTemplate template = qf.makeVirtualTopicProducer("Equiv.Assert");
-        handler = new MessageQueueingResultHandler<Item>(template, Publisher.all());
+    public void setup() throws Exception {
+        Logger.getRootLogger().setLevel(Level.FATAL);
+        Logger.getLogger("com.metabroadcast").setLevel(Level.TRACE);
+        super.setup();
+        EmbeddedZookeeper zkServer = super.zkServer();
+        mm = new KafkaMessagingModule(super.brokersString(), zkServer.connectString(), system);
+        serializer = JacksonMessageSerializer.forType(ContentEquivalenceAssertionMessage.class);
+        
+        MessageSender<ContentEquivalenceAssertionMessage> sender
+            = mm.messageSenderFactory().makeMessageSender(topic, serializer);
+        handler = new MessageQueueingResultHandler<Item>(sender, Publisher.all());
     }
 
     @Test
@@ -57,21 +80,25 @@ public class MessageQueueingResultHandlerTest {
         
         final CountDownLatch latch = new CountDownLatch(1);
         
-        Worker worker = new AbstractWorker() {
+        Worker<ContentEquivalenceAssertionMessage> worker
+            = new Worker<ContentEquivalenceAssertionMessage>() {
+                @Override
+                public void process(ContentEquivalenceAssertionMessage equivalenceAssertionMessage) {
+                    latch.countDown();
+                }
+            };
             
-            @Override
-            public void process(ContentEquivalenceAssertionMessage equivalenceAssertionMessage) {
-                latch.countDown();
-            }
-          
-        };
-        DefaultMessageListenerContainer consumer = qf.makeVirtualTopicConsumer(worker, "Deserializer", "Equiv.Assert", 1, 1);
-        consumer.initialize();
-        consumer.start();
+        AdminUtils.createTopic(zkClient(), namespacedTopic, 1, 2, new Properties());
+        TestUtils.waitUntilMetadataIsPropagated(JavaConversions.asScalaBuffer(kafkaServers()), namespacedTopic, 0, 1000);
+        TestUtils.waitUntilLeaderIsElectedOrChanged(zkClient(), namespacedTopic, 0, 500, Option.empty());
+        
+        KafkaConsumer consumer = (KafkaConsumer) mm.messageConsumerFactory().createConsumer(worker, serializer, topic, "Deserializer")
+                .withDefaultConsumers(2)
+                .build();
+        consumer.startAsync().awaitRunning(10, TimeUnit.SECONDS);
 
         handler.handle(new EquivalenceResult<Item>(subject, scores, combined, strong, desc));
-        
-        assertTrue(latch.await(1, TimeUnit.SECONDS));
+        assertTrue("message not received", latch.await(5, TimeUnit.SECONDS));
     }
 
 }
