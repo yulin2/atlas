@@ -36,8 +36,6 @@ import static org.atlasapi.media.entity.Publisher.YOUTUBE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
@@ -95,7 +93,9 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Song;
-import org.atlasapi.messaging.v3.AtlasMessagingModule;
+import org.atlasapi.messaging.v3.ContentEquivalenceAssertionMessage;
+import org.atlasapi.messaging.v3.JacksonMessageSerializer;
+import org.atlasapi.messaging.v3.KafkaMessagingModule;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
@@ -107,19 +107,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.jms.core.JmsTemplate;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.queue.MessageSender;
 import com.metabroadcast.common.time.DateTimeZones;
 
 @Configuration
-@Import({AtlasMessagingModule.class})
+@Import({KafkaMessagingModule.class})
 public class EquivModule {
 
 	private @Value("${equiv.results.directory}") String equivResultsDirectory;
@@ -133,7 +132,7 @@ public class EquivModule {
     private @Autowired EquivalenceSummaryStore equivSummaryStore;
     private @Autowired LookupWriter lookupWriter;
     
-    private @Autowired AtlasMessagingModule messaging;
+    private @Autowired KafkaMessagingModule messaging;
 
     public @Bean RecentEquivalenceResultStore equivalenceResultStore() {
         return new RecentEquivalenceResultStore(new FileEquivalenceResultStore(new File(equivResultsDirectory)));
@@ -153,8 +152,10 @@ public class EquivModule {
     }
 
     @Bean 
-    protected JmsTemplate equivAssertDestination() {
-        return messaging.queueHelper().makeVirtualTopicProducer(equivAssertDest);
+    protected MessageSender<ContentEquivalenceAssertionMessage> equivAssertDestination() {
+        return messaging.messageSenderFactory()
+                .makeMessageSender(equivAssertDest, 
+                        JacksonMessageSerializer.forType(ContentEquivalenceAssertionMessage.class));
     }
     
     private <T extends Content> EquivalenceFilter<T> standardFilter() {

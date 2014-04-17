@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.time.DateTimeZones;
+import com.metabroadcast.common.time.Timestamp;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EquivalenceUpdatingWorkerTest {
@@ -56,7 +57,7 @@ public class EquivalenceUpdatingWorkerTest {
         when(resolver.findByCanonicalUris(ImmutableSet.of(uri)))
             .thenReturn(ResolvedContent.builder().put(uri, item).build());
         
-        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", 1L, "uri", "item", "bbc.co.uk");
+        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", Timestamp.of(1L), "uri", "item", "bbc.co.uk");
         workerThatOnlyUpdatesItems.process(msg);
         
         verify(updater).updateEquivalences(item);
@@ -70,7 +71,7 @@ public class EquivalenceUpdatingWorkerTest {
         when(resolver.findByCanonicalUris(ImmutableSet.of(uri)))
             .thenReturn(ResolvedContent.builder().put(uri, brand).build());
         
-        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", 1L, "uri", "brand", "bbc.co.uk");
+        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", Timestamp.of(1L), "uri", "brand", "bbc.co.uk");
         workerThatOnlyUpdatesItems.process(msg);
         
         verify(updater, never()).updateEquivalences(brand);
@@ -83,7 +84,7 @@ public class EquivalenceUpdatingWorkerTest {
         when(resolver.findByCanonicalUris(ImmutableSet.of(uri)))
             .thenReturn(ResolvedContent.builder().put(uri, null).build());
         
-        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", 1L, "uri", "brand", "bbc.co.uk");
+        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", Timestamp.of(1L), "uri", "brand", "bbc.co.uk");
         workerThatOnlyUpdatesItems.process(msg);
         
         verify(updater, never()).updateEquivalences(null);
@@ -97,7 +98,7 @@ public class EquivalenceUpdatingWorkerTest {
         when(resolver.findByCanonicalUris(ImmutableSet.of(uri)))
             .thenReturn(ResolvedContent.builder().put(uri, topic).build());
         
-        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", 1L, "uri", "brand", "bbc.co.uk");
+        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", Timestamp.of(1L), "uri", "brand", "bbc.co.uk");
         workerThatOnlyUpdatesItems.process(msg);
         
         verify(updater, never()).updateEquivalences(any(Content.class));
@@ -114,7 +115,7 @@ public class EquivalenceUpdatingWorkerTest {
         when(resolver.findByCanonicalUris(ImmutableSet.of(uri)))
             .thenReturn(ResolvedContent.builder().put(uri, item).build());
         
-        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", 1L, "2", "item", "bbc.co.uk");
+        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", Timestamp.of(1L), "2", "item", "bbc.co.uk");
         workerThatOnlyUpdatesItems.process(msg);
         
         verify(updater).updateEquivalences(item);
@@ -134,7 +135,7 @@ public class EquivalenceUpdatingWorkerTest {
                     Lists.<CombinedEquivalenceScore>newArrayList(), 
                     new DateTime(DateTimeZones.UTC), Lists.newArrayList()));
         
-        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", 1L, "uri", "item", "bbc.co.uk");
+        EntityUpdatedMessage msg = new EntityUpdatedMessage("1", Timestamp.of(1L), "uri", "item", "bbc.co.uk");
         workerThatOnlyUpdatesItems.process(msg);
         
         verify(updater, never()).updateEquivalences(any(Content.class));
