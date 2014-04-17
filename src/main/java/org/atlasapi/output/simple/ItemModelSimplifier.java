@@ -71,12 +71,12 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private static final Map<String, String> CHANNEL_IMAGE_OVERRIDES = ImmutableMap.<String, String>builder()
                                                                                .put("cbPF", "cbbh") // BBC One
                                                                                .put("cbRD", "cbbG") // BBC Two
-                                                                               .put("cbSM", "cbdP") // ITV1
+                                                                               .put("cbSM", "cbdw") // ITV1
                                                                                .put("cbPG", "cbdj") // Channel4
-                                                                               .put("cbnt", "cbSR") // Sky Atlantic
+                                                                               .put("cbSR", "cbns") // Sky Atlantic
                                                                                .put("cbPK", "cbdq") // Channel 5
-                                                                                                    // Sky 1 TODO
-                                                                               .put("cbRT", "cbgf") // Sky living
+                                                                               .put("cbPW", "cbhf") // Sky 1 
+                                                                               .put("cbRT", "cbny") // Sky living
                                                                                .build();
     
     private final NumberToShortStringCodec idCodec;
