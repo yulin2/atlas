@@ -9,6 +9,15 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import( { MongoContentPersistenceModule.class })
+/**
+ * Module for constructing controllers that allow deletion of content
+ * using a {@link ContentPurger}. Only specific-publisher controllers
+ * should be added, rather than general ones that take a publisher as 
+ * a parameter; the latter is far too dangerous.
+ * 
+ * @author tom
+ *
+ */
 public class ContentPurgeWebModule {
 
     @Autowired
