@@ -11,7 +11,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +21,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.LocalizedDescription;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.ParentRef;
@@ -140,7 +140,7 @@ public class RoviDeltaIngestProcessorTest {
         assertThat(filmToUpdate, notNullValue());
         assertThat(filmToUpdate, is(Film.class));
         assertThat(filmToUpdate.getTitle(), equalTo("Walking Thunder"));
-        assertThat(filmToUpdate.getPublisher(), equalTo(Publisher.ROVI_EN_GB));
+        assertThat(filmToUpdate.getPublisher(), equalTo(Publisher.ROVI_EN));
         assertThat(filmToUpdate.getEquivalentTo(), hasItem(LookupRef.from(parentFilm())));
 
         Content brandToIns = items.get(canonicalUriForProgram("22636949"));
@@ -168,7 +168,7 @@ public class RoviDeltaIngestProcessorTest {
         assertThat(seasonToIns, notNullValue());
         assertThat(seasonToIns, is(Series.class));
         assertThat(seasonToIns.getTitle(), equalTo("Season 18"));
-        assertThat(seasonToIns.getPublisher(), equalTo(Publisher.ROVI_EN_GB));
+        assertThat(seasonToIns.getPublisher(), equalTo(Publisher.ROVI_EN));
         Series series = (Series) seasonToIns;
         assertThat(series.getParent(), equalTo(ParentRef.parentRefFrom(parentBrand(SEASON_PARENT_BRAND_ID))));
         assertThat(series.getSeriesNumber(), equalTo(18));
@@ -177,7 +177,7 @@ public class RoviDeltaIngestProcessorTest {
         assertThat(seasonToUpd, notNullValue());
         assertThat(seasonToUpd, is(Series.class));
         assertThat(seasonToUpd.getTitle(), equalTo("Season 17"));
-        assertThat(seasonToUpd.getPublisher(), equalTo(Publisher.ROVI_EN_GB));
+        assertThat(seasonToUpd.getPublisher(), equalTo(Publisher.ROVI_EN));
         Series series2 = (Series) seasonToUpd;
         assertThat(series2.getParent(), equalTo(ParentRef.parentRefFrom(parentBrand(SEASON_PARENT_BRAND_ID))));
         assertThat(series2.getSeriesNumber(), equalTo(17));
@@ -240,20 +240,21 @@ public class RoviDeltaIngestProcessorTest {
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PARENT_FILM_ID))))
                 .thenReturn(resolvedContent(parentFilm()));
 
+        // Resolving as an Item in order to test the content type change
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(FILM_ID_TO_UPDATE))))
-            .thenReturn(resolvedContent(new Film(canonicalUriForProgram(FILM_ID_TO_UPDATE), "", Publisher.ROVI_EN_GB)));
+            .thenReturn(resolvedContent(new Item(canonicalUriForProgram(FILM_ID_TO_UPDATE), "", Publisher.ROVI_EN)));
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(EPISODE_ID_TO_UPDATE))))
             .thenReturn(resolvedContent(new Episode(canonicalUriForProgram(EPISODE_ID_TO_UPDATE), "", Publisher.ROVI_IT)));
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PROGRAM_TO_DELETE))))
-            .thenReturn(resolvedContent(new Film(canonicalUriForProgram(PROGRAM_TO_DELETE), "", Publisher.ROVI_EN_GB)));
+            .thenReturn(resolvedContent(new Film(canonicalUriForProgram(PROGRAM_TO_DELETE), "", Publisher.ROVI_EN)));
 
         when(contentResolver.findByUris(ImmutableList.of(canonicalUriForSeasonHistory(SEASON_HISTORY_ID_TO_UPDATE))))
-            .thenReturn(resolvedContent(new Series(canonicalUriForSeason(SEASON_ID_TO_UPDATE), "", Publisher.ROVI_EN_GB)));
+            .thenReturn(resolvedContent(new Series(canonicalUriForSeason(SEASON_ID_TO_UPDATE), "", Publisher.ROVI_EN)));
 
         when(contentResolver.findByUris(ImmutableList.of(canonicalUriForSeasonHistory(SEASON_HISTORY_ID_TO_DELETE))))
-            .thenReturn(resolvedContent(new Series(canonicalUriForSeason(SEASON_ID_TO_DELETE), "", Publisher.ROVI_EN_GB)));
+            .thenReturn(resolvedContent(new Series(canonicalUriForSeason(SEASON_ID_TO_DELETE), "", Publisher.ROVI_EN)));
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PROGRAM_ID_WITH_DESC_TO_DEL))))
             .thenReturn(resolvedContent(filmWithDescToDelete()));
@@ -310,11 +311,11 @@ public class RoviDeltaIngestProcessorTest {
     }
 
     private Brand parentBrand(String id) {
-        return basicBrand(id, Publisher.ROVI_EN_GB);
+        return basicBrand(id, Publisher.ROVI_EN);
     }
 
     private Film parentFilm() {
-        return basicFilm(PARENT_FILM_ID, Publisher.ROVI_FR_FR);
+        return basicFilm(PARENT_FILM_ID, Publisher.ROVI_FR);
     }
 
     private Brand basicBrand(String id, Publisher publisher) {
