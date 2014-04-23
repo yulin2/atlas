@@ -20,7 +20,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.cassandra.thrift.Cassandra.login_args;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
 import org.atlasapi.equiv.results.probe.EquivalenceResultProbeController;
@@ -39,9 +38,9 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.messaging.v3.KafkaMessagingModule;
 import org.atlasapi.messaging.v3.EntityUpdatedMessage;
 import org.atlasapi.messaging.v3.JacksonMessageSerializer;
+import org.atlasapi.messaging.v3.KafkaMessagingModule;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
@@ -64,9 +63,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
@@ -276,24 +275,24 @@ public class EquivTaskModule {
 
     @Bean
     @Lazy(true)
-    public KafkaConsumer equivalenceUpdatingMessageListener() {
+    public Optional<KafkaConsumer> equivalenceUpdatingMessageListener() {
         if (streamedChangesUpdateEquiv) {
-            return messaging.messageConsumerFactory().createConsumer(
+            return Optional.of(messaging.messageConsumerFactory().createConsumer(
                     equivUpdatingWorker(), JacksonMessageSerializer.forType(EntityUpdatedMessage.class), 
                     contentChanges, "EquivUpdater")
                 .withDefaultConsumers(defaultStreamedEquivUpdateConsumers)
                 .withMaxConsumers(maxStreamedEquivUpdateConsumers)
-                .build();
+                .build());
         } else {
-            return null;
+            return Optional.absent();
         }
     }
     
     @PostConstruct
     public void startConsumer() {
-        KafkaConsumer consumer = equivalenceUpdatingMessageListener();
-        if (consumer != null) {
-            consumer.addListener(new Listener() {
+        Optional<KafkaConsumer> consumer = equivalenceUpdatingMessageListener();
+        if (consumer.isPresent()) {
+            consumer.get().addListener(new Listener() {
                 @Override
                 public void failed(State from, Throwable failure) {
                     log.warn("equiv update listener failed to transition from " + from, failure);
@@ -304,7 +303,7 @@ public class EquivTaskModule {
                 }
                 
             }, MoreExecutors.sameThreadExecutor());
-            consumer.startAsync();
+            consumer.get().startAsync();
         }
     }
     
