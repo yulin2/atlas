@@ -19,7 +19,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.metabroadcast.common.queue.BasicMessage;
 import com.metabroadcast.common.queue.MessageSender;
 import com.metabroadcast.common.time.SystemClock;
 import com.metabroadcast.common.time.Timestamp;
@@ -48,7 +47,7 @@ public class MessageQueueingResultHandler<T extends Content>
     @Override
     public void handle(EquivalenceResult<T> result) {
         try {
-            sender.sendMessage(messageFrom(result));;
+            sender.sendMessage(messageFrom(result));
         } catch (Exception e) {
             log.error("Failed to send equiv update message: " + result.subject(), e);
         }
@@ -61,7 +60,6 @@ public class MessageQueueingResultHandler<T extends Content>
         String subjectId = String.valueOf(subject.getId());
         String subjectType = subject.getClass().getSimpleName().toLowerCase();
         String subjectSource = subject.getPublisher().key();
-//        return new BasicMessage<Long>("1", Timestamp.of(1L), 1234L);
         return new ContentEquivalenceAssertionMessage(mid, ts, 
                 subjectId, subjectType, subjectSource, 
                 adjacents(result), sources);
