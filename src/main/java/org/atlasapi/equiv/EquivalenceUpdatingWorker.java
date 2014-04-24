@@ -52,17 +52,20 @@ public class EquivalenceUpdatingWorker implements Worker<EntityUpdatedMessage> {
             content = resolveUri(eid);
         }
         if (content == null) {
-            log.warn("Resolved null/not Content for {} {} {}", 
-                new Object[]{message.getEntitySource(), message.getEntityType(), eid});
+            log.warn("{} resolved null/not Content for {} {} {}", 
+                new Object[]{message.getMessageId(), 
+                    message.getEntitySource(), message.getEntityType(), eid});
             return;
         }
         if (filter.apply(content) && noPreviousResult(content)) {
-            log.debug("Updating equivalence: {} {} {}", 
-                new Object[]{message.getEntitySource(), message.getEntityType(), eid});
+            log.debug("{} updating equivalence: {} {} {}", 
+                new Object[]{message.getMessageId(), 
+                    message.getEntitySource(), message.getEntityType(), eid});
             equivUpdater.updateEquivalences(content);
         } else {
-            log.trace("Skipping equiv update: {} {} {}", 
-                new Object[]{message.getEntitySource(), message.getEntityType(), eid});
+            log.trace("{} skipping equiv update: {} {} {}", 
+                new Object[]{message.getMessageId(), 
+                    message.getEntitySource(), message.getEntityType(), eid});
         }
     }
 
