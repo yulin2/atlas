@@ -1,5 +1,7 @@
 package org.atlasapi.equiv.handlers;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import kafka.admin.AdminUtils;
 import kafka.utils.TestUtils;
@@ -24,6 +27,7 @@ import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.messaging.v3.ContentEquivalenceAssertionMessage;
+import org.atlasapi.messaging.v3.ContentEquivalenceAssertionMessage.AdjacentRef;
 import org.atlasapi.messaging.v3.JacksonMessageSerializer;
 import org.atlasapi.messaging.v3.KafkaMessagingModule;
 import org.atlasapi.messaging.v3.MessagingModule;
@@ -35,6 +39,8 @@ import scala.collection.JavaConversions;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.queue.MessageSender;
 import com.metabroadcast.common.queue.MessageSerializer;
 import com.metabroadcast.common.queue.Worker;
@@ -79,11 +85,14 @@ public class MessageQueueingResultHandlerTest extends KafkaTestBase {
         ReadableDescription desc = new DefaultDescription();
         
         final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<ContentEquivalenceAssertionMessage> message
+            = new AtomicReference<ContentEquivalenceAssertionMessage>();
         
         Worker<ContentEquivalenceAssertionMessage> worker
             = new Worker<ContentEquivalenceAssertionMessage>() {
                 @Override
                 public void process(ContentEquivalenceAssertionMessage equivalenceAssertionMessage) {
+                    message.set(equivalenceAssertionMessage);
                     latch.countDown();
                 }
             };
@@ -99,6 +108,19 @@ public class MessageQueueingResultHandlerTest extends KafkaTestBase {
 
         handler.handle(new EquivalenceResult<Item>(subject, scores, combined, strong, desc));
         assertTrue("message not received", latch.await(5, TimeUnit.SECONDS));
+        
+        ContentEquivalenceAssertionMessage assertionMessage = message.get();
+        
+        assertThat(assertionMessage.getEntityId(), is(subject.getId().toString()));
+        assertThat(assertionMessage.getEntityType(), is(subject.getClass().getSimpleName().toLowerCase()));
+        assertThat(assertionMessage.getEntitySource(), is(subject.getPublisher().key()));
+
+        AdjacentRef adjRef = Iterables.getOnlyElement(assertionMessage.getAdjacent());
+        assertThat(adjRef.getId(), is(equivalent.getId()));
+        assertThat(adjRef.getSource(), is(equivalent.getPublisher()));
+        assertThat(adjRef.getType(), is(equivalent.getClass().getSimpleName().toLowerCase()));
+        assertThat(ImmutableSet.copyOf(assertionMessage.getSources()), is(Publisher.all()));
+        
     }
 
 }
