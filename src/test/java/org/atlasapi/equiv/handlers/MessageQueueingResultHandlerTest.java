@@ -75,9 +75,9 @@ public class MessageQueueingResultHandlerTest extends KafkaTestBase {
     public void testHandleSendsAMessage() throws Exception {
         
         Item subject = new Item("s","s",Publisher.BBC);
-        subject.setId(1L);
+        subject.setId(1225L);
         Item equivalent = new Item("e","e",Publisher.PA);
-        equivalent.setId(2L);
+        equivalent.setId(830L);
         List<ScoredCandidates<Item>> scores = ImmutableList.of();
         ScoredCandidates<Item> combined = DefaultScoredCandidates.<Item>fromSource("src").build();
         Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
@@ -111,15 +111,17 @@ public class MessageQueueingResultHandlerTest extends KafkaTestBase {
         
         ContentEquivalenceAssertionMessage assertionMessage = message.get();
         
-        assertThat(assertionMessage.getEntityId(), is(subject.getId().toString()));
+        assertThat(assertionMessage.getEntityId(), is("cyp"));
         assertThat(assertionMessage.getEntityType(), is(subject.getClass().getSimpleName().toLowerCase()));
         assertThat(assertionMessage.getEntitySource(), is(subject.getPublisher().key()));
 
         AdjacentRef adjRef = Iterables.getOnlyElement(assertionMessage.getAdjacent());
-        assertThat(adjRef.getId(), is(equivalent.getId()));
-        assertThat(adjRef.getSource(), is(equivalent.getPublisher()));
+        assertThat(adjRef.getId(), is("cf2"));
+        assertThat(adjRef.getSource(), is(equivalent.getPublisher().key()));
         assertThat(adjRef.getType(), is(equivalent.getClass().getSimpleName().toLowerCase()));
-        assertThat(ImmutableSet.copyOf(assertionMessage.getSources()), is(Publisher.all()));
+        
+        assertThat(ImmutableSet.copyOf(assertionMessage.getSources()), 
+                is(ImmutableSet.copyOf(Iterables.transform(Publisher.all(),Publisher.TO_KEY))));
         
     }
 

@@ -2,8 +2,8 @@ package org.atlasapi.equiv.handlers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.math.BigInteger;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
@@ -17,8 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.queue.MessageSender;
 import com.metabroadcast.common.time.SystemClock;
 import com.metabroadcast.common.time.Timestamp;
@@ -31,7 +34,9 @@ public class MessageQueueingResultHandler<T extends Content>
     
     private final MessageSender<ContentEquivalenceAssertionMessage> sender;
     private final Timestamper stamper;
-    private final Set<Publisher> sources;
+    private final ImmutableSet<String> sourceKeys;
+    
+    private final NumberToShortStringCodec entityIdCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
 
     public MessageQueueingResultHandler(MessageSender<ContentEquivalenceAssertionMessage> sender, Iterable<Publisher> sources) {
         this(sender, sources, new SystemClock());
@@ -41,7 +46,7 @@ public class MessageQueueingResultHandler<T extends Content>
             Timestamper stamper) {
         this.sender = checkNotNull(sender);
         this.stamper = checkNotNull(stamper);
-        this.sources = Sets.newHashSet(sources);
+        this.sourceKeys = ImmutableSet.copyOf(Iterables.transform(sources,Publisher.TO_KEY));
     }
     
     @Override
@@ -57,12 +62,12 @@ public class MessageQueueingResultHandler<T extends Content>
         String mid = UUID.randomUUID().toString();
         Timestamp ts = stamper.timestamp();
         T subject = result.subject();
-        String subjectId = String.valueOf(subject.getId());
+        String subjectId = entityIdCodec.encode(BigInteger.valueOf(subject.getId()));
         String subjectType = subject.getClass().getSimpleName().toLowerCase();
         String subjectSource = subject.getPublisher().key();
         return new ContentEquivalenceAssertionMessage(mid, ts, 
                 subjectId, subjectType, subjectSource, 
-                adjacents(result), sources);
+                adjacents(result), sourceKeys);
     }
 
     private List<AdjacentRef> adjacents(EquivalenceResult<T> result) {
@@ -71,9 +76,11 @@ public class MessageQueueingResultHandler<T extends Content>
                 @Override
                 public AdjacentRef apply(ScoredCandidate<T> input) {
                     T cand = input.candidate();
-                    return new AdjacentRef(cand.getId(),
+                    return new AdjacentRef(
+                        entityIdCodec.encode(BigInteger.valueOf(cand.getId())),
                         cand.getClass().getSimpleName().toLowerCase(),
-                        cand.getPublisher());
+                        cand.getPublisher().key()
+                    );
                 }
             }
         ));
