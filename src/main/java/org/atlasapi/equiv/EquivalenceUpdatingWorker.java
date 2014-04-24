@@ -18,6 +18,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.queue.Worker;
 
 public class EquivalenceUpdatingWorker implements Worker<EntityUpdatedMessage> {
@@ -29,6 +30,9 @@ public class EquivalenceUpdatingWorker implements Worker<EntityUpdatedMessage> {
     private final EquivalenceResultStore resultStore;
     private final EquivalenceUpdater<Content> equivUpdater;
     private final Predicate<Content> filter;
+    
+    private final SubstitutionTableNumberCodec idCodec
+        = SubstitutionTableNumberCodec.lowerCaseOnly();
 
     public EquivalenceUpdatingWorker(ContentResolver contentResolver,
             LookupEntryStore entryStore,
@@ -45,12 +49,7 @@ public class EquivalenceUpdatingWorker implements Worker<EntityUpdatedMessage> {
     @Override
     public void process(EntityUpdatedMessage message) {
         String eid = message.getEntityId();
-        Content content;
-        try {
-            content = resolveId(Long.valueOf(eid));
-        } catch (NumberFormatException nfe) {
-            content = resolveUri(eid);
-        }
+        Content content = resolveId(idCodec.decode(eid).longValue());
         if (content == null) {
             log.warn("{} resolved null/not Content for {} {} {}", 
                 new Object[]{message.getMessageId(), 
