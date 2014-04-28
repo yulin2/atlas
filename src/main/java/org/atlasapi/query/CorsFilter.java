@@ -17,8 +17,10 @@ public class CorsFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
         // Support CORS Pre-flight request
         // See http://zhentao-li.blogspot.co.uk/2012/06/enable-cors-support-in-rest-services.html
+        
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        
         if (request.getMethod().equals("OPTIONS")) {
-            response.addHeader("Access-Control-Allow-Origin", "*");
             response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
             response.addHeader("Access-Control-Allow-Headers", "Content-Type");
             response.addHeader("Access-Control-Max-Age", "1800");//30 min
