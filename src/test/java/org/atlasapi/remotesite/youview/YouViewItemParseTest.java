@@ -46,7 +46,7 @@ public class YouViewItemParseTest {
         Map<Integer, Channel> channelMapping = ImmutableMap.<Integer, Channel>builder()
                 .put(1044, FIVE)
                 .build();
-        contentExtractor = new YouViewContentExtractor(new DummyYouViewChannelResolver(channelMapping));
+        contentExtractor = new YouViewContentExtractor(new DummyYouViewChannelResolver(channelMapping), Publisher.YOUVIEW_STAGE);
     }
     
     @Test
@@ -55,11 +55,11 @@ public class YouViewItemParseTest {
 
         Item item = contentExtractor.extract(getContentElementFromFile("youview-item.xml"));
         
-        assertEquals("http://youview.com/scheduleevent/7780297", item.getCanonicalUri());
+        assertEquals("http://stage.youview.com/scheduleevent/7780297", item.getCanonicalUri());
         assertEquals("Hatfields & McCoys", item.getTitle());
         assertEquals(MediaType.VIDEO, item.getMediaType());
         assertEquals(ImmutableSet.of("http://youview.com/programme/7655992"), item.getAliasUrls());
-        assertEquals(Publisher.YOUVIEW, item.getPublisher());
+        assertEquals(Publisher.YOUVIEW_STAGE, item.getPublisher());
         
         Version version = Iterables.getOnlyElement(item.getVersions());
         assertThat(version.getPublishedDuration(), is(3600));

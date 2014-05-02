@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.youview;
 
-import java.util.Map;
-
+import static com.google.common.base.Preconditions.checkNotNull;
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Elements;
@@ -55,7 +54,6 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private static final String AVAILABLE_KEY = "available";
     private static final String START_KEY = "start";
     private static final String END_KEY = "end";
-    private static final String SCHEDULE_EVENT_PREFIX = "http://youview.com/scheduleevent/";
 
     private static final OptionalMap<Publisher, Platform> BROADCASTER_TO_PLATFORM = 
             ImmutableOptionalMap.fromMap(ImmutableMap.of(
@@ -70,9 +68,13 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private final YouViewChannelResolver channelResolver;
     
     private final DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeNoMillis();
+    private final Publisher publisher;
+    private final String scheduleEventPrefix;
     
-    public YouViewContentExtractor(YouViewChannelResolver channelResolver) {
-        this.channelResolver = channelResolver;
+    public YouViewContentExtractor(YouViewChannelResolver channelResolver, Publisher publisher) {
+        this.channelResolver = checkNotNull(channelResolver);
+        this.publisher = checkNotNull(publisher);
+        this.scheduleEventPrefix = String.format("http://%s/scheduleevent/", publisher.key());
     }
     
     @Override
@@ -81,11 +83,11 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         Item item = new Item();
 
         String id = getId(source);
-        item.setCanonicalUri(SCHEDULE_EVENT_PREFIX + id);
+        item.setCanonicalUri(scheduleEventPrefix + id);
         item.addAlias(new Alias("youview:scheduleevent", id));
         item.setTitle(getTitle(source));
         item.setMediaType(getMediaType(source));
-        item.setPublisher(Publisher.YOUVIEW);
+        item.setPublisher(publisher);
 
         Optional<String> programmeId = getProgrammeId(source);
         if (programmeId.isPresent()) {
