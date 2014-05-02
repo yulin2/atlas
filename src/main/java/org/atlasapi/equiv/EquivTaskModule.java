@@ -15,6 +15,7 @@ import static org.atlasapi.media.entity.Publisher.ROVI_EN_GB;
 import static org.atlasapi.media.entity.Publisher.ROVI_EN_US;
 import static org.atlasapi.media.entity.Publisher.TALK_TALK;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
 
 import java.util.Set;
 
@@ -255,7 +256,7 @@ public class EquivTaskModule {
     private EquivalenceUpdatingWorker equivUpdatingWorker() {
         return new EquivalenceUpdatingWorker(contentResolver, lookupStore, equivalenceResultStore, equivUpdater,
             Predicates.or(ImmutableList.<Predicate<? super Content>>of(
-                sourceIsIn(BBC_REDUX, YOUVIEW),
+                sourceIsIn(BBC_REDUX, YOUVIEW, YOUVIEW_STAGE),
                 Predicates.and(Predicates.instanceOf(Container.class),
                     sourceIsIn(BBC, C4, C4_PMLSD, ITV, FIVE, BBC_REDUX, ITUNES, 
                         RADIO_TIMES, LOVEFILM, TALK_TALK, YOUVIEW,NETFLIX))
