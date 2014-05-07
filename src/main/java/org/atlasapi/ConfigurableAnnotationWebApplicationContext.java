@@ -1,6 +1,7 @@
 package org.atlasapi;
 
 import org.atlasapi.application.ApplicationModule;
+import org.atlasapi.codec.CodecModule;
 import org.atlasapi.equiv.OddJobRandomTaskModule;
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.EquivTaskModule;
@@ -69,7 +70,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             RadioPlayerModule.class,
             XmlTvModule.class, 
             RemoteSiteHealthModule.class, 
-            EquivModule.class
+            EquivModule.class,
+            CodecModule.class
         );
         
         if(runProcessingOnly()) {
