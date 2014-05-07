@@ -149,6 +149,11 @@ public class EquivTaskModule {
                     .build().withName("YouView Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(YOUVIEW_STAGE)
+                    .withChannels(youViewChannelResolver().getAllChannels())
+                    .build().withName("YouView Stage Schedule Equivalence (8 day) Updater"), 
+                YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(BBC)
                     .withChannels(bbcChannels())
                     .build().withName("BBC Schedule Equivalence (8 day) Updater"), 
