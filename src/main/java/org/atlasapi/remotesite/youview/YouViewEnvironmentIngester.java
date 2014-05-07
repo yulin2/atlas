@@ -40,7 +40,7 @@ public class YouViewEnvironmentIngester {
         this.youViewChannelResolver = new DefaultYouViewChannelResolver(channelResolver);
         this.youViewScheduleFetcher = new YouViewScheduleFetcher(youViewUri, Ints.saturatedCast(timeout.getStandardSeconds()));
         this.youViewElementProcessor = new DefaultYouViewElementProcessor(new YouViewContentExtractor(youViewChannelResolver, publisher), contentResolver, contentWriter);
-        this.youViewChannelProcessor = new DefaultYouViewChannelProcessor(scheduleWriter, youViewElementProcessor, new ScheduleResolverBroadcastTrimmer(publisher, scheduleResolver, contentResolver, contentWriter));
+        this.youViewChannelProcessor = new DefaultYouViewChannelProcessor(scheduleWriter, youViewElementProcessor, new ScheduleResolverBroadcastTrimmer(publisher, scheduleResolver, contentResolver, contentWriter), publisher);
     }
     
     public void startBackgroundTasks() {
