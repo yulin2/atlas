@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
@@ -29,16 +30,25 @@ public class CodecController {
     public void decode(HttpServletRequest request, HttpServletResponse response, 
             @PathVariable("id") String id) throws IOException {
         
-        IdCodec decodedId = new IdCodec(codec.decode(id));
-        gson.toJson(decodedId, response.getWriter());
+        try {
+            IdCodec decodedId = new IdCodec(codec.decode(id));
+            gson.toJson(decodedId, response.getWriter());
+        } catch (Exception e) {
+            response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
+        }
+        
     }
     
     @RequestMapping(value = "/ids/decoded/{id}.json", method = RequestMethod.GET)
     public void encode(HttpServletRequest request, HttpServletResponse response, 
             @PathVariable("id") String id) throws IOException {
         
-        IdCodec encodedId = new IdCodec(codec.encode(BigInteger.valueOf(Long.valueOf(id))));
-        gson.toJson(encodedId, response.getWriter());
+        try {
+            IdCodec encodedId = new IdCodec(codec.encode(BigInteger.valueOf(Long.valueOf(id))));
+            gson.toJson(encodedId, response.getWriter());
+        } catch (Exception e) {
+            response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
+        }
     }
     
 }
