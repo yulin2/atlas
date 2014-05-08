@@ -20,6 +20,7 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.messaging.v3.ScheduleUpdateMessage;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalentContentResolver;
@@ -49,13 +50,15 @@ import org.junit.runner.RunWith;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.queue.MessageSender;
+import com.metabroadcast.common.queue.MessagingException;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
 
@@ -74,6 +77,20 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
 	private ChannelResolver channelResolver;
 	private ContentBuffer contentBuffer;
+	private MessageSender<ScheduleUpdateMessage> ms 
+	    = new MessageSender<ScheduleUpdateMessage>(){
+
+            @Override
+            public void close() throws Exception {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void sendMessage(ScheduleUpdateMessage message) throws MessagingException {
+                // TODO Auto-generated method stub
+                
+            }};
 
     @Override
     @Before
@@ -87,7 +104,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         contentWriter = new MongoContentWriter(db, lookupStore, clock);
         programmeProcessor = new PaProgrammeProcessor(contentWriter, resolver, log);
         EquivalentContentResolver equivContentResolver = context.mock(EquivalentContentResolver.class);
-        scheduleWriter = new MongoScheduleStore(db, channelResolver, contentBuffer, equivContentResolver);
+        scheduleWriter = new MongoScheduleStore(db, channelResolver, contentBuffer, equivContentResolver, ms);
         contentBuffer = new ContentBuffer(resolver, contentWriter, new DummyItemsPeopleWriter());
     }
 
