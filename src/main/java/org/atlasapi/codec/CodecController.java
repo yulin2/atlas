@@ -23,10 +23,10 @@ public class CodecController {
 
     private static final NumberToShortStringCodec codec = SubstitutionTableNumberCodec.lowerCaseOnly();
     private static final Gson gson = new GsonBuilder()
-    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-    .create();
+        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        .create();
     
-    @RequestMapping(value = "/ids/encoded/{id}.json", method = RequestMethod.GET)
+    @RequestMapping(value = "/system/encoded/{id}.json", method = RequestMethod.GET)
     public void decode(HttpServletRequest request, HttpServletResponse response, 
             @PathVariable("id") String id) throws IOException {
         
@@ -39,7 +39,7 @@ public class CodecController {
         
     }
     
-    @RequestMapping(value = "/ids/decoded/{id}.json", method = RequestMethod.GET)
+    @RequestMapping(value = "/system/decoded/{id}.json", method = RequestMethod.GET)
     public void encode(HttpServletRequest request, HttpServletResponse response, 
             @PathVariable("id") String id) throws IOException {
         
