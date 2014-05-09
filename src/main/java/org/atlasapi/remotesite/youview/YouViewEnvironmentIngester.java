@@ -30,16 +30,34 @@ public class YouViewEnvironmentIngester {
     private final YouViewChannelResolver youViewChannelResolver;
     private Publisher publisher;
     
+    /**
+     * 
+     * @param youViewUri        YouView environment URI base
+     * @param timeout           Timeout for requests to YouView API
+     * @param scheduler         Scheduler with which to register scheduled tasks
+     * @param channelResolver   
+     * @param contentResolver
+     * @param contentWriter
+     * @param scheduleWriter
+     * @param scheduleResolver  
+     * @param publisher         The publisher to write content as
+     * @param aliasPrefix       Aliases are maintained for schedule events and programmes. They are prefixed
+     *                          with this value, eg. prefix:scheduleevent. This value should not contain the 
+     *                          colon separator
+     */
     public YouViewEnvironmentIngester(String youViewUri, Duration timeout, 
             SimpleScheduler scheduler, ChannelResolver channelResolver, ContentResolver contentResolver, 
             ContentWriter contentWriter, ScheduleWriter scheduleWriter, ScheduleResolver scheduleResolver, 
-            Publisher publisher) {
+            Publisher publisher, String aliasPrefix) {
         
         this.publisher = checkNotNull(publisher);
         this.scheduler = checkNotNull(scheduler);
         this.youViewChannelResolver = new DefaultYouViewChannelResolver(channelResolver);
         this.youViewScheduleFetcher = new YouViewScheduleFetcher(youViewUri, Ints.saturatedCast(timeout.getStandardSeconds()));
-        this.youViewElementProcessor = new DefaultYouViewElementProcessor(new YouViewContentExtractor(youViewChannelResolver, publisher), contentResolver, contentWriter);
+        this.youViewElementProcessor = new DefaultYouViewElementProcessor(
+                                                new YouViewContentExtractor(youViewChannelResolver, publisher, aliasPrefix), 
+                                                contentResolver, contentWriter
+                                       );
         this.youViewChannelProcessor = new DefaultYouViewChannelProcessor(scheduleWriter, youViewElementProcessor, new ScheduleResolverBroadcastTrimmer(publisher, scheduleResolver, contentResolver, contentWriter), publisher);
     }
     
