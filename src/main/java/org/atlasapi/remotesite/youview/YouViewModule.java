@@ -19,6 +19,8 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class YouViewModule {
 
+    private static final String YOUVIEW_PRODUCTION_ALIAS_PREFIX = "youview";
+    private static final String YOUVIEW_STAGE_ALIAS_PREFIX = "youview_stage";
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired ContentResolver contentResolver;
@@ -35,7 +37,8 @@ public class YouViewModule {
         return new YouViewEnvironmentIngester(youViewProductionUri, 
                 Duration.standardSeconds(timeout), scheduler, 
                 channelResolver, contentResolver, contentWriter, 
-                scheduleWriter, scheduleResolver, Publisher.YOUVIEW);
+                scheduleWriter, scheduleResolver, Publisher.YOUVIEW, 
+                YOUVIEW_PRODUCTION_ALIAS_PREFIX);
     }
     
     @Bean
@@ -43,7 +46,8 @@ public class YouViewModule {
         return new YouViewEnvironmentIngester(youViewStageUri, 
                 Duration.standardSeconds(timeout), scheduler, 
                 channelResolver, contentResolver, contentWriter, 
-                scheduleWriter, scheduleResolver, Publisher.YOUVIEW_STAGE);
+                scheduleWriter, scheduleResolver, Publisher.YOUVIEW_STAGE,
+                YOUVIEW_STAGE_ALIAS_PREFIX);
     }
     
     @PostConstruct
