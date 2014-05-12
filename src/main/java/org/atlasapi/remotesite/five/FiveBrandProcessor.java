@@ -43,9 +43,9 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpResponse;
 
 public class FiveBrandProcessor {
-    
+
     private static final Logger log = LoggerFactory.getLogger(FiveBrandProcessor.class);
-    
+
     private final static String WATCHABLES_URL_SUFFIX = "/watchables?expand=season%7Ctransmissions";
     private final ContentWriter writer;
     private final GenreMap genreMap = new FiveGenreMap();
@@ -64,33 +64,31 @@ public class FiveBrandProcessor {
         this.episodeProcessor = new FiveEpisodeProcessor(baseApiUrl, httpClient, channelMap);
         this.contentMerger = new ContentMerger(MergeStrategy.REPLACE);
     }
-    
+
     public void processShow(Element element) {
-        
+
         Brand brand = extractBrand(element);
-        
-       
-        
+
         String id = childValue(element, "id");
         EpisodeProcessingNodeFactory nodeFactory 
             = new EpisodeProcessingNodeFactory(episodeProcessor, brand.getSpecialization());
-        
+
         try {
-        	    String responseBody = httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body();
+            String responseBody = httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body();
             new Builder(nodeFactory).build(new StringReader(responseBody));
         } catch(Exception e) {
             log.error("Exception parsing episodes for brand " + brand.getTitle(), e);
             return;
         }
-        
+
         if(FILM.equals(brand.getSpecialization()) 
                 && nodeFactory.items.size() == 1) {
-            
+
             setFilmDescription((Film)Iterables.getOnlyElement(nodeFactory.items), element);
         }
-        
+
         write(brand);
-        
+
         for (Series series : episodeProcessor.getSeriesMap().values()) {
             write(series);
         }
@@ -104,18 +102,18 @@ public class FiveBrandProcessor {
         Maybe<Identified> maybeExisting = 
                 contentResolver.findByCanonicalUris(ImmutableSet.of(itemToWrite.getCanonicalUri()))
                                .getFirstValue();
-        
+
         if (maybeExisting.hasValue()) {
             itemToWrite = contentMerger.merge((Item) maybeExisting.requireValue(), itemToWrite);
         }
         writer.createOrUpdate(itemToWrite);
     }
-    
+
     private void write(Container containerToWrite) {
         Maybe<Identified> maybeExisting = 
                 contentResolver.findByCanonicalUris(ImmutableSet.of(containerToWrite.getCanonicalUri()))
                                .getFirstValue();
-        
+
         if (maybeExisting.hasValue()) {
             containerToWrite = contentMerger.merge((Container) maybeExisting.requireValue(), containerToWrite);
         }
@@ -126,37 +124,36 @@ public class FiveBrandProcessor {
         String id = childValue(element, "id");
         String uri = getShowUri(id);
         Maybe<Identified> maybeBrand = contentResolver.findByCanonicalUris(ImmutableSet.of(uri)).getFirstValue();
-        
+
         if (maybeBrand.hasValue()) {
             return (Brand) maybeBrand.requireValue();
         }
-        
+
         Brand brand = new Brand(uri, getBrandCurie(id), Publisher.FIVE);
-        
         brand.setTitle(childValue(element, "title"));
-        
+
         Maybe<String> description = getDescription(element);
         if (description.hasValue()) {
             brand.setDescription(description.requireValue());
         }
-        
+
         brand.setGenres(getGenres(element));
-        
+
         Maybe<String> image = getImage(element);
         if (image.hasValue()) {
             brand.setImage(image.requireValue());
         }
-        
+
         Specialization specialization = specializationFrom(element);
-        
+
         brand.setMediaType(MediaType.VIDEO);
         brand.setSpecialization(specialization);
-        
+
         return brand;        
     }
-    
+
     private static final Pattern FILM_YEAR = Pattern.compile(".*\\((\\d{4})\\)$");
-    
+
     private void setFilmDescription(Film film, Element element) {
         Maybe<String> description = getDescription(element);
         if(description.hasValue()) {
@@ -182,11 +179,11 @@ public class FiveBrandProcessor {
     private String getShowUri(String id) {
         return baseApiUrl + "/shows/" + id;
     }
-    
+
     private String getBrandCurie(String id) {
         return "five:b-" + id;
     }
-    
+
     private String childValue(Element element, String childName) {
         Element firstChild = element.getFirstChildElement(childName);
         if(firstChild != null) {
@@ -194,45 +191,45 @@ public class FiveBrandProcessor {
         }
         return null;
     }
-    
+
     private Maybe<String> getDescription(Element element) {
         String longDescription = element.getFirstChildElement("long_description").getValue();
         if (!Strings.isNullOrEmpty(longDescription)) {
             return Maybe.just(longDescription);
         }
-        
+
         String shortDescription = element.getFirstChildElement("short_description").getValue();
         if (!Strings.isNullOrEmpty(shortDescription)) {
             return Maybe.just(shortDescription);
         }
-        
+
         return Maybe.nothing();
     }
-    
+
     private Set<String> getGenres(Element element) {
         return genreMap.mapRecognised(ImmutableSet.of("http://www.five.tv/genres/" + element.getFirstChildElement("genre").getValue()));
     }
-    
+
     private Maybe<String> getImage(Element element) {
         Elements imageElements = element.getFirstChildElement("images").getChildElements("image");
         if (imageElements.size() > 0) {
             return Maybe.just(imageElements.get(0).getValue());
         }
-        
+
         return Maybe.nothing();
     }
-    
+
     private class EpisodeProcessingNodeFactory extends NodeFactory {
-        
+
         private final FiveEpisodeProcessor episodeProcessor;
-		private final List<Item> items = Lists.newArrayList();
+        private final List<Item> items = Lists.newArrayList();
         private final Specialization specialization;
 
         public EpisodeProcessingNodeFactory(FiveEpisodeProcessor episodeProcessor, Specialization specialization) {
-			this.episodeProcessor = episodeProcessor;
+            this.episodeProcessor = episodeProcessor;
             this.specialization = specialization;
         }
-        
+
         @Override
         public Nodes finishMakingElement(Element element) {
             if (element.getLocalName().equalsIgnoreCase("watchable")) {
@@ -242,7 +239,7 @@ public class FiveBrandProcessor {
                 catch (Exception e) {
                     log.error("Exception when processing episode", e);
                 }
-                
+
                 return new Nodes();
             }
             else {
