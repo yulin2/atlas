@@ -127,29 +127,25 @@ public class FiveBrandProcessor {
 
         if (maybeBrand.hasValue()) {
             return (Brand) maybeBrand.requireValue();
+        } else {
+            return createBrand(element);
         }
 
+    }
+
+    private Brand createBrand(Element element) {
+        String id = childValue(element, "id");
+        String uri = getShowUri(id);
+        
         Brand brand = new Brand(uri, getBrandCurie(id), Publisher.FIVE);
         brand.setTitle(childValue(element, "title"));
-
-        Maybe<String> description = getDescription(element);
-        if (description.hasValue()) {
-            brand.setDescription(description.requireValue());
-        }
-
+        brand.setDescription(getDescription(element).valueOrNull());
         brand.setGenres(getGenres(element));
-
-        Maybe<String> image = getImage(element);
-        if (image.hasValue()) {
-            brand.setImage(image.requireValue());
-        }
-
-        Specialization specialization = specializationFrom(element);
-
+        brand.setImage(getImage(element).valueOrNull());
         brand.setMediaType(MediaType.VIDEO);
-        brand.setSpecialization(specialization);
+        brand.setSpecialization(specializationFrom(element));
 
-        return brand;        
+        return brand;  
     }
 
     private static final Pattern FILM_YEAR = Pattern.compile(".*\\((\\d{4})\\)$");
