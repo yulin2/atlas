@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.five;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.media.entity.Specialization.FILM;
 
 import java.io.StringReader;
@@ -17,14 +18,19 @@ import nu.xom.Nodes;
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.remotesite.ContentMerger;
+import org.atlasapi.remotesite.ContentMerger.MergeStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,18 +52,86 @@ public class FiveBrandProcessor {
     private final FiveEpisodeProcessor episodeProcessor;
     private final String baseApiUrl;
     private final RemoteSiteClient<HttpResponse> httpClient;
+    private final ContentResolver contentResolver;
+    private final ContentMerger contentMerger;
 
-    public FiveBrandProcessor(ContentWriter writer, String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Multimap<String, Channel> channelMap) {
-        this.writer = writer;
-        this.baseApiUrl = baseApiUrl;
-        this.httpClient = httpClient;
+    public FiveBrandProcessor(ContentWriter writer, ContentResolver contentResolver, 
+            String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Multimap<String, Channel> channelMap) {
+        this.writer = checkNotNull(writer);
+        this.baseApiUrl = checkNotNull(baseApiUrl);
+        this.httpClient = checkNotNull(httpClient);
+        this.contentResolver = checkNotNull(contentResolver);
         this.episodeProcessor = new FiveEpisodeProcessor(baseApiUrl, httpClient, channelMap);
+        this.contentMerger = new ContentMerger(MergeStrategy.REPLACE);
     }
     
     public void processShow(Element element) {
         
+        Brand brand = extractBrand(element);
+        
+       
+        
         String id = childValue(element, "id");
-        Brand brand = new Brand(getShowUri(id), getBrandCurie(id), Publisher.FIVE);
+        EpisodeProcessingNodeFactory nodeFactory 
+            = new EpisodeProcessingNodeFactory(episodeProcessor, brand.getSpecialization());
+        
+        try {
+        	    String responseBody = httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body();
+            new Builder(nodeFactory).build(new StringReader(responseBody));
+        } catch(Exception e) {
+            log.error("Exception parsing episodes for brand " + brand.getTitle(), e);
+            return;
+        }
+        
+        if(FILM.equals(brand.getSpecialization()) 
+                && nodeFactory.items.size() == 1) {
+            
+            setFilmDescription((Film)Iterables.getOnlyElement(nodeFactory.items), element);
+        }
+        
+        write(brand);
+        
+        for (Series series : episodeProcessor.getSeriesMap().values()) {
+            write(series);
+        }
+        for (Item item : nodeFactory.items) {
+            write(brand, item);
+        }
+    }
+
+    private void write(Brand brand, Item itemToWrite) {
+        itemToWrite.setContainer(brand);
+        Maybe<Identified> maybeExisting = 
+                contentResolver.findByCanonicalUris(ImmutableSet.of(itemToWrite.getCanonicalUri()))
+                               .getFirstValue();
+        
+        if (maybeExisting.hasValue()) {
+            itemToWrite = contentMerger.merge((Item) maybeExisting.requireValue(), itemToWrite);
+        }
+        writer.createOrUpdate(itemToWrite);
+    }
+    
+    private void write(Container containerToWrite) {
+        Maybe<Identified> maybeExisting = 
+                contentResolver.findByCanonicalUris(ImmutableSet.of(containerToWrite.getCanonicalUri()))
+                               .getFirstValue();
+        
+        if (maybeExisting.hasValue()) {
+            containerToWrite = contentMerger.merge((Container) maybeExisting.requireValue(), containerToWrite);
+        }
+        writer.createOrUpdate(containerToWrite);
+    }
+
+    private Brand extractBrand(Element element) {
+        String id = childValue(element, "id");
+        String uri = getShowUri(id);
+        Maybe<Identified> maybeBrand = contentResolver.findByCanonicalUris(ImmutableSet.of(uri)).getFirstValue();
+        
+        if (maybeBrand.hasValue()) {
+            return (Brand) maybeBrand.requireValue();
+        }
+        
+        Brand brand = new Brand(uri, getBrandCurie(id), Publisher.FIVE);
         
         brand.setTitle(childValue(element, "title"));
         
@@ -78,27 +152,7 @@ public class FiveBrandProcessor {
         brand.setMediaType(MediaType.VIDEO);
         brand.setSpecialization(specialization);
         
-        EpisodeProcessingNodeFactory nodeFactory = new EpisodeProcessingNodeFactory(episodeProcessor, specialization);
-        try {
-        	    String responseBody = httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body();
-            new Builder(nodeFactory).build(new StringReader(responseBody));
-        } catch(Exception e) {
-            log.error("Exception parsing episodes for brand " + brand.getTitle(), e);
-            return;
-        }
-        
-        if(specialization == FILM && nodeFactory.items.size() == 1) {
-            setFilmDescription((Film)Iterables.getOnlyElement(nodeFactory.items), element);
-        }
-        
-        writer.createOrUpdate(brand);
-        for (Series series : episodeProcessor.getSeriesMap().values()) {
-            writer.createOrUpdate(series);
-        }
-        for (Item item : nodeFactory.items) {
-            item.setContainer(brand);
-        	writer.createOrUpdate(item);
-        }
+        return brand;        
     }
     
     private static final Pattern FILM_YEAR = Pattern.compile(".*\\((\\d{4})\\)$");
