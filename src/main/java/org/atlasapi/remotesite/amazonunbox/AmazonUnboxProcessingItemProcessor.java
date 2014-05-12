@@ -24,6 +24,7 @@ import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.ContentMerger;
+import org.atlasapi.remotesite.ContentMerger.MergeStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +67,7 @@ public class AmazonUnboxProcessingItemProcessor implements AmazonUnboxItemProces
     private final ContentLister lister;
     private final int missingContentPercentage;
     private final AmazonUnboxBrandProcessor brandProcessor;
+    private final ContentMerger contentMerger;
 
     public AmazonUnboxProcessingItemProcessor(ContentExtractor<AmazonUnboxItem, Optional<Content>> extractor, ContentResolver resolver, 
             ContentWriter writer, ContentLister lister, int missingContentPercentage, AmazonUnboxBrandProcessor brandProcessor) {
@@ -75,6 +77,7 @@ public class AmazonUnboxProcessingItemProcessor implements AmazonUnboxItemProces
         this.lister = lister;
         this.missingContentPercentage = missingContentPercentage;
         this.brandProcessor = brandProcessor;
+        this.contentMerger = new ContentMerger(MergeStrategy.MERGE);
     }
 
     @Override
@@ -100,9 +103,9 @@ public class AmazonUnboxProcessingItemProcessor implements AmazonUnboxItemProces
         } else {
             Identified identified = existing.requireValue();
             if (content instanceof Item) {
-                write(ContentMerger.merge(ContentMerger.asItem(identified), (Item) content));
+                write(contentMerger.merge(ContentMerger.asItem(identified), (Item) content));
             } else if (content instanceof Container) {
-                write(ContentMerger.merge(ContentMerger.asContainer(identified), (Container) content));
+                write(contentMerger.merge(ContentMerger.asContainer(identified), (Container) content));
             }
         }
     }
