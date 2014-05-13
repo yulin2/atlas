@@ -12,6 +12,7 @@ import org.atlasapi.media.channel.ChannelQuery;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.ImageType;
@@ -21,6 +22,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.messaging.v3.ScheduleUpdateMessage;
+import org.atlasapi.persistence.audit.PersistenceAuditLog;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalentContentResolver;
@@ -74,6 +76,21 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     private ContentResolver resolver;
     private ContentWriter contentWriter;
 	private MongoScheduleStore scheduleWriter;
+	
+	private final PersistenceAuditLog persistenceAuditLog = new PersistenceAuditLog() {
+
+        @Override
+        public void logWrite(Described described) {
+            
+        }
+
+        @Override
+        public void logNoWrite(Described described) {
+            
+        }
+        
+    
+    };
 
 	private ChannelResolver channelResolver;
 	private ContentBuffer contentBuffer;
@@ -97,7 +114,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         resolver = new LookupResolvingContentResolver(new MongoContentResolver(db, lookupStore), lookupStore);
 
         channelResolver = new DummyChannelResolver();
-        contentWriter = new MongoContentWriter(db, lookupStore, clock);
+        contentWriter = new MongoContentWriter(db, lookupStore, persistenceAuditLog, clock);
         programmeProcessor = new PaProgrammeProcessor(contentWriter, resolver, log);
         EquivalentContentResolver equivContentResolver = context.mock(EquivalentContentResolver.class);
         scheduleWriter = new MongoScheduleStore(db, channelResolver, contentBuffer, equivContentResolver, ms);
