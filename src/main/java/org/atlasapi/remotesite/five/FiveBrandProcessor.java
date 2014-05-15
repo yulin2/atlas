@@ -71,7 +71,7 @@ public class FiveBrandProcessor {
 
         String id = childValue(element, "id");
         EpisodeProcessingNodeFactory nodeFactory 
-            = new EpisodeProcessingNodeFactory(episodeProcessor, brand.getSpecialization());
+            = new EpisodeProcessingNodeFactory(brand, episodeProcessor);
 
         try {
             String responseBody = httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body();
@@ -219,18 +219,18 @@ public class FiveBrandProcessor {
 
         private final FiveEpisodeProcessor episodeProcessor;
         private final List<Item> items = Lists.newArrayList();
-        private final Specialization specialization;
+        private final Brand brand;
 
-        public EpisodeProcessingNodeFactory(FiveEpisodeProcessor episodeProcessor, Specialization specialization) {
-            this.episodeProcessor = episodeProcessor;
-            this.specialization = specialization;
+        public EpisodeProcessingNodeFactory(Brand brand, FiveEpisodeProcessor episodeProcessor) {
+            this.brand = checkNotNull(brand);
+            this.episodeProcessor = checkNotNull(episodeProcessor);
         }
 
         @Override
         public Nodes finishMakingElement(Element element) {
             if (element.getLocalName().equalsIgnoreCase("watchable")) {
                 try {
-                    items.add(episodeProcessor.processEpisode(element, specialization));
+                    items.add(episodeProcessor.processEpisode(element, brand));
                 }
                 catch (Exception e) {
                     log.error("Exception when processing episode", e);
