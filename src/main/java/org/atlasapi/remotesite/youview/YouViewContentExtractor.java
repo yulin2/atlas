@@ -49,7 +49,6 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private static final String MEDIA_CONTENT_KEY = "content";
     private static final String DURATION_KEY = "duration";
     private static final String YOUVIEW_PREFIX = "youview:";
-    private static final String YOUVIEW_URI_PREFIX = "http://youview.com/programme/";
     private static final String SCHEDULE_SLOT_KEY = "scheduleSlot";
     private static final String AVAILABLE_KEY = "available";
     private static final String START_KEY = "start";
@@ -70,11 +69,15 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private final DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeNoMillis();
     private final Publisher publisher;
     private final String scheduleEventPrefix;
+    private final String programmeAliasPrefix;
+    private final String aliasPrefix;
     
-    public YouViewContentExtractor(YouViewChannelResolver channelResolver, Publisher publisher) {
+    public YouViewContentExtractor(YouViewChannelResolver channelResolver, Publisher publisher, String aliasPrefix) {
+        this.aliasPrefix = aliasPrefix;
         this.channelResolver = checkNotNull(channelResolver);
         this.publisher = checkNotNull(publisher);
         this.scheduleEventPrefix = String.format("http://%s/scheduleevent/", publisher.key());
+        this.programmeAliasPrefix = String.format("http://%s/programme/", publisher.key());
     }
     
     @Override
@@ -84,15 +87,15 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
 
         String id = getId(source);
         item.setCanonicalUri(scheduleEventPrefix + id);
-        item.addAlias(new Alias("youview:scheduleevent", id));
+        item.addAlias(new Alias(aliasPrefix + ":scheduleevent", id));
         item.setTitle(getTitle(source));
         item.setMediaType(getMediaType(source));
         item.setPublisher(publisher);
 
         Optional<String> programmeId = getProgrammeId(source);
         if (programmeId.isPresent()) {
-            item.addAliasUrl(YOUVIEW_URI_PREFIX + programmeId.get());
-            item.addAlias(new Alias("youview:programme", programmeId.get()));
+            item.addAliasUrl(programmeAliasPrefix + programmeId.get());
+            item.addAlias(new Alias(aliasPrefix + ":programme", programmeId.get()));
         }
         
         item.addVersion(getVersion(source));
