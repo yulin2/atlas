@@ -69,7 +69,7 @@ public class ItemModelSimplifierTest {
     private final PeopleQueryResolver peopleQueryResolver = context.mock(PeopleQueryResolver.class);
     private final UpcomingItemsResolver upcomingResolver = context.mock(UpcomingItemsResolver.class);
     private final AvailableItemsResolver availableResolver = context.mock(AvailableItemsResolver.class);
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec(), new SubstitutionTableNumberCodec(), new ImageSimplifier(), peopleQueryResolver,upcomingResolver,availableResolver,null);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec(), new SubstitutionTableNumberCodec(), new ImageSimplifier(), peopleQueryResolver,upcomingResolver,availableResolver,null, null, null, null, null);
     
     @Test
     @SuppressWarnings("unchecked")
