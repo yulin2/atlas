@@ -1,29 +1,16 @@
 package org.atlasapi.query;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.filter.OncePerRequestFilter;
+import com.metabroadcast.common.webapp.http.AbstractCorsFilter;
 
 
-public class CorsFilter extends OncePerRequestFilter {
+public class CorsFilter extends AbstractCorsFilter {
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
-        // Support CORS Pre-flight request
-        // See http://zhentao-li.blogspot.co.uk/2012/06/enable-cors-support-in-rest-services.html
-        if (request.getMethod().equals("OPTIONS")) {
-            response.addHeader("Access-Control-Allow-Origin", "*");
-            response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-            response.addHeader("Access-Control-Allow-Headers", "Content-Type");
-            response.addHeader("Access-Control-Max-Age", "1800");//30 min
-        }
-        filterChain.doFilter(request, response);
+    protected boolean allowCors(String origin, HttpServletRequest request) {
+        // This is always allowing cors for every origin: Atlas is protected by the use of an API key in the requests
+        return true;
     }
 
 }
