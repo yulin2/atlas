@@ -1,14 +1,19 @@
 package org.atlasapi.output.simple;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.math.BigInteger;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelGroup;
+import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.TemporalField;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
+import org.atlasapi.media.entity.simple.ChannelGroupSummary;
 import org.atlasapi.media.entity.simple.HistoricalChannelEntry;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.output.Annotation;
@@ -28,16 +33,24 @@ public class ChannelSimplifier {
     private final PublisherSimplifier publisherSimplifier;
     private final NumberToShortStringCodec v4Codec;
     private final ImageSimplifier imageSimplifier;
+    private final ChannelGroupSummarySimplifier channelGroupAliasSimplifier;
+    private final ChannelGroupResolver channelGroupResolver;
     
-    public ChannelSimplifier(NumberToShortStringCodec idCodec, NumberToShortStringCodec v4Codec, ChannelResolver channelResolver, PublisherSimplifier publisherSimplifier, ImageSimplifier imageSimplifier) {
-        this.idCodec = idCodec;
-        this.v4Codec = v4Codec;
-        this.channelResolver = channelResolver;
-        this.publisherSimplifier = publisherSimplifier;
-        this.imageSimplifier = imageSimplifier;
+    public ChannelSimplifier(NumberToShortStringCodec idCodec, NumberToShortStringCodec v4Codec, 
+            ChannelResolver channelResolver, PublisherSimplifier publisherSimplifier, 
+            ImageSimplifier imageSimplifier, ChannelGroupSummarySimplifier channelGroupSummarySimplifier, 
+            ChannelGroupResolver channelGroupResolver) {
+        this.idCodec = checkNotNull(idCodec);
+        this.v4Codec = checkNotNull(v4Codec);
+        this.channelResolver = checkNotNull(channelResolver);
+        this.publisherSimplifier = checkNotNull(publisherSimplifier);
+        this.imageSimplifier = checkNotNull(imageSimplifier);
+        this.channelGroupAliasSimplifier = checkNotNull(channelGroupSummarySimplifier);
+        this.channelGroupResolver = checkNotNull(channelGroupResolver);
     }
-    
-    public org.atlasapi.media.entity.simple.Channel simplify(Channel input, final boolean showHistory, boolean showParent, final boolean showVariations) {
+
+    public org.atlasapi.media.entity.simple.Channel simplify(Channel input, final boolean showHistory, 
+            boolean showParent, final boolean showVariations, final boolean showGroupSummary) {
         
         org.atlasapi.media.entity.simple.Channel simple = new org.atlasapi.media.entity.simple.Channel();
         
@@ -88,7 +101,7 @@ public class ChannelSimplifier {
                 throw new RuntimeException("Could not resolve channel with id " +  input.getParent());
             }
             if (showParent) {
-                simple.setParent(simplify(channel.requireValue(), showHistory, false, false));
+                simple.setParent(simplify(channel.requireValue(), showHistory, false, false, showGroupSummary));
             } else {
                 simple.setParent(toSubChannel(channel.requireValue()));
             }
@@ -100,7 +113,7 @@ public class ChannelSimplifier {
                     @Override
                     public org.atlasapi.media.entity.simple.Channel apply(Channel input) {
                         if (showVariations) {
-                            return simplify(input, showHistory, false, false);
+                            return simplify(input, showHistory, false, false, showGroupSummary);
                         } else {
                             return toSubChannel(input);
                         }
@@ -112,9 +125,23 @@ public class ChannelSimplifier {
         if (showHistory) {            
             simple.setHistory(calculateChannelHistory(input));
         }
+        
+        
+        if (showGroupSummary) {
+            simple.setGroups(Iterables.transform(channelGroupResolver.channelGroupsFor(input), TO_CHANNEL_GROUP_ALIAS));
+        }
 
         return simple;
     }
+    
+    private final Function<ChannelGroup, ChannelGroupSummary> TO_CHANNEL_GROUP_ALIAS = new Function<ChannelGroup, ChannelGroupSummary>() {
+
+        @Override
+        public ChannelGroupSummary apply(ChannelGroup numbering) {
+            return channelGroupAliasSimplifier.simplify(numbering);
+        }
+        
+    };
     
     public Iterable<org.atlasapi.media.entity.simple.RelatedLink> simplifyRelatedLinks(Iterable<RelatedLink> relatedLinks) {
         return Iterables.transform(relatedLinks, new Function<RelatedLink, org.atlasapi.media.entity.simple.RelatedLink>() {

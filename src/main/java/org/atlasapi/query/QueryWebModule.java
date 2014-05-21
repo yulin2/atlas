@@ -44,6 +44,7 @@ import org.atlasapi.output.SimpleProductModelWriter;
 import org.atlasapi.output.SimpleScheduleModelWriter;
 import org.atlasapi.output.SimpleTopicModelWriter;
 import org.atlasapi.output.rdf.RdfXmlTranslator;
+import org.atlasapi.output.simple.ChannelGroupSummarySimplifier;
 import org.atlasapi.output.simple.ChannelGroupModelSimplifier;
 import org.atlasapi.output.simple.ChannelGroupSimplifier;
 import org.atlasapi.output.simple.ChannelModelSimplifier;
@@ -151,13 +152,22 @@ public class QueryWebModule {
     }
     
     @Bean ChannelModelSimplifier channelModelSimplifier() {
-        return new ChannelModelSimplifier(channelSimplifier(), new ChannelNumberingsChannelToChannelGroupModelSimplifier(
-            channelGroupResolver, 
-            new ChannelNumberingChannelGroupModelSimplifier(channelGroupSimplifier())));
+        return new ChannelModelSimplifier(channelSimplifier(), channelNumberingsChannelToChannelGroupModelSimplifier());
     }
     
     @Bean ChannelSimplifier channelSimplifier() {
-        return new ChannelSimplifier(v3ChannelCodec(), v4ChannelCodec(), channelResolver, publisherSimplifier(), imageSimplifier());
+        return new ChannelSimplifier(v3ChannelCodec(), v4ChannelCodec(), channelResolver, 
+                publisherSimplifier(), imageSimplifier(), channelGroupAliasSimplifier(), channelGroupResolver);
+    }
+    
+    @Bean ChannelGroupSummarySimplifier channelGroupAliasSimplifier() {
+        return new ChannelGroupSummarySimplifier(v3ChannelCodec(), channelGroupResolver);
+    }
+    
+    @Bean ChannelNumberingsChannelToChannelGroupModelSimplifier channelNumberingsChannelToChannelGroupModelSimplifier() {
+        return new ChannelNumberingsChannelToChannelGroupModelSimplifier(
+                    channelGroupResolver, 
+                    new ChannelNumberingChannelGroupModelSimplifier(channelGroupSimplifier()));
     }
     
     @Bean ChannelGroupSimplifier channelGroupSimplifier() {
@@ -191,9 +201,13 @@ public class QueryWebModule {
     }
 
     @Bean ChannelGroupModelSimplifier ChannelGroupModelSimplifier() {
-        return new ChannelGroupModelSimplifier(channelGroupSimplifier(), new ChannelNumberingsChannelGroupToChannelModelSimplifier(
-            channelResolver,
-            new ChannelNumberingChannelModelSimplifier(channelSimplifier())));
+        return new ChannelGroupModelSimplifier(channelGroupSimplifier(), numberingSimplifier());
+    }
+    
+    @Bean ChannelNumberingsChannelGroupToChannelModelSimplifier numberingSimplifier() {
+        return new ChannelNumberingsChannelGroupToChannelModelSimplifier(
+                        channelResolver,
+                        new ChannelNumberingChannelModelSimplifier(channelSimplifier()));
     }
     
     @Bean PublisherSimplifier publisherSimplifier() {

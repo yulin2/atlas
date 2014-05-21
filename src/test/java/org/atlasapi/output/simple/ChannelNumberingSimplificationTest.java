@@ -14,6 +14,7 @@ import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelNumbering;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.Platform;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
@@ -24,15 +25,18 @@ import org.mockito.Mockito;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 public class ChannelNumberingSimplificationTest extends TestCase {
     
-    private static final ChannelGroupStore channelGroupStore = new DummyChannelGroupStore();
-    private static final ChannelSimplifier channelSimplifier = new ChannelSimplifier(Mockito.mock(NumberToShortStringCodec.class), Mockito.mock(NumberToShortStringCodec.class), Mockito.mock(ChannelResolver.class), new PublisherSimplifier(), new ImageSimplifier());
+    private static final DummyChannelGroupStore channelGroupStore = new DummyChannelGroupStore();
+    private static final ChannelSimplifier channelSimplifier = new ChannelSimplifier(Mockito.mock(NumberToShortStringCodec.class), Mockito.mock(NumberToShortStringCodec.class), Mockito.mock(ChannelResolver.class), new PublisherSimplifier(), new ImageSimplifier(), 
+            new ChannelGroupSummarySimplifier(Mockito.mock(NumberToShortStringCodec.class), channelGroupStore), channelGroupStore);
     private static final ChannelGroupSimplifier channelGroupSimplifier = new ChannelGroupSimplifier(Mockito.mock(NumberToShortStringCodec.class), channelGroupStore, new PublisherSimplifier());
     private static final ChannelNumberingChannelGroupModelSimplifier nestedChannelGroupSimplifier = new ChannelNumberingChannelGroupModelSimplifier(channelGroupSimplifier);
     private static final ChannelNumberingsChannelToChannelGroupModelSimplifier numberingSimplifier = new ChannelNumberingsChannelToChannelGroupModelSimplifier(channelGroupStore, nestedChannelGroupSimplifier);
@@ -52,6 +56,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        channelGroupStore.reset();
         channel.setId(channelId);
         
         Platform platform = new Platform();
@@ -254,11 +259,37 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         org.atlasapi.media.entity.simple.ChannelNumbering second = Iterables.get(simpleChannel.getChannelGroups(), 1);
         assertThat(first.getHistory().size(), is(4));
         assertThat(second.getHistory().size(), is(4));
-     }
+    }
+    
+    @Test
+    public void testChannelGroupSummaryOutput() {
+        ChannelGroup channelGroup = channelGroupStore.channelGroupFor(channelGroupId).get();
+        channelGroup.addChannel(channelId);
+        Alias groupAlias = new Alias("my:namespace", "12345");
+        channelGroup.addAlias(groupAlias);
+        channelGroupStore.createOrUpdate(channelGroup);
+        
+        org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, ImmutableSet.of(Annotation.CHANNEL_GROUPS, Annotation.CHANNEL_GROUPS_SUMMARY), appConfig);
+        org.atlasapi.media.entity.simple.Alias alias = Iterables.getOnlyElement(Iterables.getOnlyElement(simpleChannel.getGroups()).getAliases());
+        
+        assertEquals(groupAlias.getNamespace(), alias.getNamespace());
+        assertEquals(groupAlias.getValue(), alias.getValue());
+        
+    }
     
     private static class DummyChannelGroupStore implements ChannelGroupStore {
 
-        private Map<Long, ChannelGroup> channelGroups = Maps.newHashMap();
+        private Map<Long, ChannelGroup> channelGroups;
+        private Multimap<Long, ChannelGroup> channelGroupsForChannel;
+        
+        public DummyChannelGroupStore() {
+            reset();
+        }
+        
+        public void reset() {
+            channelGroups = Maps.newHashMap();
+            channelGroupsForChannel = HashMultimap.create();
+        }
         
         @Override
         public Optional<ChannelGroup> fromAlias(String alias) {
@@ -271,7 +302,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         }
 
         @Override
-        public Iterable<ChannelGroup> channelGroupsFor(Iterable<Long> ids) {
+        public Iterable<ChannelGroup> channelGroupsFor(Iterable<? extends Long> ids) {
             return Iterables.transform(channelGroups.keySet(), new Function<Long, ChannelGroup>() {
                 @Override
                 public ChannelGroup apply(Long input) {
@@ -287,12 +318,15 @@ public class ChannelNumberingSimplificationTest extends TestCase {
 
         @Override
         public Iterable<ChannelGroup> channelGroupsFor(Channel channel) {
-            throw new UnsupportedOperationException();
+            return channelGroupsForChannel.get(channel.getId());
         }
 
         @Override
         public ChannelGroup createOrUpdate(ChannelGroup channelGroup) {
             channelGroups.put(channelGroup.getId(), channelGroup);
+            for (Long channel : channelGroup.getChannels()) {
+                channelGroupsForChannel.put(channel, channelGroup);
+            }
             return channelGroup;
         }
         

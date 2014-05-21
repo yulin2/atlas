@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 
 public class ChannelNumberingsChannelGroupToChannelModelSimplifier implements ModelSimplifier<Iterable<ChannelNumbering>, Iterable<org.atlasapi.media.entity.simple.ChannelNumbering>> {
@@ -54,7 +55,7 @@ public class ChannelNumberingsChannelGroupToChannelModelSimplifier implements Mo
                         public Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> apply(Long input) {
                             Iterable<ChannelNumbering> numberings = channelMapping.get(input);
                             final Iterable<HistoricalChannelNumberingEntry> history = generateHistory(numberings);
-                            return simplifyChannelNumberingsWithHistory(numberings, history, config);
+                            return simplifyChannelNumberingsWithHistory(numberings, history, config, annotations);
                         }
                     }
                     ));
@@ -64,7 +65,7 @@ public class ChannelNumberingsChannelGroupToChannelModelSimplifier implements Mo
                     new Function<ChannelNumbering, org.atlasapi.media.entity.simple.ChannelNumbering>() {
                         @Override
                         public org.atlasapi.media.entity.simple.ChannelNumbering apply(ChannelNumbering input) {
-                            org.atlasapi.media.entity.simple.ChannelNumbering simple = simplifyNumbering(input, annotations.contains(Annotation.HISTORY), null, config);
+                            org.atlasapi.media.entity.simple.ChannelNumbering simple = simplifyNumbering(input, null, config, annotations);
                             simple.setChannelNumber(input.getChannelNumber());
                             return simple;
                         }
@@ -85,17 +86,15 @@ public class ChannelNumberingsChannelGroupToChannelModelSimplifier implements Mo
         });
     }
     
-    private org.atlasapi.media.entity.simple.ChannelNumbering simplifyNumbering(ChannelNumbering input, boolean showHistory, 
-        Iterable<HistoricalChannelNumberingEntry> history, ApplicationConfiguration config) {
+    private org.atlasapi.media.entity.simple.ChannelNumbering simplifyNumbering(ChannelNumbering input, 
+        Iterable<HistoricalChannelNumberingEntry> history, ApplicationConfiguration config, Set<Annotation> annotations) {
         
         org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
         Maybe<Channel> channel = channelResolver.fromId(input.getChannel());
         Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  input.getChannel());
-        if (showHistory) {
-            simple.setChannel(channelSimplifier.simplify(channel.requireValue(), ImmutableSet.of(Annotation.HISTORY), config));
-        } else {
-            simple.setChannel(channelSimplifier.simplify(channel.requireValue(), ImmutableSet.<Annotation>of(), config));
-        }
+        
+        simple.setChannel(channelSimplifier.simplify(channel.requireValue(), 
+                retainAnnotationsForChannelSimplification(annotations), config));
         
         if (history != null) {
             simple.setHistory(history);
@@ -103,9 +102,13 @@ public class ChannelNumberingsChannelGroupToChannelModelSimplifier implements Mo
         return simple;
     }
     
+    private Set<Annotation> retainAnnotationsForChannelSimplification(Set<Annotation> annotations) {
+        return Sets.intersection(ImmutableSet.of(Annotation.HISTORY, Annotation.CHANNEL_GROUPS_SUMMARY), annotations);
+    }
+    
     private Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> simplifyChannelNumberingsWithHistory(
             Iterable<ChannelNumbering> numberings, Iterable<HistoricalChannelNumberingEntry> history, 
-            ApplicationConfiguration config) {
+            ApplicationConfiguration config, Set<Annotation> annotations) {
         
         Iterable<ChannelNumbering> currentNumberings = ChannelNumbering.CURRENT_NUMBERINGS(numberings);
         
@@ -113,11 +116,11 @@ public class ChannelNumberingsChannelGroupToChannelModelSimplifier implements Mo
             if (Iterables.isEmpty(numberings)) {
                 return ImmutableList.of();
             }
-            return ImmutableList.of(simplifyNumbering(Iterables.get(numberings, 0), true, history, config));
+            return ImmutableList.of(simplifyNumbering(Iterables.get(numberings, 0), history, config, annotations));
         } else {
             List<org.atlasapi.media.entity.simple.ChannelNumbering> simpleNumberings = Lists.newArrayList();
             for (ChannelNumbering currentNumbering : currentNumberings) {
-                org.atlasapi.media.entity.simple.ChannelNumbering simple = simplifyNumbering(currentNumbering, true, history, config);
+                org.atlasapi.media.entity.simple.ChannelNumbering simple = simplifyNumbering(currentNumbering, history, config, annotations);
                 simple.setChannelNumber(currentNumbering.getChannelNumber());
                 simpleNumberings.add(simple);
             }

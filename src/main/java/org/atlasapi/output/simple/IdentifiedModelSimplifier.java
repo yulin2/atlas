@@ -61,7 +61,7 @@ public abstract class IdentifiedModelSimplifier<F extends Identified, T extends 
         return publisherSimplifier.simplify(publisher);
     }
     
-    private static final Function<Alias, org.atlasapi.media.entity.simple.Alias> TO_SIMPLE_ALIAS = new Function<Alias, org.atlasapi.media.entity.simple.Alias>() {
+    static final Function<Alias, org.atlasapi.media.entity.simple.Alias> TO_SIMPLE_ALIAS = new Function<Alias, org.atlasapi.media.entity.simple.Alias>() {
 
         @Override
         public org.atlasapi.media.entity.simple.Alias apply(Alias a) {

@@ -42,6 +42,8 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
     private static final ImmutableSet<Annotation> validAnnotations = ImmutableSet.<Annotation>builder()
         .add(Annotation.CHANNELS)
         .add(Annotation.HISTORY)
+        .add(Annotation.CHANNEL_GROUPS_SUMMARY)
+        
         .build();
     
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
@@ -81,6 +83,12 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
         try {
             final ApplicationConfiguration appConfig = appConfig(request);
             
+            Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
+            if (annotations.isPresent() && !validAnnotations(annotations.get())) {
+                errorViewFor(request, response, BAD_ANNOTATION);
+                return;
+            }
+            
             List<ChannelGroup> channelGroups = ImmutableList.copyOf(channelGroupResolver.channelGroups());
 
             Selection selection = SELECTION_BUILDER.build(request);        
@@ -93,13 +101,7 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
                         }
                     }));
 
-
-            Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
-            if (annotations.isPresent() && !validAnnotations(annotations.get())) {
-                errorViewFor(request, response, BAD_ANNOTATION);
-            } else {
-                modelAndViewFor(request, response, channelGroups, appConfig);
-            }
+            modelAndViewFor(request, response, channelGroups, appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
@@ -112,21 +114,23 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
             Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver.channelGroupFor(idCodec.decode(id).longValue());
             if (!possibleChannelGroup.isPresent()) {
                 errorViewFor(request, response, NOT_FOUND);
-            } else {
-                ApplicationConfiguration appConfig = appConfig(request);
+                return;
                 
-                if (!appConfig.isEnabled(possibleChannelGroup.get().getPublisher())) {
-                    outputter.writeError(request, response, FORBIDDEN.withMessage("ChannelGroup " + id + " not available"));
-                }
-                
-                Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
-                if (annotations.isPresent() && !validAnnotations(annotations.get())) {
-                    errorViewFor(request, response, BAD_ANNOTATION);
-                } else {
-                    modelAndViewFor(request, response, ImmutableList.of(possibleChannelGroup.get()), appConfig);
-                }
+            } 
+
+            ApplicationConfiguration appConfig = appConfig(request);
+            if (!appConfig.isEnabled(possibleChannelGroup.get().getPublisher())) {
+                outputter.writeError(request, response, FORBIDDEN.withMessage("ChannelGroup " + id + " not available"));
+                return;
             }
             
+            Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
+            if (annotations.isPresent() && !validAnnotations(annotations.get())) {
+                errorViewFor(request, response, BAD_ANNOTATION);
+                return;
+            }
+            
+            modelAndViewFor(request, response, ImmutableList.of(possibleChannelGroup.get()), appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
