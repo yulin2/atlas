@@ -1,5 +1,7 @@
 package org.atlasapi.output.simple;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,8 +21,11 @@ import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.media.entity.Player;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.ReleaseDate;
+import org.atlasapi.media.entity.Service;
 import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.Subtitles;
 import org.atlasapi.media.entity.Version;
@@ -38,6 +43,8 @@ import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.output.AvailableItemsResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.UpcomingItemsResolver;
+import org.atlasapi.persistence.player.PlayerResolver;
+import org.atlasapi.persistence.service.ServiceResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -93,16 +100,23 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private final NumberToShortStringCodec channelIdCodec;
     private final ImageSimplifier imageSimplifier;
     private final Map<Long, Long> channelImageOverrides;
+    private final ServiceModelSimplifier serviceModelSimplifier;
+    private final PlayerModelSimplifier playerModelSimplifier;
+    private final ServiceResolver serviceResolver;
+    private final PlayerResolver playerResolver;
     
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
             TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, 
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
             NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, 
             ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver, UpcomingItemsResolver upcomingResolver, 
-            AvailableItemsResolver availableResolver, @Nullable DescriptionWatermarker descriptionWatermarker) {
+            AvailableItemsResolver availableResolver, @Nullable DescriptionWatermarker descriptionWatermarker,
+            PlayerResolver playerResolver, PlayerModelSimplifier playerModelSimplifier, 
+            ServiceResolver serviceResolver, ServiceModelSimplifier serviceModelSimplifier) {
         this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, 
                 containerSummaryResolver, channelResolver, idCodec, channelIdCodec, new SystemClock(), 
-                imageSimplifier, personResolver, upcomingResolver, availableResolver, descriptionWatermarker);
+                imageSimplifier, personResolver, upcomingResolver, availableResolver, descriptionWatermarker,
+                playerResolver, playerModelSimplifier, serviceResolver, serviceModelSimplifier);
     }
 
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
@@ -110,7 +124,9 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, 
             NumberToShortStringCodec idCodec, NumberToShortStringCodec channelIdCodec, Clock clock, 
             ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver, UpcomingItemsResolver upcomingResolver, 
-            AvailableItemsResolver availableResolver, @Nullable DescriptionWatermarker descriptionWatermarker) {
+            AvailableItemsResolver availableResolver, @Nullable DescriptionWatermarker descriptionWatermarker,
+            PlayerResolver playerResolver, PlayerModelSimplifier playerModelSimplifier, 
+            ServiceResolver serviceResolver, ServiceModelSimplifier serviceModelSimplifier) {
         
         super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, 
                 personResolver, upcomingResolver, availableResolver, descriptionWatermarker);
@@ -122,6 +138,10 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         this.channelResolver = channelResolver;
         this.idCodec = idCodec;
         this.channelIdCodec = channelIdCodec;
+        this.serviceModelSimplifier = serviceModelSimplifier;
+        this.playerModelSimplifier = playerModelSimplifier;
+        this.serviceResolver = checkNotNull(serviceResolver);
+        this.playerResolver = playerResolver; //TODO checkNotNull(playerResolver);
         ImmutableMap.Builder<Long, Long> builder = ImmutableMap.builder();
         
         for (Entry<String, String> entry : CHANNEL_IMAGE_OVERRIDES.entrySet()) {
@@ -139,7 +159,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
         boolean doneSegments = false;
         for (Version version : full.getVersions()) {
-            addTo(simple, version, full, annotations);
+            addTo(simple, version, full, annotations, config);
             if (!doneSegments && !version.getSegmentEvents().isEmpty() && annotations.contains(Annotation.SEGMENT_EVENTS) && segmentSimplifier != null) {
                 simple.setSegments(segmentSimplifier.simplify(version.getSegmentEvents(), annotations, config));
                 doneSegments = true;
@@ -222,11 +242,11 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         }), Predicates.notNull());
     }
 
-    private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Item item, Set<Annotation> annotations) {
+    private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Item item, Set<Annotation> annotations, ApplicationConfiguration config) {
 
         if (annotations.contains(Annotation.LOCATIONS) || annotations.contains(Annotation.AVAILABLE_LOCATIONS)) {
             for (Encoding encoding : version.getManifestedAs()) {
-                addTo(simpleItem, version, encoding, item, annotations);
+                addTo(simpleItem, version, encoding, item, annotations, config);
             }
         }
 
@@ -415,11 +435,13 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         }));
     }
 
-    private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Item item, Set<Annotation> annotations) {
+    private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Item item, Set<Annotation> annotations, ApplicationConfiguration config) {
         DateTime now = new DateTime(DateTimeZones.UTC);
         for (Location location : encoding.getAvailableAt()) {
-            if (!annotations.contains(Annotation.AVAILABLE_LOCATIONS) || location.getPolicy() == null || available(location.getPolicy(), now)) {
-                addTo(simpleItem, version, encoding, location, item);
+            if (!annotations.contains(Annotation.AVAILABLE_LOCATIONS) 
+                    || location.getPolicy() == null 
+                    || available(location.getPolicy(), now)) {
+                addTo(simpleItem, version, encoding, location, item, annotations, config);
             }
         }
     }
@@ -430,13 +452,13 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                 || policy.getAvailabilityStart().isBefore(now) && policy.getAvailabilityEnd().isAfter(now);
     }
 
-    private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Location location, Item item) {
+    private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Location location, Item item, Set<Annotation> annotations, ApplicationConfiguration config) {
 
         org.atlasapi.media.entity.simple.Location simpleLocation = new org.atlasapi.media.entity.simple.Location();
 
         copyProperties(version, simpleLocation, item);
         copyProperties(encoding, simpleLocation);
-        copyProperties(location, simpleLocation);
+        copyProperties(location, simpleLocation, annotations, config);
 
         simpleItem.addLocation(simpleLocation);
     }
@@ -491,7 +513,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         simpleLocation.setVideoVerticalSize(encoding.getVideoVerticalSize());
     }
 
-    private void copyProperties(Location location, org.atlasapi.media.entity.simple.Location simpleLocation) {
+    private void copyProperties(Location location, org.atlasapi.media.entity.simple.Location simpleLocation, Set<Annotation> annotations, ApplicationConfiguration config) {
         Policy policy = location.getPolicy();
         if (policy != null) {
             if (policy.getActualAvailabilityStart() != null) {
@@ -521,6 +543,30 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             }
             if (policy.getNetwork() != null) {
                 simpleLocation.setNetwork(policy.getNetwork().key());
+            }
+//            if (policy.getService() != null) {
+//                Optional<Service> service = serviceResolver.serviceFor(policy.getService());
+//                simpleLocation.setService(serviceModelSimplifier.simplify(service.get(), 
+//                        annotations, config));
+//            }
+//            if (policy.getPlayer() != null) {
+//                Optional<Player> player = playerResolver.playerFor(policy.getPlayer());
+//                simpleLocation.setPlayer(playerModelSimplifier.simplify(player.get(), 
+//                        annotations, config));
+//            }
+            // TODO: wire in the above
+            if (Platform.YOUVIEW_IPLAYER.equals(policy.getPlatform())) {
+                Optional<Service> service = serviceResolver.serviceFor(123L);
+                if (service.isPresent()) {
+                    simpleLocation.setService(serviceModelSimplifier.simplify(service.get(), 
+                            annotations, config));
+                }
+                
+                Optional<Player> player = playerResolver.playerFor(123L);
+                if (player.isPresent()) {
+                    simpleLocation.setPlayer(playerModelSimplifier.simplify(player.get(), 
+                            annotations, config));
+                }
             }
         }
 

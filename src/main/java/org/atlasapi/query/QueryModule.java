@@ -20,7 +20,6 @@ import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResolver;

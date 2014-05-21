@@ -57,8 +57,10 @@ import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.PersonModelSimplifier;
+import org.atlasapi.output.simple.PlayerModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.PublisherSimplifier;
+import org.atlasapi.output.simple.ServiceModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
@@ -78,6 +80,8 @@ import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoRecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.output.MongoUpcomingItemsResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
+import org.atlasapi.persistence.player.PlayerResolver;
+import org.atlasapi.persistence.service.ServiceResolver;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
@@ -132,6 +136,8 @@ public class QueryWebModule {
     private @Autowired ProductResolver productResolver;
     private @Autowired PeopleQueryResolver peopleQueryResolver;
     private @Autowired PersonStore personStore;
+    private @Autowired ServiceResolver serviceResolver;
+    private @Autowired PlayerResolver playerResolver;
     private @Autowired LookupEntryStore lookupStore;
     private @Autowired DescriptionWatermarker descriptionWatermarker;
 
@@ -167,6 +173,14 @@ public class QueryWebModule {
     @Bean
     ImageSimplifier imageSimplifier() {
         return new ImageSimplifier();
+    }
+    
+    @Bean PlayerModelSimplifier playerSimplifier() {
+        return new PlayerModelSimplifier(imageSimplifier());
+    }
+    
+    @Bean ServiceModelSimplifier serviceSimplifier() {
+        return new ServiceModelSimplifier(imageSimplifier());
     }
 
     private SubstitutionTableNumberCodec v3ChannelCodec() {
@@ -313,10 +327,13 @@ public class QueryWebModule {
         ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, 
                 topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, 
                 idCodec, channelIdCodec, imageSimplifier(),peopleQueryResolver, upcomingItemsResolver(), 
-                availableItemsResolver(), watermarker);
+                availableItemsResolver(), watermarker, playerResolver, playerSimplifier(),
+                serviceResolver, serviceSimplifier());
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }
+    
+    
 
     @Bean
     AtlasModelWriter<Iterable<Person>> personModelOutputter() {
