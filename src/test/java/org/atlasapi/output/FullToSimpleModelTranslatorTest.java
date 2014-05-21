@@ -80,6 +80,10 @@ public class FullToSimpleModelTranslatorTest {
             peopleResolver,
             upcomingResolver,
             availableResolver,
+            null,
+            null,
+            null,
+            null,
             null
     );
     private final SimpleContentModelWriter translator = new SimpleContentModelWriter(

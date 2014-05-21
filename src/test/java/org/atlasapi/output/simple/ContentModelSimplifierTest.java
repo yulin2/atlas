@@ -57,6 +57,10 @@ public class ContentModelSimplifierTest {
         Mockito.mock(PeopleQueryResolver.class),
         Mockito.mock(UpcomingItemsResolver.class),
         Mockito.mock(AvailableItemsResolver.class),
+        null,
+        null,
+        null,
+        null,
         null
     );
 
