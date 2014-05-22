@@ -568,7 +568,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                             annotations, config));
                 }
             }
-            if (location.getCanonicalUri() != null && location.getCanonicalUri().startsWith("five")) {
+            if (location.getCanonicalUri() != null && location.getCanonicalUri().startsWith("demand")) {
                 Optional<Service> service = serviceResolver.serviceFor(124L);
                 if (service.isPresent()) {
                     simpleLocation.setService(serviceModelSimplifier.simplify(service.get(), 
