@@ -12,7 +12,7 @@
   <link href="http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom" rel="self" type="application/atom+xml" />
   <link href="http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom" rel="related" type="application/atom+xml" title="Episode Guide" />
   <link href="http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/4od.atom" rel="related" type="application/atom+xml" title="4oD" />
-  <category term="http://pmlsc.channel4.com/pmlsd/tags/food.atom" scheme="tag:www.channel4.com,2010:/category/primary" label="Food" />
+  <category term="http://pmlsc.channel4.com/pmlsd/categories/food.atom" scheme="tag:www.channel4.com,2010:/category/primary" label="Food" />
   <dc:relation.BrandFlattened>false</dc:relation.BrandFlattened>
   <dc:relation.presentationBrand>C4</dc:relation.presentationBrand>
   <dc:relation.platformClientVersion>1.0</dc:relation.platformClientVersion>

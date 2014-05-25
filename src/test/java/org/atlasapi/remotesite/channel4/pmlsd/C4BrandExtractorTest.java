@@ -62,7 +62,7 @@ public class C4BrandExtractorTest extends TestCase {
 	    ImmutableMap.<String, String>builder()
 	    .put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", fileContentsFromResource("ramsays-kitchen-nightmares.atom"))
 		.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/4od.atom", fileContentsFromResource("ramsays-kitchen-nightmares-4od.atom"))
-		.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/video.atom", fileContentsFromResource("ugly-betty-video.atom"))
+		.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/videos/all.atom", fileContentsFromResource("ugly-betty-video.atom"))
 		.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", fileContentsFromResource("ramsays-kitchen-nightmares-episode-guide.atom"))
 		.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-1.atom", fileContentsFromResource("ramsays-kitchen-nightmares-series-1.atom"))
         .put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-2.atom", fileContentsFromResource("ramsays-kitchen-nightmares-series-2.atom"))

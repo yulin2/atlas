@@ -41,7 +41,7 @@ public class C4BrandClipAdapterTest {
     
     SimpleHttpClient client = new FixedResponseHttpClient(
             ImmutableMap.<String, String>builder()  
-            .put("https://pmlsc.channel4.com/pmlsd/hestons-mission-impossible/video.atom", fileContentsFromResource("hestons-mission-impossible.atom"))
+            .put("https://pmlsc.channel4.com/pmlsd/hestons-mission-impossible/videos/all.atom", fileContentsFromResource("hestons-mission-impossible.atom"))
             .build());
 
     C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());

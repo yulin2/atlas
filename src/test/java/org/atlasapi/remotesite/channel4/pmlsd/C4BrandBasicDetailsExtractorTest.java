@@ -59,7 +59,7 @@ public class C4BrandBasicDetailsExtractorTest extends TestCase {
 		assertThat(brand.getThumbnail(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_200x113.jpg"));
 		assertThat(brand.getImage(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_625x352.jpg"));
 		assertThat(brand.getGenres(), hasItems(
-		        "http://www.channel4.com/programmes/tags/food",
+		        "http://www.channel4.com/programmes/categories/food",
 		        AtlasGenre.LIFESTYLE.getUri()
 		));
 	}
@@ -83,7 +83,7 @@ public class C4BrandBasicDetailsExtractorTest extends TestCase {
         assertThat(brand.getThumbnail(), is("http://www.channel4.com/assets/programmes/images/brass-eye/brass-eye_200x113.jpg"));
         assertThat(brand.getImage(), is("http://www.channel4.com/assets/programmes/images/brass-eye/brass-eye_625x352.jpg"));
         assertThat(brand.getGenres(), hasItems(
-                "http://www.channel4.com/programmes/tags/comedy",
+                "http://www.channel4.com/programmes/categories/comedy",
                 AtlasGenre.COMEDY.getUri()
         ));
     }
