@@ -280,15 +280,19 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
     static class DummyChannelResolver implements ChannelResolver {
 
-        private Channel channel = Channel.builder()
-                .withSource(Publisher.METABROADCAST)
-                .withTitle("BBC One")
-                .withKey("bbcone")
-                .withHighDefinition(false)
-                .withMediaType(MediaType.VIDEO)
-                .withUri("http://www.bbc.co.uk/bbcone")
-                .build();
+        private final Channel channel = Channel.builder()
+                        .withSource(Publisher.METABROADCAST)
+                        .withTitle("BBC One")
+                        .withKey("bbcone")
+                        .withHighDefinition(false)
+                        .withMediaType(MediaType.VIDEO)
+                        .withUri("http://www.bbc.co.uk/bbcone")
+                        .build();
 
+        public DummyChannelResolver() {
+            channel.setId(1L);
+        }
+        
 		@Override
 		public Maybe<Channel> fromKey(String key) {
 			throw new UnsupportedOperationException();
