@@ -22,6 +22,7 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.LookupRef;
@@ -49,6 +50,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Timestamp;
 
@@ -211,7 +213,7 @@ public class PaProgrammeProcessorTest {
         version.setProvider(Publisher.PA);
         film.addVersion(version);
         
-        setupContentResolver(film, expectedItemBrand, expectedItemSeries);
+        setupContentResolver(ImmutableSet.<Identified>of(film, expectedItemBrand, expectedItemSeries));
 
         ContentHierarchyAndSummaries hierarchy = progProcessor.process(inputProgData, channel, UTC, Timestamp.of(0));
 
@@ -248,22 +250,23 @@ public class PaProgrammeProcessorTest {
         return inputProgData;
     }
 
-    private void setupContentResolver(Film film, Brand brand, Series series) {
-        when(contentResolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/films/5")))
-        .thenReturn(ResolvedContent.builder()
-            .put("http://pressassociation.com/films/5", film)
-            .build() 
-        );
-        when(contentResolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/5")))
-        .thenReturn(ResolvedContent.builder()
-            .put("http://pressassociation.com/brands/5", brand)
-            .build() 
-        );
-        when(contentResolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/series/5-6")))
-        .thenReturn(ResolvedContent.builder()
-            .put("http://pressassociation.com/series/5", series)
-            .build() 
-        );
+    private void setupContentResolver(Iterable<Identified> identifieds) {
+        
+        for (Identified id : identifieds) {
+            when(contentResolver.findByCanonicalUris(ImmutableList.of(id.getCanonicalUri())))
+                .thenReturn(ResolvedContent.builder()
+                .put(id.getCanonicalUri(), id)
+                .build() 
+            );
+            if (id instanceof Series 
+                    || id instanceof Brand) {
+                String summaryUri = id.getCanonicalUri()
+                                      .replace(Publisher.PA.key(), Publisher.PA_SERIES_SUMMARIES.key());
+                when(contentResolver.findByCanonicalUris(ImmutableList.of(summaryUri)))
+                    .thenReturn(ResolvedContent.builder().build()
+                );
+            }
+        }
     }
 
     @Test
@@ -374,7 +377,7 @@ public class PaProgrammeProcessorTest {
         
         Brand expectedItemBrand = new Brand("http://pressassociation.com/brands/5", "pa:b-5", Publisher.PA);
         Series expectedItemSeries= new Series("http://pressassociation.com/series/5-6", "pa:s-5-6", Publisher.PA);
-        setupContentResolver(film, expectedItemBrand, expectedItemSeries);
+        setupContentResolver(ImmutableSet.<Identified>of(film, expectedItemBrand, expectedItemSeries));
         
         ProgData progData = setupProgData();
         progData.setGeneric(null);
@@ -393,7 +396,7 @@ public class PaProgrammeProcessorTest {
         
         Brand expectedItemBrand = new Brand("http://pressassociation.com/brands/5", "pa:b-5", Publisher.PA);
         Series expectedItemSeries= new Series("http://pressassociation.com/series/5-6", "pa:s-5-6", Publisher.PA);
-        setupContentResolver(film, expectedItemBrand, expectedItemSeries);
+        setupContentResolver(ImmutableSet.<Identified>of(film, expectedItemBrand, expectedItemSeries));
         
         ProgData progData = setupProgData();
         progData.setGeneric("1");
