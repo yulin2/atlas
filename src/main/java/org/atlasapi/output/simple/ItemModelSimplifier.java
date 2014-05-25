@@ -140,7 +140,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         this.channelIdCodec = channelIdCodec;
         this.serviceModelSimplifier = serviceModelSimplifier;
         this.playerModelSimplifier = playerModelSimplifier;
-        this.serviceResolver = checkNotNull(serviceResolver);
+        this.serviceResolver = serviceResolver; //TODO checkNotNull(serviceResolver);
         this.playerResolver = playerResolver; //TODO checkNotNull(playerResolver);
         ImmutableMap.Builder<Long, Long> builder = ImmutableMap.builder();
         
