@@ -47,7 +47,7 @@ public class ChannelHierarchyTest {
         channel.setName("Heat TV", "2009-10-11", "2010-01-10");
         channel.setName("Newer Heat TV", "2010-01-11", null);
         channel.setImage("p131906.png", "2009-10-11", 360, 240);
-        channel.setProviderAlias("9", "1078");
+        channel.addProviderAlias("9", "1078");
         channel.setFormat();
         channel.setRegional();
         channel.setTimeshift("60");
@@ -63,7 +63,7 @@ public class ChannelHierarchyTest {
         serviceProvider.setId("9");
         serviceProvider.setName("YouView", "2000-01-01");
         
-        ChannelTree tree = ingester.processStation(station.createPaStation(), ImmutableList.of(serviceProvider.createServiceProvider()));
+        ChannelTree tree = ingester.processStation(station.createPaStation(), ImmutableList.of(serviceProvider.build()));
         Channel createdChannel = Iterables.getOnlyElement(tree.getChildren());
         
         assertEquals("http://ref.atlasapi.org/channels/pressassociation.com/1741", createdChannel.getCanonicalUri());
@@ -92,6 +92,45 @@ public class ChannelHierarchyTest {
         assertTrue(createdChannel.getHighDefinition());
         assertTrue(createdChannel.getRegional());
         assertEquals(Duration.standardSeconds(3600), createdChannel.getTimeshift());
+    }
+    
+    @Test
+    public void testChannelWithMultipleYouViewServices() {
+        ChannelInfo channel = new ChannelInfo();
+        channel.setStartDate("2009-06-06");
+        channel.setId("1741");
+        channel.setName("Heat TV", "2009-10-11", "2010-01-10");
+        channel.setName("Newer Heat TV", "2010-01-11", null);
+        channel.setImage("p131906.png", "2009-10-11", 360, 240);
+        channel.addProviderAlias("9", "1078");
+        channel.addProviderAlias("10", "1079");
+        channel.setFormat();
+        channel.setRegional();
+        channel.setTimeshift("60");
+        
+        StationInfo station = new StationInfo();
+        station.setId("1");
+        station.setName("Heat TV", "2002-03-12");
+        station.addChannel(channel);
+        
+        ServiceProviderInfo serviceProviderYv = new ServiceProviderInfo();
+        serviceProviderYv.setId("9");
+        serviceProviderYv.setName("YouView", "2000-01-01");
+        
+        ServiceProviderInfo serviceProviderBt = new ServiceProviderInfo();
+        serviceProviderBt.setId("10");
+        serviceProviderBt.setName("BT TV", "2000-01-01");
+        
+        ChannelTree tree = ingester.processStation(station.createPaStation(), 
+                ImmutableList.of(serviceProviderBt.build(),
+                                 serviceProviderYv.build()));
+        
+        Channel createdChannel = Iterables.getOnlyElement(tree.getChildren());
+        
+        assertEquals(ImmutableSet.of("http://pressassociation.com/channels/1741", 
+                                     "http://youview.com/service/1078", 
+                                     "http://bt.youview.com/service/1079"), 
+                     createdChannel.getAliasUrls());
     }
     
     @Test
@@ -125,7 +164,7 @@ public class ChannelHierarchyTest {
         serviceProvider.setId("9");
         serviceProvider.setName("YouView", "2000-01-01");
         
-        ChannelTree tree = ingester.processStation(station.createPaStation(), ImmutableList.of(serviceProvider.createServiceProvider()));
+        ChannelTree tree = ingester.processStation(station.createPaStation(), ImmutableList.of(serviceProvider.build()));
         
         Channel parent = tree.getParent();
         List<Channel> children = tree.getChildren();
@@ -202,8 +241,7 @@ public class ChannelHierarchyTest {
         private String imageHeight;
         private String startDate;
         private String endDate;
-        private String serviceProviderId;
-        private String providerChannelId;
+        private Set<ProviderChannelId> providerChannelIds = Sets.newHashSet();
         private String format;
         private boolean regional = false;
         private String timeshift;
@@ -234,9 +272,11 @@ public class ChannelHierarchyTest {
             this.endDate = endDate;
         }
         
-        public void setProviderAlias(String serviceProviderId, String providerChannelId) {
-            this.serviceProviderId = serviceProviderId;
-            this.providerChannelId = providerChannelId;
+        public void addProviderAlias(String serviceProviderId, String providerChannelId) {
+            ProviderChannelId channelId = new ProviderChannelId();
+            channelId.setServiceProviderId(serviceProviderId);
+            channelId.setvalue(providerChannelId);
+            providerChannelIds.add(channelId);
         }
         
         public void setFormat() {
@@ -272,12 +312,10 @@ public class ChannelHierarchyTest {
             }
             paChannel.setNames(paChannelNames);
             
-            if (serviceProviderId != null) {
+            if (!providerChannelIds.isEmpty()) {
                 ProviderChannelIds channelIds = new ProviderChannelIds();
                 ProviderChannelId channelId = new ProviderChannelId();
-                channelId.setServiceProviderId(serviceProviderId);
-                channelId.setvalue(providerChannelId);
-                channelIds.getProviderChannelId().add(channelId);
+                channelIds.getProviderChannelId().addAll(providerChannelIds);
                 paChannel.setProviderChannelIds(channelIds);
             }
             

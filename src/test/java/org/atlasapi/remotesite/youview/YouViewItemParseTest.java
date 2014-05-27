@@ -24,6 +24,7 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.remotesite.pa.channels.PaChannelsIngester;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Test;
@@ -43,17 +44,20 @@ public class YouViewItemParseTest {
     private final YouViewContentExtractor contentExtractor;
     
     public YouViewItemParseTest() {
+        YouViewIngestConfiguration ingestConfiguration = new YouViewIngestConfiguration(
+                ImmutableMap.of(PaChannelsIngester.YOUVIEW_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW_STAGE),
+                "aliasprefix");
         Map<Integer, Channel> channelMapping = ImmutableMap.<Integer, Channel>builder()
                 .put(1044, FIVE)
                 .build();
-        contentExtractor = new YouViewContentExtractor(new DummyYouViewChannelResolver(channelMapping), Publisher.YOUVIEW_STAGE, "aliasprefix");
+        contentExtractor = new YouViewContentExtractor(new DummyYouViewChannelResolver(channelMapping), ingestConfiguration);
     }
     
     @Test
     public void testItemParsing() throws ValidityException, ParsingException, IOException {
         DateTimeZone.setDefault(DateTimeZones.UTC);
 
-        Item item = contentExtractor.extract(getContentElementFromFile("youview-item.xml"));
+        Item item = contentExtractor.extract(Publisher.YOUVIEW_STAGE, getContentElementFromFile("youview-item.xml"));
         
         assertEquals("http://stage.youview.com/scheduleevent/7780297", item.getCanonicalUri());
         assertEquals("Hatfields & McCoys", item.getTitle());
@@ -92,7 +96,8 @@ public class YouViewItemParseTest {
     
     @Test
     public void testItemParsingNoProgrammeId() throws ValidityException, ParsingException, IOException {
-        Item item = contentExtractor.extract(getContentElementFromFile("youview-item-no-programme-id.xml"));
+        Item item = contentExtractor.extract(Publisher.YOUVIEW_STAGE, 
+                getContentElementFromFile("youview-item-no-programme-id.xml"));
         
         assertTrue(item.getAliasUrls().isEmpty());
     }

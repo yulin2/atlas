@@ -6,6 +6,7 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -33,8 +34,8 @@ public class DefaultYouViewElementProcessor implements YouViewElementProcessor {
     }
     
     @Override
-    public ItemRefAndBroadcast process(Element element) {
-        Item item = extractor.extract(element);
+    public ItemRefAndBroadcast process(Publisher targetPublisher, Element element) {
+        Item item = extractor.extract(targetPublisher, element);
         Maybe<Identified> existing = resolve(item.getCanonicalUri());
         if (existing.isNothing()) {
             write(item);

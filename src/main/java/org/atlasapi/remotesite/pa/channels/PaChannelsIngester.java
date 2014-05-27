@@ -37,6 +37,9 @@ import com.google.common.primitives.Ints;
 
 public class PaChannelsIngester {
 
+    public static final String BT_SERVICE_ID_ALIAS_PREFIX = "http://bt.youview.com/service/";
+    public static final String YOUVIEW_SERVICE_ID_ALIAS_PREFIX = "http://youview.com/service/";
+    
     private static final String GENRE_ADULT = "Adult";
     private static final String SIMULCAST_LINK_TYPE = "Web_Simulcast";
     private static final String REGIONAL_VARIATION = "regional";
@@ -45,8 +48,13 @@ public class PaChannelsIngester {
     private static final String STATION_ALIAS_PREFIX = "http://pressassociation.com/stations/";
     private static final String STATION_URI_PREFIX = "http://ref.atlasapi.org/channels/pressassociation.com/stations/";
     private static final String FORMAT_HD = "HD";
-    private static final String YOUVIEW_SERVICE_PROVIDER_NAME = "YouView";
-    private static final String YOUVIEW_CHANNEL_ALIAS_PREFIX = "http://youview.com/service/";
+    
+    static final Map<String, String> YOUVIEW_SERVICE_PROVIDERS_TO_ALIAS_PREFIX 
+            = ImmutableMap.of("YouView", YOUVIEW_SERVICE_ID_ALIAS_PREFIX, 
+                              "BT TV", BT_SERVICE_ID_ALIAS_PREFIX);
+    
+    public static final Iterable<String> YOUVIEW_SERVICE_ID_ALIAS_PREFIXES = YOUVIEW_SERVICE_PROVIDERS_TO_ALIAS_PREFIX.values();
+    
     private static final Map<String, MediaType> MEDIA_TYPE_MAPPING = ImmutableMap.<String, MediaType>builder()
         .put("TV", MediaType.VIDEO)
         .put("Radio", MediaType.AUDIO)
@@ -233,16 +241,16 @@ public class PaChannelsIngester {
         }
         String serviceProviderName = Iterables.getOnlyElement(serviceProvider.getNames().getName()).getvalue();
         
-        if (serviceProviderName.equals(YOUVIEW_SERVICE_PROVIDER_NAME)) {
-            return youViewAlias(providerChannelId.getvalue());
+        if (YOUVIEW_SERVICE_PROVIDERS_TO_ALIAS_PREFIX.containsKey(serviceProviderName)) {
+            return youViewAlias(serviceProviderName, providerChannelId.getvalue());
         }
         
         log.warn("service provider name " + serviceProviderName + " not recognised. Unable to process providerChannelId " + providerChannelId);
         return null;
     }
 
-    private String youViewAlias(String youViewChannelId) {
-        return YOUVIEW_CHANNEL_ALIAS_PREFIX + youViewChannelId;
+    private String youViewAlias(String serviceProviderName, String youViewChannelId) {
+        return YOUVIEW_SERVICE_PROVIDERS_TO_ALIAS_PREFIX.get(serviceProviderName) + youViewChannelId;
     }
 
     private void setChannelTitleAndImage(Channel channel, List<Name> names, List<Logo> images) {
