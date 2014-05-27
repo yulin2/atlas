@@ -34,6 +34,9 @@ import org.atlasapi.remotesite.pa.channels.PaChannelsIngester;
 import org.atlasapi.remotesite.pa.channels.PaChannelsUpdater;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
+import org.atlasapi.remotesite.pa.features.ContentGroupDetails;
+import org.atlasapi.remotesite.pa.features.PaFeaturesConfiguration;
+import org.atlasapi.remotesite.pa.features.PaFeaturesContentGroupProcessor;
 import org.atlasapi.remotesite.pa.features.PaFeaturesProcessor;
 import org.atlasapi.remotesite.pa.features.PaFeaturesUpdater;
 import org.atlasapi.remotesite.pa.people.PaCompletePeopleUpdater;
@@ -52,6 +55,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
@@ -135,7 +139,18 @@ public class PaModule {
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {
-        return new PaFeaturesUpdater(paProgrammeDataStore(), fileUploadResultStore(), new PaFeaturesProcessor(contentResolver, contentGroupResolver, contentGroupWriter));
+        return new PaFeaturesUpdater(
+                paProgrammeDataStore(), 
+                fileUploadResultStore(), 
+                new PaFeaturesProcessor(contentResolver), 
+                new PaFeaturesContentGroupProcessor(contentGroupResolver, contentGroupWriter, featuresConfiguration())
+        );
+    }
+    
+    @Bean PaFeaturesConfiguration featuresConfiguration() {
+        return new PaFeaturesConfiguration(ImmutableMap.of(
+                "general", new ContentGroupDetails(Publisher.PA_FEATURES, "http://pressassocation.com/features/tvpicks"))
+        );
     }
 
     @Bean PaFtpFileUpdater ftpFileUpdater() {

@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT feature_sets (feature_set+)>
+<!ELEMENT feature_set (features+)>
+<!ATTLIST feature_set
+  id CDATA #REQUIRED
+>
 <!ELEMENT copy (#PCDATA)>
 <!ELEMENT feature (seriesTitle?, programmeTitle?, copy?)>
 <!ATTLIST feature
 	id CDATA #REQUIRED
 	programmeID CDATA #REQUIRED
+	schedule CDATA #REQUIRED
 	created CDATA #REQUIRED
 	modified CDATA #REQUIRED
 	type (long | short) #REQUIRED
 >
-<!ELEMENT features (feature+)>
+<!ELEMENT features (feature*)>
 <!ELEMENT programmeTitle (#PCDATA)>
 <!ELEMENT seriesTitle (#PCDATA)>
