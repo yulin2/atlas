@@ -284,7 +284,7 @@ public class C4BrandExtractorTest extends TestCase {
 		RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
 		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", rknBrandFeed.build())
 		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", rknSeries3Feed.build())
-		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/video.atom", uglyBettyClipFeed.build());
+		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/videos/all.atom", uglyBettyClipFeed.build());
 		
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
 		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");

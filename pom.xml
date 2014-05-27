@@ -49,7 +49,7 @@
                         <configuration>
                             <generatePackage>org.atlasapi.remotesite.pa.features.bindings</generatePackage>
                             <schemaIncludes>
-                                <schemaInclude>features.dtd</schemaInclude>
+                                <schemaInclude>feature_sets.dtd</schemaInclude>
                             </schemaIncludes>
                             <forceRegenerate>true</forceRegenerate>
                             <generateDirectory>${project.build.directory}/generated-sources</generateDirectory>
@@ -357,6 +357,11 @@
                     <artifactId>servlet-api</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>16.0.1</version>
         </dependency>
         <dependency>
             <groupId>it.unimi.dsi</groupId>

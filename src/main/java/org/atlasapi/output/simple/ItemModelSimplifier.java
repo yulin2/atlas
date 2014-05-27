@@ -140,7 +140,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         this.channelIdCodec = channelIdCodec;
         this.serviceModelSimplifier = serviceModelSimplifier;
         this.playerModelSimplifier = playerModelSimplifier;
-        this.serviceResolver = checkNotNull(serviceResolver);
+        this.serviceResolver = serviceResolver; //TODO checkNotNull(serviceResolver);
         this.playerResolver = playerResolver; //TODO checkNotNull(playerResolver);
         ImmutableMap.Builder<Long, Long> builder = ImmutableMap.builder();
         
@@ -563,6 +563,19 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                 }
                 
                 Optional<Player> player = playerResolver.playerFor(123L);
+                if (player.isPresent()) {
+                    simpleLocation.setPlayer(playerModelSimplifier.simplify(player.get(), 
+                            annotations, config));
+                }
+            }
+            if (location.getCanonicalUri() != null && location.getCanonicalUri().startsWith("demand")) {
+                Optional<Service> service = serviceResolver.serviceFor(124L);
+                if (service.isPresent()) {
+                    simpleLocation.setService(serviceModelSimplifier.simplify(service.get(), 
+                            annotations, config));
+                }
+                
+                Optional<Player> player = playerResolver.playerFor(124L);
                 if (player.isPresent()) {
                     simpleLocation.setPlayer(playerModelSimplifier.simplify(player.get(), 
                             annotations, config));

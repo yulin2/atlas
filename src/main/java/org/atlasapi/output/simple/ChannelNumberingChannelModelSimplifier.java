@@ -21,7 +21,8 @@ public class ChannelNumberingChannelModelSimplifier extends IdentifiedModelSimpl
             input, 
             annotations.contains(Annotation.HISTORY), 
             annotations.contains(Annotation.PARENT), 
-            annotations.contains(Annotation.VARIATIONS)
+            annotations.contains(Annotation.VARIATIONS),
+            annotations.contains(Annotation.CHANNEL_GROUPS_SUMMARY)
         );
     }
 }
