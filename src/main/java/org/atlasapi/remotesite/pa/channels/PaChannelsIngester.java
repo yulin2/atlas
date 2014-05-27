@@ -49,7 +49,7 @@ public class PaChannelsIngester {
     private static final String STATION_URI_PREFIX = "http://ref.atlasapi.org/channels/pressassociation.com/stations/";
     private static final String FORMAT_HD = "HD";
     
-    static final Map<String, String> YOUVIEW_SERVICE_PROVIDERS_TO_ALIAS_PREFIX 
+    private static final Map<String, String> YOUVIEW_SERVICE_PROVIDERS_TO_ALIAS_PREFIX 
             = ImmutableMap.of("YouView", YOUVIEW_SERVICE_ID_ALIAS_PREFIX, 
                               "BT TV", BT_SERVICE_ID_ALIAS_PREFIX);
     
