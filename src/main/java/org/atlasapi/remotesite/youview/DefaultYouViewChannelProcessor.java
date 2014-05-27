@@ -27,18 +27,17 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
     private final ScheduleWriter scheduleWriter;
     private final YouViewElementProcessor processor;
     private final BroadcastTrimmer trimmer;
-    private final Publisher publisher;
     
-    public DefaultYouViewChannelProcessor(ScheduleWriter scheduleWriter, YouViewElementProcessor processor, 
-            BroadcastTrimmer trimmer, Publisher publisher) {
+    public DefaultYouViewChannelProcessor(ScheduleWriter scheduleWriter, 
+            YouViewElementProcessor processor, BroadcastTrimmer trimmer) {
         this.scheduleWriter = checkNotNull(scheduleWriter);
         this.processor = checkNotNull(processor);
         this.trimmer = checkNotNull(trimmer);
-        this.publisher = checkNotNull(publisher);
     }
     
     @Override
-    public UpdateProgress process(Channel channel, Elements elements, Interval schedulePeriod) {
+    public UpdateProgress process(Channel channel, Publisher targetPublisher, 
+            Elements elements, Interval schedulePeriod) {
         
         List<ItemRefAndBroadcast> broadcasts = Lists.newArrayList();
         Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
@@ -46,7 +45,7 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
         UpdateProgress progress = UpdateProgress.START;
         for (int i = 0; i < elements.size(); i++) {
             try {
-                ItemRefAndBroadcast itemAndBroadcast = processor.process(elements.get(i));
+                ItemRefAndBroadcast itemAndBroadcast = processor.process(targetPublisher, elements.get(i));
                 if (itemAndBroadcast != null) {
                     broadcasts.add(itemAndBroadcast);
                     acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
@@ -60,14 +59,14 @@ public class DefaultYouViewChannelProcessor implements YouViewChannelProcessor {
             }
         }
         if (trimmer != null) {
-            trimmer.trimBroadcasts(schedulePeriod, channel, acceptableBroadcastIds.build());
+            trimmer.trimBroadcasts(targetPublisher, schedulePeriod, channel, acceptableBroadcastIds.build());
         }
         if (broadcasts.isEmpty()) {
             log.info(String.format("No broadcasts for channel %s (%s) on %s", channel.getTitle(), 
                     getYouViewId(channel), schedulePeriod.getStart().toString()));
         } else {
             try {
-                scheduleWriter.replaceScheduleBlock(publisher, channel, broadcasts);
+                scheduleWriter.replaceScheduleBlock(targetPublisher, channel, broadcasts);
             } catch (IllegalArgumentException e) {
                 log.error(String.format("Failed to update schedule for channel %s (%s) on %s: %s", 
                         channel.getTitle(), getYouViewId(channel), 

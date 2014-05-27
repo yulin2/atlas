@@ -15,7 +15,9 @@ import static org.atlasapi.media.entity.Publisher.ROVI_EN_GB;
 import static org.atlasapi.media.entity.Publisher.ROVI_EN_US;
 import static org.atlasapi.media.entity.Publisher.TALK_TALK;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT_STAGE;
 
 import java.util.Set;
 
@@ -154,6 +156,16 @@ public class EquivTaskModule {
                     .withPublishers(YOUVIEW_STAGE)
                     .withChannels(youViewChannelResolver().getAllChannels())
                     .build().withName("YouView Stage Schedule Equivalence (8 day) Updater"), 
+                YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(YOUVIEW_BT)
+                    .withChannels(youViewChannelResolver().getAllChannels())
+                    .build().withName("YouView BT Schedule Equivalence (8 day) Updater"), 
+                YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(YOUVIEW_BT_STAGE)
+                    .withChannels(youViewChannelResolver().getAllChannels())
+                    .build().withName("YouView Stage BT Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(BBC)

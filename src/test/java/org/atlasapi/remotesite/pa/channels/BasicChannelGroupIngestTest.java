@@ -41,7 +41,7 @@ public class BasicChannelGroupIngestTest {
         serviceProvider.setId("2");
         serviceProvider.setRegions(Lists.<RegionalisationInfo>newArrayList());
 
-        ChannelGroupTree result = ingester.processPlatform(platformInfo.createPlatform(), ImmutableList.of(serviceProvider.createServiceProvider()), ImmutableList.<org.atlasapi.remotesite.pa.channels.bindings.Region>of());
+        ChannelGroupTree result = ingester.processPlatform(platformInfo.createPlatform(), ImmutableList.of(serviceProvider.build()), ImmutableList.<org.atlasapi.remotesite.pa.channels.bindings.Region>of());
         Platform platform = result.getPlatform();
         
         // test that platform fields are picked up ok
@@ -78,7 +78,7 @@ public class BasicChannelGroupIngestTest {
         platformInfo.setServiceProviderId("2");
         platformInfo.setCountries(ImmutableList.of(Countries.GB.code()));
         
-        ChannelGroupTree tree = ingester.processPlatform(platformInfo.createPlatform(), ImmutableList.of(serviceProvider.createServiceProvider()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()));
+        ChannelGroupTree tree = ingester.processPlatform(platformInfo.createPlatform(), ImmutableList.of(serviceProvider.build()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()));
         Map<String, Region> regions = tree.getRegions();
         
         Region region = Iterables.getOnlyElement(regions.values());
@@ -171,7 +171,7 @@ class ServiceProviderInfo {
         this.nameStartDate = nameStartDate;
     }
     
-    public ServiceProvider createServiceProvider() {
+    public ServiceProvider build() {
         ServiceProvider serviceProvider = new ServiceProvider();
         
         RegionalisationList regionalisationList = new RegionalisationList();
