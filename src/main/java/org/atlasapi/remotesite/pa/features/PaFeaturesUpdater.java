@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.pa.features;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.metabroadcast.common.scheduling.UpdateProgress.FAILURE;
 import static com.metabroadcast.common.scheduling.UpdateProgress.SUCCESS;
 
@@ -19,17 +20,22 @@ import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.feeds.upload.FileUploadResult.FileUploadResultType;
 import org.atlasapi.feeds.upload.persistence.FileUploadResultStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
+import org.atlasapi.remotesite.pa.features.PaFeaturesContentGroupProcessor.FeatureSetContentGroups;
 import org.atlasapi.remotesite.pa.features.bindings.Feature;
-import org.joda.time.DateMidnight;
+import org.atlasapi.remotesite.pa.features.bindings.FeatureSet;
+import org.atlasapi.remotesite.pa.features.bindings.Features;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.XMLReader;
 
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
@@ -44,11 +50,14 @@ public class PaFeaturesUpdater extends ScheduledTask {
     private final FileUploadResultStore fileUploadResultStore;
     private final PaFeaturesProcessor processor;
     private final XMLReader reader;
+    private final PaFeaturesContentGroupProcessor contentGroupProcessor;
     
-    public PaFeaturesUpdater(PaProgrammeDataStore dataStore, FileUploadResultStore fileUploadResultStore, PaFeaturesProcessor processor) {
-        this.dataStore = dataStore;
-        this.fileUploadResultStore = fileUploadResultStore;
-        this.processor = processor;
+    public PaFeaturesUpdater(PaProgrammeDataStore dataStore, FileUploadResultStore fileUploadResultStore, 
+            PaFeaturesProcessor processor, PaFeaturesContentGroupProcessor contentGroupProcessor) {
+        this.dataStore = checkNotNull(dataStore);
+        this.fileUploadResultStore = checkNotNull(fileUploadResultStore);
+        this.processor = checkNotNull(processor);
+        this.contentGroupProcessor = checkNotNull(contentGroupProcessor);
         this.reader = createReader();
     }
 
@@ -69,10 +78,11 @@ public class PaFeaturesUpdater extends ScheduledTask {
 
     @Override
     protected void runTask() {
-        DateTime sixAmToday = new DateTime(DateMidnight.now()).plusHours(6);
+        DateTime sixAmToday = LocalDate.now().toDateTime(LocalTime.MIDNIGHT).plusHours(6);
+        contentGroupProcessor.prepareUpdate();
         processor.prepareUpdate(new Interval(sixAmToday, sixAmToday.plus(UPCOMING_INTERVAL_DURATION)));
-        processFiles(dataStore.localFeaturesFiles(Predicates.<File>alwaysTrue()/*new UnprocessedFileFilter(fileUploadResultStore, SERVICE, new DateTime(DateTimeZones.UTC).minusDays(10).getMillis())*/));
-        processor.finishUpdate();
+        processFiles(dataStore.localFeaturesFiles(Predicates.<File>alwaysTrue()));
+        contentGroupProcessor.finishUpdate();
     }
     
     private void processFiles(List<File> files) {
@@ -125,9 +135,18 @@ public class PaFeaturesUpdater extends ScheduledTask {
             public void beforeUnmarshal(Object target, Object parent) { }
 
             public void afterUnmarshal(Object target, Object parent) {
-                if (target instanceof Feature) {
+                if (target instanceof FeatureSet) {
                     try {
-                        processor.process(((Feature) target).getProgrammeID());
+                        FeatureSet featureSet = (FeatureSet) target;
+                        FeatureSetContentGroups contentGroups = contentGroupProcessor.getContentGroups(featureSet.getId());
+                        if (contentGroups == null) {
+                            log.error("FeatureSet Id {} not supported");
+                        } else {
+                            Features features = Iterables.getOnlyElement(featureSet.getFeatures());
+                            for (Feature feature : features.getFeature()) {
+                                processor.process(feature.getProgrammeID(), contentGroups);
+                            }
+                        }
                     } catch (NoSuchElementException e) {
                         log.error("No content found for programme Id: " + ((Feature) target).getProgrammeID(), e);
                     }
