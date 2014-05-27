@@ -148,8 +148,12 @@ public class PaModule {
     }
     
     @Bean PaFeaturesConfiguration featuresConfiguration() {
-        return new PaFeaturesConfiguration(ImmutableMap.of(
-                "general", new ContentGroupDetails(Publisher.PA_FEATURES, "http://pressassocation.com/features/tvpicks"))
+        return new PaFeaturesConfiguration(
+                ImmutableMap.<String, ContentGroupDetails>builder()
+                    .put("General", new ContentGroupDetails(Publisher.PA_FEATURES, "http://pressassocation.com/features/tvpicks"))
+                    .put("Ireland", new ContentGroupDetails(Publisher.PA_FEATURES_IRELAND, "http://pressassocation.com/features/ireland"))
+                    .put("Soap-Entertainment", new ContentGroupDetails(Publisher.PA_FEATURES_SOAP_ENTERTAINMENT, "http://pressassocation.com/features/soap-entertainment"))
+                    .build()
         );
     }
 
