@@ -34,7 +34,9 @@ import static org.atlasapi.media.entity.Publisher.SPOTIFY;
 import static org.atlasapi.media.entity.Publisher.TALK_TALK;
 import static org.atlasapi.media.entity.Publisher.YOUTUBE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT_STAGE;
 
 import java.io.File;
 import java.util.Set;
@@ -232,7 +234,7 @@ public class EquivModule {
         Set<Publisher> acceptablePublishers = ImmutableSet.copyOf(Sets.difference(
             Publisher.all(), 
             Sets.union(
-                ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM, NETFLIX, YOUVIEW, YOUVIEW_STAGE), 
+                ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM, NETFLIX, YOUVIEW, YOUVIEW_STAGE, YOUVIEW_BT, YOUVIEW_BT_STAGE), 
                 Sets.union(musicPublishers, roviPublishers)
             )
         ));

@@ -15,7 +15,9 @@ import static org.atlasapi.media.entity.Publisher.ROVI_EN_GB;
 import static org.atlasapi.media.entity.Publisher.ROVI_EN_US;
 import static org.atlasapi.media.entity.Publisher.TALK_TALK;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT_STAGE;
 
 import java.util.Set;
 
@@ -156,6 +158,16 @@ public class EquivTaskModule {
                     .build().withName("YouView Stage Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(YOUVIEW_BT)
+                    .withChannels(youViewChannelResolver().getAllChannels())
+                    .build().withName("YouView BT Schedule Equivalence (8 day) Updater"), 
+                YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(YOUVIEW_BT_STAGE)
+                    .withChannels(youViewChannelResolver().getAllChannels())
+                    .build().withName("YouView Stage BT Schedule Equivalence (8 day) Updater"), 
+                YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(BBC)
                     .withChannels(bbcChannels())
                     .build().withName("BBC Schedule Equivalence (8 day) Updater"), 
@@ -264,10 +276,10 @@ public class EquivTaskModule {
     private EquivalenceUpdatingWorker equivUpdatingWorker() {
         return new EquivalenceUpdatingWorker(contentResolver, lookupStore, equivalenceResultStore, equivUpdater,
             Predicates.or(ImmutableList.<Predicate<? super Content>>of(
-                sourceIsIn(BBC_REDUX, YOUVIEW, YOUVIEW_STAGE),
+                sourceIsIn(BBC_REDUX, YOUVIEW, YOUVIEW_STAGE, YOUVIEW_BT, YOUVIEW_BT_STAGE),
                 Predicates.and(Predicates.instanceOf(Container.class),
                     sourceIsIn(BBC, C4, C4_PMLSD, ITV, FIVE, BBC_REDUX, ITUNES, 
-                        RADIO_TIMES, LOVEFILM, TALK_TALK, YOUVIEW,NETFLIX))
+                        RADIO_TIMES, LOVEFILM, TALK_TALK, YOUVIEW, NETFLIX))
             ))
         );
     }

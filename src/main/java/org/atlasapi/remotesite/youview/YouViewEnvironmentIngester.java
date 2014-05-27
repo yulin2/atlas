@@ -12,6 +12,8 @@ import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.joda.time.Duration;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.api.client.repackaged.com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Every;
@@ -28,7 +30,7 @@ public class YouViewEnvironmentIngester {
     private final YouViewScheduleFetcher youViewScheduleFetcher;
     private final YouViewElementProcessor youViewElementProcessor;
     private final YouViewChannelResolver youViewChannelResolver;
-    private Publisher publisher;
+    private final YouViewIngestConfiguration ingestConfiguration;
     
     /**
      * 
@@ -48,29 +50,40 @@ public class YouViewEnvironmentIngester {
     public YouViewEnvironmentIngester(String youViewUri, Duration timeout, 
             SimpleScheduler scheduler, ChannelResolver channelResolver, ContentResolver contentResolver, 
             ContentWriter contentWriter, ScheduleWriter scheduleWriter, ScheduleResolver scheduleResolver, 
-            Publisher publisher, String aliasPrefix) {
+            YouViewIngestConfiguration ingestConfiguration) {
         
-        this.publisher = checkNotNull(publisher);
+        this.ingestConfiguration = checkNotNull(ingestConfiguration);
         this.scheduler = checkNotNull(scheduler);
         this.youViewChannelResolver = new DefaultYouViewChannelResolver(channelResolver);
         this.youViewScheduleFetcher = new YouViewScheduleFetcher(youViewUri, Ints.saturatedCast(timeout.getStandardSeconds()));
         this.youViewElementProcessor = new DefaultYouViewElementProcessor(
-                                                new YouViewContentExtractor(youViewChannelResolver, publisher, aliasPrefix), 
+                                                new YouViewContentExtractor(youViewChannelResolver, ingestConfiguration), 
                                                 contentResolver, contentWriter
                                        );
-        this.youViewChannelProcessor = new DefaultYouViewChannelProcessor(scheduleWriter, youViewElementProcessor, new ScheduleResolverBroadcastTrimmer(publisher, scheduleResolver, contentResolver, contentWriter), publisher);
+        this.youViewChannelProcessor = new DefaultYouViewChannelProcessor(scheduleWriter, youViewElementProcessor, new ScheduleResolverBroadcastTrimmer(scheduleResolver, contentResolver, contentWriter));
     }
     
     public void startBackgroundTasks() {
-        scheduler.schedule(youViewTodayUpdater().withName("YouView [" + publisher.name() + "] Today Updater"), EVERY_15_MINUTES);
-        scheduler.schedule(youViewFornightUpdater().withName("YouView [" + publisher.name() + "] Updater ±7 Days"), EVERY_HOUR);
+        String publishers = publishers();
+        scheduler.schedule(youViewTodayUpdater().withName("YouView [" + publishers + "] Today Updater"), EVERY_15_MINUTES);
+        scheduler.schedule(youViewFornightUpdater().withName("YouView [" + publishers + "] Updater ±7 Days"), EVERY_HOUR);
     }
 
     private YouViewFortnightUpdater youViewFornightUpdater() {
-        return new YouViewFortnightUpdater(youViewChannelResolver, youViewScheduleFetcher, youViewChannelProcessor);
+        return new YouViewFortnightUpdater(youViewChannelResolver, 
+                youViewScheduleFetcher, youViewChannelProcessor, ingestConfiguration);
     }
         
     private YouViewTodayUpdater youViewTodayUpdater() {
-        return new YouViewTodayUpdater(youViewChannelResolver, youViewScheduleFetcher, youViewChannelProcessor);
+        return new YouViewTodayUpdater(youViewChannelResolver, youViewScheduleFetcher, 
+                youViewChannelProcessor, ingestConfiguration);
+    }
+    
+    private String publishers() {
+        return Joiner.on(",")
+                 .join(Iterables.transform(
+                         ingestConfiguration.getAliasPrefixToPublisherMap().values(), 
+                         Publisher.TO_KEY)
+                      );
     }
 }
