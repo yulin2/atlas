@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.youview;
 
-import java.util.List;
+import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
 
@@ -12,5 +12,9 @@ public interface YouViewChannelResolver {
     
     Optional<Channel> getChannel(int channelId);
     
-    List<Channel> getAllChannels();
+    Iterable<Channel> getAllChannels();
+    
+    Map<Integer, Channel> getAllChannelsByServiceId();
+
+    String getChannelServiceAlias(int channelId);
 }

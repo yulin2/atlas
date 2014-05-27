@@ -37,4 +37,14 @@ public class DummyYouViewChannelResolver implements YouViewChannelResolver {
         return ImmutableList.copyOf(channelMap.values());
     }
 
+    @Override
+    public Map<Integer, Channel> getAllChannelsByServiceId() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getChannelServiceAlias(int channelId) {
+        throw new UnsupportedOperationException();
+    }
+
 }

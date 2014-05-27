@@ -31,7 +31,7 @@ import com.metabroadcast.common.collect.ImmutableOptionalMap;
 import com.metabroadcast.common.collect.OptionalMap;
 import com.metabroadcast.common.intl.Countries;
 
-public class YouViewContentExtractor implements ContentExtractor<Element, Item> {
+public class YouViewContentExtractor {
 
     private static final String ATOM_PREFIX = "atom";
     private static final String YV_PREFIX = "yv";
@@ -67,39 +67,42 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private final YouViewChannelResolver channelResolver;
     
     private final DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeNoMillis();
-    private final Publisher publisher;
-    private final String scheduleEventPrefix;
-    private final String programmeAliasPrefix;
-    private final String aliasPrefix;
+    private final YouViewIngestConfiguration ingestConfiguration;
     
-    public YouViewContentExtractor(YouViewChannelResolver channelResolver, Publisher publisher, String aliasPrefix) {
-        this.aliasPrefix = aliasPrefix;
+    public YouViewContentExtractor(YouViewChannelResolver channelResolver, YouViewIngestConfiguration ingestConfiguration) {
+        this.ingestConfiguration = checkNotNull(ingestConfiguration);
         this.channelResolver = checkNotNull(channelResolver);
-        this.publisher = checkNotNull(publisher);
-        this.scheduleEventPrefix = String.format("http://%s/scheduleevent/", publisher.key());
-        this.programmeAliasPrefix = String.format("http://%s/programme/", publisher.key());
     }
     
-    @Override
-    public Item extract(Element source) {
+    public Item extract(Publisher targetPublisher, Element source) {
         
         Item item = new Item();
 
         String id = getId(source);
-        item.setCanonicalUri(scheduleEventPrefix + id);
-        item.addAlias(new Alias(aliasPrefix + ":scheduleevent", id));
+        item.setCanonicalUri(scheduleEventUriFor(targetPublisher, id));
+        item.addAlias(new Alias(ingestConfiguration.getAliasNamespacePrefix()
+                + ":scheduleevent", id));
         item.setTitle(getTitle(source));
         item.setMediaType(getMediaType(source));
-        item.setPublisher(publisher);
+        item.setPublisher(targetPublisher);
 
         Optional<String> programmeId = getProgrammeId(source);
         if (programmeId.isPresent()) {
-            item.addAliasUrl(programmeAliasPrefix + programmeId.get());
-            item.addAlias(new Alias(aliasPrefix + ":programme", programmeId.get()));
+            item.addAliasUrl(programmeAliasUriFor(targetPublisher, programmeId.get()));
+            item.addAlias(new Alias(ingestConfiguration.getAliasNamespacePrefix() 
+                    + ":programme", programmeId.get()));
         }
         
         item.addVersion(getVersion(source));
         return item;
+    }
+    
+    private String scheduleEventUriFor(Publisher publisher, String scheduleEventId) {
+        return String.format("http://%s/scheduleevent/%s", publisher.key(), scheduleEventId);
+    }
+    
+    private String programmeAliasUriFor(Publisher publisher, String programmeId) {
+        return String.format("http://%s/programme/%s", publisher.key(), programmeId);
     }
     
     private Optional<Location> getLocation(Element source, Channel channel) {

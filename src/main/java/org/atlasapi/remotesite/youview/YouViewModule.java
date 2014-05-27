@@ -8,12 +8,14 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
+import org.atlasapi.remotesite.pa.channels.PaChannelsIngester;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
@@ -37,8 +39,7 @@ public class YouViewModule {
         return new YouViewEnvironmentIngester(youViewProductionUri, 
                 Duration.standardSeconds(timeout), scheduler, 
                 channelResolver, contentResolver, contentWriter, 
-                scheduleWriter, scheduleResolver, Publisher.YOUVIEW, 
-                YOUVIEW_PRODUCTION_ALIAS_PREFIX);
+                scheduleWriter, scheduleResolver, productionConfiguration());
     }
     
     @Bean
@@ -46,8 +47,7 @@ public class YouViewModule {
         return new YouViewEnvironmentIngester(youViewStageUri, 
                 Duration.standardSeconds(timeout), scheduler, 
                 channelResolver, contentResolver, contentWriter, 
-                scheduleWriter, scheduleResolver, Publisher.YOUVIEW_STAGE,
-                YOUVIEW_STAGE_ALIAS_PREFIX);
+                scheduleWriter, scheduleResolver, stageConfiguration());
     }
     
     @PostConstruct
@@ -56,5 +56,17 @@ public class YouViewModule {
         youViewStageIngester().startBackgroundTasks();
     }
     
+    private YouViewIngestConfiguration productionConfiguration() {
+        return new YouViewIngestConfiguration(
+                ImmutableMap.of(PaChannelsIngester.YOUVIEW_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW,
+                        PaChannelsIngester.BT_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW_BT),
+                YOUVIEW_PRODUCTION_ALIAS_PREFIX);
+    }
     
+    private YouViewIngestConfiguration stageConfiguration() {
+        return new YouViewIngestConfiguration(
+                ImmutableMap.of(PaChannelsIngester.YOUVIEW_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW_STAGE,
+                        PaChannelsIngester.BT_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW_BT_STAGE),
+                YOUVIEW_STAGE_ALIAS_PREFIX);
+    }
 }

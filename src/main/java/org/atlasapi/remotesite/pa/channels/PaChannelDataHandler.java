@@ -33,10 +33,9 @@ import com.metabroadcast.common.base.Maybe;
 public class PaChannelDataHandler {
     
     private static final String PRESS_ASSOCIATION_URL = "http://pressassociation.com";
-    private static final Set<String> KNOWN_ALIAS_PREFIXES = ImmutableSet.of(
-            "http://pressassociation.com/",
-            "http://youview.com/service/"
-    );
+    private static final Iterable<String> KNOWN_ALIAS_PREFIXES = Iterables.concat(
+            ImmutableSet.of("http://pressassociation.com/"),
+            PaChannelsIngester.YOUVIEW_SERVICE_PROVIDERS_TO_ALIAS_PREFIX.keySet());
     private static final Predicate<String> IS_KNOWN_ALIAS = new Predicate<String>() {
         @Override
         public boolean apply(String input) {
