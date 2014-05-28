@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.pa.features;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 
 import org.atlasapi.media.entity.ChildRef;
@@ -63,7 +63,7 @@ public class PaFeaturesContentGroupProcessorTest {
         
         processor.prepareUpdate();
         
-        assertNull(processor.getContentGroups("invalidFeatureSet"));
+        assertEquals(Optional.<FeatureSetContentGroups>absent(), processor.getContentGroups("invalidFeatureSet"));
     }
     
     @Test
@@ -110,12 +110,12 @@ public class PaFeaturesContentGroupProcessorTest {
         return item.childRef();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void testContentGroupFetchBeforePreparationThrowsException() {
         processor.getContentGroups(FEATURE_SET_ID);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void testFinishBeforePreparationThrowsException() {
         processor.finishUpdate();
     }
