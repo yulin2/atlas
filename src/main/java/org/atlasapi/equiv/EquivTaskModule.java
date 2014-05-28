@@ -276,10 +276,10 @@ public class EquivTaskModule {
     private EquivalenceUpdatingWorker equivUpdatingWorker() {
         return new EquivalenceUpdatingWorker(contentResolver, lookupStore, equivalenceResultStore, equivUpdater,
             Predicates.or(ImmutableList.<Predicate<? super Content>>of(
-                sourceIsIn(BBC_REDUX, YOUVIEW, YOUVIEW_STAGE),
+                sourceIsIn(BBC_REDUX, YOUVIEW, YOUVIEW_STAGE, YOUVIEW_BT, YOUVIEW_BT_STAGE),
                 Predicates.and(Predicates.instanceOf(Container.class),
                     sourceIsIn(BBC, C4, C4_PMLSD, ITV, FIVE, BBC_REDUX, ITUNES, 
-                        RADIO_TIMES, LOVEFILM, TALK_TALK, YOUVIEW,NETFLIX))
+                        RADIO_TIMES, LOVEFILM, TALK_TALK, YOUVIEW, NETFLIX))
             ))
         );
     }

@@ -43,10 +43,10 @@ public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
         for (Entry<String, Channel> entry: channelResolver.forAliases(prefix).entrySet()) {
             Matcher m = pattern.matcher(entry.getKey());
             if (m.matches()) {
-                Integer channel = Integer.decode(m.group(1));
+                Integer serviceId = Integer.decode(m.group(1));
                 
-                channelMapBuilder.put(channel, entry.getValue());
-                aliasMapBuilder.put(channel, entry.getKey());
+                channelMapBuilder.put(serviceId, entry.getValue());
+                aliasMapBuilder.put(serviceId, entry.getKey());
             } else {
                 log.error("Could not parse YouView alias " + entry.getKey());
             }
@@ -54,22 +54,22 @@ public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
     }
 
     @Override
-    public String getChannelUri(int channelId) {
-        if (channelMap.containsKey(channelId)) {
-            return channelMap.get(channelId).getUri();
+    public String getChannelUri(int serviceId) {
+        if (channelMap.containsKey(serviceId)) {
+            return channelMap.get(serviceId).getUri();
         }
         return null;
     }
     
     @Override
-    public String getChannelServiceAlias(int channelId) {
-        return aliasMap.get(channelId);
+    public String getChannelServiceAlias(int serviceId) {
+        return aliasMap.get(serviceId);
     }
     
     @Override
-    public Optional<Channel> getChannel(int channelId) {
-        if (channelMap.containsKey(channelId)) {
-            return Optional.fromNullable(channelMap.get(channelId));
+    public Optional<Channel> getChannel(int serviceId) {
+        if (channelMap.containsKey(serviceId)) {
+            return Optional.fromNullable(channelMap.get(serviceId));
         }
         return Optional.absent();
     }

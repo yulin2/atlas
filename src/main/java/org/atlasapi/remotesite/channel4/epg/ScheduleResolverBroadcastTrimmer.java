@@ -30,16 +30,16 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
     private final Optional<Publisher> defaultPublisher;
     private final ContentWriter writer;
     private final ScheduleResolver scheduleResolver;
-	private final ContentResolver resolver;
+    private final ContentResolver resolver;
 
     public ScheduleResolverBroadcastTrimmer(Publisher publisher, ScheduleResolver scheduleResolver, 
             ContentResolver resolver, ContentWriter writer) {
         this.scheduleResolver = scheduleResolver;
         this.defaultPublisher = Optional.fromNullable(publisher);
-		this.resolver = checkNotNull(resolver);
+        this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(writer);
     }
-    
+
     public ScheduleResolverBroadcastTrimmer(ScheduleResolver scheduleResolver, 
             ContentResolver resolver, ContentWriter writer) {
         this(null, scheduleResolver, resolver, writer);
