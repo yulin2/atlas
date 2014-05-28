@@ -13,6 +13,7 @@ import org.atlasapi.persistence.content.ResolvedContent;
 
 import com.google.api.client.util.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 
@@ -38,7 +39,7 @@ public class PaFeaturesContentGroupProcessor {
     }
     
     private Map<String, FeatureSetContentGroups> getOrCreateContentGroups() {
-        return Maps.transformEntries(
+        return ImmutableMap.copyOf(Maps.transformEntries(
                 config.getFeatureSetMap(), 
                 new EntryTransformer<String, ContentGroupDetails, FeatureSetContentGroups>() {
                     @Override
@@ -49,7 +50,7 @@ public class PaFeaturesContentGroupProcessor {
                         );
                     }
                 }
-        );
+        ));
     }
 
     private ContentGroup getOrCreateContentGroup(String uri, Publisher publisher) {
