@@ -28,6 +28,7 @@ import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.preview.PreviewNetworksModule;
 import org.atlasapi.remotesite.redux.ReduxModule;
 import org.atlasapi.remotesite.rovi.RoviModule;
+import org.atlasapi.remotesite.rte.RteModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
 import org.atlasapi.remotesite.thesun.TheSunModule;
 import org.atlasapi.remotesite.talktalk.TalkTalkModule;
@@ -82,6 +83,7 @@ public class RemoteSiteModuleConfigurer {
         .put("wikipedia", WikipediaModule.class)
         .put("thesuntvpicks", TheSunModule.class)
         .put("rovi", RoviModule.class)
+        .put("rte", RteModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
