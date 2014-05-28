@@ -1,15 +1,16 @@
 package org.atlasapi.remotesite.youview;
 
-import static org.atlasapi.remotesite.youview.DefaultYouViewChannelResolver.YOUVIEW_URI_MATCHER;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
-import java.util.regex.Matcher;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
@@ -31,13 +32,19 @@ public class YouViewUpdater extends ScheduledTask {
     private final Logger log = LoggerFactory.getLogger(YouViewUpdater.class);
     private final YouViewChannelResolver channelResolver;
     private final YouViewChannelProcessor processor;
+    private final YouViewIngestConfiguration ingestConfiguration;
     
-    public YouViewUpdater(YouViewChannelResolver channelResolver, YouViewScheduleFetcher fetcher, YouViewChannelProcessor processor, int minusDays, int plusDays) {
-        this.channelResolver = channelResolver;
-        this.fetcher = fetcher;
-        this.processor = processor;
+    public YouViewUpdater(YouViewChannelResolver channelResolver, 
+            YouViewScheduleFetcher fetcher, YouViewChannelProcessor processor,
+            YouViewIngestConfiguration ingestConfiguration,
+            int minusDays, int plusDays) {
+        this.channelResolver = checkNotNull(channelResolver);
+        this.fetcher = checkNotNull(fetcher);
+        this.processor = checkNotNull(processor);
+        this.ingestConfiguration = checkNotNull(ingestConfiguration);
         this.minusDays = minusDays;
         this.plusDays = plusDays;
+        
     }
     
     // TODO report status effectively
@@ -48,21 +55,24 @@ public class YouViewUpdater extends ScheduledTask {
             LocalDate start = today.minusDays(minusDays);
             LocalDate finish = today.plusDays(plusDays);
             
-            List<Channel> youViewChannels = channelResolver.getAllChannels();
+            Map<Integer, Channel> youViewChannels = channelResolver.getAllChannelsByServiceId();
             
             UpdateProgress progress = UpdateProgress.START;
             
             while (!start.isAfter(finish)) {
                 LocalDate end = start.plusDays(1);
-                for (Channel channel : youViewChannels) {
+                for (Entry<Integer, Channel> channel : youViewChannels.entrySet()) {
                     Interval interval = new Interval(start.toDateTimeAtStartOfDay(), 
                             end.toDateTimeAtStartOfDay());
+                    Integer serviceId = channel.getKey();
                     Document xml = fetcher.getSchedule(interval.getStart(), interval.getEnd(), 
-                            getYouViewId(channel));
+                            serviceId);
                     Element root = xml.getRootElement();
                     Elements entries = root.getChildElements(ENTRY_KEY, root.getNamespaceURI(ATOM_PREFIX));
 
-                    progress = progress.reduce(processor.process(channel, entries, interval));
+                    Publisher publisher = publisherFor(channelResolver.getChannelServiceAlias(serviceId));
+                    progress = progress.reduce(processor.process(channel.getValue(),  
+                            publisher, entries, interval));
                     reportStatus(progress.toString());
                 }
                 start = end;
@@ -74,14 +84,14 @@ public class YouViewUpdater extends ScheduledTask {
 
     }
     
-    private int getYouViewId(Channel channel) {
-        for (String alias : channel.getAliasUrls()) {
-            Matcher m = YOUVIEW_URI_MATCHER.matcher(alias);
-            if(m.matches()) {
-                return Integer.decode(m.group(1));
+    private Publisher publisherFor(String channelServiceAlias) {
+        for (Entry<String, Publisher> entry : 
+                ingestConfiguration.getAliasPrefixToPublisherMap().entrySet()) {
+            if (channelServiceAlias.startsWith(entry.getKey())) {
+                return entry.getValue();
             }
         }
-        throw new RuntimeException("Channel " + channel.getCanonicalUri() + " does not have a YouView alias");
+        throw new IllegalStateException("Could not find alias prefix to determine which publisher channel should be written as");
     }
     
 }

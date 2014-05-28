@@ -5,6 +5,7 @@ import nu.xom.Element;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.ContentMerger;
@@ -28,8 +29,8 @@ public class DefaultYouViewXmlElementHandler implements YouViewXmlElementHandler
     }
     
     @Override
-    public void handle(Element element) {
-        Content content = extractor.extract(element);
+    public void handle(Publisher targetPublisher, Element element) {
+        Content content = extractor.extract(targetPublisher, element);
         Maybe<Identified> existing = resolve(content.getCanonicalUri());
         if (existing.isNothing()) {
             write(content);

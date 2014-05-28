@@ -302,7 +302,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         }
 
         @Override
-        public Iterable<ChannelGroup> channelGroupsFor(Iterable<? extends Long> ids) {
+        public Iterable<ChannelGroup> channelGroupsFor(Iterable<Long> ids) {
             return Iterables.transform(channelGroups.keySet(), new Function<Long, ChannelGroup>() {
                 @Override
                 public ChannelGroup apply(Long input) {
