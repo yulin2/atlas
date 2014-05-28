@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.rte;
 import java.util.Comparator;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.RelatedLink.LinkType;
@@ -39,7 +40,7 @@ public class RteBrandExtractor implements ContentExtractor<Entry, Brand>{
     public Brand extract(Entry source) {
         Brand brand = new Brand();
         
-        brand.setCanonicalUri(source.getId());
+        brand.setCanonicalUri(RteParser.canonicalUriFrom(source.getId()));
         brand.setTitle(source.getTitle());
         
         brand.setRelatedLinks(FluentIterable.from(source.getAlternateLinks())
@@ -47,8 +48,12 @@ public class RteBrandExtractor implements ContentExtractor<Entry, Brand>{
                 .toSortedList(BY_LINK_URL));
         
         brand.setPublisher(Publisher.RTE);
+        brand.setMediaType(MediaType.VIDEO);
         
         return brand;
     }
+    
+
+    
 
 }

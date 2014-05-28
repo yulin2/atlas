@@ -76,7 +76,8 @@ public class RteFeedProcessorTest {
     
     private void checkWrittenBrands(List<Entry> entries, List<Brand> allValues) {
         for (Entry entry: entries) {
-            assertThat(allValues, hasItem(createBrand(entry.getId())));
+            String canonicalUri = RteParser.canonicalUriFrom(entry.getId());
+            assertThat(allValues, hasItem(createBrand(canonicalUri)));
         }
     }
     
