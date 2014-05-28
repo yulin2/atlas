@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.RelatedLink.LinkType;
@@ -33,9 +34,10 @@ public class RteBrandExtractorTest {
         
         Brand brand = extractor.extract(source);
         
-        assertThat(brand.getCanonicalUri(), equalTo(source.getId()));
+        assertThat(brand.getCanonicalUri(), equalTo("http://rte.ie/shows/3288112"));
         assertThat(brand.getTitle(), equalTo(source.getTitle()));
         assertThat(brand.getPublisher(), equalTo(Publisher.RTE));
+        assertThat(brand.getMediaType(), equalTo(MediaType.VIDEO));
         
         RelatedLink relatedLink = new RelatedLink.Builder(LinkType.VOD, ALTERNATE_LINK_HREF).build();
         assertThat(brand.getRelatedLinks().size(), equalTo(1));

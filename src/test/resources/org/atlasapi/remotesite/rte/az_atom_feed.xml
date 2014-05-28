@@ -24,8 +24,7 @@
     </debug_info>
 
     <entry>
-        <id>http://feedurl.com/?id=3288112
-        </id>
+        <id>http://feedurl.com/?id=3288112</id>
         <showid>1149729</showid>
         <platform>iptv</platform>
         <published>2012-05-04T00:00:00+01:00</published>
@@ -38,8 +37,7 @@
     </entry>
 
     <entry>
-        <id>http://feedurl.com/?id=10286116
-        </id>
+        <id>http://feedurl.com/?id=10286116</id>
         <showid>10286116</showid>
         <platform>iptv</platform>
         <published>2014-05-23T19:30:00+01:00</published>
@@ -52,8 +50,7 @@
     </entry>
 
     <entry>
-        <id>http://feedurl.com/?id=10039317
-        </id>
+        <id>http://feedurl.com/?id=10039317</id>
         <showid>10039317</showid>
         <platform>iptv</platform>
         <published>2012-07-04T12:00:00+01:00</published>
