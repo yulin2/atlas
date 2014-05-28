@@ -15,6 +15,7 @@ import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.junit.Test;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -39,7 +40,7 @@ public class ConjunctiveFilterTest {
     }
 
     private Iterable<ScoredCandidate<Integer>> candidatesFor(Range<Integer> range) {
-        return Iterables.transform(range.asSet(DiscreteDomain.integers()), new Function<Integer, ScoredCandidate<Integer>>() {
+        return Iterables.transform(ContiguousSet.create(range, DiscreteDomain.integers()), new Function<Integer, ScoredCandidate<Integer>>() {
             @Override
             public ScoredCandidate<Integer> apply(@Nullable Integer input) {
                 return ScoredCandidate.valueOf(input, Score.NULL_SCORE);
