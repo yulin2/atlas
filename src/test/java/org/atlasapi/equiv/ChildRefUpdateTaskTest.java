@@ -6,6 +6,7 @@ import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.mock;
 
 import java.util.Iterator;
 
@@ -34,6 +35,8 @@ import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.entity.ContainerTranslator;
 import org.atlasapi.persistence.media.entity.ItemTranslator;
+import org.atlasapi.persistence.player.PlayerResolver;
+import org.atlasapi.persistence.service.ServiceResolver;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -67,7 +70,10 @@ public class ChildRefUpdateTaskTest extends TestCase {
     
     };
     
-    ContentWriter writer = new MongoContentWriter(mongo, lookupStore, persistenceAuditLog, new SystemClock());
+    private final ServiceResolver serviceResolver = mock(ServiceResolver.class);
+    private final PlayerResolver playerResolver = mock(PlayerResolver.class);
+    
+    ContentWriter writer = new MongoContentWriter(mongo, lookupStore, persistenceAuditLog, playerResolver, serviceResolver, new SystemClock());
     ContentLister lister = new MongoContentLister(mongo);
     
     ChildRefUpdateTask task = new ChildRefUpdateTask(lister, resolver, mongo, progressStore).forPublishers(BBC);
