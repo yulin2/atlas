@@ -29,6 +29,7 @@ import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
 import static org.atlasapi.media.entity.Publisher.RDIO;
+import static org.atlasapi.media.entity.Publisher.RTE;
 import static org.atlasapi.media.entity.Publisher.SOUNDCLOUD;
 import static org.atlasapi.media.entity.Publisher.SPOTIFY;
 import static org.atlasapi.media.entity.Publisher.TALK_TALK;
@@ -244,7 +245,7 @@ public class EquivModule {
         EquivalenceUpdater<Container> topLevelContainerUpdater = topLevelContainerUpdater(acceptablePublishers);
 
         Set<Publisher> nonStandardPublishers = ImmutableSet.copyOf(Sets.union(
-            ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, YOUVIEW, YOUVIEW_STAGE, TALK_TALK, PA), 
+            ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, RTE, YOUVIEW, YOUVIEW_STAGE, TALK_TALK, PA), 
             Sets.union(musicPublishers, roviPublishers)
         ));
         final EquivalenceUpdaters updaters = new EquivalenceUpdaters();
@@ -319,6 +320,13 @@ public class EquivModule {
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
 
+        Set<Publisher> rtePublishers = ImmutableSet.of(PA);
+        updaters.register(RTE, SourceSpecificEquivalenceUpdater.builder(RTE)
+                .withTopLevelContainerUpdater(vodContainerUpdater(rtePublishers))
+                .withItemUpdater(NullEquivalenceUpdater.<Item>get())
+                .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
+                .build());
+        
         updaters.register(TALK_TALK, SourceSpecificEquivalenceUpdater.builder(TALK_TALK)
                 .withItemUpdater(vodItemUpdater(acceptablePublishers).build())
                 .withTopLevelContainerUpdater(vodContainerUpdater(acceptablePublishers))
