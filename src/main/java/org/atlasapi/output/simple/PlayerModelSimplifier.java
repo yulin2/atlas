@@ -6,11 +6,13 @@ import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.entity.Player;
 import org.atlasapi.output.Annotation;
 
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+
 
 public class PlayerModelSimplifier extends DescribedModelSimplifier<Player, org.atlasapi.media.entity.simple.Player> {
 
     public PlayerModelSimplifier(ImageSimplifier imageSimplifier) {
-        super(imageSimplifier);
+        super(imageSimplifier, SubstitutionTableNumberCodec.lowerCaseOnly(), null);
     }
 
     @Override
