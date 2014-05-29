@@ -2,22 +2,24 @@ package org.atlasapi.remotesite.rte;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Supplier;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.sun.syndication.feed.atom.Feed;
 
 
 public class RteFeedUpdater extends ScheduledTask {
 
-    private final RteFeedSupplier feedSupplier;
+    private final Supplier<Feed> feedSupplier;
     private final RteFeedProcessor feedProcessor;
     
-    public RteFeedUpdater(RteFeedSupplier feedSupplier, RteFeedProcessor feedProcessor) {
+    public RteFeedUpdater(Supplier<Feed> feedSupplier, RteFeedProcessor feedProcessor) {
         this.feedSupplier = checkNotNull(feedSupplier);
         this.feedProcessor = checkNotNull(feedProcessor);
     }
     
     @Override
     protected void runTask() {
-        feedProcessor.process(feedSupplier.supplyFeed(), this.reporter());
+        feedProcessor.process(feedSupplier.get(), this.reporter());
     }
     
 }

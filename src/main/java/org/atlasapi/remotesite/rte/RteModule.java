@@ -34,7 +34,7 @@ public class RteModule {
     }
     
     @Bean 
-    public RteFeedSupplier feedSupplier() {
+    public RteHttpFeedSupplier feedSupplier() {
         return new RteHttpFeedSupplier(new AtomClient(), feedUrl);
     }
     
