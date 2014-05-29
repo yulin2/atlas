@@ -2,6 +2,7 @@ package org.atlasapi.equiv;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
@@ -33,6 +34,8 @@ import org.atlasapi.persistence.lookup.TransitiveLookupWriter;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.entity.IdentifiedTranslator;
+import org.atlasapi.persistence.player.PlayerResolver;
+import org.atlasapi.persistence.service.ServiceResolver;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -54,6 +57,9 @@ public class PersonRefUpdateTaskTest {
     private final ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
     private final MongoLookupEntryStore contentLookup = new MongoLookupEntryStore(mongo.collection("lookup"));
     private final ContentLister lister = new MongoContentLister(mongo);
+
+    private final ServiceResolver serviceResolver = mock(ServiceResolver.class);
+    private final PlayerResolver playerResolver = mock(PlayerResolver.class);
     
     private final PersonRefUpdateTask updateTask = new PersonRefUpdateTask(lister, mongo, progressStore)
         .forPublishers(Publisher.BBC);
@@ -73,7 +79,7 @@ public class PersonRefUpdateTaskTest {
     
     };
     
-    private final ContentWriter contentWriter = new MongoContentWriter(mongo, contentLookup, persistenceAuditLog, new SystemClock());
+    private final ContentWriter contentWriter = new MongoContentWriter(mongo, contentLookup, persistenceAuditLog, playerResolver, serviceResolver, new SystemClock());
     private final ContentResolver contentResolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo, contentLookup), contentLookup);
 
     private final LookupEntryStore peopleLookup = new MongoLookupEntryStore(mongo.collection("peopleLookup"));
