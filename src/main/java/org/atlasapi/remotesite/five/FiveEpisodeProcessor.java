@@ -53,10 +53,18 @@ public class FiveEpisodeProcessor {
     private final Multimap<String, Channel> channelMap;
     private final Map<String, Series> seriesMap = Maps.newHashMap();
 
-    public FiveEpisodeProcessor(String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Multimap<String, Channel> channelMap) {
+    private final Long webServiceId;
+    private final Long iOsServiceId;
+    private final Long demand5PlayerId;
+
+    public FiveEpisodeProcessor(String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Multimap<String, Channel> channelMap, 
+            Long webServiceId, Long androidServiceId, Long demand5PlayerId) {
         this.baseApiUrl = baseApiUrl;
         this.httpClient = httpClient;
         this.channelMap = channelMap;
+        this.webServiceId = webServiceId;
+        this.iOsServiceId = androidServiceId;
+        this.demand5PlayerId = demand5PlayerId;
     }
     
     public Item processEpisode(Element element, Brand brand) throws Exception {
@@ -108,8 +116,12 @@ public class FiveEpisodeProcessor {
         
         Encoding encoding = new Encoding();
 
-        Location location = getLocation(element);
-        encoding.addAvailableAt(location);
+        Location webLocation = getLocation(element, webUriFor(element), webServiceId);
+        encoding.addAvailableAt(webLocation);
+        
+        Location androidLocation = getLocation(element, iOsUriFor(element), iOsServiceId);
+        encoding.addAvailableAt(androidLocation);
+        
         version.addManifestedAs(encoding);
 
         version.setBroadcasts(getBroadcasts(element));
@@ -126,12 +138,10 @@ public class FiveEpisodeProcessor {
         return broadcasts;
     }
 
-    private Location getLocation(Element element) throws Exception {
-        
-        String originalVodUri = childValue(element, "vod_url").trim();
+    private Location getLocation(Element element, String uri, Long serviceId) throws Exception {
         
         Location location = new Location();
-        location.setUri(getLocationUri(originalVodUri));
+        location.setUri(uri);
         location.setTransportType(TransportType.LINK);
         location.setTransportSubType(TransportSubType.HTTP);
 
@@ -165,10 +175,21 @@ public class FiveEpisodeProcessor {
             policy.setAvailabilityEnd(dateParser.parseDateTime(scheduledAvailabilityEnd));
         }
         
+        policy.setService(serviceId);
+        policy.setPlayer(demand5PlayerId);
+        
         location.setPolicy(policy);
         return location;
     }
     
+    private String webUriFor(Element element) throws Exception {
+        String originalVodUri = childValue(element, "vod_url").trim();
+        return getLocationUri(originalVodUri);
+    }
+    
+    private String iOsUriFor(Element element) throws Exception {
+        return String.format("demand5://five.tv/%s", childValue(element, "id"));
+    }
 
     private void processSeries(Episode episode, Element element, Brand brand) {
         Element seasonLinkElement = element.getFirstChildElement("season_link");

@@ -9,6 +9,7 @@ import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,6 +29,10 @@ public class FiveModule {
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
 
+    private @Value("${service.web.id}") Long webServiceId;
+    private @Value("${player.demand5.id}") Long demand5PlayerId;
+    private @Value("${service.ios.id}") Long iOsServiceId;
+    
     @PostConstruct
     public void startBackgroundTasks() {
         scheduler.schedule(fiveUpdater().withName("Five Updater"), DAILY);
@@ -37,7 +42,8 @@ public class FiveModule {
     @Bean
     public FiveUpdater fiveUpdater() {
         Integer soTimeout = Configurer.get("five.timeout.socket", "180").toInt();
-        return new FiveUpdater(contentWriter, channelResolver, contentResolver, soTimeout);
+        return new FiveUpdater(contentWriter, channelResolver, contentResolver, 
+                webServiceId, iOsServiceId, demand5PlayerId, soTimeout);
     }
     
     @Bean
