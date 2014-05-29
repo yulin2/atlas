@@ -568,14 +568,17 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                             annotations, config));
                 }
             }
-            if (location.getCanonicalUri() != null && location.getCanonicalUri().startsWith("demand")) {
-                Optional<Service> service = serviceResolver.serviceFor(124L);
+            
+            if (policy.getService() != null) {
+                Optional<Service> service = serviceResolver.serviceFor(policy.getService());
                 if (service.isPresent()) {
                     simpleLocation.setService(serviceModelSimplifier.simplify(service.get(), 
                             annotations, config));
                 }
-                
-                Optional<Player> player = playerResolver.playerFor(124L);
+            }
+            
+            if (policy.getPlayer() != null) {
+                Optional<Player> player = playerResolver.playerFor(policy.getPlayer());
                 if (player.isPresent()) {
                     simpleLocation.setPlayer(playerModelSimplifier.simplify(player.get(), 
                             annotations, config));

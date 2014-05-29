@@ -56,12 +56,14 @@ public class FiveBrandProcessor {
     private final ContentMerger contentMerger;
 
     public FiveBrandProcessor(ContentWriter writer, ContentResolver contentResolver, 
-            String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Multimap<String, Channel> channelMap) {
+            String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Multimap<String, Channel> channelMap,
+            Long webServiceId, Long iOsServiceId, Long demand5PlayerId) {
         this.writer = checkNotNull(writer);
         this.baseApiUrl = checkNotNull(baseApiUrl);
         this.httpClient = checkNotNull(httpClient);
         this.contentResolver = checkNotNull(contentResolver);
-        this.episodeProcessor = new FiveEpisodeProcessor(baseApiUrl, httpClient, channelMap);
+        this.episodeProcessor = new FiveEpisodeProcessor(baseApiUrl, httpClient, 
+                channelMap, webServiceId, iOsServiceId, demand5PlayerId);
         this.contentMerger = new ContentMerger(MergeStrategy.REPLACE);
     }
 
