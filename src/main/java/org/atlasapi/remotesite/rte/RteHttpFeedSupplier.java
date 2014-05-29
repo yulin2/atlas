@@ -5,10 +5,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.atlasapi.remotesite.support.atom.AtomClient;
 
 import com.google.api.client.repackaged.com.google.common.base.Throwables;
+import com.google.common.base.Supplier;
 import com.sun.syndication.feed.atom.Feed;
 
 
-public class RteHttpFeedSupplier implements RteFeedSupplier {
+public class RteHttpFeedSupplier implements Supplier<Feed> {
 
     private final AtomClient atomClient;
     private final String feedUrl;
@@ -17,9 +18,9 @@ public class RteHttpFeedSupplier implements RteFeedSupplier {
         this.atomClient = checkNotNull(atomClient);
         this.feedUrl = checkNotNull(feedUrl);
     }
-    
+
     @Override
-    public Feed supplyFeed() {
+    public Feed get() {
         try {
             return atomClient.get(feedUrl);
         } catch (Exception e) {
