@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.channel4.pmlsd;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
 import java.util.Set;
@@ -48,9 +49,11 @@ public class C4AtomEntryVersionExtractor implements ContentExtractor<C4VersionDa
                                             + "</object>";
     
     private final Optional<Platform> platform;
+    private final C4LocationPolicyIds locationPolicyIds;
 
-    public C4AtomEntryVersionExtractor(Optional<Platform> platform) {
-        this.platform = platform;
+    public C4AtomEntryVersionExtractor(Optional<Platform> platform, C4LocationPolicyIds locationPolicyIds) {
+        this.platform = checkNotNull(platform);
+        this.locationPolicyIds = checkNotNull(locationPolicyIds);
     }
     
     @Override
@@ -135,7 +138,9 @@ public class C4AtomEntryVersionExtractor implements ContentExtractor<C4VersionDa
         policy = new Policy()
             .withAvailabilityStart(new DateTime(Strings.isNullOrEmpty(txDate) ? matcher.group(1) : txDate))
             .withAvailabilityEnd(new DateTime(matcher.group(2)))
-            .withRevenueContract(RevenueContract.FREE_TO_VIEW);
+            .withRevenueContract(RevenueContract.FREE_TO_VIEW)
+            .withPlayer(locationPolicyIds.getPlayerId())
+            .withService(locationPolicyIds.getServiceId());
 
         Set<Country> availableCountries = getAvailableCountries(data);    
         if (availableCountries != null) {

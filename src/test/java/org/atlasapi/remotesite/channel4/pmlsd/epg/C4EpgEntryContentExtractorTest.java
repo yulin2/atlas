@@ -18,6 +18,7 @@ import org.atlasapi.media.entity.testing.BrandTestDataBuilder;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
+import org.atlasapi.remotesite.channel4.pmlsd.C4LocationPolicyIds;
 import org.atlasapi.remotesite.channel4.pmlsd.ContentFactory;
 import org.atlasapi.remotesite.channel4.pmlsd.SourceSpecificContentFactory;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
@@ -43,6 +44,7 @@ import com.metabroadcast.common.time.TimeMachine;
 @RunWith(JMock.class)
 public class C4EpgEntryContentExtractorTest {
 
+    private final C4LocationPolicyIds locationPolicyIds = C4LocationPolicyIds.builder().build();
     private final Mockery context = new Mockery();
     private final ContentResolver resolver = context.mock(ContentResolver.class);
     private final C4BrandUpdater brandUpdater = context.mock(C4BrandUpdater.class);
@@ -53,7 +55,7 @@ public class C4EpgEntryContentExtractorTest {
     private final Clock clock = new TimeMachine(now );
     
     private final C4EpgEntryContentExtractor extractor = new C4EpgEntryContentExtractor(resolver, brandUpdater, 
-            contentFactory, Publisher.C4_PMLSD, clock );
+            contentFactory, Publisher.C4_PMLSD, locationPolicyIds, clock);
 
     private final Channel channel = Channel.builder()
         .withSource(Publisher.METABROADCAST)
