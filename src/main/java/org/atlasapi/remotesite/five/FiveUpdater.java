@@ -44,12 +44,12 @@ public class FiveUpdater extends ScheduledTask {
     private SimpleHttpClient streamHttpClient;
 
     public FiveUpdater(ContentWriter contentWriter, ChannelResolver channelResolver, ContentResolver contentResolver, 
-            Long webServiceId, Long iOsServiceId, Long demand5PlayerId, int socketTimeout) {
+            FiveLocationPolicyIds locationPolicyIds, int socketTimeout) {
         this.socketTimeout = socketTimeout;
         this.streamHttpClient = buildFetcher();
         this.processor = new FiveBrandProcessor(contentWriter, contentResolver, BASE_API_URL, 
             new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(buildFetcher()), 20), 
-            channelMap(channelResolver), webServiceId, iOsServiceId, demand5PlayerId
+            channelMap(channelResolver), locationPolicyIds
         );
     }
 
