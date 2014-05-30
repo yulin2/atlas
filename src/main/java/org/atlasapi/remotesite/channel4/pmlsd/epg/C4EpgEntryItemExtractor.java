@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.channel4.pmlsd.epg;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +18,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
+import org.atlasapi.remotesite.channel4.pmlsd.C4LocationPolicyIds;
 import org.atlasapi.remotesite.channel4.pmlsd.ContentFactory;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
@@ -29,10 +32,13 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
     private final C4EpgEntryBroadcastExtractor broadcastExtractor = new C4EpgEntryBroadcastExtractor();
     private final Clock clock;
     private final ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory;
+    private final C4LocationPolicyIds locationPolicyIds;
     
-    public C4EpgEntryItemExtractor(ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, Clock clock) {
-        this.contentFactory = contentFactory;
-        this.clock = clock;
+    public C4EpgEntryItemExtractor(ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, 
+            C4LocationPolicyIds locationPolicyIds, Clock clock) {
+        this.contentFactory = checkNotNull(contentFactory);
+        this.clock = checkNotNull(clock);
+        this.locationPolicyIds = checkNotNull(locationPolicyIds);
     }
     
     @Override
@@ -110,6 +116,8 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
     private Policy policyFrom(C4EpgEntry entry) {
         Policy policy = new Policy();
         policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
+        policy.setPlayer(locationPolicyIds.getPlayerId());
+        policy.setService(locationPolicyIds.getServiceId());
         
         if(!Objects.equal(policy.getAvailableCountries(), entry.media().availableCountries())) {
             policy.setAvailableCountries(entry.media().availableCountries());

@@ -14,6 +14,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
+import org.atlasapi.remotesite.channel4.pmlsd.C4LocationPolicyIds;
 import org.atlasapi.remotesite.channel4.pmlsd.ContentFactory;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
@@ -39,19 +40,19 @@ public class C4EpgEntryContentExtractor implements
     
     public C4EpgEntryContentExtractor(ContentResolver resolver, C4BrandUpdater updater, 
             ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, 
-            Publisher publisher, Clock clock) {
+            Publisher publisher, C4LocationPolicyIds locationPolicyIds, Clock clock) {
         this.resolver =  new C4EpgEntryContentResolver(resolver, publisher);
         this.brandUpdater = new C4EpgRelatedLinkBrandUpdater(updater);
         this.brandExtractor = new C4EpgEntryBrandExtractor(contentFactory);
-        this.itemExtractor = new C4EpgEntryItemExtractor(contentFactory, clock);
+        this.itemExtractor = new C4EpgEntryItemExtractor(contentFactory, locationPolicyIds, clock);
         this.seriesExtractor = new C4EpgEntrySeriesExtractor(contentFactory);
         this.clock = clock;
     }
 
     public C4EpgEntryContentExtractor(ContentResolver contentStore, C4BrandUpdater brandUpdater, 
             ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, 
-            Publisher publisher) {
-        this(contentStore, brandUpdater, contentFactory, publisher, new SystemClock());
+            Publisher publisher, C4LocationPolicyIds locationPolicyIds) {
+        this(contentStore, brandUpdater, contentFactory, publisher, locationPolicyIds, new SystemClock());
     }
 
     @Override

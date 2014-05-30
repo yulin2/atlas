@@ -62,7 +62,8 @@ public class C4BrandClipAdapterTest {
 	@Test
 	public void testExtractingClips() throws Exception {
 		
-		List<Clip> clips = new C4BrandClipAdapter(apiClient, Publisher.C4_PMLSD, new SystemClock(), contentFactory)
+	    C4LocationPolicyIds locationPolicyIds = C4LocationPolicyIds.builder().build();
+		List<Clip> clips = new C4BrandClipAdapter(apiClient, Publisher.C4_PMLSD, new SystemClock(), contentFactory, locationPolicyIds)
 		                        .fetch("http://pmlsc.channel4.com/pmlsd/hestons-mission-impossible");
 		assertEquals(5, clips.size());
 		

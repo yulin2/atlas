@@ -52,6 +52,15 @@ import com.sun.syndication.feed.atom.Feed;
 @RunWith( MockitoJUnitRunner.class )
 public class C4FourOdEpisodesExtractorTest extends TestCase {
 
+    private static final long PLAYER_ID = 1;
+    private static final long SERVICE_ID = 2;
+
+    private final C4LocationPolicyIds locationPolicyIds = 
+            C4LocationPolicyIds.builder()
+                .withPlayerId(PLAYER_ID)
+                .withServiceId(SERVICE_ID)
+                .build();
+    
     private ContentFactory<Feed, Feed, Entry> contentFactory
         = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());; 
     
@@ -72,7 +81,7 @@ public class C4FourOdEpisodesExtractorTest extends TestCase {
 	public void testExtractingEpisodes() throws Exception {
 		
 		List<Episode> episodes = new C4OdEpisodesAdapter(atomApiClient, Optional.<Platform>absent(), 
-		                                contentFactory, Publisher.C4_PMLSD, new SystemClock())
+		                                contentFactory, Publisher.C4_PMLSD, locationPolicyIds, new SystemClock())
 		    .fetch("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
 
 		Episode firstEpisode = (Episode) Iterables.get(episodes, 0);

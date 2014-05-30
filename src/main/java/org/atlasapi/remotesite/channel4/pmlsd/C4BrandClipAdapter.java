@@ -19,9 +19,9 @@ public class C4BrandClipAdapter implements SiteSpecificAdapter<List<Clip>> {
     private C4BrandClipExtractor extractor;
 
     public C4BrandClipAdapter(C4AtomApiClient client, Publisher publisher, Clock clock, 
-            ContentFactory<Feed, Feed, Entry> contentFactory) {
+            ContentFactory<Feed, Feed, Entry> contentFactory, C4LocationPolicyIds locationPolicyIds) {
         this.client = client;
-        this.extractor = new C4BrandClipExtractor(contentFactory, publisher, clock);
+        this.extractor = new C4BrandClipExtractor(contentFactory, publisher, locationPolicyIds, clock);
     }
     
     @Override

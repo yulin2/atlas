@@ -32,14 +32,18 @@ public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEp
     private final C4LinkBrandNameExtractor brandNameExtractor = new C4LinkBrandNameExtractor();
     
     public C4BrandExtractor(C4AtomApiClient feedClient, Optional<Platform> platform, Publisher publisher, 
-            ChannelResolver channelResolver, ContentFactory<Feed, Feed, Entry> contentFactory) {
+            ChannelResolver channelResolver, ContentFactory<Feed, Feed, Entry> contentFactory,
+            C4LocationPolicyIds locationPolicyIds) {
         SystemClock clock = new SystemClock();
         C4AtomApi c4AtomApi = new C4AtomApi(channelResolver);
-        this.basicDetailsExtractor = new C4BrandBasicDetailsExtractor(c4AtomApi, contentFactory, clock);
+        this.basicDetailsExtractor = new C4BrandBasicDetailsExtractor(c4AtomApi, contentFactory, 
+                clock);
         this.episodeGuideAdapter = new C4EpisodeGuideAdapter(feedClient, contentFactory, clock);
-        this.fourOditemAdapter = new C4OdEpisodesAdapter(feedClient, platform, contentFactory, publisher, clock);
+        this.fourOditemAdapter = new C4OdEpisodesAdapter(feedClient, platform, contentFactory, 
+                publisher, locationPolicyIds, clock);
         this.brandEpgAdatper = new C4BrandEpgAdapter(feedClient, clock, c4AtomApi, publisher);
-        this.clipAdapter = new C4BrandClipAdapter(feedClient, publisher, clock, contentFactory);
+        this.clipAdapter = new C4BrandClipAdapter(feedClient, publisher, clock, contentFactory, 
+                locationPolicyIds);
     }
 
     /*

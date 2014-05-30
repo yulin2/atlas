@@ -58,7 +58,16 @@ import com.sun.syndication.feed.atom.Feed;
 @RunWith(MockitoJUnitRunner.class)
 public class C4BrandExtractorTest extends TestCase {
     
-	private final SimpleHttpClient httpClient = new FixedResponseHttpClient(
+	private static final long PLAYER_ID = 1;
+    private static final long SERVICE_ID = 2;
+
+    private final C4LocationPolicyIds locationPolicyIds = 
+            C4LocationPolicyIds.builder()
+                .withPlayerId(PLAYER_ID)
+                .withServiceId(SERVICE_ID)
+                .build();
+    
+    private final SimpleHttpClient httpClient = new FixedResponseHttpClient(
 	    ImmutableMap.<String, String>builder()
 	    .put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", fileContentsFromResource("ramsays-kitchen-nightmares.atom"))
 		.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/4od.atom", fileContentsFromResource("ramsays-kitchen-nightmares-4od.atom"))
@@ -101,7 +110,7 @@ public class C4BrandExtractorTest extends TestCase {
 	@Before
 	public void setUp() {
 		pcExtractor = new C4BrandExtractor(atomApiClient, Optional.<Platform> absent(), Publisher.C4_PMLSD, 
-		        channelResolver, contentFactory);
+		        channelResolver, contentFactory, locationPolicyIds);
 		pcUpdater = new C4AtomBackedBrandUpdater(atomApiClient, Optional.<Platform> absent(), resolver, writer, pcExtractor);
 	}
 
@@ -252,7 +261,7 @@ public class C4BrandExtractorTest extends TestCase {
         C4AtomApiClient apiClient = new C4AtomApiClient(httpClient, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
         
 		C4BrandExtractor extractor = new C4BrandExtractor(atomApiClient, Optional.<Platform>absent(), 
-		        Publisher.C4_PMLSD, channelResolver, contentFactory);
+		        Publisher.C4_PMLSD, channelResolver, contentFactory, locationPolicyIds);
 		new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), resolver, writer, extractor)
 		        .createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
 		
@@ -286,8 +295,9 @@ public class C4BrandExtractorTest extends TestCase {
         C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.of("xbox"));
 
         RecordingContentWriter recordingWriter = new RecordingContentWriter();
+        
         C4BrandExtractor extractor = new C4BrandExtractor(apiClient, Optional.of(Platform.XBOX), 
-                Publisher.C4_PMLSD, channelResolver, contentFactory);
+                Publisher.C4_PMLSD, channelResolver, contentFactory, locationPolicyIds);
         new C4AtomBackedBrandUpdater(apiClient, Optional.of(Platform.XBOX), resolver, recordingWriter, extractor)
                 .createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/jamie-does");
         
@@ -298,6 +308,8 @@ public class C4BrandExtractorTest extends TestCase {
         Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
         Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
         assertThat(location.getPolicy().getPlatform(), is(Platform.XBOX));
+        assertThat(location.getPolicy().getService(), is(SERVICE_ID));
+        assertThat(location.getPolicy().getPlayer(), is(PLAYER_ID));
         assertThat(location.getUri(), is("https://ais.channel4.com/asset/3262609"));
     }
     
@@ -326,7 +338,7 @@ public class C4BrandExtractorTest extends TestCase {
 
         RecordingContentWriter recordingWriter = new RecordingContentWriter();
         C4BrandExtractor extractor = new C4BrandExtractor(xboxApiClient, Optional.of(Platform.XBOX), 
-                Publisher.C4_PMLSD, channelResolver, contentFactory);
+                Publisher.C4_PMLSD, channelResolver, contentFactory, locationPolicyIds);
         StubContentResolver stubResolver = new StubContentResolver();
         new C4AtomBackedBrandUpdater(xboxApiClient, Optional.of(Platform.XBOX), stubResolver, recordingWriter, extractor)
             .createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/jamie-does");
@@ -334,7 +346,7 @@ public class C4BrandExtractorTest extends TestCase {
         stubResolver.respondTo(findLast("http://pmlsc.channel4.com/pmlsd/48367/006", recordingWriter.updatedItems));
         
         extractor = new C4BrandExtractor(apiClient, Optional.<Platform>absent(), Publisher.C4_PMLSD, 
-                channelResolver, contentFactory);
+                channelResolver, contentFactory, locationPolicyIds);
         new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), stubResolver, recordingWriter, extractor)
             .createOrUpdateBrand("http://pmlsc.channel4.com/pmlsd/jamie-does");
         
