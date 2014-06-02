@@ -12,6 +12,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.BbcLocationPolicyIds;
 import org.atlasapi.remotesite.bbc.ion.IonService.MediaSetsToPoliciesFunction;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 
@@ -25,8 +26,9 @@ public class BbcIonOndemandChangeTaskBuilder {
     private final BbcIonOndemandItemUpdater itemUpdater;
 
     public BbcIonOndemandChangeTaskBuilder(ContentResolver resolver, ContentWriter writer, 
-            MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, AdapterLog log) {
-        this.itemUpdater = new BbcIonOndemandItemUpdater(mediaSetsToPoliciesFunction);
+            MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, 
+            BbcLocationPolicyIds locationPolicyIds, AdapterLog log) {
+        this.itemUpdater = new BbcIonOndemandItemUpdater(mediaSetsToPoliciesFunction, locationPolicyIds);
         this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(writer);
         this.log = checkNotNull(log);
