@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.FixedResponseHttpClient;
+import com.metabroadcast.common.time.SystemClock;
 
 @RunWith(JMock.class)
 public class BbcSlashProgrammesEpisodeIntegrationTest {
@@ -64,7 +65,8 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
         MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction = 
                 new MediaSetsToPoliciesFunction(locationPolicyIds);
 
-        BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, extendedDataAdapter, locationPolicyIds, mediaSetsToPoliciesFunction, new SystemOutAdapterLog());
+        BbcProgrammeEncodingAndLocationCreator encodingCreator = new BbcProgrammeEncodingAndLocationCreator(mediaSetsToPoliciesFunction, new SystemClock());
+        BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, extendedDataAdapter, locationPolicyIds, encodingCreator, new SystemOutAdapterLog());
         
 //        topics are disabled currently
         context.checking(new Expectations(){{

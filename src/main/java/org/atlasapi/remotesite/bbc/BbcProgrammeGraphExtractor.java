@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.remotesite.HttpClients.webserviceClient;
@@ -100,7 +101,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
     public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, 
             BbcProgrammesPolicyClient policyClient, BbcExtendedDataContentAdapter extendedDataAdapter, 
-            MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, 
+            BbcProgrammeEncodingAndLocationCreator encodingCreator,
             Clock clock, AdapterLog log) {
         this.seriesResolver = seriesResolver;
         this.policyClient = policyClient;
@@ -109,14 +110,14 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         this.log = log;
         this.clipExtractor = new BbcIonClipExtractor(log);
 		this.ionDeserialiser = BbcIonDeserializers.deserializerForClass(IonEpisodeDetailFeed.class);
-		this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(mediaSetsToPoliciesFunction, clock);
+		this.encodingCreator = checkNotNull(encodingCreator);
     }
 
     public BbcProgrammeGraphExtractor(BbcExtendedDataContentAdapter extendedDataAdapter, 
-            BbcLocationPolicyIds locationPolicyIds, MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, 
+            BbcLocationPolicyIds locationPolicyIds, BbcProgrammeEncodingAndLocationCreator encodingCreator, 
             AdapterLog log) {
         this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient(locationPolicyIds), 
-                extendedDataAdapter, mediaSetsToPoliciesFunction, new SystemClock(), log);
+                extendedDataAdapter, encodingCreator, new SystemClock(), log);
     }
 
     public Item extract(BbcProgrammeSource source) {
