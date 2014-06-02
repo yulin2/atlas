@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.media.entity.Publisher.BBC;
 
 import java.util.List;
@@ -43,16 +44,16 @@ public class BbcIonEpisodeDetailItemContentExtractor extends BaseBbcIonEpisodeIt
     private final BbcIonBroadcastExtractor broadcastExtractor;
     private RemoteSiteClient<IonVersionListFeed> versionListClient; 
     
-    public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient, MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction) {
-        this(log, containerClient, null, mediaSetsToPoliciesFunction);
+    public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient, BbcProgrammeEncodingAndLocationCreator encodingCreator) {
+        this(log, containerClient, null, encodingCreator);
     }
     
-    public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient, RemoteSiteClient<IonVersionListFeed> versionListClient, MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction) {
+    public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient, RemoteSiteClient<IonVersionListFeed> versionListClient, BbcProgrammeEncodingAndLocationCreator encodingCreator) {
         super(log, containerClient);
         this.versionListClient = versionListClient;
         this.clipExtractor = new BbcIonClipExtractor(log);
         this.broadcastExtractor = new BbcIonBroadcastExtractor();
-        this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(mediaSetsToPoliciesFunction, new SystemClock());
+        this.encodingCreator = checkNotNull(encodingCreator);
     }
 
     @Override

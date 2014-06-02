@@ -79,6 +79,7 @@ import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.time.DayRangeGenerator;
+import com.metabroadcast.common.time.SystemClock;
 
 @Configuration
 public class BbcModule {
@@ -207,7 +208,7 @@ public class BbcModule {
                 ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class), 
                 new BbcIonEpisodeDetailItemContentExtractor(log, 
                         ionClient(HttpClients.webserviceClient(), IonContainerFeed.class), 
-                        mediaSetsToPoliciesFunction()));
+                        bbcProgrammeEncodingAndLocationCreator()));
     }
 
     @Bean Runnable bbcAtoZUpdater() {
@@ -224,7 +225,7 @@ public class BbcModule {
             new BbcIonEpisodeDetailItemContentExtractor(log, 
                 ionClient(HttpClients.webserviceClient(), IonContainerFeed.class), 
                 ionClient(HttpClients.webserviceClient(), IonVersionListFeed.class),
-                mediaSetsToPoliciesFunction()
+                bbcProgrammeEncodingAndLocationCreator()
             )
         );
 	    BbcExtendedDataContentAdapter extendedDataAdapter = extendedDataAdapter();
@@ -238,6 +239,10 @@ public class BbcModule {
         );
         return new BbcIonProgrammeAdapter(contentResolver, contentWriters, detailAdapter, extendedDataAdapter, segmentAdapter, 
 	        rdfClient, containerAdapter, clipAdapter, Executors.newFixedThreadPool(5));
+	}
+	
+	@Bean BbcProgrammeEncodingAndLocationCreator bbcProgrammeEncodingAndLocationCreator() {
+	    return new BbcProgrammeEncodingAndLocationCreator(mediaSetsToPoliciesFunction(), new SystemClock());
 	}
 	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {
