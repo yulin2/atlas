@@ -16,8 +16,8 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
-import org.atlasapi.remotesite.channel4.pmlsd.C4AtomApi;
 import org.atlasapi.remotesite.channel4.pmlsd.C4BrandUpdater;
+import org.atlasapi.remotesite.channel4.pmlsd.C4LocationPolicyIds;
 import org.atlasapi.remotesite.channel4.pmlsd.ContentFactory;
 import org.atlasapi.remotesite.channel4.pmlsd.epg.model.C4EpgEntry;
 import org.joda.time.DateTime;
@@ -47,12 +47,13 @@ public class C4EpgChannelDayUpdater {
     
     public C4EpgChannelDayUpdater(RemoteSiteClient<List<C4EpgEntry>> scheduleClient, ContentWriter writer, 
             ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer, 
-            Publisher publisher, ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, Optional<String> platform) {
+            Publisher publisher, ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, Optional<String> platform, 
+            C4LocationPolicyIds locationPolicyIds) {
         this.scheduleClient = scheduleClient;
         this.writer = writer;
         this.platform = platform;
         this.epgEntryContentExtractor = new C4EpgEntryContentExtractor(resolver, brandUpdater, 
-                contentFactory, publisher);
+                contentFactory, publisher, locationPolicyIds);
         this.trimmer = trimmer;
     }
     

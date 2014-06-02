@@ -27,13 +27,14 @@ public class C4BrandClipExtractorTest {
     private final AtomFeedBuilder feed = new AtomFeedBuilder(Resources.getResource(getClass(), "green-wing-video.atom"));
     
     private final ContentFactory<Feed, Feed, Entry> contentFactory
-        = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());;
+        = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());
     
     @Test
     public void testExtract() {
         
         Clock clock = new TimeMachine(new DateTime(DateTimeZones.UTC));
-        C4BrandClipExtractor clipExtractor = new C4BrandClipExtractor(contentFactory, Publisher.C4_PMLSD, clock);
+        C4LocationPolicyIds locationPolicyIds = C4LocationPolicyIds.builder().build();;
+        C4BrandClipExtractor clipExtractor = new C4BrandClipExtractor(contentFactory, Publisher.C4_PMLSD, locationPolicyIds, clock);
         
         Clip clip = clipExtractor.extract((Entry)feed.build().getEntries().get(0));
         

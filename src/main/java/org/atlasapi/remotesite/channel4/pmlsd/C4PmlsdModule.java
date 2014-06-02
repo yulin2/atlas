@@ -63,6 +63,9 @@ public class C4PmlsdModule {
 	private @Value("${c4.keystore.path}") String keyStorePath;
 	private @Value("${c4.keystore.password}") String keyStorePass;
 	
+    private @Value("${service.web.id}") Long webServiceId;
+    private @Value("${player.4od.id}") Long fourODPlayerId;
+	
 	public static Map<Publisher, String> PUBLISHER_TO_CANONICAL_URI_HOST_MAP 
 	    = ImmutableMap.of(Publisher.C4_PMLSD, "pmlsc.channel4.com",
 	                      Publisher.C4_PMLSD_P06, "p06.pmlsc.channel4.com");
@@ -107,7 +110,7 @@ public class C4PmlsdModule {
 	    return new C4EpgChannelDayUpdater(new C4EpgClient(c4HttpsClient()), pmlsdLastUpdatedSettingContentWriter(),
                 contentResolver, pcPmlsdBrandFetcher(Optional.<Platform>absent(),Optional.<String>absent()), trimmer, 
                 Publisher.C4_PMLSD, new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4EpgEntryUriExtractor()),
-                Optional.<String>absent());
+                Optional.<String>absent(), c4PCLocationPolicyIds());
 	}
 	
 // Disabling the P06 EPG updater, since it doesn't contain hierarchy links if the programme is
@@ -137,14 +140,16 @@ public class C4PmlsdModule {
 	protected C4AtomBackedBrandUpdater pcPmlsdBrandFetcher(Optional<Platform> platform, Optional<String> platformParam) {
 	    C4AtomApiClient client = new C4AtomApiClient(c4HttpsClient(), ATOZ_BASE, platformParam);
 	    C4BrandExtractor extractor = new C4BrandExtractor(client, platform, Publisher.C4_PMLSD, 
-	            channelResolver, new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor()));
+	            channelResolver, new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor()),
+	            c4PCLocationPolicyIds());
 		return new C4AtomBackedBrandUpdater(client, platform, contentResolver, pmlsdLastUpdatedSettingContentWriter(), extractor);
 	}
 	
 	protected C4AtomBackedBrandUpdater xboxPmlsdBrandFetcher(Optional<Platform> platform, Optional<String> platformParam) {
         C4AtomApiClient client = new C4AtomApiClient(c4HttpsClient(), ATOZ_BASE, platformParam);
         C4BrandExtractor extractor = new C4BrandExtractor(client, platform, Publisher.C4_PMLSD_P06, 
-                channelResolver, new SourceSpecificContentFactory<>(Publisher.C4_PMLSD_P06, new C4AtomFeedUriExtractor()));
+                channelResolver, new SourceSpecificContentFactory<>(Publisher.C4_PMLSD_P06, new C4AtomFeedUriExtractor()), 
+                c4XBoxLocationPolicyIds());
         return new C4AtomBackedBrandUpdater(client, platform, contentResolver, pmlsdLastUpdatedSettingContentWriter(), extractor);
     }
 	
@@ -159,6 +164,18 @@ public class C4PmlsdModule {
 	
     @Bean protected LastUpdatedSettingContentWriter pmlsdLastUpdatedSettingContentWriter() {
         return new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(contentWriter));
+    }
+    
+    @Bean protected C4LocationPolicyIds c4PCLocationPolicyIds() {
+        return C4LocationPolicyIds.builder()
+                    .withPlayerId(fourODPlayerId)
+                    .withServiceId(webServiceId)
+                    .build();
+    }
+    
+    @Bean protected C4LocationPolicyIds c4XBoxLocationPolicyIds() {
+        return C4LocationPolicyIds.builder()
+                    .build();
     }
     
 }

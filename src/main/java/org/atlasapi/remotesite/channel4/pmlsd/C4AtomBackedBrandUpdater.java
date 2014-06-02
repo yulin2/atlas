@@ -19,6 +19,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Restriction;
@@ -361,8 +362,7 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
             existing.setEmbedCode(fetched.getEmbedCode());
             copyLastUpdated(fetched, existing);
         }
-        if (existing.getPolicy() == null && fetched.getPolicy() != null 
-                || existing.getPolicy() != null && fetched.getPolicy() == null) {
+        if (!equivalentPolicy(existing.getPolicy(), fetched.getPolicy())) {
             existing.setPolicy(fetched.getPolicy());
             copyLastUpdated(fetched, existing);
         }
@@ -379,6 +379,18 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         return null;
     }
 
+    private boolean equivalentPolicy(Policy existing, Policy fetched) {
+        return existing != null
+            && fetched != null
+            && Objects.equal(existing.getAvailabilityStart(), fetched.getAvailabilityStart())
+            && Objects.equal(existing.getAvailabilityEnd(), fetched.getAvailabilityEnd())
+            && Objects.equal(existing.getPlatform(), fetched.getPlatform())
+            && Objects.equal(existing.getService(), fetched.getService())
+            && Objects.equal(existing.getPlayer(), fetched.getPlayer())
+            && Objects.equal(existing.getRevenueContract(), fetched.getRevenueContract())
+            && Objects.equal(existing.getAvailableCountries(), fetched.getAvailableCountries());
+    }
+    
     private boolean equivalentRestrictions(Restriction existing, Restriction fetched) {
         return existing != null
             && fetched != null

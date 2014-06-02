@@ -24,12 +24,12 @@ public class C4BrandClipExtractor extends C4MediaItemExtractor<Clip> {
     private final Publisher publisher;
 
     public C4BrandClipExtractor(ContentFactory<Feed, Feed, Entry> contentFactory, Publisher publisher, 
-            Clock clock) {
+            C4LocationPolicyIds locationPolicyIds, Clock clock) {
         super(clock);
         this.contentFactory = contentFactory;
         this.publisher = publisher;
         // TODO: Do we have platform-specific clips?
-        versionExtractor = new C4AtomEntryVersionExtractor(Optional.<Platform>absent());
+        versionExtractor = new C4AtomEntryVersionExtractor(Optional.<Platform>absent(), locationPolicyIds);
     }
 
     @Override
