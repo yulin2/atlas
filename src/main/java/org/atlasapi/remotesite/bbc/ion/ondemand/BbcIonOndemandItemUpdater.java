@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bbc.ion.ondemand;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Set;
 
@@ -8,9 +10,12 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.BbcLocationPolicyIds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
 import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
+import org.atlasapi.remotesite.bbc.ion.IonService.MediaSetsToPoliciesFunction;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 
 import com.google.common.collect.Iterables;
@@ -23,13 +28,17 @@ import com.metabroadcast.common.time.SystemClock;
 public class BbcIonOndemandItemUpdater {
 
     private BbcProgrammeEncodingAndLocationCreator encodingCreator;
+    private final BbcLocationPolicyIds locationPolicyIds;
     
-    public BbcIonOndemandItemUpdater() {
-        this(new SystemClock());
+    public BbcIonOndemandItemUpdater(MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, 
+            BbcLocationPolicyIds locationPolicyIds) {
+        this(locationPolicyIds, mediaSetsToPoliciesFunction, new SystemClock());
     }
 
-    public BbcIonOndemandItemUpdater(Clock clock) {
-        this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(clock);
+    public BbcIonOndemandItemUpdater(BbcLocationPolicyIds locationPolicyIds, 
+            MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, Clock clock) {
+        this.locationPolicyIds = checkNotNull(locationPolicyIds);
+        this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(mediaSetsToPoliciesFunction, clock);
     }
 
     public void updateItemDetails(Item item, IonOndemandChange change) {
@@ -111,6 +120,14 @@ public class BbcIonOndemandItemUpdater {
         policy.setActualAvailabilityStart(change.getActualStart());
         policy.setAvailabilityStart(change.getScheduledStart());
         policy.setAvailabilityEnd(change.getDiscoverableEnd());
+        
+        // Hack to populate service and player on existing content
+        
+        if (Platform.PC.equals(policy.getPlatform())) {
+            policy.setPlayer(locationPolicyIds.getIPlayerPlayerId());
+            policy.setService(locationPolicyIds.getWebServiceId());
+        }
+        
         location.setAvailable(available);
     }
 

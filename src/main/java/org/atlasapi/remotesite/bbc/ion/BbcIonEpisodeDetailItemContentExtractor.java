@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.media.entity.Publisher.BBC;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
 import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
+import org.atlasapi.remotesite.bbc.ion.IonService.MediaSetsToPoliciesFunction;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
@@ -37,20 +39,21 @@ public class BbcIonEpisodeDetailItemContentExtractor extends BaseBbcIonEpisodeIt
     
     private final String VERSION_LIST_FORMAT = "http://www.bbc.co.uk/iplayer/ion/version/list/episode_id/%s/include_broadcasts/1/format/json";
 
-    private final BbcProgrammeEncodingAndLocationCreator encodingCreator = new BbcProgrammeEncodingAndLocationCreator(new SystemClock());
+    private final BbcProgrammeEncodingAndLocationCreator encodingCreator;
     private final ContentExtractor<IonEpisode, Clip> clipExtractor;
     private final BbcIonBroadcastExtractor broadcastExtractor;
     private RemoteSiteClient<IonVersionListFeed> versionListClient; 
     
-    public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient) {
-        this(log, containerClient, null);
+    public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient, BbcProgrammeEncodingAndLocationCreator encodingCreator) {
+        this(log, containerClient, null, encodingCreator);
     }
     
-    public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient, RemoteSiteClient<IonVersionListFeed> versionListClient) {
+    public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient, RemoteSiteClient<IonVersionListFeed> versionListClient, BbcProgrammeEncodingAndLocationCreator encodingCreator) {
         super(log, containerClient);
         this.versionListClient = versionListClient;
         this.clipExtractor = new BbcIonClipExtractor(log);
         this.broadcastExtractor = new BbcIonBroadcastExtractor();
+        this.encodingCreator = checkNotNull(encodingCreator);
     }
 
     @Override

@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.remotesite.HttpClients.webserviceClient;
@@ -38,11 +39,9 @@ import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
-import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -52,12 +51,12 @@ import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
-import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonClipExtractor;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
+import org.atlasapi.remotesite.bbc.ion.IonService.MediaSetsToPoliciesFunction;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
@@ -100,7 +99,10 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     private final BbcExtendedDataContentAdapter extendedDataAdapter;
     private final BbcIonClipExtractor clipExtractor;
 
-    public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient, BbcExtendedDataContentAdapter extendedDataAdapter, Clock clock, AdapterLog log) {
+    public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, 
+            BbcProgrammesPolicyClient policyClient, BbcExtendedDataContentAdapter extendedDataAdapter, 
+            BbcProgrammeEncodingAndLocationCreator encodingCreator,
+            Clock clock, AdapterLog log) {
         this.seriesResolver = seriesResolver;
         this.policyClient = policyClient;
         this.extendedDataAdapter = extendedDataAdapter;
@@ -108,11 +110,14 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         this.log = log;
         this.clipExtractor = new BbcIonClipExtractor(log);
 		this.ionDeserialiser = BbcIonDeserializers.deserializerForClass(IonEpisodeDetailFeed.class);
-		this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(clock);
+		this.encodingCreator = checkNotNull(encodingCreator);
     }
 
-    public BbcProgrammeGraphExtractor(BbcExtendedDataContentAdapter extendedDataAdapter, AdapterLog log) {
-        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient(), extendedDataAdapter, new SystemClock(), log);
+    public BbcProgrammeGraphExtractor(BbcExtendedDataContentAdapter extendedDataAdapter, 
+            BbcLocationPolicyIds locationPolicyIds, BbcProgrammeEncodingAndLocationCreator encodingCreator, 
+            AdapterLog log) {
+        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient(locationPolicyIds), 
+                extendedDataAdapter, encodingCreator, new SystemClock(), log);
     }
 
     public Item extract(BbcProgrammeSource source) {
