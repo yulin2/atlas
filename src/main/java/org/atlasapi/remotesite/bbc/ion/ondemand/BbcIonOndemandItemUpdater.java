@@ -11,6 +11,7 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
 import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
+import org.atlasapi.remotesite.bbc.ion.IonService.MediaSetsToPoliciesFunction;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 
 import com.google.common.collect.Iterables;
@@ -24,12 +25,12 @@ public class BbcIonOndemandItemUpdater {
 
     private BbcProgrammeEncodingAndLocationCreator encodingCreator;
     
-    public BbcIonOndemandItemUpdater() {
-        this(new SystemClock());
+    public BbcIonOndemandItemUpdater(MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction) {
+        this(mediaSetsToPoliciesFunction, new SystemClock());
     }
 
-    public BbcIonOndemandItemUpdater(Clock clock) {
-        this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(clock);
+    public BbcIonOndemandItemUpdater(MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, Clock clock) {
+        this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(mediaSetsToPoliciesFunction, clock);
     }
 
     public void updateItemDetails(Item item, IonOndemandChange change) {

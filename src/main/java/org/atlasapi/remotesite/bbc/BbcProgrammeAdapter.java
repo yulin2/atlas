@@ -29,10 +29,10 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesClip;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSameAs;
-import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesTopic;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
+import org.atlasapi.remotesite.bbc.ion.IonService.MediaSetsToPoliciesFunction;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -56,13 +56,14 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
 	private final ContentWriter writer;
     private final BbcSlashProgrammesRdfClient<SlashProgrammesRdf> topicClient;
 
-    public BbcProgrammeAdapter(ContentWriter writer, BbcExtendedDataContentAdapter extendedDataAdapter, AdapterLog log) {
+    public BbcProgrammeAdapter(ContentWriter writer, BbcExtendedDataContentAdapter extendedDataAdapter, 
+            MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, AdapterLog log) {
         this(writer, 
                 new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), 
                 new BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf>(SlashProgrammesVersionRdf.class), 
                 new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), 
                 new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), 
-                extendedDataAdapter, log);
+                extendedDataAdapter, mediaSetsToPoliciesFunction, log);
     }
 
     public BbcProgrammeAdapter(ContentWriter writer, 
@@ -70,13 +71,15 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
             BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf> versionClient, 
             BbcSlashProgrammesRdfClient<SlashProgrammesRdf> clipClient, 
             BbcSlashProgrammesRdfClient<SlashProgrammesRdf> topicClient, 
-            BbcExtendedDataContentAdapter extendedDataAdapter, AdapterLog log) {
+            BbcExtendedDataContentAdapter extendedDataAdapter, 
+            MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, AdapterLog log) {
         this.writer = writer;
 		this.versionClient = versionClient;
         this.episodeClient = episodeClient;
         this.clipClient = clipClient;
         this.topicClient = topicClient;
-        BbcProgrammeGraphExtractor graphExtractor = new BbcProgrammeGraphExtractor(extendedDataAdapter, log);
+        BbcProgrammeGraphExtractor graphExtractor = 
+                new BbcProgrammeGraphExtractor(extendedDataAdapter, mediaSetsToPoliciesFunction, log);
         this.itemExtractor = graphExtractor;
         this.brandExtractor = new BbcBrandExtractor(this, writer, graphExtractor, extendedDataAdapter, log);
     }
