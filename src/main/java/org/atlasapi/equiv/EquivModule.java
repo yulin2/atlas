@@ -243,7 +243,7 @@ public class EquivModule {
         
         EquivalenceUpdater<Item> standardItemUpdater = standardItemUpdater(MoreSets.add(acceptablePublishers, LOVEFILM), 
                 ImmutableSet.of(new TitleMatchingItemScorer(), new SequenceItemScorer())).build();
-        EquivalenceUpdater<Container> topLevelContainerUpdater = topLevelContainerUpdater(acceptablePublishers);
+        EquivalenceUpdater<Container> topLevelContainerUpdater = topLevelContainerUpdater(MoreSets.add(acceptablePublishers, LOVEFILM));
 
         Set<Publisher> nonStandardPublishers = ImmutableSet.copyOf(Sets.union(
             ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, RTE, YOUVIEW, YOUVIEW_STAGE, TALK_TALK, PA), 
