@@ -21,30 +21,13 @@ import com.metabroadcast.common.media.MimeType;
 
 public enum IonService {
 
-	IPLAYER_INTL_STREAM_MP3 {
-		@Override
-		public void applyTo(Encoding encoding) {
-			encoding.setDataContainerFormat(MimeType.AUDIO_MP3);
-			encoding.setAudioCoding(MimeType.AUDIO_MP3);
-		}
-        
+    IPLAYER_INTL_STREAM_MP3 {
         @Override
-        public void applyTo(Policy policy) {
-            policy.addAvailableCountry(Countries.ALL);
+        public void applyTo(Encoding encoding) {
+            encoding.setDataContainerFormat(MimeType.AUDIO_MP3);
+            encoding.setAudioCoding(MimeType.AUDIO_MP3);
         }
 
-		@Override
-		public List<Policy> policies(Function<MediaSet, Policy> mediaSetToPoliciesFunction) {
-		    return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.PC), mediaSetToPoliciesFunction));
-		}
-	},	
-	IPLAYER_INTL_STREAM_AAC_WS_CONCRETE {
-		@Override
-		public void applyTo(Encoding encoding) {
-			encoding.setDataContainerFormat(MimeType.AUDIO_AAC);
-			encoding.setAudioCoding(MimeType.AUDIO_AAC);
-		}
-        
         @Override
         public void applyTo(Policy policy) {
             policy.addAvailableCountry(Countries.ALL);
@@ -52,17 +35,34 @@ public enum IonService {
 
         @Override
         public List<Policy> policies(Function<MediaSet, Policy> mediaSetToPoliciesFunction) {
-			return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.PC, MediaSet.APPLE_IPHONE4_HLS, MediaSet.APPLE_PHONE4_IPAD_HLS_3G), mediaSetToPoliciesFunction));
-		}
-	},	
-	IPLAYER_STREAMING_H264_FLV_LO {
-		
-		@Override
-		public void applyTo(Encoding encoding) {
-			encoding.setDataContainerFormat(MimeType.APPLICATION_XSHOCKWAVEFLASH);
-			encoding.setVideoCoding(MimeType.VIDEO_H264);
-		}
-        
+            return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.PC), mediaSetToPoliciesFunction));
+        }
+    },	
+    IPLAYER_INTL_STREAM_AAC_WS_CONCRETE {
+        @Override
+        public void applyTo(Encoding encoding) {
+            encoding.setDataContainerFormat(MimeType.AUDIO_AAC);
+            encoding.setAudioCoding(MimeType.AUDIO_AAC);
+        }
+
+        @Override
+        public void applyTo(Policy policy) {
+            policy.addAvailableCountry(Countries.ALL);
+        }
+
+        @Override
+        public List<Policy> policies(Function<MediaSet, Policy> mediaSetToPoliciesFunction) {
+            return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.PC, MediaSet.APPLE_IPHONE4_HLS, MediaSet.APPLE_PHONE4_IPAD_HLS_3G), mediaSetToPoliciesFunction));
+        }
+    },	
+    IPLAYER_STREAMING_H264_FLV_LO {
+
+        @Override
+        public void applyTo(Encoding encoding) {
+            encoding.setDataContainerFormat(MimeType.APPLICATION_XSHOCKWAVEFLASH);
+            encoding.setVideoCoding(MimeType.VIDEO_H264);
+        }
+
         @Override
         public void applyTo(Policy policy) {
             policy.addAvailableCountry(Countries.GB);
@@ -70,18 +70,18 @@ public enum IonService {
 
         @Override
         public List<Policy> policies(Function<MediaSet, Policy> mediaSetToPoliciesFunction) {
-			return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.PC), mediaSetToPoliciesFunction));
+            return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.PC), mediaSetToPoliciesFunction));
 
-		}
-	},	
-	IPLAYER_STREAMING_H264_FLV_VLO {
-        
+        }
+    },	
+    IPLAYER_STREAMING_H264_FLV_VLO {
+
         @Override
         public void applyTo(Encoding encoding) {
             encoding.setDataContainerFormat(MimeType.APPLICATION_XSHOCKWAVEFLASH);
             encoding.setVideoCoding(MimeType.VIDEO_H264);
         }
-        
+
         @Override
         public void applyTo(Policy policy) {
             policy.addAvailableCountry(Countries.GB);
@@ -92,14 +92,14 @@ public enum IonService {
             return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.APPLE_IPHONE4_HLS, MediaSet.APPLE_PHONE4_IPAD_HLS_3G), mediaSetToPoliciesFunction));
         }
     },	
-	IPLAYER_UK_STREAM_AAC_RTMP_CONCRETE {
+    IPLAYER_UK_STREAM_AAC_RTMP_CONCRETE {
 
-		@Override
-		public void applyTo(Encoding encoding) {
-			encoding.setDataContainerFormat(MimeType.AUDIO_AAC);
-			encoding.setAudioCoding(MimeType.AUDIO_AAC);
-		}
-        
+        @Override
+        public void applyTo(Encoding encoding) {
+            encoding.setDataContainerFormat(MimeType.AUDIO_AAC);
+            encoding.setAudioCoding(MimeType.AUDIO_AAC);
+        }
+
         @Override
         public void applyTo(Policy policy) {
             policy.addAvailableCountry(Countries.GB);
@@ -107,17 +107,17 @@ public enum IonService {
 
         @Override
         public List<Policy> policies(Function<MediaSet, Policy> mediaSetToPoliciesFunction) {
-			 return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.PC), mediaSetToPoliciesFunction));
-		}
-	},
-	IPLAYER_INTL_STREAM_AAC_RTMP_CONCRETE {
+            return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.PC), mediaSetToPoliciesFunction));
+        }
+    },
+    IPLAYER_INTL_STREAM_AAC_RTMP_CONCRETE {
 
-		@Override
-		public void applyTo(Encoding encoding) {
-			encoding.setDataContainerFormat(MimeType.AUDIO_AAC);
-			encoding.setAudioCoding(MimeType.AUDIO_AAC);
-		}
-        
+        @Override
+        public void applyTo(Encoding encoding) {
+            encoding.setDataContainerFormat(MimeType.AUDIO_AAC);
+            encoding.setAudioCoding(MimeType.AUDIO_AAC);
+        }
+
         @Override
         public void applyTo(Policy policy) {
             policy.addAvailableCountry(Countries.ALL);
@@ -125,17 +125,17 @@ public enum IonService {
 
         @Override
         public List<Policy> policies(Function<MediaSet, Policy> mediaSetToPoliciesFunction) {
-			return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.PC), mediaSetToPoliciesFunction));
-		}
-	},	
-	IPLAYER_STREAMING_H264_FLV {
+            return ImmutableList.copyOf(Iterables.transform(Lists.newArrayList(MediaSet.PC), mediaSetToPoliciesFunction));
+        }
+    },	
+    IPLAYER_STREAMING_H264_FLV {
         @Override
         public void applyTo(Encoding encoding) {
             encoding.setDataContainerFormat(MimeType.APPLICATION_XSHOCKWAVEFLASH);
             encoding.setVideoCoding(MimeType.VIDEO_H264);
-            
+
         }
-        
+
         @Override
         public void applyTo(Policy policy) {
             policy.addAvailableCountry(Countries.GB);
@@ -152,7 +152,7 @@ public enum IonService {
             encoding.setDataContainerFormat(MimeType.AUDIO_AAC);
             encoding.setVideoCoding(MimeType.AUDIO_AAC);
         }
-        
+
         @Override
         public void applyTo(Policy policy) {
             policy.addAvailableCountry(Countries.GB);
@@ -169,7 +169,7 @@ public enum IonService {
             encoding.setDataContainerFormat(MimeType.AUDIO_AAC);
             encoding.setVideoCoding(MimeType.AUDIO_AAC);
         }
-        
+
         @Override
         public void applyTo(Policy policy) {
             policy.addAvailableCountry(Countries.GB);
@@ -181,21 +181,21 @@ public enum IonService {
         }
     };
 
-	
-	protected abstract void applyTo(Encoding encoding);
-	
-	protected abstract void applyTo(Policy policy);
 
-	protected abstract List<Policy> policies(Function<MediaSet, Policy> mediaSetToPoliciesFunction);
-	
-	public static class MediaSetsToPoliciesFunction implements Function<MediaSet, Policy> {
-	    
-	    private final BbcLocationPolicyIds locationPolicyIds;
-	    
+    protected abstract void applyTo(Encoding encoding);
+
+    protected abstract void applyTo(Policy policy);
+
+    protected abstract List<Policy> policies(Function<MediaSet, Policy> mediaSetToPoliciesFunction);
+
+    public static class MediaSetsToPoliciesFunction implements Function<MediaSet, Policy> {
+
+        private final BbcLocationPolicyIds locationPolicyIds;
+
         public MediaSetsToPoliciesFunction(BbcLocationPolicyIds locationPolicyIds) {
-	        this.locationPolicyIds = checkNotNull(locationPolicyIds);
-	    }
-        
+            this.locationPolicyIds = checkNotNull(locationPolicyIds);
+        }
+
         @Override
         public Policy apply(MediaSet input) {
             switch (input) {
@@ -220,48 +220,48 @@ public enum IonService {
             }
         }
     };
-    
+
     private enum MediaSet {
         PC,
         APPLE_IPHONE4_HLS,
         APPLE_PHONE4_IPAD_HLS_3G;
     }
-	
-	public void applyToEncoding(Encoding encoding, Function<MediaSet, Policy> mediaSetToPoliciesFunction) {
-		applyTo(encoding);
-		List<Policy> policies = policies(mediaSetToPoliciesFunction);
-		for (Policy policy : policies) {
-		    // create matching location for each policy
-		    Location location = new Location();
-	        location.setPolicy(policy);
-	        applyToLocation(location);
-	        encoding.addAvailableAt(location);
-		}
-	}
-	
-	public List<Location> locations(Function<MediaSet, Policy> mediaSetToPoliciesFunction) {
-	    List<Policy> policies = policies(mediaSetToPoliciesFunction);
-	    List<Location> locations = Lists.newArrayList();
-	    for (Policy policy : policies) {
-	        Location location = new Location();
-	        location.setPolicy(policy);
-	        applyToLocation(location);
-	        locations.add(location);
-	    }
-	    return locations;
-	}
 
-	private void applyToLocation(Location location) {
-		Policy policy = location.getPolicy();
-		applyTo(policy);
-	}
+    public void applyToEncoding(Encoding encoding, Function<MediaSet, Policy> mediaSetToPoliciesFunction) {
+        applyTo(encoding);
+        List<Policy> policies = policies(mediaSetToPoliciesFunction);
+        for (Policy policy : policies) {
+            // create matching location for each policy
+            Location location = new Location();
+            location.setPolicy(policy);
+            applyToLocation(location);
+            encoding.addAvailableAt(location);
+        }
+    }
 
-	public static Maybe<IonService> fromString(String s) {
-		for (IonService service : values()) {
-			if (service.name().equalsIgnoreCase(s)) {
-				return Maybe.just(service);
-			}
-		}
-		return Maybe.nothing();
-	}
+    public List<Location> locations(Function<MediaSet, Policy> mediaSetToPoliciesFunction) {
+        List<Policy> policies = policies(mediaSetToPoliciesFunction);
+        List<Location> locations = Lists.newArrayList();
+        for (Policy policy : policies) {
+            Location location = new Location();
+            location.setPolicy(policy);
+            applyToLocation(location);
+            locations.add(location);
+        }
+        return locations;
+    }
+
+    private void applyToLocation(Location location) {
+        Policy policy = location.getPolicy();
+        applyTo(policy);
+    }
+
+    public static Maybe<IonService> fromString(String s) {
+        for (IonService service : values()) {
+            if (service.name().equalsIgnoreCase(s)) {
+                return Maybe.just(service);
+            }
+        }
+        return Maybe.nothing();
+    }
 }
