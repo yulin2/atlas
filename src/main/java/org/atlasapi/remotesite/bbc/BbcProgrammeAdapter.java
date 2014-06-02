@@ -57,13 +57,14 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
     private final BbcSlashProgrammesRdfClient<SlashProgrammesRdf> topicClient;
 
     public BbcProgrammeAdapter(ContentWriter writer, BbcExtendedDataContentAdapter extendedDataAdapter, 
-            MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, AdapterLog log) {
+            BbcLocationPolicyIds locationPolicyIds, MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, 
+            AdapterLog log) {
         this(writer, 
                 new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), 
                 new BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf>(SlashProgrammesVersionRdf.class), 
                 new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), 
                 new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), 
-                extendedDataAdapter, mediaSetsToPoliciesFunction, log);
+                extendedDataAdapter, locationPolicyIds, mediaSetsToPoliciesFunction, log);
     }
 
     public BbcProgrammeAdapter(ContentWriter writer, 
@@ -72,6 +73,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
             BbcSlashProgrammesRdfClient<SlashProgrammesRdf> clipClient, 
             BbcSlashProgrammesRdfClient<SlashProgrammesRdf> topicClient, 
             BbcExtendedDataContentAdapter extendedDataAdapter, 
+            BbcLocationPolicyIds locationPolicyIds,
             MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, AdapterLog log) {
         this.writer = writer;
 		this.versionClient = versionClient;
@@ -79,7 +81,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
         this.clipClient = clipClient;
         this.topicClient = topicClient;
         BbcProgrammeGraphExtractor graphExtractor = 
-                new BbcProgrammeGraphExtractor(extendedDataAdapter, mediaSetsToPoliciesFunction, log);
+                new BbcProgrammeGraphExtractor(extendedDataAdapter, locationPolicyIds, mediaSetsToPoliciesFunction, log);
         this.itemExtractor = graphExtractor;
         this.brandExtractor = new BbcBrandExtractor(this, writer, graphExtractor, extendedDataAdapter, log);
     }

@@ -35,12 +35,16 @@ public class BbcProgrammesPolicyClient {
 	
 	private final SimpleHttpClient client;
 
-	public BbcProgrammesPolicyClient(SimpleHttpClient client) {
+    private final BbcLocationPolicyIds locationPolicyIds;
+
+	public BbcProgrammesPolicyClient(SimpleHttpClient client, BbcLocationPolicyIds locationPolicyIds) {
 		this.client = client;
+		this.locationPolicyIds = locationPolicyIds;
 	}
 	
-	public BbcProgrammesPolicyClient() {
-		this(HttpClients.webserviceClient());
+	public BbcProgrammesPolicyClient(BbcLocationPolicyIds locationPolicyIds) {
+		this(HttpClients.webserviceClient(), locationPolicyIds);
+        
 	}
 	
 	public Maybe<Policy> policyForUri(String episodeUri) {
@@ -94,6 +98,8 @@ public class BbcProgrammesPolicyClient {
 			policy.setAvailableCountries(availableCountries);
 			policy.setAvailabilityStart(validRange.getStart());
 			policy.setAvailabilityEnd(validRange.getEnd());
+			policy.setPlayer(locationPolicyIds.getIPlayerPlayerId());
+			policy.setService(locationPolicyIds.getWebServiceId());
 			return Maybe.just(policy);
 		}
 		

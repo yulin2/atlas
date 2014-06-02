@@ -144,7 +144,7 @@ public class BbcModule {
     
     private BbcIonScheduleUpdater bbcIonScheduleOndemandUpdater(int lookBack) {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_ONDEMAND_FORMAT, 0, lookBack);
-        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), new OndemandBbcIonBroadcastHandler(contentResolver, contentWriters, log, contentLock()), broadcastTrimmer(), channelResolver, scheduleWriter, log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), new OndemandBbcIonBroadcastHandler(contentResolver, contentWriters, bbcLocationPolicyIds(), log, contentLock()), broadcastTrimmer(), channelResolver, scheduleWriter, log);
     }
     
     private BbcIonScheduleUpdater bbcIonSocialDataUpdater(int ahead, int back) {
