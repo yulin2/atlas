@@ -27,8 +27,10 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class ItvWhatsOnExtractorTest {
     
+    private final ItvWhatsOnLocationPolicyIds locationPolicyIds 
+                    = ItvWhatsOnLocationPolicyIds.builder().build();
     private final ItvWhatsOnEntryExtractor extractor = new ItvWhatsOnEntryExtractor(ImmutableMap.of("CITV", Channel.builder()
-            .withUri("http://www.itv.com/channels/citv").build()));
+            .withUri("http://www.itv.com/channels/citv").build()), locationPolicyIds);
     
     private DateTime getDateTimeFromMillis(long millis) {
         return new DateTime(DateTimeZones.UTC).withMillis(millis);
