@@ -246,7 +246,8 @@ public class BbcModule {
 
     private BbcIonOndemandChangeUpdateBuilder bbcIonOndemandChangeUpdateBuilder() {
         return new BbcIonOndemandChangeUpdateBuilder(
-                new BbcIonOndemandChangeTaskBuilder(contentResolver, contentWriters, mediaSetsToPoliciesFunction(), log), 
+                new BbcIonOndemandChangeTaskBuilder(contentResolver, contentWriters, mediaSetsToPoliciesFunction(), 
+                        bbcLocationPolicyIds(), log), 
                 log, ionClient(HttpClients.webserviceClient(),IonOndemandChanges.class));
     }
 	
