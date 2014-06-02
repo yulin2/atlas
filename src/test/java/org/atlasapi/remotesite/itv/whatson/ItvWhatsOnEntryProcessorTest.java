@@ -27,6 +27,8 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class ItvWhatsOnEntryProcessorTest {
     
+    private final ItvWhatsOnLocationPolicyIds locationPolicyIds 
+                    = ItvWhatsOnLocationPolicyIds.builder().build();
     private final ChannelResolver channelResolver = mock(ChannelResolver.class); 
     private ItvWhatsOnEntryExtractor extractor;
     
@@ -89,7 +91,7 @@ public class ItvWhatsOnEntryProcessorTest {
                 return Maybe.just(Channel.builder().withUri((String)invocation.getArguments()[0]).build());
             }
         });
-        extractor = new ItvWhatsOnEntryExtractor(new ItvWhatsonChannelMap(channelResolver));
+        extractor = new ItvWhatsOnEntryExtractor(new ItvWhatsonChannelMap(channelResolver), locationPolicyIds);
     }
     
     
@@ -114,7 +116,7 @@ public class ItvWhatsOnEntryProcessorTest {
         episode.setContainer(brand.get());
         episode.setSeries(series.get());
         extractor.setCommonItemAttributes(episode, entry);
-        ItvWhatsOnEntryProcessor processor = new ItvWhatsOnEntryProcessor(contentResolver, contentWriter, channelResolver);
+        ItvWhatsOnEntryProcessor processor = new ItvWhatsOnEntryProcessor(contentResolver, contentWriter, channelResolver, locationPolicyIds);
         
         processor.createOrUpdateAtlasEntityFrom(entry);
         verify(contentResolver).findByCanonicalUris(ImmutableList.of(BRAND_URI));
@@ -138,7 +140,7 @@ public class ItvWhatsOnEntryProcessorTest {
         when(contentResolver.findByCanonicalUris(ImmutableList.of(ITEM_URI)))
             .thenReturn(  ResolvedContent.builder().put(ITEM_URI, getMatchedItem()).build()  );
         
-        ItvWhatsOnEntryProcessor processor = new ItvWhatsOnEntryProcessor(contentResolver, contentWriter, channelResolver);
+        ItvWhatsOnEntryProcessor processor = new ItvWhatsOnEntryProcessor(contentResolver, contentWriter, channelResolver, locationPolicyIds);
         processor.createOrUpdateAtlasEntityFrom(entry);
         verify(contentWriter).createOrUpdate((Item) getMatchedItem());
     }
