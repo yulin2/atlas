@@ -45,6 +45,7 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonSegmentAdapter;
 import org.atlasapi.remotesite.bbc.ion.DefaultBbcIonBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient;
+import org.atlasapi.remotesite.bbc.ion.IonService.MediaSetsToPoliciesFunction;
 import org.atlasapi.remotesite.bbc.ion.OndemandBbcIonBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.ScheduleBasedItemUpdatingBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.SegmentUpdatingIonBroadcastHandler;
@@ -64,6 +65,7 @@ import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -99,6 +101,9 @@ public class BbcModule {
 	private @Autowired ChannelResolver channelResolver;
 	private @Autowired ScheduleResolver scheduleResolver;
 	private @Autowired ScheduleWriter scheduleWriter;
+	
+	private @Value("${service.web.id}") Long webServiceId;
+    private @Value("${player.iplayer.id}") Long iPlayerPlayerId;
 	
     @PostConstruct
     public void scheduleTasks() {
@@ -200,7 +205,9 @@ public class BbcModule {
     private BbcIonEpisodeItemAdapter<Item> bbcIonEpisodeDetailItemAdapter() {
         return new BbcIonEpisodeItemAdapter<Item>(
                 ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class), 
-                new BbcIonEpisodeDetailItemContentExtractor(log, ionClient(HttpClients.webserviceClient(), IonContainerFeed.class)));
+                new BbcIonEpisodeDetailItemContentExtractor(log, 
+                        ionClient(HttpClients.webserviceClient(), IonContainerFeed.class), 
+                        mediaSetsToPoliciesFunction()));
     }
 
     @Bean Runnable bbcAtoZUpdater() {
@@ -216,7 +223,8 @@ public class BbcModule {
             ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class), 
             new BbcIonEpisodeDetailItemContentExtractor(log, 
                 ionClient(HttpClients.webserviceClient(), IonContainerFeed.class), 
-                ionClient(HttpClients.webserviceClient(), IonVersionListFeed.class)
+                ionClient(HttpClients.webserviceClient(), IonVersionListFeed.class),
+                mediaSetsToPoliciesFunction()
             )
         );
 	    BbcExtendedDataContentAdapter extendedDataAdapter = extendedDataAdapter();
@@ -237,7 +245,9 @@ public class BbcModule {
 	}
 
     private BbcIonOndemandChangeUpdateBuilder bbcIonOndemandChangeUpdateBuilder() {
-        return new BbcIonOndemandChangeUpdateBuilder(new BbcIonOndemandChangeTaskBuilder(contentResolver, contentWriters, log), log, ionClient(HttpClients.webserviceClient(),IonOndemandChanges.class));
+        return new BbcIonOndemandChangeUpdateBuilder(
+                new BbcIonOndemandChangeTaskBuilder(contentResolver, contentWriters, mediaSetsToPoliciesFunction(), log), 
+                log, ionClient(HttpClients.webserviceClient(),IonOndemandChanges.class));
     }
 	
 	@Bean BbcIonOndemandChangeUpdateController bbcIonOndemandChangeController() {
@@ -251,4 +261,16 @@ public class BbcModule {
 	@Bean ContentLock contentLock() {
 	    return new ContentLock();
 	}
+	
+	@Bean MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction() {
+	    return new MediaSetsToPoliciesFunction(bbcLocationPolicyIds());
+	}
+	
+	@Bean BbcLocationPolicyIds bbcLocationPolicyIds() {
+	    return BbcLocationPolicyIds.builder()
+	                               .withIPlayerPlayerId(iPlayerPlayerId)
+	                               .withWebServiceId(webServiceId)
+	                               .build();
+	}
+	
 }

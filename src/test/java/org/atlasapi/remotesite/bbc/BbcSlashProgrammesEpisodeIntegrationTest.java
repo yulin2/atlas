@@ -19,6 +19,7 @@ import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
+import org.atlasapi.remotesite.bbc.ion.IonService.MediaSetsToPoliciesFunction;
 import org.atlasapi.remotesite.channel4.RecordingContentWriter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -38,6 +39,9 @@ import com.metabroadcast.common.http.FixedResponseHttpClient;
 @RunWith(JMock.class)
 public class BbcSlashProgrammesEpisodeIntegrationTest {
     
+    private static final long IPLAYER_PLAYER_ID = 12;
+    private static final long WEB_SERVICE_ID = 15;
+    
     Mockery context = new Mockery();
     private final TopicStore topicStore = context.mock(TopicStore.class);
     
@@ -51,7 +55,16 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
         
         RecordingContentWriter writer = new RecordingContentWriter();
         
-        BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, extendedDataAdapter, new SystemOutAdapterLog());
+        BbcLocationPolicyIds locationPolicyIds = BbcLocationPolicyIds
+                .builder()
+                .withIPlayerPlayerId(IPLAYER_PLAYER_ID)
+                .withWebServiceId(WEB_SERVICE_ID)
+                .build();
+
+        MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction = 
+                new MediaSetsToPoliciesFunction(locationPolicyIds);
+
+        BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, extendedDataAdapter, mediaSetsToPoliciesFunction, new SystemOutAdapterLog());
         
 //        topics are disabled currently
         context.checking(new Expectations(){{
