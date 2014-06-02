@@ -24,8 +24,11 @@ public class ItvWhatsOnEntryProcessor {
     private final ContentWriter contentWriter;
     private final ContentMerger contentMerger;
   
-    public ItvWhatsOnEntryProcessor(ContentResolver contentResolver, ContentWriter contentWriter, ChannelResolver channelResolver) {
-        this.extractor = new ItvWhatsOnEntryExtractor(new ItvWhatsonChannelMap(channelResolver));
+    public ItvWhatsOnEntryProcessor(ContentResolver contentResolver, 
+            ContentWriter contentWriter, ChannelResolver channelResolver,
+            ItvWhatsOnLocationPolicyIds locationPolicyIds) {
+        this.extractor = new ItvWhatsOnEntryExtractor(new ItvWhatsonChannelMap(channelResolver),
+                locationPolicyIds);
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
         this.contentMerger = new ContentMerger(MergeStrategy.MERGE);

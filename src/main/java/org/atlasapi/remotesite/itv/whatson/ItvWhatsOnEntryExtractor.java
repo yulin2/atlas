@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.itv.whatson;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Map;
 
 import org.atlasapi.media.TransportSubType;
@@ -44,9 +46,11 @@ public class ItvWhatsOnEntryExtractor {
     private static final MimeType PRIMARY_IMAGE_MIMETYPE = MimeType.IMAGE_JPG;
     
     private final Map<String, Channel> channelMap;
+    private final ItvWhatsOnLocationPolicyIds locationPolicyIds;
     
-    public ItvWhatsOnEntryExtractor(Map<String, Channel> channelMap) {
+    public ItvWhatsOnEntryExtractor(Map<String, Channel> channelMap, ItvWhatsOnLocationPolicyIds locationPolicyIds) {
         this.channelMap = ImmutableMap.copyOf(channelMap);
+        this.locationPolicyIds = checkNotNull(locationPolicyIds);
     }
    
     public Optional<Brand> toBrand(ItvWhatsOnEntry entry) {
@@ -104,6 +108,8 @@ public class ItvWhatsOnEntryExtractor {
         policy.setAvailabilityEnd(entry.getAvailabilityEnd());
         policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
         policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
+        policy.setPlayer(locationPolicyIds.getItvPlayerId());
+        policy.setService(locationPolicyIds.getWebServiceId());
         return policy;
     }
     
