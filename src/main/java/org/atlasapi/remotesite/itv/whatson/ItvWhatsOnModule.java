@@ -33,6 +33,9 @@ public class ItvWhatsOnModule {
     private @Autowired ChannelResolver channelResolver;
     private @Value("${itv.whatson.schedule.url}") String feedUrl;
     
+    private @Value("${service.web.id}") Long webServiceId;
+    private @Value("${player.itvplayer.id}") Long itvPlayerId;
+    
     private static final Every EVERY_FIFTEEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(15));
     private static final Every EVERY_HOUR = RepetitionRules.every(Duration.standardHours(1));
     
@@ -57,7 +60,8 @@ public class ItvWhatsOnModule {
     
     @Bean
     public ItvWhatsOnEntryProcessor processor() {
-        return new ItvWhatsOnEntryProcessor(contentResolver, contentWriter, channelResolver);
+        return new ItvWhatsOnEntryProcessor(contentResolver, contentWriter, 
+                channelResolver, itvWhatsOnLocationPolicyIds());
     }
     
     @Bean
@@ -85,5 +89,14 @@ public class ItvWhatsOnModule {
     @Bean
     public ItvWhatsOnController itvWhatsOnController() {
         return new ItvWhatsOnController(feedUrl, itvWhatsOnClient(), processor());
+    }
+    
+    @Bean
+    public ItvWhatsOnLocationPolicyIds itvWhatsOnLocationPolicyIds() {
+        return ItvWhatsOnLocationPolicyIds
+                    .builder()
+                    .withItvPlayerId(itvPlayerId)
+                    .withWebServiceId(webServiceId)
+                    .build();
     }
 }
