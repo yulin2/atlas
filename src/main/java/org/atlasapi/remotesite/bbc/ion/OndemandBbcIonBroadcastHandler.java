@@ -17,6 +17,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.BbcLocationPolicyIds;
 import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.joda.time.DateTime;
@@ -35,10 +36,13 @@ public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private final ContentWriter writer;
     private final AdapterLog log;
     private final ContentLock lock;
+    private final BbcLocationPolicyIds locationPolicyIds;
 
-    public OndemandBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log, ContentLock lock) {
+    public OndemandBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, 
+            BbcLocationPolicyIds locationPolicyIds, AdapterLog log, ContentLock lock) {
         this.resolver = resolver;
         this.writer = writer;
+        this.locationPolicyIds = locationPolicyIds;
         this.log = log;
         this.lock = lock;
     }
@@ -122,6 +126,8 @@ public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         policy.setAvailabilityStart(actualStart);
         policy.setAvailabilityEnd(availableUntil);
         policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
+        policy.setService(locationPolicyIds.getWebServiceId());
+        policy.setPlayer(locationPolicyIds.getIPlayerPlayerId());
         location.setPolicy(policy);
         location.setCanonicalUri(iplayerId(itemId));
 

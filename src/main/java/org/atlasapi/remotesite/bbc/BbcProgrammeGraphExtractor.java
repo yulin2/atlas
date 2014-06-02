@@ -113,8 +113,9 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     }
 
     public BbcProgrammeGraphExtractor(BbcExtendedDataContentAdapter extendedDataAdapter, 
-            MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, AdapterLog log) {
-        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient(), 
+            BbcLocationPolicyIds locationPolicyIds, MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction, 
+            AdapterLog log) {
+        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient(locationPolicyIds), 
                 extendedDataAdapter, mediaSetsToPoliciesFunction, new SystemClock(), log);
     }
 

@@ -64,7 +64,7 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
         MediaSetsToPoliciesFunction mediaSetsToPoliciesFunction = 
                 new MediaSetsToPoliciesFunction(locationPolicyIds);
 
-        BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, extendedDataAdapter, mediaSetsToPoliciesFunction, new SystemOutAdapterLog());
+        BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, extendedDataAdapter, locationPolicyIds, mediaSetsToPoliciesFunction, new SystemOutAdapterLog());
         
 //        topics are disabled currently
         context.checking(new Expectations(){{

@@ -35,7 +35,9 @@ public class BbcProgrammesPolicyClientTest extends TestCase {
 	
 	@SuppressWarnings("unchecked")
 	public void testname() throws Exception {
-		Policy policy = new BbcProgrammesPolicyClient().policyForUri(programmeThatWillBeAroundForALongWhileAsIsAvailableEverywhere).requireValue();
+	    BbcLocationPolicyIds locationPolicyIds = BbcLocationPolicyIds.builder().build();
+	    
+		Policy policy = new BbcProgrammesPolicyClient(locationPolicyIds).policyForUri(programmeThatWillBeAroundForALongWhileAsIsAvailableEverywhere).requireValue();
 		
 		assertThat(policy.getAvailableCountries(), is(Collections.singleton(Countries.ALL)));
 		assertThat(new Duration(policy.getAvailabilityStart(), policy.getAvailabilityEnd()), is(greaterThan((ReadableDuration) Duration.standardDays(100))));
