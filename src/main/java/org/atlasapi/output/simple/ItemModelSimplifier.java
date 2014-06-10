@@ -544,20 +544,6 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             if (policy.getNetwork() != null) {
                 simpleLocation.setNetwork(policy.getNetwork().key());
             }
-            if (Platform.YOUVIEW_IPLAYER.equals(policy.getPlatform())) {
-                Optional<Service> service = serviceResolver.serviceFor(123L);
-                if (service.isPresent()) {
-                    simpleLocation.setService(serviceModelSimplifier.simplify(service.get(), 
-                            annotations, config));
-                }
-                
-                Optional<Player> player = playerResolver.playerFor(123L);
-                if (player.isPresent()) {
-                    simpleLocation.setPlayer(playerModelSimplifier.simplify(player.get(), 
-                            annotations, config));
-                }
-            }
-            
             if (policy.getService() != null) {
                 Optional<Service> service = serviceResolver.serviceFor(policy.getService());
                 if (service.isPresent()) {
