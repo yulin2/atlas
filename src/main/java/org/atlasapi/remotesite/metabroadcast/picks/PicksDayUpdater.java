@@ -58,7 +58,7 @@ public class PicksDayUpdater implements ChannelDayProcessor {
         this.contentGroupWriter = contentGroupWriter;
         this.contentResolver = contentResolver;
         this.picksPredicate = Predicates.and(ImmutableList.of(
-                                                new PrimetimePredicate(picksChannelsSupplier.get()), 
+                                                new InterestingItemAndBroadcastPredicate(picksChannelsSupplier.get()), 
                                                 Predicates.not(new ItemInLargeBrandPredicate(contentResolver, LARGE_BRAND_SIZE)),
                                                 Predicates.not(new ShortBroadcastPredicate(SHORT_BROADCAST_LENGTH)))
                                             );

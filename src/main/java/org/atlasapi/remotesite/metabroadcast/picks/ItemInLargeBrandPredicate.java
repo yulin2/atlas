@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableSet;
 
 
 /**
- * A predicate that will return true iff the {@link Item} is part of a brand with
+ * A predicate that will return true if the {@link Item} is part of a brand with
  * many children
  * 
  * @author tom
