@@ -48,7 +48,8 @@ public class EquivalenceBreaker {
         LookupEntry lookupEntry = 
                 Iterables.getOnlyElement(entryStore.entriesForCanonicalUris(ImmutableSet.of(sourceUri)));
         
-        if (!lookupEntry.directEquivalents().contains(directEquivUriToRemove)) {
+        if (!ImmutableSet.copyOf(Iterables.transform(lookupEntry.directEquivalents(), LookupRef.TO_URI))
+                .contains(directEquivUriToRemove)) {
             throw new IllegalArgumentException("Direct equivalence to " 
                             + directEquivUriToRemove + " not found");
         }
