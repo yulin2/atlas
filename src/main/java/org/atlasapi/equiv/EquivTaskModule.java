@@ -48,6 +48,7 @@ import org.atlasapi.messaging.v3.KafkaMessagingModule;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
+import org.atlasapi.persistence.lookup.LookupWriter;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.remotesite.bbc.ion.BbcIonServices;
 import org.atlasapi.remotesite.channel4.C4AtomApi;
@@ -121,6 +122,7 @@ public class EquivTaskModule {
     private @Autowired LookupEntryStore lookupStore;
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired ChannelResolver channelResolver;
+    private @Autowired LookupWriter lookupWriter;
     
     private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
     private @Autowired RecentEquivalenceResultStore equivalenceResultStore;
@@ -234,6 +236,10 @@ public class EquivTaskModule {
     
     public @Bean EquivGraphController debugGraphController() {
         return new EquivGraphController(lookupStore);
+    }
+    
+    public @Bean RemoveEquivalenceController removeEquivalenceController() {
+        return new RemoveEquivalenceController(new EquivalenceBreaker(contentResolver, lookupStore, lookupWriter));
     }
     
     //Probes...
