@@ -16,6 +16,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.talktalk.TalkTalkClient.TalkTalkVodListCallback;
 import org.atlasapi.remotesite.talktalk.vod.bindings.ChannelType;
+import org.atlasapi.remotesite.talktalk.vod.bindings.ItemTypeType;
 import org.atlasapi.remotesite.talktalk.vod.bindings.VODEntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,10 @@ public class TalkTalkVodContentListUpdateTask extends ScheduledTask {
                 public void process(VODEntityType entity) {
                     log.debug("processing entity {}", entity.getId());
                     try {
+                        if (!shouldProcessEntityType(entity.getItemType())) {
+                            log.warn("Ignoring entity of type " + entity.getItemType());
+                            return;
+                        }
                         String uri = uriCompiler.uriFor(entity);
                         Content content = resolve(uri);
                         if (content != null) {
@@ -92,6 +97,12 @@ public class TalkTalkVodContentListUpdateTask extends ScheduledTask {
                         log.warn(String.format("%s %s", entity.getItemType(), entity.getId()), e);
                         progress.set(progress.get().reduce(UpdateProgress.FAILURE));
                     }
+                }
+
+                private boolean shouldProcessEntityType(ItemTypeType itemType) {
+                    return ItemTypeType.BRAND.equals(itemType)
+                            || ItemTypeType.EPISODE.equals(itemType)
+                            || ItemTypeType.SERIES.equals(itemType);
                 }
             });
             
