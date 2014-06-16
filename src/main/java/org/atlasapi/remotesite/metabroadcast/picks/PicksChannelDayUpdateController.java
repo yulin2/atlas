@@ -21,7 +21,7 @@ import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 @Controller
 public class PicksChannelDayUpdateController {
 
-    private final NumberToShortStringCodec channelIdCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
+    private final NumberToShortStringCodec channelIdCodec = new SubstitutionTableNumberCodec();
     private final ChannelResolver channelResolver;
     private final PicksDayUpdater picksDayUpdater;
     
