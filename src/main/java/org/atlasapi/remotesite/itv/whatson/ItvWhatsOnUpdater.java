@@ -1,4 +1,6 @@
 package org.atlasapi.remotesite.itv.whatson;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -20,15 +22,17 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
     private final ItvWhatsOnEntryProcessor processor;
     private final DayRange dayRange;
     private final Logger log = LoggerFactory.getLogger(getClass());
+    private final int percentageFailureToTriggerJobFailure;
     
     private ItvWhatsOnUpdater(String feedUrl, 
             RemoteSiteClient<List<ItvWhatsOnEntry>> itvWhatsOnClient, 
             ItvWhatsOnEntryProcessor processor, 
-            DayRange dayRange) {
-        this.feedUrl = feedUrl;
-        this.itvWhatsOnClient = itvWhatsOnClient;
-        this.processor = processor;
-        this.dayRange = dayRange;
+            DayRange dayRange, int percentageFailureToTriggerJobFailure) {
+        this.feedUrl = checkNotNull(feedUrl);
+        this.itvWhatsOnClient = checkNotNull(itvWhatsOnClient);
+        this.processor = checkNotNull(processor);
+        this.dayRange = checkNotNull(dayRange);
+        this.percentageFailureToTriggerJobFailure = percentageFailureToTriggerJobFailure;
     }
     
     public UpdateProgress ingestFeedEntries(List<ItvWhatsOnEntry> entries) {
@@ -65,7 +69,14 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
         }
         String message = String.format("Finished. Feed %s. Item %s", feedLevelProgress, itemLevelProgress);
         reportStatus(message);
-        if (feedLevelProgress.hasFailures() || itemLevelProgress.hasFailures()) {
+        double percentageFailures = (100.0 * (feedLevelProgress.getFailures() + itemLevelProgress.getFailures())) 
+                                        / (feedLevelProgress.getTotalProgress() + itemLevelProgress.getTotalProgress());
+        
+        // Unfortunately some failures are expected with this job, since the 
+        // data quality isn't always that great; missing brand references on
+        // episodes, for example. Therefore we'll only fail the job if the
+        // number of failures breaches a configurable threshold.
+        if (percentageFailures > percentageFailureToTriggerJobFailure) {
             throw new RuntimeException(message);
         }
     }
@@ -80,6 +91,7 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
         private ItvWhatsOnEntryProcessor processor;
         private Integer lookAhead;
         private Integer lookBack;
+        private Integer percentageFailureToTriggerJobFailure;
         private LocalDate day;
         private Clock clock = new SystemClock();
         
@@ -118,10 +130,12 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
             return this;
         }
         
+        public Builder withPercentageFailureToTriggerJobFailure(int percentage) {
+            this.percentageFailureToTriggerJobFailure = percentage;
+            return this;
+        }
+        
         public ItvWhatsOnUpdater build() {
-            Preconditions.checkNotNull(feedUrl);
-            Preconditions.checkNotNull(itvWhatsOnClient);
-            Preconditions.checkNotNull(processor);
             
             DayRange dayRange;
                         
@@ -144,7 +158,7 @@ public class ItvWhatsOnUpdater extends ScheduledTask {
             return new ItvWhatsOnUpdater(feedUrl, 
                     itvWhatsOnClient, 
                     processor, 
-                    dayRange);
+                    dayRange, percentageFailureToTriggerJobFailure);
         }
     }
 }

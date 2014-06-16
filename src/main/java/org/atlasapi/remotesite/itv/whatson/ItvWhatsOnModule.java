@@ -32,6 +32,7 @@ public class ItvWhatsOnModule {
     private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
     private @Autowired ChannelResolver channelResolver;
     private @Value("${itv.whatson.schedule.url}") String feedUrl;
+    private @Value("${itv.whatson.percentageFailureToTriggerJobFailure") int percentageFailureToTriggerJobFailure;
     
     private @Value("${service.web.id}") Long webServiceId;
     private @Value("${player.itvplayer.id}") Long itvPlayerId;
@@ -72,6 +73,7 @@ public class ItvWhatsOnModule {
                 .withProcessor(processor())
                 .withLookBack(0)
                 .withLookAhead(0)
+                .withPercentageFailureToTriggerJobFailure(percentageFailureToTriggerJobFailure)
                 .build();
     }
     
@@ -83,6 +85,7 @@ public class ItvWhatsOnModule {
                 .withProcessor(processor())
                 .withLookBack(7)
                 .withLookAhead(7)
+                .withPercentageFailureToTriggerJobFailure(percentageFailureToTriggerJobFailure)
                 .build();
     }
 
