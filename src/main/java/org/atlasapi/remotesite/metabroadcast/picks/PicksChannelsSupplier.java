@@ -29,7 +29,7 @@ public class PicksChannelsSupplier implements Supplier<Set<Channel>> {
 
     private static Logger log = LoggerFactory.getLogger(PicksChannelsSupplier.class);
     
-    private final NumberToShortStringCodec codec = SubstitutionTableNumberCodec.lowerCaseOnly();
+    private final NumberToShortStringCodec codec = new SubstitutionTableNumberCodec();
     private final ChannelResolver channelResolver;
     private final Integer channelGroupId;
 
