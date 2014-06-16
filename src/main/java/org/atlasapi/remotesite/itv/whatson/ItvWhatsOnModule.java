@@ -32,7 +32,7 @@ public class ItvWhatsOnModule {
     private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
     private @Autowired ChannelResolver channelResolver;
     private @Value("${itv.whatson.schedule.url}") String feedUrl;
-    private @Value("${itv.whatson.percentageFailureToTriggerJobFailure") int percentageFailureToTriggerJobFailure;
+    private @Value("${itv.whatson.percentageFailureToTriggerJobFailure}") int percentageFailureToTriggerJobFailure;
     
     private @Value("${service.web.id}") Long webServiceId;
     private @Value("${player.itvplayer.id}") Long itvPlayerId;
