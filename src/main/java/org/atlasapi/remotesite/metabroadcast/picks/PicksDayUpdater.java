@@ -108,13 +108,17 @@ public class PicksDayUpdater implements ChannelDayProcessor {
         ContentGroup contentGroup = resolveOrCreateContentGroup();
         Iterable<ChildRef> childRefs = transform(items, Item.TO_CHILD_REF);
         pruneContents(contentGroup);
+        boolean changed = false;
         for (ChildRef childRef : childRefs) {
             
             if (!contentGroup.getContents().contains(childRef)) {
+                changed = true;
                 contentGroup.addContent(childRef);
             }
         }
-        contentGroupWriter.createOrUpdate(contentGroup);
+        if (changed) {
+            contentGroupWriter.createOrUpdate(contentGroup);
+        }
     }
     
     // The picks should be kept to a finite size, else we'll hit document size limits in mongo
