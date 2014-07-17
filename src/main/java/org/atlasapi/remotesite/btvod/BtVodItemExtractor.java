@@ -19,6 +19,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -40,6 +41,7 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 public class BtVodItemExtractor implements BtVodDataProcessor<UpdateProgress> {
 
     private static final String FILM_CATEGORY = "Film";
+    private static final String MUSIC_CATEGORY = "Music";
     private static final String IMAGE_URI_PREFIX = "http://portal.vision.bt.com/btvo/";
     private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("MMM dd yyyy hh:mmaa");
 
@@ -53,10 +55,12 @@ public class BtVodItemExtractor implements BtVodDataProcessor<UpdateProgress> {
     private final String uriPrefix;
     private final ContentMerger contentMerger;
     private UpdateProgress progress = UpdateProgress.START;
+    private BtVodContentListener listener;
 
     public BtVodItemExtractor(ContentWriter writer, ContentResolver resolver,
             BtVodBrandExtractor brandExtractor, BtVodSeriesExtractor seriesExtractor,
-            Publisher publisher, String uriPrefix) {
+            Publisher publisher, String uriPrefix, BtVodContentListener listener) {
+        this.listener = checkNotNull(listener);
         this.writer = checkNotNull(writer);
         this.resolver = checkNotNull(resolver);
         this.brandExtractor = checkNotNull(brandExtractor);
@@ -64,8 +68,6 @@ public class BtVodItemExtractor implements BtVodDataProcessor<UpdateProgress> {
         this.publisher = checkNotNull(publisher);
         this.uriPrefix = checkNotNull(uriPrefix);
         this.contentMerger = new ContentMerger(MergeStrategy.REPLACE);
-        
-        //FORMATTER.setTimeZone(TimeZone.getTimeZone("London"));
     }
     
     @Override
@@ -79,7 +81,7 @@ public class BtVodItemExtractor implements BtVodDataProcessor<UpdateProgress> {
             
             Item item = itemFrom(row);
             write(item);
-            
+            listener.onContent(item, row);
             thisProgress = UpdateProgress.SUCCESS;
         } catch (Exception e) {
             log.error("Failed to process row: " + row.toString(), e);
@@ -123,11 +125,17 @@ public class BtVodItemExtractor implements BtVodDataProcessor<UpdateProgress> {
             item = createEpisode(row);
         } else if (FILM_CATEGORY.equals(row.getColumnValue(BtVodFileColumn.CATEGORY))) {
             item = createFilm(row);
+        } else if (MUSIC_CATEGORY.equals(row.getColumnValue(BtVodFileColumn.CATEGORY))){
+            item = createSong(row);
         } else {
             item = createItem(row);
         }
         populateItemFields(item, row);
         return item;
+    }
+
+    private Item createSong(BtVodDataRow row) {
+        return new Song(uriFor(row), null, publisher);
     }
 
     private Episode createEpisode(BtVodDataRow row) {

@@ -34,11 +34,13 @@ public class BtVodSeriesExtractor implements BtVodDataProcessor<UpdateProgress>{
     private final String uriPrefix;
     private final ContentMerger contentMerger;
     private final Map<String, ParentRef> processedSeries = Maps.newHashMap();
+    private final BtVodContentListener listener;
     private UpdateProgress progress = UpdateProgress.START;
 
     public BtVodSeriesExtractor(ContentWriter writer, ContentResolver resolver,
             BtVodBrandExtractor brandExtractor, Publisher publisher, 
-            String uriPrefix) {
+            String uriPrefix, BtVodContentListener listener) {
+        this.listener = checkNotNull(listener);
         this.writer = checkNotNull(writer);
         this.resolver = checkNotNull(resolver);
         this.brandExtractor = checkNotNull(brandExtractor);
@@ -63,7 +65,7 @@ public class BtVodSeriesExtractor implements BtVodDataProcessor<UpdateProgress>{
             processedSeries.put(
                     seriesKeyFor(brandId, series.getSeriesNumber()), 
                     ParentRef.parentRefFrom(series));
-            
+            listener.onContent(series, row);
             thisProgress = UpdateProgress.SUCCESS;
         } catch (Exception e) {
             log.error("Failed to process row: " + row.toString(), e);

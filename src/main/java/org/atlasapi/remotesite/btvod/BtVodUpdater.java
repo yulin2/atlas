@@ -14,32 +14,36 @@ import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
 
-public class BtVodBrandHierarchyExtractor extends ScheduledTask {
+public class BtVodUpdater extends ScheduledTask {
 
-    private static final Logger log = LoggerFactory.getLogger(BtVodBrandHierarchyExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(BtVodUpdater.class);
     
     private final ContentResolver resolver;
     private final ContentWriter writer;
     private final String uriPrefix;
     private final Publisher publisher;
     private final BtVodData vodData;
+    private final BtVodContentGroupUpdater contentGroupUpdater;
     
-    public BtVodBrandHierarchyExtractor(ContentResolver resolver, ContentWriter contentWriter,
-            BtVodData vodData, String uriPrefix, Publisher publisher) {
+    public BtVodUpdater(ContentResolver resolver, ContentWriter contentWriter,
+            BtVodData vodData, String uriPrefix, 
+            BtVodContentGroupUpdater contentGroupUpdater, Publisher publisher) {
         this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(contentWriter);
         this.vodData = checkNotNull(vodData);
         this.uriPrefix = checkNotNull(uriPrefix);
         this.publisher = checkNotNull(publisher);
+        this.contentGroupUpdater = checkNotNull(contentGroupUpdater);
         
         withName("BT VOD Catalogue Ingest");
     }
     
     @Override
-    protected void runTask() {
-        BtVodBrandExtractor brandExtractor = new BtVodBrandExtractor(writer, resolver, publisher, uriPrefix);
-        BtVodSeriesExtractor seriesExtractor = new BtVodSeriesExtractor(writer, resolver, brandExtractor, publisher, uriPrefix);
-        BtVodItemExtractor itemExtractor = new BtVodItemExtractor(writer, resolver, brandExtractor, seriesExtractor, publisher, uriPrefix);
+    public void runTask() {
+        contentGroupUpdater.start();
+        BtVodBrandExtractor brandExtractor = new BtVodBrandExtractor(writer, resolver, publisher, uriPrefix, contentGroupUpdater);
+        BtVodSeriesExtractor seriesExtractor = new BtVodSeriesExtractor(writer, resolver, brandExtractor, publisher, uriPrefix, contentGroupUpdater);
+        BtVodItemExtractor itemExtractor = new BtVodItemExtractor(writer, resolver, brandExtractor, seriesExtractor, publisher, uriPrefix, contentGroupUpdater);
         try {
             reportStatus("Brand extract [IN PROGRESS]  Series extract [TODO]  Item extract [TODO]");
             vodData.processData(brandExtractor);
@@ -66,6 +70,7 @@ public class BtVodBrandHierarchyExtractor extends ScheduledTask {
                     || itemExtractor.getResult().getFailures() > 0) {
                 throw new RuntimeException("Failed to extract some rows");
             }
+            contentGroupUpdater.finish();
         } catch (IOException e) {
             log.error("Extraction failed", e);
             Throwables.propagate(e);

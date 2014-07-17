@@ -35,10 +35,12 @@ public class BtVodBrandExtractor implements BtVodDataProcessor<UpdateProgress> {
     private final Publisher publisher;
     private final String uriPrefix;
     private final ContentMerger contentMerger;
+    private final BtVodContentListener listener;
     private UpdateProgress progress = UpdateProgress.START;
     
     public BtVodBrandExtractor(ContentWriter writer, ContentResolver resolver,
-            Publisher publisher, String uriPrefix) {
+            Publisher publisher, String uriPrefix, BtVodContentListener listener) {
+        this.listener = checkNotNull(listener);
         this.writer = checkNotNull(writer);
         this.resolver = checkNotNull(resolver);
         this.publisher = checkNotNull(publisher);
@@ -58,6 +60,7 @@ public class BtVodBrandExtractor implements BtVodDataProcessor<UpdateProgress> {
             }
             Brand brand = brandFrom(row);
             write(brand);
+            listener.onContent(brand, row);
             processedBrands.put(brandId, ParentRef.parentRefFrom(brand));
             thisProgress = UpdateProgress.SUCCESS;
         } catch (Exception e) {
