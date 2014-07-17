@@ -11,7 +11,11 @@ import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.media.entity.simple.AudienceStatistics;
+import org.atlasapi.media.entity.simple.Demographic;
+import org.atlasapi.media.entity.simple.DemographicSegment;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Image;
 import org.atlasapi.media.entity.simple.LocalizedDescription;
@@ -24,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
@@ -95,6 +100,32 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         if (annotations.contains(Annotation.REVIEWS)) {
             simpleDescription.setReviews(simplifyReviews(content));
         }
+        if (annotations.contains(Annotation.AUDIENCE_STATISTICS)) {
+            simpleDescription.setAudienceStatistics(createDummyAudienceStatistics());
+        }
+        
+    }
+
+    private AudienceStatistics createDummyAudienceStatistics() {
+        
+        AudienceStatistics stats = new AudienceStatistics();
+        stats.setPublisher(toPublisherDetails(Publisher.METABROADCAST));
+        stats.setTotalViewers(123456);
+        stats.setViewingShare(0.25f);
+        Demographic genderDemographic = new Demographic();
+        genderDemographic.setType("gender");
+        genderDemographic.setSegments(ImmutableList.of(
+                new DemographicSegment("male", "Male", 0.5f),
+                new DemographicSegment("female", "Female", 0.5f)));
+        
+        Demographic ageDemographic = new Demographic();
+        
+        ageDemographic.setSegments(ImmutableList.of(
+                new DemographicSegment("4-9", "Age 4 to 9", 0.5f),
+                new DemographicSegment("10-16", "Age 10 to 16", 0.5f)));
+        ageDemographic.setType("age");
+        stats.setDemographics(ImmutableList.of(genderDemographic, ageDemographic));
+        return stats;
     }
 
     private String applyWatermark(F described, String description) {
