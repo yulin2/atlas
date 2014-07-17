@@ -12,6 +12,8 @@ import java.util.Map;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
@@ -58,19 +60,21 @@ public class TargetUserGroupChannelSaverTest {
     private final ChannelGroupResolver channelGroupResolver = mock(ChannelGroupResolver.class);
     private final ChannelGroupWriter channelGroupWriter = mock(ChannelGroupWriter.class);
     private final BtMpxClient btMpxClient = mock(BtMpxClient.class);
+    private final ChannelResolver channelResolver = mock(ChannelResolver.class);
+    private final ChannelWriter channelWriter = mock(ChannelWriter.class);
     private final NumberToShortStringCodec codec = SubstitutionTableNumberCodec.lowerCaseOnly();
     
     private final TargetUserGroupChannelGroupSaver saver 
         = new TargetUserGroupChannelGroupSaver(Publisher.METABROADCAST, ALIAS_URI_PREFIX, ALIAS_NAMESPACE, 
-                channelGroupResolver, channelGroupWriter, btMpxClient);
+                channelGroupResolver, channelGroupWriter, btMpxClient, channelResolver, channelWriter);
     
     
     @Test
     public void testExtractsTargetUserGroups() throws BtMpxClientException {
         
-        when(channelGroupResolver.fromAlias(canonicalUriFor(TARGET_USER_GROUP_A)))
+        when(channelGroupResolver.channelGroupFor(canonicalUriFor(TARGET_USER_GROUP_A)))
             .thenReturn(Optional.<ChannelGroup>of(channelGroup(TARGET_USER_GROUP_A, 1)));
-        when(channelGroupResolver.fromAlias(canonicalUriFor(TARGET_USER_GROUP_B)))
+        when(channelGroupResolver.channelGroupFor(canonicalUriFor(TARGET_USER_GROUP_B)))
             .thenReturn(Optional.<ChannelGroup>of(channelGroup(TARGET_USER_GROUP_B, 2)));
         when(btMpxClient.getCategories(Optional.<Selection>absent()))
             .thenReturn(categoryLookups());
@@ -96,15 +100,15 @@ public class TargetUserGroupChannelSaverTest {
     private PaginatedEntries categoryLookups() {
         Builder<Entry> entries = ImmutableList.builder();
         for (Map.Entry<String, String> entry : targetUserGroupKeyToUri.entrySet()) {
-            entries.add(new Entry(entry.getValue(), 0, "Title", ImmutableList.<Category>of(), 
-                    ImmutableList.<Content>of(), true, entry.getKey(), null, true, false));
+            entries.add(new Entry(entry.getValue(), 0, entry.getKey(), ImmutableList.<Category>of(), 
+                    ImmutableList.<Content>of(), true, "title", "targetUserGroup", true, false));
         }
         return new PaginatedEntries(0, 100, 2, "", entries.build());
     }
 
-    public Entry channelWithTargetUserGroup(String channelId, String label) {
+    public Entry channelWithTargetUserGroup(String channelId, String name) {
         //{"name":"S0128048","scheme":"subscription","label":""},{"name":"Linear TUG - GBR-bt_multicast","scheme":"targetUserGroup","label":"GBR-bt_multicast"},{"name":"Linear TUG - GBR-bt_broadband","scheme":"targetUserGroup","label":"GBR-bt_broadband"}
-        Category category = new Category("Linear TUG", "targetUserGroup", label);
+        Category category = new Category(name, "targetUserGroup", "Linear TUG");
         return new Entry(channelId, 0, "Title", 
                     ImmutableList.of(category), 
                     ImmutableList.<Content>of(), 

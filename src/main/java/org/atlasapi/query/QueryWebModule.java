@@ -10,9 +10,11 @@ import org.atlasapi.input.DelegatingModelTransformer;
 import org.atlasapi.input.ItemModelTransformer;
 import org.atlasapi.input.PersonModelTransformer;
 import org.atlasapi.input.TopicModelTransformer;
+import org.atlasapi.media.channel.CachingChannelGroupStore;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
+import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
@@ -126,7 +128,7 @@ public class QueryWebModule {
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
-    private @Autowired ChannelGroupResolver channelGroupResolver;
+    private @Autowired ChannelGroupStore channelGroupStore;
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired SearchResolver searchResolver;
     private @Autowired PeopleResolver peopleResolver;
@@ -163,21 +165,25 @@ public class QueryWebModule {
     
     @Bean ChannelSimplifier channelSimplifier() {
         return new ChannelSimplifier(v3ChannelCodec(), v4ChannelCodec(), channelResolver, 
-                publisherSimplifier(), imageSimplifier(), channelGroupAliasSimplifier(), channelGroupResolver);
+                publisherSimplifier(), imageSimplifier(), channelGroupAliasSimplifier(), new CachingChannelGroupStore(channelGroupStore));
     }
     
     @Bean ChannelGroupSummarySimplifier channelGroupAliasSimplifier() {
-        return new ChannelGroupSummarySimplifier(v3ChannelCodec(), channelGroupResolver);
+        return new ChannelGroupSummarySimplifier(v3ChannelCodec(), cachingChannelGroupResolver());
     }
     
     @Bean ChannelNumberingsChannelToChannelGroupModelSimplifier channelNumberingsChannelToChannelGroupModelSimplifier() {
         return new ChannelNumberingsChannelToChannelGroupModelSimplifier(
-                    channelGroupResolver, 
+                    cachingChannelGroupResolver(), 
                     new ChannelNumberingChannelGroupModelSimplifier(channelGroupSimplifier()));
     }
     
     @Bean ChannelGroupSimplifier channelGroupSimplifier() {
-        return new ChannelGroupSimplifier(new SubstitutionTableNumberCodec(), channelGroupResolver, publisherSimplifier());
+        return new ChannelGroupSimplifier(new SubstitutionTableNumberCodec(), cachingChannelGroupResolver(), publisherSimplifier());
+    }
+    
+    @Bean ChannelGroupResolver cachingChannelGroupResolver() {
+        return new CachingChannelGroupStore(channelGroupStore);
     }
     
     @Bean
@@ -204,7 +210,7 @@ public class QueryWebModule {
     @Bean
     ChannelGroupController channelGroupController() {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
-        return new ChannelGroupController(configFetcher, log, channelGroupModelWriter(), channelGroupResolver, idCodec);
+        return new ChannelGroupController(configFetcher, log, channelGroupModelWriter(), cachingChannelGroupResolver(), idCodec);
     }
 
     @Bean AtlasModelWriter<Iterable<ChannelGroup>> channelGroupModelWriter() {

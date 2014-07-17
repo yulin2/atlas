@@ -329,6 +329,11 @@ public class ChannelNumberingSimplificationTest extends TestCase {
             }
             return channelGroup;
         }
+
+        @Override
+        public Optional<ChannelGroup> channelGroupFor(String canonicalUri) {
+            throw new UnsupportedOperationException();
+        }
         
     }
 }

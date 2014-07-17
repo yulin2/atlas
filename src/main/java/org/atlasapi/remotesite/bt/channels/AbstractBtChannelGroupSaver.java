@@ -6,11 +6,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
+import org.atlasapi.media.channel.ChannelNumbering;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
@@ -34,13 +36,17 @@ public abstract class AbstractBtChannelGroupSaver {
     
     private final ChannelGroupResolver channelGroupResolver;
     private final ChannelGroupWriter channelGroupWriter;
+    private final ChannelResolver channelResolver;
+    private final ChannelWriter channelWriter;
     private final Publisher publisher;
     
     public AbstractBtChannelGroupSaver(Publisher publisher, ChannelGroupResolver channelGroupResolver,
-            ChannelGroupWriter channelGroupWriter) {
+            ChannelGroupWriter channelGroupWriter, ChannelResolver channelResolver, ChannelWriter channelWriter) {
         this.publisher = checkNotNull(publisher);
         this.channelGroupResolver = checkNotNull(channelGroupResolver);
         this.channelGroupWriter = checkNotNull(channelGroupWriter);
+        this.channelResolver = checkNotNull(channelResolver);
+        this.channelWriter = checkNotNull(channelWriter);
     }
 
     protected void start() { };
@@ -72,15 +78,26 @@ public abstract class AbstractBtChannelGroupSaver {
             ChannelGroup channelGroup = getOrCreateChannelGroup(aliasUri, alias);
             channelGroup.setPublisher(publisher);
             channelGroup.addTitle(titleFor(entry.getKey()));
+            
+            for (String channelId : entry.getValue()) {
+                Channel channel = Iterables.getOnlyElement(channelResolver.forIds(ImmutableSet.of(TO_NUMERIC_ID.apply(channelId))), null);
+                if (channel != null) {
+                    channel.addChannelNumber(ChannelNumbering.builder().withChannelGroup(channelGroup).build());
+                    channelWriter.createOrUpdate(channel);
+                } else {
+                    // TODO
+                }
+            }
             channelGroup.setChannels(Iterables.transform(entry.getValue(), TO_NUMERIC_ID));
             channelGroupWriter.createOrUpdate(channelGroup);
+            
         };
         
         
     }
     
     private ChannelGroup getOrCreateChannelGroup(String uri, Optional<Alias> alias) {
-        Optional<ChannelGroup> channelGroup = channelGroupResolver.fromAlias(uri);
+        Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(uri);
         
         if (channelGroup.isPresent()) {
             return channelGroup.get();

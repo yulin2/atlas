@@ -23,13 +23,13 @@ import com.metabroadcast.common.query.Selection;
 
 public class GsonBtMpxClientTest {
 
-    private static final String baseUri = "http://example.org/1/";
+    private static final String baseUri = "http://example.org/1/root";
     
     @Test
     public void testDeserialize() throws BtMpxClientException {
         SimpleHttpClient httpClient 
             = FixedResponseHttpClient.respondTo(
-                    baseUri + "bt-tve-med-feed-linear?form=cjson", 
+                    baseUri + "?form=cjson", 
                     Resources.getResource("media-feed-example.json"));
         
         BtMpxClient client = new GsonBtMpxClient(httpClient, baseUri);

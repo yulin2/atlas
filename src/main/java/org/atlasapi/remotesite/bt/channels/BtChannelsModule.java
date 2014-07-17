@@ -4,6 +4,8 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.bt.channels.mpxclient.BtMpxClient;
 import org.atlasapi.remotesite.bt.channels.mpxclient.GsonBtMpxClient;
@@ -33,6 +35,12 @@ public class BtChannelsModule {
     private ChannelGroupWriter channelGroupWriter;
     
     @Autowired
+    private ChannelResolver channelResolver;
+    
+    @Autowired
+    private ChannelWriter channelWriter;
+    
+    @Autowired
     private SimpleScheduler scheduler;
     
     @Bean
@@ -46,8 +54,8 @@ public class BtChannelsModule {
     
     @Bean 
     public BtChannelGroupUpdater productionChannelGroupUpdater() {
-        return new BtChannelGroupUpdater(btMpxClient(), Publisher.BT_TVE, "http://tve.bt.com/", 
-                "bt:mpx-production", channelGroupResolver, channelGroupWriter);
+        return new BtChannelGroupUpdater(btMpxClient(), Publisher.BT_TV_CHANNELS, "http://tv-channels.bt.com/", 
+                "bt:mpx-production", channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
     }
     
     @PostConstruct

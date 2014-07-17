@@ -74,10 +74,10 @@ public class GsonBtMpxClient implements BtMpxClient {
     }
 
     private String channelUriFor(Optional<Selection> selection) {
-        return baseUri + "bt-tve-med-feed-linear?form=cjson";
+        return baseUri + "?form=cjson";
     }
     
     private String categoryUriFor(Optional<Selection> selection) {
-        return baseUri + "bt-tve-med-feed-linear/categories?form=cjson";
+        return baseUri + "/categories?form=cjson";
     }
 }
