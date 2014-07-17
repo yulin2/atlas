@@ -26,18 +26,18 @@ public class BtChannelGroupUpdater extends ScheduledTask {
     private final List<AbstractBtChannelGroupSaver> channelGroupSavers;
     
     public BtChannelGroupUpdater(BtMpxClient btMpxClient, Publisher publisher, String aliasUriPrefix, 
-            String aliasNamespace, ChannelGroupResolver channelGroupResolver, 
+            String aliasNamespacePrefix, ChannelGroupResolver channelGroupResolver, 
             ChannelGroupWriter channelGroupWriter, ChannelResolver channelResolver, 
             ChannelWriter channelWriter) {
         
         channelGroupSavers = ImmutableList.of(
-                new SubscriptionChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespace, 
+                new SubscriptionChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespacePrefix, 
                         channelGroupResolver, channelGroupWriter, channelResolver, channelWriter),
-                new TargetUserGroupChannelGroupSaver(publisher,  aliasUriPrefix, aliasNamespace, 
+                new TargetUserGroupChannelGroupSaver(publisher,  aliasUriPrefix, aliasNamespacePrefix, 
                         channelGroupResolver, channelGroupWriter, btMpxClient, channelResolver, channelWriter),
-                new WatchableChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespace, 
+                new WatchableChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespacePrefix, 
                         channelGroupResolver, channelGroupWriter, channelResolver, channelWriter),
-                new OutputProtectionChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespace, 
+                new OutputProtectionChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespacePrefix, 
                         channelGroupResolver, channelGroupWriter, channelResolver, channelWriter));
         this.btMpxClient = checkNotNull(btMpxClient);
     }

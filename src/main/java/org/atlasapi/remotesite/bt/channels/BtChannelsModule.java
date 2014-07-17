@@ -55,7 +55,7 @@ public class BtChannelsModule {
     @Bean 
     public BtChannelGroupUpdater productionChannelGroupUpdater() {
         return new BtChannelGroupUpdater(btMpxClient(), Publisher.BT_TV_CHANNELS, "http://tv-channels.bt.com/", 
-                "bt:mpx-production", channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
+                "bt", channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
     }
     
     @PostConstruct

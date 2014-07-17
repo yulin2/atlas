@@ -29,7 +29,7 @@ public class SubscriptionChannelGroupSaver extends AbstractBtChannelGroupSaver {
         super(publisher, channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
         
         this.aliasUriPrefix = checkNotNull(aliasUriPrefix);
-        this.aliasNamespace = checkNotNull(aliasNamespace);
+        this.aliasNamespace = checkNotNull(aliasNamespace) + ":subscription-code";
     }
     
     @Override

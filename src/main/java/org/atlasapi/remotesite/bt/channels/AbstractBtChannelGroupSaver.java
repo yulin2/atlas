@@ -99,11 +99,13 @@ public abstract class AbstractBtChannelGroupSaver {
     private ChannelGroup getOrCreateChannelGroup(String uri, Optional<Alias> alias) {
         Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(uri);
         
+        ChannelGroup group;
         if (channelGroup.isPresent()) {
-            return channelGroup.get();
+            group = channelGroup.get();
+        } else {
+            group = new Region();
         }
         
-        ChannelGroup group = new Region();
         group.setCanonicalUri(uri);
         
         if (alias.isPresent()) {

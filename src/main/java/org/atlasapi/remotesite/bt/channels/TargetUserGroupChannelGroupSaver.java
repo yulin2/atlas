@@ -41,7 +41,7 @@ public class TargetUserGroupChannelGroupSaver extends AbstractBtChannelGroupSave
         super(publisher, channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
         
         this.aliasUriPrefix = checkNotNull(aliasUriPrefix);
-        this.aliasNamespace = checkNotNull(aliasNamespace);
+        this.aliasNamespace = checkNotNull(aliasNamespace) + ":tug";
         this.btMpxClient = checkNotNull(btMpxClient);
     }
     
