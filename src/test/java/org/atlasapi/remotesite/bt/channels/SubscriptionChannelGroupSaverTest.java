@@ -13,6 +13,8 @@ import java.util.Map;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
@@ -45,10 +47,13 @@ public class SubscriptionChannelGroupSaverTest {
     
     private final ChannelGroupResolver channelGroupResolver = mock(ChannelGroupResolver.class);
     private final ChannelGroupWriter channelGroupWriter = mock(ChannelGroupWriter.class);
+    private final ChannelResolver channelResolver = mock(ChannelResolver.class);
+    private final ChannelWriter channelWriter = mock(ChannelWriter.class);
+    
     private final NumberToShortStringCodec codec = SubstitutionTableNumberCodec.lowerCaseOnly();
     private final SubscriptionChannelGroupSaver saver 
         = new SubscriptionChannelGroupSaver(Publisher.METABROADCAST, ALIAS_URI_PREFIX, ALIAS_NAMESPACE, 
-                channelGroupResolver, channelGroupWriter);
+                channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
     
     
     @Test
@@ -56,9 +61,9 @@ public class SubscriptionChannelGroupSaverTest {
         String theirId1 = "S0123456";
         String theirId2 = "S6543210";
         
-        when(channelGroupResolver.fromAlias(ALIAS_URI_PREFIX + theirId1))
+        when(channelGroupResolver.channelGroupFor(ALIAS_URI_PREFIX + theirId1))
             .thenReturn(Optional.<ChannelGroup>of(channelGroup(theirId1, 1)));
-        when(channelGroupResolver.fromAlias(ALIAS_URI_PREFIX + theirId2))
+        when(channelGroupResolver.channelGroupFor(ALIAS_URI_PREFIX + theirId2))
             .thenReturn(Optional.<ChannelGroup>of(channelGroup(theirId2, 2)));
         saver.update(ImmutableList.of(channelWithSubscription(CHANNEL1_ID, "S0123456"),
                 channelWithSubscription(CHANNEL2_ID, "S6543210")));

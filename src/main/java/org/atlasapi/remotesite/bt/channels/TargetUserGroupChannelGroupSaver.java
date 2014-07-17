@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.bt.channels.mpxclient.BtMpxClient;
@@ -25,6 +27,8 @@ import com.metabroadcast.common.query.Selection;
 
 public class TargetUserGroupChannelGroupSaver extends AbstractBtChannelGroupSaver {
     
+    private static final String TARGET_USER_GROUP = "targetUserGroup";
+    private static final String TARGET_USER_GROUP_SCHEME = TARGET_USER_GROUP;
     private final String aliasUriPrefix;
     private final String aliasNamespace;
     private final BtMpxClient btMpxClient;
@@ -32,8 +36,9 @@ public class TargetUserGroupChannelGroupSaver extends AbstractBtChannelGroupSave
 
     public TargetUserGroupChannelGroupSaver(Publisher publisher, String aliasUriPrefix, 
             String aliasNamespace, ChannelGroupResolver channelGroupResolver, 
-            ChannelGroupWriter channelGroupWriter, BtMpxClient btMpxClient) {
-        super(publisher, channelGroupResolver, channelGroupWriter);
+            ChannelGroupWriter channelGroupWriter, BtMpxClient btMpxClient,
+            ChannelResolver channelResolver, ChannelWriter channelWriter) {
+        super(publisher, channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
         
         this.aliasUriPrefix = checkNotNull(aliasUriPrefix);
         this.aliasNamespace = checkNotNull(aliasNamespace);
@@ -46,7 +51,9 @@ public class TargetUserGroupChannelGroupSaver extends AbstractBtChannelGroupSave
             PaginatedEntries categories = btMpxClient.getCategories(Optional.<Selection>absent());
             ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
             for (Entry category : categories.getEntries()) {
-                builder.put(category.getLabel(), category.getGuid());
+                if (TARGET_USER_GROUP.equals(category.getScheme())) {
+                    builder.put(category.getTitle(), category.getGuid());
+                }
             }
             labelToGuidMap = builder.build();
         } catch (BtMpxClientException e) {
@@ -58,8 +65,8 @@ public class TargetUserGroupChannelGroupSaver extends AbstractBtChannelGroupSave
     protected List<String> keysFor(Entry channel) {
         ImmutableList.Builder<String> keys = ImmutableList.builder();
         for (Category category : channel.getCategories()) {
-            if ("targetUserGroup".equals(category.getScheme())) {
-                keys.add(fullTargetUserGroupFor(category.getLabel()));
+            if (TARGET_USER_GROUP_SCHEME.equals(category.getScheme())) {
+                keys.add(fullTargetUserGroupFor(category.getName()));
             }  
         }
         return keys.build();

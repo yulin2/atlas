@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.bt.channels.mpxclient.BtMpxClientException;
@@ -38,17 +40,20 @@ public class WatchableChannelGroupSaverTest {
     
     private final ChannelGroupResolver channelGroupResolver = mock(ChannelGroupResolver.class);
     private final ChannelGroupWriter channelGroupWriter = mock(ChannelGroupWriter.class);
+    private final ChannelResolver channelResolver = mock(ChannelResolver.class);
+    private final ChannelWriter channelWriter = mock(ChannelWriter.class);
+    
     private final NumberToShortStringCodec codec = SubstitutionTableNumberCodec.lowerCaseOnly();
     
     private final WatchableChannelGroupSaver saver 
         = new WatchableChannelGroupSaver(Publisher.METABROADCAST, ALIAS_URI_PREFIX, ALIAS_NAMESPACE, 
-                channelGroupResolver, channelGroupWriter);
+                channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
     
     
     @Test
     public void testsExtractsWatchableChannelGroup() throws BtMpxClientException {
         
-        when(channelGroupResolver.fromAlias(ALIAS_URI_PREFIX + "watchables"))
+        when(channelGroupResolver.channelGroupFor(ALIAS_URI_PREFIX + "watchables"))
             .thenReturn(Optional.<ChannelGroup>of(watchableChannelGroup()));
         
         saver.update(ImmutableList.of(watchableChannel(CHANNEL1_ID, true),

@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.bt.channels.mpxclient.BtMpxClient;
 import org.atlasapi.remotesite.bt.channels.mpxclient.BtMpxClientException;
@@ -25,17 +27,18 @@ public class BtChannelGroupUpdater extends ScheduledTask {
     
     public BtChannelGroupUpdater(BtMpxClient btMpxClient, Publisher publisher, String aliasUriPrefix, 
             String aliasNamespace, ChannelGroupResolver channelGroupResolver, 
-            ChannelGroupWriter channelGroupWriter) {
+            ChannelGroupWriter channelGroupWriter, ChannelResolver channelResolver, 
+            ChannelWriter channelWriter) {
         
         channelGroupSavers = ImmutableList.of(
                 new SubscriptionChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespace, 
-                        channelGroupResolver, channelGroupWriter),
+                        channelGroupResolver, channelGroupWriter, channelResolver, channelWriter),
                 new TargetUserGroupChannelGroupSaver(publisher,  aliasUriPrefix, aliasNamespace, 
-                        channelGroupResolver, channelGroupWriter, btMpxClient),
+                        channelGroupResolver, channelGroupWriter, btMpxClient, channelResolver, channelWriter),
                 new WatchableChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespace, 
-                        channelGroupResolver, channelGroupWriter),
+                        channelGroupResolver, channelGroupWriter, channelResolver, channelWriter),
                 new OutputProtectionChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespace, 
-                        channelGroupResolver, channelGroupWriter));
+                        channelGroupResolver, channelGroupWriter, channelResolver, channelWriter));
         this.btMpxClient = checkNotNull(btMpxClient);
     }
     

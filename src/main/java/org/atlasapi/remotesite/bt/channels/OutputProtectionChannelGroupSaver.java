@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.bt.channels.mpxclient.Entry;
@@ -20,8 +22,9 @@ public class OutputProtectionChannelGroupSaver extends AbstractBtChannelGroupSav
 
     public OutputProtectionChannelGroupSaver(Publisher publisher, String aliasUriPrefix, 
             String aliasNamespace, ChannelGroupResolver channelGroupResolver, 
-            ChannelGroupWriter channelGroupWriter) {
-        super(publisher, channelGroupResolver, channelGroupWriter);
+            ChannelGroupWriter channelGroupWriter, ChannelResolver channelResolver, 
+            ChannelWriter channelWriter) {
+        super(publisher, channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
         
         this.aliasUriPrefix = checkNotNull(aliasUriPrefix);
     }
