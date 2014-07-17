@@ -44,7 +44,7 @@ public class BtVodItemExtractorTest {
     private final ContentResolver contentResolver = mock(ContentResolver.class);
     private final BtVodBrandExtractor brandExtractor = mock(BtVodBrandExtractor.class);
     private final BtVodSeriesExtractor seriesExtractor = mock(BtVodSeriesExtractor.class);
-    
+    private final BtVodContentListener contentListener = mock(BtVodContentListener.class);
     
     private final BtVodItemExtractor itemExtractor 
                     = new BtVodItemExtractor(
@@ -52,7 +52,8 @@ public class BtVodItemExtractorTest {
                                 contentResolver, 
                                 brandExtractor,
                                 seriesExtractor,
-                                PUBLISHER, URI_PREFIX);
+                                PUBLISHER, URI_PREFIX,
+                                contentListener);
     
     @Test
     public void testExtractsEpisode() {

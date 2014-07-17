@@ -29,14 +29,16 @@ public class BtVodBrandExtractorTest {
     private static final Publisher PUBLISHER = Publisher.BT_VOD;
     private static final String URI_PREFIX = "http://example.org/";
     
-    private ContentWriter contentWriter = mock(ContentWriter.class);
-    private ContentResolver contentResolver = mock(ContentResolver.class);
+    private final ContentWriter contentWriter = mock(ContentWriter.class);
+    private final ContentResolver contentResolver = mock(ContentResolver.class);
+    private final BtVodContentListener contentListener = mock(BtVodContentListener.class);
     
     private final BtVodBrandExtractor brandExtractor 
                     = new BtVodBrandExtractor(
                                 contentWriter, 
                                 contentResolver, 
-                                PUBLISHER, URI_PREFIX);
+                                PUBLISHER, URI_PREFIX,
+                                contentListener);
     
     @Test
     public void testExtractsBrands() {
