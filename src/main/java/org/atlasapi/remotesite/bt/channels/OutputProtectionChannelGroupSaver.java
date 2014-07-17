@@ -31,7 +31,7 @@ public class OutputProtectionChannelGroupSaver extends AbstractBtChannelGroupSav
 
     @Override
     protected List<String> keysFor(Entry channel) {
-        if (channel.isStreamable()) {
+        if (channel.hasOutputProtection()) {
             return ImmutableList.of("1");
         }
         return ImmutableList.of();
