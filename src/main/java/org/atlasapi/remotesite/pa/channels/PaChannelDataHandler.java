@@ -182,7 +182,12 @@ public class PaChannelDataHandler {
             existingChannel.setHighDefinition(newChannel.getHighDefinition());
             existingChannel.setRegional(newChannel.getRegional());
             existingChannel.setTimeshift(newChannel.getTimeshift());
-            existingChannel.setChannelNumbers(newChannel.getChannelNumbers());
+            // This is so that channelgroups added to a channel by the BT Channel ingest
+            // aren't overwritten with just PA channelgroups
+            // NB this makes us vulnerable to changes in the PA channel data:
+            // if they change remove channelgroup from the set of channelgroups linked to a channel, we
+            // won't remove them from the channel. There may be a cleverer merging strategy.
+            existingChannel.setChannelNumbers(Sets.union(newChannel.getChannelNumbers(), existingChannel.getChannelNumbers()));
             
             return channelWriter.createOrUpdate(existingChannel);
         } else {
