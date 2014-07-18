@@ -9,6 +9,7 @@ import org.atlasapi.media.channel.ChannelNumbering;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.simple.HistoricalChannelNumberingEntry;
 import org.atlasapi.output.Annotation;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 
 import com.google.common.base.Function;
@@ -95,6 +96,12 @@ public class ChannelNumberingsChannelGroupToChannelModelSimplifier implements Mo
         
         simple.setChannel(channelSimplifier.simplify(channel.requireValue(), 
                 retainAnnotationsForChannelSimplification(annotations), config));
+        if (input.getStartDate() != null) {
+            simple.setStartDate(input.getStartDate().toDate());
+        }
+        if (input.getEndDate() != null) {
+            simple.setEndDate(input.getEndDate().toDate());
+        }
         
         if (history != null) {
             simple.setHistory(history);
