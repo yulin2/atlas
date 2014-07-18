@@ -1,5 +1,6 @@
 package org.atlasapi.output.simple;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Set;
 
@@ -20,6 +21,7 @@ import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Image;
 import org.atlasapi.media.entity.simple.LocalizedDescription;
 import org.atlasapi.media.entity.simple.LocalizedTitle;
+import org.atlasapi.media.entity.simple.Rating;
 import org.atlasapi.media.entity.simple.RelatedLink;
 import org.atlasapi.media.entity.simple.Review;
 import org.atlasapi.media.entity.simple.SameAs;
@@ -103,12 +105,24 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         if (annotations.contains(Annotation.AUDIENCE_STATISTICS)) {
             simpleDescription.setAudienceStatistics(createDummyAudienceStatistics());
         }
+        if (annotations.contains(Annotation.RATINGS)) {
+            simpleDescription.setRatings(createDummyRatings());
+        }
         
+    }
+
+    private Set<Rating> createDummyRatings() {
+        Rating rating = new Rating();
+        rating.setType("AI");
+        rating.setPublisherDetails(toPublisherDetails(Publisher.METABROADCAST));
+        rating.setValue(BigDecimal.valueOf(84));
+        return ImmutableSet.of(rating);
     }
 
     private AudienceStatistics createDummyAudienceStatistics() {
         
         AudienceStatistics stats = new AudienceStatistics();
+        
         stats.setPublisher(toPublisherDetails(Publisher.METABROADCAST));
         stats.setTotalViewers(123456);
         stats.setViewingShare(0.25f);
