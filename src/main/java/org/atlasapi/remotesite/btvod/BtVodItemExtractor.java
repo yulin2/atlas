@@ -106,8 +106,9 @@ public class BtVodItemExtractor implements BtVodDataProcessor<UpdateProgress> {
     }
 
     private boolean shouldProcess(BtVodDataRow row) {
+        String serviceFormat = row.getColumnValue(BtVodFileColumn.SERVICE_FORMAT);
         return !"Y".equals(row.getColumnValue(BtVodFileColumn.IS_SERIES))
-                && "Youview".contains(row.getColumnValue(BtVodFileColumn.SERVICE_FORMAT))
+                && serviceFormat != null && serviceFormat.contains("Youview")
                 && isValidHierarchy(row);
     }
 
