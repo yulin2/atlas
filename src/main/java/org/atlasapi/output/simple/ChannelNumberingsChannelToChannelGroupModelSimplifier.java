@@ -95,6 +95,10 @@ public class ChannelNumberingsChannelToChannelGroupModelSimplifier implements Mo
         } else {
             simple.setChannelGroup(channelGroupSimplifier.simplify(channelGroup.get(), ImmutableSet.of(Annotation.HISTORY), config));
         }
+        simple.setStartDate(input.getStartDate().toDate());
+        if (input.getEndDate() != null) {
+            simple.setEndDate(input.getEndDate().toDate());
+        }
         if (history != null) {
             simple.setHistory(history);
         }

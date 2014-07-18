@@ -69,12 +69,14 @@ public class ChannelNumberingSimplificationTest extends TestCase {
     public void testChannelNumberingAfterEndDate() {
         ChannelGroup channelGroup = channelGroupStore.channelGroupFor(channelGroupId).get();
         
+        LocalDate startDate = new LocalDate().minusYears(10);
+        LocalDate endDate = new LocalDate().minusYears(9);
         ChannelNumbering numbering = ChannelNumbering.builder()
             .withChannel(channelId)
             .withChannelGroup(channelGroupId)
             .withChannelNumber("2")
-            .withStartDate(new LocalDate().minusYears(10))
-            .withEndDate(new LocalDate().minusYears(9))
+            .withStartDate(startDate)
+            .withEndDate(endDate)
             .build();
         
         channel.addChannelNumber(numbering);
@@ -82,7 +84,9 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         
         channelGroup = channelGroupStore.createOrUpdate(channelGroup);
         org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, ImmutableSet.of(Annotation.CHANNEL_GROUPS, Annotation.HISTORY), appConfig);
-        assertThat(simpleChannel.getChannelGroups().size(), is(1));
+        org.atlasapi.media.entity.simple.ChannelNumbering simpleNumbering = Iterables.getOnlyElement(simpleChannel.getChannelGroups());
+        assertEquals(startDate.toDate(), simpleNumbering.getStartDate());
+        assertEquals(endDate.toDate(), simpleNumbering.getEndDate());
         
         simpleChannel = simplifier.simplify(channel, ImmutableSet.of(Annotation.CHANNEL_GROUPS), appConfig);
         assertTrue(simpleChannel.getChannelGroups().isEmpty());
