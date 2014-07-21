@@ -23,10 +23,15 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 public class BtChannelsModule {
 
-    private static final RepetitionRule DAILY_AT_MIDNIGHT = RepetitionRules.daily(LocalTime.MIDNIGHT);
+    private static final String URI_PREFIX = "http://tv-channels.bt.com/";
+
+    private static final RepetitionRule DAILY_AT_3PM = RepetitionRules.daily(new LocalTime(15,0));
     
     @Value("${bt.channels.baseUri}")
     private String baseUri;
+    
+    @Value("${bt.channels.freeviewPlatformChannelGroupId}")
+    private String freeviewPlatformChannelGroupId;
     
     @Autowired
     private ChannelGroupResolver channelGroupResolver;
@@ -54,14 +59,22 @@ public class BtChannelsModule {
     
     @Bean 
     public BtChannelGroupUpdater productionChannelGroupUpdater() {
-        return new BtChannelGroupUpdater(btMpxClient(), Publisher.BT_TV_CHANNELS, "http://tv-channels.bt.com/", 
-                "bt", channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
+        return new BtChannelGroupUpdater(btMpxClient(), Publisher.BT_TV_CHANNELS, 
+                URI_PREFIX,  "bt", channelGroupResolver, channelGroupWriter, 
+                channelResolver, channelWriter, allChannelsUpdater());
     }
     
+    @Bean
+    public BtAllChannelsChannelGroupUpdater allChannelsUpdater() {
+        return new BtAllChannelsChannelGroupUpdater(channelGroupWriter, 
+                channelGroupResolver, freeviewPlatformChannelGroupId, 
+                URI_PREFIX, Publisher.BT_TV_CHANNELS);
+    }
     @PostConstruct
     public void scheduleTasks() {
-        scheduler.schedule(productionChannelGroupUpdater().withName("BT Channel Group Ingester"), 
-                DAILY_AT_MIDNIGHT);
+        scheduler.schedule(productionChannelGroupUpdater()
+                .withName("BT Channel Group Ingester"), 
+                DAILY_AT_3PM);
     }
     
 }

@@ -16,39 +16,36 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 
-public class BtAllChannelsChannelGroupUpdater extends ScheduledTask {
+public class BtAllChannelsChannelGroupUpdater {
 
     private static final Logger log = LoggerFactory.getLogger(BtAllChannelsChannelGroupUpdater.class);
     private static final String ALIAS_SUFFIX = "allchannels";
     
     private final ChannelGroupResolver channelGroupResolver;
     private final ChannelGroupWriter channelGroupWriter;
-    private final Long freeviewPlatformChannelGroupId;
-    private final Long btChannelsChannelGroupId;
+    private final long freeviewPlatformChannelGroupId;
     private final String uriPrefix;
 
     private Publisher publisher;
 
     public BtAllChannelsChannelGroupUpdater(ChannelGroupWriter channelGroupWriter,
-            ChannelGroupResolver channelGroupResolver, long freeviewPlatformChannelGroupId,
-            long btChannelsChannelGroupId, String uriPrefix, Publisher publisher) {
+            ChannelGroupResolver channelGroupResolver, String freeviewPlatformChannelGroupId,
+            String uriPrefix, Publisher publisher) {
         this.channelGroupResolver = checkNotNull(channelGroupResolver);
         this.channelGroupWriter = checkNotNull(channelGroupWriter);
         this.uriPrefix = checkNotNull(uriPrefix);
         this.publisher = checkNotNull(publisher);
-        this.freeviewPlatformChannelGroupId = freeviewPlatformChannelGroupId;
-        this.btChannelsChannelGroupId = btChannelsChannelGroupId;
+        this.freeviewPlatformChannelGroupId = new SubstitutionTableNumberCodec().decode(freeviewPlatformChannelGroupId).longValue();
     }
 
-    @Override
-    protected void runTask() {
+    public void update() {
         ChannelGroup freeviewPlatform = getChannelGroup(freeviewPlatformChannelGroupId);
         
         Set<Long> allChannels = getAllChannelsFromRegions((Platform) freeviewPlatform);
-        Set<Long> btChannels = getChannelGroup(btChannelsChannelGroupId).getChannels();
+        Set<Long> btChannels = getChannelGroup(uriPrefix + AllBtChannelsChannelGroupSaver.BT_CHANNELS_URI_SUFFIX).getChannels();
         ChannelGroup allBtChannelsGroup = createOrQueryBtAllChannelsChannelGroup();
         
         Set<Long> newChannels = Sets.union(allChannels, btChannels);
@@ -76,6 +73,14 @@ public class BtAllChannelsChannelGroupUpdater extends ScheduledTask {
         Optional<ChannelGroup> group = channelGroupResolver.channelGroupFor(channelGroupId);
         if (!group.isPresent()) {
             throw new IllegalStateException("Could not find channel group " + channelGroupId);
+        }
+        return group.get();
+    }
+    
+    private ChannelGroup getChannelGroup(String uri) {
+        Optional<ChannelGroup> group = channelGroupResolver.channelGroupFor(uri);
+        if (!group.isPresent()) {
+            throw new IllegalStateException("Could not find channel group " + uri);
         }
         return group.get();
     }

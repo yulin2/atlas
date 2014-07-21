@@ -24,12 +24,14 @@ public class BtChannelGroupUpdater extends ScheduledTask {
 
     private final BtMpxClient btMpxClient;
     private final List<AbstractBtChannelGroupSaver> channelGroupSavers;
+    private BtAllChannelsChannelGroupUpdater allChannelsGroupUpdater;
     
     public BtChannelGroupUpdater(BtMpxClient btMpxClient, Publisher publisher, String aliasUriPrefix, 
             String aliasNamespacePrefix, ChannelGroupResolver channelGroupResolver, 
             ChannelGroupWriter channelGroupWriter, ChannelResolver channelResolver, 
-            ChannelWriter channelWriter) {
+            ChannelWriter channelWriter, BtAllChannelsChannelGroupUpdater allChannelsGroupUpdater) {
         
+        this.allChannelsGroupUpdater = allChannelsGroupUpdater;
         channelGroupSavers = ImmutableList.of(
                 new SubscriptionChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespacePrefix, 
                         channelGroupResolver, channelGroupWriter, channelResolver, channelWriter),
@@ -38,7 +40,10 @@ public class BtChannelGroupUpdater extends ScheduledTask {
                 new WatchableChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespacePrefix, 
                         channelGroupResolver, channelGroupWriter, channelResolver, channelWriter),
                 new OutputProtectionChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespacePrefix, 
-                        channelGroupResolver, channelGroupWriter, channelResolver, channelWriter));
+                        channelGroupResolver, channelGroupWriter, channelResolver, channelWriter),
+                new AllBtChannelsChannelGroupSaver(publisher, aliasUriPrefix, aliasNamespacePrefix, 
+                        channelGroupResolver, channelGroupWriter, channelResolver, channelWriter)
+                );
         this.btMpxClient = checkNotNull(btMpxClient);
     }
     
@@ -50,6 +55,7 @@ public class BtChannelGroupUpdater extends ScheduledTask {
             for (AbstractBtChannelGroupSaver saver : channelGroupSavers) {
                 saver.update(entries.getEntries());
             }
+            allChannelsGroupUpdater.update();
         } catch (BtMpxClientException e) {
             throw Throwables.propagate(e);
         }
