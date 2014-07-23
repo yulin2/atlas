@@ -16,6 +16,7 @@ import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Image;
 import org.atlasapi.media.entity.simple.LocalizedDescription;
 import org.atlasapi.media.entity.simple.LocalizedTitle;
+import org.atlasapi.media.entity.simple.Rating;
 import org.atlasapi.media.entity.simple.RelatedLink;
 import org.atlasapi.media.entity.simple.Review;
 import org.atlasapi.media.entity.simple.SameAs;
