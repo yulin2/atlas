@@ -44,6 +44,8 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
     private final DescriptionWatermarker descriptionWatermarker;
     private final DescribedImageExtractor imageExtractor = new DescribedImageExtractor();
     private final PublisherSimplifier publisherSimplifier = new PublisherSimplifier();
+    private final RatingModelSimplifier ratingModelSimplifier = new RatingModelSimplifier();
+    private final AudienceStatisticsModelSimplifier audienceStatsModelSimplifier = new AudienceStatisticsModelSimplifier();
     
     protected DescribedModelSimplifier(ImageSimplifier imageSimplifier) {
         this.imageSimplifier = imageSimplifier;
@@ -103,43 +105,13 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleDescription.setReviews(simplifyReviews(content));
         }
         if (annotations.contains(Annotation.AUDIENCE_STATISTICS)) {
-            simpleDescription.setAudienceStatistics(createDummyAudienceStatistics());
+            simpleDescription.setAudienceStatistics(
+                    audienceStatsModelSimplifier.simplify(content.getAudienceStatistics(), annotations, null));
         }
         if (annotations.contains(Annotation.RATINGS)) {
-            simpleDescription.setRatings(createDummyRatings());
+            simpleDescription.setRatings(toRatings(content.getRatings(), annotations));
         }
         
-    }
-
-    private Set<Rating> createDummyRatings() {
-        Rating rating = new Rating();
-        rating.setType("AI");
-        rating.setPublisherDetails(toPublisherDetails(Publisher.METABROADCAST));
-        rating.setValue(BigDecimal.valueOf(84));
-        return ImmutableSet.of(rating);
-    }
-
-    private AudienceStatistics createDummyAudienceStatistics() {
-        
-        AudienceStatistics stats = new AudienceStatistics();
-        
-        stats.setPublisher(toPublisherDetails(Publisher.METABROADCAST));
-        stats.setTotalViewers(123456);
-        stats.setViewingShare(0.25f);
-        Demographic genderDemographic = new Demographic();
-        genderDemographic.setType("gender");
-        genderDemographic.setSegments(ImmutableList.of(
-                new DemographicSegment("male", "Male", 0.5f),
-                new DemographicSegment("female", "Female", 0.5f)));
-        
-        Demographic ageDemographic = new Demographic();
-        
-        ageDemographic.setSegments(ImmutableList.of(
-                new DemographicSegment("4-9", "Age 4 to 9", 0.5f),
-                new DemographicSegment("10-16", "Age 10 to 16", 0.5f)));
-        ageDemographic.setType("age");
-        stats.setDemographics(ImmutableList.of(genderDemographic, ageDemographic));
-        return stats;
     }
 
     private String applyWatermark(F described, String description) {
@@ -159,6 +131,14 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleImages.add(imageSimplifier.simplify(image, annotations, null));
         }
         return simpleImages.build();
+    }
+    
+    private Iterable<Rating> toRatings(Iterable<org.atlasapi.media.entity.Rating> ratings, Set<Annotation> annotations) {
+        ImmutableList.Builder<Rating> simpleRatings = ImmutableList.builder();
+        for (org.atlasapi.media.entity.Rating rating : ratings) {
+            simpleRatings.add(ratingModelSimplifier.simplify(rating, annotations, null));
+        }
+        return simpleRatings.build();
     }
     
     private Function<LookupRef, SameAs> TO_SAME_AS = new Function<LookupRef, SameAs>() {
