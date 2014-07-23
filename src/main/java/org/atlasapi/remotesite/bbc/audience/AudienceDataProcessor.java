@@ -236,6 +236,9 @@ public class AudienceDataProcessor extends ScheduledTask {
             }
         }
         
+        if (count == 0) {
+            return null;
+        }
         return sum.divide(BigDecimal.valueOf(count));
     }
 
@@ -250,6 +253,9 @@ public class AudienceDataProcessor extends ScheduledTask {
             }
         }
         
+        if (count == 0) {
+            return null;
+        }
         return sum / count;
     }
 
