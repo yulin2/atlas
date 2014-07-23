@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.List;
 
@@ -239,7 +240,7 @@ public class AudienceDataProcessor extends ScheduledTask {
         if (count == 0) {
             return null;
         }
-        return sum.divide(BigDecimal.valueOf(count));
+        return sum.divide(BigDecimal.valueOf(count), 10, RoundingMode.HALF_UP);
     }
 
     private Integer meanInt(List<Integer> values) {
