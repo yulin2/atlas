@@ -37,6 +37,8 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
     private final DescriptionWatermarker descriptionWatermarker;
     private final DescribedImageExtractor imageExtractor = new DescribedImageExtractor();
     private final PublisherSimplifier publisherSimplifier = new PublisherSimplifier();
+    private final RatingModelSimplifier ratingModelSimplifier = new RatingModelSimplifier();
+    private final AudienceStatisticsModelSimplifier audienceStatsModelSimplifier = new AudienceStatisticsModelSimplifier();
     
     protected DescribedModelSimplifier(ImageSimplifier imageSimplifier) {
         this.imageSimplifier = imageSimplifier;
@@ -95,6 +97,14 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         if (annotations.contains(Annotation.REVIEWS)) {
             simpleDescription.setReviews(simplifyReviews(content));
         }
+        if (annotations.contains(Annotation.AUDIENCE_STATISTICS)) {
+            simpleDescription.setAudienceStatistics(
+                    audienceStatsModelSimplifier.simplify(content.getAudienceStatistics(), annotations, null));
+        }
+        if (annotations.contains(Annotation.RATINGS)) {
+            simpleDescription.setRatings(toRatings(content.getRatings(), annotations));
+        }
+        
     }
 
     private String applyWatermark(F described, String description) {
@@ -114,6 +124,14 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleImages.add(imageSimplifier.simplify(image, annotations, null));
         }
         return simpleImages.build();
+    }
+    
+    private Iterable<Rating> toRatings(Iterable<org.atlasapi.media.entity.Rating> ratings, Set<Annotation> annotations) {
+        ImmutableList.Builder<Rating> simpleRatings = ImmutableList.builder();
+        for (org.atlasapi.media.entity.Rating rating : ratings) {
+            simpleRatings.add(ratingModelSimplifier.simplify(rating, annotations, null));
+        }
+        return simpleRatings.build();
     }
     
     private Function<LookupRef, SameAs> TO_SAME_AS = new Function<LookupRef, SameAs>() {
