@@ -10,6 +10,7 @@ import org.atlasapi.feeds.lakeview.LakeviewModule;
 import org.atlasapi.remotesite.amazonunbox.AmazonUnboxModule;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
+import org.atlasapi.remotesite.bbc.audience.AudienceModule;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
 import org.atlasapi.remotesite.btfeatured.BtFeaturedContentModule;
 import org.atlasapi.remotesite.btvod.BtVodModule;
@@ -86,6 +87,8 @@ public class RemoteSiteModuleConfigurer {
         .put("rovi", RoviModule.class)
         .put("rte", RteModule.class)
         .put("btvod", BtVodModule.class)
+        .put("bt-channels", BtChannelsModule.class)
+        .put("bbc-audience-data", AudienceModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
