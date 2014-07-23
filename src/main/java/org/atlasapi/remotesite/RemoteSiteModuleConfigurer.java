@@ -87,7 +87,6 @@ public class RemoteSiteModuleConfigurer {
         .put("rovi", RoviModule.class)
         .put("rte", RteModule.class)
         .put("btvod", BtVodModule.class)
-        .put("bt-channels", BtChannelsModule.class)
         .put("bbc-audience-data", AudienceModule.class)
     .build();
 
