@@ -13,6 +13,7 @@ import org.atlasapi.remotesite.bbc.audience.AudienceModule;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
 import org.atlasapi.remotesite.bt.channels.BtChannelsModule;
 import org.atlasapi.remotesite.btfeatured.BtFeaturedContentModule;
+import org.atlasapi.remotesite.btvod.BtVodModule;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.five.FiveModule;
 import org.atlasapi.remotesite.hulu.HuluModule;
@@ -85,6 +86,7 @@ public class RemoteSiteModuleConfigurer {
         .put("rte", RteModule.class)
         .put("bt-channels", BtChannelsModule.class)
         .put("bbc-audience-data", AudienceModule.class)
+        .put("btvod", BtVodModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
