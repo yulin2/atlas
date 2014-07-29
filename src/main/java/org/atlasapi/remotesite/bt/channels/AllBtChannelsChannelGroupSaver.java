@@ -11,6 +11,7 @@ import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.bt.channels.mpxclient.Entry;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -26,7 +27,7 @@ public class AllBtChannelsChannelGroupSaver extends AbstractBtChannelGroupSaver 
             ChannelGroupWriter channelGroupWriter, ChannelResolver channelResolver, 
             ChannelWriter channelWriter) {
         super(publisher, channelGroupResolver, channelGroupWriter, channelResolver, 
-                channelWriter);
+                channelWriter, LoggerFactory.getLogger(AllBtChannelsChannelGroupSaver.class));
         
         this.aliasUriPrefix = checkNotNull(aliasUriPrefix);
     }
