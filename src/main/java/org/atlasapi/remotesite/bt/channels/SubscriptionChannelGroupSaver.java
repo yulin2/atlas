@@ -12,6 +12,7 @@ import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.bt.channels.mpxclient.Category;
 import org.atlasapi.remotesite.bt.channels.mpxclient.Entry;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -26,7 +27,8 @@ public class SubscriptionChannelGroupSaver extends AbstractBtChannelGroupSaver {
             String aliasNamespace, ChannelGroupResolver channelGroupResolver, 
             ChannelGroupWriter channelGroupWriter, ChannelResolver channelResolver, 
             ChannelWriter channelWriter) {
-        super(publisher, channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
+        super(publisher, channelGroupResolver, channelGroupWriter, channelResolver, channelWriter,
+                LoggerFactory.getLogger(SubscriptionChannelGroupSaver.class));
         
         this.aliasUriPrefix = checkNotNull(aliasUriPrefix);
         this.aliasNamespace = checkNotNull(aliasNamespace) + ":subscription-code";

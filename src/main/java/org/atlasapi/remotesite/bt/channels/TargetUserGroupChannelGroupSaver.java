@@ -17,6 +17,7 @@ import org.atlasapi.remotesite.bt.channels.mpxclient.BtMpxClientException;
 import org.atlasapi.remotesite.bt.channels.mpxclient.Category;
 import org.atlasapi.remotesite.bt.channels.mpxclient.Entry;
 import org.atlasapi.remotesite.bt.channels.mpxclient.PaginatedEntries;
+import org.slf4j.LoggerFactory;
 
 import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.common.base.Optional;
@@ -38,7 +39,8 @@ public class TargetUserGroupChannelGroupSaver extends AbstractBtChannelGroupSave
             String aliasNamespace, ChannelGroupResolver channelGroupResolver, 
             ChannelGroupWriter channelGroupWriter, BtMpxClient btMpxClient,
             ChannelResolver channelResolver, ChannelWriter channelWriter) {
-        super(publisher, channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
+        super(publisher, channelGroupResolver, channelGroupWriter, channelResolver, channelWriter,
+                LoggerFactory.getLogger(TargetUserGroupChannelGroupSaver.class));
         
         this.aliasUriPrefix = checkNotNull(aliasUriPrefix);
         this.aliasNamespace = checkNotNull(aliasNamespace) + ":tug";
