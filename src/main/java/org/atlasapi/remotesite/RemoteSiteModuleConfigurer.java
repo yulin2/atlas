@@ -11,6 +11,7 @@ import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.bbc.audience.AudienceModule;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
+import org.atlasapi.remotesite.bloomberg.BloombergModule;
 import org.atlasapi.remotesite.bt.channels.BtChannelsModule;
 import org.atlasapi.remotesite.btfeatured.BtFeaturedContentModule;
 import org.atlasapi.remotesite.btvod.BtVodModule;
@@ -70,6 +71,7 @@ public class RemoteSiteModuleConfigurer {
         .put("redux", ReduxModule.class)
         .put("voila", VoilaModule.class)
         .put("lovefilm", LoveFilmModule.class)
+        .put("bloomberg", BloombergModule.class)
         .put("netflix", NetflixModule.class)
         .put("youview", YouViewModule.class)
         .put("bbc-products", BBCProductsModule.class)
