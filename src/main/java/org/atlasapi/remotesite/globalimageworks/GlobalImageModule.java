@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.bloomberg;
+package org.atlasapi.remotesite.globalimageworks;
 
 import javax.annotation.PostConstruct;
 
@@ -15,7 +15,7 @@ import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
-public class BloombergModule {
+public class GlobalImageModule {
 
     private @Autowired AdapterLog log;
     private @Autowired SimpleScheduler scheduler;
@@ -25,14 +25,14 @@ public class BloombergModule {
     
     @PostConstruct
     public void startBackgroundTasks() {
-        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("Bloomberg updater"));
-        scheduler.schedule(bloombergUpdater().withName("Bloomberg Spreadsheet Updater"), RepetitionRules.NEVER);
+        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("GlobalImageWorks updater"));
+        scheduler.schedule(globalImageUpdater().withName("GlobalImageWorks Spreadsheet Updater"), RepetitionRules.NEVER);
     }
     
-    private BloombergUpdateTask bloombergUpdater() {
-        return new BloombergUpdateTask(spreadsheet.spreadsheetFetcher(), 
-                new DefaultBloombergDataRowHandler(contentResolver, contentWriter, new BloombergDataRowContentExtractor()), 
-                new BloombergAdapter());
+    private GlobalImageUpdateTask globalImageUpdater() {
+        return new GlobalImageUpdateTask(spreadsheet.spreadsheetFetcher(), 
+                new DefaultGlobalImageDataRowHandler(contentResolver, contentWriter, new GlobalImageDataRowContentExtractor()), 
+                new GlobalImageAdapter());
     }
     
 }

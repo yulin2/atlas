@@ -17,6 +17,7 @@ import org.atlasapi.remotesite.btfeatured.BtFeaturedContentModule;
 import org.atlasapi.remotesite.btvod.BtVodModule;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.five.FiveModule;
+import org.atlasapi.remotesite.globalimageworks.GlobalImageModule;
 import org.atlasapi.remotesite.hulu.HuluModule;
 import org.atlasapi.remotesite.itunes.ItunesModule;
 import org.atlasapi.remotesite.itv.ItvModule;
@@ -71,7 +72,6 @@ public class RemoteSiteModuleConfigurer {
         .put("redux", ReduxModule.class)
         .put("voila", VoilaModule.class)
         .put("lovefilm", LoveFilmModule.class)
-        .put("bloomberg", BloombergModule.class)
         .put("netflix", NetflixModule.class)
         .put("youview", YouViewModule.class)
         .put("bbc-products", BBCProductsModule.class)
@@ -89,6 +89,8 @@ public class RemoteSiteModuleConfigurer {
         .put("bt-channels", BtChannelsModule.class)
         .put("bbc-audience-data", AudienceModule.class)
         .put("btvod", BtVodModule.class)
+        .put("bloomberg", BloombergModule.class)
+        .put("globalimageworks", GlobalImageModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
