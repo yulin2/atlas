@@ -33,7 +33,7 @@ public class BloombergDataRowContentExtractor implements ContentExtractor<Bloomb
         item.setPublisher(BLOOMBERG);
         item.setCanonicalUri(uri(source.getId()));
         item.setCurie(curie(source.getId()));
-        item.setLastUpdated(new DateTime().withZone(DateTimeZone.UTC));
+        item.setLastUpdated(new DateTime(DateTimeZone.UTC));
         
         return item;
     }
@@ -49,7 +49,7 @@ public class BloombergDataRowContentExtractor implements ContentExtractor<Bloomb
     }
 
     private DateTime extractDate(String date) {
-        return new DateTime().withZone(DateTimeZone.UTC);
+        return new DateTime(DateTimeZone.UTC);
     }
 
     private String uri(String id) {
