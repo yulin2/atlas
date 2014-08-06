@@ -15,13 +15,13 @@ import com.google.common.io.CharStreams;
 import com.google.gson.JsonElement;
 
 public class GettyVideoFetcher {
-
-    private static final int ITEMS_PER_PAGE = 90;
     
     private final JsonVideoRequest jsonVideoRequest;
+    private final int itemsPerPage;
     
-    public GettyVideoFetcher(JsonVideoRequest jsonVideoRequest) {
+    public GettyVideoFetcher(JsonVideoRequest jsonVideoRequest, int itemsPerPage) {
         this.jsonVideoRequest = checkNotNull(jsonVideoRequest);
+        this.itemsPerPage = itemsPerPage;
     }
     
     public String getResponse(String token, String searchPhrase, int itemStartNumber) throws ClientProtocolException, IOException {
@@ -29,7 +29,7 @@ public class GettyVideoFetcher {
         post.setHeader("Content-type", "application/json");
         
         //maximum valid value for itemCount is 90 ; first itemStartNumber is 1
-        VideoRequest videoRequest = new VideoRequest(token, searchPhrase, ITEMS_PER_PAGE, itemStartNumber);
+        VideoRequest videoRequest = new VideoRequest(token, searchPhrase, itemsPerPage, itemStartNumber);
         JsonElement json = jsonVideoRequest.toJson(videoRequest);
         post.setEntity(new StringEntity(json.toString()));
         
