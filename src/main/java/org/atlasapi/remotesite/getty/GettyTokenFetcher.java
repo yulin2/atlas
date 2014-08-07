@@ -29,7 +29,12 @@ public class GettyTokenFetcher {
     private static final String CLIENT_SECRET = Configurer.get("getty.client.secret").get();
     private static final String ACCES_TOKEN_KEY = "access_token";
     
-    public String oauth() throws ClientProtocolException, IOException {
+    public String getToken() throws ClientProtocolException, IOException {
+        String oauth = oauth();
+        return parseToken(oauth);
+    }
+    
+    private String oauth() throws ClientProtocolException, IOException {
         HttpPost post = new HttpPost(GETTY_OAUTH_URL);
         
         Builder<BasicNameValuePair> params = new ImmutableList.Builder<BasicNameValuePair>();
@@ -43,7 +48,7 @@ public class GettyTokenFetcher {
         return CharStreams.toString(reader);
     }
     
-    public String getToken(String content) {
+    private String parseToken(String content) {
         JsonObject parse = (JsonObject) new JsonParser().parse(content);
         JsonElement element = parse.get(ACCES_TOKEN_KEY);
         return element.getAsString();

@@ -2,8 +2,10 @@ package org.atlasapi.remotesite.getty;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.http.client.ClientProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,13 +16,16 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 public class GettyUpdateTask extends ScheduledTask {
 
     private static final Logger log = LoggerFactory.getLogger(GettyUpdateTask.class);
-
+    private static final String EXPIRED_TOKEN_CODE = "AUTH-012";
+    
     private final GettyAdapter adapter;
     private final GettyDataHandler dataHandler;
     private final GettyTokenFetcher tokenFetcher;
     private final GettyVideoFetcher videoFetcher;
     private final IrisKeywordsFetcher keywordsFetcher;
     private final int itemsPerPage;
+    
+    private String token;
     
     public GettyUpdateTask(GettyAdapter adapter, GettyDataHandler dataHandler, GettyTokenFetcher tokenFetcher,
             GettyVideoFetcher videoFetcher, IrisKeywordsFetcher keywordsFetcher, int itemsPerPage) {
@@ -38,15 +43,14 @@ public class GettyUpdateTask extends ScheduledTask {
         try {
             GettyDataProcessor<UpdateProgress> processor = processor();
             int offset = 0;
-            String oauthResponse = tokenFetcher.oauth();
-            String token = tokenFetcher.getToken(oauthResponse);
+            this.token = tokenFetcher.getToken();
             
             List<String> keywords = keywordsFetcher.getKeywordsFromOffset(offset);
             
             //paginate keywords
             while (!keywords.isEmpty()) {
                 for (String keyword : keywords) {
-                    processor.process(token, keyword);
+                    processor.process(keyword);
                 }
                 offset += itemsPerPage;
                 keywords = keywordsFetcher.getKeywordsFromOffset(offset);
@@ -61,16 +65,25 @@ public class GettyUpdateTask extends ScheduledTask {
         
     }
     
+    private String getVideoResponse(String keyword, int offset) throws ClientProtocolException, IOException {
+        String response = videoFetcher.getResponse(token, keyword, offset);
+        if (response.contains(EXPIRED_TOKEN_CODE)) {
+            this.token = tokenFetcher.getToken();
+            return videoFetcher.getResponse(token, keyword, offset);
+        }
+        return response;
+    }
+    
     private GettyDataProcessor<UpdateProgress> processor() {
         return new GettyDataProcessor<UpdateProgress>() {
             
             UpdateProgress progress = UpdateProgress.START;
             
             @Override
-            public boolean process(String token, String keyword) {
+            public boolean process(String keyword) {
                 try {
                     int offset = 1;
-                    String response = videoFetcher.getResponse(token, keyword, offset);
+                    String response = getVideoResponse(keyword, offset);
                     List<VideoResponse> videos = adapter.parse(response);
                     
                     //paginate videos
@@ -80,7 +93,7 @@ public class GettyUpdateTask extends ScheduledTask {
                             progress = progress.reduce(UpdateProgress.SUCCESS);
                         }
                         offset += itemsPerPage;
-                        response = videoFetcher.getResponse(token, keyword, offset);
+                        response = getVideoResponse(keyword, offset);
                         videos = adapter.parse(response);
                     }
                     

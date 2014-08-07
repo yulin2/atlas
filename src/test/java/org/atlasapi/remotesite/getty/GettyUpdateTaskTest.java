@@ -22,7 +22,7 @@ public class GettyUpdateTaskTest {
     
     @Test
     public void testTask() throws Exception {
-        when(tokenFetcher.getToken(Matchers.anyString())).thenReturn("token");
+        when(tokenFetcher.getToken()).thenReturn("token");
         when(keywordsFetcher.getKeywordsFromOffset(0)).thenReturn(ImmutableList.of("key1", "key2"));
         when(keywordsFetcher.getKeywordsFromOffset(90)).thenReturn(ImmutableList.<String>of());
         when(videoFetcher.getResponse(Matchers.eq("token"), Matchers.eq("key1"), Matchers.eq(1))).thenReturn("val1");

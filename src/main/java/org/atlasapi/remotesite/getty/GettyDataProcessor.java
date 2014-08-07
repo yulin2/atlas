@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.getty;
 
 public interface GettyDataProcessor<T> {
 
-    boolean process(String token, String response);
+    boolean process(String response);
     
     T getResult();
     
