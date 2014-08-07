@@ -26,7 +26,7 @@ public class GettyContentExtractor implements ContentExtractor<VideoResponse, Co
     private static final String GETTY_URI_PATTERN = "http://gettyimages.co.uk/%s";
     private static final String GETTY_CURIE_PATTERN = "getty:%s";
     private static final int SECONDS_PER_MIN = 60;
-    private static final int SECONDS_PER_HOUR = 3660;
+    private static final int SECONDS_PER_HOUR = 3600;
     
     private final Splitter durationSplitter = Splitter.on(":").omitEmptyStrings();
     private final Splitter dateSplitter = Splitter.onPattern("[-|+]").omitEmptyStrings();

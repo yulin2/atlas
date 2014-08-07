@@ -27,7 +27,7 @@ public class GlobalImageDataRowContentExtractor implements ContentExtractor<Glob
 
     private static final String GLOBAL_IMAGE_URI_PATTERN = "http://globalimageworks.com/%s";
     private static final int SECONDS_PER_MIN = 60;
-    private static final int SECONDS_PER_HOUR = 3660;
+    private static final int SECONDS_PER_HOUR = 3600;
     
     private final Splitter idSplitter = Splitter.on(":").omitEmptyStrings();
     private final Splitter frameSplitter = Splitter.on(";").omitEmptyStrings();

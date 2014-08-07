@@ -27,7 +27,7 @@ public class BloombergDataRowContentExtractor implements ContentExtractor<Bloomb
 
     private static final String BLOOMBERG_URI_PATTERN = "http://bloomberg.com/%s";
     private static final int SECONDS_PER_MIN = 60;
-    private static final int SECONDS_PER_HOUR = 3660;
+    private static final int SECONDS_PER_HOUR = 3600;
     
     private final Splitter idSplitter = Splitter.on(":").omitEmptyStrings();
     private final Splitter durationSplitter = Splitter.on(":").omitEmptyStrings();
