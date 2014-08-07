@@ -132,7 +132,9 @@ public class ItvWhatsOnEntryExtractor {
         version.setBroadcasts(ImmutableSet.of(toBroadcast(entry)));
 
         if (entry.getAvailabilityStart() != null
-            && entry.getAvailabilityEnd() != null) {
+                && entry.getAvailabilityEnd() != null
+                && !entry.isComingSoon()) {
+            
             Policy policy = getPolicy(entry);
             Location location = getLocation(entry, policy);
             Encoding encoding = new Encoding();

@@ -1,17 +1,21 @@
 package org.atlasapi.remotesite.pa.features;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.pa.features.PaFeaturesContentGroupProcessor.FeatureSetContentGroups;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -40,10 +44,10 @@ public class PaFeaturesContentGroupProcessorTest {
         
         processor.prepareUpdate();
         
-        FeatureSetContentGroups contentGroups = processor.getContentGroups(FEATURE_SET_ID);
+        Optional<FeatureSetContentGroups> contentGroups = processor.getContentGroups(FEATURE_SET_ID);
         
-        assertEquals(todayGroup, contentGroups.getTodayContentGroup());
-        assertEquals(allGroup, contentGroups.getAllFeaturedContentContentGroup());
+        assertEquals(todayGroup, contentGroups.get().getTodayContentGroup());
+        assertEquals(allGroup, contentGroups.get().getAllFeaturedContentContentGroup());
         
         Mockito.verify(contentGroupResolver, times(1)).findByCanonicalUris(ImmutableList.of(todayUri));
         Mockito.verify(contentGroupResolver, times(1)).findByCanonicalUris(ImmutableList.of(allUri));
@@ -59,7 +63,7 @@ public class PaFeaturesContentGroupProcessorTest {
         
         processor.prepareUpdate();
         
-        assertNull(processor.getContentGroups("invalidFeatureSet"));
+        assertEquals(Optional.<FeatureSetContentGroups>absent(), processor.getContentGroups("invalidFeatureSet"));
     }
     
     @Test
@@ -77,12 +81,41 @@ public class PaFeaturesContentGroupProcessorTest {
         Mockito.verify(contentGroupWriter, times(1)).createOrUpdate(allGroup);
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
+    public void testWrittenContentGroupsContainContent() {
+        String todayUri = FEATURE_SET_URI_BASE;
+        String allUri = FEATURE_SET_URI_BASE + "/all";
+        
+        ContentGroup todayGroup = mockResolution(todayUri);
+        ContentGroup allGroup = mockResolution(allUri);
+        
+        processor.prepareUpdate();
+        
+        ChildRef content = createChildRef();
+        allGroup.addContent(content);
+        todayGroup.addContent(content);
+        
+        processor.finishUpdate();
+        
+        ArgumentCaptor<ContentGroup> groupCaptor = ArgumentCaptor.forClass(ContentGroup.class);
+        
+        Mockito.verify(contentGroupWriter, times(2)).createOrUpdate(groupCaptor.capture());
+        
+        assertEquals(content, groupCaptor.getValue().getContents().get(0));
+        
+    }
+    
+    private ChildRef createChildRef() {
+        Item item = new Item("a uri", "a curie", Publisher.PA_FEATURES);
+        return item.childRef();
+    }
+
+    @Test(expected = IllegalStateException.class)
     public void testContentGroupFetchBeforePreparationThrowsException() {
         processor.getContentGroups(FEATURE_SET_ID);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void testFinishBeforePreparationThrowsException() {
         processor.finishUpdate();
     }

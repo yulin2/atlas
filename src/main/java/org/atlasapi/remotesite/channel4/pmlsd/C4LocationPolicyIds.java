@@ -11,11 +11,11 @@ public class C4LocationPolicyIds {
         this.playerId = playerId;
     }
     
-    public long getServiceId() {
+    public Long getServiceId() {
         return serviceId;
     }
     
-    public long getPlayerId() {
+    public Long getPlayerId() {
         return playerId;
     }
     

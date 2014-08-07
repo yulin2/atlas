@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.five;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -53,18 +55,14 @@ public class FiveEpisodeProcessor {
     private final Multimap<String, Channel> channelMap;
     private final Map<String, Series> seriesMap = Maps.newHashMap();
 
-    private final Long webServiceId;
-    private final Long iOsServiceId;
-    private final Long demand5PlayerId;
+    private final FiveLocationPolicyIds locationPolicyIds;
 
     public FiveEpisodeProcessor(String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient, Multimap<String, Channel> channelMap, 
-            Long webServiceId, Long androidServiceId, Long demand5PlayerId) {
-        this.baseApiUrl = baseApiUrl;
-        this.httpClient = httpClient;
-        this.channelMap = channelMap;
-        this.webServiceId = webServiceId;
-        this.iOsServiceId = androidServiceId;
-        this.demand5PlayerId = demand5PlayerId;
+            FiveLocationPolicyIds locationPolicyIds) {
+        this.baseApiUrl = checkNotNull(baseApiUrl);
+        this.httpClient = checkNotNull(httpClient);
+        this.channelMap = checkNotNull(channelMap);
+        this.locationPolicyIds = checkNotNull(locationPolicyIds); 
     }
     
     public Item processEpisode(Element element, Brand brand) throws Exception {
@@ -116,11 +114,11 @@ public class FiveEpisodeProcessor {
         
         Encoding encoding = new Encoding();
 
-        Location webLocation = getLocation(element, webUriFor(element), webServiceId);
+        Location webLocation = getLocation(element, webUriFor(element), locationPolicyIds.getWebServiceId());
         encoding.addAvailableAt(webLocation);
         
-        Location androidLocation = getLocation(element, iOsUriFor(element), iOsServiceId);
-        encoding.addAvailableAt(androidLocation);
+        Location iosVersion = getLocation(element, iOsUriFor(element), locationPolicyIds.getIosServiceId());
+        encoding.addAvailableAt(iosVersion);
         
         version.addManifestedAs(encoding);
 
@@ -176,7 +174,7 @@ public class FiveEpisodeProcessor {
         }
         
         policy.setService(serviceId);
-        policy.setPlayer(demand5PlayerId);
+        policy.setPlayer(locationPolicyIds.getDemand5PlayerId());
         
         location.setPolicy(policy);
         return location;

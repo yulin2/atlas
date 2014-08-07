@@ -27,7 +27,7 @@ public class C4BrandClipExtractorTest {
     private final AtomFeedBuilder feed = new AtomFeedBuilder(Resources.getResource(getClass(), "green-wing-video.atom"));
     
     private final ContentFactory<Feed, Feed, Entry> contentFactory
-        = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());;
+        = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());
     
     @Test
     public void testExtract() {

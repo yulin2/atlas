@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.btvod;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.api.client.repackaged.com.google.common.base.Throwables;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
 
@@ -24,10 +26,14 @@ public class BtVodUpdater extends ScheduledTask {
     private final Publisher publisher;
     private final BtVodData vodData;
     private final BtVodContentGroupUpdater contentGroupUpdater;
+    private final BtVodDescribedFieldsExtractor describedFieldsExtractor;
     
     public BtVodUpdater(ContentResolver resolver, ContentWriter contentWriter,
             BtVodData vodData, String uriPrefix, 
-            BtVodContentGroupUpdater contentGroupUpdater, Publisher publisher) {
+            BtVodContentGroupUpdater contentGroupUpdater, 
+            BtVodDescribedFieldsExtractor describedFieldsExtractor, 
+            Publisher publisher) {
+        this.describedFieldsExtractor = checkNotNull(describedFieldsExtractor);
         this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(contentWriter);
         this.vodData = checkNotNull(vodData);
@@ -41,9 +47,14 @@ public class BtVodUpdater extends ScheduledTask {
     @Override
     public void runTask() {
         contentGroupUpdater.start();
-        BtVodBrandExtractor brandExtractor = new BtVodBrandExtractor(writer, resolver, publisher, uriPrefix, contentGroupUpdater);
-        BtVodSeriesExtractor seriesExtractor = new BtVodSeriesExtractor(writer, resolver, brandExtractor, publisher, uriPrefix, contentGroupUpdater);
-        BtVodItemExtractor itemExtractor = new BtVodItemExtractor(writer, resolver, brandExtractor, seriesExtractor, publisher, uriPrefix, contentGroupUpdater);
+        Set<String> processedRows = Sets.newHashSet();
+        BtVodBrandWriter brandExtractor = new BtVodBrandWriter(writer, resolver, publisher, 
+                uriPrefix, contentGroupUpdater, describedFieldsExtractor, processedRows);
+        BtVodSeriesWriter seriesExtractor = new BtVodSeriesWriter(writer, resolver, brandExtractor, 
+                describedFieldsExtractor, publisher, uriPrefix, contentGroupUpdater, processedRows);
+        BtVodItemWriter itemExtractor = new BtVodItemWriter(writer, resolver, brandExtractor, 
+                seriesExtractor, publisher, uriPrefix, contentGroupUpdater, describedFieldsExtractor, 
+                processedRows);
         try {
             reportStatus("Brand extract [IN PROGRESS]  Series extract [TODO]  Item extract [TODO]");
             vodData.processData(brandExtractor);

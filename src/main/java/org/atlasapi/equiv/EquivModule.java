@@ -118,6 +118,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.collect.MoreSets;
 import com.metabroadcast.common.queue.MessageSender;
 import com.metabroadcast.common.time.DateTimeZones;
 
@@ -244,7 +245,7 @@ public class EquivModule {
         ));
         
         //Generally acceptable publishers.
-        Set<Publisher> acceptablePublishers = ImmutableSet.copyOf(Sets.difference(
+        ImmutableSet<Publisher> acceptablePublishers = ImmutableSet.copyOf(Sets.difference(
             Publisher.all(), 
             Sets.union(
                 ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM, NETFLIX, YOUVIEW, YOUVIEW_STAGE, YOUVIEW_BT, YOUVIEW_BT_STAGE), 
@@ -252,9 +253,9 @@ public class EquivModule {
             )
         ));
         
-        EquivalenceUpdater<Item> standardItemUpdater = standardItemUpdater(acceptablePublishers, 
+        EquivalenceUpdater<Item> standardItemUpdater = standardItemUpdater(MoreSets.add(acceptablePublishers, LOVEFILM), 
                 ImmutableSet.of(new TitleMatchingItemScorer(), new SequenceItemScorer())).build();
-        EquivalenceUpdater<Container> topLevelContainerUpdater = topLevelContainerUpdater(acceptablePublishers);
+        EquivalenceUpdater<Container> topLevelContainerUpdater = topLevelContainerUpdater(MoreSets.add(acceptablePublishers, LOVEFILM));
 
         Set<Publisher> nonStandardPublishers = ImmutableSet.copyOf(Sets.union(
             ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, RTE, YOUVIEW, YOUVIEW_STAGE, TALK_TALK, PA), 

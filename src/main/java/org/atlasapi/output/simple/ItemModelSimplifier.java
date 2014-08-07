@@ -544,31 +544,6 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             if (policy.getNetwork() != null) {
                 simpleLocation.setNetwork(policy.getNetwork().key());
             }
-//            if (policy.getService() != null) {
-//                Optional<Service> service = serviceResolver.serviceFor(policy.getService());
-//                simpleLocation.setService(serviceModelSimplifier.simplify(service.get(), 
-//                        annotations, config));
-//            }
-//            if (policy.getPlayer() != null) {
-//                Optional<Player> player = playerResolver.playerFor(policy.getPlayer());
-//                simpleLocation.setPlayer(playerModelSimplifier.simplify(player.get(), 
-//                        annotations, config));
-//            }
-            // TODO: wire in the above
-            if (Platform.YOUVIEW_IPLAYER.equals(policy.getPlatform())) {
-                Optional<Service> service = serviceResolver.serviceFor(123L);
-                if (service.isPresent()) {
-                    simpleLocation.setService(serviceModelSimplifier.simplify(service.get(), 
-                            annotations, config));
-                }
-                
-                Optional<Player> player = playerResolver.playerFor(123L);
-                if (player.isPresent()) {
-                    simpleLocation.setPlayer(playerModelSimplifier.simplify(player.get(), 
-                            annotations, config));
-                }
-            }
-            
             if (policy.getService() != null) {
                 Optional<Service> service = serviceResolver.serviceFor(policy.getService());
                 if (service.isPresent()) {
@@ -576,7 +551,6 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                             annotations, config));
                 }
             }
-            
             if (policy.getPlayer() != null) {
                 Optional<Player> player = playerResolver.playerFor(policy.getPlayer());
                 if (player.isPresent()) {

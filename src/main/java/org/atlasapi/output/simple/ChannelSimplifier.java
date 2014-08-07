@@ -8,6 +8,7 @@ import java.util.Set;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
+import org.atlasapi.media.channel.ChannelNumbering;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.TemporalField;
 import org.atlasapi.media.entity.Image;
@@ -129,7 +130,11 @@ public class ChannelSimplifier {
         
         
         if (showGroupSummary) {
-            simple.setGroups(Iterables.transform(channelGroupResolver.channelGroupsFor(input), TO_CHANNEL_GROUP_ALIAS));
+            simple.setGroups(
+                    Iterables.transform(
+                            channelGroupResolver.channelGroupsFor(
+                                    Iterables.transform(input.getChannelNumbers(), ChannelNumbering.TO_CHANNEL_GROUP)),
+                            TO_CHANNEL_GROUP_ALIAS));
         }
 
         return simple;

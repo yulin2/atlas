@@ -51,7 +51,12 @@ public class BtVodModule {
     public BtVodUpdater btVodUpdater() {
         return new BtVodUpdater(contentResolver, 
                 contentWriter, btVodData(), URI_PREFIX, btVodContentGroupUpdater(), 
-                Publisher.BT_VOD);
+                describedFieldsExtractor(), Publisher.BT_VOD);
+    }
+    
+    @Bean
+    public BtVodDescribedFieldsExtractor describedFieldsExtractor() {
+        return new BtVodDescribedFieldsExtractor();
     }
     
     @Bean

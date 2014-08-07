@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.pa.features;
 
+import static com.google.api.client.util.Preconditions.checkState;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
@@ -11,7 +12,7 @@ import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 
-import com.google.api.client.util.Preconditions;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -19,6 +20,8 @@ import com.google.common.collect.Maps.EntryTransformer;
 
 public class PaFeaturesContentGroupProcessor {
     
+    private static final String PREPARE_ERROR_MSG = "Must call prepareUpdate() before fetching a FeatureSets ContentGroups";
+
     private static final String ALL_CONTENT_GROUP_SUFFIX = "/all";
     
     private final ContentGroupWriter contentGroupWriter;
@@ -64,13 +67,13 @@ public class PaFeaturesContentGroupProcessor {
         }
     }
     
-    public FeatureSetContentGroups getContentGroups(String featureSetId) {
-        Preconditions.checkArgument(contentGroups != null, "Must call prepareUpdate() before fetching a FeatureSets ContentGroups");
-        return contentGroups.get(featureSetId);
+    public Optional<FeatureSetContentGroups> getContentGroups(String featureSetId) {
+        checkState(contentGroups != null, PREPARE_ERROR_MSG);
+        return Optional.fromNullable(contentGroups.get(featureSetId));
     }
     
     public void finishUpdate() {
-        Preconditions.checkArgument(contentGroups != null, "Must call prepareUpdate() before fetching a FeatureSets ContentGroups");
+        checkState(contentGroups != null, PREPARE_ERROR_MSG);
         for (FeatureSetContentGroups featuredCgs : contentGroups.values()) {
             contentGroupWriter.createOrUpdate(featuredCgs.getTodayContentGroup());
             contentGroupWriter.createOrUpdate(featuredCgs.getAllFeaturedContentContentGroup());

@@ -58,7 +58,7 @@ public class PicksDayUpdater implements ChannelDayProcessor {
         this.contentGroupWriter = contentGroupWriter;
         this.contentResolver = contentResolver;
         this.picksPredicate = Predicates.and(ImmutableList.of(
-                                                new PrimetimePredicate(picksChannelsSupplier.get()), 
+                                                new InterestingItemAndBroadcastPredicate(picksChannelsSupplier.get()), 
                                                 Predicates.not(new ItemInLargeBrandPredicate(contentResolver, LARGE_BRAND_SIZE)),
                                                 Predicates.not(new ShortBroadcastPredicate(SHORT_BROADCAST_LENGTH)))
                                             );
@@ -108,13 +108,17 @@ public class PicksDayUpdater implements ChannelDayProcessor {
         ContentGroup contentGroup = resolveOrCreateContentGroup();
         Iterable<ChildRef> childRefs = transform(items, Item.TO_CHILD_REF);
         pruneContents(contentGroup);
+        boolean changed = false;
         for (ChildRef childRef : childRefs) {
             
             if (!contentGroup.getContents().contains(childRef)) {
+                changed = true;
                 contentGroup.addContent(childRef);
             }
         }
-        contentGroupWriter.createOrUpdate(contentGroup);
+        if (changed) {
+            contentGroupWriter.createOrUpdate(contentGroup);
+        }
     }
     
     // The picks should be kept to a finite size, else we'll hit document size limits in mongo

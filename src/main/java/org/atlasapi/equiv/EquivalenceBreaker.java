@@ -35,7 +35,7 @@ public class EquivalenceBreaker {
         this.contentResolver = checkNotNull(contentResolver);
     }
     
-    public void removeFromSet(String sourceUri, final String equivalentToRemove) {
+    public void removeFromSet(String sourceUri, final String directEquivUriToRemove) {
         Maybe<Identified> possibleSource = 
                 contentResolver.findByCanonicalUris(ImmutableSet.of(sourceUri))
                                .getFirstValue();
@@ -48,13 +48,18 @@ public class EquivalenceBreaker {
         LookupEntry lookupEntry = 
                 Iterables.getOnlyElement(entryStore.entriesForCanonicalUris(ImmutableSet.of(sourceUri)));
         
+        if (!ImmutableSet.copyOf(Iterables.transform(lookupEntry.directEquivalents(), LookupRef.TO_URI))
+                .contains(directEquivUriToRemove)) {
+            throw new IllegalArgumentException("Direct equivalence to " 
+                            + directEquivUriToRemove + " not found");
+        }
         
         Iterable<LookupRef> filteredRefs = Iterables.filter(lookupEntry.directEquivalents(), 
                 new Predicate<LookupRef>() {
 
                     @Override
                     public boolean apply(LookupRef input) {
-                        return !input.uri().equals(equivalentToRemove);
+                        return !input.uri().equals(directEquivUriToRemove);
                     }
                 });
         

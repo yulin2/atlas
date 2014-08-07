@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.itv.whatson;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.channel.Channel;
@@ -36,7 +37,7 @@ public class ItvWhatsOnExtractorTest {
         return new DateTime(DateTimeZones.UTC).withMillis(millis);
     }
     
-    private ItvWhatsOnEntry getTestItem() {
+    private ItvWhatsOnEntry getTestItem(boolean isComingSoon) {
         ItvWhatsOnEntry entry = new ItvWhatsOnEntry();
         entry.setChannel("CITV");
         entry.setBroadcastDate(getDateTimeFromMillis(1374644400000L));
@@ -63,7 +64,7 @@ public class ItvWhatsOnExtractorTest {
         entry.setAvailabilityStart(getDateTimeFromMillis(1374646200000L));
         entry.setAvailabilityEnd(getDateTimeFromMillis(1377298740000L));
         entry.setRepeat(false);
-        entry.setComingSoon(true);
+        entry.setComingSoon(isComingSoon);
         entry.setProductionId("1/7680/0029#001");
         entry.setProgrammeId("1/7680");
         entry.setSeriesId("1/7680-02");
@@ -73,14 +74,14 @@ public class ItvWhatsOnExtractorTest {
     
     @Test
     public void testBrandTranslation() {
-        Optional<Brand> brand = extractor.toBrand(getTestItem());
+        Optional<Brand> brand = extractor.toBrand(getTestItem(false));
         assertEquals(brand.get().getCanonicalUri(), "http://itv.com/brand/1/7680");
         assertEquals(brand.get().getTitle(), "Huntik - Secrets and Seekers");
     }
     
     @Test
     public void testSeriesTranslation() {
-        Optional<Series> series = extractor.toSeries(getTestItem());
+        Optional<Series> series = extractor.toSeries(getTestItem(false));
         assertEquals(series.get().getCanonicalUri(), "http://itv.com/series/1/7680-02");
     }
     
@@ -96,7 +97,7 @@ public class ItvWhatsOnExtractorTest {
     
     @Test
     public void testItemTranslation() {
-        Item item = getEpisode(getTestItem());
+        Item item = getEpisode(getTestItem(false));
         assertEquals(item.getCanonicalUri(), "http://itv.com/1/7680/0029");
         assertEquals(item.getTitle(), "Cave of the Casterwills");
         assertEquals(item.getDescription().length(), 139);
@@ -107,7 +108,7 @@ public class ItvWhatsOnExtractorTest {
     
     @Test
     public void testEpisodeSynthesizedTranslation() {
-        ItvWhatsOnEntry entry = getTestItem();
+        ItvWhatsOnEntry entry = getTestItem(false);
         entry.setEpisodeId("");        
         Episode episode = getEpisode(entry);
         assertEquals(episode.getCanonicalUri(), "http://itv.com/synthesized/1/7680/0029#001");
@@ -115,7 +116,7 @@ public class ItvWhatsOnExtractorTest {
     
     @Test
     public void testVersion() {
-        Episode episode = getEpisode(getTestItem());
+        Episode episode = getEpisode(getTestItem(false));
         Version version = Iterables.getOnlyElement(episode.getVersions());
         assertEquals(version.getCanonicalUri(), "http://itv.com/version/1/7680/0029#001");
         assertEquals(version.getDuration().intValue(), 1800);
@@ -123,7 +124,7 @@ public class ItvWhatsOnExtractorTest {
     
     @Test
     public void testBroadcast() {
-        Episode episode = getEpisode(getTestItem());
+        Episode episode = getEpisode(getTestItem(false));
         DateTime expectedTransmissionStart = getDateTimeFromMillis(1374644400000L);
         DateTime expectedTransmissionEnd = expectedTransmissionStart.plusSeconds(1800);
         Version version = Iterables.getOnlyElement(episode.getVersions());
@@ -137,7 +138,7 @@ public class ItvWhatsOnExtractorTest {
     
     @Test
     public void testLocation() {
-        Episode episode = getEpisode(getTestItem());
+        Episode episode = getEpisode(getTestItem(false));
         Version version = Iterables.getOnlyElement(episode.getVersions());
         Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
         Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
@@ -145,6 +146,14 @@ public class ItvWhatsOnExtractorTest {
         assertEquals(TransportType.LINK, location.getTransportType());
         Policy policy = location.getPolicy();
         checkPolicy(policy);
+    }
+    
+    @Test
+    public void testComingSoonNoLocation() {
+        Episode episode = getEpisode(getTestItem(true));
+        Version version = Iterables.getOnlyElement(episode.getVersions());
+        
+        assertTrue(version.getManifestedAs().isEmpty());
     }
     
     private void checkPolicy(Policy policy) {

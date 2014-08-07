@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.XMLReader;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
@@ -138,14 +139,14 @@ public class PaFeaturesUpdater extends ScheduledTask {
                 if (target instanceof FeatureSet) {
                     try {
                         FeatureSet featureSet = (FeatureSet) target;
-                        FeatureSetContentGroups contentGroups = contentGroupProcessor.getContentGroups(featureSet.getId());
-                        if (contentGroups == null) {
-                            log.error("FeatureSet Id {} not supported");
-                        } else {
+                        Optional<FeatureSetContentGroups> contentGroups = contentGroupProcessor.getContentGroups(featureSet.getId());
+                        if (contentGroups.isPresent()) {
                             Features features = Iterables.getOnlyElement(featureSet.getFeatures());
                             for (Feature feature : features.getFeature()) {
-                                processor.process(feature.getProgrammeID(), contentGroups);
+                                processor.process(feature.getProgrammeID(), contentGroups.get());
                             }
+                        } else {
+                            log.error("FeatureSet Id {} not supported");
                         }
                     } catch (NoSuchElementException e) {
                         log.error("No content found for programme Id: " + ((Feature) target).getProgrammeID(), e);

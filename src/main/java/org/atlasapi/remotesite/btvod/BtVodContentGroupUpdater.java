@@ -77,8 +77,7 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
             return (ContentGroup) maybeContentGroup.requireValue();
         }
         
-        ContentGroup contentGroup = new ContentGroup(canonicalUri, publisher);
-        return contentGroup;
+        return new ContentGroup(canonicalUri, publisher);
     }
     
     public static Predicate<VodDataAndContent> categoryPredicate(final String category) {

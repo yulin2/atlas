@@ -43,11 +43,21 @@ public class FiveModule {
     public FiveUpdater fiveUpdater() {
         Integer soTimeout = Configurer.get("five.timeout.socket", "180").toInt();
         return new FiveUpdater(contentWriter, channelResolver, contentResolver, 
-                webServiceId, iOsServiceId, demand5PlayerId, soTimeout);
+                fiveLocationPolicyIds(), soTimeout);
     }
     
     @Bean
     public FiveBrandUpdateController fiveBrandUpdateController() {
         return new FiveBrandUpdateController(fiveUpdater());
+    }
+    
+    @Bean
+    public FiveLocationPolicyIds fiveLocationPolicyIds() {
+        return FiveLocationPolicyIds.builder()
+                    .withDemand5PlayerId(demand5PlayerId)
+                    .withIosServiceId(iOsServiceId)
+                    .withWebServiceId(webServiceId)
+                    .build();
+                    
     }
 }
