@@ -23,16 +23,18 @@ public class GettyAdapter {
     private static final String DATE_CREATED = "DateCreated";
     private static final String KEYWORDS = "Keywords";
     private static final String KEYWORD_TITLE = "Text";
+    private static final String ASPECT_RATIOS = "AspectRatios";
     
     public List<VideoResponse> parse(String text) {
         JsonObject parse = (JsonObject) new JsonParser().parse(text);
         JsonArray videoArray = parse.get(SEARCH_RESULT).getAsJsonObject().get(VIDEOS).getAsJsonArray();
-        
         Builder<VideoResponse> videos = new ImmutableList.Builder<VideoResponse>();
-        for (JsonElement elem : videoArray) {
-            videos.add(createVideoResponse(elem.getAsJsonObject()));
+        //check here so that json parser doesn't fail
+        if (videoArray.size() != 0) {
+            for (JsonElement elem : videoArray) {
+                videos.add(createVideoResponse(elem.getAsJsonObject()));
+            }
         }
-        
         return videos.build();
     }
     
@@ -46,8 +48,18 @@ public class GettyAdapter {
         videoResponse.setThumb(thumb(elem));
         videoResponse.setDateCreated(elem.get(DATE_CREATED).getAsString());
         videoResponse.setTitle(elem.get(TITLE).getAsString());
+        videoResponse.setAspectRatios(aspectRatios(elem));
         
         return videoResponse;
+    }
+
+    private List<String> aspectRatios(JsonObject obj) {
+        Builder<String> aspectRatios = new ImmutableList.Builder<String>();
+        JsonArray keys = obj.get(ASPECT_RATIOS).getAsJsonArray();
+        for (JsonElement elem : keys) {
+            aspectRatios.add(elem.getAsString());
+        }
+        return aspectRatios.build();
     }
 
     private String thumb(JsonObject elem) {

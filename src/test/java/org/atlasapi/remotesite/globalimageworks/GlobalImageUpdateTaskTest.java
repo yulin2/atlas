@@ -29,7 +29,7 @@ public class GlobalImageUpdateTaskTest {
     private final ScheduledTask task = new GlobalImageUpdateTask(spreadsheetFetcher, dataHandler, adapter);
     
     @Test
-    public void test() {
+    public void testTask() {
         SpreadsheetEntry spreadsheet = new SpreadsheetEntry();
         WorksheetEntry worksheet = new WorksheetEntry();
         ListFeed feed = new ListFeed();

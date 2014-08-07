@@ -29,7 +29,7 @@ public class BloombergUpdateTaskTest {
     private final ScheduledTask task = new BloombergUpdateTask(spreadsheetFetcher, dataHandler, adapter);
     
     @Test
-    public void test() {
+    public void testTask() {
         SpreadsheetEntry spreadsheet = new SpreadsheetEntry();
         WorksheetEntry worksheet = new WorksheetEntry();
         ListFeed feed = new ListFeed();

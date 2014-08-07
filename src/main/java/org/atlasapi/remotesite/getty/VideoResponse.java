@@ -13,6 +13,7 @@ public class VideoResponse {
     private String thumb;
     private String dateCreated;
     private List<String> keywords;
+    private List<String> aspectRatios;
     
     public String getAssetId() {
         return assetId;
@@ -66,8 +67,16 @@ public class VideoResponse {
         return dateCreated;
     }
 
-    public void setDateCreated(String dateCreted) {
-        this.dateCreated = dateCreted;
+    public void setDateCreated(String dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+    
+    public List<String> getAspectRatios() {
+        return aspectRatios;
+    }
+
+    public void setAspectRatios(List<String> aspectRatios) {
+        this.aspectRatios = aspectRatios;
     }
     
     @Override
@@ -78,6 +87,7 @@ public class VideoResponse {
                 .add("description", description)
                 .add("duration", duration)
                 .add("thumb", thumb)
+                .add("dateCreated", dateCreated)
                 .add("keywords", keywords)
                 .toString();
     }
