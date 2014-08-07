@@ -31,7 +31,7 @@ private static final GlobalImageAdapter adapter = new GlobalImageAdapter();
     }
 
     @Test
-    public void testAdapter() {
+    public void testRowConversionFromCustomElements() {
         GlobalImageDataRow globalImageDataRow = adapter.globalImageDataRow(customElements());
         assertEquals("date", globalImageDataRow.getDate());
         assertEquals("description", globalImageDataRow.getDescription());

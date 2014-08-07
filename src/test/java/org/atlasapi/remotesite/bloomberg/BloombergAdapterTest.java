@@ -31,7 +31,7 @@ public class BloombergAdapterTest {
     }
 
     @Test
-    public void testAdapter() {
+    public void testRowConversionFromCustomElements() {
         BloombergDataRow bloombergDataRow = adapter.bloombergDataRow(customElements());
         assertEquals("date", bloombergDataRow.getDate());
         assertEquals("description", bloombergDataRow.getDescription());

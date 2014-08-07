@@ -1,6 +1,8 @@
 package org.atlasapi.remotesite.getty;
 
 import static org.atlasapi.media.entity.Publisher.GETTY;
+import static org.joda.time.DateTimeConstants.SECONDS_PER_MINUTE;
+import static org.joda.time.DateTimeConstants.SECONDS_PER_HOUR;
 
 import java.util.List;
 import java.util.Set;
@@ -25,8 +27,6 @@ public class GettyContentExtractor implements ContentExtractor<VideoResponse, Co
 
     private static final String GETTY_URI_PATTERN = "http://gettyimages.co.uk/%s";
     private static final String GETTY_CURIE_PATTERN = "getty:%s";
-    private static final int SECONDS_PER_MIN = 60;
-    private static final int SECONDS_PER_HOUR = 3600;
     
     private final Splitter durationSplitter = Splitter.on(":").omitEmptyStrings();
     private final Splitter dateSplitter = Splitter.onPattern("[-|+]").omitEmptyStrings();
@@ -93,7 +93,7 @@ public class GettyContentExtractor implements ContentExtractor<VideoResponse, Co
         int hours = Integer.parseInt(tokens.get(0));
         int minutes = Integer.parseInt(tokens.get(1));
         int seconds = Integer.parseInt(tokens.get(2));
-        return Duration.standardSeconds(seconds + minutes * SECONDS_PER_MIN + hours * SECONDS_PER_HOUR);
+        return Duration.standardSeconds(seconds + minutes * SECONDS_PER_MINUTE + hours * SECONDS_PER_HOUR);
     }
 
     private DateTime extractDate(String date) {

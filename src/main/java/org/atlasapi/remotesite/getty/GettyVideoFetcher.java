@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.getty;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.atlasapi.remotesite.getty.JsonVideoRequest.toJson;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,11 +16,9 @@ import com.google.gson.JsonElement;
 
 public class GettyVideoFetcher {
     
-    private final JsonVideoRequest jsonVideoRequest;
     private final int itemsPerPage;
     
-    public GettyVideoFetcher(JsonVideoRequest jsonVideoRequest, int itemsPerPage) {
-        this.jsonVideoRequest = checkNotNull(jsonVideoRequest);
+    public GettyVideoFetcher(int itemsPerPage) {
         this.itemsPerPage = itemsPerPage;
     }
     
@@ -30,7 +28,7 @@ public class GettyVideoFetcher {
         
         //maximum valid value for itemCount is 90 ; first itemStartNumber is 1
         VideoRequest videoRequest = new VideoRequest(token, searchPhrase, itemsPerPage, itemStartNumber);
-        JsonElement json = jsonVideoRequest.toJson(videoRequest);
+        JsonElement json = toJson(videoRequest);
         post.setEntity(new StringEntity(json.toString()));
         
         HttpResponse resp = new DefaultHttpClient().execute(post);

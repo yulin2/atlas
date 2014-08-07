@@ -38,17 +38,10 @@ private static final Logger log = LoggerFactory.getLogger(GlobalImageUpdateTask.
     @Override
     protected void runTask() {
         try {
-            SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(spreadsheetTitle));
-            WorksheetEntry worksheet = Iterables.getOnlyElement(spreadsheetFetcher.getWorksheetsFromSpreadsheet(spreadsheet));
-            ListFeed data = spreadsheetFetcher.getDataFromWorksheet(worksheet);
-            
+            ListFeed data = fetchData();
             GlobalImageDataProcessor<UpdateProgress> processor = processor();
             for (ListEntry row : data.getEntries()) {
-                CustomElementCollection customElements = row.getCustomElements();
-                //needed because same spreadsheet contains multiple sources
-                if (customElements.getValue(GlobalImageSpreadsheetColumn.SOURCE.getValue()).equals(GLOBALIMAGEWORKS.title())) {
-                    processor.process(customElements);
-                }
+                isGlobalImage(processor, row.getCustomElements());
             }
             
             reportStatus(processor.getResult().toString());
@@ -56,6 +49,19 @@ private static final Logger log = LoggerFactory.getLogger(GlobalImageUpdateTask.
         } catch (Exception e) {
             reportStatus(e.getMessage());
             throw Throwables.propagate(e);
+        }
+    }
+    
+    private ListFeed fetchData() {
+        SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(spreadsheetTitle));
+        WorksheetEntry worksheet = Iterables.getOnlyElement(spreadsheetFetcher.getWorksheetsFromSpreadsheet(spreadsheet));
+        return spreadsheetFetcher.getDataFromWorksheet(worksheet);
+    }
+    
+    //needed because same spreadsheet contains multiple sources
+    private void isGlobalImage(GlobalImageDataProcessor<UpdateProgress> processor, CustomElementCollection customElements) {
+        if (customElements.getValue(GlobalImageSpreadsheetColumn.SOURCE.getValue()).equals(GLOBALIMAGEWORKS.title())) {
+            processor.process(customElements);
         }
     }
 

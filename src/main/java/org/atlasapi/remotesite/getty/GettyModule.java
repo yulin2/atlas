@@ -23,9 +23,13 @@ public class GettyModule {
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
     
+    @Value("${getty.client.id}") private String clientId;
+    @Value("${getty.client.secret}") private String clientSecret;
     @Value("${getty.pagination}") private String gettyPagination;
+    @Value("${iris.pagination}") private String irisPagination;
     @Value("${iris.user}") private String irisUser;
     @Value("${iris.pswd}") private String irisPswd;
+    @Value("${iris.url}") private String irisUrl;
     
     @PostConstruct
     public void startBackgroundTasks() {
@@ -34,13 +38,12 @@ public class GettyModule {
     }
     
     private GettyUpdateTask gettyUpdater() {
-        Integer itemsPerPage = Integer.valueOf(gettyPagination);
         return new GettyUpdateTask(new GettyAdapter(), 
                 new DefaultGettyDataHandler(contentResolver, contentWriter, new GettyContentExtractor()), 
-                new GettyTokenFetcher(), 
-                new GettyVideoFetcher(new JsonVideoRequest(), itemsPerPage),
-                new IrisKeywordsFetcher(new UsernameAndPassword(irisUser, irisPswd)),
-                itemsPerPage);
+                new GettyTokenFetcher(clientId, clientSecret), 
+                new GettyVideoFetcher(Integer.valueOf(gettyPagination)),
+                new IrisKeywordsFetcher(new UsernameAndPassword(irisUser, irisPswd), irisUrl),
+                Integer.valueOf(gettyPagination), Integer.valueOf(irisPagination));
     }
     
 }

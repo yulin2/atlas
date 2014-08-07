@@ -29,7 +29,6 @@ public class BloombergDataRowContentExtractorTest {
                 .withKeywords(ImmutableList.of("key"))
                 .withSource("Bloomberg")
                 .withTitle("title")
-                .withKeywords(ImmutableList.of("key"))
                 .build();
         
         Content content = extractor.extract(row);

@@ -24,14 +24,15 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 
 public class IrisKeywordsFetcher {
 
-    private static final String IRIS_KEYWORDS_URL = "http://iris-stage.metabroadcast.com/keywords.json";
     private static final String TOP_NAME = "keywords";
     private static final String KEYWORD_TITLE = "label";
     
     private final SimpleHttpClient httpClient;
     private final UsernameAndPassword credentials;
+    private final String irisUrl;
     
-    public IrisKeywordsFetcher(UsernameAndPassword credentials) {
+    public IrisKeywordsFetcher(UsernameAndPassword credentials, String irisUrl) {
+        this.irisUrl = checkNotNull(irisUrl);
         this.credentials = checkNotNull(credentials);
         this.httpClient = new SimpleHttpClientBuilder()
             .withAcceptHeader(MimeType.APPLICATION_JSON)
@@ -55,7 +56,8 @@ public class IrisKeywordsFetcher {
     }
     
     private String getResponse(int offset) throws HttpException, Exception {
-        SimpleHttpRequest<String> request = new SimpleHttpRequest<String>(IRIS_KEYWORDS_URL, new HttpResponseTransformer<String>() {
+        String irisUrlWithOffset = String.format("%s?offset=%s", irisUrl, offset);
+        SimpleHttpRequest<String> request = new SimpleHttpRequest<String>(irisUrlWithOffset, new HttpResponseTransformer<String>() {
 
             @Override
             public String transform(HttpResponsePrologue prologue, InputStream body) throws Exception {

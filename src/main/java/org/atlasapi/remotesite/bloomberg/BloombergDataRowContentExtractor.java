@@ -16,6 +16,8 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -26,11 +28,15 @@ import com.google.common.collect.ImmutableList.Builder;
 public class BloombergDataRowContentExtractor implements ContentExtractor<BloombergDataRow, Content> {
 
     private static final String BLOOMBERG_URI_PATTERN = "http://bloomberg.com/%s";
-    private static final int SECONDS_PER_MIN = 60;
-    private static final int SECONDS_PER_HOUR = 3600;
     
     private final Splitter idSplitter = Splitter.on(":").omitEmptyStrings();
-    private final Splitter durationSplitter = Splitter.on(":").omitEmptyStrings();
+    private final PeriodFormatter durationFormatter = new PeriodFormatterBuilder()
+        .appendHours().minimumPrintedDigits(2)
+        .appendSeparator(":")
+        .appendMinutes().minimumPrintedDigits(2)
+        .appendSeparator(":")
+        .appendSeconds().minimumPrintedDigits(2)
+        .toFormatter();
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
     
     @Override
@@ -71,11 +77,7 @@ public class BloombergDataRowContentExtractor implements ContentExtractor<Bloomb
 
     private Duration extractDuration(String duration) {
         //duration is of type hh:mm:ss
-        List<String> tokens = ImmutableList.copyOf(durationSplitter.split(duration));
-        int hours = Integer.parseInt(tokens.get(0));
-        int minutes = Integer.parseInt(tokens.get(1));
-        int seconds = Integer.parseInt(tokens.get(2));
-        return Duration.standardSeconds(seconds + minutes * SECONDS_PER_MIN + hours * SECONDS_PER_HOUR);
+        return durationFormatter.parsePeriod(duration).toStandardDuration();
     }
 
     private DateTime extractDate(String date) {

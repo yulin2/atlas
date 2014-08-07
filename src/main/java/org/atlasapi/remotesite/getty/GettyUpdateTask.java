@@ -23,18 +23,21 @@ public class GettyUpdateTask extends ScheduledTask {
     private final GettyTokenFetcher tokenFetcher;
     private final GettyVideoFetcher videoFetcher;
     private final IrisKeywordsFetcher keywordsFetcher;
-    private final int itemsPerPage;
+    private final int gettyItemsPerPage;
+    private final int irisItemsPerPage;
     
     private String token;
     
     public GettyUpdateTask(GettyAdapter adapter, GettyDataHandler dataHandler, GettyTokenFetcher tokenFetcher,
-            GettyVideoFetcher videoFetcher, IrisKeywordsFetcher keywordsFetcher, int itemsPerPage) {
+            GettyVideoFetcher videoFetcher, IrisKeywordsFetcher keywordsFetcher,
+            int gettyItemsPerPage, int irisItemsPerPage) {
         this.adapter = checkNotNull(adapter);
         this.dataHandler = checkNotNull(dataHandler);
         this.tokenFetcher = checkNotNull(tokenFetcher);
         this.videoFetcher = checkNotNull(videoFetcher);
         this.keywordsFetcher = checkNotNull(keywordsFetcher);
-        this.itemsPerPage = itemsPerPage;
+        this.gettyItemsPerPage = gettyItemsPerPage;
+        this.irisItemsPerPage = irisItemsPerPage;
     }
     
     @Override
@@ -50,9 +53,10 @@ public class GettyUpdateTask extends ScheduledTask {
             //paginate keywords
             while (!keywords.isEmpty()) {
                 for (String keyword : keywords) {
+                    log.info(String.format("Processing keyword %s", keyword));
                     processor.process(keyword);
                 }
-                offset += itemsPerPage;
+                offset += irisItemsPerPage;
                 keywords = keywordsFetcher.getKeywordsFromOffset(offset);
             }
             
@@ -92,13 +96,13 @@ public class GettyUpdateTask extends ScheduledTask {
                             dataHandler.handle(video);
                             progress = progress.reduce(UpdateProgress.SUCCESS);
                         }
-                        offset += itemsPerPage;
+                        offset += gettyItemsPerPage;
                         response = getVideoResponse(keyword, offset);
                         videos = adapter.parse(response);
                     }
                     
                 } catch (Exception e) {
-                    log.warn("Failed to get videos.", e);
+                    log.warn(String.format("Failed to get videos for keyword %s.", keyword), e);
                     progress = progress.reduce(UpdateProgress.FAILURE);
                 }
                 

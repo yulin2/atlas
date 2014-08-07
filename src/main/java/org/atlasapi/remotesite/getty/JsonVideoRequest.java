@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 
 public class JsonVideoRequest {
 
-    public JsonElement toJson(VideoRequest src) {
+    public static JsonElement toJson(VideoRequest src) {
         JsonObject json = new JsonObject();
         
         JsonObject requestHeader = new JsonObject();

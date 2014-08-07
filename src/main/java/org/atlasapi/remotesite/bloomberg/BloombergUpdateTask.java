@@ -38,17 +38,10 @@ public class BloombergUpdateTask extends ScheduledTask {
     @Override
     protected void runTask() {
         try {
-            SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(spreadsheetTitle));
-            WorksheetEntry worksheet = Iterables.getOnlyElement(spreadsheetFetcher.getWorksheetsFromSpreadsheet(spreadsheet));
-            ListFeed data = spreadsheetFetcher.getDataFromWorksheet(worksheet);
-            
+            ListFeed data = fetchData();
             BloombergDataProcessor<UpdateProgress> processor = processor();
             for (ListEntry row : data.getEntries()) {
-                CustomElementCollection customElements = row.getCustomElements();
-                //needed because same spreadsheet contains multiple sources
-                if (customElements.getValue(BloombergSpreadsheetColumn.SOURCE.getValue()).equals(BLOOMBERG.title())) {
-                    processor.process(customElements);
-                }
+                isBloomberg(processor, row.getCustomElements());
             }
             
             reportStatus(processor.getResult().toString());
@@ -56,6 +49,19 @@ public class BloombergUpdateTask extends ScheduledTask {
         } catch (Exception e) {
             reportStatus(e.getMessage());
             throw Throwables.propagate(e);
+        }
+    }
+    
+    private ListFeed fetchData() {
+        SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(spreadsheetTitle));
+        WorksheetEntry worksheet = Iterables.getOnlyElement(spreadsheetFetcher.getWorksheetsFromSpreadsheet(spreadsheet));
+        return spreadsheetFetcher.getDataFromWorksheet(worksheet);
+    }
+    
+    //needed because same spreadsheet contains multiple sources
+    private void isBloomberg(BloombergDataProcessor<UpdateProgress> processor, CustomElementCollection customElements) {
+        if (customElements.getValue(BloombergSpreadsheetColumn.SOURCE.getValue()).equals(BLOOMBERG.title())) {
+            processor.process(customElements);
         }
     }
 

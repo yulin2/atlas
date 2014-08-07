@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.getty;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -16,7 +18,6 @@ import com.google.common.io.CharStreams;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.metabroadcast.common.properties.Configurer;
 
 public class GettyTokenFetcher {
 
@@ -25,9 +26,15 @@ public class GettyTokenFetcher {
     private static final String CLIENT_CREDENTIALS = "client_credentials";
     private static final String CLIENT_ID_KEY = "client_id";
     private static final String CLIENT_SECRET_KEY = "client_secret";
-    private static final String CLIENT_ID = Configurer.get("getty.client.id").get();
-    private static final String CLIENT_SECRET = Configurer.get("getty.client.secret").get();
     private static final String ACCES_TOKEN_KEY = "access_token";
+    
+    private final String clientId;
+    private final String clientSecret;
+    
+    public GettyTokenFetcher(String clientId, String clientSecret) {
+        this.clientId = checkNotNull(clientId);
+        this.clientSecret = checkNotNull(clientSecret);
+    }
     
     public String getToken() throws ClientProtocolException, IOException {
         String oauth = oauth();
@@ -39,8 +46,8 @@ public class GettyTokenFetcher {
         
         Builder<BasicNameValuePair> params = new ImmutableList.Builder<BasicNameValuePair>();
         params.add(new BasicNameValuePair(GRANT_TYPE, CLIENT_CREDENTIALS));
-        params.add(new BasicNameValuePair(CLIENT_ID_KEY, CLIENT_ID));
-        params.add(new BasicNameValuePair(CLIENT_SECRET_KEY, CLIENT_SECRET));
+        params.add(new BasicNameValuePair(CLIENT_ID_KEY, clientId));
+        params.add(new BasicNameValuePair(CLIENT_SECRET_KEY, clientSecret));
         post.setEntity(new UrlEncodedFormEntity(params.build()));
         
         HttpResponse resp = new DefaultHttpClient().execute(post);

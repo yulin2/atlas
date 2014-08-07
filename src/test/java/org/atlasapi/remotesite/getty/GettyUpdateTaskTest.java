@@ -18,7 +18,7 @@ public class GettyUpdateTaskTest {
     private final GettyTokenFetcher tokenFetcher = mock(GettyTokenFetcher.class);
     private final GettyVideoFetcher videoFetcher = mock(GettyVideoFetcher.class);
     private final IrisKeywordsFetcher keywordsFetcher = mock(IrisKeywordsFetcher.class);
-    private final ScheduledTask task = new GettyUpdateTask(adapter, handler, tokenFetcher, videoFetcher, keywordsFetcher, 90);
+    private final ScheduledTask task = new GettyUpdateTask(adapter, handler, tokenFetcher, videoFetcher, keywordsFetcher, 90, 25);
     
     @Test
     public void testTask() throws Exception {
