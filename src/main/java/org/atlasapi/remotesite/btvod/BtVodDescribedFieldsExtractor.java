@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableSet;
 
 public class BtVodDescribedFieldsExtractor {
 
-    private static final String IMAGE_URI_PREFIX = "http://portal.vision.bt.com/btvo/";
+    private static final String IMAGE_URI_PREFIX = "http://portal.vision.bt.com/btvo/content_providers/images/";
     
     public void setDescribedFieldsFrom(BtVodDataRow row, Described described) {
         described.setDescription(row.getColumnValue(BtVodFileColumn.SYNOPSIS));

@@ -27,4 +27,9 @@ public class ContentPurgeWebModule {
     public LyrebirdYoutubeContentPurgeController lyrebirdYoutubeContentPurgeController() {
         return new LyrebirdYoutubeContentPurgeController(contentPurger);
     }
+    
+    @Bean
+    public BtVodContentPurgeController btVodContentPurgeController() {
+        return new BtVodContentPurgeController(contentPurger);
+    }
 }

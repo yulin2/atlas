@@ -7,8 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 
-import joptsimple.internal.Strings;
-
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
@@ -30,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.api.client.repackaged.com.google.common.base.Throwables;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
@@ -141,13 +140,16 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
     }
 
     private Item createSong(BtVodDataRow row) {
-        return new Song(uriFor(row), null, publisher);
+        Song song = new Song(uriFor(row), null, publisher);
+        song.setTitle(titleForNonEpisode(row));
+        return song;
     }
 
     private Episode createEpisode(BtVodDataRow row) {
         Episode episode = new Episode(uriFor(row), null, publisher);
         episode.setSeriesNumber(Ints.tryParse(row.getColumnValue(BtVodFileColumn.SERIES_NUMBER)));
         episode.setEpisodeNumber(Ints.tryParse(row.getColumnValue(BtVodFileColumn.EPISODE_NUMBER)));
+        episode.setTitle(Strings.emptyToNull(row.getColumnValue(BtVodFileColumn.EPISODE_TITLE)));
         episode.setSeriesRef(
                 seriesExtractor.getSeriesRefFor(
                                     row.getColumnValue(BtVodFileColumn.BRANDIA_ID), 
@@ -158,19 +160,19 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
     }
     
     private Item createItem(BtVodDataRow row) {
-        return new Item(uriFor(row), null, publisher);
+        Item item = new Item(uriFor(row), null, publisher);
+        item.setTitle(titleForNonEpisode(row));
+        return item;
     }
     
     private Film createFilm(BtVodDataRow row) {
         Film film = new Film(uriFor(row), null, publisher);
         film.setYear(Ints.tryParse(row.getColumnValue(BtVodFileColumn.RELEASE_YEAR)));
+        film.setTitle(titleForNonEpisode(row));
         return film;
     }
     
     private void populateItemFields(Item item, BtVodDataRow row) {
-        //TODO: Choose the title more carefully from the various
-        //options available to us
-        item.setTitle(row.getColumnValue(BtVodFileColumn.EPISODE_TITLE));
         String brandId = row.getColumnValue(BtVodFileColumn.BRANDIA_ID);
         if (brandId != null) {
             item.setParentRef(brandExtractor.getBrandRefFor(brandId));
@@ -179,7 +181,14 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
         item.setVersions(createVersions(row));
     }
     
-   
+    private String titleForNonEpisode(BtVodDataRow row) {
+        String assetTitle = Strings.emptyToNull(row.getColumnValue(BtVodFileColumn.ASSET_TITLE));
+        if (assetTitle != null) {
+            return assetTitle;
+        }
+        
+        return Strings.emptyToNull(row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE));
+    }
 
     private String uriFor(BtVodDataRow row) {
         String id = row.getColumnValue(BtVodFileColumn.PRODUCT_ID);
