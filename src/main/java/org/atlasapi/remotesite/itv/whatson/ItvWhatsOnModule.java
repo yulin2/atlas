@@ -36,10 +36,7 @@ public class ItvWhatsOnModule {
     
     private @Value("${service.web.id}") Long webServiceId;
     private @Value("${player.itvplayer.id}") Long itvPlayerId;
-    
-    private @Value("${service.web.id}") Long webServiceId;
-    private @Value("${player.itvplayer.id}") Long itvPlayerId;
-    
+        
     private static final Every EVERY_FIFTEEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(15));
     private static final Every EVERY_HOUR = RepetitionRules.every(Duration.standardHours(1));
     
