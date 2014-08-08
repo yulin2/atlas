@@ -4,13 +4,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public enum GlobalImageSpreadsheetColumn {
 
-    SOURCE("_cn6ca"),
-    ID("embedcodereferenceid"),
-    TITLE("name"),
-    DESCRIPTION("description"),
-    DATE("year"),
-    DURATION("trt"),
-    KEYWORDS("categories")
+    SOURCE("source"),
+    ID("namespace"),
+    TITLE("Title"),
+    DESCRIPTION("Description"),
+    DATE("Date"),
+    DURATION("Duration"),
+    KEYWORDS("Keywords")
     ;
     
     private final String value;
