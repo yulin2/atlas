@@ -1,0 +1,18 @@
+{"SearchForVideosResult":
+    {"Videos":
+        [
+            {
+                "AssetId":"id",
+                "Caption":"description",
+                "ClipLength":"00:00:10:10",
+                "CollectionId":"476",
+                "CollectionName":"collection",
+                "Color":"Unknown",
+                "DateCreated":"/Date(1406012400000-0700)/",
+                "Keywords":[{"KeywordId":"kid","Text":"key"}],
+                "AspectRatios":["16:9"],
+                "Title":"title",
+                "Urls":{"Thumb":"thumb"}}
+        ]
+    }
+}

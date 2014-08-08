@@ -12,11 +12,14 @@ import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.bbc.audience.AudienceModule;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
+import org.atlasapi.remotesite.bloomberg.BloombergModule;
 import org.atlasapi.remotesite.bt.channels.BtChannelsModule;
 import org.atlasapi.remotesite.btfeatured.BtFeaturedContentModule;
 import org.atlasapi.remotesite.btvod.BtVodModule;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.five.FiveModule;
+import org.atlasapi.remotesite.getty.GettyModule;
+import org.atlasapi.remotesite.globalimageworks.GlobalImageModule;
 import org.atlasapi.remotesite.hulu.HuluModule;
 import org.atlasapi.remotesite.itunes.ItunesModule;
 import org.atlasapi.remotesite.itv.ItvModule;
@@ -90,6 +93,9 @@ public class RemoteSiteModuleConfigurer {
         .put("btvod", BtVodModule.class)
         .put("bbc-audience-data", AudienceModule.class)
         .put("bt-channels", BtChannelsModule.class)
+        .put("bloomberg", BloombergModule.class)
+        .put("globalimageworks", GlobalImageModule.class)
+        .put("getty", GettyModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
