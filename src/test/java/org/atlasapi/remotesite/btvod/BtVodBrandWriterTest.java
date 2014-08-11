@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.btvod;
 
+import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.anything;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,8 +16,10 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.btvod.BtVodData.BtVodDataRow;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -33,6 +37,7 @@ public class BtVodBrandWriterTest {
     private final ContentWriter contentWriter = mock(ContentWriter.class);
     private final ContentResolver contentResolver = mock(ContentResolver.class);
     private final BtVodContentListener contentListener = mock(BtVodContentListener.class);
+    private final ImageUriProvider imageUriProvider = mock(ImageUriProvider.class);
     
     private final BtVodBrandWriter brandExtractor 
                     = new BtVodBrandWriter(
@@ -40,11 +45,12 @@ public class BtVodBrandWriterTest {
                                 contentResolver, 
                                 PUBLISHER, URI_PREFIX,
                                 contentListener,
-                                new BtVodDescribedFieldsExtractor(),
+                                new BtVodDescribedFieldsExtractor(imageUriProvider),
                                 Sets.<String>newHashSet());
     
     @Test
     public void testExtractsBrands() {
+        when(imageUriProvider.imageUriFor(Matchers.anyString())).thenReturn(Optional.<String>absent());
         when(contentResolver.findByCanonicalUris(ImmutableSet.of(brandUri())))
             .thenReturn(ResolvedContent.builder().build());
         
@@ -57,6 +63,9 @@ public class BtVodBrandWriterTest {
         Builder<String, String> rows = ImmutableMap.builder();
         rows.put(BtVodFileColumn.BRANDIA_ID.key(), BRAND_ID);
         rows.put(BtVodFileColumn.BRAND_TITLE.key(), BRAND_TITLE);
+        rows.put(BtVodFileColumn.PRODUCT_ID.key(), BRAND_ID);
+        rows.put(BtVodFileColumn.SYNOPSIS.key(), "A synopsis");
+        rows.put(BtVodFileColumn.PACKSHOT.key(), "");
         
         Map<String, String> map = rows.build();
         return new BtVodDataRow(ImmutableList.copyOf(map.values()), 

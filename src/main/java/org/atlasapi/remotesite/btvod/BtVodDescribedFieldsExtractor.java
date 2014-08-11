@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.btvod;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import joptsimple.internal.Strings;
 
 import org.atlasapi.media.entity.Described;
@@ -7,12 +8,17 @@ import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.remotesite.btvod.BtVodData.BtVodDataRow;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 
 
 public class BtVodDescribedFieldsExtractor {
 
-    private static final String IMAGE_URI_PREFIX = "http://portal.vision.bt.com/btvo/content_providers/images/";
+    private final ImageUriProvider imageUriProvider;
+    
+    public BtVodDescribedFieldsExtractor(ImageUriProvider imageUriProvider) {
+        this.imageUriProvider = checkNotNull(imageUriProvider);
+    }
     
     public void setDescribedFieldsFrom(BtVodDataRow row, Described described) {
         described.setDescription(row.getColumnValue(BtVodFileColumn.SYNOPSIS));
@@ -20,12 +26,13 @@ public class BtVodDescribedFieldsExtractor {
     }
     
     private Iterable<Image> createImages(BtVodDataRow row) {    
-        String packshotFilename = row.getColumnValue(BtVodFileColumn.PACKSHOT);
-        if (Strings.isNullOrEmpty(packshotFilename)) {
+        Optional<String> imageUri = imageUriProvider.imageUriFor(row.getColumnValue(BtVodFileColumn.PRODUCT_ID));
+        
+        if (!imageUri.isPresent() || Strings.isNullOrEmpty(imageUri.get())) {
             return ImmutableSet.of();
         }
         
-        Image image = new Image(IMAGE_URI_PREFIX + packshotFilename);
+        Image image = new Image(imageUri.get());
         image.setType(ImageType.PRIMARY);
         return ImmutableSet.of(image);
     }
