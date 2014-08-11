@@ -19,6 +19,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
+import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
@@ -46,6 +47,8 @@ public class BtVodModule {
     private ContentGroupWriter contentGroupWriter;
     @Value("${bt.vod.file}")
     private String filename;
+    @Value("${bt.portal.baseUri}")
+    private String btPortalBaseUri;
     
     @Bean
     public BtVodUpdater btVodUpdater() {
@@ -56,13 +59,18 @@ public class BtVodModule {
     
     @Bean
     public BtVodDescribedFieldsExtractor describedFieldsExtractor() {
-        return new BtVodDescribedFieldsExtractor();
+        return new BtVodDescribedFieldsExtractor(btPortalImageUriProvider());
     }
     
     @Bean
     public BtVodContentGroupUpdater btVodContentGroupUpdater() {
         return new BtVodContentGroupUpdater(contentGroupResolver, contentGroupWriter, 
                 contentGroupsAndCriteria(), URI_PREFIX, Publisher.BT_VOD);
+    }
+    
+    @Bean
+    public BtPortalImageUriProvider btPortalImageUriProvider() {
+        return new BtPortalImageUriProvider(new SimpleHttpClientBuilder().build(), btPortalBaseUri);
     }
     
     private BtVodData btVodData() {
