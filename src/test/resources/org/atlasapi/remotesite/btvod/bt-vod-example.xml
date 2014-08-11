@@ -1,0 +1,12 @@
+
+<product>
+    <asset LinkedTitleID="" TitleID="289608" category_id="Film" schedulerChannel="Film" ad="0" subGenre="Action,Comedy,Horror,Sci-Fi" type="Film" downloadplay="1" artist="" hd="1" duration="1:41" rating="PG" year="1984" background="a.png" packshot="b.png" synopsis="Synopsis" genre="Comedy" ClientAssetId="BBJ289608A" id="2595397072">
+    </asset>
+    <titles>
+        <list>Thing</list>
+        <pack>Thing</pack>
+        <ext_pack>Thing</ext_pack>
+        <ext_list>Thing</ext_list>
+        <search>Thing</search>
+    </titles>
+</product>

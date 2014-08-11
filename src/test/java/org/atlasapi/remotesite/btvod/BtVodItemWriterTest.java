@@ -22,7 +22,9 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -33,6 +35,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 
 public class BtVodItemWriterTest {
 
+    private static final String IMAGE_URI = "http://example.org/123.png";
     private static final String IMAGE_FILENAME = "image.png";
     private static final String PRODUCT_ID = "1234";
     private static final String EPISODE_TITLE = "Title";
@@ -45,6 +48,7 @@ public class BtVodItemWriterTest {
     private final BtVodBrandWriter brandExtractor = mock(BtVodBrandWriter.class);
     private final BtVodSeriesWriter seriesExtractor = mock(BtVodSeriesWriter.class);
     private final BtVodContentListener contentListener = mock(BtVodContentListener.class);
+    private final ImageUriProvider imageUriProvider = mock(ImageUriProvider.class);
     
     private final BtVodItemWriter itemExtractor 
                     = new BtVodItemWriter(
@@ -54,14 +58,14 @@ public class BtVodItemWriterTest {
                                 seriesExtractor,
                                 PUBLISHER, URI_PREFIX,
                                 contentListener,
-                                new BtVodDescribedFieldsExtractor(),
+                                new BtVodDescribedFieldsExtractor(imageUriProvider),
                                 Sets.<String>newHashSet());
     
     @Test
     public void testExtractsEpisode() {
         when(contentResolver.findByCanonicalUris(ImmutableSet.of(itemUri())))
                 .thenReturn(ResolvedContent.builder().build());
-        
+        when(imageUriProvider.imageUriFor(PRODUCT_ID)).thenReturn(Optional.<String>of(IMAGE_URI));
         itemExtractor.process(itemRow());
         
         ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
@@ -73,7 +77,7 @@ public class BtVodItemWriterTest {
         assertThat(writtenItem.getDescription(), is(SYNOPSIS));
         
         Image image = Iterables.getOnlyElement(writtenItem.getImages());
-        assertThat(image.getCanonicalUri(), is("http://portal.vision.bt.com/btvo/" + IMAGE_FILENAME));
+        assertThat(image.getCanonicalUri(), is(IMAGE_URI));
         assertThat(image.getType(), is(ImageType.PRIMARY));
         
         Location location = Iterables.getOnlyElement(
@@ -83,7 +87,7 @@ public class BtVodItemWriterTest {
                                             .getAvailableAt());
         
         DateTime expectedAvailabilityStart = new DateTime(2013, DateTimeConstants.MARCH, 31, 23, 0, 0, 0, DateTimeZone.UTC);
-        DateTime expectedAvailabilityEnd = new DateTime(2014, DateTimeConstants.APRIL, 30, 0, 0, 0).withZone(DateTimeZone.UTC);
+        DateTime expectedAvailabilityEnd = new DateTime(2014, DateTimeConstants.APRIL, 30, 00, 0, 0).withZone(DateTimeZone.UTC);
         assertThat(location.getPolicy().getAvailabilityStart(), is(expectedAvailabilityStart));
         assertThat(location.getPolicy().getAvailabilityEnd(), is(expectedAvailabilityEnd));
         //assertThat(Iterables.getOnlyElement(location.getPolicy().getAvailableCountries()).code(), is("GB"));
@@ -115,6 +119,7 @@ public class BtVodItemWriterTest {
         rows.put(BtVodFileColumn.SYNOPSIS.key(), SYNOPSIS);
         rows.put(BtVodFileColumn.PRODUCT_YOUVIEW_DURATION.key(), "PT0H03M39.458S");
         rows.put(BtVodFileColumn.METADATA_DURATION.key(), "PT00H03M36S");
+        rows.put(BtVodFileColumn.ASSET_TITLE.key(), "Title");
         
         Map<String, String> map = rows.build();
         return new BtVodDataRow(ImmutableList.copyOf(map.values()), 
