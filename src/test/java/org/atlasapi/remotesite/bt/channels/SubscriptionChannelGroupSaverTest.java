@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
@@ -17,11 +18,13 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Alias;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.query.v2.ChannelGroupController;
 import org.atlasapi.remotesite.bt.channels.mpxclient.Category;
 import org.atlasapi.remotesite.bt.channels.mpxclient.Entry;
 import org.atlasapi.remotesite.bt.channels.mpxclient.Content;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -40,8 +43,11 @@ import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 @RunWith( MockitoJUnitRunner.class )
 public class SubscriptionChannelGroupSaverTest {
     
-    private static final String CHANNEL1_ID = "kdcv";
-    private static final String CHANNEL2_ID = "hqcs";
+    private static final long CHANNEL_GROUP_123456_ID = 1;
+    private static final String CHANNEL1_KEY = "kdcv";
+    private static final String CHANNEL2_KEY = "hqcs";
+    private static final Channel CHANNEL1 = new Channel(Publisher.METABROADCAST, "Channel 1", "a", true, MediaType.VIDEO, "http://channel1.com");
+    private static final Channel CHANNEL2 = new Channel(Publisher.METABROADCAST, "Channel 2", "b", true, MediaType.VIDEO, "http://channel2.com");
     private static final String ALIAS_URI_PREFIX = "http://example.org/";
     private static final String ALIAS_NAMESPACE = "a:namespace";
     
@@ -51,35 +57,49 @@ public class SubscriptionChannelGroupSaverTest {
     private final ChannelWriter channelWriter = mock(ChannelWriter.class);
     
     private final NumberToShortStringCodec codec = SubstitutionTableNumberCodec.lowerCaseOnly();
+    private final Long channel1Id = codec.decode(CHANNEL1_KEY).longValue();
+    private final Long channel2Id = codec.decode(CHANNEL2_KEY).longValue();
     private final SubscriptionChannelGroupSaver saver 
         = new SubscriptionChannelGroupSaver(Publisher.METABROADCAST, ALIAS_URI_PREFIX, ALIAS_NAMESPACE, 
                 channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
     
+    
+    @Before
+    public void setUp() {
+        CHANNEL1.setId(channel1Id);
+        CHANNEL2.setId(channel2Id);
+    }
     
     @Test
     public void testExtractsSubscriptions() {
         String theirId1 = "S0123456";
         String theirId2 = "S6543210";
         
+        when(channelResolver.forIds(ImmutableSet.<Long>of(channel1Id)))
+            .thenReturn(ImmutableSet.of(CHANNEL1));
+        when(channelResolver.forIds(ImmutableSet.<Long>of(channel2Id)))
+            .thenReturn(ImmutableSet.of(CHANNEL2));
         when(channelGroupResolver.channelGroupFor(ALIAS_URI_PREFIX + theirId1))
-            .thenReturn(Optional.<ChannelGroup>of(channelGroup(theirId1, 1)));
+            .thenReturn(Optional.<ChannelGroup>of(channelGroup(theirId1, CHANNEL_GROUP_123456_ID)));
         when(channelGroupResolver.channelGroupFor(ALIAS_URI_PREFIX + theirId2))
             .thenReturn(Optional.<ChannelGroup>of(channelGroup(theirId2, 2)));
-        saver.update(ImmutableList.of(channelWithSubscription(CHANNEL1_ID, "S0123456"),
-                channelWithSubscription(CHANNEL2_ID, "S6543210")));
+        saver.update(ImmutableList.of(channelWithSubscription(CHANNEL1_KEY, "S0123456"),
+                channelWithSubscription(CHANNEL2_KEY, "S6543210")));
         
-        ArgumentCaptor<ChannelGroup> channelGroupCaptor = ArgumentCaptor.forClass(ChannelGroup.class);
-        verify(channelGroupWriter, times(2)).createOrUpdate(channelGroupCaptor.capture());
+        ArgumentCaptor<Channel> channelCaptor = ArgumentCaptor.forClass(Channel.class);
+        verify(channelWriter, times(2)).createOrUpdate(channelCaptor.capture());
 
-        Map<String, ChannelGroup> map = Maps.uniqueIndex(channelGroupCaptor.getAllValues(), new Function<ChannelGroup, String>() {
+        Map<Long, Channel> map = Maps.uniqueIndex(channelCaptor.getAllValues(), new Function<Channel, Long>() {
 
             @Override
-            public String apply(ChannelGroup input) {
-                return Iterables.getOnlyElement(input.getAliases()).getValue();
+            public Long apply(Channel input) {
+                return input.getId();
             }
             
         });
-        assertThat(Iterables.getOnlyElement(map.get("S0123456").getChannels()), is(codec.decode(CHANNEL1_ID).longValue()));
+        Channel channel = map.get(channel1Id);
+        assertThat(Iterables.getOnlyElement(channel.getChannelNumbers()).getChannelGroup(), 
+                is(CHANNEL_GROUP_123456_ID));
     }
     
     public Entry channelWithSubscription(String channelId, String subscriptionId) {

@@ -113,6 +113,10 @@ public abstract class AbstractBtChannelGroupSaver {
                         currentChannels
                 );
         
+        if (removedChannels.isEmpty()) {
+            return;
+        }
+        
         for (Channel channel : channelResolver.forIds(removedChannels)) {
             channel.setChannelNumbers(
                 Iterables.filter(channel.getChannelNumbers(), new Predicate<ChannelNumbering>() {
@@ -136,17 +140,17 @@ public abstract class AbstractBtChannelGroupSaver {
             group = channelGroup.get();
         } else {
             group = new Region();
+            group.setCanonicalUri(uri);
+            // Adding channels to channel groups requires that the channel group has 
+            // and ID, so we save now.
+            channelGroupWriter.createOrUpdate(group);
         }
         
-        group.setCanonicalUri(uri);
         
         if (alias.isPresent()) {
             group.setAliases(alias.asSet());
         }
-        
-        // Adding channels to channel groups requires that the channel group has 
-        // and ID, so we save now.
-        channelGroupWriter.createOrUpdate(group);
+
         return group;
     }
     
