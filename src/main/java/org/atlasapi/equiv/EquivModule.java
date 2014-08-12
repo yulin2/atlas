@@ -361,7 +361,7 @@ public class EquivModule {
                     .build())
                 .build());
         
-        Set<Publisher> btVodPublishers = ImmutableSet.of(BT_VOD, PA);
+        Set<Publisher> btVodPublishers = ImmutableSet.of(PA);
         updaters.register(BT_VOD, SourceSpecificEquivalenceUpdater.builder(BT_VOD)
                 .withItemUpdater(vodItemUpdater(btVodPublishers)
                         .withScorer(new SeriesSequenceItemScorer()).build())
