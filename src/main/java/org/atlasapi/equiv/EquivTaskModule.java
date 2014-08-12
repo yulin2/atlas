@@ -2,6 +2,7 @@ package org.atlasapi.equiv;
 
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
+import static org.atlasapi.media.entity.Publisher.BT_VOD;
 import static org.atlasapi.media.entity.Publisher.C4;
 import static org.atlasapi.media.entity.Publisher.C4_PMLSD;
 import static org.atlasapi.media.entity.Publisher.FIVE;
@@ -108,6 +109,7 @@ public class EquivTaskModule {
     private static final RepetitionRule ROVI_EN_GB_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(8, 00));
     private static final RepetitionRule ROVI_EN_US_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(10, 00));
     private static final RepetitionRule RTE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(22, 00));
+    private static final RepetitionRule BT_VOD_EQUIVALENCE_REPETITION = RepetitionRules.NEVER;
     
     private @Value("${equiv.updater.enabled}") String updaterEnabled;
     private @Value("${equiv.stream-updater.enabled}") Boolean streamedChangesUpdateEquiv;
@@ -149,6 +151,7 @@ public class EquivTaskModule {
             taskScheduler.schedule(publisherUpdateTask(ROVI_EN_GB).withName("Rovi EN-GB Equivalence Updater"), ROVI_EN_GB_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(ROVI_EN_US).withName("Rovi EN-US Equivalence Updater"), ROVI_EN_GB_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(RTE).withName("RTE Equivalence Updater"), RTE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(BT_VOD).withName("BT VOD Equivalence Updater"), BT_VOD_EQUIVALENCE_REPETITION);
             
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_MUSIC).withName("Music Equivalence Updater"), RepetitionRules.every(Duration.standardHours(6)));
             
