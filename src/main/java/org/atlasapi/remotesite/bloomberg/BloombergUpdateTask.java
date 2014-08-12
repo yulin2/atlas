@@ -53,7 +53,7 @@ public class BloombergUpdateTask extends ScheduledTask {
     }
     
     private ListFeed fetchData() {
-        SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(spreadsheetTitle));
+        SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(spreadsheetTitle.replace("-", " ")));
         WorksheetEntry worksheet = Iterables.getOnlyElement(spreadsheetFetcher.getWorksheetsFromSpreadsheet(spreadsheet));
         return spreadsheetFetcher.getDataFromWorksheet(worksheet);
     }
