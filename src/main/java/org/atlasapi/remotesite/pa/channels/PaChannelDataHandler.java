@@ -6,23 +6,31 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
+import org.atlasapi.media.channel.ChannelNumbering;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.channels.bindings.Station;
 import org.atlasapi.remotesite.pa.channels.bindings.TvChannelData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
@@ -54,6 +62,7 @@ public class PaChannelDataHandler {
         }
     };
 
+    private final Logger log = LoggerFactory.getLogger(PaChannelDataHandler.class);
     private final PaChannelsIngester channelsIngester;
     private final PaChannelGroupsIngester channelGroupsIngester;
     private final ChannelGroupResolver channelGroupResolver;
@@ -61,6 +70,17 @@ public class PaChannelDataHandler {
     private final ChannelResolver channelResolver;
     private final ChannelWriter channelWriter;
     private final Map<String, Channel> channelMap = Maps.newHashMap();
+    private final LoadingCache<Long, Publisher> groupPublisherCache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<Long, Publisher>() {
+                @Override
+                public Publisher load(Long key) throws Exception {
+                    Optional<ChannelGroup> group = channelGroupResolver.channelGroupFor(key);
+                    if (group.isPresent()) {
+                        return group.get().getPublisher();
+                    }
+                    return null;
+                }
+            });
     
     public PaChannelDataHandler(PaChannelsIngester channelsIngester, PaChannelGroupsIngester channelGroupsIngester, ChannelResolver channelResolver, ChannelWriter channelWriter, ChannelGroupResolver channelGroupResolver, ChannelGroupWriter channelGroupWriter) {
         this.channelsIngester = channelsIngester;
@@ -93,11 +113,15 @@ public class PaChannelDataHandler {
             }
         }
         
+        // clear existing PA channel numberings, so that if PA rewrite history, we don't end up with duplicate
+        // numberings
+        clearPaChannelNumberings(channelMap.values());
+        
         for (org.atlasapi.remotesite.pa.channels.bindings.Platform paPlatform : channelData.getPlatforms().getPlatform()) {
             ChannelGroupTree channelGroupTree = channelGroupsIngester.processPlatform(paPlatform, channelData.getServiceProviders().getServiceProvider(), channelData.getRegions().getRegion());
             
             Platform platform = (Platform) createOrMerge(channelGroupTree.getPlatform());
-            
+
             if (channelGroupTree.getRegions().isEmpty()) {
                 // non-regionalised platform
                 channelGroupsIngester.addChannelsToPlatform(platform, paPlatform.getEpg().getEpgContent(), channelMap);
@@ -125,6 +149,29 @@ public class PaChannelDataHandler {
         // TODO should this be multi-threaded? is slowest part by far...
         for (Channel child : channelMap.values()) {
             createOrMerge(child);
+        }
+    }
+    
+    private void clearPaChannelNumberings(Iterable<Channel> channels) {
+        final Publisher publisher = Publisher.PA;
+        for (Channel channel : channels) {
+            Iterable<ChannelNumbering> nonPaNumberings = Iterables.filter(channel.getChannelNumbers(), new Predicate<ChannelNumbering>() {
+                @Override
+                public boolean apply(ChannelNumbering input) {
+                    try {
+                        Publisher groupPublisher = groupPublisherCache.get(input.getChannelGroup());
+                        if (groupPublisher == null) {
+                            return false;
+                        }
+                        return !publisher.equals(groupPublisher);
+                    } catch (ExecutionException e) {
+                        log.error("Exception upon fetch of Publisher for Channel Group " + input.getChannelGroup(), e);
+                        return true;
+                    }
+                }
+            });
+            
+            channel.setChannelNumbers(nonPaNumberings);
         }
     }
 
