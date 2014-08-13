@@ -1,5 +1,7 @@
 package org.atlasapi.output.simple;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.ContentGroupRef;
 import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.EventRef;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
@@ -60,9 +63,12 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     private final Map<String, Locale> localeMap;
     private final PeopleQueryResolver peopleQueryResolver;
     private final CrewMemberAndPersonSimplifier crewMemberAndPersonSimplifier;
+    private final EventRefModelSimplifier eventRefSimplifier;
 
     public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
-            TopicQueryResolver topicResolver, ProductResolver productResolver, ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver, UpcomingItemsResolver upcomingResolver, AvailableItemsResolver availableResolver, @Nullable DescriptionWatermarker descriptionWatermarker) {
+            TopicQueryResolver topicResolver, ProductResolver productResolver, ImageSimplifier imageSimplifier, 
+            PeopleQueryResolver peopleResolver, UpcomingItemsResolver upcomingResolver, AvailableItemsResolver availableResolver, 
+            @Nullable DescriptionWatermarker descriptionWatermarker, EventRefModelSimplifier eventSimplifier) {
         super(imageSimplifier, SubstitutionTableNumberCodec.lowerCaseOnly(), descriptionWatermarker);
         this.contentGroupResolver = contentGroupResolver;
         this.topicResolver = topicResolver;
@@ -73,6 +79,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         this.localeMap = initLocalMap();
         this.peopleQueryResolver = peopleResolver;
         this.crewMemberAndPersonSimplifier = new CrewMemberAndPersonSimplifier(imageSimplifier, upcomingResolver, availableResolver);
+        this.eventRefSimplifier = checkNotNull(eventSimplifier);
     }
 
     private Map<String, Locale> initLocalMap() {
@@ -148,7 +155,13 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
             }
             ));
         }
-          
+        
+        simpleDescription.setEvents(Iterables.transform(content.events(), new Function<EventRef, org.atlasapi.media.entity.simple.Event>() {
+            @Override
+            public org.atlasapi.media.entity.simple.Event apply(EventRef input) {
+                return eventRefSimplifier.simplify(input, annotations, config); 
+            }
+        }));
         
     }
     
