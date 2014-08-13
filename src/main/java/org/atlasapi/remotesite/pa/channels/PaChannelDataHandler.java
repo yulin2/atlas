@@ -70,11 +70,15 @@ public class PaChannelDataHandler {
     private final ChannelResolver channelResolver;
     private final ChannelWriter channelWriter;
     private final Map<String, Channel> channelMap = Maps.newHashMap();
-    private final LoadingCache<Long, Optional<ChannelGroup>> groupCache = CacheBuilder.newBuilder()
-            .build(new CacheLoader<Long, Optional<ChannelGroup>>() {
+    private final LoadingCache<Long, Publisher> groupPublisherCache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<Long, Publisher>() {
                 @Override
-                public Optional<ChannelGroup> load(Long key) throws Exception {
-                    return channelGroupResolver.channelGroupFor(key);
+                public Publisher load(Long key) throws Exception {
+                    Optional<ChannelGroup> group = channelGroupResolver.channelGroupFor(key);
+                    if (group.isPresent()) {
+                        return group.get().getPublisher();
+                    }
+                    return null;
                 }
             });
     
@@ -111,7 +115,7 @@ public class PaChannelDataHandler {
         
         // clear existing PA channel numberings, so that if PA rewrite history, we don't end up with duplicate
         // numberings
-        clearChannelNumberings(channelMap.values());
+        clearPaChannelNumberings(channelMap.values());
         
         for (org.atlasapi.remotesite.pa.channels.bindings.Platform paPlatform : channelData.getPlatforms().getPlatform()) {
             ChannelGroupTree channelGroupTree = channelGroupsIngester.processPlatform(paPlatform, channelData.getServiceProviders().getServiceProvider(), channelData.getRegions().getRegion());
@@ -148,26 +152,26 @@ public class PaChannelDataHandler {
         }
     }
     
-    private void clearChannelNumberings(Iterable<Channel> channels) {
+    private void clearPaChannelNumberings(Iterable<Channel> channels) {
         final Publisher publisher = Publisher.PA;
         for (Channel channel : channels) {
-            Iterable<ChannelNumbering> nonMatchingNumberings = Iterables.filter(channel.getChannelNumbers(), new Predicate<ChannelNumbering>() {
+            Iterable<ChannelNumbering> nonPaNumberings = Iterables.filter(channel.getChannelNumbers(), new Predicate<ChannelNumbering>() {
                 @Override
                 public boolean apply(ChannelNumbering input) {
                     try {
-                        Optional<ChannelGroup> group = groupCache.get(input.getChannelGroup());
-                        if (!group.isPresent()) {
+                        Publisher groupPublisher = groupPublisherCache.get(input.getChannelGroup());
+                        if (groupPublisher == null) {
                             return false;
                         }
-                        return !publisher.equals(group.get().getPublisher());
+                        return !publisher.equals(groupPublisher);
                     } catch (ExecutionException e) {
-                        log.error("Exception upon fetch of Channel Group " + input.getChannelGroup(), e);
+                        log.error("Exception upon fetch of Publisher for Channel Group " + input.getChannelGroup(), e);
                         return true;
                     }
                 }
             });
             
-            channel.setChannelNumbers(nonMatchingNumberings);
+            channel.setChannelNumbers(nonPaNumberings);
         }
     }
 
