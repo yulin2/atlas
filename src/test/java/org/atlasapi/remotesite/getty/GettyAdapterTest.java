@@ -19,7 +19,7 @@ public class GettyAdapterTest {
     @Test
     public void testConversionFromJson() throws IOException {
         String text = FileUtils.readFileToString(new File(Resources.getResource(getClass(), "getty.json").getFile()));
-        List<VideoResponse> videos = adapter.parse(text);
+        List<VideoResponse> videos = adapter.parse(text, "key");
         assertEquals(1, videos.size());
         VideoResponse video = Iterables.getOnlyElement(videos);
         assertEquals("id", video.getAssetId());

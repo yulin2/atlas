@@ -28,6 +28,7 @@ import com.google.common.collect.Iterables;
 public class GlobalImageDataRowContentExtractor implements ContentExtractor<GlobalImageDataRow, Content> {
 
     private static final String GLOBAL_IMAGE_URI_PATTERN = "http://globalimageworks.com/%s";
+    private static final String GLOBAL_IMAGE_CURIE_PATTERN = "globalImageWorks:%s";
     
     private final Splitter idSplitter = Splitter.on(":").omitEmptyStrings();
     private final PeriodFormatter durationFormatter = new PeriodFormatterBuilder()
@@ -49,13 +50,15 @@ public class GlobalImageDataRowContentExtractor implements ContentExtractor<Glob
     private Item extractItem(GlobalImageDataRow source) {
         Item item = new Item();
         
+        String id = Iterables.getLast(idSplitter.split(source.getId()));
+        
         item.setVersions(extractVersions(source.getDuration()));
         item.setFirstSeen(extractDate(source.getDate()));
         item.setDescription(source.getDescription());
         item.setTitle(source.getTitle());
         item.setPublisher(GLOBALIMAGEWORKS);
-        item.setCanonicalUri(uri(source.getId()));
-        item.setCurie(curie(source.getId()));
+        item.setCanonicalUri(uri(id));
+        item.setCurie(curie(id));
         item.setLastUpdated(new DateTime(DateTimeZone.UTC));
         item.setMediaType(MediaType.VIDEO);
         item.setKeyPhrases(keyphrases(source.getKeywords()));
@@ -87,11 +90,11 @@ public class GlobalImageDataRowContentExtractor implements ContentExtractor<Glob
     }
 
     private String uri(String id) {
-        return String.format(GLOBAL_IMAGE_URI_PATTERN, Iterables.getLast(idSplitter.split(id)));
+        return String.format(GLOBAL_IMAGE_URI_PATTERN, id);
     }
     
     private String curie(String id) {
-        String curie = String.format(GLOBAL_IMAGE_URI_PATTERN, id);
+        String curie = String.format(GLOBAL_IMAGE_CURIE_PATTERN, id);
         return curie;
     }
 

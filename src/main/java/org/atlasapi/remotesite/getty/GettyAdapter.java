@@ -25,20 +25,20 @@ public class GettyAdapter {
     private static final String KEYWORD_TITLE = "Text";
     private static final String ASPECT_RATIOS = "AspectRatios";
     
-    public List<VideoResponse> parse(String text) {
+    public List<VideoResponse> parse(String text, String keyword) {
         JsonObject parse = (JsonObject) new JsonParser().parse(text);
         JsonArray videoArray = parse.get(SEARCH_RESULT).getAsJsonObject().get(VIDEOS).getAsJsonArray();
         Builder<VideoResponse> videos = new ImmutableList.Builder<VideoResponse>();
         //check here so that json parser doesn't fail
         if (videoArray.size() != 0) {
             for (JsonElement elem : videoArray) {
-                videos.add(createVideoResponse(elem.getAsJsonObject()));
+                videos.add(createVideoResponse(elem.getAsJsonObject(), keyword));
             }
         }
         return videos.build();
     }
     
-    private VideoResponse createVideoResponse(JsonObject elem) {
+    private VideoResponse createVideoResponse(JsonObject elem, String keyword) {
         VideoResponse videoResponse = new VideoResponse();
         
         videoResponse.setAssetId(elem.get(ASSET_ID).getAsString());
@@ -49,6 +49,7 @@ public class GettyAdapter {
         videoResponse.setDateCreated(elem.get(DATE_CREATED).getAsString());
         videoResponse.setTitle(elem.get(TITLE).getAsString());
         videoResponse.setAspectRatios(aspectRatios(elem));
+        videoResponse.setKeywordUsefForLookup(keyword);
         
         return videoResponse;
     }
