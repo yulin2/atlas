@@ -22,10 +22,10 @@ final class C4OnDemandEpisodeExtractor extends BaseC4EpisodeExtractor {
 
     public C4OnDemandEpisodeExtractor(Optional<Platform> platform, Publisher publisher,
             ContentFactory<Feed, Feed, Entry> contentFactory, C4LocationPolicyIds locationPolicyIds, 
-            Clock clock) {
+            boolean createIosBrandLocations, Clock clock) {
         super(contentFactory, clock);
         this.publisher = publisher;
-        versionExtractor = new C4AtomEntryVersionExtractor(platform, locationPolicyIds);
+        versionExtractor = new C4AtomEntryVersionExtractor(platform, locationPolicyIds, createIosBrandLocations);
     }
 
     @Override

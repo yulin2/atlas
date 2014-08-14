@@ -54,7 +54,8 @@ public class C4AtomApi {
 	private static final Pattern IMAGE_PATTERN = Pattern.compile("https?://.+\\.channel4\\.com/(.+?)\\d+x\\d+(\\.[a-zA-Z]+)");
 	private static final String IMAGE_SIZE = "625x352";
 	private static final String THUMBNAIL_SIZE = "200x113";
-	
+	private static final String IOS_URI_PREFIX = "c4-4od://ios.channel4.com/pmlsd/";
+	private static final Pattern WEB_4OD_BRAND_ID_EXTRACTOR = Pattern.compile(String.format("^%s(.+?)/4od\\#\\d+", WEB_BASE));
 
 	private final BiMap<String, Channel> channelMap;
 	
@@ -182,6 +183,15 @@ public class C4AtomApi {
         if (matcher.matches()) {
             return PROGRAMMES_BASE + matcher.group(1);
         }
+        return null;
+    }
+
+    public static String iOsUriFromPcUri(String uri) {
+        Matcher matcher = WEB_4OD_BRAND_ID_EXTRACTOR.matcher(uri);
+                
+        if (matcher.matches()) {
+            return IOS_URI_PREFIX + matcher.group(1) + "/4od.atom";
+         }
         return null;
     }
 	

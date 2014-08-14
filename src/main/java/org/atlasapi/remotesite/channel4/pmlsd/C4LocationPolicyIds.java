@@ -3,20 +3,26 @@ package org.atlasapi.remotesite.channel4.pmlsd;
 
 public class C4LocationPolicyIds {
 
-    private final Long serviceId;
+    private final Long webServiceId;
     private final Long playerId;
+    private final Long iOsServiceId;
     
-    private C4LocationPolicyIds(Long serviceId, Long playerId) {
-        this.serviceId = serviceId;
+    private C4LocationPolicyIds(Long webServiceId, Long playerId, Long iOsServiceId) {
+        this.webServiceId = webServiceId;
         this.playerId = playerId;
+        this.iOsServiceId = iOsServiceId;
     }
     
-    public Long getServiceId() {
-        return serviceId;
+    public Long getWebServiceId() {
+        return webServiceId;
     }
     
     public Long getPlayerId() {
         return playerId;
+    }
+    
+    public Long getIOsServiceId() {
+        return iOsServiceId;
     }
     
     public static Builder builder() {
@@ -25,15 +31,21 @@ public class C4LocationPolicyIds {
     
     public static class Builder {
         
-        private Long serviceId;
+        private Long webServiceId;
         private Long playerId;
+        private Long iOsServiceId;
 
         private Builder() {
             
         }
         
-        public Builder withServiceId(long serviceId) {
-            this.serviceId = serviceId;
+        public Builder withWebServiceId(long webServiceId) {
+            this.webServiceId = webServiceId;
+            return this;
+        }
+        
+        public Builder withIosServiceId(long iOsServiceId) {
+            this.iOsServiceId = iOsServiceId;
             return this;
         }
         
@@ -43,7 +55,7 @@ public class C4LocationPolicyIds {
         }
         
         public C4LocationPolicyIds build() {
-            return new C4LocationPolicyIds(serviceId, playerId);
+            return new C4LocationPolicyIds(webServiceId, playerId, iOsServiceId);
         }
     }
 }
