@@ -14,6 +14,7 @@ public class VideoResponse {
     private String dateCreated;
     private List<String> keywords;
     private List<String> aspectRatios;
+    private String keywordUsedForLookup;
     
     public String getAssetId() {
         return assetId;
@@ -79,6 +80,14 @@ public class VideoResponse {
         this.aspectRatios = aspectRatios;
     }
     
+    public String getKeywordUsefForLookup() {
+        return keywordUsedForLookup;
+    }
+
+    public void setKeywordUsefForLookup(String keywordUsefForLookup) {
+        this.keywordUsedForLookup = keywordUsefForLookup;
+    }
+    
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
@@ -89,6 +98,7 @@ public class VideoResponse {
                 .add("thumb", thumb)
                 .add("dateCreated", dateCreated)
                 .add("keywords", keywords)
+                .add("keywordUsedForLookup", keywordUsedForLookup)
                 .toString();
     }
     

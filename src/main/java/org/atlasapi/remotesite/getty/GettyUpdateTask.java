@@ -88,7 +88,7 @@ public class GettyUpdateTask extends ScheduledTask {
                 try {
                     int offset = 1;
                     String response = getVideoResponse(keyword, offset);
-                    List<VideoResponse> videos = adapter.parse(response);
+                    List<VideoResponse> videos = adapter.parse(response, keyword);
                     
                     //paginate videos
                     while (!videos.isEmpty()) {
@@ -98,7 +98,7 @@ public class GettyUpdateTask extends ScheduledTask {
                         }
                         offset += gettyItemsPerPage;
                         response = getVideoResponse(keyword, offset);
-                        videos = adapter.parse(response);
+                        videos = adapter.parse(response, keyword);
                     }
                     
                 } catch (Exception e) {

@@ -27,8 +27,8 @@ public class GettyUpdateTaskTest {
         when(keywordsFetcher.getKeywordsFromOffset(90)).thenReturn(ImmutableList.<String>of());
         when(videoFetcher.getResponse(Matchers.eq("token"), Matchers.eq("key1"), Matchers.eq(1))).thenReturn("val1");
         when(videoFetcher.getResponse(Matchers.eq("token"), Matchers.eq("key2"), Matchers.eq(91))).thenReturn("val2");
-        when(adapter.parse(Matchers.eq("val1"))).thenReturn(ImmutableList.of(new VideoResponse(), new VideoResponse()));
-        when(adapter.parse(Matchers.eq("val2"))).thenReturn(ImmutableList.<VideoResponse>of());
+        when(adapter.parse(Matchers.eq("val1"), Matchers.eq("key1"))).thenReturn(ImmutableList.of(new VideoResponse(), new VideoResponse()));
+        when(adapter.parse(Matchers.eq("val2"), Matchers.eq("key2"))).thenReturn(ImmutableList.<VideoResponse>of());
         
         task.run();
         // first page has 2 keywords so it tries to fetch another page
@@ -41,8 +41,8 @@ public class GettyUpdateTaskTest {
         // there are no videos found
         verify(videoFetcher, times(1)).getResponse(Matchers.eq("token"), Matchers.eq("key2"), Matchers.eq(1));
         
-        verify(adapter, times(1)).parse(Matchers.eq("val1"));
-        verify(adapter, times(0)).parse(Matchers.eq("val2"));
+        verify(adapter, times(1)).parse(Matchers.eq("val1"), Matchers.eq("key1"));
+        verify(adapter, times(0)).parse(Matchers.eq("val2"), Matchers.eq("key1"));
         verify(handler, times(2)).handle(Matchers.any(VideoResponse.class));
     }
     
