@@ -29,7 +29,7 @@ public class C4BrandClipExtractor extends C4MediaItemExtractor<Clip> {
         this.contentFactory = contentFactory;
         this.publisher = publisher;
         // TODO: Do we have platform-specific clips?
-        versionExtractor = new C4AtomEntryVersionExtractor(Optional.<Platform>absent(), locationPolicyIds);
+        versionExtractor = new C4AtomEntryVersionExtractor(Optional.<Platform>absent(), locationPolicyIds, false);
     }
 
     @Override
