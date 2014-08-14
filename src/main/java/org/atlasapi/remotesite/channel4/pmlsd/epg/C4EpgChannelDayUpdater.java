@@ -48,7 +48,7 @@ public class C4EpgChannelDayUpdater {
             ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer, 
             Publisher publisher, ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, Optional<String> platform, 
             C4LocationPolicyIds locationPolicyIds) {
-        Preconditions.checkArgument(!platform.isPresent(), "If configuring the EPG updater for a platform, then modifications must be made to not write iOS app locations.")
+        Preconditions.checkArgument(!platform.isPresent(), "If configuring the EPG updater for a platform, then modifications must be made to not write iOS app locations.");
         this.scheduleClient = scheduleClient;
         this.writer = writer;
         this.platform = platform;
