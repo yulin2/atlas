@@ -9,6 +9,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,7 +24,7 @@ public class GettyModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
-    private @Autowired TopicStore topicStore;
+    private @Autowired @Qualifier("topicStore") TopicStore topicStore;
     
     @Value("${getty.client.id}") private String clientId;
     @Value("${getty.client.secret}") private String clientSecret;
