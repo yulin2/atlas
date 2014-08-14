@@ -18,8 +18,6 @@ import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.channels.bindings.Station;
 import org.atlasapi.remotesite.pa.channels.bindings.TvChannelData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -57,7 +55,6 @@ public class PaChannelDataHandler {
         }
     };
 
-    private final Logger log = LoggerFactory.getLogger(PaChannelDataHandler.class);
     private final PaChannelsIngester channelsIngester;
     private final PaChannelGroupsIngester channelGroupsIngester;
     private final ChannelGroupResolver channelGroupResolver;
@@ -191,7 +188,7 @@ public class PaChannelDataHandler {
             // unions new PA numberings with existing non-PA numberings
             existingChannel.setChannelNumbers(Sets.union(
                     newChannel.getChannelNumbers(), 
-                    Sets.newHashSet(numberingFilterer.filterNotEqualToGroupPublisher(existingChannel.getChannelNumbers(), Publisher.PA))
+                    Sets.newHashSet(numberingFilterer.filterNotEqualToGroupPublisher(existingChannel.getChannelNumbers(), Publisher.METABROADCAST))
             ));
             
             return channelWriter.createOrUpdate(existingChannel);
