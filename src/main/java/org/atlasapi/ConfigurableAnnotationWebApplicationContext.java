@@ -35,6 +35,7 @@ import com.metabroadcast.common.properties.Configurer;
 
 import org.atlasapi.persistence.CassandraPersistenceModule;
 import org.atlasapi.remotesite.wikipedia.WikipediaModule;
+import org.atlasapi.spreadsheet.GoogleSpreadsheetModule;
 import org.atlasapi.system.ContentPurgeWebModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
@@ -84,7 +85,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 PicksModule.class,
                 SimilarContentModule.class,
                 CreateYouTubeContentGroupModule.class,
-                ContentPurgeWebModule.class
+                ContentPurgeWebModule.class,
+                GoogleSpreadsheetModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(

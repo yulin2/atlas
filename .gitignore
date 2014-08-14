@@ -4,3 +4,4 @@ generated
 .settings
 /target
 /activemq-data
+/bin
