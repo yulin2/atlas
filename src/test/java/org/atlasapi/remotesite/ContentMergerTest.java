@@ -25,7 +25,7 @@ public class ContentMergerTest {
     
     @Test
     public void testVersionMerger() {
-        ContentMerger contentMerger = new ContentMerger(MergeStrategy.MERGE);
+        ContentMerger contentMerger = new ContentMerger(MergeStrategy.MERGE, MergeStrategy.KEEP);
         
         Item current = new Item();
         Item extracted = new Item();
@@ -51,7 +51,7 @@ public class ContentMergerTest {
     
     @Test
     public void testVersionMergeReplaceStrategy() {
-        ContentMerger contentMerger = new ContentMerger(MergeStrategy.REPLACE);
+        ContentMerger contentMerger = new ContentMerger(MergeStrategy.REPLACE, MergeStrategy.KEEP);
         
         Item current = new Item();
         Item extracted = new Item();

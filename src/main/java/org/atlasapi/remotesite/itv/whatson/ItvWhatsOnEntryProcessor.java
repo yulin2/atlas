@@ -31,7 +31,7 @@ public class ItvWhatsOnEntryProcessor {
                 locationPolicyIds);
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
-        this.contentMerger = new ContentMerger(MergeStrategy.MERGE);
+        this.contentMerger = new ContentMerger(MergeStrategy.MERGE, MergeStrategy.KEEP);
     }
     
     private Content createOrUpdate(Content content) {
