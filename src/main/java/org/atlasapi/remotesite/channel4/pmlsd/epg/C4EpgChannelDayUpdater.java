@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.channel4.pmlsd.epg;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +25,7 @@ import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -49,6 +48,7 @@ public class C4EpgChannelDayUpdater {
             ContentResolver resolver, C4BrandUpdater brandUpdater, BroadcastTrimmer trimmer, 
             Publisher publisher, ContentFactory<C4EpgEntry, C4EpgEntry, C4EpgEntry> contentFactory, Optional<String> platform, 
             C4LocationPolicyIds locationPolicyIds) {
+        Preconditions.checkArgument(!platform.isPresent(), "If configuring the EPG updater for a platform, then modifications must be made to not write iOS app locations.")
         this.scheduleClient = scheduleClient;
         this.writer = writer;
         this.platform = platform;

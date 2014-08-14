@@ -64,6 +64,7 @@ public class C4PmlsdModule {
 	private @Value("${c4.keystore.password}") String keyStorePass;
 	
     private @Value("${service.web.id}") Long webServiceId;
+    private @Value("${service.ios.id}") Long iOsServiceId;
     private @Value("${player.4od.id}") Long fourODPlayerId;
 	
 	public static Map<Publisher, String> PUBLISHER_TO_CANONICAL_URI_HOST_MAP 
@@ -141,7 +142,7 @@ public class C4PmlsdModule {
 	    C4AtomApiClient client = new C4AtomApiClient(c4HttpsClient(), ATOZ_BASE, platformParam);
 	    C4BrandExtractor extractor = new C4BrandExtractor(client, platform, Publisher.C4_PMLSD, 
 	            channelResolver, new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor()),
-	            c4PCLocationPolicyIds());
+	            c4PCLocationPolicyIds(), true);
 		return new C4AtomBackedBrandUpdater(client, platform, contentResolver, pmlsdLastUpdatedSettingContentWriter(), extractor);
 	}
 	
@@ -149,7 +150,7 @@ public class C4PmlsdModule {
         C4AtomApiClient client = new C4AtomApiClient(c4HttpsClient(), ATOZ_BASE, platformParam);
         C4BrandExtractor extractor = new C4BrandExtractor(client, platform, Publisher.C4_PMLSD_P06, 
                 channelResolver, new SourceSpecificContentFactory<>(Publisher.C4_PMLSD_P06, new C4AtomFeedUriExtractor()), 
-                c4XBoxLocationPolicyIds());
+                c4XBoxLocationPolicyIds(), false);
         return new C4AtomBackedBrandUpdater(client, platform, contentResolver, pmlsdLastUpdatedSettingContentWriter(), extractor);
     }
 	
@@ -169,7 +170,8 @@ public class C4PmlsdModule {
     @Bean protected C4LocationPolicyIds c4PCLocationPolicyIds() {
         return C4LocationPolicyIds.builder()
                     .withPlayerId(fourODPlayerId)
-                    .withServiceId(webServiceId)
+                    .withWebServiceId(webServiceId)
+                    .withIosServiceId(iOsServiceId)
                     .build();
     }
     

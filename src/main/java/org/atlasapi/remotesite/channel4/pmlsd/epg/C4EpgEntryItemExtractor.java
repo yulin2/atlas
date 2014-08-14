@@ -97,27 +97,32 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
         Encoding encoding = new Encoding();
         encoding.setLastUpdated(now);
 
-        encoding.addAvailableAt(extractLocation(entry.getEpgEntry(), now));
+        encoding.addAvailableAt(extractLocation(entry.getEpgEntry(), now, 
+                entry.getEpgEntry().media().player(), locationPolicyIds.getPlayerId(),
+                locationPolicyIds.getWebServiceId()));
+        encoding.addAvailableAt(extractLocation(entry.getEpgEntry(), now, 
+                entry.getEpgEntry().media().player(), locationPolicyIds.getPlayerId(),
+                locationPolicyIds.getWebServiceId()));
         
         return encoding;
     }
 
-    private Location extractLocation(C4EpgEntry entry, DateTime now) {
+    private Location extractLocation(C4EpgEntry entry, DateTime now, String uri, Long player, Long service) {
         Location location = new Location();
         location.setLastUpdated(now);
         location.setUri(entry.media().player());
         location.setTransportType(TransportType.LINK);
-        location.setPolicy(policyFrom(entry));
+        location.setPolicy(policyFrom(entry, player, service));
         return location;
     }
 
     private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
 
-    private Policy policyFrom(C4EpgEntry entry) {
+    private Policy policyFrom(C4EpgEntry entry, Long player, Long service) {
         Policy policy = new Policy();
         policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
-        policy.setPlayer(locationPolicyIds.getPlayerId());
-        policy.setService(locationPolicyIds.getServiceId());
+        policy.setPlayer(player);
+        policy.setService(service);
         
         if(!Objects.equal(policy.getAvailableCountries(), entry.media().availableCountries())) {
             policy.setAvailableCountries(entry.media().availableCountries());

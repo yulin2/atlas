@@ -25,10 +25,10 @@ public class C4OdEpisodesAdapter implements SiteSpecificAdapter<List<Episode>> {
 
     public C4OdEpisodesAdapter(C4AtomApiClient feedClient, Optional<Platform> platform, 
             ContentFactory<Feed, Feed, Entry> contentFactory, Publisher publisher, 
-            C4LocationPolicyIds locationPolicyIds, Clock clock) {
+            C4LocationPolicyIds locationPolicyIds, boolean createIosBrandLocations, Clock clock) {
         this.feedClient = feedClient;
         this.itemExtractor = new C4OnDemandEpisodeExtractor(platform, publisher, contentFactory, 
-                locationPolicyIds, clock);
+                locationPolicyIds, createIosBrandLocations, clock);
     }
 
     @Override
