@@ -28,11 +28,14 @@ public class C4CategoryGenreMap extends GenreMap {
         genres.put("http://www.channel4.com/programmes/categories/lifestyle", AtlasGenre.LIFESTYLE);
         genres.put("http://www.channel4.com/programmes/categories/music", AtlasGenre.MUSIC);
         genres.put("http://www.channel4.com/programmes/categories/news-current-affairs-and-politics", AtlasGenre.NEWS);
+        genres.put("http://www.channel4.com/programmes/categories/quizzes-and-gameshows", AtlasGenre.FACTUAL);
+        genres.put("http://www.channel4.com/programmes/categories/reality-shows", AtlasGenre.FACTUAL);
         genres.put("http://www.channel4.com/programmes/categories/religion-and-belief", AtlasGenre.FACTUAL);
         genres.put("http://www.channel4.com/programmes/categories/science-nature-and-the-environment", AtlasGenre.FACTUAL);
         genres.put("http://www.channel4.com/programmes/categories/sex-and-relationships", AtlasGenre.LIFESTYLE);
         genres.put("http://www.channel4.com/programmes/categories/society-and-culture", AtlasGenre.FACTUAL);
         genres.put("http://www.channel4.com/programmes/categories/sports-and-games", AtlasGenre.SPORT);
+        genres.put("http://www.channel4.com/programmes/categories/us-shows", AtlasGenre.SPORT);
         genres.put("http://www.channel4.com/programmes/categories/factual", AtlasGenre.NEWS); // looks wrong, but it's a renamed news, current affairs and politics
         genres.put("http://www.channel4.com/programmes/categories/sport", AtlasGenre.SPORT);
     }
