@@ -50,10 +50,13 @@ public class C4AtomEntryVersionExtractor implements ContentExtractor<C4VersionDa
     
     private final Optional<Platform> platform;
     private final C4LocationPolicyIds locationPolicyIds;
-
-    public C4AtomEntryVersionExtractor(Optional<Platform> platform, C4LocationPolicyIds locationPolicyIds) {
+    private final boolean createIosBrandLocations;
+    
+    public C4AtomEntryVersionExtractor(Optional<Platform> platform, C4LocationPolicyIds locationPolicyIds,
+            boolean createIosBrandLocations) {
         this.platform = checkNotNull(platform);
         this.locationPolicyIds = checkNotNull(locationPolicyIds);
+        this.createIosBrandLocations = createIosBrandLocations;
     }
     
     @Override
@@ -74,9 +77,18 @@ public class C4AtomEntryVersionExtractor implements ContentExtractor<C4VersionDa
         
         Encoding encoding = new Encoding();
         
-        Location location = extractLocation(data);
+        Location location = extractLocation(data.getUri(), data, 
+                locationPolicyIds.getPlayerId(), locationPolicyIds.getWebServiceId());
         if (location.getPolicy() != null) {
             encoding.addAvailableAt(location);
+        }
+        
+        if (createIosBrandLocations) {
+            Location iOsLocation = extractLocation(C4AtomApi.iOsUriFromPcUri(data.getUri()), 
+                    data, locationPolicyIds.getPlayerId(), locationPolicyIds.getIOsServiceId());
+            if (iOsLocation.getPolicy() != null) {
+                encoding.addAvailableAt(iOsLocation);
+            }
         }
         
         Matcher matcher = CLIP_ID_PATTERN.matcher(data.getId());
@@ -108,23 +120,23 @@ public class C4AtomEntryVersionExtractor implements ContentExtractor<C4VersionDa
 
     private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
     
-    private Location extractLocation(C4VersionData data) {
+    private Location extractLocation(String uri, C4VersionData data, Long playerId, Long serviceId) {
         Location location = new Location();
-        location.setUri(data.getUri());
+        location.setUri(uri);
         location.setLastUpdated(data.getLastUpdated());
         if(data.getId() != null) { 
             location.addAliasUrl(data.getId().replace("tag:pmlsc", "tag:www"));
         }
         location.setTransportType(TransportType.LINK);
         
-        Policy policy = extractPolicy(data);
+        Policy policy = extractPolicy(data, playerId, serviceId);
         if (policy != null) {
             location.setPolicy(policy);
         }
         return location;
     }
 
-    private Policy extractPolicy(C4VersionData data) {
+    private Policy extractPolicy(C4VersionData data, Long playerId, Long serviceId) {
         String availability = data.getLookup().get(C4AtomApi.DC_TERMS_AVAILABLE);
         if (availability == null) {
             return null;
@@ -139,8 +151,8 @@ public class C4AtomEntryVersionExtractor implements ContentExtractor<C4VersionDa
             .withAvailabilityStart(new DateTime(Strings.isNullOrEmpty(txDate) ? matcher.group(1) : txDate))
             .withAvailabilityEnd(new DateTime(matcher.group(2)))
             .withRevenueContract(RevenueContract.FREE_TO_VIEW)
-            .withPlayer(locationPolicyIds.getPlayerId())
-            .withService(locationPolicyIds.getServiceId());
+            .withPlayer(playerId)
+            .withService(serviceId);
 
         Set<Country> availableCountries = getAvailableCountries(data);    
         if (availableCountries != null) {

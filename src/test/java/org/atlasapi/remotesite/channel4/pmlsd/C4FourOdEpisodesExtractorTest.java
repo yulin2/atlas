@@ -58,7 +58,7 @@ public class C4FourOdEpisodesExtractorTest extends TestCase {
     private final C4LocationPolicyIds locationPolicyIds = 
             C4LocationPolicyIds.builder()
                 .withPlayerId(PLAYER_ID)
-                .withServiceId(SERVICE_ID)
+                .withWebServiceId(SERVICE_ID)
                 .build();
     
     private ContentFactory<Feed, Feed, Entry> contentFactory
@@ -81,7 +81,7 @@ public class C4FourOdEpisodesExtractorTest extends TestCase {
 	public void testExtractingEpisodes() throws Exception {
 		
 		List<Episode> episodes = new C4OdEpisodesAdapter(atomApiClient, Optional.<Platform>absent(), 
-		                                contentFactory, Publisher.C4_PMLSD, locationPolicyIds, new SystemClock())
+		                                contentFactory, Publisher.C4_PMLSD, locationPolicyIds, false, new SystemClock())
 		    .fetch("http://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares");
 
 		Episode firstEpisode = (Episode) Iterables.get(episodes, 0);
