@@ -31,6 +31,9 @@ public class BtVodModule {
     private static final String TV_CATEGORY = "TV";
     private static final String KIDS_CATEGORY = "Kids";
     private static final String SPORT_CATEGORY = "Sport";
+    private static final String BUY_TO_OWN_CATEGORY = "BuyToOwn";
+    private static final String TV_BOX_SETS_CATEGORY = "TvBoxSets";
+    private static final String BOX_OFFICE_CATEGORY = "BoxOffice";
     
     private static final String CZN_CONTENT_PROVIDER_ID = "CHC";
     private static final String URI_PREFIX = "http://vod.bt.com/";
@@ -85,6 +88,9 @@ public class BtVodModule {
                 .put(KIDS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(KIDS_CATEGORY))
                 .put(SPORT_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(SPORT_CATEGORY))
                 .put(CZN_CONTENT_PROVIDER_ID.toLowerCase(), BtVodContentGroupUpdater.contentProviderPredicate(CZN_CONTENT_PROVIDER_ID))
+                .put(BUY_TO_OWN_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.buyToOwnPredicate())
+                .put(BOX_OFFICE_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.boxOfficePredicate())
+                .put(TV_BOX_SETS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.tvBoxSetsPredicate())
                 .build();
     }
     
