@@ -56,7 +56,7 @@ public class C4AtomEntryVersionExtractor implements ContentExtractor<C4VersionDa
             boolean createIosBrandLocations) {
         this.platform = checkNotNull(platform);
         this.locationPolicyIds = checkNotNull(locationPolicyIds);
-        this.createIosBrandLocations = checkNotNull(createIosBrandLocations);
+        this.createIosBrandLocations = createIosBrandLocations;
     }
     
     @Override
