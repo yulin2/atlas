@@ -29,9 +29,13 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 
 /**
  * {@link ScheduledTask} which processes a range of {@link Channel}s and
- * {@link LocalDate} days via a {@link ChannelDayProcessor}.
+ * {@link LocalDate} days via a {@link ChannelDayProcessor}. The number 
+ * of job failures required to cause the {@link ScheduledTask} to fail
+ * can be configured.
  */
 public final class ChannelDayProcessingTask extends ScheduledTask {
+
+    private static final int DEFAULT_FAILURE_THRESHOLD_PERCENTAGE = 100;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     
@@ -44,16 +48,25 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
     private int tasks;
     private AtomicReference<UpdateProgress> progress;
 
+    private final int jobFailThresholdInPercent;
+
     public ChannelDayProcessingTask(ExecutorService executor, Supplier<? extends Collection<ChannelDay>> channelDays, ChannelDayProcessor processor) {
-        this(executor, channelDays, processor, null);
+        this(executor, channelDays, processor, null, DEFAULT_FAILURE_THRESHOLD_PERCENTAGE);
+    }
+    
+    public ChannelDayProcessingTask(ExecutorService executor, 
+            Supplier<? extends Collection<ChannelDay>> channelDays, ChannelDayProcessor processor,
+            ChannelDayProcessingTaskListener listener) {
+        this(executor, channelDays, processor, listener, DEFAULT_FAILURE_THRESHOLD_PERCENTAGE);
     }
     
     public ChannelDayProcessingTask(ExecutorService executor, Supplier<? extends Collection<ChannelDay>> channelDays, ChannelDayProcessor processor,
-            ChannelDayProcessingTaskListener listener) {
+            ChannelDayProcessingTaskListener listener, int jobFailThresholdInPercent) {
         this.listener = listener;
         this.executor = MoreExecutors.listeningDecorator(executor);
         this.channelDays = checkNotNull(channelDays);
         this.processor = checkNotNull(processor);
+        this.jobFailThresholdInPercent = jobFailThresholdInPercent;
     }
 
     private void updateStatus() {
@@ -82,6 +95,18 @@ public final class ChannelDayProcessingTask extends ScheduledTask {
         if (listener != null) {
             listener.completed(progress.get());
         }
+        
+        if (taskFailureRateExceedsJobFailThreshold()) {
+            throw new RuntimeException(
+                    String.format("Too many failures: %d failures of %d total exceeds threshold of %d%%", 
+                                  progress.get().getFailures(),
+                                  progress.get().getTotalProgress(),
+                                  jobFailThresholdInPercent));
+        }
+    }
+
+    private boolean taskFailureRateExceedsJobFailThreshold() {
+        return ( 100 * progress.get().getFailures() / progress.get().getTotalProgress()) >= jobFailThresholdInPercent; 
     }
 
     private void waitForFinish(ImmutableList<ListenableFuture<UpdateProgress>> taskResults) {

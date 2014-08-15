@@ -57,6 +57,7 @@ public class BbcNitroModule {
     private @Value("${bbc.nitro.threadCount.today}") Integer nitroTodayThreadCount;
     private @Value("${bbc.nitro.threadCount.fortnight}") Integer nitroFortnightThreadCount;
     private @Value("${bbc.nitro.requestPageSize}") Integer nitroRequestPageSize;
+    private @Value("${bbc.nitro.jobFailureThresholdPercent}") Integer jobFailureThresholdPercent;
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
@@ -82,7 +83,7 @@ public class BbcNitroModule {
     private ScheduledTask nitroScheduleUpdateTask(int back, int forward, Integer threadCount, Integer rateLimit) {
         DayRangeChannelDaySupplier drcds = new DayRangeChannelDaySupplier(bbcChannelSupplier(), dayRangeSupplier(back, forward));
         ExecutorService executor = Executors.newFixedThreadPool(threadCount, nitroThreadFactory);
-        return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor(rateLimit));
+        return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor(rateLimit), null, jobFailureThresholdPercent);
     }
     
     @Bean
