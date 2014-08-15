@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.btvod;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import joptsimple.internal.Strings;
 
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Image;
@@ -9,6 +8,7 @@ import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.remotesite.btvod.BtVodData.BtVodDataRow;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
