@@ -107,8 +107,8 @@ public class BtVodSeriesWriter implements BtVodDataProcessor<UpdateProgress>{
     }
     
     private String uriFor(BtVodDataRow row) {
-        String brandId = row.getColumnValue(BtVodFileColumn.BRANDIA_ID);
-        return uriPrefix + "series/" + brandId;
+        String seriesId = row.getColumnValue(BtVodFileColumn.PRODUCT_ID);
+        return uriPrefix + "series/" + seriesId;
     }
     
     @Override
