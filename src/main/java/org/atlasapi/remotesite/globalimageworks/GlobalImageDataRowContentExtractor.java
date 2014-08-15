@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
+import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -76,6 +78,9 @@ public class GlobalImageDataRowContentExtractor implements ContentExtractor<Glob
 
     private Set<Version> extractVersions(String duration) {
         Version version = new Version();
+        Encoding encoding = new Encoding();
+        encoding.setAvailableAt(ImmutableSet.of(new Location()));
+        version.addManifestedAs(encoding);
         version.setDuration(extractDuration(duration));
         return ImmutableSet.of(version);
     }
