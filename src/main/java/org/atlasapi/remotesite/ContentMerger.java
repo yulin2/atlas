@@ -78,6 +78,7 @@ public class ContentMerger {
         current.setMediumDescription(extracted.getMediumDescription());
         current.setLongDescription(current.getLongDescription());
         current.setImage(extracted.getImage());
+        current.setImages(extracted.getImages());
         current.setYear(extracted.getYear());
         current.setGenres(extracted.getGenres());
         current.setPeople(extracted.people());
