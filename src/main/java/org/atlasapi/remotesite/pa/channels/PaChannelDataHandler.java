@@ -15,6 +15,7 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.channels.bindings.Station;
 import org.atlasapi.remotesite.pa.channels.bindings.TvChannelData;
 
@@ -61,6 +62,7 @@ public class PaChannelDataHandler {
     private final ChannelResolver channelResolver;
     private final ChannelWriter channelWriter;
     private final Map<String, Channel> channelMap = Maps.newHashMap();
+    private final ChannelNumberingFilterer numberingFilterer;
     
     public PaChannelDataHandler(PaChannelsIngester channelsIngester, PaChannelGroupsIngester channelGroupsIngester, ChannelResolver channelResolver, ChannelWriter channelWriter, ChannelGroupResolver channelGroupResolver, ChannelGroupWriter channelGroupWriter) {
         this.channelsIngester = channelsIngester;
@@ -69,6 +71,7 @@ public class PaChannelDataHandler {
         this.channelWriter = channelWriter;
         this.channelGroupResolver = channelGroupResolver;
         this.channelGroupWriter = channelGroupWriter;
+        this.numberingFilterer = new ChannelNumberingFilterer(channelGroupResolver);
     }
     
     public void handle(TvChannelData channelData) {
@@ -97,7 +100,7 @@ public class PaChannelDataHandler {
             ChannelGroupTree channelGroupTree = channelGroupsIngester.processPlatform(paPlatform, channelData.getServiceProviders().getServiceProvider(), channelData.getRegions().getRegion());
             
             Platform platform = (Platform) createOrMerge(channelGroupTree.getPlatform());
-            
+
             if (channelGroupTree.getRegions().isEmpty()) {
                 // non-regionalised platform
                 channelGroupsIngester.addChannelsToPlatform(platform, paPlatform.getEpg().getEpgContent(), channelMap);
@@ -182,12 +185,11 @@ public class PaChannelDataHandler {
             existingChannel.setHighDefinition(newChannel.getHighDefinition());
             existingChannel.setRegional(newChannel.getRegional());
             existingChannel.setTimeshift(newChannel.getTimeshift());
-            // This is so that channelgroups added to a channel by the BT Channel ingest
-            // aren't overwritten with just PA channelgroups
-            // NB this makes us vulnerable to changes in the PA channel data:
-            // if they change remove channelgroup from the set of channelgroups linked to a channel, we
-            // won't remove them from the channel. There may be a cleverer merging strategy.
-            existingChannel.setChannelNumbers(Sets.union(newChannel.getChannelNumbers(), existingChannel.getChannelNumbers()));
+            // unions new PA numberings with existing non-PA numberings
+            existingChannel.setChannelNumbers(Sets.union(
+                    newChannel.getChannelNumbers(), 
+                    Sets.newHashSet(numberingFilterer.filterNotEqualToGroupPublisher(existingChannel.getChannelNumbers(), Publisher.METABROADCAST))
+            ));
             
             return channelWriter.createOrUpdate(existingChannel);
         } else {

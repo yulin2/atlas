@@ -2,9 +2,12 @@ package org.atlasapi.remotesite.getty;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.HashMap;
+
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -26,7 +29,24 @@ public class DefaultGettyDataHandler implements GettyDataHandler {
         this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(writer);
         this.extractor = checkNotNull(extractor);
-        this.contentMerger = new ContentMerger(MergeStrategy.MERGE);
+        this.contentMerger = new ContentMerger(MergeStrategy.MERGE){
+            @Override
+            public Item merge(Item current, Item extracted) {
+                Item merged = super.merge(current, extracted);
+
+                HashMap<Long, TopicRef> mergedRefs = new HashMap<Long, TopicRef>();
+                for (TopicRef topicRef : merged.getTopicRefs()) {
+                    mergedRefs.put(topicRef.getTopic(), topicRef);
+                }
+                for (TopicRef topicRef : extracted.getTopicRefs()) {
+                    mergedRefs.put(topicRef.getTopic(), topicRef);
+                }
+
+                merged.setTopicRefs(mergedRefs.values());
+                return merged;
+            }
+            // TODO support merging TopicRefs in ContentMerger -- but remember to handle offsets!
+        };
     }
     
     @Override

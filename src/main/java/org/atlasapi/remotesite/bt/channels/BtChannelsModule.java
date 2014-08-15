@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bt.channels;
 
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.channel.ChannelGroupResolver;
@@ -9,10 +11,12 @@ import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.bt.channels.mpxclient.BtMpxClient;
 import org.atlasapi.remotesite.bt.channels.mpxclient.GsonBtMpxClient;
+import org.atlasapi.remotesite.pa.PaModule;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
@@ -20,7 +24,7 @@ import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
-
+@Import( PaModule.class )
 public class BtChannelsModule {
 
     private static final String URI_PREFIX = "http://tv-channels.bt.com/";
@@ -48,6 +52,9 @@ public class BtChannelsModule {
     @Autowired
     private SimpleScheduler scheduler;
     
+    @Autowired
+    private WriteLock channelWriterLock;
+    
     @Bean
     public BtMpxClient btMpxClient() {
         return new GsonBtMpxClient(httpClient(), baseUri);
@@ -61,7 +68,7 @@ public class BtChannelsModule {
     public BtChannelGroupUpdater productionChannelGroupUpdater() {
         return new BtChannelGroupUpdater(btMpxClient(), Publisher.BT_TV_CHANNELS, 
                 URI_PREFIX,  "bt", channelGroupResolver, channelGroupWriter, 
-                channelResolver, channelWriter, allChannelsUpdater());
+                channelResolver, channelWriter, allChannelsUpdater(), channelWriterLock);
     }
     
     @Bean

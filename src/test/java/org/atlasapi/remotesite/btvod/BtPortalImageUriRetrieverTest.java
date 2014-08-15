@@ -23,7 +23,6 @@ public class BtPortalImageUriRetrieverTest {
     private static final String BASE_URI = "http://example.org/";
     private static final String PRODUCT_ID_WITH_IMAGE = "1";
     private static final String PRODUCT_ID_WITHOUT_IMAGE = "2";
-    private static final String PRODUCT_ID_WITH_NO_REMOTE_URI = "3";
     
     private String fileContentsFromResource(String resourceName)  {
         try {
@@ -35,9 +34,9 @@ public class BtPortalImageUriRetrieverTest {
     }
     
     private final SimpleHttpClient httpClient = new FixedResponseHttpClient(
-            ImmutableMap.of(BASE_URI + "xml/" + PRODUCT_ID_WITH_IMAGE + ".xml", 
+            ImmutableMap.of(BASE_URI + "xml/product/" + PRODUCT_ID_WITH_IMAGE + ".xml", 
                             fileContentsFromResource("bt-vod-example.xml"),
-                            BASE_URI + "xml/" + PRODUCT_ID_WITHOUT_IMAGE + ".xml",
+                            BASE_URI + "xml/product/" + PRODUCT_ID_WITHOUT_IMAGE + ".xml",
                             fileContentsFromResource("bt-vod-example-no-image.xml")));
     
     private final BtPortalImageUriProvider uriRetriever = new BtPortalImageUriProvider(httpClient, BASE_URI);

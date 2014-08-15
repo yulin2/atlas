@@ -71,6 +71,6 @@ public class BtPortalImageUriProvider implements ImageUriProvider {
     }
     
     private String productUriFor(String productId) {
-        return baseUri + "xml/" + productId + ".xml";
+        return baseUri + "xml/product/" + productId + ".xml";
     }
 }

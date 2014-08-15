@@ -39,17 +39,17 @@ public class C4LocationPolicyIds {
             
         }
         
-        public Builder withWebServiceId(long webServiceId) {
+        public Builder withWebServiceId(Long webServiceId) {
             this.webServiceId = webServiceId;
             return this;
         }
         
-        public Builder withIosServiceId(long iOsServiceId) {
+        public Builder withIosServiceId(Long iOsServiceId) {
             this.iOsServiceId = iOsServiceId;
             return this;
         }
         
-        public Builder withPlayerId(long playerId) {
+        public Builder withPlayerId(Long playerId) {
             this.playerId = playerId;
             return this;
         }
