@@ -17,6 +17,7 @@ import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.Event;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
@@ -25,6 +26,7 @@ import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.atlasapi.media.entity.simple.ChannelQueryResult;
 import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
+import org.atlasapi.media.entity.simple.EventQueryResult;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
 import org.atlasapi.media.entity.simple.ProductQueryResult;
 import org.atlasapi.media.entity.simple.ScheduleQueryResult;
@@ -41,14 +43,15 @@ import org.atlasapi.output.SimpleChannelGroupModelWriter;
 import org.atlasapi.output.SimpleChannelModelWriter;
 import org.atlasapi.output.SimpleContentGroupModelWriter;
 import org.atlasapi.output.SimpleContentModelWriter;
+import org.atlasapi.output.SimpleEventModelWriter;
 import org.atlasapi.output.SimplePersonModelWriter;
 import org.atlasapi.output.SimpleProductModelWriter;
 import org.atlasapi.output.SimpleScheduleModelWriter;
 import org.atlasapi.output.SimpleTopicModelWriter;
 import org.atlasapi.output.rdf.RdfXmlTranslator;
-import org.atlasapi.output.simple.ChannelGroupSummarySimplifier;
 import org.atlasapi.output.simple.ChannelGroupModelSimplifier;
 import org.atlasapi.output.simple.ChannelGroupSimplifier;
+import org.atlasapi.output.simple.ChannelGroupSummarySimplifier;
 import org.atlasapi.output.simple.ChannelModelSimplifier;
 import org.atlasapi.output.simple.ChannelNumberingChannelGroupModelSimplifier;
 import org.atlasapi.output.simple.ChannelNumberingChannelModelSimplifier;
@@ -57,8 +60,11 @@ import org.atlasapi.output.simple.ChannelNumberingsChannelToChannelGroupModelSim
 import org.atlasapi.output.simple.ChannelSimplifier;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ContentGroupModelSimplifier;
+import org.atlasapi.output.simple.EventModelSimplifier;
+import org.atlasapi.output.simple.EventRefModelSimplifier;
 import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
+import org.atlasapi.output.simple.OrganisationModelSimplifier;
 import org.atlasapi.output.simple.PersonModelSimplifier;
 import org.atlasapi.output.simple.PlayerModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
@@ -75,6 +81,7 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.people.PersonStore;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.event.EventResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
@@ -94,6 +101,7 @@ import org.atlasapi.query.v2.ChannelController;
 import org.atlasapi.query.v2.ChannelGroupController;
 import org.atlasapi.query.v2.ContentGroupController;
 import org.atlasapi.query.v2.ContentWriteController;
+import org.atlasapi.query.v2.EventsController;
 import org.atlasapi.query.v2.PeopleController;
 import org.atlasapi.query.v2.PeopleWriteController;
 import org.atlasapi.query.v2.ProductController;
@@ -143,6 +151,7 @@ public class QueryWebModule {
     private @Autowired PlayerResolver playerResolver;
     private @Autowired LookupEntryStore lookupStore;
     private @Autowired DescriptionWatermarker descriptionWatermarker;
+    private @Autowired EventResolver eventResolver;
 
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
@@ -296,6 +305,11 @@ public class QueryWebModule {
     ContentGroupController contentGroupController() {
         return new ContentGroupController(contentGroupResolver, queryExecutor, configFetcher, log, contentGroupOutputter(), queryController());
     }
+    
+    @Bean
+    EventsController eventController() {
+        return new EventsController(configFetcher, log, eventModelOutputter(), idCodec(), eventResolver, topicResolver);
+    }
 
     @Bean
     AtlasModelWriter<QueryResult<Identified, ? extends Identified>> contentModelOutputter() {
@@ -309,9 +323,27 @@ public class QueryWebModule {
         RecentlyBroadcastChildrenResolver recentChildren = new MongoRecentlyBroadcastChildrenResolver(mongo);
         NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo, idCodec);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(contentItemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableItemsResolver(), upcomingItemsResolver(), productResolver, recentChildren, imageSimplifier(),peopleQueryResolver,containerSummary);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(contentItemModelSimplifier(), localHostName, 
+                contentGroupResolver, topicResolver, availableItemsResolver(), upcomingItemsResolver(), productResolver, 
+                recentChildren, imageSimplifier(), peopleQueryResolver, containerSummary, eventRefSimplifier());
         containerSimplier.exposeIds(Boolean.valueOf(exposeIds));
         return containerSimplier;
+    }
+    
+    @Bean
+    EventRefModelSimplifier eventRefSimplifier() {
+        return new EventRefModelSimplifier(eventSimplifier(), eventResolver, idCodec());
+    }
+
+    
+    @Bean
+    EventModelSimplifier eventSimplifier() {
+        return new EventModelSimplifier(topicSimplifier(), personSimplifier(), organisationSimplifier(), idCodec());
+    }
+    
+    @Bean
+    OrganisationModelSimplifier organisationSimplifier() {
+        return new OrganisationModelSimplifier(imageSimplifier(), personSimplifier());
     }
 
     @Bean
@@ -348,7 +380,7 @@ public class QueryWebModule {
                 topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, 
                 idCodec, channelIdCodec, imageSimplifier(),peopleQueryResolver, upcomingItemsResolver(), 
                 availableItemsResolver(), watermarker, playerResolver, playerSimplifier(),
-                serviceResolver, serviceSimplifier());
+                serviceResolver, serviceSimplifier(), eventRefSimplifier());
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }
@@ -375,6 +407,14 @@ public class QueryWebModule {
         return this.<Iterable<Topic>>standardWriter(
                 new SimpleTopicModelWriter(new JsonTranslator<TopicQueryResult>(), contentResolver, topicModelSimplifier),
                 new SimpleTopicModelWriter(new JaxbXmlTranslator<TopicQueryResult>(), contentResolver, topicModelSimplifier));
+    }
+
+    @Bean
+    AtlasModelWriter<Iterable<Event>> eventModelOutputter() {
+        EventModelSimplifier eventModelSimplifier = eventSimplifier();
+        return this.<Iterable<Event>>standardWriter(
+                new SimpleEventModelWriter(new JsonTranslator<EventQueryResult>(), contentResolver, eventModelSimplifier),
+                new SimpleEventModelWriter(new JaxbXmlTranslator<EventQueryResult>(), contentResolver, eventModelSimplifier));
     }
 
     @Bean

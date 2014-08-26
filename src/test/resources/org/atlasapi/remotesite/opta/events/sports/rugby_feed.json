@@ -1,0 +1,60 @@
+{
+    "fixtures": {
+        "fixture": [
+            {
+                "@attributes": {
+                    "comp_id": "201",
+                    "comp_name": "Aviva Premiership",
+                    "game_date": "20140905",
+                    "group": "1",
+                    "group_name": "1",
+                    "id": "115014",
+                    "leg": "1",
+                    "live_scores": "11",
+                    "public": "1",
+                    "round": "1",
+                    "round_type_id": "1",
+                    "season_id": "2015",
+                    "stage": "1",
+                    "time": "19:45:00",
+                    "venue": "Franklin's Gardens",
+                    "venue_id": "28"
+                },
+                "team": [
+                    {
+                        "@attributes": {
+                            "home_or_away": "home",
+                            "team_id": "1400"
+                        },
+                        "@value": ""
+                    },
+                    {
+                        "@attributes": {
+                            "home_or_away": "away",
+                            "team_id": "1100"
+                        },
+                        "@value": ""
+                    }
+                ]
+            }
+        ],
+        "teams": {
+            "team": [
+                {
+                    "@attributes": {
+                        "id": "1100",
+                        "name": "Gloucester"
+                    },
+                    "@value": ""
+                },
+                {
+                    "@attributes": {
+                        "id": "1400",
+                        "name": "Northampton"
+                    },
+                    "@value": ""
+                }
+            ]
+        }
+    }
+}

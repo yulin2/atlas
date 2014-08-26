@@ -8,14 +8,15 @@ import static org.mockito.Mockito.verify;
 import java.util.Set;
 
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
+import org.atlasapi.output.simple.EventRefModelSimplifier;
 import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.PersonModelSimplifier;
@@ -65,6 +66,7 @@ public class FullToSimpleModelTranslatorTest {
     private final UpcomingItemsResolver upcomingResolver = mock(UpcomingItemsResolver.class);
     private final AvailableItemsResolver availableResolver = mock(AvailableItemsResolver.class);
     private final PersonModelSimplifier personSimplifier = mock(PersonModelSimplifier.class);
+    private EventRefModelSimplifier eventSimplifier = mock(EventRefModelSimplifier.class);
 
     private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(
             "localhostName", 
@@ -84,7 +86,8 @@ public class FullToSimpleModelTranslatorTest {
             null,
             null,
             null,
-            null
+            null,
+            eventSimplifier 
     );
     private final SimpleContentModelWriter translator = new SimpleContentModelWriter(
             xmlOutputter, 
@@ -100,7 +103,8 @@ public class FullToSimpleModelTranslatorTest {
                     recentChildren, 
                     imageSimplifier,
                     peopleResolver,
-                    containerSummaryResolver
+                    containerSummaryResolver,
+                    eventSimplifier
             ), 
             topicSimplifier, 
             productSimplifier, 

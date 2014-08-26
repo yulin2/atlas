@@ -1,7 +1,5 @@
 package org.atlasapi.output.simple;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,7 +21,6 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Player;
 import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.ReleaseDate;
 import org.atlasapi.media.entity.Service;
 import org.atlasapi.media.entity.Song;
@@ -54,9 +51,9 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 import com.metabroadcast.common.base.Maybe;
@@ -112,11 +109,11 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver, UpcomingItemsResolver upcomingResolver, 
             AvailableItemsResolver availableResolver, @Nullable DescriptionWatermarker descriptionWatermarker,
             PlayerResolver playerResolver, PlayerModelSimplifier playerModelSimplifier, 
-            ServiceResolver serviceResolver, ServiceModelSimplifier serviceModelSimplifier) {
+            ServiceResolver serviceResolver, ServiceModelSimplifier serviceModelSimplifier, EventRefModelSimplifier eventSimplifier) {
         this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, 
                 containerSummaryResolver, channelResolver, idCodec, channelIdCodec, new SystemClock(), 
                 imageSimplifier, personResolver, upcomingResolver, availableResolver, descriptionWatermarker,
-                playerResolver, playerModelSimplifier, serviceResolver, serviceModelSimplifier);
+                playerResolver, playerModelSimplifier, serviceResolver, serviceModelSimplifier, eventSimplifier);
     }
 
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, 
@@ -126,10 +123,10 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             ImageSimplifier imageSimplifier, PeopleQueryResolver personResolver, UpcomingItemsResolver upcomingResolver, 
             AvailableItemsResolver availableResolver, @Nullable DescriptionWatermarker descriptionWatermarker,
             PlayerResolver playerResolver, PlayerModelSimplifier playerModelSimplifier, 
-            ServiceResolver serviceResolver, ServiceModelSimplifier serviceModelSimplifier) {
+            ServiceResolver serviceResolver, ServiceModelSimplifier serviceModelSimplifier, EventRefModelSimplifier eventSimplifier) {
         
         super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, 
-                personResolver, upcomingResolver, availableResolver, descriptionWatermarker);
+                personResolver, upcomingResolver, availableResolver, descriptionWatermarker, eventSimplifier);
         
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
