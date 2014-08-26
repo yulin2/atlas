@@ -11,7 +11,6 @@ import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.bbc.audience.AudienceModule;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
-import org.atlasapi.remotesite.bloomberg.BloombergModule;
 import org.atlasapi.remotesite.bt.channels.BtChannelsModule;
 import org.atlasapi.remotesite.btfeatured.BtFeaturedContentModule;
 import org.atlasapi.remotesite.btvod.BtVodModule;
@@ -23,7 +22,7 @@ import org.atlasapi.remotesite.itunes.ItunesModule;
 import org.atlasapi.remotesite.itv.ItvModule;
 import org.atlasapi.remotesite.itv.interlinking.ItvInterlinkingModule;
 import org.atlasapi.remotesite.itv.whatson.ItvWhatsOnModule;
-import org.atlasapi.remotesite.knowledgemotion.GlobalImageModule;
+import org.atlasapi.remotesite.knowledgemotion.KnowledgeMotionModule;
 import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
 import org.atlasapi.remotesite.metabroadcast.MetaBroadcastModule;
 import org.atlasapi.remotesite.music.emipub.EmiPubModule;
@@ -90,8 +89,7 @@ public class RemoteSiteModuleConfigurer {
         .put("bt-channels", BtChannelsModule.class)
         .put("bbc-audience-data", AudienceModule.class)
         .put("btvod", BtVodModule.class)
-        .put("bloomberg", BloombergModule.class)
-        .put("globalimageworks", GlobalImageModule.class)
+        .put("knowledgemotion", KnowledgeMotionModule.class)
         .put("getty", GettyModule.class)
     .build();
 
