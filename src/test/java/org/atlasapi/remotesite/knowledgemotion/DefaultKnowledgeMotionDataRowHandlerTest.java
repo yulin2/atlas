@@ -17,6 +17,7 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.OngoingStubbing;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 
 public class DefaultKnowledgeMotionDataRowHandlerTest {
@@ -26,8 +27,9 @@ public class DefaultKnowledgeMotionDataRowHandlerTest {
     
     private final ContentResolver resolver = mock(ContentResolver.class);
     private final ContentWriter writer = mock(ContentWriter.class);
+
     @SuppressWarnings("unchecked")
-    private final ContentExtractor<KnowledgeMotionDataRow, Content> extractor = mock(ContentExtractor.class);
+    private final ContentExtractor<KnowledgeMotionDataRow, Optional<? extends Content>> extractor = mock(ContentExtractor.class);
     
     private final DefaultKnowledgeMotionDataRowHandler handler = new DefaultKnowledgeMotionDataRowHandler(resolver, writer, extractor);
     
@@ -50,8 +52,8 @@ public class DefaultKnowledgeMotionDataRowHandlerTest {
         item2.setTitle("title2");
         
         for(Content content : ImmutableList.<Content>of(item1, item2)) {
-            OngoingStubbing<Content> stubbing = Mockito.<Content>when(extractor.extract(EMPTY_ROW));
-            stubbing = stubbing.thenReturn(content);
+            OngoingStubbing<Optional<? extends Content>> stubbing = Mockito.<Optional<? extends Content>>when(extractor.extract(EMPTY_ROW));
+            stubbing = stubbing.thenReturn(Optional.of(content));
             
             when(resolver.findByCanonicalUris(Matchers.<Iterable<String>>any())).thenReturn(NOTHING_RESOLVED);
             handler.handle(EMPTY_ROW);

@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.knowledgemotion;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -24,7 +25,9 @@ public class KnowledgeMotionModule {
     private @Autowired ContentWriter contentWriter;
     private @Autowired GoogleSpreadsheetModule spreadsheet;
 
-    private static final ImmutableList<KnowledgeMotionSourceConfig> SOURCES = ImmutableList.of(
+    static final ImmutableList<KnowledgeMotionSourceConfig> SOURCES = ImmutableList.of(
+            KnowledgeMotionSourceConfig.from("GlobalImageworks", Publisher.KM_GLOBALIMAGEWORKS, "globalImageWorks:%s", "http://globalimageworks.com/%s"),
+            KnowledgeMotionSourceConfig.from("Bloomberg", Publisher.KM_BLOOMBERG, "bloomberg:%s", "http://bloomberg.com/%s")
     );
 
     @PostConstruct

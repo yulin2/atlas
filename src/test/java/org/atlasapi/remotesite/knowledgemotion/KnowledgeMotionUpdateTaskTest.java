@@ -33,7 +33,7 @@ public class KnowledgeMotionUpdateTaskTest {
         WorksheetEntry worksheet = new WorksheetEntry();
         ListFeed feed = new ListFeed();
         ListEntry entry = new ListEntry();
-        entry.getCustomElements().setValueLocal(KnowledgeMotionSpreadsheetColumn.SOURCE.getValue(), KnowledgeMotionUpdateTask.GLOBALIMAGE_ROW_HEADER);
+        entry.getCustomElements().setValueLocal(KnowledgeMotionSpreadsheetColumn.SOURCE.getValue(), "Arbitrary Source");
         feed.setEntries(ImmutableList.of(entry));
         
         when(spreadsheetFetcher.getSpreadsheetByTitle(Matchers.anyString())).thenReturn(ImmutableList.of(spreadsheet));
