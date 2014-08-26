@@ -20,7 +20,7 @@ public class IdConversionTest {
     
     @Test
     public void testLowerCaseDecoding() {
-        Set<String> stringids = ImmutableSet.of("ckrnh");
+        Set<String> stringids = ImmutableSet.of("hkzf","hkzv","hky6","hky4","hk2m");
         
         for (String strId : stringids) {
             System.out.print("NumberLong(" + lowerCase.decode(strId) + "), ");
@@ -38,7 +38,7 @@ public class IdConversionTest {
     
     @Test
     public void testToString() {
-        Set<Long> ids = ImmutableSet.of(104253l, 104255l, 104257l, 104259l);
+        Set<Long> ids = ImmutableSet.of(104261l);
         
         for (Long id : ids) {
             System.out.println(id + " " + lowerCase.encode(BigInteger.valueOf(id)) + " " + upperCase.encode(BigInteger.valueOf(id)));

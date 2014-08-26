@@ -1,0 +1,121 @@
+{
+    "SoccerFeed": {
+        "SoccerDocument": {
+            "@attributes": {
+                "Type": "RESULTS Latest",
+                "competition_code": "DE_BL",
+                "competition_id": "22",
+                "competition_name": "German Bundesliga",
+                "game_system_id": "1",
+                "season_id": "2014",
+                "season_name": "Season 2014/2015",
+                "timestamp": "2014-08-05 09-01-03"
+            },
+            "MatchData": [
+                {
+                    "@attributes": {
+                        "detail_id": "1",
+                        "last_modified": "2014-06-24T12:29:59+00:00",
+                        "timestamp_accuracy_id": "1",
+                        "timing_id": "1",
+                        "uID": "g758690"
+                    },
+                    "MatchInfo": {
+                        "@attributes": {
+                            "MatchDay": "6",
+                            "MatchType": "Regular",
+                            "Period": "PreMatch",
+                            "Venue_id": "1372"
+                        },
+                        "Date": {
+                            "@attributes": {
+                                "TBC": "1"
+                            },
+                            "@value": "2014-09-27 14:30:00"
+                        },
+                        "TZ": "BST"
+                    },
+                    "Stat": [
+                        {
+                            "@attributes": {
+                                "Type": "Venue"
+                            },
+                            "@value": "RheinEnergieStadion"
+                        },
+                        {
+                            "@attributes": {
+                                "Type": "City"
+                            },
+                            "@value": "K\u00f6ln"
+                        }
+                    ],
+                    "TeamData": [
+                        {
+                            "@attributes": {
+                                "Side": "Home",
+                                "TeamRef": "t387"
+                            },
+                            "@value": ""
+                        },
+                        {
+                            "@attributes": {
+                                "Side": "Away",
+                                "TeamRef": "t156"
+                            },
+                            "@value": ""
+                        }
+                    ]
+                }
+            ],
+            "Team": [
+                {
+                    "@attributes": {
+                        "uID": "t387"
+                    },
+                    "Name": "1. FC K\u00f6ln"
+                },
+                {
+                    "@attributes": {
+                        "uID": "t156"
+                    },
+                    "Name": "FC Bayern M\u00fcnchen"
+                }
+            ],
+            "TimingTypes": {
+                "DetailTypes": {
+                    "DetailType": [
+                        {
+                            "@attributes": {
+                                "detail_id": "1",
+                                "name": "All Events (with positions)"
+                            },
+                            "@value": ""
+                        }
+                    ]
+                },
+                "TimestampAccuracyTypes": {
+                    "TimestampAccuracyType": [
+                        {
+                            "@attributes": {
+                                "name": "Fully Accurate Timestamps (24hr + Match Times)",
+                                "timing_id": "1"
+                            },
+                            "@value": ""
+                        }
+                    ]
+                },
+                "TimingType": {
+                    "TimingType": [
+                        {
+                            "@attributes": {
+                                "name": "Live",
+                                "timestamp_accuracy_id": "1"
+                            },
+                            "@value": ""
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
