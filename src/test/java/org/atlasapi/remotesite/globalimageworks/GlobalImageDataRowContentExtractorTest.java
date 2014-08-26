@@ -35,12 +35,12 @@ public class GlobalImageDataRowContentExtractorTest {
         Content content = extractor.extract(row);
         Item item = (Item) content;
         assertThat(item.getCanonicalUri(), endsWith("id"));
-        assertEquals(item.getPublisher(), Publisher.GLOBALIMAGEWORKS);
+        assertEquals(item.getPublisher(), Publisher.KM_GLOBALIMAGEWORKS);
         assertEquals("description", item.getDescription());
         assertEquals("title", item.getTitle());
         assertEquals(MediaType.VIDEO, item.getMediaType());
         assertEquals(Integer.valueOf(61), Iterables.getOnlyElement(item.getVersions()).getDuration());
-        assertEquals(new KeyPhrase("key", Publisher.GLOBALIMAGEWORKS), Iterables.getOnlyElement(item.getKeyPhrases()));
+        assertEquals(new KeyPhrase("key", Publisher.KM_GLOBALIMAGEWORKS), Iterables.getOnlyElement(item.getKeyPhrases()));
     }
     
 }

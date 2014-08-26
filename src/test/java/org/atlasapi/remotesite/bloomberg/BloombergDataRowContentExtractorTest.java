@@ -35,12 +35,12 @@ public class BloombergDataRowContentExtractorTest {
         Item item = (Item) content;
         assertThat(item.getCanonicalUri(), endsWith("id"));
         assertThat(item.getCurie(), endsWith("id"));
-        assertEquals(item.getPublisher(), Publisher.BLOOMBERG);
+        assertEquals(item.getPublisher(), Publisher.KM_BLOOMBERG);
         assertEquals("description", item.getDescription());
         assertEquals("title", item.getTitle());
         assertEquals(MediaType.VIDEO, item.getMediaType());
         assertEquals(Integer.valueOf(61), Iterables.getOnlyElement(item.getVersions()).getDuration());
-        assertEquals(new KeyPhrase("key", Publisher.BLOOMBERG), Iterables.getOnlyElement(item.getKeyPhrases()));
+        assertEquals(new KeyPhrase("key", Publisher.KM_BLOOMBERG), Iterables.getOnlyElement(item.getKeyPhrases()));
     }
     
 }

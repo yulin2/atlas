@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.globalimageworks;
 
-import static org.atlasapi.media.entity.Publisher.GLOBALIMAGEWORKS;
+import static org.atlasapi.media.entity.Publisher.KM_GLOBALIMAGEWORKS;
 
 import java.util.List;
 import java.util.Set;
@@ -58,7 +58,7 @@ public class GlobalImageDataRowContentExtractor implements ContentExtractor<Glob
         item.setFirstSeen(extractDate(source.getDate()));
         item.setDescription(source.getDescription());
         item.setTitle(source.getTitle());
-        item.setPublisher(GLOBALIMAGEWORKS);
+        item.setPublisher(KM_GLOBALIMAGEWORKS);
         item.setCanonicalUri(uri(id));
         item.setCurie(curie(id));
         item.setLastUpdated(new DateTime(DateTimeZone.UTC));
@@ -71,7 +71,7 @@ public class GlobalImageDataRowContentExtractor implements ContentExtractor<Glob
     private Iterable<KeyPhrase> keyphrases(List<String> keywords) {
         Builder<KeyPhrase> keyphrases = new ImmutableList.Builder<KeyPhrase>();
         for (String keyword : keywords) {
-            keyphrases.add(new KeyPhrase(keyword, GLOBALIMAGEWORKS));
+            keyphrases.add(new KeyPhrase(keyword, KM_GLOBALIMAGEWORKS));
         }
         return keyphrases.build();
     }

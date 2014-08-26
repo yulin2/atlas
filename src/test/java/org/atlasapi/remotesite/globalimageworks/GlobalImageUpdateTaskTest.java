@@ -5,7 +5,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.spreadsheet.SpreadsheetFetcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +33,7 @@ public class GlobalImageUpdateTaskTest {
         WorksheetEntry worksheet = new WorksheetEntry();
         ListFeed feed = new ListFeed();
         ListEntry entry = new ListEntry();
-        entry.getCustomElements().setValueLocal(GlobalImageSpreadsheetColumn.SOURCE.getValue(), Publisher.GLOBALIMAGEWORKS.title());
+        entry.getCustomElements().setValueLocal(GlobalImageSpreadsheetColumn.SOURCE.getValue(), GlobalImageUpdateTask.GLOBALIMAGE_ROW_HEADER);
         feed.setEntries(ImmutableList.of(entry));
         
         when(spreadsheetFetcher.getSpreadsheetByTitle(Matchers.anyString())).thenReturn(ImmutableList.of(spreadsheet));

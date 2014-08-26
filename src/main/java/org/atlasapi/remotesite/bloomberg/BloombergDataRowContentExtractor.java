@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.bloomberg;
 
-import static org.atlasapi.media.entity.Publisher.BLOOMBERG;
+import static org.atlasapi.media.entity.Publisher.KM_BLOOMBERG;
 
 import java.util.List;
 import java.util.Set;
@@ -56,7 +56,7 @@ public class BloombergDataRowContentExtractor implements ContentExtractor<Bloomb
         item.setFirstSeen(extractDate(source.getDate()));
         item.setDescription(source.getDescription());
         item.setTitle(source.getTitle());
-        item.setPublisher(BLOOMBERG);
+        item.setPublisher(KM_BLOOMBERG);
         item.setCanonicalUri(uri(id));
         item.setCurie(curie(id));
         item.setLastUpdated(new DateTime(DateTimeZone.UTC));
@@ -69,7 +69,7 @@ public class BloombergDataRowContentExtractor implements ContentExtractor<Bloomb
     private Iterable<KeyPhrase> keyphrases(List<String> keywords) {
         Builder<KeyPhrase> keyphrases = new ImmutableList.Builder<KeyPhrase>();
         for (String keyword : keywords) {
-            keyphrases.add(new KeyPhrase(keyword, BLOOMBERG));
+            keyphrases.add(new KeyPhrase(keyword, KM_BLOOMBERG));
         }
         return keyphrases.build();
     }

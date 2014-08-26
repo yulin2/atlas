@@ -5,7 +5,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.spreadsheet.SpreadsheetFetcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +33,7 @@ public class BloombergUpdateTaskTest {
         WorksheetEntry worksheet = new WorksheetEntry();
         ListFeed feed = new ListFeed();
         ListEntry entry = new ListEntry();
-        entry.getCustomElements().setValueLocal(BloombergSpreadsheetColumn.SOURCE.getValue(), Publisher.BLOOMBERG.title());
+        entry.getCustomElements().setValueLocal(BloombergSpreadsheetColumn.SOURCE.getValue(), BloombergUpdateTask.BLOOMBERG_ROW_HEADER);
         feed.setEntries(ImmutableList.of(entry));
         
         when(spreadsheetFetcher.getSpreadsheetByTitle(Matchers.anyString())).thenReturn(ImmutableList.of(spreadsheet));

@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.bloomberg;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.atlasapi.media.entity.Publisher.BLOOMBERG;
 import static org.atlasapi.remotesite.bloomberg.BloombergSpreadsheetColumn.ID;
 
 import org.atlasapi.spreadsheet.SpreadsheetFetcher;
@@ -27,7 +26,9 @@ public class BloombergUpdateTask extends ScheduledTask {
     private final SpreadsheetFetcher spreadsheetFetcher;
     private final BloombergAdapter adapter;
     private final BloombergDataRowHandler dataHandler;
-    
+
+    final static String BLOOMBERG_ROW_HEADER = "Bloomberg";
+
     public BloombergUpdateTask(SpreadsheetFetcher spreadsheetFetcher, 
             BloombergDataRowHandler dataHandler, BloombergAdapter adapter) {
         this.spreadsheetFetcher = checkNotNull(spreadsheetFetcher);
@@ -60,7 +61,7 @@ public class BloombergUpdateTask extends ScheduledTask {
     
     //needed because same spreadsheet contains multiple sources
     private void isBloomberg(BloombergDataProcessor<UpdateProgress> processor, CustomElementCollection customElements) {
-        if (customElements.getValue(BloombergSpreadsheetColumn.SOURCE.getValue()).equals(BLOOMBERG.title())) {
+        if (BLOOMBERG_ROW_HEADER.equals(customElements.getValue(BloombergSpreadsheetColumn.SOURCE.getValue()))) {
             processor.process(customElements);
         }
     }

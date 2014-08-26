@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.globalimageworks;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.atlasapi.media.entity.Publisher.GLOBALIMAGEWORKS;
 import static org.atlasapi.remotesite.globalimageworks.GlobalImageSpreadsheetColumn.ID;
 
 import org.atlasapi.spreadsheet.SpreadsheetFetcher;
@@ -27,7 +26,9 @@ private static final Logger log = LoggerFactory.getLogger(GlobalImageUpdateTask.
     private final SpreadsheetFetcher spreadsheetFetcher;
     private final GlobalImageAdapter adapter;
     private final GlobalImageDataRowHandler dataHandler;
-    
+
+    final static String GLOBALIMAGE_ROW_HEADER = "GlobalImageworks";
+
     public GlobalImageUpdateTask(SpreadsheetFetcher spreadsheetFetcher, 
             GlobalImageDataRowHandler dataHandler, GlobalImageAdapter adapter) {
         this.spreadsheetFetcher = checkNotNull(spreadsheetFetcher);
@@ -60,7 +61,7 @@ private static final Logger log = LoggerFactory.getLogger(GlobalImageUpdateTask.
     
     //needed because same spreadsheet contains multiple sources
     private void isGlobalImage(GlobalImageDataProcessor<UpdateProgress> processor, CustomElementCollection customElements) {
-        if (customElements.getValue(GlobalImageSpreadsheetColumn.SOURCE.getValue()).equals(GLOBALIMAGEWORKS.title())) {
+        if (GLOBALIMAGE_ROW_HEADER.equals(customElements.getValue(GlobalImageSpreadsheetColumn.SOURCE.getValue()))) {
             processor.process(customElements);
         }
     }
