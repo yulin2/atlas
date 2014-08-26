@@ -60,8 +60,7 @@ public class OptaEventsModule {
     private @Value("opta.events.http.username") String username;
     private @Value("opta.events.http.password") String password;
     
- // http://omo.akamai.opta.net/competition.php?feed_type=f1&competition=8&season_id=2014&user=owv2&psw=wacRUs5U&json
-    
+
     @PostConstruct
     public void startBackgroundTasks() {
         scheduler.schedule(soccerIngestTask().withName("Opta Soccer Events Updater"), RepetitionRules.NEVER);

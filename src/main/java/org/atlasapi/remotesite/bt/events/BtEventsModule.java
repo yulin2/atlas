@@ -43,22 +43,22 @@ public class BtEventsModule {
     }
     
     @Bean
-    private BtEventsIngestTask ingestTask() {
+    public BtEventsIngestTask ingestTask() {
         return new BtEventsIngestTask(fetcher(), dataHandler());
     }
     
     @Bean
-    private BtEventsDataHandler dataHandler() {
+    public BtEventsDataHandler dataHandler() {
         return new BtEventsDataHandler(organisationStore, eventStore, utility());
     }
     
     @Bean
-    private BtEventsUtility utility() {
+    public BtEventsUtility utility() {
         return new BtEventsUtility(topicStore);
     }
 
     @Bean
-    private BtEventsFetcher fetcher() {
+    public BtEventsFetcher fetcher() {
         return new S3BtEventsFetcher(s3Service(), fileNames(), s3BucketName, s3Folder);
     }
     
@@ -70,7 +70,7 @@ public class BtEventsModule {
     }
 
     @Bean
-    private S3Service s3Service() {
+    public S3Service s3Service() {
         try {
             ProviderCredentials credentials = new AWSCredentials(s3AccessKey, s3SecretAccessKey);
             return new RestS3Service(credentials);
