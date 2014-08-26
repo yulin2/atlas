@@ -1,12 +1,12 @@
-package org.atlasapi.remotesite.globalimageworks;
+package org.atlasapi.remotesite.knowledgemotion;
 
-import static org.atlasapi.remotesite.globalimageworks.GlobalImageSpreadsheetColumn.DATE;
-import static org.atlasapi.remotesite.globalimageworks.GlobalImageSpreadsheetColumn.DESCRIPTION;
-import static org.atlasapi.remotesite.globalimageworks.GlobalImageSpreadsheetColumn.DURATION;
-import static org.atlasapi.remotesite.globalimageworks.GlobalImageSpreadsheetColumn.ID;
-import static org.atlasapi.remotesite.globalimageworks.GlobalImageSpreadsheetColumn.KEYWORDS;
-import static org.atlasapi.remotesite.globalimageworks.GlobalImageSpreadsheetColumn.SOURCE;
-import static org.atlasapi.remotesite.globalimageworks.GlobalImageSpreadsheetColumn.TITLE;
+import static org.atlasapi.remotesite.knowledgemotion.KnowledgeMotionSpreadsheetColumn.DATE;
+import static org.atlasapi.remotesite.knowledgemotion.KnowledgeMotionSpreadsheetColumn.DESCRIPTION;
+import static org.atlasapi.remotesite.knowledgemotion.KnowledgeMotionSpreadsheetColumn.DURATION;
+import static org.atlasapi.remotesite.knowledgemotion.KnowledgeMotionSpreadsheetColumn.ID;
+import static org.atlasapi.remotesite.knowledgemotion.KnowledgeMotionSpreadsheetColumn.KEYWORDS;
+import static org.atlasapi.remotesite.knowledgemotion.KnowledgeMotionSpreadsheetColumn.SOURCE;
+import static org.atlasapi.remotesite.knowledgemotion.KnowledgeMotionSpreadsheetColumn.TITLE;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -14,9 +14,9 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.gdata.data.spreadsheet.CustomElementCollection;
 
-public class GlobalImageAdapterTest {
+public class KnowledgeMotionAdapterTest {
 
-private static final GlobalImageAdapter adapter = new GlobalImageAdapter();
+private static final KnowledgeMotionAdapter adapter = new KnowledgeMotionAdapter();
     
     private CustomElementCollection customElements() {
         CustomElementCollection customElements = new CustomElementCollection();
@@ -32,7 +32,7 @@ private static final GlobalImageAdapter adapter = new GlobalImageAdapter();
 
     @Test
     public void testRowConversionFromCustomElements() {
-        GlobalImageDataRow globalImageDataRow = adapter.globalImageDataRow(customElements());
+        KnowledgeMotionDataRow globalImageDataRow = adapter.dataRow(customElements());
         assertEquals("date", globalImageDataRow.getDate());
         assertEquals("description", globalImageDataRow.getDescription());
         assertEquals("duration", globalImageDataRow.getDuration());

@@ -1,9 +1,9 @@
-package org.atlasapi.remotesite.bloomberg;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
@@ -19,20 +19,20 @@ import org.mockito.stubbing.OngoingStubbing;
 
 import com.google.common.collect.ImmutableList;
 
-public class DefaultBloombergDataRowHandlerTest {
+public class DefaultKnowledgeMotionDataRowHandlerTest {
 
     private static final ResolvedContent NOTHING_RESOLVED = ResolvedContent.builder().build();
-    private static final BloombergDataRow EMPTY_ROW = emptyRow();
+    private static final KnowledgeMotionDataRow EMPTY_ROW = emptyRow();
     
     private final ContentResolver resolver = mock(ContentResolver.class);
     private final ContentWriter writer = mock(ContentWriter.class);
     @SuppressWarnings("unchecked")
-    private final ContentExtractor<BloombergDataRow, Content> extractor = mock(ContentExtractor.class);
+    private final ContentExtractor<KnowledgeMotionDataRow, Content> extractor = mock(ContentExtractor.class);
     
-    private final DefaultBloombergDataRowHandler handler = new DefaultBloombergDataRowHandler(resolver, writer, extractor);
+    private final DefaultKnowledgeMotionDataRowHandler handler = new DefaultKnowledgeMotionDataRowHandler(resolver, writer, extractor);
     
-    private static BloombergDataRow emptyRow() {
-        return BloombergDataRow.builder()
+    private static KnowledgeMotionDataRow emptyRow() {
+        return KnowledgeMotionDataRow.builder()
                 .withDate("date")
                 .withDescription("description")
                 .withDuration("duration")
@@ -44,9 +44,9 @@ public class DefaultBloombergDataRowHandlerTest {
     
     @Test
     public void testWritingContent() {
-        Item item1 = new Item("item1", "i", Publisher.KM_BLOOMBERG);
+        Item item1 = new Item("item1", "i", Publisher.KM_GLOBALIMAGEWORKS);
         item1.setTitle("title1");
-        Item item2 = new Item("item2", "i", Publisher.KM_BLOOMBERG);
+        Item item2 = new Item("item2", "i", Publisher.KM_GLOBALIMAGEWORKS);
         item2.setTitle("title2");
         
         for(Content content : ImmutableList.<Content>of(item1, item2)) {

@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.globalimageworks;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import javax.annotation.PostConstruct;
 
@@ -11,28 +11,32 @@ import org.atlasapi.spreadsheet.GoogleSpreadsheetModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
-public class GlobalImageModule {
+public class KnowledgeMotionModule {
 
     private @Autowired AdapterLog log;
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
     private @Autowired GoogleSpreadsheetModule spreadsheet;
-    
+
+    private static final ImmutableList<KnowledgeMotionSourceConfig> SOURCES = ImmutableList.of(
+    );
+
     @PostConstruct
     public void startBackgroundTasks() {
-        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("GlobalImageWorks updater"));
-        scheduler.schedule(globalImageUpdater().withName("GlobalImageWorks Spreadsheet Updater"), RepetitionRules.NEVER);
+        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("KnowledgeMotion Spreadsheet updater"));
+        scheduler.schedule(globalImageUpdater().withName("KnowledgeMotion Spreadsheet Updater"), RepetitionRules.NEVER);
     }
-    
-    private GlobalImageUpdateTask globalImageUpdater() {
-        return new GlobalImageUpdateTask(spreadsheet.spreadsheetFetcher(), 
-                new DefaultGlobalImageDataRowHandler(contentResolver, contentWriter, new GlobalImageDataRowContentExtractor()), 
-                new GlobalImageAdapter());
+
+    private KnowledgeMotionUpdateTask globalImageUpdater() {
+        return new KnowledgeMotionUpdateTask(spreadsheet.spreadsheetFetcher(), 
+                new DefaultKnowledgeMotionDataRowHandler(contentResolver, contentWriter, new KnowledgeMotionDataRowContentExtractor(SOURCES)), 
+                new KnowledgeMotionAdapter());
     }
-    
+
 }

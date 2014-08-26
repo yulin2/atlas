@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.bloomberg;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -11,27 +11,32 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.ContentMerger;
 import org.atlasapi.remotesite.ContentMerger.MergeStrategy;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 
-public class DefaultBloombergDataRowHandler implements BloombergDataRowHandler {
+public class DefaultKnowledgeMotionDataRowHandler implements KnowledgeMotionDataRowHandler {
 
     private final ContentResolver resolver;
     private final ContentWriter writer;
-    private final ContentExtractor<BloombergDataRow, Content> extractor;
+    private final ContentExtractor<KnowledgeMotionDataRow, Optional<? extends Content>> extractor;
     private final ContentMerger contentMerger;
-    
-    public DefaultBloombergDataRowHandler(ContentResolver resolver, ContentWriter writer, 
-            ContentExtractor<BloombergDataRow, Content> extractor) {
+
+    public DefaultKnowledgeMotionDataRowHandler(ContentResolver resolver, ContentWriter writer, 
+            ContentExtractor<KnowledgeMotionDataRow, Optional<? extends Content>> extractor) {
         this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(writer);
         this.extractor = checkNotNull(extractor);
         this.contentMerger = new ContentMerger(MergeStrategy.MERGE);
     }
-    
+
     @Override
-    public void handle(BloombergDataRow row) {
-        Content content = extractor.extract(row);
+    public void handle(KnowledgeMotionDataRow row) {
+        Content content = extractor.extract(row).orNull();
+        if (content == null) {
+            return;
+        }
+
         Maybe<Identified> existing = resolve(content.getCanonicalUri());
         if (existing.isNothing()) {
             write(content);
@@ -40,7 +45,7 @@ public class DefaultBloombergDataRowHandler implements BloombergDataRowHandler {
             write(contentMerger.merge(ContentMerger.asItem(identified), (Item) content));
         }
     }
-    
+
     private void write(Content content) {
         Item item = (Item) content;
         writer.createOrUpdate(item);

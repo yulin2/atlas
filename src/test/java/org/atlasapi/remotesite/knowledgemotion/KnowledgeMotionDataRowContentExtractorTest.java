@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.globalimageworks;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.junit.Assert.assertEquals;
@@ -14,14 +14,14 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-public class GlobalImageDataRowContentExtractorTest {
+public class KnowledgeMotionDataRowContentExtractorTest {
 
-    private final GlobalImageDataRowContentExtractor extractor = new GlobalImageDataRowContentExtractor();
+    private final KnowledgeMotionDataRowContentExtractor extractor = new KnowledgeMotionDataRowContentExtractor();
     
     @Test
     public void testExtractItem() {
         
-        GlobalImageDataRow row = GlobalImageDataRow.builder()
+        KnowledgeMotionDataRow row = KnowledgeMotionDataRow.builder()
                 .withDate("2014-01-01")
                 .withDescription("description")
                 .withDuration("0:01:01;10")

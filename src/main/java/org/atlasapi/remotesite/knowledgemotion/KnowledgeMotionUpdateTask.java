@@ -1,7 +1,6 @@
-package org.atlasapi.remotesite.globalimageworks;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.atlasapi.remotesite.globalimageworks.GlobalImageSpreadsheetColumn.ID;
 
 import org.atlasapi.spreadsheet.SpreadsheetFetcher;
 import org.slf4j.Logger;
@@ -18,78 +17,69 @@ import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
-public class GlobalImageUpdateTask extends ScheduledTask {
+public class KnowledgeMotionUpdateTask extends ScheduledTask {
 
-private static final Logger log = LoggerFactory.getLogger(GlobalImageUpdateTask.class);
+private static final Logger log = LoggerFactory.getLogger(KnowledgeMotionUpdateTask.class);
     
     private final String spreadsheetTitle = Configurer.get("spreadsheet.title").get();
     private final SpreadsheetFetcher spreadsheetFetcher;
-    private final GlobalImageAdapter adapter;
-    private final GlobalImageDataRowHandler dataHandler;
+    private final KnowledgeMotionAdapter adapter;
+    private final KnowledgeMotionDataRowHandler dataHandler;
 
-    final static String GLOBALIMAGE_ROW_HEADER = "GlobalImageworks";
-
-    public GlobalImageUpdateTask(SpreadsheetFetcher spreadsheetFetcher, 
-            GlobalImageDataRowHandler dataHandler, GlobalImageAdapter adapter) {
+    public KnowledgeMotionUpdateTask(SpreadsheetFetcher spreadsheetFetcher, 
+            KnowledgeMotionDataRowHandler dataHandler, KnowledgeMotionAdapter adapter) {
         this.spreadsheetFetcher = checkNotNull(spreadsheetFetcher);
         this.dataHandler = checkNotNull(dataHandler);
         this.adapter = checkNotNull(adapter);
     }
-    
+
     @Override
     protected void runTask() {
         try {
             ListFeed data = fetchData();
-            GlobalImageDataProcessor<UpdateProgress> processor = processor();
+            KnowledgeMotionDataProcessor<UpdateProgress> processor = processor();
             for (ListEntry row : data.getEntries()) {
-                isGlobalImage(processor, row.getCustomElements());
+                processor.process(row.getCustomElements());
             }
-            
+
             reportStatus(processor.getResult().toString());
-            
+
         } catch (Exception e) {
             reportStatus(e.getMessage());
             throw Throwables.propagate(e);
         }
     }
-    
+
     private ListFeed fetchData() {
         SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(spreadsheetTitle.replace("-", " ")));
         WorksheetEntry worksheet = Iterables.getOnlyElement(spreadsheetFetcher.getWorksheetsFromSpreadsheet(spreadsheet));
         return spreadsheetFetcher.getDataFromWorksheet(worksheet);
     }
-    
-    //needed because same spreadsheet contains multiple sources
-    private void isGlobalImage(GlobalImageDataProcessor<UpdateProgress> processor, CustomElementCollection customElements) {
-        if (GLOBALIMAGE_ROW_HEADER.equals(customElements.getValue(GlobalImageSpreadsheetColumn.SOURCE.getValue()))) {
-            processor.process(customElements);
-        }
-    }
 
-    private GlobalImageDataProcessor<UpdateProgress> processor() {
-        return new GlobalImageDataProcessor<UpdateProgress>() {
-            
+    private KnowledgeMotionDataProcessor<UpdateProgress> processor() {
+        return new KnowledgeMotionDataProcessor<UpdateProgress>() {
+
             UpdateProgress progress = UpdateProgress.START;
-            
+
             @Override
             public boolean process(CustomElementCollection customElements) {
                 try {
-                    GlobalImageDataRow row = adapter.globalImageDataRow(customElements);
+                    KnowledgeMotionDataRow row = adapter.dataRow(customElements);
                     dataHandler.handle(row);
                     progress = progress.reduce(UpdateProgress.SUCCESS);
                 } catch (Exception e) {
-                    log.warn("Row: " + customElements.getValue(ID.getValue()), e);
+                    log.warn("Row: " + customElements.getValue(KnowledgeMotionSpreadsheetColumn.ID.getValue()), e);
                     progress = progress.reduce(UpdateProgress.FAILURE);
                 }
                 reportStatus(progress.toString());
                 return shouldContinue();
             }
-            
+
             @Override
             public UpdateProgress getResult() {
                 return progress;
             }
         };
     }
-    
+
 }

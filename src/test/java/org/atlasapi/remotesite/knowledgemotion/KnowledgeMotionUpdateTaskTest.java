@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.globalimageworks;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -20,12 +20,12 @@ import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GlobalImageUpdateTaskTest {
+public class KnowledgeMotionUpdateTaskTest {
 
     private final SpreadsheetFetcher spreadsheetFetcher = mock(SpreadsheetFetcher.class);
-    private final GlobalImageAdapter adapter = mock(GlobalImageAdapter.class);
-    private final GlobalImageDataRowHandler dataHandler = mock(GlobalImageDataRowHandler.class);
-    private final ScheduledTask task = new GlobalImageUpdateTask(spreadsheetFetcher, dataHandler, adapter);
+    private final KnowledgeMotionAdapter adapter = mock(KnowledgeMotionAdapter.class);
+    private final KnowledgeMotionDataRowHandler dataHandler = mock(KnowledgeMotionDataRowHandler.class);
+    private final ScheduledTask task = new KnowledgeMotionUpdateTask(spreadsheetFetcher, dataHandler, adapter);
     
     @Test
     public void testTask() {
@@ -33,7 +33,7 @@ public class GlobalImageUpdateTaskTest {
         WorksheetEntry worksheet = new WorksheetEntry();
         ListFeed feed = new ListFeed();
         ListEntry entry = new ListEntry();
-        entry.getCustomElements().setValueLocal(GlobalImageSpreadsheetColumn.SOURCE.getValue(), GlobalImageUpdateTask.GLOBALIMAGE_ROW_HEADER);
+        entry.getCustomElements().setValueLocal(KnowledgeMotionSpreadsheetColumn.SOURCE.getValue(), KnowledgeMotionUpdateTask.GLOBALIMAGE_ROW_HEADER);
         feed.setEntries(ImmutableList.of(entry));
         
         when(spreadsheetFetcher.getSpreadsheetByTitle(Matchers.anyString())).thenReturn(ImmutableList.of(spreadsheet));
@@ -41,8 +41,8 @@ public class GlobalImageUpdateTaskTest {
         when(spreadsheetFetcher.getDataFromWorksheet(worksheet)).thenReturn(feed);
         
         task.run();
-        verify(adapter, times(1)).globalImageDataRow(Iterables.getOnlyElement(feed.getEntries()).getCustomElements());
-        verify(dataHandler, times(1)).handle(Matchers.any(GlobalImageDataRow.class));
+        verify(adapter, times(1)).dataRow(Iterables.getOnlyElement(feed.getEntries()).getCustomElements());
+        verify(dataHandler, times(1)).handle(Matchers.any(KnowledgeMotionDataRow.class));
     }
     
 }
