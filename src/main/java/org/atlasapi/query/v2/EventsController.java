@@ -16,6 +16,7 @@ import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.event.EventResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,7 +30,7 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
-
+@Controller
 public class EventsController extends BaseController<Iterable<Event>> {
 
     private static final SelectionBuilder SELECTION_BUILDER = Selection.builder()
