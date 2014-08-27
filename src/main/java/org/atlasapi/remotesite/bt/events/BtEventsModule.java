@@ -33,10 +33,9 @@ public class BtEventsModule {
     private @Autowired OrganisationStore organisationStore;
     private @Autowired @Qualifier("topicStore") TopicStore topicStore;
     
-    private @Value("s3.access") String s3AccessKey;
-    private @Value("s3.secret") String s3SecretAccessKey;
-    private @Value("bt.events.s3.bucket") String s3BucketName;
-    private @Value("bt.events.s3.folder") String s3Folder;
+    private @Value("${s3.access}") String s3AccessKey;
+    private @Value("${s3.secret}") String s3SecretAccessKey;
+    private @Value("${bt.events.s3.bucket}") String s3BucketName;
     
     @PostConstruct
     public void startBackgroundTasks() {
@@ -57,7 +56,7 @@ public class BtEventsModule {
     }
 
     private BtEventsFetcher fetcher() {
-        return new S3BtEventsFetcher(s3Service(), fileNames(), s3BucketName, s3Folder);
+        return new S3BtEventsFetcher(s3Service(), fileNames(), s3BucketName);
     }
     
     private Map<BtSportType, String> fileNames() {

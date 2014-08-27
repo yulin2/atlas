@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.bt.events;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.events.EventsUtility;
@@ -9,7 +8,6 @@ import org.joda.time.DateTime;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 
 public final class BtEventsUtility extends EventsUtility<BtSportType> {
@@ -53,9 +51,14 @@ public final class BtEventsUtility extends EventsUtility<BtSportType> {
             .put("Sepang Circuit", "http://dbpedia.org/resources/Sepang_Circuit")
             .put("Comunitat Valenciana", "http://dbpedia.org/resources/Circuit_Ricardo_Tormo")
             .build();
-    private static final Map<BtSportType, Set<String>> EVENT_GROUPS_LOOKUP = ImmutableMap.<BtSportType, Set<String>>builder()
-            .put(BtSportType.UFC, ImmutableSet.of("http://dbpedia.org/resources/UFC"))
-            .put(BtSportType.MOTO_GP, ImmutableSet.of("http://dbpedia.org/resources/Moto_gp", "http://dbpedia.org/resources/Motorsport"))
+    private static final Map<BtSportType, Map<String, String>> EVENT_GROUPS_LOOKUP = ImmutableMap.<BtSportType, Map<String, String>>builder()
+            .put(BtSportType.UFC, ImmutableMap.of(
+                    "UFC", "http://dbpedia.org/resources/UFC"
+            ))
+            .put(BtSportType.MOTO_GP, ImmutableMap.of(
+                    "Moto GP", "http://dbpedia.org/resources/Moto_gp", 
+                    "Motorsport", "http://dbpedia.org/resources/Motorsport"
+            ))
             .build();
 
     public BtEventsUtility(TopicStore topicStore) {
@@ -89,7 +92,7 @@ public final class BtEventsUtility extends EventsUtility<BtSportType> {
     }
 
     @Override
-    public Optional<Set<String>> fetchEventGroupUrls(BtSportType sport) {
+    public Optional<Map<String, String>> fetchEventGroupUrls(BtSportType sport) {
         return Optional.fromNullable(EVENT_GROUPS_LOOKUP.get(sport));
     }
 

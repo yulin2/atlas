@@ -1,6 +1,11 @@
 package org.atlasapi.remotesite.bt.events;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.joda.time.DateTimeFieldType.dayOfMonth;
+import static org.joda.time.DateTimeFieldType.hourOfDay;
+import static org.joda.time.DateTimeFieldType.millisOfSecond;
+import static org.joda.time.DateTimeFieldType.minuteOfHour;
+import static org.joda.time.DateTimeFieldType.secondOfMinute;
 
 import java.util.Set;
 
@@ -13,9 +18,11 @@ import org.atlasapi.persistence.event.EventStore;
 import org.atlasapi.remotesite.bt.events.model.BtEvent;
 import org.atlasapi.remotesite.events.EventParsingDataHandler;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
+import org.joda.time.format.DateTimeParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +32,26 @@ import com.google.common.collect.ImmutableSet;
 
 public final class BtEventsDataHandler extends EventParsingDataHandler<BtSportType, BtTeam, BtEvent> {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    private static final DateTimeParser MILLIS_PARSER = new DateTimeFormatterBuilder()
+            .appendLiteral('.')
+            .appendFixedDecimal(millisOfSecond(), 3)
+            .toParser();
+    
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
+            .appendFixedDecimal(DateTimeFieldType.year(), 4)
+            .appendLiteral('-')
+            .appendFixedDecimal(DateTimeFieldType.monthOfYear(), 2)
+            .appendLiteral('-')
+            .appendFixedDecimal(dayOfMonth(), 2)
+            .appendLiteral('T')
+            .appendFixedDecimal(hourOfDay(), 2)
+            .appendLiteral(':')
+            .appendFixedDecimal(minuteOfHour(), 2)
+            .appendLiteral(':')
+            .appendFixedDecimal(secondOfMinute(), 2)
+            .appendOptional(MILLIS_PARSER)
+            .toFormatter();
+            
     
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final BtEventsUtility utility;

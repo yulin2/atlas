@@ -21,12 +21,13 @@ import org.atlasapi.remotesite.opta.events.sports.OptaSportsDataTransformer;
 import org.atlasapi.remotesite.opta.events.sports.model.OptaFixture;
 import org.atlasapi.remotesite.opta.events.sports.model.OptaSportsTeam;
 import org.jets3t.service.S3Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
-import com.google.api.client.util.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -43,9 +44,11 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 public class OptaEventsModule {
 
     private static final String SCOTTISH_PREMIER_LEAGUE_FILENAME = "F1_14_2014.json";
-    private static final String GERMAN_BUNDESLIGA_FILENAME = "F1_2_2014.json";
+    private static final String GERMAN_BUNDESLIGA_FILENAME = "F1_22_2014.json";
     private static final String RUGBY_LEAGUE_FILENAME = "RU1_201_2015.json";
-    private static final String OPTA_HTTP_CONFIG_PREFIX = "opta.events.sports.http.";
+    private static final String OPTA_HTTP_CONFIG_PREFIX = "opta.events.http.sports.";
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired EventStore eventStore;
@@ -53,13 +56,12 @@ public class OptaEventsModule {
     private @Autowired @Qualifier("topicStore") TopicStore topicStore;
     private @Autowired S3Service s3Service;
     
-    private @Value("s3.access") String s3AccessKey;
-    private @Value("s3.secret") String s3SecretAccessKey;
-    private @Value("opta.events.s3.bucket") String s3BucketName;
-    private @Value("opta.events.s3.folder") String s3Folder;
-    private @Value("opta.events.http.baseUrl") String baseUrl;
-    private @Value("opta.events.http.username") String username;
-    private @Value("opta.events.http.password") String password;
+    private @Value("${s3.access}") String s3AccessKey;
+    private @Value("${s3.secret}") String s3SecretAccessKey;
+    private @Value("${opta.events.s3.bucket}") String s3BucketName;
+    private @Value("${opta.events.http.baseUrl}") String baseUrl;
+    private @Value("${opta.events.http.username}") String username;
+    private @Value("${opta.events.http.password}") String password;
     
     @PostConstruct
     public void startBackgroundTasks() {
@@ -73,7 +75,7 @@ public class OptaEventsModule {
 
     private OptaEventsFetcher<SoccerTeam, SoccerMatchData> soccerFetcher() {
         return new CombiningOptaEventsFetcher<>(ImmutableList.<OptaEventsFetcher<SoccerTeam, SoccerMatchData>>of(
-                new S3OptaEventsFetcher<>(s3Service, soccerFileNames(), soccerTransformer(), s3BucketName, s3Folder),
+                new S3OptaEventsFetcher<>(s3Service, soccerFileNames(), soccerTransformer(), s3BucketName),
                 new HttpOptaEventsFetcher<>(sportConfig(), HttpClients.webserviceClient(), soccerTransformer(), new UsernameAndPassword(username, password), baseUrl)
         ));
     }
@@ -87,10 +89,14 @@ public class OptaEventsModule {
         for (Entry<String, Parameter> property : Configurer.getParamsWithKeyMatching(Predicates.containsPattern(OPTA_HTTP_CONFIG_PREFIX))) {
             String sportKey = property.getKey().substring(OPTA_HTTP_CONFIG_PREFIX.length());
             String sportConfig = property.getValue().get();
-
-            OptaSportType sport = OptaSportType.valueOf(sportKey.toUpperCase());
-            OptaSportConfiguration config = parseConfig(sportConfig);
-            configMapping.put(sport, config);
+            
+            if (!Strings.isNullOrEmpty(sportConfig)) {
+                OptaSportType sport = OptaSportType.valueOf(sportKey.toUpperCase());
+                OptaSportConfiguration config = parseConfig(sportConfig);
+                configMapping.put(sport, config);
+            } else {
+                log.warn("Opta HTTP configuration for sport {} is missing.", sportKey);
+            }
         }
         return configMapping.build();
     }
@@ -102,7 +108,6 @@ public class OptaEventsModule {
      * @return
      */
     private OptaSportConfiguration parseConfig(String sportConfig) {
-        Preconditions.checkArgument(Strings.isNullOrEmpty(sportConfig));
         Iterable<String> configItems = Splitter.on('|').split(sportConfig);
         return OptaSportConfiguration.builder()
                 .withFeedType(Iterables.get(configItems, 0))
@@ -133,7 +138,7 @@ public class OptaEventsModule {
     }
 
     private OptaEventsFetcher<OptaSportsTeam, OptaFixture> sportsFetcher() {
-        return new S3OptaEventsFetcher<>(s3Service, sportFileNames(), sportsTransformer(), s3BucketName, s3Folder);
+        return new S3OptaEventsFetcher<>(s3Service, sportFileNames(), sportsTransformer(), s3BucketName);
     }
     
     private OptaDataTransformer<OptaSportsTeam, OptaFixture> sportsTransformer() {

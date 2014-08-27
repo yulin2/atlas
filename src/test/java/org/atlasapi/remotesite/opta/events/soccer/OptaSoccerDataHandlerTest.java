@@ -24,6 +24,8 @@ import org.atlasapi.remotesite.opta.events.soccer.model.OptaSoccerEventsFeed;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerMatchData;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerMatchInfo.MatchDate;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerTeam;
+import org.atlasapi.remotesite.opta.events.soccer.model.SoccerTeamData;
+import org.atlasapi.remotesite.opta.events.soccer.model.SoccerTeamDataDeserializer;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Before;
@@ -49,6 +51,7 @@ public class OptaSoccerDataHandlerTest {
     private static final OptaSportType SPORT = OptaSportType.FOOTBALL_GERMAN_BUNDESLIGA;
     private Gson gson = new GsonBuilder()
             .registerTypeAdapter(MatchDate.class, new MatchDateDeserializer())
+            .registerTypeAdapter(SoccerTeamData.class, new SoccerTeamDataDeserializer())
             .create();
     private OrganisationStore organisationStore = Mockito.mock(OrganisationStore.class);
     private EventStore eventStore = Mockito.mock(EventStore.class);

@@ -25,30 +25,35 @@ public abstract class EventsIngestTask<S, T, M> extends ScheduledTask {
 
     @Override
     protected void runTask() {
+        UpdateProgress overallProgress = UpdateProgress.START;
         for (S sport : fetcher.sports()) {
             Optional<? extends EventsData<T, M>> data = fetcher.fetch(sport);
             if (!data.isPresent()) {
                 log.error("No data to fetch for sport {}", sport);
             } else {
-                processData(sport, data.get());
+                overallProgress = overallProgress.reduce(processData(sport, data.get()));
             }
         }
+        reportStatus(String.format("Sports processed: %d Results: %s", fetcher.sports().size(), overallProgress.toString()));
     }
 
-    private void processData(S sport, EventsData<T, M> data) {
+    private UpdateProgress processData(S sport, EventsData<T, M> data) {
         DataProcessor<T> teamProcessor = teamProcessor();
         for (T team : data.teams()) {
             teamProcessor.process(team);
         }
 
-        reportStatus("Teams: " + teamProcessor.getResult().toString());
+        String teamResult = "Teams: " + teamProcessor.getResult().toString();
+        reportStatus(sport.toString() + ": " + teamResult);
         
         DataProcessor<M> matchProcessor = matchProcessor(sport);
         for (M match : data.matches()) {
             matchProcessor.process(match);
         }
         
-        reportStatus("Fixtures: " + matchProcessor.getResult().toString());
+        String eventResult = "Events: " + matchProcessor.getResult().toString();
+        reportStatus(sport.toString() + ": " + teamResult + " " + eventResult);
+        return teamProcessor.getResult().reduce(matchProcessor.getResult());
     }
 
     private DataProcessor<T> teamProcessor() {

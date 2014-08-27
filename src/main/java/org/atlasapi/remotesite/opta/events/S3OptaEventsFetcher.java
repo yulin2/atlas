@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.opta.events.model.OptaMatch;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
@@ -30,15 +29,13 @@ public final class S3OptaEventsFetcher<T extends OptaTeam, M extends OptaMatch> 
     private final Map<OptaSportType, String> fileNames;
     private final OptaDataTransformer<T, M> transformer;
     private final String bucketName;
-    private final String folder;
     
     public S3OptaEventsFetcher(S3Service s3Service, Map<OptaSportType, String> fileNames, 
-            OptaDataTransformer<T, M> transformer, String bucketName, String folder) {
+            OptaDataTransformer<T, M> transformer, String bucketName) {
         this.s3Service = checkNotNull(s3Service);
         this.fileNames = ImmutableMap.copyOf(fileNames);
         this.transformer = checkNotNull(transformer);
         this.bucketName = checkNotNull(bucketName);
-        this.folder = checkNotNull(folder);
     }
 
     @Override
@@ -48,10 +45,10 @@ public final class S3OptaEventsFetcher<T extends OptaTeam, M extends OptaMatch> 
             if (fileName == null) {
                 return Optional.absent();
             }
-            S3Object[] objects = s3Service.listObjects(bucketName, folder, NO_DELIMITER);
+            S3Object[] objects = s3Service.listObjects(bucketName, "", NO_DELIMITER);
             S3Object file = getFileforName(objects, fileName);
             if (file == null) {
-                throw new FetchException(String.format("No data file in %s/%s", bucketName, folder));
+                throw new FetchException(String.format("No data file %s in %s", fileName, bucketName));
             }
             InputStream in = inputStreamFor(s3Service, file);
             return Optional.fromNullable(transformer.transform(in));
@@ -62,8 +59,7 @@ public final class S3OptaEventsFetcher<T extends OptaTeam, M extends OptaMatch> 
 
     private S3Object getFileforName(S3Object[] objects, String fileName) {
         for (S3Object obj : objects) {
-            String matchName = folder + '/' + fileNames;
-            if (matchName.equals(obj.getName())) {
+            if (fileName.equals(obj.getName())) {
                 return obj;
             }
         }
@@ -74,7 +70,7 @@ public final class S3OptaEventsFetcher<T extends OptaTeam, M extends OptaMatch> 
         final String key = object.getKey();
         try {
             S3Object fullObject = service.getObject(bucketName, key);
-            return new BZip2CompressorInputStream(fullObject.getDataInputStream());
+            return fullObject.getDataInputStream();
         } catch (ServiceException e) {
             throw new IOException(e.getMessage(), e);
         }

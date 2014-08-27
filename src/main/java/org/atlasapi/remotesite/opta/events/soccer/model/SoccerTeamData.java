@@ -1,18 +1,22 @@
 package org.atlasapi.remotesite.opta.events.soccer.model;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.annotations.SerializedName;
 
 
 public class SoccerTeamData {
 
-    @SerializedName("Goal")
     private List<SoccerGoal> goals;
-    @SerializedName("@attributes")
     private TeamDataAttributes attributes;
 
-    public SoccerTeamData() { }
+    public SoccerTeamData(Iterable<SoccerGoal> goals, TeamDataAttributes attributes) {
+        this.goals = ImmutableList.copyOf(goals);
+        this.attributes = checkNotNull(attributes);
+    }
     
     public List<SoccerGoal> goals() {
         return goals;

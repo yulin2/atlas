@@ -15,7 +15,6 @@ import org.mockito.Mockito;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 
@@ -75,8 +74,8 @@ public class EventsUtilityTest {
     private EventsUtility<OptaSportType> createEventUtil(TopicStore topicStore) {
         return new EventsUtility<OptaSportType>(topicStore) {
             
-            Map<OptaSportType, Set<String>> groupMapping = ImmutableMap.of(
-                    OptaSportType.RUGBY, (Set<String>)ImmutableSet.of("sport uri")
+            Map<OptaSportType, Map<String, String>> groupMapping = ImmutableMap.of(
+                    OptaSportType.RUGBY, (Map<String, String>)ImmutableMap.of("Sport", "sport uri")
             );
             
             @Override
@@ -98,7 +97,7 @@ public class EventsUtilityTest {
             }
             
             @Override
-            public Optional<Set<String>> fetchEventGroupUrls(OptaSportType sport) {
+            public Optional<Map<String, String>> fetchEventGroupUrls(OptaSportType sport) {
                 return Optional.fromNullable(groupMapping.get(sport));
             }
         };

@@ -27,8 +27,7 @@ public class S3BtEventsFetcherTest {
             SPORT, MOTO_GP_FILENAME
     );
     private String bucketName = "bucket";
-    private String folder = "folder";
-    private final S3BtEventsFetcher fetcher = new S3BtEventsFetcher(s3Service, fileNames, bucketName, folder);
+    private final S3BtEventsFetcher fetcher = new S3BtEventsFetcher(s3Service, fileNames, bucketName);
     
     @Test
     public void testConversionToBtDataFormat() throws IOException {

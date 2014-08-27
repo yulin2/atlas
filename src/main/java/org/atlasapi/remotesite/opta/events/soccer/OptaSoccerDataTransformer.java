@@ -9,6 +9,8 @@ import org.atlasapi.remotesite.opta.events.soccer.model.OptaSoccerEventsFeed;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerMatchData;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerMatchInfo.MatchDate;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerTeam;
+import org.atlasapi.remotesite.opta.events.soccer.model.SoccerTeamData;
+import org.atlasapi.remotesite.opta.events.soccer.model.SoccerTeamDataDeserializer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,6 +20,7 @@ public class OptaSoccerDataTransformer implements OptaDataTransformer<SoccerTeam
 
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(MatchDate.class, new MatchDateDeserializer())
+            .registerTypeAdapter(SoccerTeamData.class, new SoccerTeamDataDeserializer())
             .create();
     
     public OptaSoccerDataTransformer() { }
