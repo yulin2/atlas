@@ -48,18 +48,15 @@ public class BtEventsModule {
         return new BtEventsIngestTask(fetcher(), dataHandler());
     }
     
-    @Bean
-    public BtEventsDataHandler dataHandler() {
+    private BtEventsDataHandler dataHandler() {
         return new BtEventsDataHandler(organisationStore, eventStore, utility());
     }
     
-    @Bean
-    public BtEventsUtility utility() {
+    private BtEventsUtility utility() {
         return new BtEventsUtility(topicStore);
     }
 
-    @Bean
-    public BtEventsFetcher fetcher() {
+    private BtEventsFetcher fetcher() {
         return new S3BtEventsFetcher(s3Service(), fileNames(), s3BucketName, s3Folder);
     }
     
