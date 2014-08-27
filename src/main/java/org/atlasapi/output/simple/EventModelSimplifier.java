@@ -51,7 +51,7 @@ public class EventModelSimplifier extends IdentifiedModelSimplifier<Event, org.a
         event.setOrganisations(simplifyOrganisations(model.organisations(), annotations, config));
         event.setEventGroups(simplifyEventGroups(model.eventGroups(), annotations, config));
         
-        if (annotations.contains(Annotation.SUB_ITEMS)) {
+        if (annotations.contains(Annotation.CONTENT)) {
             event.setContent(simplifyContent(model.content(), annotations, config));
         }
         
