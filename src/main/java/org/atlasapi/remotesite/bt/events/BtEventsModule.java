@@ -13,6 +13,7 @@ import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
 import org.jets3t.service.security.ProviderCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +31,7 @@ public class BtEventsModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired EventStore eventStore;
     private @Autowired OrganisationStore organisationStore;
-    private @Autowired TopicStore topicStore;
+    private @Autowired @Qualifier("topicStore") TopicStore topicStore;
     
     private @Value("s3.access") String s3AccessKey;
     private @Value("s3.secret") String s3SecretAccessKey;

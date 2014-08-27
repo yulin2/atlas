@@ -22,6 +22,7 @@ import org.atlasapi.remotesite.opta.events.sports.model.OptaFixture;
 import org.atlasapi.remotesite.opta.events.sports.model.OptaSportsTeam;
 import org.jets3t.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
@@ -49,7 +50,7 @@ public class OptaEventsModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired EventStore eventStore;
     private @Autowired OrganisationStore organisationStore;
-    private @Autowired TopicStore topicStore;
+    private @Autowired @Qualifier("topicStore") TopicStore topicStore;
     private @Autowired S3Service s3Service;
     
     private @Value("s3.access") String s3AccessKey;
