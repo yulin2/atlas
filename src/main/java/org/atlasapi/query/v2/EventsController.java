@@ -71,7 +71,7 @@ public class EventsController extends BaseController<Iterable<Event>> {
             Iterable<Event> events;
             
             if (eventGroupId != null) {
-                Maybe<Topic> eventGroup = topicResolver.topicForId(Long.valueOf(eventGroupId));
+                Maybe<Topic> eventGroup = topicResolver.topicForId(idCodec.decode(eventGroupId).longValue());
                 if (eventGroup.isNothing()) {
                     errorViewFor(request, response, EVENT_GROUP_NOT_FOUND);
                     return; 
