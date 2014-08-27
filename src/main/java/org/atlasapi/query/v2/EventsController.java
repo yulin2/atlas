@@ -90,13 +90,13 @@ public class EventsController extends BaseController<Iterable<Event>> {
         }
     }
 
-    @RequestMapping(value={"/3.0/events/{id}.*", "/events{id}.*"})
+    @RequestMapping(value={"/3.0/events/{id}.*", "/events/{id}.*"})
     public void singleEvent(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("id") String id) throws IOException {
         try {
             final ApplicationConfiguration appConfig = appConfig(request);
             
-            Optional<Event> event = eventResolver.fetch(Long.valueOf(id));
+            Optional<Event> event = eventResolver.fetch(idCodec.decode(id).longValue());
             if (!event.isPresent()) {
                 errorViewFor(request, response, NOT_FOUND);
                 return;
