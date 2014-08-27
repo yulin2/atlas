@@ -10,10 +10,12 @@ import static org.joda.time.DateTimeConstants.SECONDS_PER_HOUR;
 import java.util.List;
 import java.util.Set;
 
+import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
+import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
@@ -111,15 +113,25 @@ public class GettyContentExtractor implements ContentExtractor<VideoResponse, Co
         return ImmutableSet.of(version);
     }
     
-    private Set<Version> addAspectRationAndDuration(Duration duration, Iterable<String> aspectRatios) {
+    private Set<Version> addAspectRationAndDuration(Duration duration, List<String> aspectRatios) {
         com.google.common.collect.ImmutableSet.Builder<Version> versions = new ImmutableSet.Builder<Version>();
-        for (String aspectRatio : aspectRatios) {
+        if (aspectRatios.isEmpty()) {
             Version version = new Version();
             Encoding encoding = new Encoding();
-            encoding.setVideoAspectRatio(aspectRatio);
+            encoding.setAvailableAt(ImmutableSet.of(new Location()));
             version.addManifestedAs(encoding);
             version.setDuration(duration);
             versions.add(version);
+        } else {
+            for (String aspectRatio : aspectRatios) {
+                Version version = new Version();
+                Encoding encoding = new Encoding();
+                encoding.setAvailableAt(ImmutableSet.of(new Location()));
+                encoding.setVideoAspectRatio(aspectRatio);
+                version.addManifestedAs(encoding);
+                version.setDuration(duration);
+                versions.add(version);
+            }
         }
         return versions.build();
     }

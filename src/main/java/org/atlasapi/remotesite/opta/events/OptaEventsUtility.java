@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.opta.events;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.events.EventsUtility;
@@ -11,7 +10,6 @@ import org.joda.time.Duration;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 
 public class OptaEventsUtility extends EventsUtility<OptaSportType> {
@@ -21,7 +19,8 @@ public class OptaEventsUtility extends EventsUtility<OptaSportType> {
     private static final Map<OptaSportType, Duration> DURATION_MAPPING = ImmutableMap.of(
             OptaSportType.RUGBY, Duration.standardMinutes(100),
             OptaSportType.FOOTBALL_GERMAN_BUNDESLIGA, Duration.standardMinutes(110),
-            OptaSportType.FOOTBALL_SCOTTISH_PREMIER_LEAGUE, Duration.standardMinutes(110)
+            OptaSportType.FOOTBALL_SCOTTISH_PREMIER_LEAGUE, Duration.standardMinutes(110),
+            OptaSportType.FOOTBALL_PREMIER_LEAGUE, Duration.standardMinutes(110)
     );
     private static final Map<String, String> VENUE_LOOKUP = ImmutableMap.<String, String>builder()
             .put("Recreation Ground", "http://dbpedia.org/resources/Recreation_Ground_(Bath)")
@@ -69,21 +68,46 @@ public class OptaEventsUtility extends EventsUtility<OptaSportType> {
             .put("Volkswagen Arena", "http://dbpedia.org/resources/Volkswagen_Arena")
             .put("WIRSOL Rhein-Neckar-Arena", "http://dbpedia.org/resources/Rhein-Neckar_Arena")
             .put("Weserstadion", "http://dbpedia.org/resources/Weserstadion")
+            .put("Anfield", "http://dbpedia.org/resources/Anfield") 
+            .put("Boleyn Ground", "http://dbpedia.org/resources/Boleyn_Ground") 
+            .put("Britannia Stadium", "http://dbpedia.org/resources/Britannia_Stadium") 
+            .put("Emirates Stadium", "http://dbpedia.org/resources/Emirates_Stadium") 
+            .put("Etihad Stadium", "http://dbpedia.org/resources/City_of_Manchester_Stadium") 
+            .put("Goodison Park", "http://dbpedia.org/resources/Goodison_Park") 
+            .put("King Power Stadium", "http://dbpedia.org/resources/King_Power_Stadium") 
+            .put("Liberty Stadium", "http://dbpedia.org/resources/Liberty_Stadium") 
+            .put("Loftus Road Stadium", "http://dbpedia.org/resources/Loftus_Road") 
+            .put("Old Trafford", "http://dbpedia.org/resources/Old_Trafford") 
+            .put("Selhurst Park", "http://dbpedia.org/resources/Selhurst_Park") 
+            .put("St. James' Park", "http://dbpedia.org/resources/St_James%27_Park") 
+            .put("St. Mary's Stadium", "http://dbpedia.org/resources/St_Mary%27s_Stadium") 
+            .put("Stadium of Light", "http://dbpedia.org/resources/Stadium_of_Light") 
+            .put("Stamford Bridge", "http://dbpedia.org/resources/Stamford_Bridge_(stadium)") 
+            .put("The Hawthorns", "http://dbpedia.org/resources/The_Hawthorns") 
+            .put("The KC Stadium", "http://dbpedia.org/resources/KC_Stadium") 
+            .put("Turf Moor", "http://dbpedia.org/resources/Turf_Moor") 
+            .put("Villa Park", "http://dbpedia.org/resources/Villa_Park") 
+            .put("White Hart Lane", "http://dbpedia.org/resources/White_Hart_Lane") 
             .build();
-    private static final Map<OptaSportType, Set<String>> EVENT_GROUPS_LOOKUP = ImmutableMap.<OptaSportType, Set<String>>builder()
-            .put(OptaSportType.RUGBY, ImmutableSet.of(
-                    "http://dbpedia.org/resources/Rugby_league", 
-                    "http://dbpedia.org/resources/Rugby_football"
+    private static final Map<OptaSportType, Map<String, String>> EVENT_GROUPS_LOOKUP = ImmutableMap.<OptaSportType, Map<String, String>>builder()
+            .put(OptaSportType.RUGBY, ImmutableMap.of(
+                    "Rugby League", "http://dbpedia.org/resources/Rugby_league", 
+                    "Rugby Football", "http://dbpedia.org/resources/Rugby_football"
             ))
-            .put(OptaSportType.FOOTBALL_SCOTTISH_PREMIER_LEAGUE, ImmutableSet.of(
-                    "http://dbpedia.org/resources/Football", 
-                    "http://dbpedia.org/resources/Association_football", 
-                    "http://dbpedia.org/resources/Scottish_Premier_League"
+            .put(OptaSportType.FOOTBALL_SCOTTISH_PREMIER_LEAGUE, ImmutableMap.of(
+                    "Football", "http://dbpedia.org/resources/Football", 
+                    "Association Football", "http://dbpedia.org/resources/Association_football", 
+                    "Scottish Premier League", "http://dbpedia.org/resources/Scottish_Premier_League"
             ))
-            .put(OptaSportType.FOOTBALL_GERMAN_BUNDESLIGA, ImmutableSet.of(
-                    "http://dbpedia.org/resources/Football", 
-                    "http://dbpedia.org/resources/Association_football", 
-                    "http://dbpedia.org/resources/German_Bundesliga"
+            .put(OptaSportType.FOOTBALL_GERMAN_BUNDESLIGA, ImmutableMap.of(
+                    "Football", "http://dbpedia.org/resources/Football", 
+                    "Association Football", "http://dbpedia.org/resources/Association_football", 
+                    "German Bundesliga", "http://dbpedia.org/resources/German_Bundesliga"
+            ))
+            .put(OptaSportType.FOOTBALL_PREMIER_LEAGUE, ImmutableMap.of(
+                    "Football", "http://dbpedia.org/resources/Football", 
+                    "Association Football", "http://dbpedia.org/resources/Association_football", 
+                    "Premier League", "http://dbpedia.org/resources/Premier_League"
             ))
             .build();
     
@@ -116,7 +140,7 @@ public class OptaEventsUtility extends EventsUtility<OptaSportType> {
     }
 
     @Override
-    public Optional<Set<String>> fetchEventGroupUrls(OptaSportType sport) {
+    public Optional<Map<String, String>> fetchEventGroupUrls(OptaSportType sport) {
         return Optional.fromNullable(EVENT_GROUPS_LOOKUP.get(sport));
     }
 

@@ -37,12 +37,15 @@ public class BtVodSeriesWriter implements BtVodDataProcessor<UpdateProgress>{
     private final Map<String, ParentRef> processedSeries = Maps.newHashMap();
     private final BtVodContentListener listener;
     private final Set<String> processedRows;
+    private final BtVodDescribedFieldsExtractor describedFieldsExtractor;
     private UpdateProgress progress = UpdateProgress.START;
+
 
     public BtVodSeriesWriter(ContentWriter writer, ContentResolver resolver,
             BtVodBrandWriter brandExtractor, 
             BtVodDescribedFieldsExtractor describedFieldsExtractor, Publisher publisher, 
-            String uriPrefix, BtVodContentListener listener, Set<String> processedRows) {
+            String uriPrefix, BtVodContentListener listener, 
+            Set<String> processedRows) {
         this.processedRows = checkNotNull(processedRows);
         this.listener = checkNotNull(listener);
         this.writer = checkNotNull(writer);
@@ -50,6 +53,7 @@ public class BtVodSeriesWriter implements BtVodDataProcessor<UpdateProgress>{
         this.brandExtractor = checkNotNull(brandExtractor);
         this.publisher = checkNotNull(publisher);
         this.uriPrefix = checkNotNull(uriPrefix);
+        this.describedFieldsExtractor = checkNotNull(describedFieldsExtractor);
         this.contentMerger = new ContentMerger(MergeStrategy.REPLACE);
     }
     
@@ -101,7 +105,8 @@ public class BtVodSeriesWriter implements BtVodDataProcessor<UpdateProgress>{
         Integer seriesNumber = 
                 Integer.parseInt(row.getColumnValue(BtVodFileColumn.SERIES_NUMBER));
         series.withSeriesNumber(seriesNumber);
-        
+        series.setTitle(row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE));
+        describedFieldsExtractor.setDescribedFieldsFrom(row, series);
         series.setParentRef(brandExtractor.getBrandRefFor(row.getColumnValue(BtVodFileColumn.BRANDIA_ID)));
         return series;
     }

@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.bt.events.model.BtEvent;
 import org.atlasapi.remotesite.bt.events.model.BtEventsFeed;
@@ -32,14 +31,12 @@ public class S3BtEventsFetcher implements BtEventsFetcher {
     private final S3Service s3Service;
     private final Map<BtSportType, String> fileNames;
     private final String bucketName;
-    private final String folder;
     
     public S3BtEventsFetcher(S3Service s3Service, Map<BtSportType, String> fileNames, 
-            String bucketName, String folder) {
+            String bucketName) {
         this.s3Service = checkNotNull(s3Service);
         this.fileNames = checkNotNull(fileNames);
         this.bucketName = checkNotNull(bucketName);
-        this.folder = checkNotNull(folder);
     }
     
     @Override
@@ -49,10 +46,10 @@ public class S3BtEventsFetcher implements BtEventsFetcher {
             if (fileName == null) {
                 return Optional.absent();
             }
-            S3Object[] objects = s3Service.listObjects(bucketName, folder, NO_DELIMITER);
+            S3Object[] objects = s3Service.listObjects(bucketName, "", NO_DELIMITER);
             S3Object file = getFileforName(objects, fileName);
             if (file == null) {
-                throw new FetchException(String.format("No data file %s in %s/%s", fileName, bucketName, folder));
+                throw new FetchException(String.format("No data file %s in %s", fileName, bucketName));
             }
             InputStream in = inputStreamFor(s3Service, file);
             return extractData(in);
@@ -73,8 +70,7 @@ public class S3BtEventsFetcher implements BtEventsFetcher {
     
     private S3Object getFileforName(S3Object[] objects, String fileName) {
         for (S3Object obj : objects) {
-            String matchName = folder + '/' + fileName;
-            if (matchName.equals(obj.getName())) {
+            if (fileName.equals(obj.getName())) {
                 return obj;
             }
         }
@@ -85,7 +81,7 @@ public class S3BtEventsFetcher implements BtEventsFetcher {
         final String key = object.getKey();
         try {
             S3Object fullObject = service.getObject(bucketName, key);
-            return new BZip2CompressorInputStream(fullObject.getDataInputStream());
+            return fullObject.getDataInputStream();
         } catch (ServiceException e) {
             throw new IOException(e.getMessage(), e);
         }

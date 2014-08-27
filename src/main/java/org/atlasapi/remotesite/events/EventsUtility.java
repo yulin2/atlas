@@ -1,5 +1,10 @@
 package org.atlasapi.remotesite.events;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.atlasapi.media.entity.Publisher.DBPEDIA;
+
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Topic;
@@ -17,10 +22,16 @@ public abstract class EventsUtility<S> {
 
     private static final String DBPEDIA_NAMESPACE = "dbpedia";
     
-    private final Function<String, Topic> topicLookup;
+    private final Function<Entry<String, String>, Topic> topicLookup = new Function<Entry<String, String>, Topic>() {
+        @Override
+        public Topic apply(Entry<String, String> input) {
+            return resolveOrCreateDbpediaTopic(input.getKey(), Topic.Type.SUBJECT, input.getValue());
+        }
+    };
+    private final TopicStore topicStore;
     
     public EventsUtility(TopicStore topicStore)  {
-        this.topicLookup = createTopicLookup(topicStore);
+        this.topicStore = checkNotNull(topicStore);
     }
     
     public abstract String createEventUri(String id);
@@ -48,7 +59,7 @@ public abstract class EventsUtility<S> {
         if (!value.isPresent()) {
             return Optional.absent();
         }
-        return Optional.of(topicLookup.apply(value.get()));
+        return Optional.of(resolveOrCreateDbpediaTopic(location, Topic.Type.PLACE, value.get()));
     }
     
     public abstract Optional<String> fetchLocationUrl(String location);
@@ -64,29 +75,32 @@ public abstract class EventsUtility<S> {
      * values found for the provided sport
      */
     public Optional<Set<Topic>> parseEventGroups(S sport) {
-        Optional<Set<String>> eventGroups = fetchEventGroupUrls(sport);
+        Optional<Map<String, String>> eventGroups = fetchEventGroupUrls(sport);
         if (!eventGroups.isPresent()) {
             return Optional.absent();
         }
-        return Optional.<Set<Topic>>of(ImmutableSet.copyOf(Iterables.transform(eventGroups.get(), topicLookup)));
+        return Optional.<Set<Topic>>of(ImmutableSet.copyOf(Iterables.transform(eventGroups.get().entrySet(), topicLookup)));
     }
     
-    public abstract Optional<Set<String>> fetchEventGroupUrls(S sport);
+    public abstract Optional<Map<String, String>> fetchEventGroupUrls(S sport);
     
-    private Function<String, Topic> createTopicLookup(final TopicStore topicStore) {
-        return new Function<String, Topic>() {
-            @Override
-            public Topic apply(String input) {
-                Maybe<Topic> resolved = topicStore.topicFor(DBPEDIA_NAMESPACE, input);
-                if (resolved.hasValue()) {
-                    return resolved.requireValue();
-                }
-                throw new IllegalStateException(String.format(
-                        "Topic store failed to create Topic with namespace %s and value %s", 
-                        DBPEDIA_NAMESPACE, 
-                        input
-                ));
-            }
-        };
+    private Topic resolveOrCreateDbpediaTopic(String title, Topic.Type topicType, String value) {
+        Maybe<Topic> resolved = topicStore.topicFor(DBPEDIA_NAMESPACE, value);
+        if (resolved.hasValue()) {
+            Topic topic = resolved.requireValue();
+            
+            topic.setPublisher(DBPEDIA);
+            topic.setTitle(title);
+            topic.setType(topicType);
+            
+            topicStore.write(topic);
+            
+            return topic;
+        }
+        throw new IllegalStateException(String.format(
+                "Topic store failed to create Topic with namespace %s and value %s", 
+                DBPEDIA_NAMESPACE, 
+                value
+        ));
     }
 }
