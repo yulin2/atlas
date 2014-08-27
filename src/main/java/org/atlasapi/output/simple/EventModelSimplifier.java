@@ -28,6 +28,7 @@ public class EventModelSimplifier extends IdentifiedModelSimplifier<Event, org.a
 
     public EventModelSimplifier(TopicModelSimplifier topicSimplifier, PersonModelSimplifier personSimplifier, 
             OrganisationModelSimplifier organisationSimplifier, NumberToShortStringCodec codecForContent) {
+        super(codecForContent);
         this.topicSimplifier = checkNotNull(topicSimplifier);
         this.personSimplifier = checkNotNull(personSimplifier);
         this.organisationSimplifier = checkNotNull(organisationSimplifier);
