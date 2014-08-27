@@ -1,6 +1,4 @@
-package org.atlasapi.remotesite.bloomberg;
-
-import static org.atlasapi.media.entity.Publisher.BLOOMBERG;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import java.util.List;
 import java.util.Set;
@@ -11,6 +9,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.joda.time.DateTime;
@@ -21,17 +20,16 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.ImmutableList.Builder;
 
-public class BloombergDataRowContentExtractor implements ContentExtractor<BloombergDataRow, Content> {
+public class KnowledgeMotionDataRowContentExtractor implements ContentExtractor<KnowledgeMotionDataRow, Optional<? extends Content>> {
 
-    private static final String BLOOMBERG_URI_PATTERN = "http://bloomberg.com/%s";
-    private static final String BLOOMBERG_CURIE_PATTERN = "bloomberg:%s";
-    
     private final Splitter idSplitter = Splitter.on(":").omitEmptyStrings();
     private final PeriodFormatter durationFormatter = new PeriodFormatterBuilder()
         .appendHours().minimumPrintedDigits(2)
@@ -39,41 +37,59 @@ public class BloombergDataRowContentExtractor implements ContentExtractor<Bloomb
         .appendMinutes().minimumPrintedDigits(2)
         .appendSeparator(":")
         .appendSeconds().minimumPrintedDigits(2)
+        .appendSeparator(";")
+        .appendMillis().minimumPrintedDigits(2)
         .toFormatter();
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-    
+
+    private final ImmutableMap<String, KnowledgeMotionSourceConfig> sources;
+
+    public KnowledgeMotionDataRowContentExtractor(Iterable<KnowledgeMotionSourceConfig> sources) {
+        ImmutableMap.Builder<String, KnowledgeMotionSourceConfig> sourceMap = ImmutableMap.builder();
+        for (KnowledgeMotionSourceConfig source : sources) {
+            sourceMap.put(source.rowHeader(), source);
+        }
+        this.sources = sourceMap.build();
+    }
+
     @Override
-    public Content extract(BloombergDataRow source) {
+    public Optional<? extends Content> extract(KnowledgeMotionDataRow source) {
         return extractItem(source);
     }
 
-    private Item extractItem(BloombergDataRow source) {
+    private Optional<Item> extractItem(KnowledgeMotionDataRow dataRow) {
+        KnowledgeMotionSourceConfig sourceConfig = sources.get(dataRow.getSource());
+        if (sourceConfig == null) {
+            return Optional.absent();
+        }
+
         Item item = new Item();
-        
-        String id = Iterables.getLast(idSplitter.split(source.getId()));
-        
-        item.setVersions(extractVersions(source.getDuration()));
-        item.setFirstSeen(extractDate(source.getDate()));
-        item.setDescription(source.getDescription());
-        item.setTitle(source.getTitle());
-        item.setPublisher(BLOOMBERG);
-        item.setCanonicalUri(uri(id));
-        item.setCurie(curie(id));
+
+        String id = Iterables.getLast(idSplitter.split(dataRow.getId()));
+        Publisher publisher = sourceConfig.publisher();
+
+        item.setVersions(extractVersions(dataRow.getDuration()));
+        item.setFirstSeen(extractDate(dataRow.getDate()));
+        item.setDescription(dataRow.getDescription());
+        item.setTitle(dataRow.getTitle());
+        item.setPublisher(publisher);
+        item.setCanonicalUri(sourceConfig.uri(id));
+        item.setCurie(sourceConfig.curie(id));
         item.setLastUpdated(new DateTime(DateTimeZone.UTC));
         item.setMediaType(MediaType.VIDEO);
-        item.setKeyPhrases(keyphrases(source.getKeywords()));
-        
-        return item;
+        item.setKeyPhrases(keyphrases(dataRow.getKeywords(), publisher));
+
+        return Optional.of(item);
     }
-    
-    private Iterable<KeyPhrase> keyphrases(List<String> keywords) {
+
+    private Iterable<KeyPhrase> keyphrases(List<String> keywords, Publisher publisher) {
         Builder<KeyPhrase> keyphrases = new ImmutableList.Builder<KeyPhrase>();
         for (String keyword : keywords) {
-            keyphrases.add(new KeyPhrase(keyword, BLOOMBERG));
+            keyphrases.add(new KeyPhrase(keyword, publisher));
         }
         return keyphrases.build();
     }
-    
+
     private Set<Version> extractVersions(String duration) {
         Version version = new Version();
         Encoding encoding = new Encoding();
@@ -84,7 +100,7 @@ public class BloombergDataRowContentExtractor implements ContentExtractor<Bloomb
     }
 
     private Duration extractDuration(String duration) {
-        //duration is of type hh:mm:ss
+        //duration is of type hh:mm:ss;f
         return durationFormatter.parsePeriod(duration).toStandardDuration();
     }
 
@@ -92,13 +108,4 @@ public class BloombergDataRowContentExtractor implements ContentExtractor<Bloomb
         return dateTimeFormatter.parseDateTime(date).withZone(DateTimeZone.UTC);
     }
 
-    private String uri(String id) {
-        return String.format(BLOOMBERG_URI_PATTERN, id);
-    }
-    
-    private String curie(String id) {
-        String curie = String.format(BLOOMBERG_CURIE_PATTERN, id);
-        return curie;
-    }
-    
 }

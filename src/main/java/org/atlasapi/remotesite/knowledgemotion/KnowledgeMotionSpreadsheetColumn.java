@@ -1,8 +1,8 @@
-package org.atlasapi.remotesite.globalimageworks;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public enum GlobalImageSpreadsheetColumn {
+public enum KnowledgeMotionSpreadsheetColumn {
 
     SOURCE("source"),
     ID("namespace"),
@@ -15,7 +15,7 @@ public enum GlobalImageSpreadsheetColumn {
     
     private final String value;
     
-    private GlobalImageSpreadsheetColumn(String value) {
+    private KnowledgeMotionSpreadsheetColumn(String value) {
         this.value = checkNotNull(value);
     }
     

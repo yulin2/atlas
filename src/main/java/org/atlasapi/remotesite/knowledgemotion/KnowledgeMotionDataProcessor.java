@@ -1,8 +1,8 @@
-package org.atlasapi.remotesite.bloomberg;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import com.google.gdata.data.spreadsheet.CustomElementCollection;
 
-public interface BloombergDataProcessor<T> {
+public interface KnowledgeMotionDataProcessor<T> {
 
     boolean process(CustomElementCollection customElements);
     

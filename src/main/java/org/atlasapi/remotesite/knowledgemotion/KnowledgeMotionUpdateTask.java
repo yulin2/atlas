@@ -1,8 +1,6 @@
-package org.atlasapi.remotesite.bloomberg;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.atlasapi.media.entity.Publisher.BLOOMBERG;
-import static org.atlasapi.remotesite.bloomberg.BloombergSpreadsheetColumn.ID;
 
 import org.atlasapi.spreadsheet.SpreadsheetFetcher;
 import org.slf4j.Logger;
@@ -19,71 +17,64 @@ import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
-public class BloombergUpdateTask extends ScheduledTask {
+public class KnowledgeMotionUpdateTask extends ScheduledTask {
 
-    private static final Logger log = LoggerFactory.getLogger(BloombergUpdateTask.class);
+private static final Logger log = LoggerFactory.getLogger(KnowledgeMotionUpdateTask.class);
     
     private final String spreadsheetTitle = Configurer.get("spreadsheet.title").get();
     private final SpreadsheetFetcher spreadsheetFetcher;
-    private final BloombergAdapter adapter;
-    private final BloombergDataRowHandler dataHandler;
-    
-    public BloombergUpdateTask(SpreadsheetFetcher spreadsheetFetcher, 
-            BloombergDataRowHandler dataHandler, BloombergAdapter adapter) {
+    private final KnowledgeMotionAdapter adapter;
+    private final KnowledgeMotionDataRowHandler dataHandler;
+
+    public KnowledgeMotionUpdateTask(SpreadsheetFetcher spreadsheetFetcher, 
+            KnowledgeMotionDataRowHandler dataHandler, KnowledgeMotionAdapter adapter) {
         this.spreadsheetFetcher = checkNotNull(spreadsheetFetcher);
         this.dataHandler = checkNotNull(dataHandler);
         this.adapter = checkNotNull(adapter);
     }
-    
+
     @Override
     protected void runTask() {
         try {
             ListFeed data = fetchData();
-            BloombergDataProcessor<UpdateProgress> processor = processor();
+            KnowledgeMotionDataProcessor<UpdateProgress> processor = processor();
             for (ListEntry row : data.getEntries()) {
-                isBloomberg(processor, row.getCustomElements());
+                processor.process(row.getCustomElements());
             }
-            
+
             reportStatus(processor.getResult().toString());
-            
+
         } catch (Exception e) {
             reportStatus(e.getMessage());
             throw Throwables.propagate(e);
         }
     }
-    
+
     private ListFeed fetchData() {
         SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(spreadsheetTitle.replace("-", " ")));
         WorksheetEntry worksheet = Iterables.getOnlyElement(spreadsheetFetcher.getWorksheetsFromSpreadsheet(spreadsheet));
         return spreadsheetFetcher.getDataFromWorksheet(worksheet);
     }
-    
-    //needed because same spreadsheet contains multiple sources
-    private void isBloomberg(BloombergDataProcessor<UpdateProgress> processor, CustomElementCollection customElements) {
-        if (customElements.getValue(BloombergSpreadsheetColumn.SOURCE.getValue()).equals(BLOOMBERG.title())) {
-            processor.process(customElements);
-        }
-    }
 
-    private BloombergDataProcessor<UpdateProgress> processor() {
-        return new BloombergDataProcessor<UpdateProgress>() {
-            
+    private KnowledgeMotionDataProcessor<UpdateProgress> processor() {
+        return new KnowledgeMotionDataProcessor<UpdateProgress>() {
+
             UpdateProgress progress = UpdateProgress.START;
-            
+
             @Override
             public boolean process(CustomElementCollection customElements) {
                 try {
-                    BloombergDataRow row = adapter.bloombergDataRow(customElements);
+                    KnowledgeMotionDataRow row = adapter.dataRow(customElements);
                     dataHandler.handle(row);
                     progress = progress.reduce(UpdateProgress.SUCCESS);
                 } catch (Exception e) {
-                    log.warn("Row: " + customElements.getValue(ID.getValue()), e);
+                    log.warn("Row: " + customElements.getValue(KnowledgeMotionSpreadsheetColumn.ID.getValue()), e);
                     progress = progress.reduce(UpdateProgress.FAILURE);
                 }
                 reportStatus(progress.toString());
                 return shouldContinue();
             }
-            
+
             @Override
             public UpdateProgress getResult() {
                 return progress;
