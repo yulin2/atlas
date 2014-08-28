@@ -16,11 +16,13 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.SeriesRef;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
+import org.atlasapi.media.entity.simple.ContentIdentifier.SeriesIdentifier;
 import org.atlasapi.media.entity.simple.Identified;
 import org.atlasapi.media.entity.simple.Playlist;
-import org.atlasapi.media.entity.simple.ContentIdentifier.SeriesIdentifier;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.output.AvailableItemsResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
@@ -33,9 +35,6 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-
-import org.atlasapi.persistence.content.ContentGroupResolver;
-import org.atlasapi.persistence.content.PeopleQueryResolver;
 
 public class ContainerModelSimplifier extends ContentModelSimplifier<Container, Playlist> {
 
@@ -63,8 +62,8 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, String localHostName, 
             ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, AvailableItemsResolver availableResovler, 
             UpcomingItemsResolver upcomingResolver, ProductResolver productResolver, RecentlyBroadcastChildrenResolver recentChildren,
-            ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver, ContainerSummaryResolver containerSummaryResolver) {
-        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, peopleResolver, upcomingResolver, availableResovler, null);
+            ImageSimplifier imageSimplifier, PeopleQueryResolver peopleResolver, ContainerSummaryResolver containerSummaryResolver, EventRefModelSimplifier eventSimplifier) {
+        super(localHostName, contentGroupResolver, topicResolver, productResolver, imageSimplifier, peopleResolver, upcomingResolver, availableResovler, null, eventSimplifier);
         this.itemSimplifier = itemSimplifier;
         this.availableItemsResolver = availableResovler;
         this.upcomingItemsResolver = upcomingResolver;

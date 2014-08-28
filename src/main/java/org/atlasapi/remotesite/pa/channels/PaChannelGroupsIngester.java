@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelNumbering;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Publisher;
@@ -20,7 +21,10 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;
@@ -75,15 +79,30 @@ public class PaChannelGroupsIngester {
             if (regionalisationList == null) {
                 // add to all regions
                 for (Region region : regions.values()) {
+                    clearNumberings(channel, region);
                     channel.addChannelNumber(region, epgContent.getChannelNumber(), startDate, endDate);
                 }
             } else {
                 // add to selected regions
                 for (Regionalisation epgRegion : regionalisationList.getRegionalisation()) {
-                    channel.addChannelNumber(regions.get(epgRegion.getRegionId()), epgContent.getChannelNumber(), startDate, endDate);
+                    Region region = regions.get(epgRegion.getRegionId());
+                    clearNumberings(channel, region);
+                    channel.addChannelNumber(region, epgContent.getChannelNumber(), startDate, endDate);
                 }
             }
         }
+    }
+
+    private void clearNumberings(Channel channel, final Region region) {
+        Set<ChannelNumbering> channelNumbers = ImmutableSet.copyOf(Iterables.filter(
+                channel.getChannelNumbers(), 
+                new Predicate<ChannelNumbering>() {
+                    @Override
+                    public boolean apply(ChannelNumbering numbering) {
+                        return !numbering.getChannelGroup().equals(region);
+                    }
+                }));
+        channel.setChannelNumbers(channelNumbers);
     }
 
     private Map<String, Region> createRegionsForPlatform(List<Regionalisation> regionalisations, List<org.atlasapi.remotesite.pa.channels.bindings.Region> paRegions, org.atlasapi.remotesite.pa.channels.bindings.Platform paPlatform, Set<Country> countries) {

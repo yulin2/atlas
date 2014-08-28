@@ -11,6 +11,7 @@ import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.TemporalField;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Broadcast;
@@ -27,10 +28,11 @@ import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.testing.ComplexBroadcastTestDataBuilder;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.output.AvailableItemsResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.UpcomingItemsResolver;
@@ -46,14 +48,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.collect.MoreSets;
 import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.media.MimeType;
-
-import org.atlasapi.persistence.content.ContentGroupResolver;
-import org.atlasapi.persistence.content.PeopleQueryResolver;
 
 public class ItemModelSimplifierTest {
 
@@ -69,7 +67,8 @@ public class ItemModelSimplifierTest {
     private final PeopleQueryResolver peopleQueryResolver = context.mock(PeopleQueryResolver.class);
     private final UpcomingItemsResolver upcomingResolver = context.mock(UpcomingItemsResolver.class);
     private final AvailableItemsResolver availableResolver = context.mock(AvailableItemsResolver.class);
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec(), new SubstitutionTableNumberCodec(), new ImageSimplifier(), peopleQueryResolver,upcomingResolver,availableResolver,null, null, null, null, null);
+    private EventRefModelSimplifier eventSimplifier  = context.mock(EventRefModelSimplifier.class);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, new SubstitutionTableNumberCodec(), new SubstitutionTableNumberCodec(), new ImageSimplifier(), peopleQueryResolver,upcomingResolver,availableResolver,null, null, null, null, null, eventSimplifier  );
     
     @Test
     @SuppressWarnings("unchecked")
