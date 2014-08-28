@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import org.atlasapi.remotesite.knowledgemotion.topics.KeywordsExtractor;
 import org.atlasapi.remotesite.knowledgemotion.topics.WikipediaKeyword;
 
 import com.google.common.base.Optional;
@@ -19,7 +20,7 @@ import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.url.UrlEncoding;
 
-public class SpotlightKeywordsExtractor {
+public class SpotlightKeywordsExtractor implements KeywordsExtractor {
 
     private static final String DBPEDIA_CONFIDENCE = "0.01";
     private static final String DBPEDIA_SUPPORT = "2";
@@ -35,6 +36,7 @@ public class SpotlightKeywordsExtractor {
             .build();
     }
 
+    @Override
     public List<WikipediaKeyword> extractKeywordsFromText(String text) {
         String encodedText = UrlEncoding.encode(text);
         String url = String.format(DBPEDIA_SPOTLIGHT_URL_PATTERN, encodedText, DBPEDIA_CONFIDENCE, DBPEDIA_SUPPORT);
@@ -48,6 +50,7 @@ public class SpotlightKeywordsExtractor {
         }
     }
 
+    @Override
     public Optional<WikipediaKeyword> tryGuessSingleKeywordFromText(String text) {
         List<WikipediaKeyword> keywords = extractKeywordsFromText(text);
         try {
