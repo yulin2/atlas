@@ -47,7 +47,7 @@ public class EventParsingDataHandlerTest {
     public void testResolvesAndWritesEvent() {
         OptaMatch matchData = Mockito.mock(OptaMatch.class);
         Mockito.when(testEvent.getCanonicalUri()).thenReturn("eventUri");
-        Mockito.when(organisationStore.organisation("eventUri")).thenReturn(Optional.<Organisation>absent());
+        Mockito.when(eventStore.fetch("eventUri")).thenReturn(Optional.<Event>absent());
         
         handler.handle(matchData, OptaSportType.RUGBY);
         

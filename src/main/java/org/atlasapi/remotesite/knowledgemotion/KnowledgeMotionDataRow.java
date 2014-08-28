@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.globalimageworks;
+package org.atlasapi.remotesite.knowledgemotion;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -7,7 +7,7 @@ import java.util.List;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 
-public class GlobalImageDataRow {
+public class KnowledgeMotionDataRow {
 
     private final String source;
     private final String id;
@@ -21,7 +21,7 @@ public class GlobalImageDataRow {
         return new Builder();
     }
     
-    private GlobalImageDataRow(String source, String id, String title, String description, 
+    private KnowledgeMotionDataRow(String source, String id, String title, String description, 
             String date, String duration, Iterable<String> keywords) {
         this.source = checkNotNull(source);
         this.id = checkNotNull(id);
@@ -84,8 +84,8 @@ public class GlobalImageDataRow {
         private String duration;
         private List<String> keywords = ImmutableList.of();
         
-        public GlobalImageDataRow build() {
-            return new GlobalImageDataRow(source, id, title, description, date, duration, keywords);
+        public KnowledgeMotionDataRow build() {
+            return new KnowledgeMotionDataRow(source, id, title, description, date, duration, keywords);
         }
         
         private Builder() {}

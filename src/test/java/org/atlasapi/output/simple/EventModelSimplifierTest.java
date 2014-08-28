@@ -48,7 +48,7 @@ public class EventModelSimplifierTest {
 
     @Test
     public void testContentAddedWithSubItemsAnnotation() {
-        Set<Annotation> annotations = ImmutableSet.of(Annotation.SUB_ITEMS);
+        Set<Annotation> annotations = ImmutableSet.of(Annotation.CONTENT);
         ChildRef childRef = new ChildRef(1234l, "a uri", "sortkey", DateTime.now(), EntityType.FILM);
         Iterable<ChildRef> content = ImmutableList.of(childRef);
         Event event = createEvent()

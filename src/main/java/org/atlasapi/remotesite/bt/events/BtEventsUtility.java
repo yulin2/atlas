@@ -57,7 +57,8 @@ public final class BtEventsUtility extends EventsUtility<BtSportType> {
             ))
             .put(BtSportType.MOTO_GP, ImmutableMap.of(
                     "Moto GP", "http://dbpedia.org/resources/Moto_gp", 
-                    "Motorsport", "http://dbpedia.org/resources/Motorsport"
+                    "Motorsport", "http://dbpedia.org/resources/Motorsport",
+                    "Grand Prix motorcycle racing", "http://dbpedia.org/resources/Grand_Prix_motorcycle_racing"
             ))
             .build();
 

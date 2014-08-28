@@ -91,7 +91,7 @@ public class OptaEventsUtility extends EventsUtility<OptaSportType> {
             .build();
     private static final Map<OptaSportType, Map<String, String>> EVENT_GROUPS_LOOKUP = ImmutableMap.<OptaSportType, Map<String, String>>builder()
             .put(OptaSportType.RUGBY, ImmutableMap.of(
-                    "Rugby League", "http://dbpedia.org/resources/Rugby_league", 
+                    "English Premiership (rugby union)", "http://dbpedia.org/resources/English_Premiership_(rugby_union)", 
                     "Rugby Football", "http://dbpedia.org/resources/Rugby_football"
             ))
             .put(OptaSportType.FOOTBALL_SCOTTISH_PREMIER_LEAGUE, ImmutableMap.of(
