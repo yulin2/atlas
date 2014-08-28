@@ -16,6 +16,7 @@ import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.event.EventResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
+import org.joda.time.DateTime;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +30,7 @@ import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
+import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 
 @Controller
 public class EventsController extends BaseController<Iterable<Event>> {
@@ -49,6 +51,7 @@ public class EventsController extends BaseController<Iterable<Event>> {
             .withErrorCode("Api Key required")
             .withStatusCode(HttpStatusCode.FORBIDDEN);
     
+    private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final EventResolver eventResolver;
     private final TopicQueryResolver topicResolver;
 
@@ -60,29 +63,32 @@ public class EventsController extends BaseController<Iterable<Event>> {
         this.eventResolver = checkNotNull(eventResolver);
     }
 
-    @SuppressWarnings("deprecation") // because of Maybe returned from TopicQueryResolver
     @RequestMapping(value={"/3.0/events.*", "/events.*"})
     public void allEvents(HttpServletRequest request, HttpServletResponse response,
-            @RequestParam(value = "event_group", required = false) String eventGroupId) throws IOException {
+            @RequestParam(value = "event_group", required = false) String eventGroupId,
+            @RequestParam(value = "from", required = false) String fromStr) throws IOException {
         try {
             final ApplicationConfiguration appConfig = appConfig(request);
             
             Selection selection = SELECTION_BUILDER.build(request);
             Iterable<Event> events;
             
+            Optional<Topic> eventGroup = Optional.absent();
+            Optional<DateTime> from = Optional.absent();
+            
             if (eventGroupId != null) {
-                Maybe<Topic> eventGroup = topicResolver.topicForId(idCodec.decode(eventGroupId).longValue());
-                if (eventGroup.isNothing()) {
+                Maybe<Topic> resolved = topicResolver.topicForId(idCodec.decode(eventGroupId).longValue());
+                if (resolved.isNothing()) {
                     errorViewFor(request, response, EVENT_GROUP_NOT_FOUND);
                     return; 
-                } else {
-                    events = eventResolver.fetchByEventGroup(eventGroup.requireValue());
                 }
-            } else {
-                events = eventResolver.fetchAll();
+                eventGroup = Optional.of(resolved.requireValue());
+            }
+            if (fromStr != null) {
+                from = Optional.fromNullable(dateTimeInQueryParser.parse(fromStr));
             }
             
-            events = selection.apply(Iterables.filter(events, isEnabled(appConfig)));
+            events = selection.apply(Iterables.filter(eventResolver.fetch(eventGroup, from), isEnabled(appConfig)));
 
             modelAndViewFor(request, response, events, appConfig);
         } catch (Exception e) {
