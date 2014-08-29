@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.knowledgemotion.topics.cache;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.emptyToNull;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 
 public class KeyphraseTopicCacheRow {
@@ -44,4 +45,25 @@ public class KeyphraseTopicCacheRow {
     public KeyphraseTopicCacheRow withTopicIdResult(Optional<Long> topicIdLookupResult) {
         return new KeyphraseTopicCacheRow(keyPhrase, maybeArticleNameLookupResult, Optional.of(topicIdLookupResult));
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(keyPhrase, maybeArticleNameLookupResult, maybeTopicIdLookupResult);
+    }
+
+    @Override
+    public boolean equals(Object it) {
+        if (it == null) {
+            return false;
+        }
+        if (it instanceof KeyphraseTopicCacheRow) {
+            KeyphraseTopicCacheRow other = (KeyphraseTopicCacheRow) it;
+            return
+                keyPhrase.equals(other.getKeyPhrase()) &&
+                maybeArticleNameLookupResult.equals(other.getPossibleArticleNameResult()) &&
+                maybeTopicIdLookupResult.equals(other.getPossibleTopicIdResult());
+        }
+        return false;
+    }
+
 }
