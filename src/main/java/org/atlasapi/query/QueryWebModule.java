@@ -117,6 +117,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.google.common.base.Splitter;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
@@ -129,6 +130,7 @@ public class QueryWebModule {
     
     private @Value("${local.host.name}") String localHostName;
     private @Value("${ids.expose}") String exposeIds;
+    private @Value("${events.whitelist.ids}") String eventsWhitelist;
     
     private @Autowired DatabasedMongo mongo;
     private @Autowired ContentGroupWriter contentGroupWriter;
@@ -308,7 +310,8 @@ public class QueryWebModule {
     
     @Bean
     EventsController eventController() {
-        return new EventsController(configFetcher, log, eventModelOutputter(), idCodec(), eventResolver, topicResolver);
+        Iterable<String> whitelistedIds = Splitter.on(',').split(eventsWhitelist);
+        return new EventsController(configFetcher, log, eventModelOutputter(), idCodec(), eventResolver, topicResolver, whitelistedIds);
     }
 
     @Bean
