@@ -1,8 +1,10 @@
 package org.atlasapi.query.v2;
 
-import static com.google.api.client.util.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,8 +24,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
@@ -54,13 +59,39 @@ public class EventsController extends BaseController<Iterable<Event>> {
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final EventResolver eventResolver;
     private final TopicQueryResolver topicResolver;
+    private final Predicate<Event> filterNonWhitelistedEvents;
 
     public EventsController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, 
             AtlasModelWriter<? super Iterable<Event>> outputter, NumberToShortStringCodec idCodec, 
-            EventResolver eventResolver, TopicQueryResolver topicResolver) {
+            EventResolver eventResolver, TopicQueryResolver topicResolver, Iterable<String> whitelistedIds) {
         super(configFetcher, log, outputter, idCodec);
         this.topicResolver = topicResolver;
         this.eventResolver = checkNotNull(eventResolver);
+        this.filterNonWhitelistedEvents = createFilter(whitelistedIds);
+    }
+
+    private Predicate<Event> createFilter(Iterable<String> whitelistedIds) {
+        final Set<Long> ids = ImmutableSet.copyOf(Iterables.transform(checkNotNull(whitelistedIds), new Function<String, Long>() {
+            @Override
+            public Long apply(String input) {
+                return idCodec.decode(input).longValue();
+            }
+        }));
+        return new Predicate<Event>() {
+            @Override
+            public boolean apply(Event input) {
+                return ids.contains(input.getId());
+            }
+        };
+    }
+
+    private Function<Long, String> encodeIds(final NumberToShortStringCodec idCodec) {
+        return new Function<Long, String>() {
+            @Override
+            public String apply(Long input) {
+                return idCodec.encode(BigInteger.valueOf(input));
+            }
+        };
     }
 
     @RequestMapping(value={"/3.0/events.*", "/events.*"})
@@ -88,7 +119,7 @@ public class EventsController extends BaseController<Iterable<Event>> {
                 from = Optional.fromNullable(dateTimeInQueryParser.parse(fromStr));
             }
             
-            events = selection.apply(Iterables.filter(eventResolver.fetch(eventGroup, from), isEnabled(appConfig)));
+            events = selection.apply(Iterables.filter(eventResolver.fetch(eventGroup, from), Predicates.and(isEnabled(appConfig), filterNonWhitelistedEvents)));
 
             modelAndViewFor(request, response, events, appConfig);
         } catch (Exception e) {
