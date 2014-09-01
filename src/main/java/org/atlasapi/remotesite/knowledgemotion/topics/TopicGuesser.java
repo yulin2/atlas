@@ -79,7 +79,12 @@ public class TopicGuesser {
         if (maybeTopic.isNothing()) {
             return Optional.absent();
         }
-        return Optional.of(maybeTopic.requireValue().getId());
+        Topic topic = maybeTopic.requireValue();
+
+        topic.setPublisher(Publisher.DBPEDIA);
+        topic.setTitle(articleName);
+        topicStore.write(topic);
+        return Optional.of(topic.getId());
     }
 
 }
