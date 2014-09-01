@@ -11,6 +11,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -30,8 +31,9 @@ public class DefaultKnowledgeMotionDataRowHandlerTest {
 
     @SuppressWarnings("unchecked")
     private final ContentExtractor<KnowledgeMotionDataRow, Optional<? extends Content>> extractor = mock(ContentExtractor.class);
+    private final TopicQueryResolver topicStore = mock(TopicQueryResolver.class);
     
-    private final DefaultKnowledgeMotionDataRowHandler handler = new DefaultKnowledgeMotionDataRowHandler(resolver, writer, extractor);
+    private final DefaultKnowledgeMotionDataRowHandler handler = new DefaultKnowledgeMotionDataRowHandler(resolver, writer, extractor, topicStore);
     
     private static KnowledgeMotionDataRow emptyRow() {
         return KnowledgeMotionDataRow.builder()
