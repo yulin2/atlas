@@ -9,6 +9,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
+import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.knowledgemotion.topics.TopicGuesser;
 import org.atlasapi.remotesite.knowledgemotion.topics.cache.KeyphraseTopicCache;
@@ -42,6 +43,9 @@ public class KnowledgeMotionModule {
     @Autowired
     private TopicStore topicStore;
 
+    @Autowired
+    private TopicQueryResolver topicQueryResolver;
+
     static final ImmutableList<KnowledgeMotionSourceConfig> SOURCES = ImmutableList.of(
             KnowledgeMotionSourceConfig.from("GlobalImageworks", Publisher.KM_GLOBALIMAGEWORKS, "globalImageWorks:%s", "http://globalimageworks.com/%s"),
             KnowledgeMotionSourceConfig.from("Bloomberg", Publisher.KM_BLOOMBERG, "bloomberg:%s", "http://bloomberg.com/%s")
@@ -63,7 +67,7 @@ public class KnowledgeMotionModule {
 
     private KnowledgeMotionUpdateTask knowledgeMotionUpdater() {
         return new KnowledgeMotionUpdateTask(spreadsheet.spreadsheetFetcher(), 
-                new DefaultKnowledgeMotionDataRowHandler(contentResolver, contentWriter, new KnowledgeMotionDataRowContentExtractor(SOURCES, topicGuesser())),
+                new DefaultKnowledgeMotionDataRowHandler(contentResolver, contentWriter, new KnowledgeMotionDataRowContentExtractor(SOURCES, topicGuesser()), topicQueryResolver),
                 new KnowledgeMotionAdapter());
     }
 
