@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.knowledgemotion;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Set;
 
@@ -12,6 +14,7 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.knowledgemotion.topics.TopicGuesser;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -43,13 +46,15 @@ public class KnowledgeMotionDataRowContentExtractor implements ContentExtractor<
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     private final ImmutableMap<String, KnowledgeMotionSourceConfig> sources;
+    private final TopicGuesser topicGuesser;
 
-    public KnowledgeMotionDataRowContentExtractor(Iterable<KnowledgeMotionSourceConfig> sources) {
+    public KnowledgeMotionDataRowContentExtractor(Iterable<KnowledgeMotionSourceConfig> sources, TopicGuesser topicGuesser) {
         ImmutableMap.Builder<String, KnowledgeMotionSourceConfig> sourceMap = ImmutableMap.builder();
         for (KnowledgeMotionSourceConfig source : sources) {
             sourceMap.put(source.rowHeader(), source);
         }
         this.sources = sourceMap.build();
+        this.topicGuesser = checkNotNull(topicGuesser);
     }
 
     @Override
@@ -77,7 +82,10 @@ public class KnowledgeMotionDataRowContentExtractor implements ContentExtractor<
         item.setCurie(sourceConfig.curie(id));
         item.setLastUpdated(new DateTime(DateTimeZone.UTC));
         item.setMediaType(MediaType.VIDEO);
-        item.setKeyPhrases(keyphrases(dataRow.getKeywords(), publisher));
+
+        List<String> keyPhrases = dataRow.getKeywords();
+        item.setKeyPhrases(keyphrases(keyPhrases, publisher));
+        item.setTopicRefs(topicGuesser.guessTopics(keyPhrases));
 
         return Optional.of(item);
     }
