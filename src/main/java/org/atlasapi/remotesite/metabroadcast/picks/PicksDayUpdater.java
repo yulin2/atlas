@@ -45,6 +45,8 @@ public class PicksDayUpdater implements ChannelDayProcessor {
     private static final Logger log = LoggerFactory.getLogger(PicksDayUpdater.class);
     
     private static final String CONTENT_GROUP = "http://picks.metabroadcast.com/schedule-picks";
+    private static final String SOAP_GENRE = "http://pressassociation.com/genres/1500";
+    
     private final ScheduleResolver scheduleResolver;
     private final ContentGroupResolver contentGroupResolver;
     private final ContentResolver contentResolver;
@@ -58,10 +60,16 @@ public class PicksDayUpdater implements ChannelDayProcessor {
         this.contentGroupWriter = contentGroupWriter;
         this.contentResolver = contentResolver;
         this.picksPredicate = Predicates.and(ImmutableList.of(
-                                                new InterestingItemAndBroadcastPredicate(picksChannelsSupplier.get()), 
-                                                Predicates.not(new ItemInLargeBrandPredicate(contentResolver, LARGE_BRAND_SIZE)),
-                                                Predicates.not(new ShortBroadcastPredicate(SHORT_BROADCAST_LENGTH)))
-                                            );
+                new InterestingItemAndBroadcastPredicate(picksChannelsSupplier.get()), 
+                Predicates.or(
+                                Predicates.not(new ItemInLargeBrandPredicate(contentResolver, LARGE_BRAND_SIZE)),
+                                Predicates.and(
+                                        new GenreMatchPredicate(ImmutableSet.of(SOAP_GENRE)),
+                                        new FirstBroadcastPredicate()
+                                )
+                             ),
+                Predicates.not(new ShortBroadcastPredicate(SHORT_BROADCAST_LENGTH)))
+            );
     }
     
     @Override
@@ -73,7 +81,9 @@ public class PicksDayUpdater implements ChannelDayProcessor {
                     ImmutableSet.of(channelDay.getChannel()), 
                     ImmutableSet.of(Publisher.PA)).scheduleChannels(), TO_ITEMS));
             
-            // We need to resolve the content to get all broadcasts
+            // We need to resolve the content to get all broadcasts, since items returned
+            // from a schedule request only have a single broadcast corresponding to the
+            // schedule slot
             final Map<String, Maybe<Identified>> resolved = 
                     contentResolver.findByCanonicalUris(
                             ImmutableSet.copyOf(Iterables.transform(picks, Identified.TO_URI))
