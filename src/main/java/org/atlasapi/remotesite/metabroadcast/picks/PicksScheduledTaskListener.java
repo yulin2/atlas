@@ -25,18 +25,15 @@ public class PicksScheduledTaskListener implements ChannelDayProcessingTaskListe
         // Only mark up until today as completed, as we'll re-run future days in case of
         // schedule changes
         if ((lastDayCompleted == null || channelDay.getDay().isAfter(lastDayCompleted))
-                        && channelDay.getDay().isAfter(clock.now().toLocalDate())) {
+                        && channelDay.getDay().isBefore(clock.now().toLocalDate())) {
             lastDayCompleted = channelDay.getDay();
         }
     }
 
     @Override
     public void completed(UpdateProgress progress) {
-        // Don't mark a day as completed that is in the future, as schedules
-        // may change, so we'll reprocess the day until it's in the past
         if (!progress.hasFailures() 
-                && lastDayCompleted != null
-                && lastDayCompleted.isBefore(clock.now().toLocalDate())) {
+                && lastDayCompleted != null) {
             picksLastProcessedStore.setLastScheduleDayProcessed(lastDayCompleted);
         }
     }
