@@ -17,6 +17,7 @@ import org.atlasapi.remotesite.opta.events.sports.model.OptaFixture;
 import org.atlasapi.remotesite.opta.events.sports.model.OptaFixtureTeam;
 import org.atlasapi.remotesite.opta.events.sports.model.OptaSportsTeam;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ import com.google.common.collect.Iterables;
 
 public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaFixture> {
     
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat.forPattern("yyyyMMdd HH:mm:ss").withZoneUTC();
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat.forPattern("yyyyMMdd HH:mm:ss");
     
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final OptaEventsUtility utility;
@@ -58,14 +59,17 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
         if (!title.isPresent()) {
             return Optional.absent();
         }
-        DateTime startTime = parseStartTime(match);
+        Optional<DateTime> startTime = parseStartTime(match, sport);
+        if (!startTime.isPresent()) {
+            return Optional.absent();
+        }
         
         Optional<Topic> venue = createOrResolveVenue(match);
         if (!venue.isPresent()) {
             return Optional.absent();
         }
         
-        Optional<DateTime> endTime = utility.createEndTime(sport, startTime);
+        Optional<DateTime> endTime = utility.createEndTime(sport, startTime.get());
         if (!endTime.isPresent()) {
             log.error("No duration mapping exists for sport {}", sport.name());
             return Optional.absent();
@@ -74,7 +78,7 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
                 .withTitle(title.get())
                 .withPublisher(Publisher.OPTA)
                 .withVenue(venue.get())
-                .withStartTime(startTime)
+                .withStartTime(startTime.get())
                 .withEndTime(endTime.get())
                 .withOrganisations(parseOrganisations(match))
                 .withEventGroups(parseEventGroups(sport))
@@ -103,8 +107,16 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
         return Optional.of(team.get().getTitle());
     }
     
-    private DateTime parseStartTime(OptaFixture fixture) {
-        return TIME_FORMATTER.parseDateTime(fixture.attributes().gameDate() + " " + fixture.attributes().time());
+    private Optional<DateTime> parseStartTime(OptaFixture fixture, OptaSportType sport) {
+        Optional<DateTimeZone> timeZone = utility.fetchTimeZone(sport);
+        if (!timeZone.isPresent()) {
+            log.error("No timezone mapping exists for sport {}", sport);
+            return Optional.absent();
+        }
+        return Optional.of(
+                TIME_FORMATTER.withZone(timeZone.get())
+                        .parseDateTime(fixture.attributes().gameDate() + " " + fixture.attributes().time())
+        );
     }
     
     private Optional<Topic> createOrResolveVenue(OptaFixture match) {
