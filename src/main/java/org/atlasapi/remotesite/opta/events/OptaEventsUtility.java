@@ -6,6 +6,7 @@ import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.events.EventsUtility;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 
 import com.google.common.base.Optional;
@@ -21,6 +22,12 @@ public class OptaEventsUtility extends EventsUtility<OptaSportType> {
             OptaSportType.FOOTBALL_GERMAN_BUNDESLIGA, Duration.standardMinutes(110),
             OptaSportType.FOOTBALL_SCOTTISH_PREMIER_LEAGUE, Duration.standardMinutes(110),
             OptaSportType.FOOTBALL_PREMIER_LEAGUE, Duration.standardMinutes(110)
+    );
+    private static final Map<OptaSportType, DateTimeZone> TIMEZONE_MAPPING = ImmutableMap.of(
+            OptaSportType.RUGBY, DateTimeZone.forID("Europe/London"),
+            OptaSportType.FOOTBALL_GERMAN_BUNDESLIGA, DateTimeZone.forID("Europe/Berlin"),
+            OptaSportType.FOOTBALL_SCOTTISH_PREMIER_LEAGUE, DateTimeZone.forID("Europe/London"),
+            OptaSportType.FOOTBALL_PREMIER_LEAGUE, DateTimeZone.forID("Europe/London")
     );
     private static final Map<String, String> VENUE_LOOKUP = ImmutableMap.<String, String>builder()
             .put("Recreation Ground", "http://dbpedia.org/resources/Recreation_Ground_(Bath)")
@@ -144,4 +151,16 @@ public class OptaEventsUtility extends EventsUtility<OptaSportType> {
         return Optional.fromNullable(EVENT_GROUPS_LOOKUP.get(sport));
     }
 
+    /**
+     * Fetches an appropriate Joda {@link DateTimeZone} for a given sport, returning
+     * Optional.absent() if no mapping is found.
+     * <p>
+     * This method exists because the timezone information in the Opta feeds is either
+     * ambiguous ('BST') or non-existent (the non-soccer feeds). Fortunately all sports
+     * ingested thus far are each played within a single timezone.
+     * @param sport the sport to fetch a timezone for
+     */
+    public Optional<DateTimeZone> fetchTimeZone(OptaSportType sport) {
+        return Optional.fromNullable(TIMEZONE_MAPPING.get(sport));
+    }
 }

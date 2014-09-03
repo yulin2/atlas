@@ -4,7 +4,6 @@ import static com.google.api.client.util.Preconditions.checkNotNull;
 
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 
 import org.atlasapi.media.entity.Event;
 import org.atlasapi.media.entity.Organisation;
@@ -64,14 +63,17 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
         if (!title.isPresent()) {
             return Optional.absent();
         }
-        DateTime startTime = parseStartTime(match);
+        Optional<DateTime> startTime = parseStartTime(match, sport);
+        if (!startTime.isPresent()) {
+            return Optional.absent();
+        }
         
         Optional<Topic> venue = createOrResolveVenue(match);
         if (!venue.isPresent()) {
             return Optional.absent();
         }
         
-        Optional<DateTime> endTime = utility.createEndTime(sport, startTime);
+        Optional<DateTime> endTime = utility.createEndTime(sport, startTime.get());
         if (!endTime.isPresent()) {
             log.error("No duration mapping found for sport {}", sport.name());
             return Optional.absent();
@@ -81,7 +83,7 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
                 .withTitle(title.get())
                 .withPublisher(Publisher.OPTA)
                 .withVenue(venue.get())
-                .withStartTime(startTime)
+                .withStartTime(startTime.get())
                 .withEndTime(endTime.get())
                 .withOrganisations(parseOrganisations(match))
                 .withEventGroups(parseEventGroups(sport))
@@ -111,13 +113,20 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
         return Optional.fromNullable(team.get().getTitle());
     }
 
-    
-    private DateTime parseStartTime(SoccerMatchData match) {
+    // we ignore the timezone string, as it uses the three letter codes such as 'BST', which are ambiguous 
+    // (BST is either British Summer Time or Bangladesh Standard Time)
+    private Optional<DateTime> parseStartTime(SoccerMatchData match, OptaSportType sport) {
         String dateStr = match.matchInformation().date().date();
-        String timeZoneStr = match.matchInformation().timeZone();
+        Optional<DateTimeZone> timeZone = utility.fetchTimeZone(sport);
+        if (!timeZone.isPresent()) {
+            log.error("No time zone mapping found for sport {}", sport);
+            return Optional.absent();
+        }
         
-        return DATE_TIME_FORMATTER.withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(timeZoneStr)))
-                .parseDateTime(dateStr);
+        return Optional.of(
+                DATE_TIME_FORMATTER.withZone(timeZone.get())
+                        .parseDateTime(dateStr)
+        );
     }
     
     private Optional<Topic> createOrResolveVenue(SoccerMatchData match) {
