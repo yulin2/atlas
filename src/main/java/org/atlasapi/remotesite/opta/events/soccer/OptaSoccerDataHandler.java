@@ -11,8 +11,9 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
+import org.atlasapi.remotesite.events.EventsUriCreator;
 import org.atlasapi.remotesite.opta.events.OptaDataHandler;
-import org.atlasapi.remotesite.opta.events.OptaEventsUtility;
+import org.atlasapi.remotesite.opta.events.OptaEventsMapper;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerMatchData;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerStats;
@@ -39,18 +40,20 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
     
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final OptaEventsUtility utility;
+    private final OptaEventsMapper mapper;
+    private final EventsUriCreator uriCreator;
 
-    public OptaSoccerDataHandler(OrganisationStore organisationStore, EventStore eventStore, OptaEventsUtility utility) {
+    public OptaSoccerDataHandler(OrganisationStore organisationStore, EventStore eventStore, OptaEventsMapper mapper, EventsUriCreator uriCreator) {
         super(organisationStore, eventStore);
-        this.utility = checkNotNull(utility);
+        this.mapper = checkNotNull(mapper);
+        this.uriCreator = checkNotNull(uriCreator);
     }
     
     @Override
     public Optional<Organisation> parseOrganisation(SoccerTeam team) {
         Organisation organisation = new Organisation();
 
-        organisation.setCanonicalUri(utility.createTeamUri(team.attributes().uId()));
+        organisation.setCanonicalUri(uriCreator.createTeamUri(team.attributes().uId()));
         organisation.setPublisher(Publisher.OPTA);
         organisation.setTitle(team.name());
 
@@ -73,7 +76,7 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
             return Optional.absent();
         }
         
-        Optional<DateTime> endTime = utility.createEndTime(sport, startTime.get());
+        Optional<DateTime> endTime = mapper.createEndTime(sport, startTime.get());
         if (!endTime.isPresent()) {
             log.error("No duration mapping found for sport {}", sport.name());
             return Optional.absent();
@@ -89,7 +92,7 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
                 .withEventGroups(parseEventGroups(sport))
                 .build();
 
-        event.setCanonicalUri(utility.createEventUri(match.attributes().uId()));
+        event.setCanonicalUri(uriCreator.createEventUri(match.attributes().uId()));
         
         return Optional.of(event);
     }
@@ -105,7 +108,7 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
     
     private Optional<String> fetchTeamName(SoccerTeamData teamData) {
         String teamId = teamData.attributes().teamRef();
-        Optional<Organisation> team = getTeamByUri(utility.createTeamUri(teamId));
+        Optional<Organisation> team = getTeamByUri(uriCreator.createTeamUri(teamId));
         if (!team.isPresent()) {
             log.error("team {} not present in teams list", teamId);
             return Optional.absent();
@@ -117,7 +120,7 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
     // (BST is either British Summer Time or Bangladesh Standard Time)
     private Optional<DateTime> parseStartTime(SoccerMatchData match, OptaSportType sport) {
         String dateStr = match.matchInformation().date().date();
-        Optional<DateTimeZone> timeZone = utility.fetchTimeZone(sport);
+        Optional<DateTimeZone> timeZone = mapper.fetchTimeZone(sport);
         if (!timeZone.isPresent()) {
             log.error("No time zone mapping found for sport {}", sport);
             return Optional.absent();
@@ -131,7 +134,7 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
     
     private Optional<Topic> createOrResolveVenue(SoccerMatchData match) {
         String location = getVenueData(match.stats());
-        Optional<Topic> value = utility.createOrResolveVenue(location);
+        Optional<Topic> value = mapper.createOrResolveVenue(location);
         if (!value.isPresent()) {
             log.error("Unable to resolve location: {}", location);
         }
@@ -151,14 +154,14 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
         Iterable<Organisation> organisations = Iterables.transform(match.teamData(), new Function<SoccerTeamData, Organisation>() {
             @Override
             public Organisation apply(SoccerTeamData input) {
-                return getTeamByUri(utility.createTeamUri(input.attributes().teamRef())).orNull();
+                return getTeamByUri(uriCreator.createTeamUri(input.attributes().teamRef())).orNull();
             }
         });
         return Iterables.filter(organisations, Predicates.notNull());
     }
 
     private Iterable<Topic> parseEventGroups(OptaSportType sport) {
-        Optional<Set<Topic>> eventGroups = utility.parseEventGroups(sport);
+        Optional<Set<Topic>> eventGroups = mapper.parseEventGroups(sport);
         if (!eventGroups.isPresent()) {
             log.warn("No event groups mapped to sport {}", sport.name());
             return ImmutableList.of();

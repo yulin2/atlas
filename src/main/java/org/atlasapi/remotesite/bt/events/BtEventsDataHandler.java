@@ -15,8 +15,11 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
-import org.atlasapi.remotesite.bt.events.model.BtEvent;
+import org.atlasapi.remotesite.bt.events.feedModel.BtEvent;
+import org.atlasapi.remotesite.bt.events.feedModel.BtTeam;
+import org.atlasapi.remotesite.bt.events.model.BtSportType;
 import org.atlasapi.remotesite.events.EventParsingDataHandler;
+import org.atlasapi.remotesite.events.EventsUriCreator;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
@@ -54,11 +57,14 @@ public final class BtEventsDataHandler extends EventParsingDataHandler<BtSportTy
             
     
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final BtEventsUtility utility;
+    private final BtEventsFieldMapper mapper;
+    private final EventsUriCreator uriCreator;
 
-    public BtEventsDataHandler(OrganisationStore organisationStore, EventStore eventStore, BtEventsUtility utility) {
+    public BtEventsDataHandler(OrganisationStore organisationStore, EventStore eventStore, BtEventsFieldMapper mapper,
+            EventsUriCreator uriCreator) {
         super(organisationStore, eventStore);
-        this.utility = checkNotNull(utility);
+        this.mapper = checkNotNull(mapper);
+        this.uriCreator = checkNotNull(uriCreator);
     }
 
     @Override
@@ -69,7 +75,7 @@ public final class BtEventsDataHandler extends EventParsingDataHandler<BtSportTy
 
     @Override
     public Optional<Event> parseEvent(BtEvent match, BtSportType sport) {
-        Optional<Topic> venue = utility.createOrResolveVenue(match.location());
+        Optional<Topic> venue = mapper.createOrResolveVenue(match.location());
         if (!venue.isPresent()) {
             return Optional.absent();
         }
@@ -83,7 +89,7 @@ public final class BtEventsDataHandler extends EventParsingDataHandler<BtSportTy
                 .withEventGroups(createEventGroups(sport))
                 .build();
         
-        event.setCanonicalUri(utility.createEventUri(match.id()));
+        event.setCanonicalUri(uriCreator.createEventUri(match.id()));
         
         return Optional.of(event);
     }
@@ -97,7 +103,7 @@ public final class BtEventsDataHandler extends EventParsingDataHandler<BtSportTy
     }
 
     private Iterable<Topic> createEventGroups(BtSportType sport) {
-        Optional<Set<Topic>> eventGroups = utility.parseEventGroups(sport);
+        Optional<Set<Topic>> eventGroups = mapper.parseEventGroups(sport);
         if (!eventGroups.isPresent()) {
             log.warn("No event groups mapped to sport {}", sport.name());
             return ImmutableSet.of();

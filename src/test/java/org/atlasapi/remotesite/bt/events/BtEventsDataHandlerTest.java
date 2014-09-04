@@ -16,8 +16,12 @@ import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
 import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.remotesite.bt.events.model.BtEvent;
-import org.atlasapi.remotesite.bt.events.model.BtEventsFeed;
+import org.atlasapi.remotesite.bt.events.feedModel.BtEvent;
+import org.atlasapi.remotesite.bt.events.feedModel.BtEventsFeed;
+import org.atlasapi.remotesite.bt.events.feedModel.BtTeam;
+import org.atlasapi.remotesite.bt.events.model.BtEventsData;
+import org.atlasapi.remotesite.bt.events.model.BtSportType;
+import org.atlasapi.remotesite.events.EventsUriCreator;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Before;
@@ -44,8 +48,9 @@ public class BtEventsDataHandlerTest {
     private OrganisationStore organisationStore = Mockito.mock(OrganisationStore.class);
     private EventStore eventStore = Mockito.mock(EventStore.class);
     private TopicStore topicStore = Mockito.mock(TopicStore.class);
-    private BtEventsUtility utility = new BtEventsUtility(topicStore);
-    private final BtEventsDataHandler handler = new BtEventsDataHandler(organisationStore, eventStore, utility);
+    private BtEventsFieldMapper mapper = new BtEventsFieldMapper(topicStore);
+    private EventsUriCreator uriCreator = new BtEventsUriCreator();
+    private final BtEventsDataHandler handler = new BtEventsDataHandler(organisationStore, eventStore, mapper, uriCreator );
     private BtEventsData feedData;
     
     public BtEventsDataHandlerTest() throws JsonSyntaxException, JsonIOException, IOException {
@@ -82,12 +87,12 @@ public class BtEventsDataHandlerTest {
         assertEquals("http://bt.com/events/" + match.id(), parsedEvent.getCanonicalUri());
         assertEquals(match.name(), parsedEvent.title());
         assertEquals(Publisher.BT_EVENTS, parsedEvent.publisher());
-        assertEquals(utility.fetchLocationUrl(match.location()).get(), parsedEvent.venue().getValue());
+        assertEquals(mapper.fetchLocationUrl(match.location()).get(), parsedEvent.venue().getValue());
         assertEquals(new DateTime(2014, 3, 20, 0, 0, 0, 563, DateTimeZone.UTC), parsedEvent.startTime());
         assertEquals(new DateTime(2014, 03, 23, 11, 23, 17, 833, DateTimeZone.UTC), parsedEvent.endTime());
         assertTrue(parsedEvent.organisations().isEmpty());
         assertTrue(parsedEvent.participants().isEmpty());
-        assertEquals(transformToValues(utility.parseEventGroups(BtSportType.MOTO_GP).get()), transformToValues(parsedEvent.eventGroups()));
+        assertEquals(transformToValues(mapper.parseEventGroups(BtSportType.MOTO_GP).get()), transformToValues(parsedEvent.eventGroups()));
         assertTrue(parsedEvent.content().isEmpty());
     }
 

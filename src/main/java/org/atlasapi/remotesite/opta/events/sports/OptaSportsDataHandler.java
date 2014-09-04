@@ -10,8 +10,9 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
+import org.atlasapi.remotesite.events.EventsUriCreator;
 import org.atlasapi.remotesite.opta.events.OptaDataHandler;
-import org.atlasapi.remotesite.opta.events.OptaEventsUtility;
+import org.atlasapi.remotesite.opta.events.OptaEventsMapper;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
 import org.atlasapi.remotesite.opta.events.sports.model.OptaFixture;
 import org.atlasapi.remotesite.opta.events.sports.model.OptaFixtureTeam;
@@ -35,18 +36,21 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormat.forPattern("yyyyMMdd HH:mm:ss");
     
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final OptaEventsUtility utility;
+    private final OptaEventsMapper utility;
+    private final EventsUriCreator uriCreator;
 
-    public OptaSportsDataHandler(OrganisationStore organisationStore, EventStore eventStore, OptaEventsUtility utility) {
+    public OptaSportsDataHandler(OrganisationStore organisationStore, EventStore eventStore, 
+            OptaEventsMapper utility, EventsUriCreator uriCreator) {
         super(organisationStore, eventStore);
         this.utility = checkNotNull(utility);
+        this.uriCreator = checkNotNull(uriCreator);
     }
 
     @Override
     public Optional<Organisation> parseOrganisation(OptaSportsTeam team) {
         Organisation organisation = new Organisation();
 
-        organisation.setCanonicalUri(utility.createTeamUri(team.attributes().id()));
+        organisation.setCanonicalUri(uriCreator.createTeamUri(team.attributes().id()));
         organisation.setPublisher(Publisher.OPTA);
         organisation.setTitle(team.attributes().name());
 
@@ -84,7 +88,7 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
                 .withEventGroups(parseEventGroups(sport))
                 .build();
 
-        event.setCanonicalUri(utility.createEventUri(match.attributes().id()));
+        event.setCanonicalUri(uriCreator.createEventUri(match.attributes().id()));
         
         return Optional.of(event);
     }
@@ -99,7 +103,7 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
     }
     
     private Optional<String> fetchTeamName(OptaFixtureTeam teamData) {
-        Optional<Organisation> team = getTeamByUri(utility.createTeamUri(teamData.attributes().teamId()));
+        Optional<Organisation> team = getTeamByUri(uriCreator.createTeamUri(teamData.attributes().teamId()));
         if (!team.isPresent()) {
             log.error("team {} not present in teams list", teamData.attributes().teamId());
             return Optional.absent();
@@ -132,7 +136,7 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
         Iterable<Organisation> organisations = Iterables.transform(fixture.teams(), new Function<OptaFixtureTeam, Organisation>() {
             @Override
             public Organisation apply(OptaFixtureTeam input) {
-                return getTeamByUri(utility.createTeamUri(input.attributes().teamId())).orNull();
+                return getTeamByUri(uriCreator.createTeamUri(input.attributes().teamId())).orNull();
             }
         });
         return Iterables.filter(organisations, Predicates.notNull());

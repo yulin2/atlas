@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.opta.events.model.OptaMatch;
+import org.atlasapi.remotesite.opta.events.model.OptaSportConfiguration;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
 import org.atlasapi.remotesite.opta.events.model.OptaTeam;
 
@@ -46,7 +47,7 @@ public final class HttpOptaEventsFetcher<T extends OptaTeam, M extends OptaMatch
             @Override
             public Optional<? extends OptaEventsData<T, M>> transform(HttpResponsePrologue prologue, InputStream body)
                     throws HttpException, Exception {
-                return Optional.fromNullable(optaDataTransformer.transform(body));
+                return Optional.fromNullable(optaDataTransformer.<OptaEventsData<T, M>>transform(body));
             }
         };
     }
@@ -56,7 +57,7 @@ public final class HttpOptaEventsFetcher<T extends OptaTeam, M extends OptaMatch
         try {
             OptaSportConfiguration config = sportConfig.get(sport);
             if (config == null) {
-                return Optional.absent();
+                throw new IllegalArgumentException("No configuration for sport " + sport.name());
             }
             
             String url = String.format(urlPattern, config.feedType(), config.competition(), config.seasonId());

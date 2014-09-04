@@ -11,6 +11,9 @@ import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.events.EventsUriCreator;
+import org.atlasapi.remotesite.events.S3FileFetcher;
+import org.atlasapi.remotesite.opta.events.model.OptaSportConfiguration;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
 import org.atlasapi.remotesite.opta.events.soccer.OptaSoccerDataHandler;
 import org.atlasapi.remotesite.opta.events.soccer.OptaSoccerDataTransformer;
@@ -20,7 +23,8 @@ import org.atlasapi.remotesite.opta.events.sports.OptaSportsDataHandler;
 import org.atlasapi.remotesite.opta.events.sports.OptaSportsDataTransformer;
 import org.atlasapi.remotesite.opta.events.sports.model.OptaFixture;
 import org.atlasapi.remotesite.opta.events.sports.model.OptaSportsTeam;
-import org.jets3t.service.S3Service;
+import org.atlasapi.remotesite.util.RestS3ServiceSupplier;
+import org.jets3t.service.security.AWSCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +58,6 @@ public class OptaEventsModule {
     private @Autowired EventStore eventStore;
     private @Autowired OrganisationStore organisationStore;
     private @Autowired @Qualifier("topicStore") TopicStore topicStore;
-    private @Autowired S3Service s3Service;
     
     private @Value("${s3.access}") String s3AccessKey;
     private @Value("${s3.secret}") String s3SecretAccessKey;
@@ -75,18 +78,35 @@ public class OptaEventsModule {
 
     private OptaEventsFetcher<SoccerTeam, SoccerMatchData> soccerFetcher() {
         return new CombiningOptaEventsFetcher<>(ImmutableList.<OptaEventsFetcher<SoccerTeam, SoccerMatchData>>of(
-                new S3OptaEventsFetcher<>(s3Service, soccerFileNames(), soccerTransformer(), s3BucketName),
-                new HttpOptaEventsFetcher<>(sportConfig(), HttpClients.webserviceClient(), soccerTransformer(), new UsernameAndPassword(username, password), baseUrl)
+                new S3OptaEventsFetcher<>(s3FileFetcher(), soccerFileNames(), soccerTransformer(), s3BucketName),
+                new HttpOptaEventsFetcher<>(
+                        sportConfig(), 
+                        HttpClients.webserviceClient(), 
+                        soccerTransformer(), 
+                        new UsernameAndPassword(username, password), baseUrl)
         ));
+    }
+    
+    private S3FileFetcher s3FileFetcher() {
+        AWSCredentials credentials = new AWSCredentials(s3AccessKey, s3SecretAccessKey);
+        return new S3FileFetcher(new RestS3ServiceSupplier(credentials));
     }
     
     private OptaDataTransformer<SoccerTeam, SoccerMatchData> soccerTransformer() {
         return new OptaSoccerDataTransformer();
     }
+    
+    private EventsUriCreator uriCreator() {
+        return new OptaEventsUriCreator();
+    }
 
     private Map<OptaSportType, OptaSportConfiguration> sportConfig() {
-        Builder<OptaSportType, OptaSportConfiguration> configMapping = ImmutableMap.<OptaSportType, OptaSportConfiguration>builder();
-        for (Entry<String, Parameter> property : Configurer.getParamsWithKeyMatching(Predicates.containsPattern(OPTA_HTTP_CONFIG_PREFIX))) {
+        Builder<OptaSportType, OptaSportConfiguration> configMapping = 
+                ImmutableMap.<OptaSportType, OptaSportConfiguration>builder();
+        
+        Iterable<Entry<String, Parameter>> matchingParams = 
+                Configurer.getParamsWithKeyMatching(Predicates.containsPattern(OPTA_HTTP_CONFIG_PREFIX));
+        for (Entry<String, Parameter> property : matchingParams) {
             String sportKey = property.getKey().substring(OPTA_HTTP_CONFIG_PREFIX.length());
             String sportConfig = property.getValue().get();
             
@@ -125,12 +145,12 @@ public class OptaEventsModule {
 
     @Bean
     private OptaSoccerDataHandler soccerDataHandler() {
-        return new OptaSoccerDataHandler(organisationStore, eventStore, utility());
+        return new OptaSoccerDataHandler(organisationStore, eventStore, utility(), new OptaEventsUriCreator());
     }
 
     @Bean
-    private OptaEventsUtility utility() {
-        return new OptaEventsUtility(topicStore);
+    private OptaEventsMapper utility() {
+        return new OptaEventsMapper(topicStore);
     }
 
     private OptaEventsIngestTask<OptaSportsTeam, OptaFixture> sportsIngestTask() {
@@ -138,7 +158,7 @@ public class OptaEventsModule {
     }
 
     private OptaEventsFetcher<OptaSportsTeam, OptaFixture> sportsFetcher() {
-        return new S3OptaEventsFetcher<>(s3Service, sportFileNames(), sportsTransformer(), s3BucketName);
+        return new S3OptaEventsFetcher<>(s3FileFetcher(), sportFileNames(), sportsTransformer(), s3BucketName);
     }
     
     private OptaDataTransformer<OptaSportsTeam, OptaFixture> sportsTransformer() {
@@ -152,6 +172,6 @@ public class OptaEventsModule {
     }
 
     private OptaSportsDataHandler sportsDataHandler() {
-        return new OptaSportsDataHandler(organisationStore, eventStore, utility());
+        return new OptaSportsDataHandler(organisationStore, eventStore, utility(), uriCreator());
     }
 }

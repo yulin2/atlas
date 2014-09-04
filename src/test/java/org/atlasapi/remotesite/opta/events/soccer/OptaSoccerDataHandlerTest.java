@@ -17,7 +17,9 @@ import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
 import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.remotesite.opta.events.OptaEventsUtility;
+import org.atlasapi.remotesite.events.EventsUriCreator;
+import org.atlasapi.remotesite.opta.events.OptaEventsMapper;
+import org.atlasapi.remotesite.opta.events.OptaEventsUriCreator;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
 import org.atlasapi.remotesite.opta.events.soccer.model.MatchDateDeserializer;
 import org.atlasapi.remotesite.opta.events.soccer.model.OptaSoccerEventsFeed;
@@ -56,8 +58,9 @@ public class OptaSoccerDataHandlerTest {
     private OrganisationStore organisationStore = Mockito.mock(OrganisationStore.class);
     private EventStore eventStore = Mockito.mock(EventStore.class);
     private TopicStore topicStore = Mockito.mock(TopicStore.class);
-    private OptaEventsUtility utility = new OptaEventsUtility(topicStore);
-    private final OptaSoccerDataHandler handler = new OptaSoccerDataHandler(organisationStore, eventStore, utility);
+    private OptaEventsMapper mapper = new OptaEventsMapper(topicStore);
+    private EventsUriCreator uriCreator = new OptaEventsUriCreator();
+    private final OptaSoccerDataHandler handler = new OptaSoccerDataHandler(organisationStore, eventStore, mapper, uriCreator );
     private OptaSoccerEventsData feedData;
     
     public OptaSoccerDataHandlerTest() throws JsonSyntaxException, JsonIOException, IOException {
@@ -107,12 +110,12 @@ public class OptaSoccerDataHandlerTest {
         assertEquals("http://optasports.com/events/" + match.attributes().uId(), parsedEvent.getCanonicalUri());
         assertEquals("1. FC Köln vs FC Bayern München", parsedEvent.title());
         assertEquals(Publisher.OPTA, parsedEvent.publisher());
-        assertEquals(utility.fetchLocationUrl("RheinEnergieStadion").get(), parsedEvent.venue().getValue());
+        assertEquals(mapper.fetchLocationUrl("RheinEnergieStadion").get(), parsedEvent.venue().getValue());
         assertEquals(startTime, parsedEvent.startTime());
-        assertEquals(utility.createEndTime(SPORT, startTime).get(), parsedEvent.endTime());
+        assertEquals(mapper.createEndTime(SPORT, startTime).get(), parsedEvent.endTime());
         assertEquals(expectedTeamUris, transformToUris(parsedEvent.organisations()));
         assertTrue(parsedEvent.participants().isEmpty());
-        assertEquals(transformToValues(utility.parseEventGroups(SPORT).get()), transformToValues(parsedEvent.eventGroups()));
+        assertEquals(transformToValues(mapper.parseEventGroups(SPORT).get()), transformToValues(parsedEvent.eventGroups()));
         assertTrue(parsedEvent.content().isEmpty());
     }
 

@@ -1,6 +1,7 @@
-package org.atlasapi.remotesite.bt.events;
+package org.atlasapi.remotesite.bt.events.model;
 
-import org.atlasapi.remotesite.bt.events.model.BtEvent;
+import org.atlasapi.remotesite.bt.events.feedModel.BtEvent;
+import org.atlasapi.remotesite.bt.events.feedModel.BtTeam;
 import org.atlasapi.remotesite.events.EventsData;
 
 import com.google.common.collect.ImmutableList;

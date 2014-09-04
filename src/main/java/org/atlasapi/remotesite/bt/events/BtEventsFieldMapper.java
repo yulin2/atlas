@@ -3,16 +3,16 @@ package org.atlasapi.remotesite.bt.events;
 import java.util.Map;
 
 import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.remotesite.events.EventsUtility;
+import org.atlasapi.remotesite.bt.events.model.BtSportType;
+import org.atlasapi.remotesite.events.EventsFieldMapper;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
 
-public final class BtEventsUtility extends EventsUtility<BtSportType> {
+public final class BtEventsFieldMapper extends EventsFieldMapper<BtSportType> {
     
-    private static final String EVENT_URI_BASE = "http://bt.com/events/";
     private static final Map<String, String> VENUE_LOOKUP = ImmutableMap.<String, String>builder()
             .put("Mandalay Bay Events Center, Las Vegas, Nevada", "http://dbpedia.org/resources/Mandalay_Bay_Events_Center")
             .put("Rogers Centre, Vancouver", "http://dbpedia.org/resources/Rogers_Arena")
@@ -62,21 +62,8 @@ public final class BtEventsUtility extends EventsUtility<BtSportType> {
             ))
             .build();
 
-    public BtEventsUtility(TopicStore topicStore) {
+    public BtEventsFieldMapper(TopicStore topicStore) {
         super(topicStore);
-    }
-
-    @Override
-    public String createEventUri(String id) {
-        return EVENT_URI_BASE + id;
-    }
-
-    /**
-     * BT currently don't provide Team information
-     */
-    @Override
-    public String createTeamUri(String id) {
-        throw new UnsupportedOperationException();
     }
 
     /**

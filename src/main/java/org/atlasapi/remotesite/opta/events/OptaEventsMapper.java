@@ -3,7 +3,7 @@ package org.atlasapi.remotesite.opta.events;
 import java.util.Map;
 
 import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.remotesite.events.EventsUtility;
+import org.atlasapi.remotesite.events.EventsFieldMapper;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -13,10 +13,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
 
-public class OptaEventsUtility extends EventsUtility<OptaSportType> {
+public class OptaEventsMapper extends EventsFieldMapper<OptaSportType> {
     
-    private static final String EVENT_URI_BASE = "http://optasports.com/events/";
-    private static final String TEAM_URI_BASE = "http://optasports.com/teams/";
     private static final Map<OptaSportType, Duration> DURATION_MAPPING = ImmutableMap.of(
             OptaSportType.RUGBY, Duration.standardMinutes(100),
             OptaSportType.FOOTBALL_GERMAN_BUNDESLIGA, Duration.standardMinutes(110),
@@ -118,18 +116,8 @@ public class OptaEventsUtility extends EventsUtility<OptaSportType> {
             ))
             .build();
     
-    public OptaEventsUtility(TopicStore topicStore) {
+    public OptaEventsMapper(TopicStore topicStore) {
         super(topicStore);
-    }
-
-    @Override
-    public String createEventUri(String id) {
-        return EVENT_URI_BASE + id;
-    }
-
-    @Override
-    public String createTeamUri(String id) {
-        return TEAM_URI_BASE + id;
     }
 
     @Override

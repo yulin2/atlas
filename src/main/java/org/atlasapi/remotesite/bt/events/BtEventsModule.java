@@ -7,11 +7,10 @@ import javax.annotation.PostConstruct;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
 import org.atlasapi.persistence.topic.TopicStore;
-import org.jets3t.service.S3Service;
-import org.jets3t.service.S3ServiceException;
-import org.jets3t.service.impl.rest.httpclient.RestS3Service;
+import org.atlasapi.remotesite.bt.events.model.BtSportType;
+import org.atlasapi.remotesite.events.S3FileFetcher;
+import org.atlasapi.remotesite.util.RestS3ServiceSupplier;
 import org.jets3t.service.security.AWSCredentials;
-import org.jets3t.service.security.ProviderCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,31 +47,23 @@ public class BtEventsModule {
     }
     
     private BtEventsDataHandler dataHandler() {
-        return new BtEventsDataHandler(organisationStore, eventStore, utility());
-    }
-    
-    private BtEventsUtility utility() {
-        return new BtEventsUtility(topicStore);
+        BtEventsFieldMapper mapper = new BtEventsFieldMapper(topicStore);
+        return new BtEventsDataHandler(organisationStore, eventStore, mapper, new BtEventsUriCreator());
     }
 
     private BtEventsFetcher fetcher() {
-        return new S3BtEventsFetcher(s3Service(), fileNames(), s3BucketName);
+        return new S3BtEventsFetcher(fileFetcher(), fileNames(), s3BucketName, new BtEventsDataTransformer());
     }
-    
+
+    private S3FileFetcher fileFetcher() {
+        AWSCredentials credentials = new AWSCredentials(s3AccessKey, s3SecretAccessKey);
+        return new S3FileFetcher(new RestS3ServiceSupplier(credentials));
+    }
+
     private Map<BtSportType, String> fileNames() {
         return ImmutableMap.of(
                 BtSportType.MOTO_GP, MOTOGP_FILENAME,
                 BtSportType.UFC, UFC_FILENAME
         );
-    }
-
-    @Bean
-    public S3Service s3Service() {
-        try {
-            ProviderCredentials credentials = new AWSCredentials(s3AccessKey, s3SecretAccessKey);
-            return new RestS3Service(credentials);
-        } catch (S3ServiceException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
     }
 }

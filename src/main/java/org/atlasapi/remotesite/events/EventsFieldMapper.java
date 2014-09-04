@@ -18,7 +18,7 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 
 
-public abstract class EventsUtility<S> {
+public abstract class EventsFieldMapper<S> {
 
     private static final String DBPEDIA_NAMESPACE = "dbpedia";
     
@@ -30,13 +30,9 @@ public abstract class EventsUtility<S> {
     };
     private final TopicStore topicStore;
     
-    public EventsUtility(TopicStore topicStore)  {
+    public EventsFieldMapper(TopicStore topicStore)  {
         this.topicStore = checkNotNull(topicStore);
     }
-    
-    public abstract String createEventUri(String id);
-    
-    public abstract String createTeamUri(String id);
     
     /**
      * Where an end time has not been provided for an {@link org.atlasapi.media.entity.Event},
