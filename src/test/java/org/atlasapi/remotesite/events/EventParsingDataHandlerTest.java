@@ -4,6 +4,7 @@ import org.atlasapi.media.entity.Event;
 import org.atlasapi.media.entity.Organisation;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
+import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.opta.events.model.OptaMatch;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
 import org.atlasapi.remotesite.opta.events.model.OptaTeam;
@@ -19,8 +20,13 @@ public class EventParsingDataHandlerTest {
     private Event testEvent = Mockito.mock(Event.class);
     private OrganisationStore organisationStore = Mockito.mock(OrganisationStore.class);
     private EventStore eventStore = Mockito.mock(EventStore.class);
+    private TopicStore topicStore = Mockito.mock(TopicStore.class);
+    private EventTopicResolver topicResolver = new EventTopicResolver(topicStore);
+    @SuppressWarnings("unchecked")
+    private EventsFieldMapper<OptaSportType> mapper = Mockito.mock(EventsFieldMapper.class);
     private final EventParsingDataHandler<OptaSportType, OptaTeam, OptaMatch> handler = 
-            new EventParsingDataHandler<OptaSportType, OptaTeam, OptaMatch>(organisationStore, eventStore) {
+            new EventParsingDataHandler<OptaSportType, OptaTeam, OptaMatch>(
+                    organisationStore, eventStore, topicResolver, mapper) {
         
                 @Override
                 public Optional<Organisation> parseOrganisation(OptaTeam team) {
@@ -29,6 +35,10 @@ public class EventParsingDataHandlerTest {
                 @Override
                 public Optional<Event> parseEvent(OptaMatch match, OptaSportType sport) {
                     return Optional.of(testEvent);
+                }
+                @Override
+                public String extractLocation(OptaMatch match) {
+                    return "a location";
                 }
     };
 

@@ -8,6 +8,7 @@ import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.util.RestS3ServiceSupplier;
 import org.jets3t.service.security.AWSCredentials;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;

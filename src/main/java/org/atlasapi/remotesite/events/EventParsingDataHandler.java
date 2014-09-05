@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.atlasapi.media.entity.Event;
 import org.atlasapi.media.entity.Organisation;
+import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
 
@@ -19,10 +20,15 @@ public abstract class EventParsingDataHandler<S, T, M> implements DataHandler<S,
     
     private final OrganisationStore organisationStore;
     private final EventStore eventStore;
+    private final EventTopicResolver topicResolver;
+    private final EventsFieldMapper<S> mapper;
 
-    public EventParsingDataHandler(OrganisationStore organisationStore, EventStore eventStore) {
+    public EventParsingDataHandler(OrganisationStore organisationStore, EventStore eventStore, 
+            EventTopicResolver topicResolver, EventsFieldMapper<S> mapper) {
         this.organisationStore = checkNotNull(organisationStore);
         this.eventStore = checkNotNull(eventStore);
+        this.topicResolver = checkNotNull(topicResolver);
+        this.mapper = checkNotNull(mapper);
     }
     
     @Override
@@ -45,6 +51,8 @@ public abstract class EventParsingDataHandler<S, T, M> implements DataHandler<S,
     
     public abstract Optional<Event> parseEvent(M match, S sport);
 
+    public abstract String extractLocation(M match);
+    
     private void createOrMerge(Organisation newOrganisation) {
         Optional<Organisation> resolved = organisationStore.organisation(newOrganisation.getCanonicalUri());
         if (resolved.isPresent()) {
@@ -59,8 +67,25 @@ public abstract class EventParsingDataHandler<S, T, M> implements DataHandler<S,
         }
     }
     
+    public Optional<Topic> fetchLocationTopic(M match, S sport) {
+        String location = extractLocation(match);
+        if (mapper.fetchIgnoredLocations(sport).contains(location)) {
+            return Optional.absent();
+        }
+        Optional<String> locationUrl = mapper.fetchLocationUrl(location);
+        if (!locationUrl.isPresent()) {
+            throw new NoSuchMappingException("No mapping for location " + location);
+        }
+        return Optional.of(topicResolver.createOrResolveVenue(location, locationUrl.get()));
+    }
+
     public Optional<Organisation> getTeamByUri(String uri) {
         return Optional.fromNullable(teamNameMapping.get(uri));
+    }
+    
+    public Iterable<Topic> resolveOrCreateEventGroups(S sport) {
+        Map<String, String> eventGroupTopicUrls = mapper.fetchEventGroupUrls(sport);
+        return topicResolver.createOrResolveEventGroups(eventGroupTopicUrls);
     }
 
     /**

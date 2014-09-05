@@ -1,22 +1,20 @@
 package org.atlasapi.remotesite.opta.events;
 
 import java.util.Map;
+import java.util.Set;
 
-import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.remotesite.events.EventsUtility;
+import org.atlasapi.remotesite.events.EventsFieldMapper;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 
-public class OptaEventsUtility extends EventsUtility<OptaSportType> {
+public class OptaEventsMapper implements EventsFieldMapper<OptaSportType> {
     
-    private static final String EVENT_URI_BASE = "http://optasports.com/events/";
-    private static final String TEAM_URI_BASE = "http://optasports.com/teams/";
     private static final Map<OptaSportType, Duration> DURATION_MAPPING = ImmutableMap.of(
             OptaSportType.RUGBY, Duration.standardMinutes(100),
             OptaSportType.FOOTBALL_GERMAN_BUNDESLIGA, Duration.standardMinutes(110),
@@ -117,28 +115,21 @@ public class OptaEventsUtility extends EventsUtility<OptaSportType> {
                     "Premier League", "http://dbpedia.org/resources/Premier_League"
             ))
             .build();
+    private static final Map<OptaSportType, Set<String>> IGNORED_LOCATIONS_LOOKUP = ImmutableMap.<OptaSportType, Set<String>>builder()
+            .put(OptaSportType.RUGBY, ImmutableSet.<String>of())
+            .put(OptaSportType.FOOTBALL_GERMAN_BUNDESLIGA, ImmutableSet.<String>of())
+            .put(OptaSportType.FOOTBALL_PREMIER_LEAGUE, ImmutableSet.<String>of())
+            .put(OptaSportType.FOOTBALL_SCOTTISH_PREMIER_LEAGUE, ImmutableSet.<String>of())
+            .build();
+    private static final Set<String> IGNORED_TEAM_NAMES = ImmutableSet.of(
+            "TBC"
+    );
     
-    public OptaEventsUtility(TopicStore topicStore) {
-        super(topicStore);
-    }
+    public OptaEventsMapper() {  }
 
     @Override
-    public String createEventUri(String id) {
-        return EVENT_URI_BASE + id;
-    }
-
-    @Override
-    public String createTeamUri(String id) {
-        return TEAM_URI_BASE + id;
-    }
-
-    @Override
-    public Optional<DateTime> createEndTime(OptaSportType sport, DateTime start) {
-        Optional<Duration> duration = Optional.fromNullable(DURATION_MAPPING.get(sport));
-        if (!duration.isPresent()) {
-            return Optional.absent();
-        }
-        return Optional.of(start.plus(duration.get()));
+    public Duration fetchDuration(OptaSportType sport) {
+        return DURATION_MAPPING.get(sport);
     }
 
     @Override
@@ -147,8 +138,13 @@ public class OptaEventsUtility extends EventsUtility<OptaSportType> {
     }
 
     @Override
-    public Optional<Map<String, String>> fetchEventGroupUrls(OptaSportType sport) {
-        return Optional.fromNullable(EVENT_GROUPS_LOOKUP.get(sport));
+    public Map<String, String> fetchEventGroupUrls(OptaSportType sport) {
+        return EVENT_GROUPS_LOOKUP.get(sport);
+    }
+
+    @Override
+    public Set<String> fetchIgnoredLocations(OptaSportType sport) {
+        return IGNORED_LOCATIONS_LOOKUP.get(sport);
     }
 
     /**
@@ -160,7 +156,12 @@ public class OptaEventsUtility extends EventsUtility<OptaSportType> {
      * ingested thus far are each played within a single timezone.
      * @param sport the sport to fetch a timezone for
      */
-    public Optional<DateTimeZone> fetchTimeZone(OptaSportType sport) {
-        return Optional.fromNullable(TIMEZONE_MAPPING.get(sport));
+    public DateTimeZone fetchTimeZone(OptaSportType sport) {
+        return TIMEZONE_MAPPING.get(sport);
+    }
+
+    @Override
+    public Set<String> fetchIgnoredTeams() {
+        return IGNORED_TEAM_NAMES;
     }
 }

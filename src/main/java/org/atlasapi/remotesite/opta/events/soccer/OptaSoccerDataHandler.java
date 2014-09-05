@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.opta.events.soccer;
 import static com.google.api.client.util.Preconditions.checkNotNull;
 
 import java.util.List;
-import java.util.Set;
 
 import org.atlasapi.media.entity.Event;
 import org.atlasapi.media.entity.Organisation;
@@ -11,8 +10,10 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
+import org.atlasapi.remotesite.events.EventTopicResolver;
+import org.atlasapi.remotesite.events.EventsUriCreator;
 import org.atlasapi.remotesite.opta.events.OptaDataHandler;
-import org.atlasapi.remotesite.opta.events.OptaEventsUtility;
+import org.atlasapi.remotesite.opta.events.OptaEventsMapper;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerMatchData;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerStats;
@@ -20,6 +21,7 @@ import org.atlasapi.remotesite.opta.events.soccer.model.SoccerTeam;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerTeamData;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -29,7 +31,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 
@@ -39,18 +40,25 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
     
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final OptaEventsUtility utility;
+    private final OptaEventsMapper mapper;
+    private final EventsUriCreator uriCreator;
 
-    public OptaSoccerDataHandler(OrganisationStore organisationStore, EventStore eventStore, OptaEventsUtility utility) {
-        super(organisationStore, eventStore);
-        this.utility = checkNotNull(utility);
+    public OptaSoccerDataHandler(OrganisationStore organisationStore, EventStore eventStore, EventTopicResolver topicResolver, 
+            OptaEventsMapper mapper, EventsUriCreator uriCreator) {
+        super(organisationStore, eventStore, topicResolver, mapper);
+        this.mapper = checkNotNull(mapper);
+        this.uriCreator = checkNotNull(uriCreator);
     }
     
     @Override
     public Optional<Organisation> parseOrganisation(SoccerTeam team) {
         Organisation organisation = new Organisation();
 
-        organisation.setCanonicalUri(utility.createTeamUri(team.attributes().uId()));
+        if (mapper.fetchIgnoredTeams().contains(team.name())) {
+            log.warn("Found team with ignored name {}", team.name());
+            return Optional.absent();
+        }
+        organisation.setCanonicalUri(uriCreator.createTeamUri(team.attributes().uId()));
         organisation.setPublisher(Publisher.OPTA);
         organisation.setTitle(team.name());
 
@@ -63,33 +71,26 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
         if (!title.isPresent()) {
             return Optional.absent();
         }
-        Optional<DateTime> startTime = parseStartTime(match, sport);
-        if (!startTime.isPresent()) {
-            return Optional.absent();
-        }
+        DateTime startTime = parseStartTime(match, sport);
         
-        Optional<Topic> venue = createOrResolveVenue(match);
+        Optional<Topic> venue = fetchLocationTopic(match, sport);
         if (!venue.isPresent()) {
             return Optional.absent();
         }
         
-        Optional<DateTime> endTime = utility.createEndTime(sport, startTime.get());
-        if (!endTime.isPresent()) {
-            log.error("No duration mapping found for sport {}", sport.name());
-            return Optional.absent();
-        }
+        Duration duration = mapper.fetchDuration(sport);
         
         Event event = Event.builder()
                 .withTitle(title.get())
                 .withPublisher(Publisher.OPTA)
                 .withVenue(venue.get())
-                .withStartTime(startTime.get())
-                .withEndTime(endTime.get())
+                .withStartTime(startTime)
+                .withEndTime(startTime.plus(duration))
                 .withOrganisations(parseOrganisations(match))
-                .withEventGroups(parseEventGroups(sport))
+                .withEventGroups(resolveOrCreateEventGroups(sport))
                 .build();
 
-        event.setCanonicalUri(utility.createEventUri(match.attributes().uId()));
+        event.setCanonicalUri(uriCreator.createEventUri(match.attributes().uId()));
         
         return Optional.of(event);
     }
@@ -105,7 +106,7 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
     
     private Optional<String> fetchTeamName(SoccerTeamData teamData) {
         String teamId = teamData.attributes().teamRef();
-        Optional<Organisation> team = getTeamByUri(utility.createTeamUri(teamId));
+        Optional<Organisation> team = getTeamByUri(uriCreator.createTeamUri(teamId));
         if (!team.isPresent()) {
             log.error("team {} not present in teams list", teamId);
             return Optional.absent();
@@ -115,30 +116,19 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
 
     // we ignore the timezone string, as it uses the three letter codes such as 'BST', which are ambiguous 
     // (BST is either British Summer Time or Bangladesh Standard Time)
-    private Optional<DateTime> parseStartTime(SoccerMatchData match, OptaSportType sport) {
+    private DateTime parseStartTime(SoccerMatchData match, OptaSportType sport) {
         String dateStr = match.matchInformation().date().date();
-        Optional<DateTimeZone> timeZone = utility.fetchTimeZone(sport);
-        if (!timeZone.isPresent()) {
-            log.error("No time zone mapping found for sport {}", sport);
-            return Optional.absent();
-        }
-        
-        return Optional.of(
-                DATE_TIME_FORMATTER.withZone(timeZone.get())
-                        .parseDateTime(dateStr)
-        );
+        DateTimeZone timeZone = mapper.fetchTimeZone(sport);
+        return DATE_TIME_FORMATTER.withZone(timeZone)
+                        .parseDateTime(dateStr);
+    }
+
+    @Override
+    public String extractLocation(SoccerMatchData match) {
+        return getVenueName(match.stats());
     }
     
-    private Optional<Topic> createOrResolveVenue(SoccerMatchData match) {
-        String location = getVenueData(match.stats());
-        Optional<Topic> value = utility.createOrResolveVenue(location);
-        if (!value.isPresent()) {
-            log.error("Unable to resolve location: {}", location);
-        }
-        return value;
-    }
-    
-    private String getVenueData(List<SoccerStats> stats) {
+    private String getVenueName(List<SoccerStats> stats) {
         return Iterables.getOnlyElement(Iterables.filter(stats, new Predicate<SoccerStats>() {
             @Override
             public boolean apply(SoccerStats input) {
@@ -151,19 +141,9 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
         Iterable<Organisation> organisations = Iterables.transform(match.teamData(), new Function<SoccerTeamData, Organisation>() {
             @Override
             public Organisation apply(SoccerTeamData input) {
-                return getTeamByUri(utility.createTeamUri(input.attributes().teamRef())).orNull();
+                return getTeamByUri(uriCreator.createTeamUri(input.attributes().teamRef())).orNull();
             }
         });
         return Iterables.filter(organisations, Predicates.notNull());
-    }
-
-    private Iterable<Topic> parseEventGroups(OptaSportType sport) {
-        Optional<Set<Topic>> eventGroups = utility.parseEventGroups(sport);
-        if (!eventGroups.isPresent()) {
-            log.warn("No event groups mapped to sport {}", sport.name());
-            return ImmutableList.of();
-        } else {
-            return eventGroups.get();
-        }
     }
 }

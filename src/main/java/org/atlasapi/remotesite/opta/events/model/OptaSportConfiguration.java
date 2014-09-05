@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.opta.events;
+package org.atlasapi.remotesite.opta.events.model;
 
 import static com.google.api.client.util.Preconditions.checkNotNull;
 

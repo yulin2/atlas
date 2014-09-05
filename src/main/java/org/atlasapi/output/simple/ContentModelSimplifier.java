@@ -1,7 +1,5 @@
 package org.atlasapi.output.simple;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -79,7 +77,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         this.localeMap = initLocalMap();
         this.peopleQueryResolver = peopleResolver;
         this.crewMemberAndPersonSimplifier = new CrewMemberAndPersonSimplifier(imageSimplifier, upcomingResolver, availableResolver);
-        this.eventRefSimplifier = checkNotNull(eventSimplifier);
+        this.eventRefSimplifier = eventSimplifier;
     }
 
     private Map<String, Locale> initLocalMap() {

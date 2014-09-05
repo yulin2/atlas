@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -17,7 +18,10 @@ import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
 import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.remotesite.opta.events.OptaEventsUtility;
+import org.atlasapi.remotesite.events.EventTopicResolver;
+import org.atlasapi.remotesite.events.EventsUriCreator;
+import org.atlasapi.remotesite.opta.events.OptaEventsMapper;
+import org.atlasapi.remotesite.opta.events.OptaEventsUriCreator;
 import org.atlasapi.remotesite.opta.events.model.OptaSportType;
 import org.atlasapi.remotesite.opta.events.soccer.model.MatchDateDeserializer;
 import org.atlasapi.remotesite.opta.events.soccer.model.OptaSoccerEventsFeed;
@@ -56,8 +60,10 @@ public class OptaSoccerDataHandlerTest {
     private OrganisationStore organisationStore = Mockito.mock(OrganisationStore.class);
     private EventStore eventStore = Mockito.mock(EventStore.class);
     private TopicStore topicStore = Mockito.mock(TopicStore.class);
-    private OptaEventsUtility utility = new OptaEventsUtility(topicStore);
-    private final OptaSoccerDataHandler handler = new OptaSoccerDataHandler(organisationStore, eventStore, utility);
+    private EventTopicResolver topicResolver = new EventTopicResolver(topicStore);
+    private OptaEventsMapper mapper = new OptaEventsMapper();
+    private EventsUriCreator uriCreator = new OptaEventsUriCreator();
+    private final OptaSoccerDataHandler handler = new OptaSoccerDataHandler(organisationStore, eventStore, topicResolver, mapper, uriCreator);
     private OptaSoccerEventsData feedData;
     
     public OptaSoccerDataHandlerTest() throws JsonSyntaxException, JsonIOException, IOException {
@@ -101,18 +107,20 @@ public class OptaSoccerDataHandlerTest {
         
         Event parsedEvent = parsed.get();
 
-        DateTime startTime = new DateTime(2014, 9, 27, 14, 30, 0, DateTimeZone.forTimeZone(TimeZone.getTimeZone("BST")));
+        DateTime startTime = new DateTime(2014, 9, 27, 14, 30, 0, DateTimeZone.forID("Europe/Berlin"));
         ImmutableSet<String> expectedTeamUris = ImmutableSet.of("http://optasports.com/teams/t387", "http://optasports.com/teams/t156");
         
         assertEquals("http://optasports.com/events/" + match.attributes().uId(), parsedEvent.getCanonicalUri());
         assertEquals("1. FC Köln vs FC Bayern München", parsedEvent.title());
         assertEquals(Publisher.OPTA, parsedEvent.publisher());
-        assertEquals(utility.fetchLocationUrl("RheinEnergieStadion").get(), parsedEvent.venue().getValue());
+        assertEquals(mapper.fetchLocationUrl("RheinEnergieStadion").get(), parsedEvent.venue().getValue());
         assertEquals(startTime, parsedEvent.startTime());
-        assertEquals(utility.createEndTime(SPORT, startTime).get(), parsedEvent.endTime());
+        assertEquals(startTime.plus(mapper.fetchDuration(SPORT)), parsedEvent.endTime());
         assertEquals(expectedTeamUris, transformToUris(parsedEvent.organisations()));
         assertTrue(parsedEvent.participants().isEmpty());
-        assertEquals(transformToValues(utility.parseEventGroups(SPORT).get()), transformToValues(parsedEvent.eventGroups()));
+        Map<String, String> groupUrls = mapper.fetchEventGroupUrls(SPORT);
+        Iterable<Topic> expectedEventGroups = topicResolver.createOrResolveEventGroups(groupUrls);
+        assertEquals(transformToValues(expectedEventGroups), transformToValues(parsedEvent.eventGroups()));
         assertTrue(parsedEvent.content().isEmpty());
     }
 

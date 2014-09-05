@@ -44,6 +44,7 @@ public class ItvWhatsOnController {
                 .withFeedUrl(feedUrl)
                 .withWhatsOnClient(itvWhatsOnClient)
                 .withProcessor(processor)
+                .withPercentageFailureToTriggerJobFailure(0)
                 .withDay(scheduleDay)
                 .build();
         updater.run();  

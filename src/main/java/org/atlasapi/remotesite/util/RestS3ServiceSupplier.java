@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.lovefilm;
+package org.atlasapi.remotesite.util;
 
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
