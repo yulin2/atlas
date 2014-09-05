@@ -101,7 +101,7 @@ public class OptaSoccerDataHandlerTest {
         
         Event parsedEvent = parsed.get();
 
-        DateTime startTime = new DateTime(2014, 9, 27, 14, 30, 0, DateTimeZone.forTimeZone(TimeZone.getTimeZone("BST")));
+        DateTime startTime = new DateTime(2014, 9, 27, 14, 30, 0, DateTimeZone.forID("Europe/Berlin"));
         ImmutableSet<String> expectedTeamUris = ImmutableSet.of("http://optasports.com/teams/t387", "http://optasports.com/teams/t156");
         
         assertEquals("http://optasports.com/events/" + match.attributes().uId(), parsedEvent.getCanonicalUri());
