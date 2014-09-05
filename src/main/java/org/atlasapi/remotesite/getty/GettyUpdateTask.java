@@ -53,7 +53,7 @@ public class GettyUpdateTask extends ScheduledTask {
             //paginate keywords
             while (!keywords.isEmpty()) {
                 for (String keyword : keywords) {
-                    log.info(String.format("Processing keyword %s", keyword));
+                    log.debug(String.format("Processing keyword %s", keyword));
                     processor.process(keyword);
                 }
                 offset += irisItemsPerPage;
@@ -93,8 +93,13 @@ public class GettyUpdateTask extends ScheduledTask {
                     //paginate videos
                     while (!videos.isEmpty()) {
                         for (VideoResponse video : videos) {
-                            dataHandler.handle(video);
-                            progress = progress.reduce(UpdateProgress.SUCCESS);
+                            try {
+                                dataHandler.handle(video);
+                                progress = progress.reduce(UpdateProgress.SUCCESS);
+                            } catch (Exception e) {
+                                log.warn(String.format("Failed to get page of videos for keyword %s.", keyword), e);
+                                progress = progress.reduce(UpdateProgress.FAILURE);
+                            }
                         }
                         offset += gettyItemsPerPage;
                         response = getVideoResponse(keyword, offset);

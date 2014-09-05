@@ -3,14 +3,12 @@ package org.atlasapi.remotesite.getty;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.media.entity.Publisher.DBPEDIA;
 import static org.atlasapi.media.entity.Publisher.GETTY;
-import static org.atlasapi.media.entity.Topic.Type.SUBJECT;
-import static org.joda.time.DateTimeConstants.SECONDS_PER_MINUTE;
 import static org.joda.time.DateTimeConstants.SECONDS_PER_HOUR;
+import static org.joda.time.DateTimeConstants.SECONDS_PER_MINUTE;
 
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
@@ -19,9 +17,9 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.joda.time.DateTime;
@@ -32,10 +30,11 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
+import com.metabroadcast.common.base.Maybe;
 
 public class GettyContentExtractor implements ContentExtractor<VideoResponse, Content> {
 
-    private static final String DBPEDIA_NS = "dbpedia";
+    private static final String DBPEDIA_NAMESPACE = "dbpedia";
     private static final String DBPEDIA_URI_PATTERN = "http://dbpedia.org/resource/%s";
     private static final String GETTY_URI_PATTERN = "http://gettyimages.co.uk/%s";
     private static final String GETTY_CURIE_PATTERN = "getty:%s";
@@ -76,18 +75,21 @@ public class GettyContentExtractor implements ContentExtractor<VideoResponse, Co
     
     private TopicRef createTopicFromKeyword(String keyword) {
         String value = String.format(DBPEDIA_URI_PATTERN, keyword);
-        Topic topic = topicStore.topicFor(DBPEDIA_NS, value).valueOrNull();
-        if (topic == null) {
-            throw new IllegalStateException("This should never happen, as topic is either found or created by the topic store, so failing fast.");
-        } else {
+        Maybe<Topic> resolved = topicStore.topicFor(DBPEDIA_NAMESPACE, value);
+        if (resolved.hasValue()) {
+            Topic topic = resolved.requireValue();
+            
             topic.setValue(value);
             topic.setNamespace(Publisher.DBPEDIA.name().toLowerCase());
             topic.setPublisher(DBPEDIA);
             topic.setTitle(titleFrom(keyword));
             topic.setType(Type.SUBJECT);
             topicStore.write(topic);
+            
             return new TopicRef(topic, 1.0f, false, TopicRef.Relationship.ABOUT);
         }
+        
+        throw new IllegalStateException(String.format("Topic Store failed to create Topic for %s", keyword));
     }
     
     private String titleFrom(String keyword) {

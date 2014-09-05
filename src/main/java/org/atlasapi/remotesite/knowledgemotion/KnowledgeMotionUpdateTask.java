@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.knowledgemotion;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.atlasapi.spreadsheet.SpreadsheetFetcher;
+import org.atlasapi.googlespreadsheet.SpreadsheetFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +19,9 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class KnowledgeMotionUpdateTask extends ScheduledTask {
 
-private static final Logger log = LoggerFactory.getLogger(KnowledgeMotionUpdateTask.class);
+    private static final Logger log = LoggerFactory.getLogger(KnowledgeMotionUpdateTask.class);
     
-    private final String spreadsheetTitle = Configurer.get("spreadsheet.title").get();
+    private final String spreadsheetTitle = Configurer.get("google.spreadsheet.title").get();
     private final SpreadsheetFetcher spreadsheetFetcher;
     private final KnowledgeMotionAdapter adapter;
     private final KnowledgeMotionDataRowHandler dataHandler;
@@ -51,6 +51,7 @@ private static final Logger log = LoggerFactory.getLogger(KnowledgeMotionUpdateT
     }
 
     private ListFeed fetchData() {
+        //Replace spaces with dashes (something weird happening in jetty)
         SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(spreadsheetTitle.replace("-", " ")));
         WorksheetEntry worksheet = Iterables.getOnlyElement(spreadsheetFetcher.getWorksheetsFromSpreadsheet(spreadsheet));
         return spreadsheetFetcher.getDataFromWorksheet(worksheet);
