@@ -71,10 +71,7 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
         if (!title.isPresent()) {
             return Optional.absent();
         }
-        Optional<DateTime> startTime = parseStartTime(match, sport);
-        if (!startTime.isPresent()) {
-            return Optional.absent();
-        }
+        DateTime startTime = parseStartTime(match, sport);
         
         Optional<Topic> venue = fetchLocationTopic(match, sport);
         if (!venue.isPresent()) {
@@ -87,8 +84,8 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
                 .withTitle(title.get())
                 .withPublisher(Publisher.OPTA)
                 .withVenue(venue.get())
-                .withStartTime(startTime.get())
-                .withEndTime(startTime.get().plus(duration))
+                .withStartTime(startTime)
+                .withEndTime(startTime.plus(duration))
                 .withOrganisations(parseOrganisations(match))
                 .withEventGroups(resolveOrCreateEventGroups(sport))
                 .build();
@@ -119,18 +116,11 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
 
     // we ignore the timezone string, as it uses the three letter codes such as 'BST', which are ambiguous 
     // (BST is either British Summer Time or Bangladesh Standard Time)
-    private Optional<DateTime> parseStartTime(SoccerMatchData match, OptaSportType sport) {
+    private DateTime parseStartTime(SoccerMatchData match, OptaSportType sport) {
         String dateStr = match.matchInformation().date().date();
-        Optional<DateTimeZone> timeZone = mapper.fetchTimeZone(sport);
-        if (!timeZone.isPresent()) {
-            log.error("No time zone mapping found for sport {}", sport);
-            return Optional.absent();
-        }
-        
-        return Optional.of(
-                DATE_TIME_FORMATTER.withZone(timeZone.get())
-                        .parseDateTime(dateStr)
-        );
+        DateTimeZone timeZone = mapper.fetchTimeZone(sport);
+        return DATE_TIME_FORMATTER.withZone(timeZone)
+                        .parseDateTime(dateStr);
     }
 
     @Override

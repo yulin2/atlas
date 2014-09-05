@@ -66,10 +66,7 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
         if (!title.isPresent()) {
             return Optional.absent();
         }
-        Optional<DateTime> startTime = parseStartTime(match, sport);
-        if (!startTime.isPresent()) {
-            return Optional.absent();
-        }
+        DateTime startTime = parseStartTime(match, sport);
         
         Optional<Topic> venue = fetchLocationTopic(match, sport);
         if (!venue.isPresent()) {
@@ -82,8 +79,8 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
                 .withTitle(title.get())
                 .withPublisher(Publisher.OPTA)
                 .withVenue(venue.get())
-                .withStartTime(startTime.get())
-                .withEndTime(startTime.get().plus(duration))
+                .withStartTime(startTime)
+                .withEndTime(startTime.plus(duration))
                 .withOrganisations(parseOrganisations(match))
                 .withEventGroups(resolveOrCreateEventGroups(sport))
                 .build();
@@ -111,16 +108,10 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
         return Optional.of(team.get().getTitle());
     }
     
-    private Optional<DateTime> parseStartTime(OptaFixture fixture, OptaSportType sport) {
-        Optional<DateTimeZone> timeZone = mapper.fetchTimeZone(sport);
-        if (!timeZone.isPresent()) {
-            log.error("No timezone mapping exists for sport {}", sport);
-            return Optional.absent();
-        }
-        return Optional.of(
-                TIME_FORMATTER.withZone(timeZone.get())
-                        .parseDateTime(fixture.attributes().gameDate() + " " + fixture.attributes().time())
-        );
+    private DateTime parseStartTime(OptaFixture fixture, OptaSportType sport) {
+        DateTimeZone timeZone = mapper.fetchTimeZone(sport);
+        return TIME_FORMATTER.withZone(timeZone)
+                        .parseDateTime(fixture.attributes().gameDate() + " " + fixture.attributes().time());
     }
     
     private Iterable<Organisation> parseOrganisations(OptaFixture fixture) {

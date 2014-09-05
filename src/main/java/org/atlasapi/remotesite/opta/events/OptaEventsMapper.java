@@ -156,8 +156,8 @@ public class OptaEventsMapper implements EventsFieldMapper<OptaSportType> {
      * ingested thus far are each played within a single timezone.
      * @param sport the sport to fetch a timezone for
      */
-    public Optional<DateTimeZone> fetchTimeZone(OptaSportType sport) {
-        return Optional.fromNullable(TIMEZONE_MAPPING.get(sport));
+    public DateTimeZone fetchTimeZone(OptaSportType sport) {
+        return TIMEZONE_MAPPING.get(sport);
     }
 
     @Override
