@@ -9,8 +9,8 @@ import joptsimple.internal.Strings;
 
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.events.EventTopicResolver;
 import org.atlasapi.remotesite.events.EventsUriCreator;
 import org.atlasapi.remotesite.events.S3FileFetcher;
 import org.atlasapi.remotesite.opta.events.model.OptaSportConfiguration;
@@ -28,7 +28,6 @@ import org.jets3t.service.security.AWSCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
@@ -57,7 +56,7 @@ public class OptaEventsModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired EventStore eventStore;
     private @Autowired OrganisationStore organisationStore;
-    private @Autowired @Qualifier("topicStore") TopicStore topicStore;
+    private @Autowired EventTopicResolver topicResolver;
     
     private @Value("${s3.access}") String s3AccessKey;
     private @Value("${s3.secret}") String s3SecretAccessKey;
@@ -145,12 +144,7 @@ public class OptaEventsModule {
 
     @Bean
     private OptaSoccerDataHandler soccerDataHandler() {
-        return new OptaSoccerDataHandler(organisationStore, eventStore, utility(), new OptaEventsUriCreator());
-    }
-
-    @Bean
-    private OptaEventsMapper utility() {
-        return new OptaEventsMapper(topicStore);
+        return new OptaSoccerDataHandler(organisationStore, eventStore, topicResolver, new OptaEventsMapper(), uriCreator());
     }
 
     private OptaEventsIngestTask<OptaSportsTeam, OptaFixture> sportsIngestTask() {
@@ -172,6 +166,6 @@ public class OptaEventsModule {
     }
 
     private OptaSportsDataHandler sportsDataHandler() {
-        return new OptaSportsDataHandler(organisationStore, eventStore, utility(), uriCreator());
+        return new OptaSportsDataHandler(organisationStore, eventStore, topicResolver, new OptaEventsMapper(), uriCreator());
     }
 }

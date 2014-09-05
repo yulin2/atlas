@@ -1,17 +1,18 @@
 package org.atlasapi.remotesite.bt.events;
 
 import java.util.Map;
+import java.util.Set;
 
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.bt.events.model.BtSportType;
 import org.atlasapi.remotesite.events.EventsFieldMapper;
-import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 
-public final class BtEventsFieldMapper extends EventsFieldMapper<BtSportType> {
+public final class BtEventsFieldMapper implements EventsFieldMapper<BtSportType> {
     
     private static final Map<String, String> VENUE_LOOKUP = ImmutableMap.<String, String>builder()
             .put("Mandalay Bay Events Center, Las Vegas, Nevada", "http://dbpedia.org/resources/Mandalay_Bay_Events_Center")
@@ -61,16 +62,19 @@ public final class BtEventsFieldMapper extends EventsFieldMapper<BtSportType> {
                     "Grand Prix motorcycle racing", "http://dbpedia.org/resources/Grand_Prix_motorcycle_racing"
             ))
             .build();
+    private static final Map<BtSportType, Set<String>> IGNORED_LOCATIONS_LOOKUP = ImmutableMap.<BtSportType, Set<String>>builder()
+            .put(BtSportType.UFC, ImmutableSet.<String>of())
+            .put(BtSportType.MOTO_GP, ImmutableSet.of("Global"))
+            .build();
+    private static final Set<String> IGNORED_TEAM_NAMES = ImmutableSet.<String>of();
 
-    public BtEventsFieldMapper(TopicStore topicStore) {
-        super(topicStore);
-    }
+    public BtEventsFieldMapper() { }
 
     /**
      * BT currently don't provide either start or end times
      */
     @Override
-    public Optional<DateTime> createEndTime(BtSportType sport, DateTime start) {
+    public Duration fetchDuration(BtSportType sport) {
         throw new UnsupportedOperationException();
     }
 
@@ -80,8 +84,17 @@ public final class BtEventsFieldMapper extends EventsFieldMapper<BtSportType> {
     }
 
     @Override
-    public Optional<Map<String, String>> fetchEventGroupUrls(BtSportType sport) {
-        return Optional.fromNullable(EVENT_GROUPS_LOOKUP.get(sport));
+    public Map<String, String> fetchEventGroupUrls(BtSportType sport) {
+        return EVENT_GROUPS_LOOKUP.get(sport);
     }
 
+    @Override
+    public Set<String> fetchIgnoredLocations(BtSportType sport) {
+        return IGNORED_LOCATIONS_LOOKUP.get(sport);
+    }
+
+    @Override
+    public Set<String> fetchIgnoredTeams() {
+        return IGNORED_TEAM_NAMES;
+    }
 }

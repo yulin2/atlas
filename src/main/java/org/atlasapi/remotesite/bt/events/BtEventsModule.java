@@ -8,6 +8,7 @@ import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.bt.events.model.BtSportType;
+import org.atlasapi.remotesite.events.EventTopicResolver;
 import org.atlasapi.remotesite.events.S3FileFetcher;
 import org.atlasapi.remotesite.util.RestS3ServiceSupplier;
 import org.jets3t.service.security.AWSCredentials;
@@ -47,8 +48,12 @@ public class BtEventsModule {
     }
     
     private BtEventsDataHandler dataHandler() {
-        BtEventsFieldMapper mapper = new BtEventsFieldMapper(topicStore);
-        return new BtEventsDataHandler(organisationStore, eventStore, mapper, new BtEventsUriCreator());
+        return new BtEventsDataHandler(organisationStore, eventStore, topicResolver(), new BtEventsFieldMapper(), new BtEventsUriCreator());
+    }
+    
+    @Bean
+    public EventTopicResolver topicResolver() {
+        return new EventTopicResolver(topicStore);
     }
 
     private BtEventsFetcher fetcher() {

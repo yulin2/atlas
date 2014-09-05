@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Event;
@@ -21,6 +22,7 @@ import org.atlasapi.remotesite.bt.events.feedModel.BtEventsFeed;
 import org.atlasapi.remotesite.bt.events.feedModel.BtTeam;
 import org.atlasapi.remotesite.bt.events.model.BtEventsData;
 import org.atlasapi.remotesite.bt.events.model.BtSportType;
+import org.atlasapi.remotesite.events.EventTopicResolver;
 import org.atlasapi.remotesite.events.EventsUriCreator;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -48,9 +50,11 @@ public class BtEventsDataHandlerTest {
     private OrganisationStore organisationStore = Mockito.mock(OrganisationStore.class);
     private EventStore eventStore = Mockito.mock(EventStore.class);
     private TopicStore topicStore = Mockito.mock(TopicStore.class);
-    private BtEventsFieldMapper mapper = new BtEventsFieldMapper(topicStore);
+    private BtEventsFieldMapper mapper = new BtEventsFieldMapper();
+    private EventTopicResolver topicResolver = new EventTopicResolver(topicStore);
     private EventsUriCreator uriCreator = new BtEventsUriCreator();
-    private final BtEventsDataHandler handler = new BtEventsDataHandler(organisationStore, eventStore, mapper, uriCreator );
+    private final BtEventsDataHandler handler = new BtEventsDataHandler(
+            organisationStore, eventStore, topicResolver, mapper, uriCreator);
     private BtEventsData feedData;
     
     public BtEventsDataHandlerTest() throws JsonSyntaxException, JsonIOException, IOException {
@@ -92,7 +96,9 @@ public class BtEventsDataHandlerTest {
         assertEquals(new DateTime(2014, 03, 23, 11, 23, 17, 833, DateTimeZone.UTC), parsedEvent.endTime());
         assertTrue(parsedEvent.organisations().isEmpty());
         assertTrue(parsedEvent.participants().isEmpty());
-        assertEquals(transformToValues(mapper.parseEventGroups(BtSportType.MOTO_GP).get()), transformToValues(parsedEvent.eventGroups()));
+        Map<String, String> groupUrls = mapper.fetchEventGroupUrls(BtSportType.MOTO_GP);
+        Iterable<Topic> expectedEventGroups = topicResolver.createOrResolveEventGroups(groupUrls);
+        assertEquals(transformToValues(expectedEventGroups), transformToValues(parsedEvent.eventGroups()));
         assertTrue(parsedEvent.content().isEmpty());
     }
 

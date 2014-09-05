@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.opta.events.soccer;
 import static com.google.api.client.util.Preconditions.checkNotNull;
 
 import java.util.List;
-import java.util.Set;
 
 import org.atlasapi.media.entity.Event;
 import org.atlasapi.media.entity.Organisation;
@@ -11,6 +10,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
+import org.atlasapi.remotesite.events.EventTopicResolver;
 import org.atlasapi.remotesite.events.EventsUriCreator;
 import org.atlasapi.remotesite.opta.events.OptaDataHandler;
 import org.atlasapi.remotesite.opta.events.OptaEventsMapper;
@@ -21,6 +21,7 @@ import org.atlasapi.remotesite.opta.events.soccer.model.SoccerTeam;
 import org.atlasapi.remotesite.opta.events.soccer.model.SoccerTeamData;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -30,7 +31,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 
@@ -43,8 +43,9 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
     private final OptaEventsMapper mapper;
     private final EventsUriCreator uriCreator;
 
-    public OptaSoccerDataHandler(OrganisationStore organisationStore, EventStore eventStore, OptaEventsMapper mapper, EventsUriCreator uriCreator) {
-        super(organisationStore, eventStore);
+    public OptaSoccerDataHandler(OrganisationStore organisationStore, EventStore eventStore, EventTopicResolver topicResolver, 
+            OptaEventsMapper mapper, EventsUriCreator uriCreator) {
+        super(organisationStore, eventStore, topicResolver, mapper);
         this.mapper = checkNotNull(mapper);
         this.uriCreator = checkNotNull(uriCreator);
     }
@@ -53,6 +54,10 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
     public Optional<Organisation> parseOrganisation(SoccerTeam team) {
         Organisation organisation = new Organisation();
 
+        if (mapper.fetchIgnoredTeams().contains(team.name())) {
+            log.warn("Found team with ignored name {}", team.name());
+            return Optional.absent();
+        }
         organisation.setCanonicalUri(uriCreator.createTeamUri(team.attributes().uId()));
         organisation.setPublisher(Publisher.OPTA);
         organisation.setTitle(team.name());
@@ -71,25 +76,21 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
             return Optional.absent();
         }
         
-        Optional<Topic> venue = createOrResolveVenue(match);
+        Optional<Topic> venue = fetchLocationTopic(match, sport);
         if (!venue.isPresent()) {
             return Optional.absent();
         }
         
-        Optional<DateTime> endTime = mapper.createEndTime(sport, startTime.get());
-        if (!endTime.isPresent()) {
-            log.error("No duration mapping found for sport {}", sport.name());
-            return Optional.absent();
-        }
+        Duration duration = mapper.fetchDuration(sport);
         
         Event event = Event.builder()
                 .withTitle(title.get())
                 .withPublisher(Publisher.OPTA)
                 .withVenue(venue.get())
                 .withStartTime(startTime.get())
-                .withEndTime(endTime.get())
+                .withEndTime(startTime.get().plus(duration))
                 .withOrganisations(parseOrganisations(match))
-                .withEventGroups(parseEventGroups(sport))
+                .withEventGroups(resolveOrCreateEventGroups(sport))
                 .build();
 
         event.setCanonicalUri(uriCreator.createEventUri(match.attributes().uId()));
@@ -131,17 +132,13 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
                         .parseDateTime(dateStr)
         );
     }
-    
-    private Optional<Topic> createOrResolveVenue(SoccerMatchData match) {
-        String location = getVenueData(match.stats());
-        Optional<Topic> value = mapper.createOrResolveVenue(location);
-        if (!value.isPresent()) {
-            log.error("Unable to resolve location: {}", location);
-        }
-        return value;
+
+    @Override
+    public String extractLocation(SoccerMatchData match) {
+        return getVenueName(match.stats());
     }
     
-    private String getVenueData(List<SoccerStats> stats) {
+    private String getVenueName(List<SoccerStats> stats) {
         return Iterables.getOnlyElement(Iterables.filter(stats, new Predicate<SoccerStats>() {
             @Override
             public boolean apply(SoccerStats input) {
@@ -158,15 +155,5 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
             }
         });
         return Iterables.filter(organisations, Predicates.notNull());
-    }
-
-    private Iterable<Topic> parseEventGroups(OptaSportType sport) {
-        Optional<Set<Topic>> eventGroups = mapper.parseEventGroups(sport);
-        if (!eventGroups.isPresent()) {
-            log.warn("No event groups mapped to sport {}", sport.name());
-            return ImmutableList.of();
-        } else {
-            return eventGroups.get();
-        }
     }
 }

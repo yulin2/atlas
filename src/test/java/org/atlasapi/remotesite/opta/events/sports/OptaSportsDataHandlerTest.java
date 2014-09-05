@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Event;
@@ -16,6 +17,7 @@ import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.organisation.OrganisationStore;
 import org.atlasapi.persistence.event.EventStore;
 import org.atlasapi.persistence.topic.TopicStore;
+import org.atlasapi.remotesite.events.EventTopicResolver;
 import org.atlasapi.remotesite.events.EventsUriCreator;
 import org.atlasapi.remotesite.opta.events.OptaEventsMapper;
 import org.atlasapi.remotesite.opta.events.OptaEventsUriCreator;
@@ -50,9 +52,11 @@ public class OptaSportsDataHandlerTest {
     private OrganisationStore organisationStore = Mockito.mock(OrganisationStore.class);
     private EventStore eventStore = Mockito.mock(EventStore.class);
     private TopicStore topicStore = Mockito.mock(TopicStore.class);
-    private OptaEventsMapper mapper = new OptaEventsMapper(topicStore);
+    private OptaEventsMapper mapper = new OptaEventsMapper();
+    private EventTopicResolver topicResolver = new EventTopicResolver(topicStore);
     private EventsUriCreator uriCreator = new OptaEventsUriCreator();
-    private final OptaSportsDataHandler handler = new OptaSportsDataHandler(organisationStore, eventStore, mapper, uriCreator );
+    private final OptaSportsDataHandler handler = new OptaSportsDataHandler(
+            organisationStore, eventStore, topicResolver, mapper, uriCreator);
     private OptaSportsEventsData feedData;
     
     public OptaSportsDataHandlerTest() throws JsonSyntaxException, JsonIOException, IOException {
@@ -104,10 +108,12 @@ public class OptaSportsDataHandlerTest {
         assertEquals(Publisher.OPTA, parsedEvent.publisher());
         assertEquals(mapper.fetchLocationUrl(match.attributes().venue()).get(), parsedEvent.venue().getValue());
         assertEquals(startTime, parsedEvent.startTime());
-        assertEquals(mapper.createEndTime(SPORT, startTime).get(), parsedEvent.endTime());
+        assertEquals(startTime.plus(mapper.fetchDuration(SPORT)), parsedEvent.endTime());
         assertEquals(expectedTeamUris, transformToUris(parsedEvent.organisations()));
         assertTrue(parsedEvent.participants().isEmpty());
-        assertEquals(transformToValues(mapper.parseEventGroups(SPORT).get()), transformToValues(parsedEvent.eventGroups()));
+        Map<String, String> groupUrls = mapper.fetchEventGroupUrls(SPORT);
+        Iterable<Topic> expectedEventGroups = topicResolver.createOrResolveEventGroups(groupUrls);
+        assertEquals(transformToValues(expectedEventGroups), transformToValues(parsedEvent.eventGroups()));
         assertTrue(parsedEvent.content().isEmpty());
     }
 
