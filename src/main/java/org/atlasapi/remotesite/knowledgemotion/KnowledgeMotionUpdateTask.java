@@ -51,12 +51,17 @@ public class KnowledgeMotionUpdateTask extends ScheduledTask {
     }
 
     private ListFeed fetchData() {
-        //Replace spaces with dashes (something weird happening in jetty)
-        SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(spreadsheetTitle.replace("-", " ")));
+        
+        SpreadsheetEntry spreadsheet = Iterables.getOnlyElement(spreadsheetFetcher.getSpreadsheetByTitle(getModifiedTitle()));
         WorksheetEntry worksheet = Iterables.getOnlyElement(spreadsheetFetcher.getWorksheetsFromSpreadsheet(spreadsheet));
         return spreadsheetFetcher.getDataFromWorksheet(worksheet);
     }
 
+    //Replace spaces with dashes (something weird happening in jetty)
+    private String getModifiedTitle() {
+        return spreadsheetTitle.replace("-", " ");
+    }
+    
     private KnowledgeMotionDataProcessor<UpdateProgress> processor() {
         return new KnowledgeMotionDataProcessor<UpdateProgress>() {
 
