@@ -29,12 +29,12 @@ public class C4BrandClipExtractorTest {
     private final ContentFactory<Feed, Feed, Entry> contentFactory
         = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());
     
+    private final Clock clock = new TimeMachine(new DateTime(DateTimeZones.UTC));
+    private final C4LocationPolicyIds locationPolicyIds = C4LocationPolicyIds.builder().build();;
+    private final C4BrandClipExtractor clipExtractor = new C4BrandClipExtractor(contentFactory, Publisher.C4_PMLSD, locationPolicyIds, new C4ContentLinker(), clock);
+    
     @Test
     public void testExtract() {
-        
-        Clock clock = new TimeMachine(new DateTime(DateTimeZones.UTC));
-        C4LocationPolicyIds locationPolicyIds = C4LocationPolicyIds.builder().build();;
-        C4BrandClipExtractor clipExtractor = new C4BrandClipExtractor(contentFactory, Publisher.C4_PMLSD, locationPolicyIds, clock);
         
         Clip clip = clipExtractor.extract((Entry)feed.build().getEntries().get(0));
         
@@ -48,7 +48,14 @@ public class C4BrandClipExtractorTest {
         assertThat(clip.getDescription(), is("'This country could soon have a new world champion'"));
         assertThat(clip.getImage(), is("http://www.channel4.com/assets/programmes/images/green-wing/series-1/episode-7/guyball/green-wing-s1e7-guyball_625x352.jpg"));
         assertThat(clip.getThumbnail(), is("http://www.channel4.com/assets/programmes/images/green-wing/series-1/episode-7/guyball/green-wing-s1e7-guyball_200x113.jpg"));
+        assertThat(clip.getClipOf(), is("s1-e7"));
    
+    }
+    
+    @Test
+    public void testExtractSeriesClip() {
+        Clip clip = clipExtractor.extract((Entry)feed.build().getEntries().get(11));
+        assertThat(clip.getClipOf(), is("s1"));
     }
 
 }

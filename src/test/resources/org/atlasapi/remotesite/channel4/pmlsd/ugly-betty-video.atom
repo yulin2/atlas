@@ -164,8 +164,8 @@
     <dcterms:available>start=2010-07-19; end=2010-10-17; scheme=W3C-DTF</dcterms:available>
     <dc:relation.AgeRating>0</dc:relation.AgeRating>
     <dc:relation.Duration>0:53</dc:relation.Duration>
-    <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
-    <dc:relation.EpisodeNumber>2</dc:relation.EpisodeNumber>
+    <dc:relation.SeriesNumber />
+    <dc:relation.EpisodeNumber />
   </entry>
   <entry xmlns:dcterms="http://purl.org/dc/terms">
 
@@ -188,7 +188,7 @@
     <dc:relation.AgeRating>0</dc:relation.AgeRating>
     <dc:relation.Duration>1:00</dc:relation.Duration>
     <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
-    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+    <dc:relation.EpisodeNumber />
   </entry>
 
 </feed>

@@ -1,23 +1,20 @@
 package org.atlasapi.remotesite.channel4.pmlsd;
 
-import static org.atlasapi.media.entity.Identified.TO_URI;
-
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -101,18 +98,18 @@ class C4ContentLinker {
 
     public SetMultimap<Series, Episode> linkClipsToContent(SetMultimap<Series, Episode> content, List<Clip> clips, Brand brand) {
 
-        Map<String, Episode> lookup = toEpisodeLookup(content.values());
+        Map<String, Content> lookup = toContentLookup(content);
 
         for (Clip clip : clips) {
-            Episode episode = findEpisode(lookup, clip);
-            if (episode != null) {
+            Content found = findContent(lookup, clip);
+            if (found != null) {
                 // This is a temporary container of the series/episode number until we have
                 // episode IDs in the clip API.
                 // 
                 // The clipOf field should be unset, since it's not actually a reference to
                 // another item
                 clip.setClipOf(null);
-                episode.addClip(clip);
+                found.addClip(clip);
             } else {
                 brand.addClip(clip);
             }
@@ -123,27 +120,48 @@ class C4ContentLinker {
 
     public static final Pattern SERIES_AND_EPISODE_NUMBER_IN_ANY_URI = Pattern.compile("series-(\\d+)/episode-(\\d+)");
     
-    private Episode findEpisode(Map<String, Episode> lookup, Clip clip) {
+    private Content findContent(Map<String, Content> lookup, Clip clip) {
         return lookup.get(clip.getClipOf());
     }
 
-    private Map<String, Episode> toEpisodeLookup(Iterable<Episode> contents) {
-        Map<String, Episode> lookup = Maps.newHashMap();
-        for (Episode episode : contents) {
-            if (episode.getSeriesNumber() != null && episode.getEpisodeNumber() != null) {
-                lookup.put(concatSeriesAndEpNum(episode), episode);
+    private Map<String, Content> toContentLookup(SetMultimap<Series, Episode> content) {
+        Map<String, Content> lookup = Maps.newHashMap();
+        for (Content c : Iterables.concat(content.keys(), content.values())) {
+            Optional<String> key = createKey(c);
+            if (key.isPresent()) {
+                lookup.put(key.get(), c);
             }
         }
         return lookup;
     }
 
-    private String concatSeriesAndEpNum(Episode episode) {
-        return concatSeriesAndEpNum(episode.getSeriesNumber(), episode.getEpisodeNumber());
+    private Optional<String> createKey(Identified ided) {
+        if (ided instanceof Series) {
+            Series series = (Series) ided;
+            return createKeyForSeries(series.getSeriesNumber());
+        }
+        if (ided instanceof Episode) {
+            Episode episode = (Episode) ided;
+            return createKeyForEpisode(episode.getSeriesNumber(), episode.getEpisodeNumber());
+        }
+        if (ided instanceof Brand) {
+            return Optional.of("brand");
+        }
+        throw new IllegalArgumentException("Unsupported type: " + ided.getClass().getCanonicalName());
     }
-
-    private String concatSeriesAndEpNum(int seriesNumber, int episodeNumber) {
-        return seriesNumber + "-" + episodeNumber;
-
+    
+    public Optional<String> createKeyForSeries(Integer seriesNumber) {
+        if (seriesNumber == null) {
+            return Optional.absent();
+        }
+        return Optional.of(String.format("s%d", seriesNumber));
+    }
+    
+    public Optional<String> createKeyForEpisode(Integer seriesNumber, Integer episodeNumber) {
+        if (seriesNumber == null || episodeNumber == null) {
+            return Optional.absent();
+        }
+        return Optional.of(String.format("s%d-e%d", seriesNumber, episodeNumber));
     }
     
     private static Function<Episode, String> TO_TAG_URI = new Function<Episode, String>() {
