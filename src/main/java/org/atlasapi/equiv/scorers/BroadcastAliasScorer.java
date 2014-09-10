@@ -1,7 +1,6 @@
 package org.atlasapi.equiv.scorers;
 
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
@@ -27,18 +26,18 @@ public class BroadcastAliasScorer extends BaseBroadcastItemScorer {
 
     @Override
     protected boolean subjectAndCandidateMatch(Item subject, Item candidate) {
-        ImmutableSet<Alias> candidateAliases = FluentIterable.from(candidate.flattenBroadcasts())
-                .transformAndConcat(new Function<Broadcast, Iterable<Alias>>() {
+        ImmutableSet<String> candidateAliases = FluentIterable.from(candidate.flattenBroadcasts())
+                .transformAndConcat(new Function<Broadcast, Iterable<String>>() {
 
                     @Override
-                    public Iterable<Alias> apply(Broadcast input) {
-                        return input.getAliases();
+                    public Iterable<String> apply(Broadcast input) {
+                        return input.getAliasUrls();
                     }
                 })
                 .toSet();
 
         for (Broadcast subjectBroadcast : subject.flattenBroadcasts()) {
-            if (!Sets.union(candidateAliases, ImmutableSet.copyOf(subjectBroadcast.getAliases()))
+            if (!Sets.union(candidateAliases, ImmutableSet.copyOf(subjectBroadcast.getAliasUrls()))
                     .isEmpty()) {
                 return true;
             }

@@ -22,7 +22,7 @@ public class BroadcastModelTransformer {
           complex.setWidescreen(simple.getWidescreen());
           complex.setSurround(simple.getSurround());
           complex.setLive(simple.getLive());
-          // TODO ALIASES
+          complex.setAliasUrls(simple.getAliases());
         return complex;
     }
 
