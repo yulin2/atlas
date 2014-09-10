@@ -14,6 +14,14 @@ import com.google.common.collect.Sets;
 public class BroadcastAliasScorer extends BaseBroadcastItemScorer {
 
     private static final String NAME = "Broadcast-Alias";
+    private static final Function<Broadcast, Iterable<String>> BROADCAST_TO_ALIAS_STRING_ITERABLE = new Function<Broadcast, Iterable<String>>() {
+
+        @Override
+        public Iterable<String> apply(Broadcast input) {
+            return input.getAliasUrls();
+        }
+
+    };
 
     public BroadcastAliasScorer(ContentResolver resolver, Score misMatchScore) {
         super(resolver, misMatchScore);
@@ -26,21 +34,17 @@ public class BroadcastAliasScorer extends BaseBroadcastItemScorer {
 
     @Override
     protected boolean subjectAndCandidateMatch(Item subject, Item candidate) {
-        ImmutableSet<String> candidateAliases = FluentIterable.from(candidate.flattenBroadcasts())
-                .transformAndConcat(new Function<Broadcast, Iterable<String>>() {
 
-                    @Override
-                    public Iterable<String> apply(Broadcast input) {
-                        return input.getAliasUrls();
-                    }
-                })
+        ImmutableSet<String> aliasesOfCandidateBroadcasts = FluentIterable.from(candidate.flattenBroadcasts())
+                .transformAndConcat(BROADCAST_TO_ALIAS_STRING_ITERABLE)
                 .toSet();
 
-        for (Broadcast subjectBroadcast : subject.flattenBroadcasts()) {
-            if (!Sets.union(candidateAliases, ImmutableSet.copyOf(subjectBroadcast.getAliasUrls()))
-                    .isEmpty()) {
-                return true;
-            }
+        ImmutableSet<String> aliasesOfSubjectBroadcasts = FluentIterable.from(subject.flattenBroadcasts())
+                .transformAndConcat(BROADCAST_TO_ALIAS_STRING_ITERABLE)
+                .toSet();
+
+        if (!Sets.intersection(aliasesOfCandidateBroadcasts, aliasesOfSubjectBroadcasts).isEmpty()) {
+            return true;
         }
         return false;
     }
