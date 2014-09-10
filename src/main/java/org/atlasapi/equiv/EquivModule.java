@@ -532,7 +532,7 @@ public class EquivModule {
             new TitleMatchingItemScorer(), 
             new SequenceItemScorer(), 
             new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/),
-            new BroadcastAliasScorer(contentResolver, Score.ZERO)
+            new BroadcastAliasScorer(contentResolver, Score.nullScore())
         ), filter).build();
     }
 
