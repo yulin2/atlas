@@ -53,5 +53,4 @@ public class BroadcastItemTitleScorer extends BaseBroadcastItemScorer {
     private boolean hasTitle(Content c) {
         return !Strings.isNullOrEmpty(c.getTitle());
     }
-
 }

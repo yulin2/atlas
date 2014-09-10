@@ -39,6 +39,7 @@ import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT_STAGE;
+import static org.atlasapi.media.entity.Publisher.BETTY;
 
 import java.io.File;
 import java.util.Set;
@@ -76,6 +77,7 @@ import org.atlasapi.equiv.results.filters.SpecializationFilter;
 import org.atlasapi.equiv.results.persistence.FileEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.scorers.BroadcastAliasScorer;
 import org.atlasapi.equiv.scorers.ContainerHierarchyMatchingScorer;
 import org.atlasapi.equiv.scorers.CrewMemberScorer;
 import org.atlasapi.equiv.scorers.EquivalenceScorer;
@@ -292,15 +294,21 @@ public class EquivModule {
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
         
+        
         Set<Publisher> youViewStagePublishers = Sets.union(Sets.difference(acceptablePublishers, ImmutableSet.of(YOUVIEW)), ImmutableSet.of(YOUVIEW_STAGE));
         updaters.register(YOUVIEW_STAGE, SourceSpecificEquivalenceUpdater.builder(YOUVIEW_STAGE)
                 .withItemUpdater(broadcastItemEquivalenceUpdater(youViewStagePublishers, Score.negativeOne(),youviewBroadcastFilter))
                 .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(youViewStagePublishers))
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
-
+        
+        updaters.register(BETTY, SourceSpecificEquivalenceUpdater.builder(BETTY)
+            .withItemUpdater(broadcastItemEquivalenceUpdater(ImmutableSet.of(BETTY), Score.nullScore(), Predicates.alwaysTrue()))
+            .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
+            .withTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
+            .build());
+        
         Set<Publisher> reduxPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX));
-
         updaters.register(BBC_REDUX, SourceSpecificEquivalenceUpdater.builder(BBC_REDUX)
                 .withItemUpdater(broadcastItemEquivalenceUpdater(reduxPublishers, Score.nullScore(), Predicates.alwaysTrue()))
                 .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(reduxPublishers))
@@ -523,7 +531,8 @@ public class EquivModule {
         return standardItemUpdater(sources, ImmutableSet.of(
             new TitleMatchingItemScorer(), 
             new SequenceItemScorer(), 
-            new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/)
+            new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/),
+            new BroadcastAliasScorer(contentResolver, Score.ZERO)
         ), filter).build();
     }
 
