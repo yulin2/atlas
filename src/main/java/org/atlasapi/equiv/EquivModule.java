@@ -303,7 +303,7 @@ public class EquivModule {
                 .build());
         
         updaters.register(BETTY, SourceSpecificEquivalenceUpdater.builder(BETTY)
-            .withItemUpdater(broadcastItemEquivalenceUpdater(ImmutableSet.of(BETTY), Score.nullScore(), Predicates.alwaysTrue()))
+            .withItemUpdater(broadcastItemEquivalenceUpdater(ImmutableSet.of(YOUVIEW), Score.nullScore(), Predicates.alwaysTrue()))
             .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
             .withTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
             .build());
