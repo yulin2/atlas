@@ -8,7 +8,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.lovefilm.RestS3ServiceSupplier;
+import org.atlasapi.remotesite.util.RestS3ServiceSupplier;
 import org.atlasapi.s3.DefaultS3Client;
 import org.atlasapi.s3.S3Client;
 import org.jets3t.service.security.AWSCredentials;
