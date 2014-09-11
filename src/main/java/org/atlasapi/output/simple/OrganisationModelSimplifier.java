@@ -12,14 +12,15 @@ import org.atlasapi.output.Annotation;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 
 
 public class OrganisationModelSimplifier extends DescribedModelSimplifier<Organisation, org.atlasapi.media.entity.simple.Organisation> {
 
     private final PersonModelSimplifier personSimplifier;
 
-    public OrganisationModelSimplifier(ImageSimplifier imageSimplifier, PersonModelSimplifier personSimplifier) {
-        super(imageSimplifier);
+    public OrganisationModelSimplifier(ImageSimplifier imageSimplifier, PersonModelSimplifier personSimplifier, NumberToShortStringCodec codec) {
+        super(imageSimplifier, codec, null);
         this.personSimplifier = checkNotNull(personSimplifier);
     }
 

@@ -346,7 +346,7 @@ public class QueryWebModule {
     
     @Bean
     OrganisationModelSimplifier organisationSimplifier() {
-        return new OrganisationModelSimplifier(imageSimplifier(), personSimplifier());
+        return new OrganisationModelSimplifier(imageSimplifier(), personSimplifier(), idCodec());
     }
 
     @Bean
