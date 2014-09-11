@@ -3,7 +3,7 @@ package org.atlasapi.remotesite.getty;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class JsonVideoRequest {
+public class VideoRequestSerializer {
 
     public static JsonElement toJson(VideoRequest src) {
         JsonObject json = new JsonObject();

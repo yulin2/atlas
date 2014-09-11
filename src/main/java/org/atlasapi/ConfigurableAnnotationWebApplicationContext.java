@@ -11,6 +11,7 @@ import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
 import org.atlasapi.feeds.xmltv.XmlTvModule;
 import org.atlasapi.feeds.youview.YouViewFeedsWebModule;
 import org.atlasapi.feeds.youview.YouViewUploadModule;
+import org.atlasapi.googlespreadsheet.GoogleSpreadsheetModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
 import org.atlasapi.persistence.ManualScheduleRebuildModule;
@@ -36,7 +37,6 @@ import com.metabroadcast.common.properties.Configurer;
 
 import org.atlasapi.persistence.CassandraPersistenceModule;
 import org.atlasapi.remotesite.wikipedia.WikipediaModule;
-import org.atlasapi.spreadsheet.GoogleSpreadsheetModule;
 import org.atlasapi.system.ContentPurgeWebModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {

@@ -16,17 +16,17 @@ public class GettyUpdateTaskTest {
     private final GettyAdapter adapter = mock(GettyAdapter.class);
     private final GettyDataHandler handler = mock(GettyDataHandler.class);
     private final GettyTokenFetcher tokenFetcher = mock(GettyTokenFetcher.class);
-    private final GettyVideoFetcher videoFetcher = mock(GettyVideoFetcher.class);
+    private final GettyClient gettyClient = mock(GettyClient.class);
     private final IrisKeywordsFetcher keywordsFetcher = mock(IrisKeywordsFetcher.class);
-    private final ScheduledTask task = new GettyUpdateTask(adapter, handler, tokenFetcher, videoFetcher, keywordsFetcher, 90, 25);
+    private final ScheduledTask task = new GettyUpdateTask(gettyClient, adapter, handler, keywordsFetcher, 90, 25);
     
     @Test
     public void testTask() throws Exception {
         when(tokenFetcher.getToken()).thenReturn("token");
         when(keywordsFetcher.getKeywordsFromOffset(0)).thenReturn(ImmutableList.of("key1", "key2"));
         when(keywordsFetcher.getKeywordsFromOffset(90)).thenReturn(ImmutableList.<String>of());
-        when(videoFetcher.getResponse(Matchers.eq("token"), Matchers.eq("key1"), Matchers.eq(1))).thenReturn("val1");
-        when(videoFetcher.getResponse(Matchers.eq("token"), Matchers.eq("key2"), Matchers.eq(91))).thenReturn("val2");
+        when(gettyClient.getVideoResponse(Matchers.eq("key1"), Matchers.eq(1))).thenReturn("val1");
+        when(gettyClient.getVideoResponse(Matchers.eq("key2"), Matchers.eq(91))).thenReturn("val2");
         when(adapter.parse(Matchers.eq("val1"), Matchers.eq("key1"))).thenReturn(ImmutableList.of(new VideoResponse(), new VideoResponse()));
         when(adapter.parse(Matchers.eq("val2"), Matchers.eq("key2"))).thenReturn(ImmutableList.<VideoResponse>of());
         
@@ -34,12 +34,9 @@ public class GettyUpdateTaskTest {
         // first page has 2 keywords so it tries to fetch another page
         verify(keywordsFetcher, times(2)).getKeywordsFromOffset(Matchers.anyInt());
         
-        // first page has 2 videos so it tries to fetch another page
-        verify(videoFetcher, times(1)).getResponse(Matchers.eq("token"), Matchers.eq("key1"), Matchers.eq(1));
-        verify(videoFetcher, times(1)).getResponse(Matchers.eq("token"), Matchers.eq("key1"), Matchers.eq(91));
+        verify(gettyClient, times(1)).getVideoResponse(Matchers.eq("key1"), Matchers.eq(1));
         
-        // there are no videos found
-        verify(videoFetcher, times(1)).getResponse(Matchers.eq("token"), Matchers.eq("key2"), Matchers.eq(1));
+        verify(gettyClient, times(1)).getVideoResponse(Matchers.eq("key2"), Matchers.eq(1));
         
         verify(adapter, times(1)).parse(Matchers.eq("val1"), Matchers.eq("key1"));
         verify(adapter, times(0)).parse(Matchers.eq("val2"), Matchers.eq("key1"));

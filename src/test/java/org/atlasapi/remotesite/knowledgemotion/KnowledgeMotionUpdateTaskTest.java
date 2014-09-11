@@ -5,7 +5,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.atlasapi.spreadsheet.SpreadsheetFetcher;
+import org.atlasapi.googlespreadsheet.SpreadsheetFetcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
