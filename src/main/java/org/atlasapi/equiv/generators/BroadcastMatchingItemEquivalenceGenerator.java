@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGenerator<Item>{
@@ -170,9 +171,9 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
     private Schedule scheduleAround(Broadcast broadcast, Set<Publisher> publishers) {
         DateTime start = broadcast.getTransmissionTime().minus(flexibility);
         DateTime end = broadcast.getTransmissionEndTime().plus(flexibility);
-        Maybe<Channel> channel = channelResolver.fromUri(broadcast.getBroadcastOn());
-        if (channel.hasValue()) {
-            return resolver.unmergedSchedule(start, end, ImmutableSet.of(channel.requireValue()), publishers);
+        Maybe<Channel> channelFromUri = channelResolver.fromUri(broadcast.getBroadcastOn());
+        if (channelFromUri.hasValue()) {
+            return resolver.unmergedSchedule(start, end, ImmutableSet.of(channelFromUri.requireValue()), publishers);
         }
         return null;
     }
