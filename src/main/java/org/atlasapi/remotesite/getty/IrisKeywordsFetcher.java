@@ -28,12 +28,11 @@ public class IrisKeywordsFetcher {
     private static final String KEYWORD_TITLE = "label";
     
     private final SimpleHttpClient httpClient;
-    private final UsernameAndPassword credentials;
     private final String irisUrl;
     
     public IrisKeywordsFetcher(UsernameAndPassword credentials, String irisUrl) {
         this.irisUrl = checkNotNull(irisUrl);
-        this.credentials = checkNotNull(credentials);
+        checkNotNull(credentials);
         this.httpClient = new SimpleHttpClientBuilder()
             .withAcceptHeader(MimeType.APPLICATION_JSON)
             .withPreemptiveBasicAuth(credentials)

@@ -1,4 +1,4 @@
-package org.atlasapi.spreadsheet;
+package org.atlasapi.googlespreadsheet;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,10 +10,10 @@ import com.google.api.client.json.jackson.JacksonFactory;
 @Configuration
 public class GoogleSpreadsheetModule {
 
-    private @Value("${client.id}") String clientId;
-    private @Value("${client.secret}") String clientSecret;
-    private @Value("${refresh.token}") String refreshToken;
-    private @Value("${access.token}") String accessToken;
+    private @Value("${google.spreadsheet.client.id}") String clientId;
+    private @Value("${google.spreadsheet.client.secret}") String clientSecret;
+    private @Value("${google.spreadsheet.refresh.token}") String refreshToken;
+    private @Value("${google.spreadsheet.access.token}") String accessToken;
     
     @Bean
     public ClientCredentials clientCredentials() {

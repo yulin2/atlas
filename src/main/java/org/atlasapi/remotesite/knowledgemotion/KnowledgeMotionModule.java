@@ -2,12 +2,10 @@ package org.atlasapi.remotesite.knowledgemotion;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.googlespreadsheet.GoogleSpreadsheetModule;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
@@ -15,7 +13,6 @@ import org.atlasapi.remotesite.knowledgemotion.topics.TopicGuesser;
 import org.atlasapi.remotesite.knowledgemotion.topics.cache.KeyphraseTopicCache;
 import org.atlasapi.remotesite.knowledgemotion.topics.spotlight.SpotlightKeywordsExtractor;
 import org.atlasapi.remotesite.knowledgemotion.topics.spotlight.SpotlightResourceParser;
-import org.atlasapi.spreadsheet.GoogleSpreadsheetModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +25,6 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class KnowledgeMotionModule {
 
-    private @Autowired AdapterLog log;
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
@@ -53,7 +49,6 @@ public class KnowledgeMotionModule {
 
     @PostConstruct
     public void startBackgroundTasks() {
-        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("KnowledgeMotion Spreadsheet updater"));
         scheduler.schedule(knowledgeMotionUpdater().withName("KnowledgeMotion Spreadsheet Updater"), RepetitionRules.NEVER);
     }
 

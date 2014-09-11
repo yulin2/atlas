@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.getty;
 
-import static org.atlasapi.remotesite.getty.JsonVideoRequest.toJson;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.atlasapi.remotesite.getty.VideoRequestSerializer.toJson;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,15 +15,31 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import com.google.common.io.CharStreams;
 import com.google.gson.JsonElement;
 
-public class GettyVideoFetcher {
+public class GettyClient {
+
+    private static final String EXPIRED_TOKEN_CODE = "AUTH-012";
     
+    private final GettyTokenFetcher tokenFetcher;
     private final int itemsPerPage;
     
-    public GettyVideoFetcher(int itemsPerPage) {
+    private String token;
+    
+    public GettyClient(GettyTokenFetcher tokenFetcher, int itemsPerPage) {
+        this.tokenFetcher = checkNotNull(tokenFetcher);
         this.itemsPerPage = itemsPerPage;
     }
     
-    public String getResponse(String token, String searchPhrase, int itemStartNumber) throws ClientProtocolException, IOException {
+    public String getVideoResponse(String keyword, int offset) throws ClientProtocolException, IOException {
+        this.token = tokenFetcher.getToken();
+        String response = getResponse(token, keyword, offset);
+        if (response.contains(EXPIRED_TOKEN_CODE)) {
+            this.token = tokenFetcher.getToken();
+            return getResponse(token, keyword, offset);
+        }
+        return response;
+    }
+    
+    private String getResponse(String token, String searchPhrase, int itemStartNumber) throws ClientProtocolException, IOException {
         HttpPost post = new HttpPost("https://connect.gettyimages.com/v1/search/SearchForVideos");
         post.setHeader("Content-type", "application/json");
         

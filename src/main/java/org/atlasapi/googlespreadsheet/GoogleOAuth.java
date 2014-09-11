@@ -1,4 +1,4 @@
-package org.atlasapi.spreadsheet;
+package org.atlasapi.googlespreadsheet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
