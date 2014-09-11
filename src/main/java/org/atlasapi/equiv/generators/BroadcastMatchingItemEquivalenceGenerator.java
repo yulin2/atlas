@@ -175,11 +175,6 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
         if (channelFromUri.hasValue()) {
             return resolver.unmergedSchedule(start, end, ImmutableSet.of(channelFromUri.requireValue()), publishers);
         }
-        //Perhaps the broadcastOn value is an encoded channel ID
-        Maybe<Channel> channelFromId = channelResolver.fromId(new SubstitutionTableNumberCodec().decode(broadcast.getBroadcastOn()).longValue());
-        if (channelFromId.hasValue()) {
-            return resolver.unmergedSchedule(start, end, ImmutableSet.of(channelFromId.requireValue()), publishers);
-        }
         return null;
     }
     

@@ -255,7 +255,7 @@ public class QueryWebModule {
     }
     
     ClipModelTransformer clipTransformer() {
-        return new ClipModelTransformer(lookupStore, topicStore, idCodec(), new SystemClock());
+        return new ClipModelTransformer(lookupStore, topicStore, channelResolver, idCodec(), new SystemClock());
     }
     
     BrandModelTransformer brandTransformer() {
@@ -263,7 +263,7 @@ public class QueryWebModule {
     }
     
     ItemModelTransformer itemTransformer() {
-        return new ItemModelTransformer(lookupStore, topicStore, idCodec(), clipTransformer(), new SystemClock());
+        return new ItemModelTransformer(lookupStore, topicStore, channelResolver, idCodec(), clipTransformer(), new SystemClock());
     }  
     
     ContentWriteController contentWriteController() {
