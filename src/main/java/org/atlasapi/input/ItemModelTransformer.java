@@ -2,6 +2,7 @@ package org.atlasapi.input;
 
 import java.util.Currency;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.atlasapi.media.TransportSubType;
@@ -56,11 +57,24 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
             item = film;
         } else if ("song".equals(type)) {
             item = createSong(inputItem);
+        } else if ("broadcast".equals(type)) {
+            item = createBroadcast(inputItem);
         } else {
             item = new Item();
         }
         item.setLastUpdated(now);
         return setItemFields(item, inputItem, now);
+    }
+    
+    protected Item createBroadcast(org.atlasapi.media.entity.simple.Item inputItem) {
+        Item item = new Item();
+        HashSet<Broadcast> broadcasts = Sets.newHashSet();
+        for(org.atlasapi.media.entity.simple.Broadcast broadcast : inputItem.getBroadcasts()) {
+            broadcasts.add(broadcastTransformer.transform(broadcast));
+        }
+        Version version = new Version().copyWithBroadcasts(broadcasts);
+        item.setVersions(ImmutableSet.of(version));
+        return item;
     }
 
     protected Item createSong(org.atlasapi.media.entity.simple.Item inputItem) {
