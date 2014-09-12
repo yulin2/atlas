@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -36,10 +37,11 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
 
     private final BroadcastModelTransformer broadcastTransformer;
     
-    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, NumberToShortStringCodec idCodec, 
+    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, 
+            ChannelResolver channelResolver, NumberToShortStringCodec idCodec, 
             ClipModelTransformer clipsModelTransformer, Clock clock) {
         super(lookupStore, topicStore, idCodec, clipsModelTransformer, clock);
-        this.broadcastTransformer = new BroadcastModelTransformer();
+        this.broadcastTransformer = new BroadcastModelTransformer(channelResolver);
     }
 
     @Override
