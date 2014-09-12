@@ -53,8 +53,8 @@ public class BroadcastModelTransformer {
                 new DateTime(simple.getTransmissionTime()),
                 new DateTime(simple.getTransmissionEndTime()))
                 .withId(simple.getId());
-        complex.setActualTransmissionTime(simple.getActualTransmissionTime());
-        complex.setActualTransmissionEndTime(simple.getActualTransmissionEndTime());
+        complex.setActualTransmissionTime(new DateTime(simple.getActualTransmissionTime()));
+        complex.setActualTransmissionEndTime(new DateTime(simple.getActualTransmissionEndTime()));
         complex.setScheduleDate(simple.getScheduleDate());
         complex.setRepeat(simple.getRepeat());
         complex.setSubtitled(simple.getSubtitled());
