@@ -53,25 +53,8 @@ public class BroadcastModelTransformer {
                 new DateTime(simple.getTransmissionTime()),
                 new DateTime(simple.getTransmissionEndTime()))
                 .withId(simple.getId());
-<<<<<<< HEAD
-<<<<<<< HEAD
-          complex.setActualTransmissionTime(simple.getActualTransmissionTime());
-          complex.setActualTransmissionEndTime(simple.getActualTransmissionEndTime());
-          complex.setScheduleDate(simple.getScheduleDate());
-          complex.setRepeat(simple.getRepeat());
-          complex.setSubtitled(simple.getSubtitled());
-          complex.setSigned(simple.getSigned());
-          complex.setAudioDescribed(simple.getAudioDescribed());
-          complex.setHighDefinition(simple.getHighDefinition());
-          complex.setWidescreen(simple.getWidescreen());
-          complex.setSurround(simple.getSurround());
-          complex.setLive(simple.getLive());
-          // TODO ALIASES
-=======
-=======
->>>>>>> 8fc92c2... channel resolving broadcast transformer
-        complex.setActualTransmissionTime(simple.getActualTransmissionTime());
-        complex.setActualTransmissionEndTime(simple.getActualTransmissionEndTime());
+        complex.setActualTransmissionTime(new DateTime(simple.getActualTransmissionTime()));
+        complex.setActualTransmissionEndTime(new DateTime(simple.getActualTransmissionEndTime()));
         complex.setScheduleDate(simple.getScheduleDate());
         complex.setRepeat(simple.getRepeat());
         complex.setSubtitled(simple.getSubtitled());
@@ -82,10 +65,6 @@ public class BroadcastModelTransformer {
         complex.setSurround(simple.getSurround());
         complex.setLive(simple.getLive());
         complex.setAliasUrls(simple.getAliases());
-<<<<<<< HEAD
->>>>>>> 8fc92c2... channel resolving broadcast transformer
-=======
->>>>>>> 8fc92c2... channel resolving broadcast transformer
         return complex;
     }
 
