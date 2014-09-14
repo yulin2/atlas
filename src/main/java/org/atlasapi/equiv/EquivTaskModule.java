@@ -2,6 +2,7 @@ package org.atlasapi.equiv;
 
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
+import static org.atlasapi.media.entity.Publisher.BETTY;
 import static org.atlasapi.media.entity.Publisher.BT_VOD;
 import static org.atlasapi.media.entity.Publisher.C4;
 import static org.atlasapi.media.entity.Publisher.C4_PMLSD;
@@ -18,8 +19,8 @@ import static org.atlasapi.media.entity.Publisher.RTE;
 import static org.atlasapi.media.entity.Publisher.TALK_TALK;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT;
-import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT_STAGE;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
 
 import java.util.Set;
 
@@ -288,7 +289,7 @@ public class EquivTaskModule {
     private EquivalenceUpdatingWorker equivUpdatingWorker() {
         return new EquivalenceUpdatingWorker(contentResolver, lookupStore, equivalenceResultStore, equivUpdater,
             Predicates.or(ImmutableList.<Predicate<? super Content>>of(
-                sourceIsIn(BBC_REDUX, YOUVIEW, YOUVIEW_STAGE, YOUVIEW_BT, YOUVIEW_BT_STAGE),
+                sourceIsIn(BBC_REDUX, YOUVIEW, YOUVIEW_STAGE, YOUVIEW_BT, YOUVIEW_BT_STAGE, BETTY),
                 Predicates.and(Predicates.instanceOf(Container.class),
                     sourceIsIn(BBC, C4, C4_PMLSD, ITV, FIVE, BBC_REDUX, ITUNES, 
                         RADIO_TIMES, LOVEFILM, TALK_TALK, YOUVIEW, NETFLIX))
