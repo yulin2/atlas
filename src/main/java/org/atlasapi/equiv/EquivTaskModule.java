@@ -90,7 +90,8 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 @Import({EquivModule.class, KafkaMessagingModule.class})
 public class EquivTaskModule {
-    
+
+
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final Set<String> ignored = ImmutableSet.of("http://www.bbc.co.uk/programmes/b006mgyl"); 
@@ -111,6 +112,7 @@ public class EquivTaskModule {
     private static final RepetitionRule ROVI_EN_US_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(10, 00));
     private static final RepetitionRule RTE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(22, 00));
     private static final RepetitionRule BT_VOD_EQUIVALENCE_REPETITION = RepetitionRules.NEVER;
+    private static final RepetitionRule BETTY_UPDATE_REPETITION = RepetitionRules.every(Duration.standardHours(1));
     
     private @Value("${equiv.updater.enabled}") String updaterEnabled;
     private @Value("${equiv.stream-updater.enabled}") Boolean streamedChangesUpdateEquiv;
@@ -153,9 +155,14 @@ public class EquivTaskModule {
             taskScheduler.schedule(publisherUpdateTask(ROVI_EN_US).withName("Rovi EN-US Equivalence Updater"), ROVI_EN_GB_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(RTE).withName("RTE Equivalence Updater"), RTE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(BT_VOD).withName("BT VOD Equivalence Updater"), BT_VOD_EQUIVALENCE_REPETITION);
-            
+
+
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_MUSIC).withName("Music Equivalence Updater"), RepetitionRules.every(Duration.standardHours(6)));
-            
+
+            taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(BETTY)
+                    .build().withName("Betty Schedule Equivalence Updater"),
+                    BETTY_UPDATE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(YOUVIEW)
                     .withChannels(youViewChannelResolver().getAllChannels())
