@@ -161,6 +161,7 @@ public class EquivTaskModule {
 
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(BETTY)
+                    .withChannels(youViewChannelResolver().getAllChannels())
                     .build().withName("Betty Schedule Equivalence Updater"),
                     BETTY_UPDATE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
