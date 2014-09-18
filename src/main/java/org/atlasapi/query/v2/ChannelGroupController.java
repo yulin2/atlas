@@ -1,5 +1,7 @@
 package org.atlasapi.query.v2;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -9,9 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupType;
+import org.atlasapi.media.channel.ChannelNumbering;
+import org.atlasapi.media.channel.ChannelQuery;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AtlasErrorSummary;
@@ -26,11 +32,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.query.Selection;
@@ -38,6 +47,8 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
 @Controller
 public class ChannelGroupController extends BaseController<Iterable<ChannelGroup>> {
+
+    private static final Splitter SPLIT_ON_COMMA = Splitter.on(',');
 
     private static final ImmutableSet<Annotation> validAnnotations = ImmutableSet.<Annotation>builder()
         .add(Annotation.CHANNELS)
@@ -62,16 +73,20 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
     
     private static final String TYPE_KEY = "type";
     private static final String PLATFORM_ID_KEY = "platform_id";
+    private static final String CHANNEL_GENRES_KEY = "channel_genres";
     private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(50).withDefaultLimit(10);
     private final ChannelGroupResolver channelGroupResolver;
     private final ChannelGroupFilterer filterer = new ChannelGroupFilterer();
+    private final ChannelResolver channelResolver;
     private final NumberToShortStringCodec idCodec;
     private final QueryParameterAnnotationsExtractor annotationExtractor;
    
 
-    public ChannelGroupController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ChannelGroup>> outputter, ChannelGroupResolver channelGroupResolver, NumberToShortStringCodec idCodec) {
+    public ChannelGroupController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ChannelGroup>> outputter, 
+            ChannelGroupResolver channelGroupResolver, ChannelResolver channelResolver, NumberToShortStringCodec idCodec) {
         super(configFetcher, log, outputter);
         this.channelGroupResolver = channelGroupResolver;
+        this.channelResolver = checkNotNull(channelResolver);
         this.idCodec = idCodec;
         this.annotationExtractor = new QueryParameterAnnotationsExtractor();
     }
@@ -109,7 +124,8 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
 
     @RequestMapping(value={"/3.0/channel_groups/{id}.*", "/channel_groups/{id}.*"})
     public void listChannel(HttpServletRequest request, HttpServletResponse response, 
-            @PathVariable("id") String id) throws IOException {
+            @PathVariable("id") String id, 
+            @RequestParam(value = CHANNEL_GENRES_KEY, required = false) String channelGenres) throws IOException {
         try {
             Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver.channelGroupFor(idCodec.decode(id).longValue());
             if (!possibleChannelGroup.isPresent()) {
@@ -129,13 +145,36 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
                 errorViewFor(request, response, BAD_ANNOTATION);
                 return;
             }
+            ChannelGroup toReturn;
+            if (!Strings.isNullOrEmpty(channelGenres)) {
+                Set<String> genres = ImmutableSet.copyOf(SPLIT_ON_COMMA.split(channelGenres));
+                toReturn = filterByChannelGenres(possibleChannelGroup.get(), genres);
+            } else {
+                toReturn = possibleChannelGroup.get();
+            }
             
-            modelAndViewFor(request, response, ImmutableList.of(possibleChannelGroup.get()), appConfig);
+            modelAndViewFor(request, response, ImmutableList.of(toReturn), appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
     }
     
+    private ChannelGroup filterByChannelGenres(ChannelGroup channelGroup, final Set<String> genres) {
+        Iterables.filter(channelGroup.getChannelNumberings(), new Predicate<ChannelNumbering>() {
+            @Override
+            public boolean apply(ChannelNumbering input) {
+                Channel channel = Iterables.getOnlyElement(channelResolver.forIds(ImmutableSet.of(input.getChannel())));
+                return hasMatchingGenre(channel, genres);
+            }
+
+            });
+        return null;
+    }
+    
+    private boolean hasMatchingGenre(Channel channel, Set<String> genres) {
+        return Sets.intersection(channel.getGenres(), genres).isEmpty();
+    }
+
     private boolean validAnnotations(Set<Annotation> annotations) {
         return validAnnotations.containsAll(annotations);
     }
