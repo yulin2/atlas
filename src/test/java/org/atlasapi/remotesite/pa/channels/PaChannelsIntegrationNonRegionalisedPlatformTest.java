@@ -1,8 +1,8 @@
 package org.atlasapi.remotesite.pa.channels;
 
 import java.io.File;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
+import junit.framework.TestCase;
 
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupStore;
@@ -18,8 +18,6 @@ import com.google.common.base.Optional;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
-import junit.framework.TestCase;
-
 public class PaChannelsIntegrationNonRegionalisedPlatformTest extends TestCase {
 
     private PaChannelsIngester channelsIngester;
@@ -30,7 +28,6 @@ public class PaChannelsIntegrationNonRegionalisedPlatformTest extends TestCase {
     private ChannelGroupStore channelGroupStore;
     private PaProgrammeDataStore store = new DummyPaProgrammeDataStore(file);
     private PaChannelsUpdater updater; 
-    private Lock lock = new ReentrantLock();
     
     @Override
     @Before
@@ -42,7 +39,7 @@ public class PaChannelsIntegrationNonRegionalisedPlatformTest extends TestCase {
         channelsIngester = new PaChannelsIngester();
         channelGroupsIngester = new PaChannelGroupsIngester();
         dataHandler = new PaChannelDataHandler(channelsIngester, channelGroupsIngester, channelStore, channelStore, channelGroupStore, channelGroupStore);
-        updater = new PaChannelsUpdater(store, dataHandler, lock);
+        updater = new PaChannelsUpdater(store, dataHandler);
         updater.run();
     }
     
