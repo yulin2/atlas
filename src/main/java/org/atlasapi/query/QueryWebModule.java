@@ -221,7 +221,7 @@ public class QueryWebModule {
     @Bean
     ChannelGroupController channelGroupController() {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
-        return new ChannelGroupController(configFetcher, log, channelGroupModelWriter(), cachingChannelGroupResolver(), idCodec);
+        return new ChannelGroupController(configFetcher, log, channelGroupModelWriter(), cachingChannelGroupResolver(), channelResolver, idCodec);
     }
 
     @Bean AtlasModelWriter<Iterable<ChannelGroup>> channelGroupModelWriter() {
