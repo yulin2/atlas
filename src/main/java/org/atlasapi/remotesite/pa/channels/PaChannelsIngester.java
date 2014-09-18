@@ -85,7 +85,7 @@ public class PaChannelsIngester {
         try {
             if (!station.getChannels().getChannel().isEmpty()) {
                 Boolean isAdult = null;
-                Set<String> genres = null;
+                Set<String> genres = Sets.newHashSet();
                 if (station.getGenres() != null) {
                     isAdult = isAdult(station.getGenres());
                     genres = parseGenres(station.getGenres());
