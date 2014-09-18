@@ -1,9 +1,6 @@
 package org.atlasapi.remotesite.pa.channels;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.File;
-import java.util.concurrent.locks.Lock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,24 +34,15 @@ public class PaChannelsUpdater extends ScheduledTask {
     private final PaProgrammeDataStore dataStore;
     private final PaChannelDataHandler channelDataHandler;
     private final Logger log = LoggerFactory.getLogger(PaChannelsUpdater.class);
-    private final Lock channelWriterLock;
 
-    public PaChannelsUpdater(PaProgrammeDataStore dataStore, PaChannelDataHandler channelDataHandler, Lock channelWriterLock) {
-        this.dataStore = checkNotNull(dataStore);
-        this.channelDataHandler = checkNotNull(channelDataHandler);
-        this.channelWriterLock = checkNotNull(channelWriterLock);
+    public PaChannelsUpdater(PaProgrammeDataStore dataStore, PaChannelDataHandler channelDataHandler) {
+        this.dataStore = dataStore;
+        this.channelDataHandler = channelDataHandler;
     }
     
     @Override
     public void runTask() {
-        try {
-            log.info("Acquiring channel writer lock");
-            channelWriterLock.lock();
-            log.info("Acquired channel writer lock");
-            processFiles(dataStore.localChannelsFiles(Predicates.<File>alwaysTrue()));
-        } finally {
-            channelWriterLock.unlock();
-        }
+        processFiles(dataStore.localChannelsFiles(Predicates.<File>alwaysTrue()));
     }
     
     public void processFiles(Iterable<File> files) {

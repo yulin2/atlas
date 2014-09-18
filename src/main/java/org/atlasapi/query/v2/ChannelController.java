@@ -48,6 +48,8 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 @Controller
 public class ChannelController extends BaseController<Iterable<Channel>> {
     
+    private static final Splitter SPLIT_ON_COMMA = Splitter.on(',');
+
     private static final ImmutableSet<Annotation> validAnnotations = ImmutableSet.<Annotation>builder()
         .add(Annotation.CHANNEL_GROUPS)
         .add(Annotation.HISTORY)
@@ -72,7 +74,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
         .withStatusCode(HttpStatusCode.BAD_REQUEST);
     
     private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(100).withDefaultLimit(10);
-    private static final Splitter CSV_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
+    private static final Splitter CSV_SPLITTER = SPLIT_ON_COMMA.trimResults().omitEmptyStrings();
     private static final String TITLE = "title";
     private static final String TITLE_REVERSE = "title.reverse";
 
@@ -94,13 +96,14 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
             @RequestParam(value = "broadcaster", required = false) String broadcasterKey,
             @RequestParam(value = "media_type", required = false) String mediaTypeKey, 
             @RequestParam(value = "available_from", required = false) String availableFromKey,
-            @RequestParam(value = "order_by", required = false) String orderBy) throws IOException {
+            @RequestParam(value = "order_by", required = false) String orderBy,
+            @RequestParam(value = "genres", required = false) String genresString) throws IOException {
         try {
             final ApplicationConfiguration appConfig = appConfig(request); 
             
             Selection selection = SELECTION_BUILDER.build(request);
             
-            ChannelQuery query = constructQuery(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey);
+            ChannelQuery query = constructQuery(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey, genresString);
             
             Iterable<Channel> channels = channelResolver.allChannels(query);
 
@@ -162,7 +165,8 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
     }
     
     private ChannelQuery constructQuery(String platformId, String regionIds,
-            String broadcasterKey, String mediaTypeKey, String availableFromKey) {
+            String broadcasterKey, String mediaTypeKey, String availableFromKey,
+            String genresString) {
         ChannelQuery.Builder query = ChannelQuery.builder();
         
         Set<Long> channelGroups = getChannelGroups(platformId, regionIds);
@@ -180,6 +184,11 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
         
         if (!Strings.isNullOrEmpty(availableFromKey)) {
             query.withAvailableFrom(Publisher.fromKey(availableFromKey).requireValue());
+        }
+        
+        if (!Strings.isNullOrEmpty(genresString)) {
+            Iterable<String> genres = SPLIT_ON_COMMA.split(genresString);
+            query.withGenres(ImmutableSet.copyOf(genres));
         }
         
         return query.build();
