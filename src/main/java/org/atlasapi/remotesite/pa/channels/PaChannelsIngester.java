@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 
 public class PaChannelsIngester {
@@ -133,7 +134,7 @@ public class PaChannelsIngester {
     // with spaces replaced with underscores
     private Set<String> parseGenres(Genres genres) {
         String genre = genres.getGenre();
-        return ImmutableSet.of(GENRE_URI_PREFIX + genre.toLowerCase().replace(' ', '_'));
+        return Sets.newHashSet(GENRE_URI_PREFIX + genre.toLowerCase().replace(' ', '_'));
     }
 
     private Channel processParentChannel(Station station, org.atlasapi.remotesite.pa.channels.bindings.Channel firstChild, Set<String> genres, Boolean isAdult) {
