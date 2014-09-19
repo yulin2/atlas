@@ -16,7 +16,6 @@ import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupType;
 import org.atlasapi.media.channel.ChannelNumbering;
-import org.atlasapi.media.channel.ChannelQuery;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.output.Annotation;
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -160,7 +158,7 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
     }
     
     private ChannelGroup filterByChannelGenres(ChannelGroup channelGroup, final Set<String> genres) {
-        Iterables.filter(channelGroup.getChannelNumberings(), new Predicate<ChannelNumbering>() {
+        Iterable<ChannelNumbering> filtered = Iterables.filter(channelGroup.getChannelNumberings(), new Predicate<ChannelNumbering>() {
             @Override
             public boolean apply(ChannelNumbering input) {
                 Channel channel = Iterables.getOnlyElement(channelResolver.forIds(ImmutableSet.of(input.getChannel())));
@@ -168,11 +166,12 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
             }
 
             });
-        return null;
+        channelGroup.setChannelNumberings(filtered);
+        return channelGroup;
     }
     
     private boolean hasMatchingGenre(Channel channel, Set<String> genres) {
-        return Sets.intersection(channel.getGenres(), genres).isEmpty();
+        return !Sets.intersection(channel.getGenres(), genres).isEmpty();
     }
 
     private boolean validAnnotations(Set<Annotation> annotations) {
