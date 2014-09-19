@@ -112,8 +112,7 @@ public class EquivTaskModule {
     private static final RepetitionRule ROVI_EN_US_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(10, 00));
     private static final RepetitionRule RTE_EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(22, 00));
     private static final RepetitionRule BT_VOD_EQUIVALENCE_REPETITION = RepetitionRules.NEVER;
-    private static final RepetitionRule BETTY_UPDATE_REPETITION = RepetitionRules.every(Duration.standardHours(1));
-    
+
     private @Value("${equiv.updater.enabled}") String updaterEnabled;
     private @Value("${equiv.stream-updater.enabled}") Boolean streamedChangesUpdateEquiv;
     private @Value("${equiv.stream-updater.consumers.default}") Integer defaultStreamedEquivUpdateConsumers;
@@ -159,11 +158,6 @@ public class EquivTaskModule {
 
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_MUSIC).withName("Music Equivalence Updater"), RepetitionRules.every(Duration.standardHours(6)));
 
-            taskScheduler.schedule(taskBuilder(0, 7)
-                    .withPublishers(BETTY)
-                    .withChannels(youViewChannelResolver().getAllChannels())
-                    .build().withName("Betty Schedule Equivalence Updater"),
-                    BETTY_UPDATE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(YOUVIEW)
                     .withChannels(youViewChannelResolver().getAllChannels())
