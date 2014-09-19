@@ -22,9 +22,7 @@ import com.google.common.collect.ImmutableSet;
 @RunWith(MockitoJUnitRunner.class)
 public class BroadcastAliasScorerTest {
 
-    private final Score mismatchScore = Score.nullScore();
-    private final ContentResolver resolver = mock(ContentResolver.class);
-    private final BroadcastAliasScorer scorer = new BroadcastAliasScorer(resolver, mismatchScore);
+    private final BroadcastAliasScorer scorer = new BroadcastAliasScorer(Score.nullScore());
 
     @Test
     public void testScoresOneWhenCandidateHasMatchingAlias() {
