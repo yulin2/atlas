@@ -167,7 +167,7 @@ public class PaChannelDataHandler {
                 break;
             }
         }
-        checkNotNull("channel with uri " + newChannel.getCanonicalUri() + " has no aliases");
+        checkNotNull(alias, "channel with uri " + newChannel.getCanonicalUri() + " has no aliases");
         
         Maybe<Channel> existing = channelResolver.forAlias(alias);
         if (existing.hasValue()) {
@@ -185,6 +185,7 @@ public class PaChannelDataHandler {
             existingChannel.setHighDefinition(newChannel.getHighDefinition());
             existingChannel.setRegional(newChannel.getRegional());
             existingChannel.setTimeshift(newChannel.getTimeshift());
+            existingChannel.setGenres(newChannel.getGenres());
             // unions new PA numberings with existing non-PA numberings
             existingChannel.setChannelNumbers(Sets.union(
                     newChannel.getChannelNumbers(), 

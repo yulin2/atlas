@@ -51,7 +51,7 @@ public class PaChannelsIngester {
     private static final String CHANNEL_URI_PREFIX = "http://ref.atlasapi.org/channels/pressassociation.com/";
     private static final String STATION_ALIAS_PREFIX = "http://pressassociation.com/stations/";
     private static final String STATION_URI_PREFIX = "http://ref.atlasapi.org/channels/pressassociation.com/stations/";
-    private static final String GENRE_URI_PREFIX = "http://ref.atlasapi.org/channels/pressassociation.com/genres/";
+    private static final String GENRE_URI_PREFIX = "http://pressassociation.com/genres/";
     private static final String FORMAT_HD = "HD";
     
     private static final Map<String, String> YOUVIEW_SERVICE_PROVIDERS_TO_ALIAS_PREFIX 
