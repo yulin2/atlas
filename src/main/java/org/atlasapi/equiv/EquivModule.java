@@ -301,9 +301,10 @@ public class EquivModule {
                 .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(youViewStagePublishers))
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
-        
+
+        Set<Publisher> bettyPublishers = ImmutableSet.of(BETTY, YOUVIEW, YOUVIEW_STAGE, PA);
         updaters.register(BETTY, SourceSpecificEquivalenceUpdater.builder(BETTY)
-            .withItemUpdater(broadcastItemEquivalenceUpdater(youViewPublishers, Score.nullScore(), Predicates.alwaysTrue()))
+            .withItemUpdater(broadcastItemEquivalenceUpdater(bettyPublishers, Score.nullScore(), Predicates.alwaysTrue()))
             .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
             .withTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
             .build());
