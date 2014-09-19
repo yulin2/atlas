@@ -20,7 +20,6 @@ import org.atlasapi.remotesite.btvod.BtVodData.BtVodDataRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
@@ -103,14 +102,14 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
         return optionalUri.isPresent() && processedBrands.containsKey(optionalUri.get());
     }
 
-    private Optional<String> getSyntethisedKey(BtVodDataRow row) {
+    private Optional<String> getSynthesizedKey(BtVodDataRow row) {
         String title = row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE);
 
-        if (isSyntesizableFromSeries(row)) {
+        if (canParseBrandFromSeries(row)) {
             return Optional.of(Sanitizer.sanitize(brandTitleFromSeriesTitle(title)));
         }
 
-        if (isSyntesizableFromEpisode(row)) {
+        if (canParseBrandFromEpisode(row)) {
             return Optional.of(Sanitizer.sanitize(brandTitleFromEpisodeTitle(title)));
         }
 
@@ -119,7 +118,7 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
 
     private String getKey(BtVodDataRow row) {
         String productId = row.getColumnValue(BtVodFileColumn.PRODUCT_ID);
-        return getSyntethisedKey(row).or(productId);
+        return getSynthesizedKey(row).or(productId);
     }
 
     private String brandTitleFromEpisodeTitle(String title) {
@@ -139,10 +138,10 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
     }
 
     private boolean shouldSynthesizeBrand(BtVodDataRow row) {
-        return isSyntesizableFromEpisode(row) || isSyntesizableFromSeries(row);
+        return canParseBrandFromEpisode(row) || canParseBrandFromSeries(row);
     }
 
-    private boolean isSyntesizableFromEpisode(BtVodDataRow row) {
+    private boolean canParseBrandFromEpisode(BtVodDataRow row) {
         String seriesNumber = row.getColumnValue(BtVodFileColumn.SERIES_NUMBER);
         String isSeries = row.getColumnValue(BtVodFileColumn.IS_SERIES);
         return Strings.isNullOrEmpty(row.getColumnValue(BtVodFileColumn.BRANDIA_ID))
@@ -152,14 +151,14 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
                 && isTitleSyntesizableFromEpisode(row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE));
     }
 
-    private boolean isSyntesizableFromSeries(BtVodDataRow row) {
+    private boolean canParseBrandFromSeries(BtVodDataRow row) {
         String isSeries = row.getColumnValue(BtVodFileColumn.IS_SERIES);
         return Strings.isNullOrEmpty(row.getColumnValue(BtVodFileColumn.BRANDIA_ID))
                 && "Y".equals(isSeries)
-                && isTitleSyntesizableFromSeries(row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE));
+                && isTitleSynthesizableFromSeries(row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE));
     }
 
-    private boolean isTitleSyntesizableFromSeries(String title) {
+    private boolean isTitleSynthesizableFromSeries(String title) {
         Matcher matcher = BRAND_TITLE_FROM_SERIES_PATTERN.matcher(title);
         return matcher.matches();
     }
@@ -187,9 +186,9 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
         Brand brand = new Brand(uriFor(row).get(), null, publisher);
         String productTitle = row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE);
 
-        if (isSyntesizableFromEpisode(row)) {
+        if (canParseBrandFromEpisode(row)) {
             brand.setTitle(brandTitleFromEpisodeTitle(productTitle));
-        } else if (isSyntesizableFromSeries(row)) {
+        } else if (canParseBrandFromSeries(row)) {
             brand.setTitle(brandTitleFromSeriesTitle(productTitle));
         } else {
             brand.setTitle(row.getColumnValue(BtVodFileColumn.BRAND_TITLE));
@@ -204,17 +203,17 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
 
         if (!shouldSynthesizeBrand(row) && brandId == null) {
             return Optional.absent();
-        }
-
-        if (shouldSynthesizeBrand(row)) {
+        } else if (shouldSynthesizeBrand(row)) {
             return Optional.of(uriPrefix + "synthesized/brands/" + ensureSynthesizedKey(row));
+        } else if (brandId != null) {
+            return Optional.of(uriPrefix + "brands/" + brandId);
         }
 
-        return Optional.of(uriPrefix + "brands/" + row.getColumnValue(BtVodFileColumn.BRANDIA_ID));
+        return Optional.absent();
     }
 
     private String ensureSynthesizedKey(BtVodDataRow row) {
-        Optional<String> synthesizedKey = getSyntethisedKey(row);
+        Optional<String> synthesizedKey = getSynthesizedKey(row);
 
         if (!synthesizedKey.isPresent()) {
             String productId = row.getColumnValue(BtVodFileColumn.PRODUCT_ID);
