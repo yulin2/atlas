@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.btvod;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Container;
@@ -18,6 +19,7 @@ import org.atlasapi.remotesite.btvod.BtVodData.BtVodDataRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
@@ -27,7 +29,7 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 public class BtVodSeriesWriter implements BtVodDataProcessor<UpdateProgress>{
 
     private static final Logger log = LoggerFactory.getLogger(BtVodSeriesWriter.class);
-    
+
     private final ContentWriter writer;
     private final ContentResolver resolver;
     private final BtVodBrandWriter brandExtractor;
@@ -69,11 +71,11 @@ public class BtVodSeriesWriter implements BtVodDataProcessor<UpdateProgress>{
             
             Series series = seriesFrom(row);
             write(series);
-            
-            String brandId = row.getColumnValue(BtVodFileColumn.BRANDIA_ID);
-            processedSeries.put(
-                    seriesKeyFor(brandId, series.getSeriesNumber()), 
-                    ParentRef.parentRefFrom(series));
+
+            // This allows a lookup by series title. Note that the only reference from an episode to a series is the series title.
+            // Consequently this map will be used to lookup SeriesRef when processing episodes
+            // TODO: is there a better approach than this ^?
+            processedSeries.put(series.getTitle(), ParentRef.parentRefFrom(series));
             listener.onContent(series, row);
             thisProgress = UpdateProgress.SUCCESS;
         } catch (Exception e) {
@@ -107,7 +109,7 @@ public class BtVodSeriesWriter implements BtVodDataProcessor<UpdateProgress>{
         series.withSeriesNumber(seriesNumber);
         series.setTitle(row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE));
         describedFieldsExtractor.setDescribedFieldsFrom(row, series);
-        series.setParentRef(brandExtractor.getBrandRefFor(row.getColumnValue(BtVodFileColumn.BRANDIA_ID)));
+        series.setParentRef(brandExtractor.getBrandRefFor(row).orNull());
         return series;
     }
     
@@ -121,11 +123,8 @@ public class BtVodSeriesWriter implements BtVodDataProcessor<UpdateProgress>{
         return progress;
     }
 
-    public ParentRef getSeriesRefFor(String brandId, int seriesNumber) {
-        return processedSeries.get(seriesKeyFor(brandId, seriesNumber));
+    public Optional<ParentRef> getSeriesRefFor(String seriesTitle) {
+        return Optional.fromNullable(processedSeries.get(seriesTitle));
     }
-    
-    private String seriesKeyFor(String brandId, int seriesNumber) {
-        return brandId + "-" + seriesNumber;
-    }
+
 }
