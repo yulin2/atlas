@@ -57,16 +57,19 @@ public class BtVodUpdater extends ScheduledTask {
                 processedRows);
         try {
             reportStatus("Brand extract [IN PROGRESS]  Series extract [TODO]  Item extract [TODO]");
+
             vodData.processData(brandExtractor);
             reportStatus(String.format("Brand extract [DONE: %d rows successful %d rows failed]  Series extract [IN PROGRESS]  Item extract [TODO]", 
                     brandExtractor.getResult().getProcessed(), 
                     brandExtractor.getResult().getFailures()));
+
             vodData.processData(seriesExtractor);
             reportStatus(String.format("Brand extract [DONE: %d rows successful %d rows failed]  Series extract [DONE: %d rows successful %d rows failed]  Item extract [IN PROGRESS]", 
                     brandExtractor.getResult().getProcessed(), 
                     brandExtractor.getResult().getFailures(), 
                     seriesExtractor.getResult().getProcessed(), 
                     seriesExtractor.getResult().getFailures()));
+
             vodData.processData(itemExtractor);
             reportStatus(String.format("Brand extract [DONE: %d rows successful %d rows failed]  Series extract [DONE: %d rows successful %d rows failed]  Item extract [DONE: %d rows successful %d rows failed]",
                     brandExtractor.getResult().getProcessed(), 

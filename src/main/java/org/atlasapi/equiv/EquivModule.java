@@ -66,6 +66,7 @@ import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
 import org.atlasapi.equiv.results.combining.RequiredScoreFilteringCombiner;
 import org.atlasapi.equiv.results.extractors.MusicEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.TopEquivalenceExtractor;
 import org.atlasapi.equiv.results.filters.AlwaysTrueFilter;
 import org.atlasapi.equiv.results.filters.ConjunctiveFilter;
 import org.atlasapi.equiv.results.filters.ContainerHierarchyFilter;
@@ -304,7 +305,7 @@ public class EquivModule {
 
         Set<Publisher> bettyPublishers = ImmutableSet.of(BETTY, YOUVIEW, YOUVIEW_STAGE, PA);
         updaters.register(BETTY, SourceSpecificEquivalenceUpdater.builder(BETTY)
-            .withItemUpdater(broadcastItemEquivalenceUpdater(bettyPublishers, Score.nullScore(), Predicates.alwaysTrue()))
+                .withItemUpdater(aliasIdentifiedBroadcastItemEquivalenceUpdater(bettyPublishers))
             .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
             .withTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
             .build());
@@ -532,9 +533,26 @@ public class EquivModule {
         return standardItemUpdater(sources, ImmutableSet.of(
             new TitleMatchingItemScorer(), 
             new SequenceItemScorer(), 
-            new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/),
-            new BroadcastAliasScorer(contentResolver, Score.nullScore())
+            new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/)
         ), filter).build();
+    }
+
+    private EquivalenceUpdater<Item> aliasIdentifiedBroadcastItemEquivalenceUpdater(
+            Set<Publisher> sources) {
+        return ContentEquivalenceUpdater.<Item>builder()
+                .withGenerator(new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver,
+                        channelResolver,
+                        sources,
+                        Duration.standardMinutes(10),
+                        Predicates.alwaysTrue()))
+                .withScorer(new BroadcastAliasScorer(Score.nullScore()))
+                .withFilter(AlwaysTrueFilter.<Item>get())
+                .withExtractor(TopEquivalenceExtractor.<Item>create())
+                .withHandler(new BroadcastingEquivalenceResultHandler<>(ImmutableList.of(
+                        new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
+                        new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore)
+                )))
+                .build();
     }
 
     private EquivalenceUpdater<Item> rtItemEquivalenceUpdater() {
