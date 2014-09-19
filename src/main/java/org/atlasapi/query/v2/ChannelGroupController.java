@@ -171,7 +171,7 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
     }
     
     private boolean hasMatchingGenre(Channel channel, Set<String> genres) {
-        return Sets.intersection(channel.getGenres(), genres).isEmpty();
+        return !Sets.intersection(channel.getGenres(), genres).isEmpty();
     }
 
     private boolean validAnnotations(Set<Annotation> annotations) {
