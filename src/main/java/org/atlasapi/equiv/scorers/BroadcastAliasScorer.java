@@ -43,10 +43,7 @@ public class BroadcastAliasScorer extends BaseBroadcastItemScorer {
                 .transformAndConcat(BROADCAST_TO_ALIAS_STRING_ITERABLE)
                 .toSet();
 
-        if (!Sets.intersection(aliasesOfCandidateBroadcasts, aliasesOfSubjectBroadcasts).isEmpty()) {
-            return true;
-        }
-        return false;
+        return !Sets.intersection(aliasesOfCandidateBroadcasts, aliasesOfSubjectBroadcasts).isEmpty();
     }
 
     @Override

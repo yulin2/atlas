@@ -24,6 +24,31 @@ public class BroadcastModelTransformer {
 
     public Broadcast transform(org.atlasapi.media.entity.simple.Broadcast simple) {
 
+        Broadcast complex = new Broadcast(resolveChannel(simple),
+                new DateTime(simple.getTransmissionTime()),
+                new DateTime(simple.getTransmissionEndTime()))
+                .withId(simple.getId());
+        
+        if (simple.getActualTransmissionTime() != null) {
+            complex.setActualTransmissionTime(new DateTime(simple.getActualTransmissionTime()));
+        }
+        if (simple.getActualTransmissionEndTime() != null) {
+            complex.setActualTransmissionEndTime(new DateTime(simple.getActualTransmissionEndTime()));
+        }
+        complex.setScheduleDate(simple.getScheduleDate());
+        complex.setRepeat(simple.getRepeat());
+        complex.setSubtitled(simple.getSubtitled());
+        complex.setSigned(simple.getSigned());
+        complex.setAudioDescribed(simple.getAudioDescribed());
+        complex.setHighDefinition(simple.getHighDefinition());
+        complex.setWidescreen(simple.getWidescreen());
+        complex.setSurround(simple.getSurround());
+        complex.setLive(simple.getLive());
+        complex.setAliasUrls(simple.getAliases());
+        return complex;
+    }
+
+    private String resolveChannel(org.atlasapi.media.entity.simple.Broadcast simple) {
         if (Strings.isNullOrEmpty(simple.getBroadcastOn())
             && !hasChannelId(simple)) {
             throw new IllegalArgumentException(
@@ -48,31 +73,7 @@ public class BroadcastModelTransformer {
         } else {
             broadcastOn = simple.getBroadcastOn();
         }
-        
-
-
-        Broadcast complex = new Broadcast(broadcastOn,
-                new DateTime(simple.getTransmissionTime()),
-                new DateTime(simple.getTransmissionEndTime()))
-                .withId(simple.getId());
-        
-        if (simple.getActualTransmissionTime() != null) {
-            complex.setActualTransmissionTime(new DateTime(simple.getActualTransmissionTime()));
-        }
-        if (simple.getActualTransmissionEndTime() != null) {
-            complex.setActualTransmissionEndTime(new DateTime(simple.getActualTransmissionEndTime()));
-        }
-        complex.setScheduleDate(simple.getScheduleDate());
-        complex.setRepeat(simple.getRepeat());
-        complex.setSubtitled(simple.getSubtitled());
-        complex.setSigned(simple.getSigned());
-        complex.setAudioDescribed(simple.getAudioDescribed());
-        complex.setHighDefinition(simple.getHighDefinition());
-        complex.setWidescreen(simple.getWidescreen());
-        complex.setSurround(simple.getSurround());
-        complex.setLive(simple.getLive());
-        complex.setAliasUrls(simple.getAliases());
-        return complex;
+        return broadcastOn;
     }
 
     private boolean hasChannelId(org.atlasapi.media.entity.simple.Broadcast simple) {
