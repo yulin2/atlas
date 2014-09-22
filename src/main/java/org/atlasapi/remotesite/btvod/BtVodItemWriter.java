@@ -6,6 +6,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -13,6 +15,7 @@ import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Song;
@@ -28,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.api.client.repackaged.com.google.common.base.Throwables;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Ints;
@@ -40,7 +44,7 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
     private static final String FILM_CATEGORY = "Film";
     private static final String MUSIC_CATEGORY = "Music";
     private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("MMM dd yyyy hh:mmaa");
-
+    private static final Pattern EPISODE_TITLE_PATTERN = Pattern.compile("^.* S[0-9]+\\-E[0-9]+ (.*)");
     private static final Logger log = LoggerFactory.getLogger(BtVodItemWriter.class);
     
     private final ContentWriter writer;
@@ -120,12 +124,12 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
     private boolean isValidHierarchy(BtVodDataRow row) {
         return Strings.isNullOrEmpty(row.getColumnValue(BtVodFileColumn.SERIES_NUMBER))
                 || (!Strings.isNullOrEmpty(row.getColumnValue(BtVodFileColumn.SERIES_NUMBER))
-                        && !Strings.isNullOrEmpty(row.getColumnValue(BtVodFileColumn.BRANDIA_ID)));
+                        && brandExtractor.getBrandRefFor(row).isPresent());
     }
     
     private Item itemFrom(BtVodDataRow row) {
         Item item;
-        if (!Strings.isNullOrEmpty(row.getColumnValue(BtVodFileColumn.BRANDIA_ID))
+        if (brandExtractor.getBrandRefFor(row).isPresent()
                 && !Strings.isNullOrEmpty(row.getColumnValue(BtVodFileColumn.SERIES_NUMBER))) {
             item = createEpisode(row);
         } else if (FILM_CATEGORY.equals(row.getColumnValue(BtVodFileColumn.CATEGORY))) {
@@ -149,16 +153,37 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
         Episode episode = new Episode(uriFor(row), null, publisher);
         episode.setSeriesNumber(Ints.tryParse(row.getColumnValue(BtVodFileColumn.SERIES_NUMBER)));
         episode.setEpisodeNumber(Ints.tryParse(row.getColumnValue(BtVodFileColumn.EPISODE_NUMBER)));
-        episode.setTitle(Strings.emptyToNull(row.getColumnValue(BtVodFileColumn.EPISODE_TITLE)));
-        episode.setSeriesRef(
-                seriesExtractor.getSeriesRefFor(
-                                    row.getColumnValue(BtVodFileColumn.BRANDIA_ID), 
-                                    episode.getSeriesNumber())
-                         );
+        String fullTitle = Strings.emptyToNull(row.getColumnValue(BtVodFileColumn.EPISODE_TITLE));
+        episode.setTitle(extractEpisodeTitle(fullTitle));
+        episode.setSeriesRef(getSeriesRefOrNull(row));
         
         return episode;
     }
-    
+
+    private ParentRef getSeriesRefOrNull(BtVodDataRow row) {
+        return seriesExtractor.getSeriesRefFor(row.getColumnValue(BtVodFileColumn.SERIES_TITLE))
+                .orNull();
+    }
+
+    /**
+     * An episode title has usually the form of "Scrubs S4-E18 My Roommates"
+     * In this case we want to extract the real episode title "My Roommates"
+     * Otherwise we leave the title untouched
+     */
+    private String extractEpisodeTitle(String title) {
+        if (title == null) {
+            return null;
+        }
+
+        Matcher matcher = EPISODE_TITLE_PATTERN.matcher(title);
+
+        if (matcher.matches()) {
+            return matcher.group(1);
+        }
+
+        return title;
+    }
+
     private Item createItem(BtVodDataRow row) {
         Item item = new Item(uriFor(row), null, publisher);
         item.setTitle(titleForNonEpisode(row));
@@ -173,10 +198,12 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
     }
     
     private void populateItemFields(Item item, BtVodDataRow row) {
-        String brandId = row.getColumnValue(BtVodFileColumn.BRANDIA_ID);
-        if (brandId != null) {
-            item.setParentRef(brandExtractor.getBrandRefFor(brandId));
+        Optional<ParentRef> brandRefFor = brandExtractor.getBrandRefFor(row);
+
+        if (brandRefFor.isPresent()) {
+            item.setParentRef(brandRefFor.get());
         }
+
         describedFieldsExtractor.setDescribedFieldsFrom(row, item);
         item.setVersions(createVersions(row));
     }

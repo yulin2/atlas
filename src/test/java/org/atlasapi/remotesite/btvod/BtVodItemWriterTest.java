@@ -8,10 +8,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -22,15 +24,14 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.google.common.collect.ImmutableMap.Builder;
 
 
 public class BtVodItemWriterTest {
@@ -38,10 +39,13 @@ public class BtVodItemWriterTest {
     private static final String IMAGE_URI = "http://example.org/123.png";
     private static final String IMAGE_FILENAME = "image.png";
     private static final String PRODUCT_ID = "1234";
-    private static final String EPISODE_TITLE = "Title";
+    private static final String SERIES_TITLE = "Series Title";
+    private static final String REAL_EPISODE_TITLE = "Real Title";
+    private static final String FULL_EPISODE_TITLE = SERIES_TITLE + " S1-E9 " + REAL_EPISODE_TITLE;
     private static final Publisher PUBLISHER = Publisher.BT_VOD;
     private static final String URI_PREFIX = "http://example.org/";
     private static final String SYNOPSIS = "Synopsis";
+    private static final String BRAND_URI = URI_PREFIX + "brands/1234";
     
     private final ContentWriter contentWriter = mock(ContentWriter.class);
     private final ContentResolver contentResolver = mock(ContentResolver.class);
@@ -63,18 +67,26 @@ public class BtVodItemWriterTest {
     
     @Test
     public void testExtractsEpisode() {
+        BtVodDataRow btVodDataRow = episodeRow();
+        ParentRef parentRef = new ParentRef(BRAND_URI);
+        ParentRef seriesRef = new ParentRef("seriesUri");
+
         when(contentResolver.findByCanonicalUris(ImmutableSet.of(itemUri())))
                 .thenReturn(ResolvedContent.builder().build());
         when(imageUriProvider.imageUriFor(PRODUCT_ID)).thenReturn(Optional.<String>of(IMAGE_URI));
-        itemExtractor.process(itemRow());
+        when(seriesExtractor.getSeriesRefFor(SERIES_TITLE)).thenReturn(Optional.of(seriesRef));
+        when(brandExtractor.getBrandRefFor(btVodDataRow)).thenReturn(Optional.of(parentRef));
+
+        itemExtractor.process(btVodDataRow);
         
         ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
         verify(contentWriter).createOrUpdate(itemCaptor.capture());
-        
+
         Item writtenItem = itemCaptor.getValue();
         
-        assertThat(writtenItem.getTitle(), is(EPISODE_TITLE));
+        assertThat(writtenItem.getTitle(), is(REAL_EPISODE_TITLE));
         assertThat(writtenItem.getDescription(), is(SYNOPSIS));
+        assertThat(writtenItem.getContainer(), is(parentRef));
         
         Image image = Iterables.getOnlyElement(writtenItem.getImages());
         assertThat(image.getCanonicalUri(), is(IMAGE_URI));
@@ -104,12 +116,14 @@ public class BtVodItemWriterTest {
         
     }
     
-    private BtVodDataRow itemRow() {
+    private BtVodDataRow episodeRow() {
         Builder<String, String> rows = ImmutableMap.builder();
         rows.put(BtVodFileColumn.BRANDIA_ID.key(), "");
-        rows.put(BtVodFileColumn.SERIES_NUMBER.key(), "");
+        rows.put(BtVodFileColumn.SERIES_NUMBER.key(), "1");
+        rows.put(BtVodFileColumn.SERIES_TITLE.key(), SERIES_TITLE);
         rows.put(BtVodFileColumn.PRODUCT_ID.key(), PRODUCT_ID);
-        rows.put(BtVodFileColumn.EPISODE_TITLE.key(), EPISODE_TITLE);
+        rows.put(BtVodFileColumn.EPISODE_TITLE.key(), FULL_EPISODE_TITLE);
+        rows.put(BtVodFileColumn.EPISODE_NUMBER.key(), "9");
         rows.put(BtVodFileColumn.SERVICE_FORMAT.key(), "Youview");
         rows.put(BtVodFileColumn.IS_SERIES.key(), "N");
         rows.put(BtVodFileColumn.CATEGORY.key(), "");
