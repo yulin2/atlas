@@ -332,20 +332,7 @@ public class EquivModule {
         updaters.register(TALK_TALK, SourceSpecificEquivalenceUpdater.builder(TALK_TALK)
                 .withItemUpdater(vodItemUpdater(acceptablePublishers).build())
                 .withTopLevelContainerUpdater(vodContainerUpdater(acceptablePublishers))
-                .withNonTopLevelContainerUpdater(ContentEquivalenceUpdater.<Container>builder()
-                    .withGenerator(new ContainerCandidatesContainerEquivalenceGenerator(contentResolver, equivSummaryStore))
-                    .withScorer(new SequenceContainerScorer())
-                    .withCombiner(new NullScoreAwareAveragingCombiner<Container>())
-                    .withFilter(this.<Container>standardFilter(ImmutableList.<EquivalenceFilter<Container>>of(
-                        new ContainerHierarchyFilter()
-                    )))
-                    .withExtractor(PercentThresholdEquivalenceExtractor.<Container> moreThanPercent(90))
-                    .withHandler(new BroadcastingEquivalenceResultHandler<Container>(ImmutableList.of(
-                        new LookupWritingEquivalenceHandler<Container>(lookupWriter, acceptablePublishers),
-                        new ResultWritingEquivalenceHandler<Container>(equivalenceResultStore()),
-                        new EquivalenceSummaryWritingHandler<Container>(equivSummaryStore)
-                    )))
-                    .build())
+                .withNonTopLevelContainerUpdater(vodSeriesUpdater(acceptablePublishers))
                 .build());
         
         Set<Publisher> btVodPublishers = ImmutableSet.of(PA);
@@ -353,7 +340,7 @@ public class EquivModule {
                 .withItemUpdater(vodItemUpdater(btVodPublishers)
                         .withScorer(new SeriesSequenceItemScorer()).build())
                 .withTopLevelContainerUpdater(vodContainerUpdater(btVodPublishers))
-                .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
+                .withNonTopLevelContainerUpdater(vodSeriesUpdater(btVodPublishers))
                 .build());
                 
         Set<Publisher> itunesAndMusicPublishers = Sets.union(musicPublishers, ImmutableSet.of(ITUNES));
@@ -392,6 +379,24 @@ public class EquivModule {
         
         
         return updaters; 
+    }
+
+    private ContentEquivalenceUpdater<Container> vodSeriesUpdater(
+            Set<Publisher> acceptablePublishers) {
+        return ContentEquivalenceUpdater.<Container>builder()
+            .withGenerator(new ContainerCandidatesContainerEquivalenceGenerator(contentResolver, equivSummaryStore))
+            .withScorer(new SequenceContainerScorer())
+            .withCombiner(new NullScoreAwareAveragingCombiner<Container>())
+            .withFilter(this.<Container>standardFilter(ImmutableList.<EquivalenceFilter<Container>>of(
+                new ContainerHierarchyFilter()
+            )))
+            .withExtractor(PercentThresholdEquivalenceExtractor.<Container> moreThanPercent(90))
+            .withHandler(new BroadcastingEquivalenceResultHandler<Container>(ImmutableList.of(
+                new LookupWritingEquivalenceHandler<Container>(lookupWriter, acceptablePublishers),
+                new ResultWritingEquivalenceHandler<Container>(equivalenceResultStore()),
+                new EquivalenceSummaryWritingHandler<Container>(equivSummaryStore)
+            )))
+            .build();
     }
 
     private SourceSpecificEquivalenceUpdater roviUpdater(Publisher roviSource, ImmutableSet<Publisher> roviMatchPublishers) {
