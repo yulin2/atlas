@@ -76,8 +76,7 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
              * TODO: In the current data file the column BrandIA_ID is always empty
              * Should we keep checking it or just ignore it?
             */
-            String brandId = row.getColumnValue(BtVodFileColumn.BRANDIA_ID);
-            if ( ( Strings.isNullOrEmpty(brandId) && !shouldSynthesizeBrand(row))
+            if ( (!isBrand(row) && !shouldSynthesizeBrand(row))
                     || isBrandAlreadyProcessed(row)
                     || processedRows.contains(getKey(row))) {
                 thisProgress = UpdateProgress.SUCCESS;
@@ -138,14 +137,17 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
     }
 
     private boolean shouldSynthesizeBrand(BtVodDataRow row) {
-        return canParseBrandFromEpisode(row) || canParseBrandFromSeries(row);
+        return !isBrand(row) && (canParseBrandFromEpisode(row) || canParseBrandFromSeries(row));
+    }
+
+    private boolean isBrand(BtVodDataRow row) {
+        return !Strings.isNullOrEmpty(getBrandId(row));
     }
 
     private boolean canParseBrandFromEpisode(BtVodDataRow row) {
         String seriesNumber = row.getColumnValue(BtVodFileColumn.SERIES_NUMBER);
         String isSeries = row.getColumnValue(BtVodFileColumn.IS_SERIES);
-        return Strings.isNullOrEmpty(row.getColumnValue(BtVodFileColumn.BRANDIA_ID))
-                && seriesNumber != null
+        return seriesNumber != null
                 && Ints.tryParse(seriesNumber) != null
                 && !"Y".equals(isSeries)
                 && isTitleSyntesizableFromEpisode(row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE));
@@ -153,8 +155,7 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
 
     private boolean canParseBrandFromSeries(BtVodDataRow row) {
         String isSeries = row.getColumnValue(BtVodFileColumn.IS_SERIES);
-        return Strings.isNullOrEmpty(row.getColumnValue(BtVodFileColumn.BRANDIA_ID))
-                && "Y".equals(isSeries)
+        return "Y".equals(isSeries)
                 && isTitleSynthesizableFromSeries(row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE));
     }
 
@@ -186,12 +187,12 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
         Brand brand = new Brand(uriFor(row).get(), null, publisher);
         String productTitle = row.getColumnValue(BtVodFileColumn.PRODUCT_TITLE);
 
-        if (canParseBrandFromEpisode(row)) {
+        if (isBrand(row)) {
+            brand.setTitle(row.getColumnValue(BtVodFileColumn.BRAND_TITLE));
+        } else if (canParseBrandFromEpisode(row)) {
             brand.setTitle(brandTitleFromEpisodeTitle(productTitle));
         } else if (canParseBrandFromSeries(row)) {
             brand.setTitle(brandTitleFromSeriesTitle(productTitle));
-        } else {
-            brand.setTitle(row.getColumnValue(BtVodFileColumn.BRAND_TITLE));
         }
 
         describedFieldsExtractor.setDescribedFieldsFrom(row, brand);
@@ -199,17 +200,19 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
     }
     
     private Optional<String> uriFor(BtVodDataRow row) {
-        String brandId = row.getColumnValue(BtVodFileColumn.BRANDIA_ID);
-
-        if (!shouldSynthesizeBrand(row) && brandId == null) {
+        if (!shouldSynthesizeBrand(row) && !isBrand(row)) {
             return Optional.absent();
         } else if (shouldSynthesizeBrand(row)) {
             return Optional.of(uriPrefix + "synthesized/brands/" + ensureSynthesizedKey(row));
-        } else if (brandId != null) {
-            return Optional.of(uriPrefix + "brands/" + brandId);
+        } else if (isBrand(row)) {
+            return Optional.of(uriPrefix + "brands/" + getBrandId(row));
         }
 
         return Optional.absent();
+    }
+
+    private String getBrandId(BtVodDataRow row) {
+        return row.getColumnValue(BtVodFileColumn.BRANDIA_ID);
     }
 
     private String ensureSynthesizedKey(BtVodDataRow row) {
