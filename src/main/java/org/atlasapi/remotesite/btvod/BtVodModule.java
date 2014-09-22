@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
@@ -80,10 +81,17 @@ public class BtVodModule {
         return new BtVodData(Files.asCharSource(new File(filename), Charsets.UTF_8));
     }
     
+    @SuppressWarnings("unchecked")
     private Map<String, Predicate<VodDataAndContent>> contentGroupsAndCriteria() {
         return ImmutableMap.<String, Predicate<VodDataAndContent>> builder()
                 .put(MUSIC_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(MUSIC_CATEGORY))
-                .put(FILM_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(FILM_CATEGORY))
+                .put(FILM_CATEGORY.toLowerCase(), 
+                        Predicates.and(
+                                BtVodContentGroupUpdater.categoryPredicate(FILM_CATEGORY),
+                                Predicates.not(BtVodContentGroupUpdater.buyToOwnPredicate()),
+                                Predicates.not(BtVodContentGroupUpdater.boxOfficePredicate())
+                        )
+                    )
                 .put(TV_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(TV_CATEGORY))
                 .put(KIDS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(KIDS_CATEGORY))
                 .put(SPORT_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(SPORT_CATEGORY))
