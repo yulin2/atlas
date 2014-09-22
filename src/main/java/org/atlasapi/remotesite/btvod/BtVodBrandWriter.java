@@ -193,6 +193,9 @@ public class BtVodBrandWriter implements BtVodDataProcessor<UpdateProgress> {
             brand.setTitle(brandTitleFromEpisodeTitle(productTitle));
         } else if (canParseBrandFromSeries(row)) {
             brand.setTitle(brandTitleFromSeriesTitle(productTitle));
+        } else {
+            String productId = row.getColumnValue(BtVodFileColumn.PRODUCT_ID);
+            throw new RuntimeException("Unexpected state - row with product_id: " + productId + " is not a brand nor is possible to parse a brand from it");
         }
 
         describedFieldsExtractor.setDescribedFieldsFrom(row, brand);
