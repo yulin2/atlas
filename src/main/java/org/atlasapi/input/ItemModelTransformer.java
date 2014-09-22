@@ -65,7 +65,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         return setItemFields(item, inputItem, now);
     }
     
-    protected Item createBroadcast(org.atlasapi.media.entity.simple.Item inputItem) {
+    private Item createBroadcast(org.atlasapi.media.entity.simple.Item inputItem) {
         Item item = new Item();
         HashSet<Broadcast> broadcasts = Sets.newHashSet();
         for(org.atlasapi.media.entity.simple.Broadcast broadcast : inputItem.getBroadcasts()) {
@@ -76,7 +76,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         return item;
     }
 
-    protected Item createSong(org.atlasapi.media.entity.simple.Item inputItem) {
+    private Item createSong(org.atlasapi.media.entity.simple.Item inputItem) {
         Song song = new Song();
         song.setIsrc(inputItem.getIsrc());
         if (inputItem.getDuration() != null) {
