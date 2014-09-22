@@ -44,6 +44,7 @@ import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
 import java.io.File;
 import java.util.Set;
 
+import org.apache.cassandra.utils.AlwaysPresentFilter;
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContainerCandidatesContainerEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContainerCandidatesItemEquivalenceGenerator;
@@ -297,7 +298,7 @@ public class EquivModule {
                 .build());
         
         updaters.register(BETTY, SourceSpecificEquivalenceUpdater.builder(BETTY)
-                .withItemUpdater(broadcastItemEquivalenceUpdater(youViewPublishers, Score.nullScore(),youviewBroadcastFilter))
+                .withItemUpdater(broadcastItemEquivalenceUpdater(ImmutableSet.of(BETTY, YOUVIEW, YOUVIEW_BT), Score.nullScore(), Predicates.alwaysTrue()))
                 .withTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
