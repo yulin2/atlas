@@ -61,7 +61,7 @@ public class BtVodBrandWriterTest {
     }
     
     @Test
-         public void testCreatesSyntheticBrandFromEpisodeData() {
+    public void testCreatesSyntheticBrandFromEpisodeData() {
         when(imageUriProvider.imageUriFor(Matchers.anyString())).thenReturn(Optional.<String>absent());
         when(contentResolver.findByCanonicalUris(ImmutableSet.of(URI_PREFIX + "synthesized/brands/perception")))
                 .thenReturn(ResolvedContent.builder().build());
