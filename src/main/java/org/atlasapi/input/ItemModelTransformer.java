@@ -2,10 +2,12 @@ package org.atlasapi.input;
 
 import java.util.Currency;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -36,10 +38,11 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
 
     private final BroadcastModelTransformer broadcastTransformer;
     
-    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, NumberToShortStringCodec idCodec, 
+    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, 
+            ChannelResolver channelResolver, NumberToShortStringCodec idCodec, 
             ClipModelTransformer clipsModelTransformer, Clock clock) {
         super(lookupStore, topicStore, idCodec, clipsModelTransformer, clock);
-        this.broadcastTransformer = new BroadcastModelTransformer();
+        this.broadcastTransformer = new BroadcastModelTransformer(channelResolver);
     }
 
     @Override
@@ -53,14 +56,27 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
             item = film;
         } else if ("song".equals(type)) {
             item = createSong(inputItem);
+        } else if ("broadcast".equals(type)) {
+            item = createBroadcast(inputItem);
         } else {
             item = new Item();
         }
         item.setLastUpdated(now);
         return setItemFields(item, inputItem, now);
     }
+    
+    private Item createBroadcast(org.atlasapi.media.entity.simple.Item inputItem) {
+        Item item = new Item();
+        HashSet<Broadcast> broadcasts = Sets.newHashSet();
+        for(org.atlasapi.media.entity.simple.Broadcast broadcast : inputItem.getBroadcasts()) {
+            broadcasts.add(broadcastTransformer.transform(broadcast));
+        }
+        Version version = new Version().copyWithBroadcasts(broadcasts);
+        item.setVersions(ImmutableSet.of(version));
+        return item;
+    }
 
-    protected Item createSong(org.atlasapi.media.entity.simple.Item inputItem) {
+    private Item createSong(org.atlasapi.media.entity.simple.Item inputItem) {
         Song song = new Song();
         song.setIsrc(inputItem.getIsrc());
         if (inputItem.getDuration() != null) {
