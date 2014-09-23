@@ -15,6 +15,8 @@ import com.google.common.collect.Iterables;
 
 public class BtVodDescribedFieldsExtractor {
 
+    private static final String MUSIC_CATEGORY = "Music";
+    
     private final ImageUriProvider imageUriProvider;
     
     public BtVodDescribedFieldsExtractor(ImageUriProvider imageUriProvider) {
@@ -30,7 +32,12 @@ public class BtVodDescribedFieldsExtractor {
         }
     }
     
-    private Iterable<Image> createImages(BtVodDataRow row) {    
+    private Iterable<Image> createImages(BtVodDataRow row) { 
+        
+        if (!MUSIC_CATEGORY.equals(row.getColumnValue(BtVodFileColumn.CATEGORY))) {
+            return ImmutableSet.of();
+        }
+        
         Optional<String> imageUri = imageUriProvider.imageUriFor(row.getColumnValue(BtVodFileColumn.PRODUCT_ID));
         
         if (!imageUri.isPresent() || Strings.isNullOrEmpty(imageUri.get())) {
