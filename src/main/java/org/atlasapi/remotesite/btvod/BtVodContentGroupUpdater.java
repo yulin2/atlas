@@ -32,6 +32,7 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
     private static final String FOX_PROVIDER_ID = "XXA";
     private static final String SONY_PROVIDER_ID = "XXB";
     private static final String EONE_PROVIDER_ID = "XXC";
+    private static final String CZN_CONTENT_PROVIDER_ID = "CHC";
     
     private final ContentGroupResolver contentGroupResolver;
     private final ContentGroupWriter contentGroupWriter;
@@ -125,6 +126,10 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
         
     };
     
+    public static Predicate<VodDataAndContent> cznPredicate() {
+        return BtVodContentGroupUpdater.contentProviderPredicate(CZN_CONTENT_PROVIDER_ID);
+    }
+    
     public static Predicate<VodDataAndContent> tvBoxSetsPredicate() {
         
         return new Predicate<VodDataAndContent>() {
@@ -137,9 +142,12 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
         };
     }
     
+    @SuppressWarnings("unchecked")
     public static Predicate<VodDataAndContent> boxOfficePredicate() {
         
-        return Predicates.and(Predicates.not(buyToOwnPredicate()),
+        return Predicates.and(
+                Predicates.not(buyToOwnPredicate()),
+                Predicates.not(cznPredicate()), 
                 new Predicate<VodDataAndContent>() {
 
                     @Override
