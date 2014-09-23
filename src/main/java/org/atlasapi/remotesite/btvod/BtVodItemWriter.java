@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,6 +75,8 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
         this.uriPrefix = checkNotNull(uriPrefix);
         this.contentMerger = new ContentMerger(MergeStrategy.REPLACE);
         this.processedRows = checkNotNull(processedRows);
+        
+        FORMATTER.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
     
     @Override
