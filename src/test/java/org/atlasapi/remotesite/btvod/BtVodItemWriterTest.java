@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.btvod;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -8,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.Item;
@@ -114,6 +114,31 @@ public class BtVodItemWriterTest {
     @Test
     public void testExtractsItem() {
         
+    }
+
+    @Test
+    public void testFilmTitleParsing() {
+        assertThat(BtVodItemWriter.extractFilmTitle("The English Patient (Miramax)"),
+                is(equalTo("The English Patient")));
+
+        assertThat(BtVodItemWriter.extractFilmTitle("Star Trek Into Darkness - HD"),
+                is(equalTo("Star Trek Into Darkness")));
+
+        assertThat(BtVodItemWriter.extractFilmTitle("Race To Witch Mountain (Disney) - HD"),
+                is(equalTo("Race To Witch Mountain")));
+
+        assertThat(BtVodItemWriter.extractFilmTitle("The Great Beauty - HD - Oscar Winner! (Curzon)"),
+                is(equalTo("The Great Beauty - HD - Oscar Winner!")));
+
+        assertThat(BtVodItemWriter.extractFilmTitle(
+                "Classic 70's and 80's - HD - Best Little Whorehouse In Texas (PictureBox) - HD"),
+                is(equalTo("Classic 70's and 80's - HD - Best Little Whorehouse In Texas")));
+
+        assertThat(BtVodItemWriter.extractFilmTitle("Classic 70's and 80's - Picturebox - The Day Of The Jackal (PictureBox)"),
+                is(equalTo("Classic 70's and 80's - Picturebox - The Day Of The Jackal")));
+
+        assertThat(BtVodItemWriter.extractFilmTitle("Mr. Peabody & Sherman (Before DVD) - HD"),
+                is(equalTo("Mr. Peabody & Sherman")));
     }
     
     private BtVodDataRow episodeRow() {

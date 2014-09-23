@@ -46,6 +46,8 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
     private static final String MUSIC_CATEGORY = "Music";
     private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("MMM dd yyyy hh:mmaa");
     private static final Pattern EPISODE_TITLE_PATTERN = Pattern.compile("^.* S[0-9]+\\-E[0-9]+ (.*)");
+    private static final Pattern FILM_TITLE_PATTERN_PARENTHESIS = Pattern.compile("^(.+) (\\(.+)");
+    private static final Pattern FILM_TITLE_PATTERN_HD = Pattern.compile("^(.+) (- HD)");
     private static final Logger log = LoggerFactory.getLogger(BtVodItemWriter.class);
     
     private final ContentWriter writer;
@@ -196,7 +198,7 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
     private Film createFilm(BtVodDataRow row) {
         Film film = new Film(uriFor(row), null, publisher);
         film.setYear(Ints.tryParse(row.getColumnValue(BtVodFileColumn.RELEASE_YEAR)));
-        film.setTitle(titleForNonEpisode(row));
+        film.setTitle(extractFilmTitle(titleForNonEpisode(row)));
         return film;
     }
     
@@ -263,5 +265,22 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
             Throwables.propagate(e);
         }
         return null;
+    }
+
+    protected static String extractFilmTitle(String originalTitle) {
+        if (Strings.isNullOrEmpty(originalTitle)) {
+            return originalTitle;
+        }
+
+        Matcher parenthesisMatcher = FILM_TITLE_PATTERN_PARENTHESIS.matcher(originalTitle);
+        Matcher hdMatcher = FILM_TITLE_PATTERN_HD.matcher(originalTitle);
+
+        if (parenthesisMatcher.matches()) {
+            return parenthesisMatcher.group(1);
+        } else if (hdMatcher.matches()) {
+            return hdMatcher.group(1);
+        }
+
+        return originalTitle;
     }
 }
