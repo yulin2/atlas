@@ -308,8 +308,14 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private org.atlasapi.media.entity.simple.Broadcast simplify(Broadcast broadcast, Set<Annotation> annotations) {
         org.atlasapi.media.entity.simple.Broadcast simpleModel = new org.atlasapi.media.entity.simple.Broadcast(broadcast.getBroadcastOn(), broadcast.getTransmissionTime(),
                 broadcast.getTransmissionEndTime(), broadcast.getSourceId());
-        simpleModel.setActualTransmissionTime(broadcast.getActualTransmissionTime().toDate());
-        simpleModel.setActualTransmissionEndTime(broadcast.getActualTransmissionEndTime().toDate());
+        if (broadcast.getActualTransmissionTime() != null) {
+            simpleModel.setActualTransmissionTime(broadcast.getActualTransmissionTime().toDate());
+        }
+        
+        if (broadcast.getActualTransmissionEndTime() != null) {
+            simpleModel.setActualTransmissionEndTime(broadcast.getActualTransmissionEndTime().toDate());
+        }
+        
         simpleModel.setRepeat(broadcast.getRepeat());
         simpleModel.setSubtitled(broadcast.getSubtitled());
         simpleModel.setSigned(broadcast.getSigned());
