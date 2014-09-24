@@ -303,7 +303,7 @@ public class EquivModule {
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
 
-        Set<Publisher> bettyPublishers = ImmutableSet.of(BETTY, YOUVIEW, YOUVIEW_STAGE, PA);
+        Set<Publisher> bettyPublishers = ImmutableSet.of(BETTY, YOUVIEW);
         updaters.register(BETTY, SourceSpecificEquivalenceUpdater.builder(BETTY)
                 .withItemUpdater(aliasIdentifiedBroadcastItemEquivalenceUpdater(bettyPublishers))
             .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
@@ -548,16 +548,13 @@ public class EquivModule {
                 .withGenerator(new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver,
                         channelResolver,
                         sources,
-                        Duration.standardMinutes(10),
+                        Duration.standardMinutes(5),
                         Predicates.alwaysTrue()))
-                .withScorer(new BroadcastAliasScorer(Score.nullScore()))
+                .withScorer(new BroadcastAliasScorer(Score.negativeOne()))
                 .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
                 .withFilter(AlwaysTrueFilter.<Item>get())
-                .withExtractor(TopEquivalenceExtractor.<Item>create())
-                .withHandler(new BroadcastingEquivalenceResultHandler<>(ImmutableList.of(
-                        new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
-                        new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore)
-                )))
+                .withExtractor(new PercentThresholdEquivalenceExtractor<Item>(0.95))
+                .withHandler(itemResultHandlers(ImmutableSet.of(BETTY, YOUVIEW)))
                 .build();
     }
 
