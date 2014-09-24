@@ -2,12 +2,9 @@ package org.atlasapi.remotesite.knowledgemotion;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.HashMap;
-
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
@@ -31,27 +28,7 @@ public class DefaultKnowledgeMotionDataRowHandler implements KnowledgeMotionData
         this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(writer);
         this.extractor = checkNotNull(extractor);
-        this.contentMerger = new ContentMerger(MergeStrategy.MERGE){
-            @Override
-            public Item merge(Item current, Item extracted) {
-                Item merged = super.merge(current, extracted);
-
-                HashMap<Long, TopicRef> mergedRefs = new HashMap<Long, TopicRef>();
-                for (TopicRef topicRef : merged.getTopicRefs()) {
-                    if (topicStore.topicForId(topicRef.getTopic()).hasValue()){
-                        // this check is only needed because at one point i accidentally created refs to topics that weren't written properly
-                        mergedRefs.put(topicRef.getTopic(), topicRef);
-                    }
-                }
-                for (TopicRef topicRef : extracted.getTopicRefs()) {
-                    mergedRefs.put(topicRef.getTopic(), topicRef);
-                }
-
-                merged.setTopicRefs(mergedRefs.values());
-                return merged;
-            }
-            // TODO support merging TopicRefs in ContentMerger -- but remember to handle offsets!
-        };
+        this.contentMerger = new ContentMerger(MergeStrategy.MERGE, MergeStrategy.REPLACE);
     }
 
     @Override
