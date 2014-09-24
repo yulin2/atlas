@@ -88,10 +88,6 @@ public class BtVodItemWriterTest {
         assertThat(writtenItem.getDescription(), is(SYNOPSIS));
         assertThat(writtenItem.getContainer(), is(parentRef));
         
-        Image image = Iterables.getOnlyElement(writtenItem.getImages());
-        assertThat(image.getCanonicalUri(), is(IMAGE_URI));
-        assertThat(image.getType(), is(ImageType.PRIMARY));
-        
         Location location = Iterables.getOnlyElement(
                                 Iterables.getOnlyElement(
                                         Iterables.getOnlyElement(writtenItem.getVersions())
