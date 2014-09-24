@@ -47,12 +47,13 @@ public final class OptaSoccerDataHandler extends OptaDataHandler<SoccerTeam, Soc
     }
     
     @Override
-    public Optional<Organisation> parseOrganisation(SoccerTeam team) {
+    public Optional<Organisation> parseOrganisation(SoccerTeam team, OptaSportType sport) {
         Organisation organisation = new Organisation();
 
         organisation.setCanonicalUri(utility.createTeamUri(team.attributes().uId()));
         organisation.setPublisher(Publisher.OPTA);
         organisation.setTitle(team.name());
+        organisation.setEventGroups(parseEventGroups(sport));
 
         return Optional.of(organisation);
     }

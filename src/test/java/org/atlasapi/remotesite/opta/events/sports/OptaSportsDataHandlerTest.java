@@ -74,7 +74,7 @@ public class OptaSportsDataHandlerTest {
     @Test
     public void testTeamParsing() {
         OptaSportsTeam team = Iterables.getFirst(feedData.teams(), null);
-        Optional<Organisation> parsed = handler.parseOrganisation(team);
+        Optional<Organisation> parsed = handler.parseOrganisation(team, SPORT);
         
         Organisation parsedTeam = parsed.get();
         
@@ -110,7 +110,7 @@ public class OptaSportsDataHandlerTest {
 
     private void parseTeams() {
         for (OptaSportsTeam team : feedData.teams()) {
-            handler.handle(team);
+            handler.handleTeam(team, SPORT);
         }
     }
 

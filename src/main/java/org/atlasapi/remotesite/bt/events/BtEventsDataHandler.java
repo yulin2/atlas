@@ -62,7 +62,7 @@ public final class BtEventsDataHandler extends EventParsingDataHandler<BtSportTy
     }
 
     @Override
-    public Optional<Organisation> parseOrganisation(BtTeam team) {
+    public Optional<Organisation> parseOrganisation(BtTeam team, BtSportType sport) {
         // no-op: BT has no event modelling currently
         return Optional.absent();
     }
