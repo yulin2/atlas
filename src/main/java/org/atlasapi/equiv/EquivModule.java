@@ -461,16 +461,14 @@ public class EquivModule {
     private EquivalenceUpdater<Container> facebookContainerEquivalenceUpdater(Set<Publisher> facebookAcceptablePublishers) {
         return ContentEquivalenceUpdater.<Container> builder()
             .withGenerators(ImmutableSet.of(
-                    TitleSearchGenerator.create(searchResolver,
-                            Container.class,
-                            facebookAcceptablePublishers),
+                    TitleSearchGenerator.create(searchResolver, Container.class, facebookAcceptablePublishers),
                     aliasResolvingGenerator(contentResolver, Container.class)
             ))
             .withScorers(ImmutableSet.<EquivalenceScorer<Container>> of())
             .withCombiner(NullScoreAwareAveragingCombiner.<Container> get())
             .withFilter(ConjunctiveFilter.valueOf(ImmutableList.of(
-                    new MinimumScoreFilter<Container>(0.2),
-                    new SpecializationFilter<Container>()
+                new MinimumScoreFilter<Container>(0.2),
+                new SpecializationFilter<Container>()
             )))
             .withExtractor(PercentThresholdEquivalenceExtractor.<Container> moreThanPercent(90))
             .withHandler(containerResultHandlers(facebookAcceptablePublishers))
@@ -479,21 +477,18 @@ public class EquivModule {
 
     private EquivalenceUpdater<Container> vodContainerUpdater(Set<Publisher> acceptablePublishers) {
         return ContentEquivalenceUpdater.<Container> builder()
-            .withGenerator(
-                    TitleSearchGenerator.create(searchResolver,
-                            Container.class,
-                            acceptablePublishers)
+            .withGenerator(TitleSearchGenerator.create(searchResolver, Container.class, acceptablePublishers)
             )
             .withScorers(ImmutableSet.of(
-                    new TitleMatchingContainerScorer(),
-                    new ContainerHierarchyMatchingScorer(contentResolver)
+                new TitleMatchingContainerScorer(),
+                new ContainerHierarchyMatchingScorer(contentResolver)
             ))
             .withCombiner(new RequiredScoreFilteringCombiner<Container>(
-                            new NullScoreAwareAveragingCombiner<Container>(),
-                            TitleMatchingContainerScorer.NAME)
+                new NullScoreAwareAveragingCombiner<Container>(),
+                TitleMatchingContainerScorer.NAME)
             )
             .withFilter(this.<Container>standardFilter())
-            .withExtractor(PercentThresholdEquivalenceExtractor.<Container>moreThanPercent(90))
+            .withExtractor(PercentThresholdEquivalenceExtractor.<Container> moreThanPercent(90))
             .withHandler(containerResultHandlers(acceptablePublishers))
             .build();
     }
@@ -501,28 +496,26 @@ public class EquivModule {
     private ContentEquivalenceUpdater.Builder<Item> vodItemUpdater(Set<Publisher> acceptablePublishers) {
         return ContentEquivalenceUpdater.<Item> builder()
             .withGenerators(ImmutableSet.of(
-                    new ContainerCandidatesItemEquivalenceGenerator(contentResolver,
-                            equivSummaryStore),
-                    new FilmEquivalenceGenerator(searchResolver, acceptablePublishers, true)
+                new ContainerCandidatesItemEquivalenceGenerator(contentResolver, equivSummaryStore),
+                new FilmEquivalenceGenerator(searchResolver, acceptablePublishers, true)
             ))
             .withScorers(ImmutableSet.of(
-                    new TitleMatchingItemScorer(),
-                    new SequenceItemScorer()
+                new TitleMatchingItemScorer(),
+                new SequenceItemScorer()
             ))
             .withCombiner(new RequiredScoreFilteringCombiner<Item>(
-                    new NullScoreAwareAveragingCombiner<Item>(),
-                    TitleMatchingItemScorer.NAME
+                new NullScoreAwareAveragingCombiner<Item>(),
+                TitleMatchingItemScorer.NAME
             ))
             .withFilter(this.<Item>standardFilter())
-            .withExtractor(PercentThresholdEquivalenceExtractor.<Item>moreThanPercent(90))
+            .withExtractor(PercentThresholdEquivalenceExtractor.<Item> moreThanPercent(90))
             .withHandler(new BroadcastingEquivalenceResultHandler<Item>(ImmutableList.of(
-                    EpisodeFilteringEquivalenceResultHandler.strict(
-                            new LookupWritingEquivalenceHandler<Item>(lookupWriter,
-                                    acceptablePublishers),
-                            equivSummaryStore
-                    ),
-                    new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
-                    new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore)
+                EpisodeFilteringEquivalenceResultHandler.strict(
+                    new LookupWritingEquivalenceHandler<Item>(lookupWriter, acceptablePublishers),
+                    equivSummaryStore
+                ),
+                new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
+                new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore)
             )));
     }
 
