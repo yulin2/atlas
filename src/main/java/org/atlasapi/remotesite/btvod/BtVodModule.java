@@ -10,6 +10,9 @@ import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.btvod.portal.PortalClient;
+import org.atlasapi.remotesite.btvod.portal.XmlPortalClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -53,6 +56,8 @@ public class BtVodModule {
     private String filename;
     @Value("${bt.portal.baseUri}")
     private String btPortalBaseUri;
+    @Value("${bt.portal.contentGroups.baseUri}")
+    private String btPortalContentGroupsBaseUri;
     
     @Bean
     public BtVodUpdater btVodUpdater() {
@@ -82,24 +87,27 @@ public class BtVodModule {
     }
     
     @SuppressWarnings("unchecked")
-    private Map<String, Predicate<VodDataAndContent>> contentGroupsAndCriteria() {
-        return ImmutableMap.<String, Predicate<VodDataAndContent>> builder()
+    private Map<String, BtVodContentGroupPredicate> contentGroupsAndCriteria() {
+        return ImmutableMap.<String, BtVodContentGroupPredicate> builder()
                 .put(MUSIC_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(MUSIC_CATEGORY))
-                .put(FILM_CATEGORY.toLowerCase(), 
-                        Predicates.and(
-                                BtVodContentGroupUpdater.categoryPredicate(FILM_CATEGORY),
-                                Predicates.not(BtVodContentGroupUpdater.buyToOwnPredicate()),
-                                Predicates.not(BtVodContentGroupUpdater.cznPredicate())
-                        )
-                    )
+                .put(FILM_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.filmPredicate())
                 .put(TV_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(TV_CATEGORY))
                 .put(KIDS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(KIDS_CATEGORY))
                 .put(SPORT_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(SPORT_CATEGORY))
                 .put(CZN_CONTENT_PROVIDER_ID.toLowerCase(), BtVodContentGroupUpdater.cznPredicate())
-                .put(BUY_TO_OWN_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.buyToOwnPredicate())
-                .put(BOX_OFFICE_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.boxOfficePredicate())
-                .put(TV_BOX_SETS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.tvBoxSetsPredicate())
+                .put(BUY_TO_OWN_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), "01_boxoffice/07_new_must_own_movies"))
+                .put(BOX_OFFICE_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), "01_boxoffice/35_searcha-z"))
+                .put(TV_BOX_SETS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), "03_tv/40_searcha-z"))
                 .build();
+    }
+    
+    @Bean
+    public PortalClient portalClient() {
+        return new XmlPortalClient(btPortalContentGroupsBaseUri, 
+                new SimpleHttpClientBuilder()
+                        .withUserAgent(HttpClients.ATLAS_USER_AGENT)
+                        .withRetries(3)
+                        .build());
     }
     
     @PostConstruct
