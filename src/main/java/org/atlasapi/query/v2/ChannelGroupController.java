@@ -165,9 +165,10 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
                 return hasMatchingGenre(channel, genres);
             }
 
-            });
-        channelGroup.setChannelNumberings(filtered);
-        return channelGroup;
+        });
+        ChannelGroup filteredGroup = channelGroup.copy();
+        filteredGroup.setChannelNumberings(filtered);
+        return filteredGroup;
     }
     
     private boolean hasMatchingGenre(Channel channel, Set<String> genres) {
