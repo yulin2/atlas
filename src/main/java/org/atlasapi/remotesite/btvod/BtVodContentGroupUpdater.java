@@ -7,9 +7,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.Described;
+import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -18,6 +22,7 @@ import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.remotesite.btvod.BtVodData.BtVodDataRow;
 import org.atlasapi.remotesite.btvod.portal.PortalClient;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.HashMultimap;
@@ -181,7 +186,8 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
         return BtVodContentGroupUpdater.contentProviderPredicate(CZN_CONTENT_PROVIDER_ID);
     }
     
-    public static BtVodContentGroupPredicate portalContentGroupPredicate(final PortalClient portalClient, final String groupId) {
+    public static BtVodContentGroupPredicate portalContentGroupPredicate(final PortalClient portalClient, final String groupId,
+            @Nullable final Class<? extends Described> typeFilter) {
         
         return new BtVodContentGroupPredicate() {
             
@@ -193,7 +199,9 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
                     throw new IllegalStateException("Must call init() first");
                 }
                 return ids.contains(input.getBtVodDataRow()
-                                .getColumnValue(BtVodFileColumn.PRODUCT_ID));
+                                .getColumnValue(BtVodFileColumn.PRODUCT_ID))
+                       && (typeFilter == null
+                               || typeFilter.isAssignableFrom(input.getContent().getClass()));
             }
             
             @Override

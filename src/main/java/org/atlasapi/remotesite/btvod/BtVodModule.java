@@ -5,7 +5,9 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -19,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
@@ -30,6 +33,9 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class BtVodModule {
 
+    private static final String PORTAL_BOXSET_GROUP = "03_tv/40_searcha-z";
+    private static final String PORTAL_BOXOFFICE_GROUP = "01_boxoffice/35_searcha-z";
+    private static final String PORTAL_BUY_TO_OWN_GROUP = "01_boxoffice/07_new_must_own_movies";
     private static final String MUSIC_CATEGORY = "Music";
     private static final String FILM_CATEGORY = "Film";
     private static final String TV_CATEGORY = "TV";
@@ -86,7 +92,6 @@ public class BtVodModule {
         return new BtVodData(Files.asCharSource(new File(filename), Charsets.UTF_8));
     }
     
-    @SuppressWarnings("unchecked")
     private Map<String, BtVodContentGroupPredicate> contentGroupsAndCriteria() {
         return ImmutableMap.<String, BtVodContentGroupPredicate> builder()
                 .put(MUSIC_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(MUSIC_CATEGORY))
@@ -95,9 +100,9 @@ public class BtVodModule {
                 .put(KIDS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(KIDS_CATEGORY))
                 .put(SPORT_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.categoryPredicate(SPORT_CATEGORY))
                 .put(CZN_CONTENT_PROVIDER_ID.toLowerCase(), BtVodContentGroupUpdater.cznPredicate())
-                .put(BUY_TO_OWN_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), "01_boxoffice/07_new_must_own_movies"))
-                .put(BOX_OFFICE_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), "01_boxoffice/35_searcha-z"))
-                .put(TV_BOX_SETS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), "03_tv/40_searcha-z"))
+                .put(BUY_TO_OWN_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), PORTAL_BUY_TO_OWN_GROUP, null))
+                .put(BOX_OFFICE_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), PORTAL_BOXOFFICE_GROUP, null))
+                .put(TV_BOX_SETS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), PORTAL_BOXSET_GROUP, Series.class))
                 .build();
     }
     
