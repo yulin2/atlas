@@ -1,13 +1,11 @@
 package org.atlasapi.remotesite.btvod;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Item;
@@ -22,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -41,7 +38,7 @@ public class BtVodContentGroupUpdaterTest {
     private final ContentGroupResolver contentGroupResolver = mock(ContentGroupResolver.class);
     private final ContentGroupWriter contentGroupWriter = mock(ContentGroupWriter.class);
     
-    private Map<String, Predicate<VodDataAndContent>> contentGroupsAndCriteria = 
+    private Map<String, BtVodContentGroupPredicate> contentGroupsAndCriteria = 
             ImmutableMap.of();
     
     private BtVodContentGroupUpdater updater;
@@ -72,12 +69,17 @@ public class BtVodContentGroupUpdaterTest {
         
     }
     
-    private final Predicate<VodDataAndContent> item1Predicate = 
-            new Predicate<VodDataAndContent>() {
+    private final BtVodContentGroupPredicate item1Predicate = 
+            new BtVodContentGroupPredicate() {
 
-        @Override
-        public boolean apply(VodDataAndContent input) {
-            return item1.getCanonicalUri().equals(input.getContent().getCanonicalUri());
-        }
+                @Override
+                public boolean apply(VodDataAndContent input) {
+                    return item1.getCanonicalUri().equals(input.getContent().getCanonicalUri());
+                }
+        
+                @Override
+                public void init() {
+                    
+                }
     };
 }

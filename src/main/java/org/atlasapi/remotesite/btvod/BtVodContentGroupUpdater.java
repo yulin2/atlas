@@ -5,21 +5,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.Described;
+import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.remotesite.btvod.BtVodData.BtVodDataRow;
+import org.atlasapi.remotesite.btvod.portal.PortalClient;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -33,17 +38,18 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
     private static final String SONY_PROVIDER_ID = "XXB";
     private static final String EONE_PROVIDER_ID = "XXC";
     private static final String CZN_CONTENT_PROVIDER_ID = "CHC";
+    private static final String FILM_CATEGORY = "Film";
     
     private final ContentGroupResolver contentGroupResolver;
     private final ContentGroupWriter contentGroupWriter;
-    private final ImmutableMap<String, Predicate<VodDataAndContent>> contentGroupsAndCriteria;
+    private final ImmutableMap<String, BtVodContentGroupPredicate> contentGroupsAndCriteria;
     private final String uriPrefix;
     private final Publisher publisher;
     private Multimap<String, ChildRef> contents;
 
     public BtVodContentGroupUpdater(ContentGroupResolver contentGroupResolver, 
             ContentGroupWriter contentGroupWriter,
-            Map<String, Predicate<VodDataAndContent>> contentGroupsAndCriteria,
+            Map<String, BtVodContentGroupPredicate> contentGroupsAndCriteria,
             String uriPrefix, Publisher publisher) {
         this.contentGroupResolver = checkNotNull(contentGroupResolver);
         this.contentGroupWriter = checkNotNull(contentGroupWriter);
@@ -55,7 +61,7 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
     @Override
     public void onContent(Content content, BtVodDataRow vodData) {
         VodDataAndContent vodDataAndContent = new VodDataAndContent(vodData, content);
-        for (Entry<String, Predicate<VodDataAndContent>> entry : 
+        for (Entry<String, BtVodContentGroupPredicate> entry : 
                 contentGroupsAndCriteria.entrySet()) {
             if (entry.getValue().apply(vodDataAndContent)) {
                 contents.put(entry.getKey(), content.childRef());
@@ -65,6 +71,10 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
 
     public void start() {
         contents = HashMultimap.create();
+        
+        for (BtVodContentGroupPredicate predicate : contentGroupsAndCriteria.values()) {
+            predicate.init();
+        }
     }
     
     public void finish() {
@@ -89,23 +99,27 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
         return new ContentGroup(canonicalUri, publisher);
     }
     
-    public static Predicate<VodDataAndContent> categoryPredicate(final String category) {
+    public static BtVodContentGroupPredicate categoryPredicate(final String category) {
         
-        return new Predicate<VodDataAndContent>() {
-
+        return new BtVodContentGroupPredicate() {
+            
             @Override
             public boolean apply(VodDataAndContent input) {
                 return category.equals(
-                                    input.getBtVodDataRow()
-                                         .getColumnValue(BtVodFileColumn.CATEGORY));
+                        input.getBtVodDataRow()
+                             .getColumnValue(BtVodFileColumn.CATEGORY));
             }
             
-        };
+            @Override
+            public void init() {
+                
+            }
+        }; 
     }
     
-    public static Predicate<VodDataAndContent> contentProviderPredicate(final String providerId) {
+    public static BtVodContentGroupPredicate contentProviderPredicate(final String providerId) {
         
-        return new Predicate<VodDataAndContent>() {
+        return new BtVodContentGroupPredicate() {
 
             @Override
             public boolean apply(VodDataAndContent input) {
@@ -114,30 +128,85 @@ public class BtVodContentGroupUpdater implements BtVodContentListener {
                                          .getColumnValue(BtVodFileColumn.CONTENT_PROVIDER_ID));
             }
             
+            @Override
+            public void init() {
+                
+            }
         };
     }
     
     @SuppressWarnings("unchecked")
-    public static Predicate<VodDataAndContent> buyToOwnPredicate() {
+    public static BtVodContentGroupPredicate buyToOwnPredicate() {
         
-        return Predicates.<VodDataAndContent>or(contentProviderPredicate(FOX_PROVIDER_ID), 
-                             contentProviderPredicate(SONY_PROVIDER_ID), 
-                             contentProviderPredicate(EONE_PROVIDER_ID));
-        
+        return new BtVodContentGroupPredicate() {
+            
+            private final Predicate<VodDataAndContent> delegate = 
+                    Predicates.<VodDataAndContent>or(
+                            contentProviderPredicate(FOX_PROVIDER_ID), 
+                            contentProviderPredicate(SONY_PROVIDER_ID), 
+                            contentProviderPredicate(EONE_PROVIDER_ID));
+            
+            @Override
+            public boolean apply(VodDataAndContent input) {
+                return delegate.apply(input);
+            }
+            
+            @Override
+            public void init() {
+                
+            }
+        };
     };
     
-    public static Predicate<VodDataAndContent> cznPredicate() {
+    public static BtVodContentGroupPredicate filmPredicate() {
+        
+        return new BtVodContentGroupPredicate() {
+            
+            @SuppressWarnings("unchecked")
+            private final Predicate<VodDataAndContent> delegate = 
+                    Predicates.and(
+                            BtVodContentGroupUpdater.categoryPredicate(FILM_CATEGORY),
+                            Predicates.not(BtVodContentGroupUpdater.buyToOwnPredicate()),
+                            Predicates.not(BtVodContentGroupUpdater.cznPredicate())
+                    );
+            
+            @Override
+            public boolean apply(VodDataAndContent input) {
+                return delegate.apply(input);
+            }
+            
+            @Override
+            public void init() {
+                
+            }
+        };
+    }
+    
+    public static BtVodContentGroupPredicate cznPredicate() {
         return BtVodContentGroupUpdater.contentProviderPredicate(CZN_CONTENT_PROVIDER_ID);
     }
     
-    public static Predicate<VodDataAndContent> tvBoxSetsPredicate() {
+    public static BtVodContentGroupPredicate portalContentGroupPredicate(final PortalClient portalClient, final String groupId,
+            @Nullable final Class<? extends Described> typeFilter) {
         
-        return new Predicate<VodDataAndContent>() {
-
+        return new BtVodContentGroupPredicate() {
+            
+            private Set<String> ids = null;
+            
             @Override
             public boolean apply(VodDataAndContent input) {
-                return Strings.isNullOrEmpty(input.getBtVodDataRow().getColumnValue(BtVodFileColumn.CATEGORY))
-                        && input.getContent() instanceof Series;
+                if (ids == null) {
+                    throw new IllegalStateException("Must call init() first");
+                }
+                return ids.contains(input.getBtVodDataRow()
+                                .getColumnValue(BtVodFileColumn.PRODUCT_ID))
+                       && (typeFilter == null
+                               || typeFilter.isAssignableFrom(input.getContent().getClass()));
+            }
+            
+            @Override
+            public void init() {
+                ids = portalClient.getProductIdsForGroup(groupId);
             }
         };
     }
