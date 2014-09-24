@@ -39,6 +39,7 @@ public class BtVodBrandWriterTest {
     private final ContentResolver contentResolver = mock(ContentResolver.class);
     private final BtVodContentListener contentListener = mock(BtVodContentListener.class);
     private final ImageUriProvider imageUriProvider = mock(ImageUriProvider.class);
+    private final BtVodDescribedFieldsExtractor extractor = mock(BtVodDescribedFieldsExtractor.class);
     
     private final BtVodBrandWriter brandExtractor 
                     = new BtVodBrandWriter(
@@ -46,7 +47,7 @@ public class BtVodBrandWriterTest {
                                 contentResolver, 
                                 PUBLISHER, URI_PREFIX,
                                 contentListener,
-                                new BtVodDescribedFieldsExtractor(imageUriProvider),
+                                extractor,
                                 Sets.<String>newHashSet());
     
     @Test
@@ -100,6 +101,7 @@ public class BtVodBrandWriterTest {
         rows.put(BtVodFileColumn.SERIES_NUMBER.key(), "1");
         rows.put(BtVodFileColumn.SYNOPSIS.key(), "");
         rows.put(BtVodFileColumn.IS_SERIES.key(), "Y");
+        rows.put(BtVodFileColumn.CATEGORY.key(), "");
 
         Map<String, String> map = rows.build();
         return new BtVodDataRow(ImmutableList.copyOf(map.values()),
@@ -114,6 +116,7 @@ public class BtVodBrandWriterTest {
         rows.put(BtVodFileColumn.SERIES_NUMBER.key(), "2");
         rows.put(BtVodFileColumn.SYNOPSIS.key(), "");
         rows.put(BtVodFileColumn.IS_SERIES.key(), "");
+        rows.put(BtVodFileColumn.CATEGORY.key(), "");
         
         Map<String, String> map = rows.build();
         return new BtVodDataRow(ImmutableList.copyOf(map.values()), 
@@ -130,6 +133,7 @@ public class BtVodBrandWriterTest {
         rows.put(BtVodFileColumn.PACKSHOT.key(), "");
         rows.put(BtVodFileColumn.SERIES_NUMBER.key(), "");
         rows.put(BtVodFileColumn.IS_SERIES.key(), "");
+        rows.put(BtVodFileColumn.CATEGORY.key(), "");
         Map<String, String> map = rows.build();
         return new BtVodDataRow(ImmutableList.copyOf(map.values()), 
                 ImmutableList.copyOf(map.keySet()));

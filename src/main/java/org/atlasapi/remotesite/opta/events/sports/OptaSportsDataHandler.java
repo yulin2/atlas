@@ -46,7 +46,7 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
     }
 
     @Override
-    public Optional<Organisation> parseOrganisation(OptaSportsTeam team) {
+    public Optional<Organisation> parseOrganisation(OptaSportsTeam team, OptaSportType sport) {
         Organisation organisation = new Organisation();
 
         if (mapper.fetchIgnoredTeams().contains(team.attributes().name())) {
@@ -56,6 +56,7 @@ public class OptaSportsDataHandler extends OptaDataHandler<OptaSportsTeam, OptaF
         organisation.setCanonicalUri(uriCreator.createTeamUri(team.attributes().id()));
         organisation.setPublisher(Publisher.OPTA);
         organisation.setTitle(team.attributes().name());
+        organisation.setEventGroups(resolveOrCreateEventGroups(sport));
 
         return Optional.of(organisation);
     }

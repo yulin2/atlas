@@ -88,18 +88,14 @@ public class BtVodItemWriterTest {
         assertThat(writtenItem.getDescription(), is(SYNOPSIS));
         assertThat(writtenItem.getContainer(), is(parentRef));
         
-        Image image = Iterables.getOnlyElement(writtenItem.getImages());
-        assertThat(image.getCanonicalUri(), is(IMAGE_URI));
-        assertThat(image.getType(), is(ImageType.PRIMARY));
-        
         Location location = Iterables.getOnlyElement(
                                 Iterables.getOnlyElement(
                                         Iterables.getOnlyElement(writtenItem.getVersions())
                                             .getManifestedAs())
                                             .getAvailableAt());
         
-        DateTime expectedAvailabilityStart = new DateTime(2013, DateTimeConstants.MARCH, 31, 23, 0, 0, 0, DateTimeZone.UTC);
-        DateTime expectedAvailabilityEnd = new DateTime(2014, DateTimeConstants.APRIL, 30, 00, 0, 0).withZone(DateTimeZone.UTC);
+        DateTime expectedAvailabilityStart = new DateTime(2013, DateTimeConstants.APRIL, 1, 0, 0, 0, 0, DateTimeZone.UTC);
+        DateTime expectedAvailabilityEnd = new DateTime(2014, DateTimeConstants.APRIL, 30, 0, 0, 0, 0, DateTimeZone.UTC);
         assertThat(location.getPolicy().getAvailabilityStart(), is(expectedAvailabilityStart));
         assertThat(location.getPolicy().getAvailabilityEnd(), is(expectedAvailabilityEnd));
         //assertThat(Iterables.getOnlyElement(location.getPolicy().getAvailableCountries()).code(), is("GB"));

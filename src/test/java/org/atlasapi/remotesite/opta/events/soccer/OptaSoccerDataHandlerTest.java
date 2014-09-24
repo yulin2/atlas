@@ -9,7 +9,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import org.atlasapi.media.entity.Event;
 import org.atlasapi.media.entity.Organisation;
@@ -88,7 +87,7 @@ public class OptaSoccerDataHandlerTest {
     @Test
     public void testTeamParsing() {
         SoccerTeam team = Iterables.getFirst(feedData.teams(), null);
-        Optional<Organisation> parsed = handler.parseOrganisation(team);
+        Optional<Organisation> parsed = handler.parseOrganisation(team, SPORT);
         
         Organisation parsedTeam = parsed.get();
         
@@ -126,7 +125,7 @@ public class OptaSoccerDataHandlerTest {
 
     private void parseTeams() {
         for (SoccerTeam team : feedData.teams()) {
-            handler.handle(team);
+            handler.handleTeam(team, SPORT);
         }
     }
 

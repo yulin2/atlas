@@ -21,6 +21,7 @@ import static org.atlasapi.media.entity.Publisher.AMAZON_UK;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.BBC_MUSIC;
 import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
+import static org.atlasapi.media.entity.Publisher.BETTY;
 import static org.atlasapi.media.entity.Publisher.BT_VOD;
 import static org.atlasapi.media.entity.Publisher.FACEBOOK;
 import static org.atlasapi.media.entity.Publisher.ITUNES;
@@ -37,9 +38,8 @@ import static org.atlasapi.media.entity.Publisher.TALK_TALK;
 import static org.atlasapi.media.entity.Publisher.YOUTUBE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT;
-import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT_STAGE;
-import static org.atlasapi.media.entity.Publisher.BETTY;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
 
 import java.io.File;
 import java.util.Set;
@@ -66,7 +66,6 @@ import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
 import org.atlasapi.equiv.results.combining.RequiredScoreFilteringCombiner;
 import org.atlasapi.equiv.results.extractors.MusicEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
-import org.atlasapi.equiv.results.extractors.TopEquivalenceExtractor;
 import org.atlasapi.equiv.results.filters.AlwaysTrueFilter;
 import org.atlasapi.equiv.results.filters.ConjunctiveFilter;
 import org.atlasapi.equiv.results.filters.ContainerHierarchyFilter;
@@ -194,23 +193,15 @@ public class EquivModule {
             .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
             .withFilter(this.<Item>standardFilter())
             .withExtractor(PercentThresholdEquivalenceExtractor.<Item> moreThanPercent(90))
-            .withHandler(itemResultHandlers(acceptablePublishers));
-    }
-
-    private BroadcastingEquivalenceResultHandler<Item> itemResultHandlers(
-            Set<Publisher> acceptablePublishers) {
-        ImmutableList.Builder<EquivalenceResultHandler<Item>> handlers = ImmutableList.builder();
-        handlers
-            .add(EpisodeFilteringEquivalenceResultHandler.relaxed(
-                    new LookupWritingEquivalenceHandler<Item>(lookupWriter, acceptablePublishers),
-                    equivSummaryStore
-            ))
-            .add(new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()))
-            .add(new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore));
-        if (Boolean.valueOf(messagingEnabled)) {
-            handlers.add(new MessageQueueingResultHandler<Item>(equivAssertDestination(), acceptablePublishers));
-        }
-        return new BroadcastingEquivalenceResultHandler<Item>(handlers.build());
+            .withHandler((EquivalenceResultHandler<Item>) new BroadcastingEquivalenceResultHandler<Item>(ImmutableList.of(
+                    EpisodeFilteringEquivalenceResultHandler.relaxed(
+                        new LookupWritingEquivalenceHandler<Item>(lookupWriter, acceptablePublishers),
+                        equivSummaryStore
+                    ),
+                    new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()),
+                    new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore),
+                    new MessageQueueingResultHandler<Item>(equivAssertDestination(), acceptablePublishers)
+                )));
     }
     
     private EquivalenceUpdater<Container> topLevelContainerUpdater(Set<Publisher> publishers) {
@@ -303,17 +294,22 @@ public class EquivModule {
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
 
-        Set<Publisher> bettyPublishers = ImmutableSet.of(BETTY, YOUVIEW);
         updaters.register(BETTY, SourceSpecificEquivalenceUpdater.builder(BETTY)
-                .withItemUpdater(aliasIdentifiedBroadcastItemEquivalenceUpdater(bettyPublishers))
-            .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
-            .withTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
-            .build());
+                .withItemUpdater(broadcastItemEquivalenceUpdater(ImmutableSet.of(BETTY, YOUVIEW, YOUVIEW_BT), Score.nullScore(), Predicates.alwaysTrue()))
+                .withTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
+                .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
+                .build());
         
         Set<Publisher> reduxPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX));
         updaters.register(BBC_REDUX, SourceSpecificEquivalenceUpdater.builder(BBC_REDUX)
                 .withItemUpdater(broadcastItemEquivalenceUpdater(reduxPublishers, Score.nullScore(), Predicates.alwaysTrue()))
                 .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(reduxPublishers))
+                .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
+                .build());
+        
+        updaters.register(BETTY, SourceSpecificEquivalenceUpdater.builder(BETTY)
+                .withItemUpdater(broadcastItemEquivalenceUpdater(ImmutableSet.of(BETTY, YOUVIEW, YOUVIEW_BT), Score.nullScore(), Predicates.alwaysTrue()))
+                .withTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
         
@@ -374,7 +370,7 @@ public class EquivModule {
             .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
             .withFilter(AlwaysTrueFilter.<Item>get())
             .withExtractor(new MusicEquivalenceExtractor())
-            .withHandler((EquivalenceResultHandler<Item>) new BroadcastingEquivalenceResultHandler<Item>(ImmutableList.of(
+            .withHandler(new BroadcastingEquivalenceResultHandler<Item>(ImmutableList.of(
                 EpisodeFilteringEquivalenceResultHandler.relaxed(
                     new LookupWritingEquivalenceHandler<Item>(lookupWriter, itunesAndMusicPublishers),
                     equivSummaryStore
@@ -538,24 +534,9 @@ public class EquivModule {
         return standardItemUpdater(sources, ImmutableSet.of(
             new TitleMatchingItemScorer(), 
             new SequenceItemScorer(), 
-            new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/)
+            new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/),
+            new BroadcastAliasScorer(contentResolver, Score.nullScore())
         ), filter).build();
-    }
-
-    private EquivalenceUpdater<Item> aliasIdentifiedBroadcastItemEquivalenceUpdater(
-            Set<Publisher> sources) {
-        return ContentEquivalenceUpdater.<Item>builder()
-                .withGenerator(new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver,
-                        channelResolver,
-                        sources,
-                        Duration.standardMinutes(5),
-                        Predicates.alwaysTrue()))
-                .withScorer(new BroadcastAliasScorer(Score.negativeOne()))
-                .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
-                .withFilter(AlwaysTrueFilter.<Item>get())
-                .withExtractor(new PercentThresholdEquivalenceExtractor<Item>(0.95))
-                .withHandler(itemResultHandlers(ImmutableSet.of(BETTY, YOUVIEW)))
-                .build();
     }
 
     private EquivalenceUpdater<Item> rtItemEquivalenceUpdater() {

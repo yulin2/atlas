@@ -315,6 +315,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         if (broadcast.getActualTransmissionEndTime() != null) {
             simpleModel.setActualTransmissionEndTime(broadcast.getActualTransmissionEndTime().toDate());
         }
+
         simpleModel.setRepeat(broadcast.getRepeat());
         simpleModel.setSubtitled(broadcast.getSubtitled());
         simpleModel.setSigned(broadcast.getSigned());
