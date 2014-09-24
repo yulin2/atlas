@@ -564,6 +564,12 @@
 	       <groupId>com.google.gdata</groupId>
 	       <artifactId>core</artifactId>
 	       <version>1.47.1</version>
+	       <exclusions>
+	       	<exclusion>
+	       		<artifactId>servlet-api</artifactId>
+	       		<groupId>org.mortbay.jetty</groupId>
+	       	</exclusion>
+	       </exclusions>
 	   </dependency>
 	   <dependency>
 	       <groupId>com.google.apis</groupId>
