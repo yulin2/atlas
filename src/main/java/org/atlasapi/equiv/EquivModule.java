@@ -551,6 +551,7 @@ public class EquivModule {
                         Duration.standardMinutes(10),
                         Predicates.alwaysTrue()))
                 .withScorer(new BroadcastAliasScorer(Score.nullScore()))
+                .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
                 .withFilter(AlwaysTrueFilter.<Item>get())
                 .withExtractor(TopEquivalenceExtractor.<Item>create())
                 .withHandler(new BroadcastingEquivalenceResultHandler<>(ImmutableList.of(
