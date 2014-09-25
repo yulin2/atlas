@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.List;
 import java.util.Set;
 
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
@@ -18,8 +19,11 @@ import org.atlasapi.remotesite.bt.channels.mpxclient.PaginatedEntries;
 
 import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
@@ -32,12 +36,16 @@ public class BtChannelGroupUpdater extends ScheduledTask {
     private final ChannelGroupResolver channelGroupResolver;
     private final Publisher publisher;
     private final ChannelGroupWriter channelGroupWriter;
+    private final ChannelResolver channelResolver;
+    private final ChannelWriter channelWriter;
     
     public BtChannelGroupUpdater(BtMpxClient btMpxClient, Publisher publisher, String aliasUriPrefix, 
             String aliasNamespacePrefix, ChannelGroupResolver channelGroupResolver, 
             ChannelGroupWriter channelGroupWriter, ChannelResolver channelResolver, 
             ChannelWriter channelWriter, BtAllChannelsChannelGroupUpdater allChannelsGroupUpdater) {
         
+        this.channelWriter = channelWriter;
+        this.channelResolver = checkNotNull(channelResolver);
         this.channelGroupWriter = checkNotNull(channelGroupWriter);
         this.publisher = checkNotNull(publisher);
         this.channelGroupResolver = checkNotNull(channelGroupResolver);
@@ -73,13 +81,36 @@ public class BtChannelGroupUpdater extends ScheduledTask {
     }
 
     private void removeOldChannelGroupChannels(Set<String> allCurrentChannelGroups) {
+        
+        Set<Long> channelGroupIdsToRemove = Sets.newHashSet();
         for (ChannelGroup channelGroup : channelGroupResolver.channelGroups()) {
             if (publisher.equals(channelGroup.getPublisher())
                     && !allCurrentChannelGroups.contains(channelGroup.getCanonicalUri())) {
-                channelGroup.setChannelNumberings(ImmutableSet.<ChannelNumbering>of());
-                channelGroupWriter.createOrUpdate(channelGroup);
+                channelGroupIdsToRemove.add(channelGroup.getId());
             }
         }
+        
+        Predicate<ChannelNumbering> shouldKeepPredicate 
+            = shouldKeepChannelGroupMembership(channelGroupIdsToRemove);
+        
+        for (Channel channel : channelResolver.all()) {
+            int existingSize = channel.getChannelNumbers().size();
+            Iterable<ChannelNumbering> filtered = Iterables.filter(channel.getChannelNumbers(), shouldKeepPredicate);
+            if (Iterables.size(filtered) != existingSize) {
+                channel.setChannelNumbers(filtered);
+                channelWriter.createOrUpdate(channel);
+            }
+        }
+    }
+    
+    private Predicate<ChannelNumbering> shouldKeepChannelGroupMembership(final Set<Long> groupsToRemove) {
+        return new Predicate<ChannelNumbering>() {
+
+            @Override
+            public boolean apply(ChannelNumbering input) {
+                return !groupsToRemove.contains(input.getChannelGroup());
+            }
+        };
     }
 
 }
