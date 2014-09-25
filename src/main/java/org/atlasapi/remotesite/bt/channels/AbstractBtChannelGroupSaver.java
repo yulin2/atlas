@@ -63,7 +63,7 @@ public abstract class AbstractBtChannelGroupSaver {
     protected abstract String aliasUriFor(String key);
     protected abstract String titleFor(String key);
     
-    public void update(Iterable<Entry> channels) {
+    public Set<String> update(Iterable<Entry> channels) {
         start();
         ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
         for (Entry channel : channels) {
@@ -73,11 +73,11 @@ public abstract class AbstractBtChannelGroupSaver {
                 builder.put(key, channel.getGuid());
             }
         }
-        updateChannelGroups(builder.build());
+        return updateChannelGroups(builder.build());
     }
 
-    private void updateChannelGroups(ImmutableMultimap<String, String> keys) {
-        
+    private Set<String> updateChannelGroups(ImmutableMultimap<String, String> keys) {
+        ImmutableSet.Builder<String> channelGroupUris = ImmutableSet.builder();
         for (Map.Entry<String, Collection<String>> entry : keys.asMap().entrySet()) {
             String aliasUri = aliasUriFor(entry.getKey());
             Optional<Alias> alias = aliasFor(entry.getKey());
@@ -100,10 +100,9 @@ public abstract class AbstractBtChannelGroupSaver {
             }
             removeOldChannelsInGroup(channelGroup, currentChannels);
             channelGroupWriter.createOrUpdate(channelGroup);
-            
+            channelGroupUris.add(channelGroup.getCanonicalUri());
         };
-        
-        
+        return channelGroupUris.build();
     }
     
     private void removeOldChannelsInGroup(final ChannelGroup channelGroup, Set<Long> currentChannels) {
