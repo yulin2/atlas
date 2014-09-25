@@ -7,7 +7,6 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.ContentMerger;
 import org.atlasapi.remotesite.ContentMerger.MergeStrategy;
@@ -24,7 +23,7 @@ public class DefaultKnowledgeMotionDataRowHandler implements KnowledgeMotionData
     private final ContentMerger contentMerger;
 
     public DefaultKnowledgeMotionDataRowHandler(ContentResolver resolver, ContentWriter writer, 
-            ContentExtractor<KnowledgeMotionDataRow, Optional<? extends Content>> extractor, final TopicQueryResolver topicStore) {
+            ContentExtractor<KnowledgeMotionDataRow, Optional<? extends Content>> extractor) {
         this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(writer);
         this.extractor = checkNotNull(extractor);
