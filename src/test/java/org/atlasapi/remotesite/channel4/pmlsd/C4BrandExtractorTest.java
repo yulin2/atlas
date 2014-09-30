@@ -18,6 +18,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -28,6 +29,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Policy.Platform;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -71,7 +73,8 @@ public class C4BrandExtractorTest extends TestCase {
 	    ImmutableMap.<String, String>builder()
 	    .put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", fileContentsFromResource("ramsays-kitchen-nightmares.atom"))
 		.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/4od.atom", fileContentsFromResource("ramsays-kitchen-nightmares-4od.atom"))
-		.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/videos/all.atom", fileContentsFromResource("ugly-betty-video.atom"))
+                    .put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/videos/all.atom",
+                            fileContentsFromResource("ugly-betty-video.atom"))
 		.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", fileContentsFromResource("ramsays-kitchen-nightmares-episode-guide.atom"))
 		.put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-1.atom", fileContentsFromResource("ramsays-kitchen-nightmares-series-1.atom"))
         .put("https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-2.atom", fileContentsFromResource("ramsays-kitchen-nightmares-series-2.atom"))
@@ -255,7 +258,7 @@ public class C4BrandExtractorTest extends TestCase {
 
  
     @Test
-	public void testThatClipsAreAddedToBrands() throws Exception {
+	public void testThatClipsAreAddedToBrandsAndSeries() throws Exception {
         when(resolver.findByCanonicalUris(anyUris())).thenReturn(ResolvedContent.builder().build());
 
         C4AtomApiClient apiClient = new C4AtomApiClient(httpClient, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
@@ -271,11 +274,21 @@ public class C4BrandExtractorTest extends TestCase {
         ArgumentCaptor<Item> itemCapturer = ArgumentCaptor.forClass(Item.class);
         verify(writer, atLeast(1)).createOrUpdate(itemCapturer.capture());
 		
-        int clipsCount = 0;
+        int brandClipsCount = 0;
+        int seriesClipsCount = 0;
+        int episodeClipsCount = 0;
         for (Content content : Iterables.concat(containerCapturer.getAllValues(), itemCapturer.getAllValues())) {
-            clipsCount += content.getClips().size();
+            if (content instanceof Brand) {
+                brandClipsCount += content.getClips().size();
+            } else if (content instanceof Series) {
+                seriesClipsCount += content.getClips().size();
+            } else if (content instanceof Episode) {
+                episodeClipsCount += content.getClips().size();
+            }
         }
-        assertThat(clipsCount, is(8));
+        assertThat(brandClipsCount, is(1));
+        assertThat(seriesClipsCount, is(1));
+        assertThat(episodeClipsCount, is(6));
 	}
     
     @Test
