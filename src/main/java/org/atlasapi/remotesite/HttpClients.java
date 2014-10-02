@@ -18,7 +18,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 
 public class HttpClients {
 
-    public static final String ATLAS_USER_AGENT = "Mozilla/5.0 (compatible; atlas/1.0; +http://atlasapi.org)";
+    public static final String ATLAS_USER_AGENT = "Mozilla/5.0 (compatible; atlas/3.0; +http://atlas.metabroadcast.com)";
 
     /**
      * @return A {@link SimpleHttpClient} that is configured to work
