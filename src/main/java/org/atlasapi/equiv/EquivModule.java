@@ -159,6 +159,22 @@ public class EquivModule {
         return new BroadcastingEquivalenceResultHandler<Container>(handlers.build());
     }
 
+    private BroadcastingEquivalenceResultHandler<Item> itemResultHandlers(
+            Set<Publisher> acceptablePublishers) {
+        ImmutableList.Builder<EquivalenceResultHandler<Item>> handlers = ImmutableList.builder();
+        handlers
+                .add(EpisodeFilteringEquivalenceResultHandler.relaxed(
+                        new LookupWritingEquivalenceHandler<Item>(lookupWriter,
+                                acceptablePublishers),
+                        equivSummaryStore
+                ))
+                .add(new ResultWritingEquivalenceHandler<Item>(equivalenceResultStore()))
+                .add(new EquivalenceSummaryWritingHandler<Item>(equivSummaryStore));
+        handlers.add(new MessageQueueingResultHandler<Item>(equivAssertDestination(),
+                acceptablePublishers));
+        return new BroadcastingEquivalenceResultHandler<Item>(handlers.build());
+    }
+
     @Bean 
     protected MessageSender<ContentEquivalenceAssertionMessage> equivAssertDestination() {
         return messaging.messageSenderFactory()
@@ -308,7 +324,9 @@ public class EquivModule {
                 .build());
         
         updaters.register(BETTY, SourceSpecificEquivalenceUpdater.builder(BETTY)
-                .withItemUpdater(broadcastItemEquivalenceUpdater(ImmutableSet.of(BETTY, YOUVIEW, YOUVIEW_BT), Score.nullScore(), Predicates.alwaysTrue()))
+                .withItemUpdater(aliasIdentifiedBroadcastItemEquivalenceUpdater(ImmutableSet.of(
+                        BETTY,
+                        YOUVIEW)))
                 .withTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
@@ -454,8 +472,8 @@ public class EquivModule {
     private EquivalenceUpdater<Container> facebookContainerEquivalenceUpdater(Set<Publisher> facebookAcceptablePublishers) {
         return ContentEquivalenceUpdater.<Container> builder()
             .withGenerators(ImmutableSet.of(
-                TitleSearchGenerator.create(searchResolver, Container.class, facebookAcceptablePublishers),
-                aliasResolvingGenerator(contentResolver, Container.class)
+                    TitleSearchGenerator.create(searchResolver, Container.class, facebookAcceptablePublishers),
+                    aliasResolvingGenerator(contentResolver, Container.class)
             ))
             .withScorers(ImmutableSet.<EquivalenceScorer<Container>> of())
             .withCombiner(NullScoreAwareAveragingCombiner.<Container> get())
@@ -470,8 +488,7 @@ public class EquivModule {
 
     private EquivalenceUpdater<Container> vodContainerUpdater(Set<Publisher> acceptablePublishers) {
         return ContentEquivalenceUpdater.<Container> builder()
-            .withGenerator(
-                TitleSearchGenerator.create(searchResolver, Container.class, acceptablePublishers)
+            .withGenerator(TitleSearchGenerator.create(searchResolver, Container.class, acceptablePublishers)
             )
             .withScorers(ImmutableSet.of(
                 new TitleMatchingContainerScorer(),
@@ -481,7 +498,7 @@ public class EquivModule {
                 new NullScoreAwareAveragingCombiner<Container>(),
                 TitleMatchingContainerScorer.NAME)
             )
-            .withFilter(this.<Container> standardFilter())
+            .withFilter(this.<Container>standardFilter())
             .withExtractor(PercentThresholdEquivalenceExtractor.<Container> moreThanPercent(90))
             .withHandler(containerResultHandlers(acceptablePublishers))
             .build();
@@ -533,10 +550,25 @@ public class EquivModule {
             Predicate<? super Broadcast> filter) {
         return standardItemUpdater(sources, ImmutableSet.of(
             new TitleMatchingItemScorer(), 
-            new SequenceItemScorer(), 
-            new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/),
-            new BroadcastAliasScorer(contentResolver, Score.nullScore())
+            new SequenceItemScorer(),
+            new TitleSubsetBroadcastItemScorer(contentResolver, titleMismatch, 80/*percent*/)
         ), filter).build();
+    }
+
+    private EquivalenceUpdater<Item> aliasIdentifiedBroadcastItemEquivalenceUpdater(
+            Set<Publisher> sources) {
+        return ContentEquivalenceUpdater.<Item>builder()
+                .withGenerator(new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver,
+                        channelResolver,
+                        sources,
+                        Duration.standardMinutes(5),
+                        Predicates.alwaysTrue()))
+                .withScorer(new BroadcastAliasScorer(Score.negativeOne()))
+                .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
+                .withFilter(AlwaysTrueFilter.<Item>get())
+                .withExtractor(new PercentThresholdEquivalenceExtractor<Item>(0.95))
+                .withHandler(itemResultHandlers(sources))
+                .build();
     }
 
     private EquivalenceUpdater<Item> rtItemEquivalenceUpdater() {
