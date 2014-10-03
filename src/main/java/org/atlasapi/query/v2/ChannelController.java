@@ -197,9 +197,9 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
     private Optional<Ordering<Channel>> ordering(String orderBy) {
         if (!Strings.isNullOrEmpty(orderBy)) {
             if (orderBy.equals(TITLE)) {
-                return Optional.of(MoreOrderings.transformingOrdering(TO_TITLE).nullsLast());
+                return Optional.of(MoreOrderings.transformingOrdering(TO_TITLE));
             } else if (orderBy.equals(TITLE_REVERSE)) {
-                return Optional.of(MoreOrderings.transformingOrdering(TO_TITLE, Ordering.<String>natural().reverse()).nullsFirst());
+                return Optional.of(MoreOrderings.transformingOrdering(TO_TITLE, Ordering.<String>natural().reverse()));
             }
         }
         
@@ -209,7 +209,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
     private static final Function<Channel, String> TO_TITLE = new Function<Channel, String>() {
         @Override
         public String apply(Channel input) {
-            return input.getTitle();
+            return Strings.nullToEmpty(input.getTitle());
         }
     };
 
