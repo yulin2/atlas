@@ -22,14 +22,16 @@ public class C4BrandClipExtractor extends C4MediaItemExtractor<Clip> {
     private final C4AtomEntryVersionExtractor versionExtractor;
     private final C4AtomFeedUriExtractor uriExtractor = new C4AtomFeedUriExtractor();
     private final Publisher publisher;
+    private final C4ContentLinker contentLinker;
 
     public C4BrandClipExtractor(ContentFactory<Feed, Feed, Entry> contentFactory, Publisher publisher, 
-            C4LocationPolicyIds locationPolicyIds, Clock clock) {
+            C4LocationPolicyIds locationPolicyIds, C4ContentLinker contentLinker, Clock clock) {
         super(clock);
         this.contentFactory = contentFactory;
         this.publisher = publisher;
         // TODO: Do we have platform-specific clips?
         versionExtractor = new C4AtomEntryVersionExtractor(Optional.<Platform>absent(), locationPolicyIds, false);
+        this.contentLinker = checkNotNull(contentLinker);
     }
 
     @Override
@@ -59,11 +61,15 @@ public class C4BrandClipExtractor extends C4MediaItemExtractor<Clip> {
         Integer episode = Ints.tryParse(Strings.nullToEmpty(lookup.get(C4AtomApi.DC_EPISODE_NUMBER)));
         Integer series = Ints.tryParse(Strings.nullToEmpty(lookup.get(C4AtomApi.DC_SERIES_NUMBER)));
         
-        if (episode == null || series == null) {
+        if (episode == null && series == null) {
             return Optional.absent();
         }
         
-        return Optional.of(String.format("%d-%d", series, episode));
+        if (episode == null && series != null) {
+            return contentLinker.createKeyForSeries(series);
+        }
+        
+        return contentLinker.createKeyForEpisode(series, episode);
     }
     
 }
