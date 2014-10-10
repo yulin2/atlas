@@ -44,7 +44,6 @@ import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
 import java.io.File;
 import java.util.Set;
 
-import org.apache.cassandra.utils.AlwaysPresentFilter;
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContainerCandidatesContainerEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContainerCandidatesItemEquivalenceGenerator;
@@ -179,6 +178,15 @@ public class EquivModule {
                         JacksonMessageSerializer.forType(ContentEquivalenceAssertionMessage.class));
     }
     
+    private static Predicate<Broadcast> YOUVIEW_BROADCAST_FILTER = new Predicate<Broadcast>() {
+        
+        @Override
+        public boolean apply(Broadcast input) {
+            DateTime twoWeeksAgo = new DateTime(DateTimeZones.UTC).minusDays(15);
+            return input.getTransmissionTime().isAfter(twoWeeksAgo);
+        }
+    };
+    
     private <T extends Content> EquivalenceFilter<T> standardFilter() {
         return standardFilter(ImmutableList.<EquivalenceFilter<T>>of());
     }
@@ -266,7 +274,7 @@ public class EquivModule {
         EquivalenceUpdater<Container> topLevelContainerUpdater = topLevelContainerUpdater(MoreSets.add(acceptablePublishers, LOVEFILM));
 
         Set<Publisher> nonStandardPublishers = ImmutableSet.copyOf(Sets.union(
-            ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, RTE, YOUVIEW, YOUVIEW_STAGE, TALK_TALK, PA, BT_VOD, BETTY), 
+            ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, RTE, YOUVIEW, YOUVIEW_STAGE, YOUVIEW_BT, YOUVIEW_BT_STAGE, TALK_TALK, PA, BT_VOD, BETTY), 
             Sets.union(musicPublishers, roviPublishers)
         ));
         final EquivalenceUpdaters updaters = new EquivalenceUpdaters();
@@ -283,27 +291,26 @@ public class EquivModule {
                 .withTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
                 .build());
+
+        registerYouViewUpdaterForPublisher(
+                YOUVIEW, 
+                Sets.union(Sets.difference(acceptablePublishers, ImmutableSet.of(YOUVIEW_STAGE)), ImmutableSet.of(YOUVIEW)), 
+                updaters);
         
-        Set<Publisher> youViewPublishers = Sets.union(Sets.difference(acceptablePublishers, ImmutableSet.of(YOUVIEW_STAGE)), ImmutableSet.of(YOUVIEW));
-        Predicate<Broadcast> youviewBroadcastFilter = new Predicate<Broadcast>(){
-            @Override
-            public boolean apply(Broadcast input) {
-                DateTime twoWeeksAgo = new DateTime(DateTimeZones.UTC).minusDays(15);
-                return input.getTransmissionTime().isAfter(twoWeeksAgo);
-            }
-        };
-        updaters.register(YOUVIEW, SourceSpecificEquivalenceUpdater.builder(YOUVIEW)
-                .withItemUpdater(broadcastItemEquivalenceUpdater(youViewPublishers, Score.negativeOne(),youviewBroadcastFilter))
-                .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(youViewPublishers))
-                .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
-                .build());
+        registerYouViewUpdaterForPublisher(
+                YOUVIEW_STAGE, 
+                Sets.union(Sets.difference(acceptablePublishers, ImmutableSet.of(YOUVIEW)), ImmutableSet.of(YOUVIEW_STAGE)), 
+                updaters);
         
-        Set<Publisher> youViewStagePublishers = Sets.union(Sets.difference(acceptablePublishers, ImmutableSet.of(YOUVIEW)), ImmutableSet.of(YOUVIEW_STAGE));
-        updaters.register(YOUVIEW_STAGE, SourceSpecificEquivalenceUpdater.builder(YOUVIEW_STAGE)
-                .withItemUpdater(broadcastItemEquivalenceUpdater(youViewStagePublishers, Score.negativeOne(),youviewBroadcastFilter))
-                .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(youViewStagePublishers))
-                .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
-                .build());
+        registerYouViewUpdaterForPublisher(
+                YOUVIEW_BT, 
+                Sets.union(Sets.difference(acceptablePublishers, ImmutableSet.of(YOUVIEW_BT_STAGE)), ImmutableSet.of(YOUVIEW_BT)), 
+                updaters);
+        
+        registerYouViewUpdaterForPublisher(
+                YOUVIEW_BT_STAGE, 
+                Sets.union(Sets.difference(acceptablePublishers, ImmutableSet.of(YOUVIEW_BT)), ImmutableSet.of(YOUVIEW_BT_STAGE)), 
+                updaters);
 
         Set<Publisher> reduxPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX));
 
@@ -406,6 +413,15 @@ public class EquivModule {
         
         
         return updaters; 
+    }
+
+    private void registerYouViewUpdaterForPublisher(Publisher publisher, Set<Publisher> matchTo, EquivalenceUpdaters updaters) {
+        updaters.register(publisher, SourceSpecificEquivalenceUpdater.builder(publisher)
+                .withItemUpdater(broadcastItemEquivalenceUpdater(matchTo, Score.negativeOne(), YOUVIEW_BROADCAST_FILTER))
+                .withTopLevelContainerUpdater(broadcastItemContainerEquivalenceUpdater(matchTo))
+                .withNonTopLevelContainerUpdater(NullEquivalenceUpdater.<Container>get())
+                .build());
+        
     }
 
     private ContentEquivalenceUpdater<Container> vodSeriesUpdater(
