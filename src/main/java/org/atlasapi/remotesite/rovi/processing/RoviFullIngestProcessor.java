@@ -64,10 +64,13 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
             LOG.info("Indexing completed");
             
             LOG.info("Start processing programs");
-            
-            processBrandsWithoutParent(programFile, descriptionIndex, episodeSequenceIndex);
-            processBrandsWithParent(programFile, descriptionIndex, episodeSequenceIndex);
-            processSeries(seasonsFile);
+
+            /**
+             * Temporary commented out completed steps for saving time on stage
+             */
+            // processBrandsWithoutParent(programFile, descriptionIndex, episodeSequenceIndex);
+            // processBrandsWithParent(programFile, descriptionIndex, episodeSequenceIndex);
+            // processSeries(seasonsFile);
             processItemsWithoutParent(programFile, descriptionIndex, episodeSequenceIndex);
             processItemsWithParent(programFile, descriptionIndex, episodeSequenceIndex);
             processBroadcasts(scheduleFile);

@@ -30,7 +30,7 @@ public class C4BrandClipExtractorTest {
         = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());
     
     private final Clock clock = new TimeMachine(new DateTime(DateTimeZones.UTC));
-    private final C4LocationPolicyIds locationPolicyIds = C4LocationPolicyIds.builder().build();;
+    private final C4LocationPolicyIds locationPolicyIds = C4LocationPolicyIds.builder().build();
     private final C4BrandClipExtractor clipExtractor = new C4BrandClipExtractor(contentFactory, Publisher.C4_PMLSD, locationPolicyIds, new C4ContentLinker(), clock);
     
     @Test
