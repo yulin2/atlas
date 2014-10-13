@@ -70,6 +70,12 @@ public abstract class RoviLineProcessor<T extends KeyedLine<?>> implements LineP
             handleProcessingException(e, line);
         } finally {
             scannedLines++;
+
+            // Temporary for tracking how many lines have been processed in logs
+            if (scannedLines % 100000 == 0) {
+                log().info("Number of lines scanned so far: " + scannedLines);
+            }
+
             doFinally(line);
         }
 
