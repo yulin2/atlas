@@ -40,7 +40,6 @@ public class MongoSecondaryReadPreferenceBuilderTest {
         TaggableReadPreference readPreference = (TaggableReadPreference) 
                 builder.fromProperties(ImmutableSet.<String>of("key:value", "key2:value2"));
         
-        List<DBObject> dbos = readPreference.getTagSets();
         assertTrue(readPreference.isSlaveOk());
         
         List<DBObject> dbos = readPreference.getTagSets();        
