@@ -58,23 +58,22 @@ public class AtlasModule {
     public @Bean Mongo mongo() {
         Mongo mongo = new Mongo(mongoHosts());
         mongo.setReadPreference(readPreference());
-        if(processingConfig != null && processingConfig.toBoolean()) {
-            if (processingWriteConcern != null 
-                    && !Strings.isNullOrEmpty(processingWriteConcern.get())) {
+        if(isProcessing() 
+                && processingWriteConcern != null 
+                && !Strings.isNullOrEmpty(processingWriteConcern.get())) {
                 
-                WriteConcern writeConcern = WriteConcern.valueOf(processingWriteConcern.get());
-                if (writeConcern == null) {
-                    throw new IllegalArgumentException("Could not parse write concern: " + 
-                                    processingWriteConcern.get());
-                }
-                mongo.setWriteConcern(writeConcern);
+            WriteConcern writeConcern = WriteConcern.valueOf(processingWriteConcern.get());
+            if (writeConcern == null) {
+                throw new IllegalArgumentException("Could not parse write concern: " + 
+                                processingWriteConcern.get());
             }
+            mongo.setWriteConcern(writeConcern);
         }
         return mongo;
     }
 
     public @Bean ReadPreference readPreference() {
-        boolean requirePrimary = processingConfig != null && processingConfig.toBoolean();
+        boolean requirePrimary = isProcessing();
         if (requirePrimary) {
             return ReadPreference.primary();
         }
@@ -89,6 +88,10 @@ public class AtlasModule {
         }
         
         return secondaryReadPreferenceBuilder.fromProperties(tags.build());
+    }
+
+    private boolean isProcessing() {
+        return processingConfig != null && processingConfig.toBoolean();
     }
     
     private List<ServerAddress> mongoHosts() {
