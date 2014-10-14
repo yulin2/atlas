@@ -34,6 +34,7 @@ import com.mongodb.Bytes;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.ReadPreference;
 
 public class LookupRefUpdateTask extends ScheduledTask {
 
@@ -55,7 +56,7 @@ public class LookupRefUpdateTask extends ScheduledTask {
     public LookupRefUpdateTask(DBCollection lookupCollection, DBCollection progressCollection) {
         this.lookupCollection = checkNotNull(lookupCollection);
         this.entryTranslator = new LookupEntryTranslator();
-        this.entryStore = new MongoLookupEntryStore(lookupCollection);
+        this.entryStore = new MongoLookupEntryStore(lookupCollection, ReadPreference.primary());
         this.progressCollection = checkNotNull(progressCollection);
         this.scheduleKey = "lookuprefupdate";
     }
