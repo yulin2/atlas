@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.atlasapi;
 
 import java.net.UnknownHostException;
+import java.util.Iterator;
 import java.util.List;
 
 import org.atlasapi.system.JettyHealthProbe;
@@ -32,6 +33,8 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 import com.metabroadcast.common.webapp.properties.ContextConfigurer;
+import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
@@ -39,11 +42,14 @@ import com.mongodb.WriteConcern;
 
 @Configuration
 public class AtlasModule {
-	
+    
 	private final String mongoHost = Configurer.get("mongo.host").get();
 	private final String dbName = Configurer.get("mongo.dbName").get();
+	private final String mongoTag = Strings.emptyToNull(Configurer.get("mongo.db.tag").get());
+	private final String mongoFallbackTag = Strings.emptyToNull(Configurer.get("mongo.db.tag.fallback").get());
 	private final Parameter processingConfig = Configurer.get("processing.config");
 	private final Parameter processingWriteConcern = Configurer.get("processing.mongo.writeConcern");
+	private final MongoSecondaryReadPreferenceBuilder secondaryReadPreferenceBuilder = new MongoSecondaryReadPreferenceBuilder();
 
 	public @Bean DatabasedMongo databasedMongo() {
 	    return new DatabasedMongo(mongo(), dbName);
@@ -51,9 +57,8 @@ public class AtlasModule {
 
     public @Bean Mongo mongo() {
         Mongo mongo = new Mongo(mongoHosts());
-        if(processingConfig == null || !processingConfig.toBoolean()) {
-            mongo.setReadPreference(ReadPreference.secondaryPreferred());
-        } else {
+        mongo.setReadPreference(readPreference());
+        if(processingConfig != null && processingConfig.toBoolean()) {
             if (processingWriteConcern != null 
                     && !Strings.isNullOrEmpty(processingWriteConcern.get())) {
                 
@@ -68,6 +73,24 @@ public class AtlasModule {
         return mongo;
     }
 
+    public @Bean ReadPreference readPreference() {
+        boolean requirePrimary = processingConfig != null && processingConfig.toBoolean();
+        if (requirePrimary) {
+            return ReadPreference.primary();
+        }
+        
+        ImmutableList.Builder<String> tags = ImmutableList.builder();
+        if (mongoTag != null) {
+            tags.add(mongoTag);
+        }
+        
+        if (mongoFallbackTag != null) {
+            tags.add(mongoFallbackTag);
+        }
+        
+        return secondaryReadPreferenceBuilder.fromProperties(tags.build());
+    }
+    
     private List<ServerAddress> mongoHosts() {
         Splitter splitter = Splitter.on(",").omitEmptyStrings().trimResults();
         return ImmutableList.copyOf(Iterables.filter(Iterables.transform(splitter.split(mongoHost), new Function<String, ServerAddress>() {
