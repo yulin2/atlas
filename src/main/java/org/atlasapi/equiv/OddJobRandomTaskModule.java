@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.mongodb.ReadPreference;
 
 @Configuration
 public class OddJobRandomTaskModule {
@@ -54,7 +55,8 @@ public class OddJobRandomTaskModule {
     @Bean
     public PersonLookupPopulationTask personLookupPopulationTask() {
         return new PersonLookupPopulationTask(mongo.collection("people"), 
-                new MongoLookupEntryStore(mongo.collection("peopleLookup")));
+                new MongoLookupEntryStore(mongo.collection("peopleLookup"), 
+                                          ReadPreference.primary()));
     }
     
     @Bean
