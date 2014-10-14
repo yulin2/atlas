@@ -23,6 +23,7 @@ public class MongoSecondaryReadPreferenceBuilderTest {
     public void testNoTags() {
         TaggableReadPreference readPreference = (TaggableReadPreference) builder.fromProperties(ImmutableSet.<String>of());
         
+        assertTrue(readPreference.isSlaveOk());
         assertTrue(readPreference.getTagSets().isEmpty());
     }
     
@@ -30,6 +31,7 @@ public class MongoSecondaryReadPreferenceBuilderTest {
     public void testWithSingleTag() {
         TaggableReadPreference readPreference = (TaggableReadPreference) builder.fromProperties(ImmutableSet.<String>of("key:value"));
         DBObject dbo = Iterables.getOnlyElement(readPreference.getTagSets());
+        assertTrue(readPreference.isSlaveOk());
         assertThat((String)dbo.get("key"), is(equalTo("value")));
     }
     
@@ -39,6 +41,9 @@ public class MongoSecondaryReadPreferenceBuilderTest {
                 builder.fromProperties(ImmutableSet.<String>of("key:value", "key2:value2"));
         
         List<DBObject> dbos = readPreference.getTagSets();
+        assertTrue(readPreference.isSlaveOk());
+        
+        List<DBObject> dbos = readPreference.getTagSets();        
         assertThat((String)dbos.get(0).get("key"), is(equalTo("value")));
         assertThat((String)dbos.get(1).get("key2"), is(equalTo("value2")));
     }

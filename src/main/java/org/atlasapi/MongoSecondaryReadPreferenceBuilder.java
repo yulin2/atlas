@@ -16,19 +16,18 @@ public class MongoSecondaryReadPreferenceBuilder {
     private static final Splitter KEY_VALUE_SPLITTER = Splitter.on(":").omitEmptyStrings().trimResults(); 
     
     /**
-     * Convert from a set of strings, of format 
-     * key1:value1,key2:value2 into a {@link DBObject} 
-     * suitable for passing as a paramater to a 
+     * Convert from a collection of strings, of format key1:value1,key2:value2
+     * into a {@link DBObject} suitable for passing as a paramater to a
      * {@link ReadPreference} instantiation.
      * 
-     * @param property
-     * @return
+     * @param properties    Strings from which to parse tags
+     * @return              A {@link ReadPreference} reflecting tag preferences
      */
     public ReadPreference fromProperties(Iterable<String> properties) {
  
         Iterable<DBObject> tagPreferences = Iterables.transform(properties, PROPERTY_TO_TAG_DBO);
         
-        if (Iterables.size(tagPreferences) == 0) {
+        if (Iterables.isEmpty(tagPreferences)) {
             return ReadPreference.secondaryPreferred();
         }
         
