@@ -46,13 +46,14 @@ import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.SystemClock;
+import com.mongodb.ReadPreference;
 
 public class ChildRefUpdateTaskTest extends TestCase {
 
     DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
 
     ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
-    MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo.collection("lookup"));
+    MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo.collection("lookup"), ReadPreference.primary());
     ContentResolver resolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo, lookupStore), lookupStore);
     
     private final PersistenceAuditLog persistenceAuditLog = new PersistenceAuditLog() {

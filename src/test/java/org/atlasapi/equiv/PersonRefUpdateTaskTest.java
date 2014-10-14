@@ -49,13 +49,14 @@ import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.time.SystemClock;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.ReadPreference;
 
 public class PersonRefUpdateTaskTest {
     
     private final DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
 
     private final ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
-    private final MongoLookupEntryStore contentLookup = new MongoLookupEntryStore(mongo.collection("lookup"));
+    private final MongoLookupEntryStore contentLookup = new MongoLookupEntryStore(mongo.collection("lookup"), ReadPreference.primary());
     private final ContentLister lister = new MongoContentLister(mongo);
 
     private final ServiceResolver serviceResolver = mock(ServiceResolver.class);
@@ -82,7 +83,7 @@ public class PersonRefUpdateTaskTest {
     private final ContentWriter contentWriter = new MongoContentWriter(mongo, contentLookup, persistenceAuditLog, playerResolver, serviceResolver, new SystemClock());
     private final ContentResolver contentResolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo, contentLookup), contentLookup);
 
-    private final LookupEntryStore peopleLookup = new MongoLookupEntryStore(mongo.collection("peopleLookup"));
+    private final LookupEntryStore peopleLookup = new MongoLookupEntryStore(mongo.collection("peopleLookup"), ReadPreference.primary());
     private final PersonStore personStore = new MongoPersonStore(mongo, TransitiveLookupWriter.explicitTransitiveLookupWriter(peopleLookup), peopleLookup, persistenceAuditLog);
 
     private Item item1;
