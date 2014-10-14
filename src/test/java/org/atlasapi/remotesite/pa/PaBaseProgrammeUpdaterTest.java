@@ -67,6 +67,7 @@ import com.metabroadcast.common.queue.MessageSender;
 import com.metabroadcast.common.queue.MessagingException;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
+import com.mongodb.ReadPreference;
 
 @RunWith(JMock.class)
 public class PaBaseProgrammeUpdaterTest extends TestCase {
@@ -117,7 +118,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
         DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
-        MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(db.collection("lookup"));
+        MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(db.collection("lookup"), ReadPreference.primary());
         resolver = new LookupResolvingContentResolver(new MongoContentResolver(db, lookupStore), lookupStore);
 
         channelResolver = new DummyChannelResolver();
