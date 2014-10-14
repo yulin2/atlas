@@ -41,6 +41,7 @@ import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.mongodb.ReadPreference;
 
 @Configuration
 @Import(EquivModule.class)
@@ -49,6 +50,7 @@ public class QueryModule {
 	private @Autowired @Qualifier("remoteSiteContentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	
 	private @Autowired DatabasedMongo mongo;
+	private @Autowired ReadPreference readPreference;
     private @Autowired CassandraContentStore cassandra;
     private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
 	
@@ -58,7 +60,7 @@ public class QueryModule {
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 	    
-        MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo.collection("lookup"));
+        MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo.collection("lookup"), readPreference);
 	    KnownTypeContentResolver mongoContentResolver = new MongoContentResolver(mongo, lookupStore);
         KnownTypeContentResolver cassandraContentResolver = new CassandraKnownTypeContentResolver(cassandra);
 		
