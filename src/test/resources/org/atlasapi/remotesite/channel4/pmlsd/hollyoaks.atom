@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/">
+  <id>tag:pmlsc.channel4.com,2009:/programmes/hollyoaks/videos/all</id>
+  <title type="text">Hollyoaks Clips</title>
+  <subtitle type="html">The daily soap that follows the loves, lives and misdemeanours of a group of people living in the Chester village of Hollyoaks where anything could, and frequently does, happen...</subtitle>
+  <updated>2014-10-16T05:29:10.010Z</updated>
+  <author>
+    <name>Channel 4 Television</name>
+  </author>
+  <logo imageSource="own">http://cache.channel4.com/assets/programmes/images/hollyoaks/01aee34c-d896-463e-bfdc-88f1c1c33231_200x113.jpg</logo>
+  <dc:relation.platformClientVersion>1.1</dc:relation.platformClientVersion>
+  <dc:relation.BrandWebSafeTitle>hollyoaks</dc:relation.BrandWebSafeTitle>
+  <link href="http://www.channel4.com/programmes/hollyoaks/videos" rel="alternate" type="text/html" />
+  <link href="https://pmlsc.channel4.com/pmlsd/hollyoaks/videos/all.atom" rel="self" type="application/atom+xml" />
+  <link href="https://pmlsc.channel4.com/pmlsd/hollyoaks.atom" rel="up" type="application/atom+xml" />
+  <link href="https://pmlsc.channel4.com/pmlsd/hollyoaks/videos/all/page-2.atom" rel="next" type="application/atom+xml" />
+  <dc:relation.Sharable>false</dc:relation.Sharable>
+  <generator version="1.83">PMLSD</generator>
+  <entry xmlns:dcterms="http://purl.org/dc/terms">
+    <id>tag:pmlsc.channel4.com,2009:clip/3838863635001</id>
+    <title type="text">Theresa: "You're the daddy, Dodger!"</title>
+    <summary type="html">Dodger is the father of Theresa's baby, but what does that mean for Maxine and Sienna? Jorgie and Danny tell us here...</summary>
+    <updated>2014-10-14T17:42:14.143Z</updated>
+    <link href="https://pmlsc.channel4.com/pmlsd/hollyoaks/videos/3838863635001.atom" rel="self" type="application/atom+xml" />
+    <link href="http://www.channel4.com/programmes/hollyoaks/videos/3838863635001" rel="alternate" type="text/html" />
+    <link href="https://pmlsc.channel4.com/pmlsd/hollyoaks/episode-guide.atom" rel="related" type="application/atom+xml" title="Episode Guide" />
+    <media:group>
+      <media:player url="http://www.channel4.com/programmes/hollyoaks/videos/3838863635001" />
+      <media:thumbnail url="http://static.bips.channel4.com/bips/200x113/videos/3838863635001.jpg" height="113" width="200" imageSource="own" altText="" />
+      <media:rating>nonadult</media:rating>
+      <media:copyright url="http://cache.channel4.com/terms_and_conditions.html">Terms and Conditions</media:copyright>
+      <media:restriction relationship="allow" type="country">GG,IE,JE,GB,IM</media:restriction>
+      <media:rights status="official" />
+      <media:category scheme="urn:c4uk:4od:clip:type" label="Short-Form Type">EXTRA</media:category>
+    </media:group>
+    <dcterms:available>start=2014-10-14T16:45:25.000Z; end=2037-12-31T00:00:00.000Z; scheme=W3C-DTF</dcterms:available>
+    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.Duration>1:07</dc:relation.Duration>
+    <dc:relation.SeriesNumber />
+    <dc:relation.EpisodeNumber />
+    <dc:relation.ExternalVideoId>3838863635001</dc:relation.ExternalVideoId>
+  </entry>
+</feed>

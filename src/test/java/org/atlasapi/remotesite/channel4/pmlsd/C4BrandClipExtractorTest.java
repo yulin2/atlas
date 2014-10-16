@@ -24,7 +24,8 @@ import com.sun.syndication.feed.atom.Feed;
 @RunWith( MockitoJUnitRunner.class )
 public class C4BrandClipExtractorTest {
 
-    private final AtomFeedBuilder feed = new AtomFeedBuilder(Resources.getResource(getClass(), "green-wing-video.atom"));
+    private final AtomFeedBuilder greenWingFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "green-wing-video.atom"));
+    private final AtomFeedBuilder hollyoaksFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "hollyoaks.atom"));
     
     private final ContentFactory<Feed, Feed, Entry> contentFactory
         = new SourceSpecificContentFactory<>(Publisher.C4_PMLSD, new C4AtomFeedUriExtractor());
@@ -36,7 +37,7 @@ public class C4BrandClipExtractorTest {
     @Test
     public void testExtract() {
         
-        Clip clip = clipExtractor.extract((Entry)feed.build().getEntries().get(0));
+        Clip clip = clipExtractor.extract((Entry)greenWingFeed.build().getEntries().get(0));
         
         assertThat(clip.getCanonicalUri(), is("http://www.channel4.com/programmes/green-wing/video/series-1/episode-7/guyball"));
         assertThat(clip.getPublisher(), is(C4PmlsdModule.SOURCE));
@@ -53,8 +54,15 @@ public class C4BrandClipExtractorTest {
     }
     
     @Test
+    public void testExtractBipsUri() {
+        Clip clip = clipExtractor.extract((Entry)hollyoaksFeed.build().getEntries().get(0));
+        assertThat(clip.getImage(), is("http://static.bips.channel4.com/bips/625x352/videos/3838863635001.jpg"));
+        assertThat(clip.getThumbnail(), is("http://static.bips.channel4.com/bips/200x113/videos/3838863635001.jpg"));
+    }
+    
+    @Test
     public void testExtractSeriesClip() {
-        Clip clip = clipExtractor.extract((Entry)feed.build().getEntries().get(11));
+        Clip clip = clipExtractor.extract((Entry)greenWingFeed.build().getEntries().get(11));
         assertThat(clip.getClipOf(), is("s1"));
     }
 
