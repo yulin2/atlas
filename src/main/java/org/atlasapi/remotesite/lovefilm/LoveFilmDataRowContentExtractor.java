@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.lovefilm;
 
-import static org.atlasapi.feeds.youview.LoveFilmGenreMapping.TO_ATLAS_GENRE;
-import static org.atlasapi.feeds.youview.LoveFilmGenreMapping.TO_ATLAS_SUB_GENRE;
 import static org.atlasapi.media.entity.Policy.RevenueContract.FREE_TO_VIEW;
 import static org.atlasapi.media.entity.Policy.RevenueContract.PAY_TO_RENT;
 import static org.atlasapi.media.entity.Policy.RevenueContract.SUBSCRIPTION;
@@ -38,7 +36,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.atlasapi.feeds.youview.LoveFilmGenreMapping;
+import org.atlasapi.feeds.youview.genres.GenreMapping;
+import org.atlasapi.feeds.youview.genres.GenreMappings;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
@@ -54,6 +53,7 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
@@ -107,6 +107,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private static final Splitter TITLE_SPLIT = Splitter.on(" - ").trimResults();
     private final DateTimeFormatter dateMonthYearFormat = DateTimeFormat.forPattern("dd/MM/YYYY").withZoneUTC();
     private final DateTimeFormatter yearMonthDayFormat = ISODateTimeFormat.date().withZone(DateTimeZone.forID("Europe/London"));
+    private final GenreMapping genreMapping = GenreMappings.mappingFor(Publisher.LOVEFILM);
     
     private static final EnglishLanguageCodeMap languageCodeMap = new EnglishLanguageCodeMap();
     private static final OptionalMap<String, Certificate> certificateMap = ImmutableOptionalMap.fromMap(
@@ -328,7 +329,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
 
     private Iterable<String> subGenresFrom(String genreString) {
         Iterable<String> subGenres = COMMA_SPLITTER.split(genreString);
-        return Iterables.transform(subGenres, TO_ATLAS_SUB_GENRE);
+        return Iterables.transform(subGenres, genreMapping.toAtlasSubGenre());
     }
 
     private Integer yearFrom(String pubDate) {
@@ -340,7 +341,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     
     private Iterable<String> genresFrom(String genreCsv) {
         Iterable<String> genres = COMMA_SPLITTER.split(genreCsv);
-        return Iterables.transform(genres, TO_ATLAS_GENRE);
+        return Iterables.transform(genres, genreMapping.toAtlasGenre());
     }
 
 
