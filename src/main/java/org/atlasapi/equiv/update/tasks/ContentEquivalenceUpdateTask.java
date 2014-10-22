@@ -17,6 +17,7 @@ import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.equiv.update.RootEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.ContentCategory;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
@@ -37,6 +38,7 @@ public final class ContentEquivalenceUpdateTask extends AbstractContentListingTa
     private List<Publisher> publishers;
     private int processed = 0;
     private UpdateProgress progress = UpdateProgress.START;
+    private ContentCategory[] categories;
     
     public ContentEquivalenceUpdateTask(ContentLister contentLister, ContentResolver contentResolver, ScheduleTaskProgressStore progressStore, EquivalenceUpdater<Content> updater, Set<String> ignored) {
         super(contentLister);
@@ -48,6 +50,11 @@ public final class ContentEquivalenceUpdateTask extends AbstractContentListingTa
     public ContentEquivalenceUpdateTask forPublishers(Publisher... publishers) {
         this.publishers = ImmutableList.copyOf(publishers);
         this.schedulingKey = Joiner.on("-").join(Iterables.transform(this.publishers, Publisher.TO_KEY))+"-equivalence";
+        return this;
+    }
+    
+    public ContentEquivalenceUpdateTask forContent(ContentCategory... categories) {
+        this.categories = categories;
         return this;
     }
 
@@ -63,7 +70,14 @@ public final class ContentEquivalenceUpdateTask extends AbstractContentListingTa
 
     @Override
     protected ContentListingCriteria listingCriteria(ContentListingProgress progress) {
-        return defaultCriteria().forPublishers(publishers).forContent(CONTAINER, TOP_LEVEL_ITEM).startingAt(progress).build();
+        
+        ContentCategory[] criteriaCategories;
+        if (categories != null) {
+            criteriaCategories = categories;
+        } else {
+            criteriaCategories = new ContentCategory[] { CONTAINER, TOP_LEVEL_ITEM };
+        }
+        return defaultCriteria().forPublishers(publishers).forContent(criteriaCategories).startingAt(progress).build();
     }
     
     @Override
