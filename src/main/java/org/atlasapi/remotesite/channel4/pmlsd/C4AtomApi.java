@@ -52,6 +52,7 @@ public class C4AtomApi {
 	public static final String DC_DURATION = "dc:relation.Duration";
 
 	private static final Pattern IMAGE_PATTERN = Pattern.compile("https?://.+\\.channel4\\.com/(.+?)\\d+x\\d+(\\.[a-zA-Z]+)");
+	private static final Pattern BIPS_IMAGE_PATTERN = Pattern.compile("https?://.+\\.channel4.com\\/bips/(\\d+x\\d+)/videos/.*");
 	private static final String IMAGE_SIZE = "625x352";
 	private static final String THUMBNAIL_SIZE = "200x113";
 	private static final String IOS_URI_PREFIX = "c4-4od://ios.channel4.com/pmlsd/";
@@ -76,6 +77,13 @@ public class C4AtomApi {
 			if (matcher.matches()) {
 				content.setThumbnail(C4_WEB_ROOT + matcher.group(1) + THUMBNAIL_SIZE + matcher.group(2));
 				content.setImage((C4_WEB_ROOT + matcher.group(1) + IMAGE_SIZE + matcher.group(2)));
+			} else {
+			    Matcher bipsMatcher = BIPS_IMAGE_PATTERN.matcher(anImage);
+			    if (bipsMatcher.matches()) {
+			        String originalSize = bipsMatcher.group(1);
+			        content.setThumbnail(anImage.replace(originalSize, THUMBNAIL_SIZE));
+			        content.setImage(anImage.replace(originalSize, IMAGE_SIZE));
+			    }
 			}
 		}
 	}
