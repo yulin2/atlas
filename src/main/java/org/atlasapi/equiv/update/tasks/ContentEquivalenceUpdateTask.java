@@ -140,14 +140,20 @@ public final class ContentEquivalenceUpdateTask extends AbstractContentListingTa
         List<String> parts = Lists.newArrayList();
 
         if (categories != null) {
-            parts = FluentIterable.from(asList(categories))
+            parts.addAll(FluentIterable.from(asList(categories))
                     .transform(ContentCategory.TO_NAME)
-                    .toList();
+                    .toList());
         }
 
-        parts.addAll(FluentIterable.from(this.publishers).transform(Publisher.TO_KEY).toList());
+        if (publishers != null) {
+            parts.addAll(FluentIterable.from(this.publishers)
+                    .transform(Publisher.TO_KEY)
+                    .toList());
+        }
 
-        return Joiner.on("-").join(parts)+"-equivalence";
+        parts.add("equivalence");
+
+        return Joiner.on("-").join(parts);
     }
 
 }
