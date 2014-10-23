@@ -87,11 +87,15 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 ContentPurgeWebModule.class,
                 GoogleSpreadsheetModule.class
             );
-            if (youViewUploadEnabled()) {
+            if (youViewControllersEnabled()) {
                 builder.add(
-                    YouViewUploadModule.class,
                     YouViewFeedsWebModule.class
                 );
+                if (youViewUploadEnabled()) {
+                    builder.add(
+                        YouViewUploadModule.class
+                    );
+                }
             }
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
@@ -103,10 +107,20 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
         }
     }
 
+    // youview upload controllers can be enabled with one of these flags without enabling 
+    // the scheduled upload tasks. If the upload flags are enabled, those will override
+    // the flags controlling the controllers
+    private boolean youViewControllersEnabled() {
+        return Boolean.parseBoolean(Configurer.get("youview.upload.lovefilm.endpoints.enabled").get()) 
+                || Boolean.parseBoolean(Configurer.get("youview.upload.unbox.endpoints.enabled").get())
+                || Boolean.parseBoolean(Configurer.get("youview.upload.nitro.endpoints.enabled").get())
+                || youViewUploadEnabled();
+    }
+
     private boolean youViewUploadEnabled() {
-        return Boolean.parseBoolean(Configurer.get("youview.upload.lovefilm.enabled").get()) 
-                || Boolean.parseBoolean(Configurer.get("youview.upload.unbox.enabled").get())
-                || Boolean.parseBoolean(Configurer.get("youview.upload.nitro.enabled").get());
+        return Boolean.parseBoolean(Configurer.get("youview.upload.lovefilm.upload.enabled").get()) 
+                || Boolean.parseBoolean(Configurer.get("youview.upload.unbox.upload.enabled").get())
+                || Boolean.parseBoolean(Configurer.get("youview.upload.nitro.upload.enabled").get());
     }
 
 	private boolean runProcessingOnly() {
