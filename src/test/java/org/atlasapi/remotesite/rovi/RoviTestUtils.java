@@ -1,7 +1,9 @@
 package org.atlasapi.remotesite.rovi;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -13,9 +15,12 @@ import org.atlasapi.persistence.content.ResolvedContent.ResolvedContentBuilder;
 import org.atlasapi.remotesite.rovi.model.ActionType;
 import org.atlasapi.remotesite.rovi.model.RoviCulture;
 import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
+import org.atlasapi.remotesite.rovi.processing.CountingLineProcessor;
+import org.atlasapi.remotesite.rovi.processing.RoviDataProcessingResult;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
 
@@ -77,6 +82,14 @@ public class RoviTestUtils {
         ResolvedContentBuilder resolvedContentBuilder = ResolvedContent.builder();
         ResolvedContent resolvedContent = resolvedContentBuilder.build();
         return resolvedContent;
+    }
+
+    public static long countTotalLines(File file, Charset fileCharset) throws IOException {
+        RoviDataProcessingResult result = Files.readLines(file,
+                fileCharset,
+                new CountingLineProcessor());
+
+        return result.getProcessedLines();
     }
     
 }

@@ -24,7 +24,23 @@ public class RoviDataProcessingResult {
         this.startTime = checkNotNull(startTime);
         this.endTime = checkNotNull(endTime);
     }
-    
+
+    public long getProcessedLines() {
+        return processedLines;
+    }
+
+    public long getFailedLines() {
+        return failedLines;
+    }
+
+    public DateTime getStartTime() {
+        return startTime;
+    }
+
+    public DateTime getEndTime() {
+        return endTime;
+    }
+
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
