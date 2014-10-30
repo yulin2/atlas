@@ -35,6 +35,8 @@ import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.parsers.RoviEpisodeSequenceLineParser;
 import org.atlasapi.remotesite.rovi.parsers.RoviProgramDescriptionLineParser;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatus;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatusStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +46,7 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -71,6 +74,8 @@ public class RoviFullIngestProcessorTest {
 
     @Mock private ScheduleFileProcessor scheduleProcessor;
 
+    @Mock private IngestStatusStore statusStore;
+
     private ArgumentCaptor<? extends Content> argument = ArgumentCaptor.forClass(Content.class);
 
     @Before
@@ -84,11 +89,14 @@ public class RoviFullIngestProcessorTest {
                 contentWriter,
                 contentResolver,
                 scheduleProcessor,
-                new AuxiliaryCacheSupplier(contentResolver));
+                new AuxiliaryCacheSupplier(contentResolver),
+                statusStore);
     }
 
     @Test
     public void testProcessing() throws IOException {
+        when(statusStore.getIngestStatus()).thenReturn(Optional.<IngestStatus>absent());
+
         processor.process(fileFromResource(PROGRAM_FILE),
                 fileFromResource(SEASON_HISTORY_SEQUENCE),
                 fileFromResource(SCHEDULE),

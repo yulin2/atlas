@@ -19,11 +19,16 @@ import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.parsers.RoviProgramLineParser;
 import org.atlasapi.remotesite.rovi.parsers.RoviSeasonHistoryLineParser;
 import org.atlasapi.remotesite.rovi.populators.ContentPopulatorSupplier;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestFileProcessingStep;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestProcessingChain;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestProcessingStep;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatus;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatusStore;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.io.Files;
-
+import com.google.common.base.Optional;
 
 public class RoviFullIngestProcessor implements RoviIngestProcessor {
     private final static Logger LOG = LoggerFactory.getLogger(RoviFullIngestProcessor.class);
@@ -35,6 +40,7 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
     private final ContentResolver contentResolver;
     private final ScheduleFileProcessor scheduleFileProcessor;
     private final AuxiliaryCacheSupplier auxCacheSupplier;
+    private final IngestStatusStore ingestStatusStore;
     
     public RoviFullIngestProcessor(
             KeyedFileIndexer<String, RoviProgramDescriptionLine> programDescriptionIndexer,
@@ -42,7 +48,8 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
             RoviContentWriter contentWriter,
             ContentResolver contentResolver,
             ScheduleFileProcessor scheduleFileProcessor,
-            AuxiliaryCacheSupplier auxCacheSupplier) {
+            AuxiliaryCacheSupplier auxCacheSupplier,
+            IngestStatusStore ingestStatusStore) {
 
         this.programDescriptionIndexer = checkNotNull(programDescriptionIndexer);
         this.episodeSequenceIndexer = checkNotNull(episodeSequenceIndexer);
@@ -50,6 +57,7 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
         this.contentResolver = checkNotNull(contentResolver);
         this.scheduleFileProcessor = checkNotNull(scheduleFileProcessor);
         this.auxCacheSupplier = checkNotNull(auxCacheSupplier);
+        this.ingestStatusStore = checkNotNull(ingestStatusStore);
     }
 
     @Override
@@ -64,12 +72,21 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
             LOG.info("Indexing completed");
             
             LOG.info("Start processing programs");
-            
-            processBrandsWithoutParent(programFile, descriptionIndex, episodeSequenceIndex);
-            processBrandsWithParent(programFile, descriptionIndex, episodeSequenceIndex);
-            processSeries(seasonsFile);
-            processItemsWithoutParent(programFile, descriptionIndex, episodeSequenceIndex);
-            processItemsWithParent(programFile, descriptionIndex, episodeSequenceIndex);
+
+            Optional<IngestStatus> maybeRecoveredStatus = ingestStatusStore.getIngestStatus();
+
+            IngestProcessingChain ingestChain = IngestProcessingChain
+                    .withFirstStep(brandsWithoutParentIngestStep(programFile,
+                            descriptionIndex,
+                            episodeSequenceIndex))
+                    .andThen(brandsWithParentIngestStep(programFile, descriptionIndex, episodeSequenceIndex))
+                    .andThen(seriesIngestStep(seasonsFile))
+                    .andThen(itemWithoutParentIngestStep(programFile, descriptionIndex, episodeSequenceIndex))
+                    .andFinally(itemWithParentIngestStep(programFile, descriptionIndex, episodeSequenceIndex));
+
+            ingestChain.execute(maybeRecoveredStatus);
+
+            // TODO: schedule processor should be consistent with the other steps
             processBroadcasts(scheduleFile);
             
             LOG.info("Processing programs complete");
@@ -85,79 +102,105 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
         LOG.info("Processing schedule complete");
     }
 
-    private void processItemsWithParent(File programFile,
+    private IngestProcessingStep brandsWithoutParentIngestStep(File programFile,
             KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
-            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex)
-            throws IOException {
-        RoviDataProcessingResult processingNoBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
-                new RoviProgramLineParser(),
-                FILE_CHARSET,
-                NO_BRAND_WITH_PARENT,
-                contentWriter,
-                contentResolver,
-                contentPopulator(descriptionIndex, episodeSequenceIndex)
-                ));
-        
-        LOG.info("Processing programs (no brands) with parent complete, result: {}", processingNoBrandsWithParentResult);
-    }
+            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex) {
 
-    private void processItemsWithoutParent(File programFile,
-            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
-            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex)
-            throws IOException {
-        RoviDataProcessingResult processingNoBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
-                new RoviProgramLineParser(),
-                FILE_CHARSET,
-                NO_BRAND_NO_PARENT,
-                contentWriter,
-                contentResolver,
-                contentPopulator(descriptionIndex, episodeSequenceIndex)
-                ));
-        
-        LOG.info("Processing programs (no brands) with no parent complete, result: {}", processingNoBrandsNoParentResult);
-    }
-
-    private void processSeries(File seasonsFile) throws IOException {
-        RoviDataProcessingResult processingSeriesResult = Files.readLines(seasonsFile, FILE_CHARSET, new RoviSeasonLineIngestor(
-                new RoviSeasonHistoryLineParser(),
-                FILE_CHARSET,
-                contentResolver,
-                contentWriter,
-                auxCacheSupplier.parentPublisherCache(MAX_CACHE_SIZE)));
-        
-        LOG.info("Processing series complete, result: {}", processingSeriesResult);
-    }
-
-    private void processBrandsWithParent(File programFile,
-            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
-            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex)
-            throws IOException {
-        RoviDataProcessingResult processingBrandsWithParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
-                new RoviProgramLineParser(),
-                FILE_CHARSET,
-                IS_BRAND_WITH_PARENT,
-                contentWriter,
-                contentResolver,
-                contentPopulator(descriptionIndex, episodeSequenceIndex)
-                ));
-        
-        LOG.info("Processing brands with parent complete, result: {}", processingBrandsWithParentResult);
-    }
-
-    private void processBrandsWithoutParent(File programFile,
-            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
-            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex)
-            throws IOException {
-        RoviDataProcessingResult processingBrandsNoParentResult = Files.readLines(programFile, FILE_CHARSET, new RoviProgramLineIngestor(
+        RoviProgramLineIngestor ingestor = new RoviProgramLineIngestor (
                 new RoviProgramLineParser(),
                 FILE_CHARSET,
                 IS_BRAND_NO_PARENT,
                 contentWriter,
                 contentResolver,
                 contentPopulator(descriptionIndex, episodeSequenceIndex)
-                ));
-        
-        LOG.info("Processing brands with no parent complete, result: {}", processingBrandsNoParentResult);
+        );
+
+        return IngestFileProcessingStep.forStep(IngestStep.BRANDS_NO_PARENT)
+                .withFile(programFile)
+                .withCharset(FILE_CHARSET)
+                .withProcessor(ingestor)
+                .withStatusPersistor(ingestStatusStore)
+                .build();
+    }
+
+    private IngestProcessingStep brandsWithParentIngestStep(File programFile,
+            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
+            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex) {
+
+        RoviProgramLineIngestor ingestor = new RoviProgramLineIngestor(
+                new RoviProgramLineParser(),
+                FILE_CHARSET,
+                IS_BRAND_WITH_PARENT,
+                contentWriter,
+                contentResolver,
+                contentPopulator(descriptionIndex, episodeSequenceIndex)
+        );
+
+        return IngestFileProcessingStep.forStep(IngestStep.BRANDS_WITH_PARENT)
+                .withFile(programFile)
+                .withCharset(FILE_CHARSET)
+                .withProcessor(ingestor)
+                .withStatusPersistor(ingestStatusStore)
+                .build();
+    }
+
+    private IngestProcessingStep seriesIngestStep(File seasonsFile) {
+        RoviSeasonLineIngestor ingestor = new RoviSeasonLineIngestor(
+                new RoviSeasonHistoryLineParser(),
+                FILE_CHARSET,
+                contentResolver,
+                contentWriter,
+                auxCacheSupplier.parentPublisherCache(MAX_CACHE_SIZE));
+
+        return IngestFileProcessingStep.forStep(IngestStep.SERIES)
+                .withFile(seasonsFile)
+                .withCharset(FILE_CHARSET)
+                .withProcessor(ingestor)
+                .withStatusPersistor(ingestStatusStore)
+                .build();
+    }
+
+    private IngestProcessingStep itemWithoutParentIngestStep(File programFile,
+            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
+            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex) {
+
+        RoviProgramLineIngestor ingestor = new RoviProgramLineIngestor(
+                new RoviProgramLineParser(),
+                FILE_CHARSET,
+                NO_BRAND_NO_PARENT,
+                contentWriter,
+                contentResolver,
+                contentPopulator(descriptionIndex, episodeSequenceIndex)
+        );
+
+        return IngestFileProcessingStep.forStep(IngestStep.ITEMS_NO_PARENT)
+                .withFile(programFile)
+                .withCharset(FILE_CHARSET)
+                .withProcessor(ingestor)
+                .withStatusPersistor(ingestStatusStore)
+                .build();
+
+    }
+
+    private IngestProcessingStep itemWithParentIngestStep(File programFile,
+            KeyedFileIndex<String, RoviProgramDescriptionLine> descriptionIndex,
+            KeyedFileIndex<String, RoviEpisodeSequenceLine> episodeSequenceIndex) {
+
+        RoviProgramLineIngestor ingestor = new RoviProgramLineIngestor(
+                new RoviProgramLineParser(),
+                FILE_CHARSET,
+                NO_BRAND_WITH_PARENT,
+                contentWriter,
+                contentResolver,
+                contentPopulator(descriptionIndex, episodeSequenceIndex)
+        );
+
+        return IngestFileProcessingStep.forStep(IngestStep.ITEMS_WITH_PARENT)
+                .withFile(programFile)
+                .withCharset(FILE_CHARSET)
+                .withProcessor(ingestor)
+                .withStatusPersistor(ingestStatusStore)
+                .build();
     }
 
     private ContentPopulatorSupplier contentPopulator(
@@ -170,7 +213,6 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
                 contentResolver,
                 auxCacheSupplier.seasonNumberCache(MAX_CACHE_SIZE));
     }
-    
 
     private void releaseIndexResources(KeyedFileIndex<?, ?>... indexes) {
         for (KeyedFileIndex<?, ?> index: indexes) {
