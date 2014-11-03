@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.amazonunbox;
 
-import static org.atlasapi.feeds.youview.YouViewDeleter.REVERSE_HIERARCHICAL_ORDER;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -34,12 +32,40 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 
 
 public class AmazonUnboxProcessingItemProcessor implements AmazonUnboxItemProcessor {
+    
+    private static final Ordering<Content> REVERSE_HIERARCHICAL_ORDER = new Ordering<Content>() {
+        @Override
+        public int compare(Content left, Content right) {
+            if (left instanceof Item) {
+                if (right instanceof Item) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } else if (left instanceof Series) {
+                if (right instanceof Item) {
+                    return 1;
+                } else if (right instanceof Series) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } else {
+                if (right instanceof Brand) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            }
+        }
+    };
     
     private static final Predicate<Content> IS_SERIES = new Predicate<Content>() {
         @Override
