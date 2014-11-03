@@ -30,7 +30,6 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 import com.youview.refdata.schemas.youviewstatusreport._2010_12_07.TransactionStateType;
 
 @Controller
-@RequestMapping("/3.0/feeds/youview/{publisher}/transactions")
 public class TransactionController extends BaseController<Iterable<Transaction>> {
     
     private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(100).withDefaultLimit(10);
@@ -51,7 +50,7 @@ public class TransactionController extends BaseController<Iterable<Transaction>>
         this.transactionStore = checkNotNull(transactionStore);
     }
 
-    @RequestMapping(value=".json", method = RequestMethod.GET)
+    @RequestMapping(value="/3.0/feeds/youview/{publisher}/transactions.json", method = RequestMethod.GET)
     public void transactions(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("publisher") String publisherStr,
             @RequestParam(value = "uri", required = false) String contentUri,
@@ -88,7 +87,7 @@ public class TransactionController extends BaseController<Iterable<Transaction>>
         return query.build();
     }
 
-    @RequestMapping(value="/{id}.json", method = RequestMethod.GET)
+    @RequestMapping(value="/3.0/feeds/youview/{publisher}/transactions/{id}.json", method = RequestMethod.GET)
     public void transaction(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("publisher") String publisherStr,
             @PathVariable("id") String id) throws IOException {
