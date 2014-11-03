@@ -26,7 +26,6 @@ import com.metabroadcast.common.http.HttpStatusCode;
 
 
 @Controller
-@RequestMapping("/feeds/youview/{publisher}/statistics")
 public class FeedStatsController extends BaseController<Iterable<FeedStatistics>> {
     
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
@@ -46,7 +45,7 @@ public class FeedStatsController extends BaseController<Iterable<FeedStatistics>
         this.statsResolver = checkNotNull(statsResolver);
     }
 
-    @RequestMapping(value=".json", method = RequestMethod.GET)
+    @RequestMapping(value="/3.0/feeds/youview/{publisher}/statistics.json", method = RequestMethod.GET)
     public void statistics(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("publisher") String publisherStr) throws IOException {
         try {
