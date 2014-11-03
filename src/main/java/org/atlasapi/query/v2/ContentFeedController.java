@@ -92,6 +92,7 @@ public class ContentFeedController extends BaseController<Iterable<FeedStatistic
             ApplicationConfiguration appConfig = appConfig(request);
             if (!appConfig.isEnabled(publisher)) {
                 errorViewFor(request, response, FORBIDDEN);
+                return;
             }
 
             Optional<String> since = Optional.fromNullable(lastUpdated);

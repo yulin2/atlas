@@ -53,6 +53,7 @@ public class FeedStatsController extends BaseController<Iterable<FeedStatistics>
         Publisher publisher = Publisher.valueOf(publisherStr.trim().toUpperCase());
         if (!appConfig.isEnabled(publisher)) {
             errorViewFor(request, response, FORBIDDEN);
+            return;
         }
         
         Optional<FeedStatistics> resolved = statsResolver.resolveFor(publisher);

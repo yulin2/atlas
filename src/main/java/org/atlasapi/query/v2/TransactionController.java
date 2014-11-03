@@ -16,6 +16,8 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +44,7 @@ public class TransactionController extends BaseController<Iterable<Transaction>>
             .withErrorCode("Api Key required")
             .withStatusCode(HttpStatusCode.FORBIDDEN);
     
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final TransactionStore transactionStore;
     
     public TransactionController(ApplicationConfigurationFetcher configFetcher, AdapterLog log,
@@ -92,10 +95,14 @@ public class TransactionController extends BaseController<Iterable<Transaction>>
             @PathVariable("publisher") String publisherStr,
             @PathVariable("id") String id) throws IOException {
         try {
-            Publisher publisher = Publisher.valueOf(publisherStr.trim().toUpperCase());
+            
+            String rawPublisherStr = publisherStr.trim().toUpperCase();
+            log.debug("transactions accessed with publisher {}", rawPublisherStr);
+            Publisher publisher = Publisher.valueOf(rawPublisherStr);
             ApplicationConfiguration appConfig = appConfig(request);
             if (!appConfig.isEnabled(publisher)) {
                 errorViewFor(request, response, FORBIDDEN);
+                return;
             }
 
             Optional<Transaction> resolved = transactionStore.transactionFor(id, publisher);
