@@ -156,7 +156,10 @@ public class ContentWriteController {
 
     private Item mergeItems(Item existing, Item update) {
         if (!update.getVersions().isEmpty()) {
-            Version existingVersion = Iterables.getFirst(existing.getVersions(), new Version());
+            if (Iterables.isEmpty(existing.getVersions())) {
+                existing.addVersion(new Version());
+            }
+            Version existingVersion = existing.getVersions().iterator().next();
             Version postedVersion = Iterables.getOnlyElement(update.getVersions());
             mergeVersions(existingVersion, postedVersion);
         }
