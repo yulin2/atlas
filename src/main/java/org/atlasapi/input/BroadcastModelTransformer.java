@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.BlackoutRestriction;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Strings;
@@ -46,6 +47,9 @@ public class BroadcastModelTransformer {
         complex.setSurround(simple.getSurround());
         complex.setLive(simple.getLive());
         complex.setAliasUrls(simple.getAliases());
+        if (simple.getBlackoutRestriction() != null) {
+            complex.setBlackoutRestriction(new BlackoutRestriction(simple.getBlackoutRestriction().getAll()));
+        }
         return complex;
     }
 
