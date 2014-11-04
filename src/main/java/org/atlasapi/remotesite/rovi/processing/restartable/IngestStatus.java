@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class IngestStatus {
 
+    public static final IngestStatus COMPLETED = new IngestStatus(IngestStep.COMPLETED, 0);
+
     private final IngestStep currentStep;
     private final long processedLine;
 
@@ -18,6 +20,10 @@ public class IngestStatus {
 
     public long getProcessedLine() {
         return processedLine;
+    }
+
+    public boolean isCompleted() {
+        return (currentStep == IngestStep.COMPLETED);
     }
 
     @Override
@@ -40,4 +46,5 @@ public class IngestStatus {
     public int hashCode() {
         return Objects.hash(currentStep, processedLine);
     }
+
 }

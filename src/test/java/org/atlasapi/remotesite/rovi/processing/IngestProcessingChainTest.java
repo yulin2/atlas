@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestProcessingChain;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestProcessingStep;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatus;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestStep;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,6 +68,32 @@ public class IngestProcessingChainTest {
         verify(step3, times(1)).execute();
 
         assertEquals(recoveredStatus, argument.getValue());
+    }
+
+    @Test
+    public void testShouldExecuteAllTheStepsWhenRestartingFromCompleted() {
+        IngestProcessingChain processingChain = IngestProcessingChain.withFirstStep(step1)
+                .andThen(step2)
+                .andFinally(step3);
+
+        processingChain.restartFrom(IngestStatus.COMPLETED);
+
+        verify(step1, times(1)).execute();
+        verify(step2, times(1)).execute();
+        verify(step3, times(1)).execute();
+    }
+
+    @Test
+    public void testShouldNotExecuteIfRecoveredStepNotPartOfTheChain() {
+        IngestProcessingChain processingChain = IngestProcessingChain.withFirstStep(step1)
+                .andThen(step2)
+                .andFinally(step3);
+
+        processingChain.restartFrom(new IngestStatus(IngestStep.BROADCASTS, 0));
+
+        verify(step1, times(0)).execute();
+        verify(step2, times(0)).execute();
+        verify(step3, times(0)).execute();
     }
 
 }

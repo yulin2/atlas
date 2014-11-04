@@ -46,4 +46,8 @@ public class DefaultIngestStatusStore implements IngestStatusStore {
                 values);
     }
 
+    @Override public void markAsCompleted() {
+        persistIngestStatus(IngestStatus.COMPLETED);
+    }
+
 }
