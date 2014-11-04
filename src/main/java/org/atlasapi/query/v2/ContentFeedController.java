@@ -7,11 +7,11 @@ import java.util.Collection;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBElement;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.feeds.tvanytime.TvAnytimeGenerator;
-import org.atlasapi.feeds.youview.statistics.FeedStatistics;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -30,11 +30,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import tva.metadata._2010.TVAMainType;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.HttpStatusCode;
-import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.time.DateTimeZones;
 
 /**
@@ -45,13 +46,8 @@ import com.metabroadcast.common.time.DateTimeZones;
  * @author Oliver Hall (oli@metabroadcast.com)
  *
  */
-// TODO this bypasses the normal atlas writing framework (as it's not writing atlas classes)
-// this needs a less hacky solution as to how we choose to output non-atlas classes through the atlas
-// writing framework.
-// have made it use Iterable<FeedStatistics> for now
-@RequestMapping(value = "/3.0/feeds/youview/{publisher}")
 @Controller
-public class ContentFeedController extends BaseController<Iterable<FeedStatistics>> {
+public class ContentFeedController extends BaseController<JAXBElement<TVAMainType>> {
 
     private static final DateTime START_OF_TIME = new DateTime(2000, 1, 1, 0, 0, 0, 0, DateTimeZones.UTC);
     private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException())
@@ -65,7 +61,7 @@ public class ContentFeedController extends BaseController<Iterable<FeedStatistic
     private final ContentResolver contentResolver;
     
     public ContentFeedController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, 
-            AtlasModelWriter<Iterable<FeedStatistics>> outputter, TvAnytimeGenerator feedGenerator, 
+            AtlasModelWriter<JAXBElement<TVAMainType>> outputter, TvAnytimeGenerator feedGenerator, 
             LastUpdatedContentFinder contentFinder, ContentResolver contentResolver) {
         super(configFetcher, log, outputter);
         this.feedGenerator = checkNotNull(feedGenerator);
@@ -82,7 +78,7 @@ public class ContentFeedController extends BaseController<Iterable<FeedStatistic
      *                      bootstrap feed
      * @throws IOException 
      */
-    @RequestMapping(value=".xml", method = RequestMethod.GET)
+    @RequestMapping(value="/3.0/feeds/youview/{publisher}.xml", method = RequestMethod.GET)
     public void generateFeed(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("publisher") String publisherStr,
             @RequestParam(value = "lastUpdated", required = false) String lastUpdated,
@@ -95,17 +91,18 @@ public class ContentFeedController extends BaseController<Iterable<FeedStatistic
                 return;
             }
 
+            // TODO return sensible error if user asks for content that is not available
             Optional<String> since = Optional.fromNullable(lastUpdated);
             Optional<String> possibleUri = Optional.fromNullable(uri);
-            feedGenerator.generateXml(getContent(publisher, since, possibleUri), response.getOutputStream());
-
-            response.setContentType(MimeType.APPLICATION_XML.toString());
-            response.setStatus(HttpServletResponse.SC_OK);
+            JAXBElement<TVAMainType> tva = feedGenerator.generateTVAnytimeFrom(getContent(publisher, since, possibleUri));
+            
+            modelAndViewFor(request, response, tva, appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
     }
     
+    // TODO extract this into custom content resolver class
     private Iterable<Content> getContent(Publisher publisher, Optional<String> since, Optional<String> possibleUri) {
         if (possibleUri.isPresent()) {
             ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(possibleUri.get()));
