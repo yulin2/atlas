@@ -6,5 +6,6 @@ public interface IngestStatusStore {
 
     Optional<IngestStatus> getIngestStatus();
     void persistIngestStatus(IngestStatus newStatus);
+    void markAsCompleted();
 
 }

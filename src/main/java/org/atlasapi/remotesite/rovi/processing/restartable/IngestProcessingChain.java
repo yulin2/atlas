@@ -15,6 +15,7 @@ public class IngestProcessingChain {
 
     private final static Logger LOG = LoggerFactory.getLogger(IngestProcessingChain.class);
     private final ImmutableList<IngestProcessingStep> steps;
+    private final static int NOT_FOUND = -1;
 
     private IngestProcessingChain(List<IngestProcessingStep> steps) {
         this.steps = ImmutableList.copyOf(steps);
@@ -33,9 +34,27 @@ public class IngestProcessingChain {
     }
 
     public void restartFrom(IngestStatus recoveredStatus) {
-        int index = Iterables.indexOf(steps, isStep(recoveredStatus.getCurrentStep()));
-        Iterable<IngestProcessingStep> stepsToExecute = Iterables.skip(steps, index);
+        if (recoveredStatus.isCompleted()) {
+            execute();
+            return;
+        }
+
+        IngestStep recoveredStep = recoveredStatus.getCurrentStep();
+        int index = Iterables.indexOf(steps, isStep(recoveredStep));
+
+        if (index == NOT_FOUND) {
+            LOG.warn("Step "
+                    + recoveredStep.name()
+                    + " not found in the chain, maybe a not restartable step? Skipping all the steps");
+            return;
+        }
+
+        Iterable<IngestProcessingStep> stepsToExecute = skipAlreadyProcessedSteps(index);
         executeAll(stepsToExecute, recoveredStatus);
+    }
+
+    private Iterable<IngestProcessingStep> skipAlreadyProcessedSteps(int numberOfStepsToSkip) {
+        return Iterables.skip(steps, numberOfStepsToSkip);
     }
 
     private void executeAll(Iterable<IngestProcessingStep> steps) {

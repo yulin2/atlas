@@ -8,6 +8,7 @@ public enum IngestStep {
     ITEMS_NO_PARENT,
     ITEMS_WITH_PARENT,
     BROADCASTS,
+    COMPLETED,
     ;
 
 }

@@ -86,8 +86,16 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
 
             ingestChain.execute(maybeRecoveredStatus);
 
+            /**
+             * Broadcasts processing is not restartable at the moment because its different nature
+             * compared to the other steps. It's quicker than other steps though, so not a massive problem for now
+             */
+            ingestStatusStore.persistIngestStatus(new IngestStatus(IngestStep.BROADCASTS, 0));
+
             // TODO: schedule processor should be consistent with the other steps
             processBroadcasts(scheduleFile);
+
+            ingestStatusStore.markAsCompleted();
             
             LOG.info("Processing programs complete");
             
