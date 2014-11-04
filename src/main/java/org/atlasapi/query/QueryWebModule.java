@@ -1,5 +1,7 @@
 package org.atlasapi.query;
 
+import javax.xml.bind.JAXBElement;
+
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.feeds.tvanytime.TvAnytimeGenerator;
 import org.atlasapi.feeds.utils.DescriptionWatermarker;
@@ -45,7 +47,7 @@ import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.DispatchingAtlasModelWriter;
-import org.atlasapi.output.FeedStatisticsModelWriter;
+import org.atlasapi.output.JaxbTVAnytimeModelWriter;
 import org.atlasapi.output.JaxbXmlTranslator;
 import org.atlasapi.output.JsonTranslator;
 import org.atlasapi.output.QueryResult;
@@ -55,6 +57,7 @@ import org.atlasapi.output.SimpleContentGroupModelWriter;
 import org.atlasapi.output.SimpleContentModelWriter;
 import org.atlasapi.output.SimpleEventModelWriter;
 import org.atlasapi.output.SimpleOrganisationModelWriter;
+import org.atlasapi.output.SimpleFeedStatisticsModelWriter;
 import org.atlasapi.output.SimplePersonModelWriter;
 import org.atlasapi.output.SimpleProductModelWriter;
 import org.atlasapi.output.SimpleScheduleModelWriter;
@@ -74,6 +77,7 @@ import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 import org.atlasapi.output.simple.EventModelSimplifier;
 import org.atlasapi.output.simple.EventRefModelSimplifier;
+import org.atlasapi.output.simple.FeedStatisticsModelSimplifier;
 import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.OrganisationModelSimplifier;
@@ -135,6 +139,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import tva.metadata._2010.TVAMainType;
 
 import com.google.common.base.Splitter;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -356,10 +362,7 @@ public class QueryWebModule {
     
     @Bean
     ContentFeedController contentFeedController() {
-        // TODO this uses the feedStats outputter, as it needs something to write errors. However, it doesn't use it
-        // for writing output (it writes to the response output stream directly). Thus at the moment it doesn't matter
-        // which outputter it uses (this should probably be fixed).
-        return new ContentFeedController(configFetcher, log, feedStatsModelOutputter(), feedGenerator, contentFinder, contentResolver);
+        return new ContentFeedController(configFetcher, log, tvaModelOutputter(), feedGenerator, contentFinder, contentResolver);
     }
     
     @Bean
@@ -394,6 +397,11 @@ public class QueryWebModule {
     @Bean
     TransactionModelSimplifier transactionSimplifier() {
         return new TransactionModelSimplifier();
+    }
+    
+    @Bean
+    FeedStatisticsModelSimplifier feedStatsSimplifier() {
+        return new FeedStatisticsModelSimplifier();
     }
     
     @Bean
@@ -490,9 +498,18 @@ public class QueryWebModule {
     
     @Bean
     AtlasModelWriter<Iterable<FeedStatistics>> feedStatsModelOutputter() {
+        FeedStatisticsModelSimplifier feedStatsSimplifier = feedStatsSimplifier();
         return this.<Iterable<FeedStatistics>>standardWriter(
-                new FeedStatisticsModelWriter(new JsonTranslator<FeedStatisticsQueryResult>()),
-                new FeedStatisticsModelWriter(new JaxbXmlTranslator<FeedStatisticsQueryResult>()));
+                new SimpleFeedStatisticsModelWriter(new JsonTranslator<FeedStatisticsQueryResult>(), feedStatsSimplifier),
+                new SimpleFeedStatisticsModelWriter(new JaxbXmlTranslator<FeedStatisticsQueryResult>(), feedStatsSimplifier));
+    }
+    
+    @Bean
+    AtlasModelWriter<JAXBElement<TVAMainType>> tvaModelOutputter() {
+        AtlasModelWriter<JAXBElement<TVAMainType>> jaxbWriter = new JaxbTVAnytimeModelWriter();
+        return DispatchingAtlasModelWriter.<JAXBElement<TVAMainType>>dispatchingModelWriter()
+                .register(jaxbWriter, "xml", MimeType.APPLICATION_XML)
+                .build();
     }
 
     @Bean

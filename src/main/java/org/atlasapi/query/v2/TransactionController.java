@@ -67,6 +67,7 @@ public class TransactionController extends BaseController<Iterable<Transaction>>
             
             if (!appConfig.isEnabled(publisher)) {
                 errorViewFor(request, response, FORBIDDEN);
+                return;
             }
 
             TransactionQuery transactionQuery = queryFrom(publisher, selection, contentUri, transactionId, status);
