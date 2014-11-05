@@ -2,8 +2,6 @@ package org.atlasapi.remotesite.getty;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.HashMap;
-
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -14,10 +12,24 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.ContentMerger;
 import org.atlasapi.remotesite.ContentMerger.MergeStrategy;
 
+import com.google.common.base.Equivalence;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 
 public class DefaultGettyDataHandler implements GettyDataHandler {
+
+    private final static Equivalence<TopicRef> SAME_TOPIC_SAME_TIME = new Equivalence<TopicRef>() {
+        @Override
+        protected boolean doEquivalent(TopicRef a, TopicRef b) {
+            return Objects.equal(a.getTopic(), b.getTopic())
+                    && Objects.equal(a.getOffset(), b.getOffset());
+        }
+        @Override
+        protected int doHash(TopicRef topicRef) {
+            return Objects.hashCode(topicRef.getTopic(), topicRef.getOffset());
+        }
+    };
 
     private final ContentResolver resolver;
     private final ContentWriter writer;
@@ -29,24 +41,7 @@ public class DefaultGettyDataHandler implements GettyDataHandler {
         this.resolver = checkNotNull(resolver);
         this.writer = checkNotNull(writer);
         this.extractor = checkNotNull(extractor);
-        this.contentMerger = new ContentMerger(MergeStrategy.MERGE){
-            @Override
-            public Item merge(Item current, Item extracted) {
-                Item merged = super.merge(current, extracted);
-
-                HashMap<Long, TopicRef> mergedRefs = new HashMap<Long, TopicRef>();
-                for (TopicRef topicRef : merged.getTopicRefs()) {
-                    mergedRefs.put(topicRef.getTopic(), topicRef);
-                }
-                for (TopicRef topicRef : extracted.getTopicRefs()) {
-                    mergedRefs.put(topicRef.getTopic(), topicRef);
-                }
-
-                merged.setTopicRefs(mergedRefs.values());
-                return merged;
-            }
-            // TODO support merging TopicRefs in ContentMerger -- but remember to handle offsets!
-        };
+        this.contentMerger = new ContentMerger(MergeStrategy.MERGE, MergeStrategy.replaceTopicsBasedOn(SAME_TOPIC_SAME_TIME));
     }
     
     @Override

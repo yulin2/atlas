@@ -30,7 +30,7 @@ public class DefaultYouViewElementProcessor implements YouViewElementProcessor {
         this.extractor = extractor;
         this.resolver = resolver;
         this.writer = writer;
-        this.contentMerger = new ContentMerger(MergeStrategy.MERGE);
+        this.contentMerger = new ContentMerger(MergeStrategy.MERGE, MergeStrategy.KEEP);
     }
     
     @Override
