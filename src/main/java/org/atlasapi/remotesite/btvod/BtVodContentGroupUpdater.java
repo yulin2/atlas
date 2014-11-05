@@ -13,7 +13,6 @@ import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Described;
-import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -22,7 +21,6 @@ import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.remotesite.btvod.BtVodData.BtVodDataRow;
 import org.atlasapi.remotesite.btvod.portal.PortalClient;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.HashMultimap;
