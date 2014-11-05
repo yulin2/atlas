@@ -32,7 +32,7 @@ public class BtVodModule {
     private static final String PORTAL_BOXSET_GROUP = "03_tv/40_searcha-z/all";
     private static final String PORTAL_BOXOFFICE_GROUP = "01_boxoffice/35_searcha-z/all";
     private static final String PORTAL_BUY_TO_OWN_GROUP = "01_boxoffice/07_new_must_own_movies/all";
-    private static final String BOX_OFFICE_PICKS_GROUP = "05_on_demand_rcuod/50_misc_car_you/Misc_metabroadcast/Misc_metabroadcast_1";
+    private static final String BOX_OFFICE_PICKS_GROUP = "50_misc_car_you/Misc_metabroadcast/Misc_metabroadcast_1";
     
     private static final String MUSIC_CATEGORY = "Music";
     private static final String FILM_CATEGORY = "Film";
