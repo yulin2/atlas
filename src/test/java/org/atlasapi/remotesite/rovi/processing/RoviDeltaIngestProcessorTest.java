@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.rovi.processing;
 
+import static junit.framework.Assert.assertTrue;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForProgram;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeasonHistory;
@@ -11,12 +12,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Map;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
@@ -27,33 +27,24 @@ import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
-import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.remotesite.rovi.RoviConstants;
-import org.atlasapi.remotesite.rovi.RoviContentWriter;
+import org.atlasapi.remotesite.rovi.RoviTestUtils;
 import org.atlasapi.remotesite.rovi.indexing.KeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.model.RoviCulture;
-import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
-import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramLine;
-import org.atlasapi.remotesite.rovi.parsers.RoviEpisodeSequenceLineParser;
-import org.atlasapi.remotesite.rovi.parsers.RoviProgramDescriptionLineParser;
 import org.atlasapi.remotesite.rovi.parsers.RoviProgramLineParser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+
 
 @RunWith(MockitoJUnitRunner.class)
-public class RoviDeltaIngestProcessorTest {
+public class RoviDeltaIngestProcessorTest extends AbstractRoviIngestProcessorTest {
 
     private static final String EPISODE_PARENT_BRAND_ID = "22636949";
     private static final String SEASON_PARENT_BRAND_ID = "3667685";
@@ -86,14 +77,6 @@ public class RoviDeltaIngestProcessorTest {
     
     private RoviDeltaIngestProcessor processor;
 
-    @Mock private RoviContentWriter contentWriter;
-
-    @Mock private ContentResolver contentResolver;
-
-    @Mock private ScheduleFileProcessor scheduleProcessor;
-
-    private ArgumentCaptor<? extends Content> argument = ArgumentCaptor.forClass(Content.class);
-    
     @Before
     public void init() {
         instructContentResolver();
@@ -102,7 +85,7 @@ public class RoviDeltaIngestProcessorTest {
                 programIndexer(),
                 descriptionsIndexer(),
                 episodeSequenceIndexer(),
-                contentWriter,
+                roviContentWriter,
                 contentResolver,
                 scheduleProcessor,
                 new AuxiliaryCacheSupplier(contentResolver));
@@ -116,17 +99,10 @@ public class RoviDeltaIngestProcessorTest {
                 fileFromResource(PROGRAM_DESCRIPTION),
                 fileFromResource(EPISODE_SEQUENCE));
 
-        Mockito.verify(contentWriter, atLeastOnce()).writeContent(argument.capture());
+        assertTrue(contentWriter.hasWritten());
 
-        ImmutableMap<String, ? extends Content> items = Maps.uniqueIndex(argument.getAllValues(),
-                new Function<Content, String>() {
+        Map<String, ? extends Content> items = contentWriter.getItems();
 
-                    @Override
-                    public String apply(Content input) {
-                        return input.getCanonicalUri();
-                    }
-                });  
-        
         Content filmToInsert = items.get(canonicalUriForProgram("20049987"));
         assertThat(filmToInsert, notNullValue());
         assertThat(filmToInsert, is(Film.class));
@@ -143,7 +119,7 @@ public class RoviDeltaIngestProcessorTest {
         assertThat(filmToUpdate.getPublisher(), equalTo(Publisher.ROVI_EN_GB));
         assertThat(filmToUpdate.getEquivalentTo(), hasItem(LookupRef.from(parentFilm())));
 
-        Content brandToIns = items.get(canonicalUriForProgram("22636949"));
+        Content brandToIns = items.get(canonicalUriForProgram(EPISODE_PARENT_BRAND_ID));
         assertThat(brandToIns, notNullValue());
         assertThat(brandToIns, is(Brand.class));
         assertThat(brandToIns.getTitle(), equalTo("Il trenino Thomas e i suoi amici"));
@@ -215,30 +191,18 @@ public class RoviDeltaIngestProcessorTest {
                 new RoviProgramLineParser());
     }
     
-    private MapBasedKeyedFileIndexer<String, RoviProgramDescriptionLine> descriptionsIndexer() {
-        return new MapBasedKeyedFileIndexer<>(
-                RoviConstants.FILE_CHARSET,
-                new RoviProgramDescriptionLineParser());
-    }
-
-    private MapBasedKeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer() {
-        return new MapBasedKeyedFileIndexer<>(
-                RoviConstants.FILE_CHARSET,
-                new RoviEpisodeSequenceLineParser());
-    }
-    
     private void instructContentResolver() {
         when(contentResolver.findByCanonicalUris(Mockito.anyCollectionOf(String.class)))
             .thenReturn(unresolvedContent());
         
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(EPISODE_PARENT_BRAND_ID))))
-                .thenReturn(resolvedContent(parentBrand(EPISODE_PARENT_BRAND_ID)));
+            .thenAnswer(writtenOrUnresolved(EPISODE_PARENT_BRAND_ID));
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(SEASON_PARENT_BRAND_ID))))
             .thenReturn(resolvedContent(parentBrand(SEASON_PARENT_BRAND_ID)));
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PARENT_FILM_ID))))
-                .thenReturn(resolvedContent(parentFilm()));
+            .thenReturn(resolvedContent(parentFilm()));
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(FILM_ID_TO_UPDATE))))
             .thenReturn(resolvedContent(new Film(canonicalUriForProgram(FILM_ID_TO_UPDATE), "", Publisher.ROVI_EN_GB)));
@@ -248,12 +212,6 @@ public class RoviDeltaIngestProcessorTest {
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PROGRAM_TO_DELETE))))
             .thenReturn(resolvedContent(new Film(canonicalUriForProgram(PROGRAM_TO_DELETE), "", Publisher.ROVI_EN_GB)));
-
-        when(contentResolver.findByUris(ImmutableList.of(canonicalUriForSeasonHistory(SEASON_HISTORY_ID_TO_UPDATE))))
-            .thenReturn(resolvedContent(new Series(canonicalUriForSeason(SEASON_ID_TO_UPDATE), "", Publisher.ROVI_EN_GB)));
-
-        when(contentResolver.findByUris(ImmutableList.of(canonicalUriForSeasonHistory(SEASON_HISTORY_ID_TO_DELETE))))
-            .thenReturn(resolvedContent(new Series(canonicalUriForSeason(SEASON_ID_TO_DELETE), "", Publisher.ROVI_EN_GB)));
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PROGRAM_ID_WITH_DESC_TO_DEL))))
             .thenReturn(resolvedContent(filmWithDescToDelete()));
@@ -266,9 +224,16 @@ public class RoviDeltaIngestProcessorTest {
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(EPISODE_WITH_SEQ_TO_DEL))))
             .thenReturn(resolvedContent(episodeWithSeqToDelete()));
-        
-    }
 
+        when(contentResolver.findByUris(Mockito.anyCollectionOf(String.class)))
+                .thenReturn(RoviTestUtils.unresolvedContent());
+
+        when(contentResolver.findByUris(ImmutableList.of(canonicalUriForSeasonHistory(SEASON_HISTORY_ID_TO_UPDATE))))
+                .thenReturn(resolvedContent(new Series(canonicalUriForSeason(SEASON_ID_TO_UPDATE), "", Publisher.ROVI_EN_GB)));
+
+        when(contentResolver.findByUris(ImmutableList.of(canonicalUriForSeasonHistory(SEASON_HISTORY_ID_TO_DELETE))))
+                .thenReturn(resolvedContent(new Series(canonicalUriForSeason(SEASON_ID_TO_DELETE), "", Publisher.ROVI_EN_GB)));
+    }
 
     private Episode episodeWithSeqToDelete() {
         Episode episodeWithSeqToDel = new Episode(canonicalUriForProgram(EPISODE_WITH_SEQ_TO_DEL), "", Publisher.ROVI_EN);
