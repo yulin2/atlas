@@ -50,7 +50,7 @@ public class LocalOrRemoteNitroFetcher {
         this.resolver = resolver;
         this.contentAdapter = contentAdapter;
         this.clock = clock;
-        this.contentMerger = new ContentMerger(MergeStrategy.MERGE);
+        this.contentMerger = new ContentMerger(MergeStrategy.MERGE, MergeStrategy.KEEP);
     }
     
     public ResolveOrFetchResult<Item> resolveOrFetchItem(Iterable<Broadcast> broadcasts) throws NitroException {

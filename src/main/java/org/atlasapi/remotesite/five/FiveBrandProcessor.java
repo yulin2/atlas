@@ -64,7 +64,7 @@ public class FiveBrandProcessor {
         this.contentResolver = checkNotNull(contentResolver);
         this.episodeProcessor = new FiveEpisodeProcessor(baseApiUrl, httpClient, 
                 channelMap, locationPolicyIds);
-        this.contentMerger = new ContentMerger(MergeStrategy.REPLACE);
+        this.contentMerger = new ContentMerger(MergeStrategy.REPLACE, MergeStrategy.KEEP);
     }
 
     public void processShow(Element element) {
