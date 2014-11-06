@@ -14,6 +14,7 @@ import org.atlasapi.remotesite.knowledgemotion.topics.spotlight.SpotlightKeyword
 import org.atlasapi.remotesite.knowledgemotion.topics.spotlight.SpotlightResourceParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
@@ -48,7 +49,8 @@ public class KnowledgeMotionModule {
         scheduler.schedule(knowledgeMotionUpdater().withName("KnowledgeMotion Spreadsheet Updater"), RepetitionRules.NEVER);
     }
 
-    private TopicGuesser topicGuesser() {
+    @Bean
+    public TopicGuesser topicGuesser() {
         return new TopicGuesser(
                 new SpotlightKeywordsExtractor(new SpotlightResourceParser()),
                 new KeyphraseTopicCache(mongo),

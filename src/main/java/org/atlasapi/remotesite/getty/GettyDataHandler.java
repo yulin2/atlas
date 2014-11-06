@@ -1,7 +1,11 @@
 package org.atlasapi.remotesite.getty;
 
-public interface GettyDataHandler {
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 
-    void handle(VideoResponse video);
-    
+interface GettyDataHandler {
+
+    Identified handle(VideoResponse video);
+    void write(Content content);
+
 }
