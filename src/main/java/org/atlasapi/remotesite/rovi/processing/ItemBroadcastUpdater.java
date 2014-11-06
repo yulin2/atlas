@@ -28,7 +28,7 @@ public class ItemBroadcastUpdater {
         this.contentWriter = checkNotNull(contentWriter);
     }
     
-    public void addBroadcasts(String uri, Iterable<Broadcast> newBroadcasts) {
+    public void addBroadcasts(String uri, Iterable<Broadcast> newBroadcasts, boolean replaceBroadcasts) {
         Maybe<Identified> resolved = contentResolver.findByCanonicalUris(ImmutableSet.of(uri)).getFirstValue();
         
         if (resolved.isNothing()) {
@@ -42,19 +42,32 @@ public class ItemBroadcastUpdater {
         }
         Item item = (Item) identified;
         Version version = Iterables.getOnlyElement(item.getVersions());
-        
-        SetView<Broadcast> newBroadcastsSetForContent = getNewSetOfBroadcasts(newBroadcasts, version);
-        version.setBroadcasts(newBroadcastsSetForContent);
+
+        version.setBroadcasts(mergeOrReplaceBroadcasts(version, newBroadcasts, replaceBroadcasts));
+
+        if (replaceBroadcasts) {
+            version.setBroadcasts(Sets.newHashSet(newBroadcasts));
+        } else {
+            SetView<Broadcast> newBroadcastsSetForContent = mergeWithExistentBroadcasts(newBroadcasts, version);
+            version.setBroadcasts(newBroadcastsSetForContent);
+        }
         
         contentWriter.createOrUpdate(item);
     }
 
-    private SetView<Broadcast> getNewSetOfBroadcasts(Iterable<Broadcast> newBroadcasts,
+    private Set<Broadcast> mergeOrReplaceBroadcasts(Version version,
+            Iterable<Broadcast> newBroadcasts,
+            boolean replaceBroadcasts) {
+        if (replaceBroadcasts) {
+            return Sets.newHashSet(newBroadcasts);
+        } else {
+            return mergeWithExistentBroadcasts(newBroadcasts, version);
+        }
+    }
+
+    private SetView<Broadcast> mergeWithExistentBroadcasts(Iterable<Broadcast> newBroadcasts,
             Version version) {
         Set<Broadcast> existingBroadcasts = version.getBroadcasts();
-        //existingBroadcasts.addAll(ImmutableSet.copyOf(newBroadcasts));
-        
-        SetView<Broadcast> newBroadcastsSetForContent = Sets.union(Sets.newHashSet(newBroadcasts), existingBroadcasts);
-        return newBroadcastsSetForContent;
+        return Sets.union(Sets.newHashSet(newBroadcasts), existingBroadcasts);
     }
 }
