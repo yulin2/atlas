@@ -27,7 +27,6 @@ public class GettyModule {
     @Value("${getty.client.user}") private String clientUsername;
     @Value("${getty.client.password}") private String clientPassword;
     @Value("${getty.pagination}") private String gettyPagination;
-    @Value("${getty.quoteSearchPhrases}") private boolean quoteSearchPhrases;
 
     @Value("${iris.pagination}") private String irisPagination;
     @Value("${iris.user}") private String irisUser;
@@ -49,7 +48,7 @@ public class GettyModule {
     private GettyClient gettyClient() {
         return new GettyClient(
                 new GettyTokenFetcher(clientId, clientSecret, clientUsername, clientPassword),
-                Integer.valueOf(gettyPagination), quoteSearchPhrases
+                Integer.valueOf(gettyPagination)
         );
     }
 
