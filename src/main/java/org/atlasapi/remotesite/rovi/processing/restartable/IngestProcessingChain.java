@@ -1,12 +1,15 @@
 package org.atlasapi.remotesite.rovi.processing.restartable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.atlasapi.remotesite.rovi.processing.RoviDataProcessingResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -17,7 +20,7 @@ public class IngestProcessingChain {
     private final ImmutableList<IngestProcessingStep> steps;
     private final static int NOT_FOUND = -1;
 
-    private IngestProcessingChain(List<IngestProcessingStep> steps) {
+    public IngestProcessingChain(List<IngestProcessingStep> steps) {
         this.steps = ImmutableList.copyOf(steps);
     }
 
@@ -25,15 +28,16 @@ public class IngestProcessingChain {
         executeAll(steps);
     }
 
-    public void execute(Optional<IngestStatus> maybeRecoveredStatus) {
-        if (maybeRecoveredStatus.isPresent()) {
-            restartFrom(maybeRecoveredStatus.get());
+    public void execute(@Nullable IngestStatus recoveredStatus) {
+        if (recoveredStatus != null) {
+            restartFrom(recoveredStatus);
         } else {
             execute();
         }
     }
 
     public void restartFrom(IngestStatus recoveredStatus) {
+        checkNotNull(recoveredStatus, "A not null recovered status should be provided");
         if (recoveredStatus.isCompleted()) {
             execute();
             return;
@@ -43,14 +47,13 @@ public class IngestProcessingChain {
         int index = Iterables.indexOf(steps, isStep(recoveredStep));
 
         if (index == NOT_FOUND) {
-            LOG.warn("Step "
+            throw new UnrecoverableIngestStatusException("Step "
                     + recoveredStep.name()
-                    + " not found in the chain, maybe a not restartable step? Skipping all the steps");
-            return;
+                    + " not found in the chain, can't proceed with the ingest");
         }
 
-        Iterable<IngestProcessingStep> stepsToExecute = skipAlreadyProcessedSteps(index);
-        executeAll(stepsToExecute, recoveredStatus);
+        Iterable<IngestProcessingStep> remainingSteps = skipAlreadyProcessedSteps(index);
+        executeAllRemainingSteps(remainingSteps, recoveredStatus);
     }
 
     private Iterable<IngestProcessingStep> skipAlreadyProcessedSteps(int numberOfStepsToSkip) {
@@ -64,18 +67,15 @@ public class IngestProcessingChain {
         }
     }
 
-    private void executeAll(Iterable<IngestProcessingStep> stepsToExecute,
+    private void executeAllRemainingSteps(Iterable<IngestProcessingStep> remainingSteps,
             IngestStatus recoveredIngestStatus) {
-        IngestProcessingStep recoveredStep = Iterables.getFirst(stepsToExecute, null);
+        // Add a precondition
+        IngestProcessingStep recoveredStep = Iterables.getFirst(remainingSteps, null);
 
         if (recoveredStep != null) {
             recoveredStep.execute(recoveredIngestStatus);
-            executeAll(Iterables.skip(stepsToExecute, 1));
+            executeAll(Iterables.skip(remainingSteps, 1));
         }
-    }
-
-    public static ChainBuilder withFirstStep(IngestProcessingStep firstStep) {
-        return new ChainBuilder(firstStep);
     }
 
     private Predicate<IngestProcessingStep> isStep(final IngestStep step) {
@@ -85,24 +85,6 @@ public class IngestProcessingChain {
                 return input.getStep().equals(step);
             }
         };
-    }
-
-    public static class ChainBuilder {
-        private final ImmutableList.Builder<IngestProcessingStep> steps = ImmutableList.builder();
-
-        private ChainBuilder(IngestProcessingStep firstStep) {
-            steps.add(firstStep);
-        }
-
-        public ChainBuilder andThen(IngestProcessingStep step) {
-            steps.add(step);
-            return this;
-        }
-
-        public IngestProcessingChain andFinally(IngestProcessingStep step) {
-            steps.add(step);
-            return new IngestProcessingChain(steps.build());
-        }
     }
 
 }

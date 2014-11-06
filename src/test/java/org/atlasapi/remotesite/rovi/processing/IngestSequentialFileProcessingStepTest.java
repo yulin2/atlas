@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 
-import org.atlasapi.remotesite.rovi.processing.restartable.IngestFileProcessingStep;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestSequentialFileProcessingStep;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatus;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatusStore;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestStep;
@@ -20,21 +20,21 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class IngestFileProcessingStepTest {
+public class IngestSequentialFileProcessingStepTest {
 
     private static final String FILE_PATH = "org/atlasapi/remotesite/rovi/program.txt";
 
-    @Mock private IngestStatusStore statusStore;
+    @Mock
+    private IngestStatusStore statusStore;
 
     @Test
     public void testAllLinesAreProcessedWithNoRecoveredStatus() throws IOException {
         File file = fileFromResource(FILE_PATH);
 
-        IngestFileProcessingStep ingestStep = IngestFileProcessingStep.forStep(BRANDS_NO_PARENT)
+        IngestSequentialFileProcessingStep ingestStep = IngestSequentialFileProcessingStep.builder(FILE_CHARSET, statusStore)
+                .withStep(BRANDS_NO_PARENT)
                 .withFile(file)
-                .withCharset(FILE_CHARSET)
                 .withProcessor(new CountingLineProcessor())
-                .withStatusPersistor(statusStore)
                 .build();
 
         long totalLines = countTotalLines(file, FILE_CHARSET);
@@ -48,17 +48,16 @@ public class IngestFileProcessingStepTest {
         File file = fileFromResource(FILE_PATH);
         IngestStatus recoveredStatus = new IngestStatus(BRANDS_NO_PARENT, 3);
 
-        IngestFileProcessingStep ingestStep = IngestFileProcessingStep.forStep(BRANDS_NO_PARENT)
+        IngestSequentialFileProcessingStep ingestStep = IngestSequentialFileProcessingStep.builder(FILE_CHARSET, statusStore)
+                .withStep(BRANDS_NO_PARENT)
                 .withFile(file)
-                .withCharset(FILE_CHARSET)
                 .withProcessor(new CountingLineProcessor())
-                .withStatusPersistor(statusStore)
                 .build();
 
         long totalLines = countTotalLines(file, FILE_CHARSET);
         RoviDataProcessingResult result = ingestStep.execute(recoveredStatus);
 
-        assertEquals(totalLines - recoveredStatus.getProcessedLine(), result.getProcessedLines());
+        assertEquals(totalLines - recoveredStatus.getLatestProcessedLine(), result.getProcessedLines());
     }
 
     @Test(expected = UnrecoverableIngestStatusException.class)
@@ -66,11 +65,10 @@ public class IngestFileProcessingStepTest {
         File file = fileFromResource(FILE_PATH);
         IngestStatus recoveredStatus = new IngestStatus(IngestStep.ITEMS_NO_PARENT, 3);
 
-        IngestFileProcessingStep ingestStep = IngestFileProcessingStep.forStep(BRANDS_NO_PARENT)
+        IngestSequentialFileProcessingStep ingestStep = IngestSequentialFileProcessingStep.builder(FILE_CHARSET, statusStore)
+                .withStep(BRANDS_NO_PARENT)
                 .withFile(file)
-                .withCharset(FILE_CHARSET)
                 .withProcessor(new CountingLineProcessor())
-                .withStatusPersistor(statusStore)
                 .build();
 
         ingestStep.execute(recoveredStatus);

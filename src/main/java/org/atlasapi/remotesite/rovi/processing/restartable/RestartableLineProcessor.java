@@ -17,7 +17,7 @@ public class RestartableLineProcessor implements LineProcessor<RoviDataProcessin
     private final IngestStatusStore statusPersistor;
     private final IngestStatus startingStatus;
 
-    private long processedLines = 0;
+    private long scannedLines = 0;
 
     public RestartableLineProcessor(LineProcessor<RoviDataProcessingResult> delegate,
             IngestStatus startingStatus, IngestStatusStore statusPersistor) {
@@ -28,9 +28,9 @@ public class RestartableLineProcessor implements LineProcessor<RoviDataProcessin
 
     @Override
     public boolean processLine(String line) throws IOException {
-        processedLines++;
+        scannedLines++;
 
-        if (processedLines <= startingStatus.getProcessedLine()) {
+        if (scannedLines <= startingStatus.getLatestProcessedLine()) {
             return CONTINUE_SKIPPING;
         }
 
@@ -42,13 +42,13 @@ public class RestartableLineProcessor implements LineProcessor<RoviDataProcessin
 
     private void persistCurrentStatusIfNeeded() {
         if (shouldPersist()) {
-            IngestStatus newStatus = new IngestStatus(startingStatus.getCurrentStep(), processedLines);
+            IngestStatus newStatus = new IngestStatus(startingStatus.getCurrentStep(), scannedLines);
             statusPersistor.persistIngestStatus(newStatus);
         }
     }
 
     private boolean shouldPersist() {
-        return processedLines % UPDATE_STATUS_EVERY_N_LINES == 0;
+        return scannedLines % UPDATE_STATUS_EVERY_N_LINES == 0;
     }
 
     @Override

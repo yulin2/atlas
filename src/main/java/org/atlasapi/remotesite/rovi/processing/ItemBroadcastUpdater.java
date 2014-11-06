@@ -52,7 +52,7 @@ public class ItemBroadcastUpdater {
     private SetView<Broadcast> getNewSetOfBroadcasts(Iterable<Broadcast> newBroadcasts,
             Version version) {
         Set<Broadcast> existingBroadcasts = version.getBroadcasts();
-        existingBroadcasts.addAll(ImmutableSet.copyOf(newBroadcasts));
+        //existingBroadcasts.addAll(ImmutableSet.copyOf(newBroadcasts));
         
         SetView<Broadcast> newBroadcastsSetForContent = Sets.union(Sets.newHashSet(newBroadcasts), existingBroadcasts);
         return newBroadcastsSetForContent;

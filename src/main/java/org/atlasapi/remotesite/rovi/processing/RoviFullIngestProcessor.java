@@ -19,16 +19,18 @@ import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
 import org.atlasapi.remotesite.rovi.parsers.RoviProgramLineParser;
 import org.atlasapi.remotesite.rovi.parsers.RoviSeasonHistoryLineParser;
 import org.atlasapi.remotesite.rovi.populators.ContentPopulatorSupplier;
-import org.atlasapi.remotesite.rovi.processing.restartable.IngestFileProcessingStep;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestSequentialFileProcessingStep;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestProcessingChain;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestProcessingStep;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatus;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatusStore;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestStep;
+import org.atlasapi.remotesite.rovi.processing.restartable.NonRestartableFileProcessingStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 
 public class RoviFullIngestProcessor implements RoviIngestProcessor {
     private final static Logger LOG = LoggerFactory.getLogger(RoviFullIngestProcessor.class);
@@ -41,7 +43,7 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
     private final ScheduleFileProcessor scheduleFileProcessor;
     private final AuxiliaryCacheSupplier auxCacheSupplier;
     private final IngestStatusStore ingestStatusStore;
-    
+
     public RoviFullIngestProcessor(
             KeyedFileIndexer<String, RoviProgramDescriptionLine> programDescriptionIndexer,
             KeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer,
@@ -73,27 +75,17 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
             
             LOG.info("Start processing programs");
 
+            ImmutableList.Builder<IngestProcessingStep> processingSteps = ImmutableList.builder();
+            processingSteps.add(brandsWithoutParentIngestStep(programFile, descriptionIndex, episodeSequenceIndex));
+            processingSteps.add(brandsWithParentIngestStep(programFile, descriptionIndex, episodeSequenceIndex));
+            processingSteps.add(seriesIngestStep(seasonsFile));
+            processingSteps.add(itemWithoutParentIngestStep(programFile, descriptionIndex, episodeSequenceIndex));
+            processingSteps.add(itemWithParentIngestStep(programFile, descriptionIndex, episodeSequenceIndex));
+            processingSteps.add(broadcastsIngestStep(scheduleFile));
+            IngestProcessingChain ingestChain = new IngestProcessingChain(processingSteps.build());
+
             Optional<IngestStatus> maybeRecoveredStatus = ingestStatusStore.getIngestStatus();
-
-            IngestProcessingChain ingestChain = IngestProcessingChain
-                    .withFirstStep(brandsWithoutParentIngestStep(programFile,
-                            descriptionIndex,
-                            episodeSequenceIndex))
-                    .andThen(brandsWithParentIngestStep(programFile, descriptionIndex, episodeSequenceIndex))
-                    .andThen(seriesIngestStep(seasonsFile))
-                    .andThen(itemWithoutParentIngestStep(programFile, descriptionIndex, episodeSequenceIndex))
-                    .andFinally(itemWithParentIngestStep(programFile, descriptionIndex, episodeSequenceIndex));
-
-            ingestChain.execute(maybeRecoveredStatus);
-
-            /**
-             * Broadcasts processing is not restartable at the moment because its different nature
-             * compared to the other steps. It's quicker than other steps though, so not a massive problem for now
-             */
-            ingestStatusStore.persistIngestStatus(new IngestStatus(IngestStep.BROADCASTS, 0));
-
-            // TODO: schedule processor should be consistent with the other steps
-            processBroadcasts(scheduleFile);
+            ingestChain.execute(maybeRecoveredStatus.orNull());
 
             ingestStatusStore.markAsCompleted();
             
@@ -104,10 +96,8 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
         }
     }
 
-    private void processBroadcasts(File scheduleFile) throws IOException {
-        scheduleFileProcessor.process(scheduleFile);
-        
-        LOG.info("Processing schedule complete");
+    private IngestSequentialFileProcessingStep.Builder processingStepBuilder() {
+        return IngestSequentialFileProcessingStep.builder(FILE_CHARSET, ingestStatusStore);
     }
 
     private IngestProcessingStep brandsWithoutParentIngestStep(File programFile,
@@ -123,11 +113,10 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
                 contentPopulator(descriptionIndex, episodeSequenceIndex)
         );
 
-        return IngestFileProcessingStep.forStep(IngestStep.BRANDS_NO_PARENT)
+        return processingStepBuilder()
+                .withStep(IngestStep.BRANDS_NO_PARENT)
                 .withFile(programFile)
-                .withCharset(FILE_CHARSET)
                 .withProcessor(ingestor)
-                .withStatusPersistor(ingestStatusStore)
                 .build();
     }
 
@@ -144,11 +133,10 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
                 contentPopulator(descriptionIndex, episodeSequenceIndex)
         );
 
-        return IngestFileProcessingStep.forStep(IngestStep.BRANDS_WITH_PARENT)
+        return processingStepBuilder()
+                .withStep(IngestStep.BRANDS_WITH_PARENT)
                 .withFile(programFile)
-                .withCharset(FILE_CHARSET)
                 .withProcessor(ingestor)
-                .withStatusPersistor(ingestStatusStore)
                 .build();
     }
 
@@ -160,11 +148,10 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
                 contentWriter,
                 auxCacheSupplier.parentPublisherCache(MAX_CACHE_SIZE));
 
-        return IngestFileProcessingStep.forStep(IngestStep.SERIES)
+        return processingStepBuilder()
+                .withStep(IngestStep.SERIES)
                 .withFile(seasonsFile)
-                .withCharset(FILE_CHARSET)
                 .withProcessor(ingestor)
-                .withStatusPersistor(ingestStatusStore)
                 .build();
     }
 
@@ -181,13 +168,11 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
                 contentPopulator(descriptionIndex, episodeSequenceIndex)
         );
 
-        return IngestFileProcessingStep.forStep(IngestStep.ITEMS_NO_PARENT)
+        return  processingStepBuilder()
+                .withStep(IngestStep.ITEMS_NO_PARENT)
                 .withFile(programFile)
-                .withCharset(FILE_CHARSET)
                 .withProcessor(ingestor)
-                .withStatusPersistor(ingestStatusStore)
                 .build();
-
     }
 
     private IngestProcessingStep itemWithParentIngestStep(File programFile,
@@ -203,11 +188,18 @@ public class RoviFullIngestProcessor implements RoviIngestProcessor {
                 contentPopulator(descriptionIndex, episodeSequenceIndex)
         );
 
-        return IngestFileProcessingStep.forStep(IngestStep.ITEMS_WITH_PARENT)
+        return processingStepBuilder()
+                .withStep(IngestStep.ITEMS_WITH_PARENT)
                 .withFile(programFile)
-                .withCharset(FILE_CHARSET)
                 .withProcessor(ingestor)
-                .withStatusPersistor(ingestStatusStore)
+                .build();
+    }
+
+    private IngestProcessingStep broadcastsIngestStep(File scheduleFile) {
+        return NonRestartableFileProcessingStep.builder()
+                .withStep(IngestStep.BROADCASTS)
+                .withFile(scheduleFile)
+                .withFileProcessor(scheduleFileProcessor)
                 .build();
     }
 

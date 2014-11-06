@@ -23,12 +23,13 @@ import com.google.common.io.Files;
 public class RestartableLineProcessorTest {
 
     private final static int LINES_TO_SKIP = 3;
+    private final static int START_FROM_BEGINNING = 0;
     private static final String FILE_PATH = "org/atlasapi/remotesite/rovi/program.txt";
 
     @Mock private IngestStatusStore statusStore;
 
     @Test
-    public void testLinesAreSkipped() throws IOException {
+    public void testLinesAreSkippedWhenRecoveringFromLatestProcessedLine() throws IOException {
         IngestStatus ingestStatus = new IngestStatus(IngestStep.BRANDS_NO_PARENT, LINES_TO_SKIP);
 
         RestartableLineProcessor skippingProcessor = new RestartableLineProcessor(new CountingLineProcessor(),
@@ -42,6 +43,23 @@ public class RestartableLineProcessorTest {
                 skippingProcessor);
 
         assertEquals(totalLinesInFile - LINES_TO_SKIP, skippingResult.getProcessedLines());
+    }
+
+    @Test
+    public void testAllLinesAreProcessedWhenStartingFromBeginning() throws IOException {
+        IngestStatus ingestStatus = new IngestStatus(IngestStep.BRANDS_NO_PARENT, START_FROM_BEGINNING);
+
+        RestartableLineProcessor skippingProcessor = new RestartableLineProcessor(new CountingLineProcessor(),
+                ingestStatus,
+                statusStore);
+
+        long totalLinesInFile = countTotalLines(fileFromResource(FILE_PATH), FILE_CHARSET);
+
+        RoviDataProcessingResult result = Files.readLines(fileFromResource(FILE_PATH),
+                FILE_CHARSET,
+                skippingProcessor);
+
+        assertEquals(totalLinesInFile, result.getProcessedLines());
     }
 
     private long countTotalLines(File file, Charset fileCharset) throws IOException {

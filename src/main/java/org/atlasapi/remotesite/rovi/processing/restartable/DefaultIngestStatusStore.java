@@ -39,14 +39,15 @@ public class DefaultIngestStatusStore implements IngestStatusStore {
     public void persistIngestStatus(IngestStatus newStatus) {
         Map<String, Object> values = ImmutableMap.<String, Object>builder()
                 .put(STEP_KEY, newStatus.getCurrentStep().name())
-                .put(LAST_LINE_KEY, newStatus.getProcessedLine())
+                .put(LAST_LINE_KEY, newStatus.getLatestProcessedLine())
                 .build();
 
         store.storeState(ROVI_FULL_INGEST_JOB_KEY,
                 values);
     }
 
-    @Override public void markAsCompleted() {
+    @Override
+    public void markAsCompleted() {
         persistIngestStatus(IngestStatus.COMPLETED);
     }
 

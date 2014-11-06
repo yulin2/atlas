@@ -14,6 +14,8 @@ import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.model.ScheduleLine;
 import org.atlasapi.remotesite.rovi.parsers.ScheduleLineParser;
 import org.atlasapi.remotesite.rovi.populators.ScheduleLineBroadcastExtractor;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,12 +25,14 @@ import com.google.common.collect.FluentIterable;
 import com.metabroadcast.common.base.Maybe;
 
 
-public class ScheduleFileProcessor {
+public class ScheduleFileProcessor implements FileProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(ScheduleFileProcessor.class);
     
     private final ItemBroadcastUpdater itemBroadcastUpdater;
     private final ScheduleLineBroadcastExtractor scheduleLineBroadcastExtractor;
+    private int processedItems = 0;
+    private int failedItems = 0;
     
     public ScheduleFileProcessor(ItemBroadcastUpdater itemBroadcastUpdater, 
             ScheduleLineBroadcastExtractor scheduleLineBroadcastExtractor) {
@@ -36,11 +40,12 @@ public class ScheduleFileProcessor {
         this.scheduleLineBroadcastExtractor = checkNotNull(scheduleLineBroadcastExtractor);
     }
     
-    public void process(File scheduleFile) throws IOException {
+    public RoviDataProcessingResult process(File scheduleFile) throws IOException {
         MapBasedKeyedFileIndexer<String, ScheduleLine> scheduleIndexer = new MapBasedKeyedFileIndexer<>(
                 RoviConstants.FILE_CHARSET,
                 new ScheduleLineParser());
-        
+
+        DateTime start = DateTime.now(DateTimeZone.UTC);
         log.trace("Start processing schedule ingest of {}", scheduleFile.getCanonicalPath());
         KeyedFileIndex<String, ScheduleLine> index = scheduleIndexer.index(scheduleFile, Predicates.not(IS_DELETE));
         
@@ -54,8 +59,10 @@ public class ScheduleFileProcessor {
                                                                          .transform(Maybe.<Broadcast>requireValueFunction());
                     
                     itemBroadcastUpdater.addBroadcasts(canonicalUriForProgram(programmeId), broadcasts);
+                    processedItems++;
                 } catch (Exception e) {
                     log.error("Rovi programme ID " + programmeId, e);
+                    failedItems++;
                 }
             }
             log.trace("Done processing schedule ingest of {}", scheduleFile.getCanonicalPath());
@@ -63,6 +70,11 @@ public class ScheduleFileProcessor {
         finally {
             index.releaseResources();
         }
+
+        return new RoviDataProcessingResult(processedItems,
+                failedItems,
+                start,
+                DateTime.now(DateTimeZone.UTC));
     }
     
     private final Function<ScheduleLine, Maybe<Broadcast>> toBroadcast = new Function<ScheduleLine, Maybe<Broadcast>>() {
