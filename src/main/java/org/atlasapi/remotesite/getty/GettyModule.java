@@ -24,6 +24,8 @@ public class GettyModule {
 
     @Value("${getty.client.id}") private String clientId;
     @Value("${getty.client.secret}") private String clientSecret;
+    @Value("${getty.client.user}") private String clientUsername;
+    @Value("${getty.client.password}") private String clientPassword;
     @Value("${getty.pagination}") private String gettyPagination;
     @Value("${getty.quoteSearchPhrases}") private boolean quoteSearchPhrases;
 
@@ -45,7 +47,10 @@ public class GettyModule {
     }
 
     private GettyClient gettyClient() {
-        return new GettyClient(new GettyTokenFetcher(clientId, clientSecret), Integer.valueOf(gettyPagination), quoteSearchPhrases);
+        return new GettyClient(
+                new GettyTokenFetcher(clientId, clientSecret, clientUsername, clientPassword),
+                Integer.valueOf(gettyPagination), quoteSearchPhrases
+        );
     }
 
 }

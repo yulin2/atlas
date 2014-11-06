@@ -22,43 +22,49 @@ import com.google.gson.JsonParser;
 public class GettyTokenFetcher {
 
     private static final String GETTY_OAUTH_URL = "https://connect.gettyimages.com/oauth2/token"; 
-    private static final String GRANT_TYPE = "grant_type";
-    private static final String CLIENT_CREDENTIALS = "client_credentials";
-    private static final String CLIENT_ID_KEY = "client_id";
-    private static final String CLIENT_SECRET_KEY = "client_secret";
-    private static final String ACCES_TOKEN_KEY = "access_token";
-    
+    private static final String ACCESS_TOKEN_KEY = "access_token";
+
     private final String clientId;
     private final String clientSecret;
-    
-    public GettyTokenFetcher(String clientId, String clientSecret) {
+    private final String username;
+    private final String password;
+
+    public GettyTokenFetcher(String clientId, String clientSecret, String username, String password) {
         this.clientId = checkNotNull(clientId);
         this.clientSecret = checkNotNull(clientSecret);
+        this.username = checkNotNull(username);
+        this.password = checkNotNull(password);
     }
-    
+
     public String getToken() throws ClientProtocolException, IOException {
         String oauth = oauth();
         return parseToken(oauth);
     }
-    
+
     private String oauth() throws ClientProtocolException, IOException {
         HttpPost post = new HttpPost(GETTY_OAUTH_URL);
-        
+
         Builder<BasicNameValuePair> params = new ImmutableList.Builder<BasicNameValuePair>();
-        params.add(new BasicNameValuePair(GRANT_TYPE, CLIENT_CREDENTIALS));
-        params.add(new BasicNameValuePair(CLIENT_ID_KEY, clientId));
-        params.add(new BasicNameValuePair(CLIENT_SECRET_KEY, clientSecret));
+        params.add(new BasicNameValuePair("grant_type", "password"));
+        params.add(new BasicNameValuePair("client_id", clientId));
+        params.add(new BasicNameValuePair("client_secret", clientSecret));
+        params.add(new BasicNameValuePair("username", username));
+        params.add(new BasicNameValuePair("password", password));
+        // This could, if necessary, hold a refresh token instead of the username and password.
+        // The refresh token would, however, expire after a year, as well as if the password changed.
+        // See https://github.com/gettyimages/connect/blob/master/oauth2.md
+
         post.setEntity(new UrlEncodedFormEntity(params.build()));
-        
+
         HttpResponse resp = new DefaultHttpClient().execute(post);
         InputStreamReader reader = new InputStreamReader(resp.getEntity().getContent());
         return CharStreams.toString(reader);
     }
-    
+
     private String parseToken(String content) {
         JsonObject parse = (JsonObject) new JsonParser().parse(content);
-        JsonElement element = parse.get(ACCES_TOKEN_KEY);
+        JsonElement element = parse.get(ACCESS_TOKEN_KEY);
         return element.getAsString();
     }
-    
+
 }
