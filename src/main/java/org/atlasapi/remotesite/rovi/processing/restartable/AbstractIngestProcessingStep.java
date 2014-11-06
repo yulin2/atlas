@@ -33,6 +33,7 @@ public abstract class AbstractIngestProcessingStep implements IngestProcessingSt
 
     private void ensureRecoveredStepIsValid(IngestStatus recoveredIngestStatus) {
         if (!recoveredIngestStatus.getCurrentStep().equals(step)) {
+            // TODO: Make this message more clear with context
             String errorMsg = "Step %s cannot be recovered from step %s";
             throw new UnrecoverableIngestStatusException(String.format(errorMsg,
                     recoveredIngestStatus.getCurrentStep().name(),

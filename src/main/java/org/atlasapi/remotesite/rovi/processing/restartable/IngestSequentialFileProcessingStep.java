@@ -6,20 +6,19 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import org.atlasapi.remotesite.rovi.processing.IngestStepFailedException;
 import org.atlasapi.remotesite.rovi.processing.RoviDataProcessingResult;
 
 import com.google.common.io.Files;
 import com.google.common.io.LineProcessor;
 
-public class IngestFileProcessingStep extends AbstractIngestProcessingStep {
+public class IngestSequentialFileProcessingStep extends AbstractIngestProcessingStep {
 
     private final LineProcessor<RoviDataProcessingResult> processor;
     private final File file;
     private final Charset charset;
     private final IngestStatusStore persistor;
 
-    private IngestFileProcessingStep(IngestStep step,
+    private IngestSequentialFileProcessingStep(IngestStep step,
             LineProcessor<RoviDataProcessingResult> delegate, File file, Charset charset,
             IngestStatusStore persistor) {
         super(step);
@@ -34,8 +33,8 @@ public class IngestFileProcessingStep extends AbstractIngestProcessingStep {
         return execute(new RestartableLineProcessor(processor, ingestStatus, persistor));
     }
 
-    public static Builder forStep(IngestStep step) {
-        return new Builder(step);
+    public static Builder builder(Charset charset, IngestStatusStore persistor) {
+        return new Builder(charset, persistor);
     }
 
     private RoviDataProcessingResult execute(LineProcessor<RoviDataProcessingResult> processor) {
@@ -53,8 +52,14 @@ public class IngestFileProcessingStep extends AbstractIngestProcessingStep {
         private Charset charset;
         private IngestStatusStore persistor;
 
-        private Builder(IngestStep step) {
+        private Builder(Charset charset, IngestStatusStore persistor) {
+            this.charset = charset;
+            this.persistor = persistor;
+        }
+
+        public Builder withStep(IngestStep step) {
             this.step = step;
+            return this;
         }
 
         public Builder withProcessor(LineProcessor<RoviDataProcessingResult> processor) {
@@ -67,18 +72,8 @@ public class IngestFileProcessingStep extends AbstractIngestProcessingStep {
             return this;
         }
 
-        public Builder withCharset(Charset charset) {
-            this.charset = charset;
-            return this;
-        }
-
-        public Builder withStatusPersistor(IngestStatusStore persistor) {
-            this.persistor = persistor;
-            return this;
-        }
-
-        public IngestFileProcessingStep build() {
-            return new IngestFileProcessingStep(step, processor, file, charset, persistor);
+        public IngestSequentialFileProcessingStep build() {
+            return new IngestSequentialFileProcessingStep(step, processor, file, charset, persistor);
         }
     }
 }

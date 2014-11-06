@@ -11,6 +11,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -184,6 +186,7 @@ public class RoviFullIngestProcessorTest {
         assertThat(episode2.getSeriesRef(), equalTo(ParentRef.parentRefFrom(parentSeries())));
         assertThat(episode2.getContainer(), equalTo(ParentRef.parentRefFrom(parentBrand())));
 
+        verify(scheduleProcessor, times(1)).process(fileFromResource(SCHEDULE));
     }
 
     private MapBasedKeyedFileIndexer<String, RoviProgramDescriptionLine> descriptionsIndexer() {

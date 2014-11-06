@@ -8,10 +8,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestProcessingChain;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestProcessingStep;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatus;
 import org.atlasapi.remotesite.rovi.processing.restartable.IngestStep;
+import org.atlasapi.remotesite.rovi.processing.restartable.UnrecoverableIngestStatusException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.collect.Lists;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IngestProcessingChainTest {
@@ -32,18 +36,20 @@ public class IngestProcessingChainTest {
     @Mock
     private IngestProcessingStep step3;
 
+    private List<IngestProcessingStep> steps;
+
     @Before
     public void init() {
         when(step1.getStep()).thenReturn(BRANDS_NO_PARENT);
         when(step2.getStep()).thenReturn(BRANDS_WITH_PARENT);
         when(step3.getStep()).thenReturn(ITEMS_NO_PARENT);
+
+        steps = Lists.newArrayList(step1, step2, step3);
     }
 
     @Test
     public void testShouldExecuteAllTheStepsInTheChain() {
-        IngestProcessingChain processingChain = IngestProcessingChain.withFirstStep(step1)
-                .andThen(step2)
-                .andFinally(step3);
+        IngestProcessingChain processingChain = new IngestProcessingChain(steps);
 
         processingChain.execute();
 
@@ -57,9 +63,7 @@ public class IngestProcessingChainTest {
         IngestStatus recoveredStatus = new IngestStatus(BRANDS_WITH_PARENT, 3);
         ArgumentCaptor<IngestStatus> argument = ArgumentCaptor.forClass(IngestStatus.class);
 
-        IngestProcessingChain processingChain = IngestProcessingChain.withFirstStep(step1)
-                .andThen(step2)
-                .andFinally(step3);
+        IngestProcessingChain processingChain = new IngestProcessingChain(steps);
 
         processingChain.restartFrom(recoveredStatus);
 
@@ -72,9 +76,7 @@ public class IngestProcessingChainTest {
 
     @Test
     public void testShouldExecuteAllTheStepsWhenRestartingFromCompleted() {
-        IngestProcessingChain processingChain = IngestProcessingChain.withFirstStep(step1)
-                .andThen(step2)
-                .andFinally(step3);
+        IngestProcessingChain processingChain = new IngestProcessingChain(steps);
 
         processingChain.restartFrom(IngestStatus.COMPLETED);
 
@@ -83,17 +85,10 @@ public class IngestProcessingChainTest {
         verify(step3, times(1)).execute();
     }
 
-    @Test
+    @Test(expected = UnrecoverableIngestStatusException.class)
     public void testShouldNotExecuteIfRecoveredStepNotPartOfTheChain() {
-        IngestProcessingChain processingChain = IngestProcessingChain.withFirstStep(step1)
-                .andThen(step2)
-                .andFinally(step3);
-
+        IngestProcessingChain processingChain = new IngestProcessingChain(steps);
         processingChain.restartFrom(new IngestStatus(IngestStep.BROADCASTS, 0));
-
-        verify(step1, times(0)).execute();
-        verify(step2, times(0)).execute();
-        verify(step3, times(0)).execute();
     }
 
 }

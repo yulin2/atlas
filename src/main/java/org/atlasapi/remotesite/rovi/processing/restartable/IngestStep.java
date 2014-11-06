@@ -11,4 +11,9 @@ public enum IngestStep {
     COMPLETED,
     ;
 
+
+    public boolean isCompleted() {
+        return this.equals(IngestStep.COMPLETED);
+    }
+
 }

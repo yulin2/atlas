@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.rovi.processing;
+package org.atlasapi.remotesite.rovi.processing.restartable;
 
 public class IngestStepFailedException extends RuntimeException {
 
