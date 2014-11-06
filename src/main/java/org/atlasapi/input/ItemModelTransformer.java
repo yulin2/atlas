@@ -92,14 +92,6 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         if (inputItem.getSeriesSummary() != null) {
             episode.setSeriesRef(new ParentRef(inputItem.getSeriesSummary().getUri()));
         }
-        if (!inputItem.getBroadcasts().isEmpty()) {
-            Set<Broadcast> broadcasts = Sets.newHashSet();
-            for (org.atlasapi.media.entity.simple.Broadcast broadcast : inputItem.getBroadcasts()) {
-                broadcasts.add(broadcastTransformer.transform(broadcast));
-            }
-            
-            episode.addVersion(new Version().copyWithBroadcasts(broadcasts));
-        }
         return episode;
     }
 
@@ -113,6 +105,14 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         }
         if (inputItem.getBrandSummary() != null) {
             item.setParentRef(new ParentRef(inputItem.getBrandSummary().getUri()));
+        }
+        if (!inputItem.getBroadcasts().isEmpty()) {
+            Set<Broadcast> broadcasts = Sets.newHashSet();
+            for (org.atlasapi.media.entity.simple.Broadcast broadcast : inputItem.getBroadcasts()) {
+                broadcasts.add(broadcastTransformer.transform(broadcast));
+            }
+            
+            item.addVersion(new Version().copyWithBroadcasts(broadcasts));
         }
         return item;
     }

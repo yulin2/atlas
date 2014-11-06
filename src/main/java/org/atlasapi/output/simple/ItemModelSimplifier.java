@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Service;
 import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.Subtitles;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.simple.BlackoutRestriction;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.Channel;
 import org.atlasapi.media.entity.simple.Identified;
@@ -88,6 +89,10 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                                                                                .put("cbj8", "cbhs") // Sky Sports 1 HD
                                                                                .put("cbj9", "cbht") // Sky Sports 2 HD
                                                                                .build();
+    
+    private static final Set<String> TEST_CHANNELS_FOR_BLACKOUT_FLAG = 
+            ImmutableSet.of("http://ref.atlasapi.org/channels/nickjr", "http://ref.atlasapi.org/channels/cartoonito");
+    
     
     private final NumberToShortStringCodec idCodec;
     private final ContainerSummaryResolver containerSummaryResolver;
@@ -307,7 +312,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
     private org.atlasapi.media.entity.simple.Broadcast simplify(Broadcast broadcast, Set<Annotation> annotations) {
         org.atlasapi.media.entity.simple.Broadcast simpleModel = new org.atlasapi.media.entity.simple.Broadcast(broadcast.getBroadcastOn(), broadcast.getTransmissionTime(),
-                broadcast.getTransmissionEndTime(), broadcast.getSourceId());
+                broadcast.getTransmissionEndTime(), broadcast.getSourceId(), blackoutRestriction(broadcast));
         if (broadcast.getActualTransmissionTime() != null) {
             simpleModel.setActualTransmissionTime(broadcast.getActualTransmissionTime().toDate());
         }
@@ -337,6 +342,21 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         }
 
         return simpleModel;
+    }
+    
+    private BlackoutRestriction blackoutRestriction(Broadcast broadcast) {
+
+        boolean hasBlackoutRestrction = (TEST_CHANNELS_FOR_BLACKOUT_FLAG.contains(broadcast.getBroadcastOn())
+                                            && broadcast.getTransmissionTime() != null
+                                            && broadcast.getTransmissionTime().getHourOfDay() % 2 == 0)
+                                         || ( broadcast.getBlackoutRestriction() != null
+                                               && Boolean.TRUE.equals(broadcast.getBlackoutRestriction().getAll()));
+        
+        if (hasBlackoutRestrction) {
+            return new BlackoutRestriction(true);
+        } else {
+            return null;
+        }
     }
     
     private Channel simplify(org.atlasapi.media.channel.Channel channel, Set<Annotation> annotations, 
