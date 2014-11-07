@@ -43,8 +43,9 @@ public abstract class RoviActionLineIngestor<T extends KeyedActionLine<?>, CONTE
     }
 
     private void handleInsert(T parsedLine) throws IndexAccessException {
-        CONTENT content;
-        content = createContent(parsedLine);
+        Optional<CONTENT> resolved = resolveContent(parsedLine);
+        CONTENT content = resolved.isPresent() ? resolved.get() : createContent(parsedLine);
+
         populateContent(content, parsedLine);
         contentWriter.writeContent(content);
     }
