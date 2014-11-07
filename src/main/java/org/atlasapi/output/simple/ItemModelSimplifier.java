@@ -89,11 +89,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                                                                                .put("cbj8", "cbhs") // Sky Sports 1 HD
                                                                                .put("cbj9", "cbht") // Sky Sports 2 HD
                                                                                .build();
-    
-    private static final Set<String> TEST_CHANNELS_FOR_BLACKOUT_FLAG = 
-            ImmutableSet.of("http://ref.atlasapi.org/channels/nickjr", "http://ref.atlasapi.org/channels/cartoonito");
-    
-    
+
     private final NumberToShortStringCodec idCodec;
     private final ContainerSummaryResolver containerSummaryResolver;
     private final ChannelResolver channelResolver;
@@ -344,14 +340,8 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     }
     
     private BlackoutRestriction blackoutRestriction(Broadcast broadcast) {
-
-        boolean hasBlackoutRestrction = (TEST_CHANNELS_FOR_BLACKOUT_FLAG.contains(broadcast.getBroadcastOn())
-                                            && broadcast.getTransmissionTime() != null
-                                            && broadcast.getTransmissionTime().getHourOfDay() % 2 == 0)
-                                         || ( broadcast.getBlackoutRestriction() != null
-                                               && Boolean.TRUE.equals(broadcast.getBlackoutRestriction().getAll()));
-        
-        if (hasBlackoutRestrction) {
+        if (broadcast.getBlackoutRestriction() != null
+                && Boolean.TRUE.equals(broadcast.getBlackoutRestriction().getAll())) {
             return new BlackoutRestriction(true);
         } else {
             return null;

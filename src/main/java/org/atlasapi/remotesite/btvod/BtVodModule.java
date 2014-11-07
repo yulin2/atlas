@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentGroupResolver;
@@ -21,9 +20,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
@@ -33,9 +29,11 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class BtVodModule {
 
-    private static final String PORTAL_BOXSET_GROUP = "03_tv/40_searcha-z";
-    private static final String PORTAL_BOXOFFICE_GROUP = "01_boxoffice/35_searcha-z";
-    private static final String PORTAL_BUY_TO_OWN_GROUP = "01_boxoffice/07_new_must_own_movies";
+    private static final String PORTAL_BOXSET_GROUP = "03_tv/40_searcha-z/all";
+    private static final String PORTAL_BOXOFFICE_GROUP = "01_boxoffice/35_searcha-z/all";
+    private static final String PORTAL_BUY_TO_OWN_GROUP = "01_boxoffice/07_new_must_own_movies/all";
+    private static final String BOX_OFFICE_PICKS_GROUP = "50_misc_car_you/Misc_metabroadcast/Misc_metabroadcast_1";
+    
     private static final String MUSIC_CATEGORY = "Music";
     private static final String FILM_CATEGORY = "Film";
     private static final String TV_CATEGORY = "TV";
@@ -45,6 +43,7 @@ public class BtVodModule {
     private static final String TV_BOX_SETS_CATEGORY = "TvBoxSets";
     private static final String BOX_OFFICE_CATEGORY = "BoxOffice";
     private static final String CZN_CONTENT_PROVIDER_ID = "CHC";
+    private static final String BOX_OFFICE_PICKS_CATEGORY = "BoxOfficePicks";
     
     private static final String URI_PREFIX = "http://vod.bt.com/";
     
@@ -103,6 +102,7 @@ public class BtVodModule {
                 .put(BUY_TO_OWN_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), PORTAL_BUY_TO_OWN_GROUP, null))
                 .put(BOX_OFFICE_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), PORTAL_BOXOFFICE_GROUP, null))
                 .put(TV_BOX_SETS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), PORTAL_BOXSET_GROUP, Series.class))
+                .put(BOX_OFFICE_PICKS_CATEGORY.toLowerCase(), BtVodContentGroupUpdater.portalContentGroupPredicate(portalClient(), BOX_OFFICE_PICKS_GROUP, null))
                 .build();
     }
     

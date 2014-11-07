@@ -62,7 +62,7 @@ public class XmlPortalClient implements PortalClient {
     private PageData getProductIdsForGroupPage(String groupId, int pageNumber) throws HttpException, Exception {
         Document document = 
             httpClient.get(
-                    new SimpleHttpRequest<Document>(uriBase + groupId + "/all/" + String.valueOf(pageNumber) + ".xml", 
+                    new SimpleHttpRequest<Document>(uriBase + groupId + "/" + String.valueOf(pageNumber) + ".xml", 
                     TRANSFORMER)
                 );
         return parsePage(document.getRootElement());        

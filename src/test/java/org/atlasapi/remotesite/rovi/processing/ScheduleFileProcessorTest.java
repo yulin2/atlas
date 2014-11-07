@@ -68,8 +68,7 @@ public class ScheduleFileProcessorTest {
     @Test
     public void testProcessFile() throws IOException {
         ScheduleFileProcessor scheduleFileProcessor = new ScheduleFileProcessor(itemBroadcastUpdater,
-                scheduleLineBroadcastExtractor,
-                true);
+                scheduleLineBroadcastExtractor);
 
         Item testItem1 = testItem(PROGRAM1_URI);
         Item testItem2 = testItem(PROGRAM2_URI);
@@ -84,36 +83,10 @@ public class ScheduleFileProcessorTest {
     }
 
     @Test
-    public void testFullIngestShouldReplaceExistentBroadcasts() throws IOException {
-        ScheduleFileProcessor scheduleFileProcessor = new ScheduleFileProcessor(itemBroadcastUpdater,
-                scheduleLineBroadcastExtractor,
-                true);
-
-        Item testItem1 = testItemWithBroadcasts(PROGRAM1_URI, existingBroadcasts());
-        Item testItem2 = testItem(PROGRAM2_URI);
-
-        when(contentResolver.findByCanonicalUris(ImmutableSet.of(PROGRAM1_URI))).thenReturn(resolvedContentFor(testItem1));
-        when(contentResolver.findByCanonicalUris(ImmutableSet.of(PROGRAM2_URI))).thenReturn(resolvedContentFor(testItem2));
-
-        scheduleFileProcessor.process(new File(Resources.getResource("org/atlasapi/remotesite/rovi/schedule.txt").getFile()));
-
-        ArgumentCaptor<Item> argument = ArgumentCaptor.forClass(Item.class);
-
-        verify(contentWriter, times(2)).createOrUpdate(argument.capture());
-
-        Map<String, Item> items = getItemsMap(argument);
-        Item writtenItem1 = items.get(PROGRAM1_URI);
-        Set<Broadcast> newBroadcasts = Iterables.getOnlyElement(writtenItem1.getVersions()).getBroadcasts();
-
-        assertTrue(Sets.intersection(newBroadcasts, existingBroadcasts()).isEmpty());
-    }
-
-    @Test
-    public void testFullIngestShouldMergeExistentBroadcasts() throws IOException {
+    public void testIngestShouldMergeExistentBroadcasts() throws IOException {
         reset(contentResolver);
         ScheduleFileProcessor scheduleFileProcessor = new ScheduleFileProcessor(itemBroadcastUpdater,
-                scheduleLineBroadcastExtractor,
-                false);
+                scheduleLineBroadcastExtractor);
 
         Item testItem1 = testItemWithBroadcasts(PROGRAM1_URI, existingBroadcasts());
         Item testItem2 = testItem(PROGRAM2_URI);

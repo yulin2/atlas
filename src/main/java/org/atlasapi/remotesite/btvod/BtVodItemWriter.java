@@ -42,6 +42,7 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 
 public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
 
+    private static final String BEFORE_DVD_SUFFIX = " (Before DVD)";
     private static final String FILM_CATEGORY = "Film";
     private static final String MUSIC_CATEGORY = "Music";
     private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("MMM dd yyyy hh:mmaa");
@@ -143,7 +144,17 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
             item = createItem(row);
         }
         populateItemFields(item, row);
+        sanitiseTitle(item);
         return item;
+    }
+    
+    private void sanitiseTitle(Item item) {
+        String title = item.getTitle();
+        if (title == null) {
+            return;
+        }
+        
+        item.setTitle(title.replace(BEFORE_DVD_SUFFIX, ""));
     }
 
     private Item createSong(BtVodDataRow row) {
