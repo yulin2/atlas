@@ -28,7 +28,7 @@ public class ItemBroadcastUpdater {
         this.contentWriter = checkNotNull(contentWriter);
     }
     
-    public void addBroadcasts(String uri, Iterable<Broadcast> newBroadcasts, boolean replaceBroadcasts) {
+    public void addBroadcasts(String uri, Iterable<Broadcast> newBroadcasts) {
         Maybe<Identified> resolved = contentResolver.findByCanonicalUris(ImmutableSet.of(uri)).getFirstValue();
         
         if (resolved.isNothing()) {
@@ -41,28 +41,11 @@ public class ItemBroadcastUpdater {
                                                     + identified.getClass().getSimpleName());
         }
         Item item = (Item) identified;
+
         Version version = Iterables.getOnlyElement(item.getVersions());
+        version.setBroadcasts(mergeWithExistentBroadcasts(newBroadcasts, version));
 
-        version.setBroadcasts(mergeOrReplaceBroadcasts(version, newBroadcasts, replaceBroadcasts));
-
-        if (replaceBroadcasts) {
-            version.setBroadcasts(Sets.newHashSet(newBroadcasts));
-        } else {
-            SetView<Broadcast> newBroadcastsSetForContent = mergeWithExistentBroadcasts(newBroadcasts, version);
-            version.setBroadcasts(newBroadcastsSetForContent);
-        }
-        
         contentWriter.createOrUpdate(item);
-    }
-
-    private Set<Broadcast> mergeOrReplaceBroadcasts(Version version,
-            Iterable<Broadcast> newBroadcasts,
-            boolean replaceBroadcasts) {
-        if (replaceBroadcasts) {
-            return Sets.newHashSet(newBroadcasts);
-        } else {
-            return mergeWithExistentBroadcasts(newBroadcasts, version);
-        }
     }
 
     private SetView<Broadcast> mergeWithExistentBroadcasts(Iterable<Broadcast> newBroadcasts,

@@ -35,9 +35,6 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class RoviModule {
 
-    private static final boolean FULL_INGEST = true;
-    private static final boolean DELTA_INGEST = false;
-
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
@@ -89,7 +86,7 @@ public class RoviModule {
                 episodeSequenceIndexer(),
                 roviContentWriter(),
                 contentResolver,
-                fullIngestScheduleProcessor(),
+                scheduleProcessor(),
                 auxCacheSupplier(),
                 ingestStatusPersistor());
     }
@@ -102,7 +99,7 @@ public class RoviModule {
                 episodeSequenceIndexer(),
                 roviContentWriter(),
                 contentResolver,
-                deltaIngestScheduleProcessor(),
+                scheduleProcessor(),
                 auxCacheSupplier());
     }
     
@@ -136,20 +133,10 @@ public class RoviModule {
     }
     
     @Bean
-    public ScheduleFileProcessor fullIngestScheduleProcessor() {
-        return scheduleProcessor(FULL_INGEST);
-    }
-
-    @Bean
-    public ScheduleFileProcessor deltaIngestScheduleProcessor() {
-        return scheduleProcessor(DELTA_INGEST);
-    }
-
-    private ScheduleFileProcessor scheduleProcessor(boolean fullIngest) {
+    private ScheduleFileProcessor scheduleProcessor() {
         return new ScheduleFileProcessor(
                 new ItemBroadcastUpdater(contentResolver, contentWriter),
-                new ScheduleLineBroadcastExtractor(channelResolver),
-                fullIngest);
+                new ScheduleLineBroadcastExtractor(channelResolver));
     }
     
     @PostConstruct

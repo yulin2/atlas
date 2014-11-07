@@ -33,13 +33,11 @@ public class ScheduleFileProcessor implements FileProcessor {
     private final ScheduleLineBroadcastExtractor scheduleLineBroadcastExtractor;
     private int processedItems = 0;
     private int failedItems = 0;
-    private final boolean fullIngest;
-    
+
     public ScheduleFileProcessor(ItemBroadcastUpdater itemBroadcastUpdater, 
-            ScheduleLineBroadcastExtractor scheduleLineBroadcastExtractor, boolean fullIngest) {
+            ScheduleLineBroadcastExtractor scheduleLineBroadcastExtractor) {
         this.itemBroadcastUpdater = checkNotNull(itemBroadcastUpdater);
         this.scheduleLineBroadcastExtractor = checkNotNull(scheduleLineBroadcastExtractor);
-        this.fullIngest = fullIngest;
     }
     
     public RoviDataProcessingResult process(File scheduleFile) throws IOException {
@@ -60,7 +58,7 @@ public class ScheduleFileProcessor implements FileProcessor {
                                                                          .filter(Maybe.HAS_VALUE)
                                                                          .transform(Maybe.<Broadcast>requireValueFunction());
                     
-                    itemBroadcastUpdater.addBroadcasts(canonicalUriForProgram(programmeId), broadcasts, fullIngest);
+                    itemBroadcastUpdater.addBroadcasts(canonicalUriForProgram(programmeId), broadcasts);
                     processedItems++;
                 } catch (Exception e) {
                     log.error("Rovi programme ID " + programmeId, e);
