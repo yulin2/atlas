@@ -133,7 +133,7 @@ public class RoviModule {
     }
     
     @Bean
-    private ScheduleFileProcessor scheduleProcessor() {
+    public ScheduleFileProcessor scheduleProcessor() {
         return new ScheduleFileProcessor(
                 new ItemBroadcastUpdater(contentResolver, contentWriter),
                 new ScheduleLineBroadcastExtractor(channelResolver));
