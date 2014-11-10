@@ -40,7 +40,7 @@ public class XmlPortalClientTest {
     
     @Test
     public void testParseAndPaginate() throws HttpException, Exception {
-        Set<String> productIdsForGroup = client.getProductIdsForGroup("test");
+        Set<String> productIdsForGroup = client.getProductIdsForGroup("test/all");
         assertTrue(productIdsForGroup.contains("C4_55809"));
     }
 }
