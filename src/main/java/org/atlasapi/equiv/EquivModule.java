@@ -70,6 +70,7 @@ import org.atlasapi.equiv.results.filters.AlwaysTrueFilter;
 import org.atlasapi.equiv.results.filters.ConjunctiveFilter;
 import org.atlasapi.equiv.results.filters.ContainerHierarchyFilter;
 import org.atlasapi.equiv.results.filters.EquivalenceFilter;
+import org.atlasapi.equiv.results.filters.ExclusionListFilter;
 import org.atlasapi.equiv.results.filters.MediaTypeFilter;
 import org.atlasapi.equiv.results.filters.MinimumScoreFilter;
 import org.atlasapi.equiv.results.filters.PublisherFilter;
@@ -117,6 +118,8 @@ import org.springframework.context.annotation.Import;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -131,6 +134,7 @@ public class EquivModule {
 
 	private @Value("${equiv.results.directory}") String equivResultsDirectory;
 	private @Value("${messaging.destination.equiv.assert}") String equivAssertDest;
+	private @Value("${equiv.excludedUris}") String excludedUris;
     
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired SearchResolver searchResolver;
@@ -196,10 +200,18 @@ public class EquivModule {
             new MinimumScoreFilter<T>(0.2),
             new MediaTypeFilter<T>(),
             new SpecializationFilter<T>(),
-            new PublisherFilter<T>()
+            new PublisherFilter<T>(),
+            new ExclusionListFilter<T>(excludedUrisFromProperties())
         ), additional));
     }
     
+    private ImmutableSet<String> excludedUrisFromProperties() {
+        if(Strings.isNullOrEmpty(excludedUris)) {
+            return ImmutableSet.of();
+        }
+        return ImmutableSet.copyOf(Splitter.on(',').split(excludedUris));
+    }
+
     private ContentEquivalenceUpdater.Builder<Item> standardItemUpdater(Set<Publisher> acceptablePublishers, Set<? extends EquivalenceScorer<Item>> scorers) {
         return standardItemUpdater(acceptablePublishers, scorers, Predicates.alwaysTrue());
     }
