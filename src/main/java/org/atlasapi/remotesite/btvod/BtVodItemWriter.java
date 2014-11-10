@@ -48,6 +48,7 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
     private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("MMM dd yyyy hh:mmaa");
     private static final Pattern EPISODE_TITLE_PATTERN = Pattern.compile("^.* S[0-9]+\\-E[0-9]+ (.*)");
     private static final Logger log = LoggerFactory.getLogger(BtVodItemWriter.class);
+    private static final String COMING_SOON_SUFFIX = ": Coming Soon";
     
     private final ContentWriter writer;
     private final ContentResolver resolver;
@@ -154,7 +155,7 @@ public class BtVodItemWriter implements BtVodDataProcessor<UpdateProgress> {
             return;
         }
         
-        item.setTitle(title.replace(BEFORE_DVD_SUFFIX, ""));
+        item.setTitle(title.replace(BEFORE_DVD_SUFFIX, "").replace(COMING_SOON_SUFFIX, ""));
     }
 
     private Item createSong(BtVodDataRow row) {
