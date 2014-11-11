@@ -60,7 +60,7 @@ public class GettyContentExtractor implements ContentExtractor<VideoResponse, Co
         item.setMediaType(MediaType.VIDEO);
         item.setImage(source.getThumb());
         item.setThumbnail(source.getThumb());
-        item.setTopicRefs(topicGuesser.guessTopics(source.getKeywords()));
+//        item.setTopicRefs(topicGuesser.guessTopics(source.getKeywords()));
 
         return item;
     }
