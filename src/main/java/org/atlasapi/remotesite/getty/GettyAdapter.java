@@ -81,16 +81,19 @@ public class GettyAdapter {
     private List<String> keywords(JsonObject obj) {
         Builder<String> keywordStrings = new ImmutableList.Builder<String>();
 
-        for (JsonElement elem : obj.get(KEYWORDS).getAsJsonArray()) {
-            JsonObject kwObject = elem.getAsJsonObject();
-            JsonElement maybeType = kwObject.get(KEYWORD_TYPE);
-            if (maybeType != null && KEYWORDS_TYPES_TO_IGNORE.contains(maybeType.getAsString())) {
-                continue;  // skip this keyword
-            }
-            JsonElement maybeTitle = kwObject.get(KEYWORD_TITLE);
-            String keywordTitle = (maybeTitle == null) ? null : Strings.emptyToNull(maybeTitle.getAsString());
-            if (keywordTitle != null) {
-                keywordStrings.add(keywordTitle);
+        JsonElement maybeKeywords = obj.get(KEYWORDS);
+        if (maybeKeywords != null) {
+            for (JsonElement elem : maybeKeywords.getAsJsonArray()) {
+                JsonObject kwObject = elem.getAsJsonObject();
+                JsonElement maybeType = kwObject.get(KEYWORD_TYPE);
+                if (maybeType != null && KEYWORDS_TYPES_TO_IGNORE.contains(maybeType.getAsString())) {
+                    continue;  // skip this keyword
+                }
+                JsonElement maybeTitle = kwObject.get(KEYWORD_TITLE);
+                String keywordTitle = (maybeTitle == null) ? null : Strings.emptyToNull(maybeTitle.getAsString());
+                if (keywordTitle != null) {
+                    keywordStrings.add(keywordTitle);
+                }
             }
         }
 
