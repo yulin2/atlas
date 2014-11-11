@@ -21,17 +21,12 @@ public class GettyClient {
     
     private final GettyTokenFetcher tokenFetcher;
     private final int itemsPerPage;
-    private final boolean quoteSearchPhrases;
     
     private String token;
     
-    /**
-     * @param quoteSearchPhrases Whether to wrap multi-word search strings in quotes (more precision, fewer results).
-     */
-    public GettyClient(GettyTokenFetcher tokenFetcher, int itemsPerPage, boolean quoteSearchPhrases) {
+    public GettyClient(GettyTokenFetcher tokenFetcher, int itemsPerPage) {
         this.tokenFetcher = checkNotNull(tokenFetcher);
         this.itemsPerPage = itemsPerPage;
-        this.quoteSearchPhrases = quoteSearchPhrases;
     }
     
     public String getVideoResponse(String keyword, int offset) throws ClientProtocolException, IOException {
@@ -48,8 +43,8 @@ public class GettyClient {
         HttpPost post = new HttpPost("https://connect.gettyimages.com/v1/search/SearchForVideos");
         post.setHeader("Content-type", "application/json");
 
-        if (quoteSearchPhrases && searchPhrase.contains(" ")) {
-            searchPhrase = "\"" + searchPhrase + "\"";
+        if (searchPhrase.contains(" ")) {
+            searchPhrase = "\"" + searchPhrase.replaceAll("\"", "\\\"") + "\"";
         }
 
         //maximum valid value for itemCount is 90 ; first itemStartNumber is 1

@@ -14,56 +14,55 @@ public class VideoResponse {
     private String dateCreated;
     private List<String> keywords;
     private List<String> aspectRatios;
-    private String keywordUsedForLookup;
-    
+
     public String getAssetId() {
         return assetId;
     }
-    
+
     public void setAssetId(String assetId) {
         this.assetId = assetId;
     }
-    
+
     public String getTitle() {
         return title;
     }
-    
+
     public void setTitle(String title) {
         this.title = title;
     }
-    
+
     public String getDescription() {
         return description;
     }
-    
+
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     public String getDuration() {
         return duration;
     }
-    
+
     public void setDuration(String duration) {
         this.duration = duration;
     }
-    
+
     public String getThumb() {
         return thumb;
     }
-    
+
     public void setThumb(String thumb) {
         this.thumb = thumb;
     }
-    
+
     public List<String> getKeywords() {
         return keywords;
     }
-    
+
     public void setKeywords(List<String> keywords) {
         this.keywords = keywords;
     }
-    
+
     public String getDateCreated() {
         return dateCreated;
     }
@@ -71,7 +70,7 @@ public class VideoResponse {
     public void setDateCreated(String dateCreated) {
         this.dateCreated = dateCreated;
     }
-    
+
     public List<String> getAspectRatios() {
         return aspectRatios;
     }
@@ -79,15 +78,7 @@ public class VideoResponse {
     public void setAspectRatios(List<String> aspectRatios) {
         this.aspectRatios = aspectRatios;
     }
-    
-    public String getKeywordUsefForLookup() {
-        return keywordUsedForLookup;
-    }
 
-    public void setKeywordUsefForLookup(String keywordUsefForLookup) {
-        this.keywordUsedForLookup = keywordUsefForLookup;
-    }
-    
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
@@ -98,8 +89,7 @@ public class VideoResponse {
                 .add("thumb", thumb)
                 .add("dateCreated", dateCreated)
                 .add("keywords", keywords)
-                .add("keywordUsedForLookup", keywordUsedForLookup)
                 .toString();
     }
-    
+
 }
