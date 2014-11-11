@@ -50,16 +50,33 @@ public class GettyAdapter {
         return videos.build();
     }
 
+    /** Gson is an enormous pile of crap and JsonElement.getAsString() just fails on 'JsonNull'. Helpful. */
+    private String maybeString(JsonElement elem) {
+        try {
+            return elem.getAsString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Iterable<JsonElement> maybeList(JsonElement elem) {
+        try {
+            return elem.getAsJsonArray();
+        } catch (Exception e) {
+            return ImmutableList.of();
+        }
+    }
+
     private VideoResponse createVideoResponse(JsonObject elem) {
         VideoResponse videoResponse = new VideoResponse();
 
-        videoResponse.setAssetId(elem.get(ASSET_ID).getAsString());
-        videoResponse.setDescription(elem.get(DESCRIPTION).getAsString());
-        videoResponse.setDuration(elem.get(DURATION).getAsString());
+        videoResponse.setAssetId(maybeString(elem.get(ASSET_ID)));
+        videoResponse.setDescription(maybeString(elem.get(DESCRIPTION)));
+        videoResponse.setDuration(maybeString(elem.get(DURATION)));
         videoResponse.setKeywords(keywords(elem));
         videoResponse.setThumb(thumb(elem));
-        videoResponse.setDateCreated(elem.get(DATE_CREATED).getAsString());
-        videoResponse.setTitle(elem.get(TITLE).getAsString());
+        videoResponse.setDateCreated(maybeString(elem.get(DATE_CREATED)));
+        videoResponse.setTitle(maybeString(elem.get(TITLE)));
         videoResponse.setAspectRatios(aspectRatios(elem));
 
         return videoResponse;
@@ -67,33 +84,32 @@ public class GettyAdapter {
 
     private List<String> aspectRatios(JsonObject obj) {
         Builder<String> aspectRatios = new ImmutableList.Builder<String>();
-        JsonArray keys = obj.get(ASPECT_RATIOS).getAsJsonArray();
-        for (JsonElement elem : keys) {
+        for (JsonElement elem : maybeList(obj.get(ASPECT_RATIOS))) {
             aspectRatios.add(elem.getAsString());
         }
         return aspectRatios.build();
     }
 
     private String thumb(JsonObject elem) {
-        return elem.get(URLS).getAsJsonObject().get(THUMB).getAsString();
+        try {
+            return elem.get(URLS).getAsJsonObject().get(THUMB).getAsString();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private List<String> keywords(JsonObject obj) {
         Builder<String> keywordStrings = new ImmutableList.Builder<String>();
 
-        JsonElement maybeKeywords = obj.get(KEYWORDS);
-        if (maybeKeywords != null) {
-            for (JsonElement elem : maybeKeywords.getAsJsonArray()) {
-                JsonObject kwObject = elem.getAsJsonObject();
-                JsonElement maybeType = kwObject.get(KEYWORD_TYPE);
-                if (maybeType != null && KEYWORDS_TYPES_TO_IGNORE.contains(maybeType.getAsString())) {
-                    continue;  // skip this keyword
-                }
-                JsonElement maybeTitle = kwObject.get(KEYWORD_TITLE);
-                String keywordTitle = (maybeTitle == null) ? null : Strings.emptyToNull(maybeTitle.getAsString());
-                if (keywordTitle != null) {
-                    keywordStrings.add(keywordTitle);
-                }
+        for (JsonElement elem : maybeList(obj.get(KEYWORDS))) {
+            JsonObject kwObject = elem.getAsJsonObject();
+            JsonElement maybeType = kwObject.get(KEYWORD_TYPE);
+            if (maybeType != null && KEYWORDS_TYPES_TO_IGNORE.contains(maybeType.getAsString())) {
+                continue;  // skip this keyword
+            }
+            String keywordTitle = Strings.emptyToNull(maybeString(kwObject.get(KEYWORD_TITLE)));
+            if (keywordTitle != null) {
+                keywordStrings.add(keywordTitle);
             }
         }
 
