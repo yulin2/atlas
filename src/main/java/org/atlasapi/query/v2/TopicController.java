@@ -20,6 +20,7 @@ import org.atlasapi.output.QueryResult;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
+import org.atlasapi.query.content.FilterActivelyPublishedOnlyQueryExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -117,8 +118,13 @@ public class TopicController extends BaseController<Iterable<Topic>> {
         
         try {
             Selection selection = query.getSelection();
-            QueryResult<Identified, Topic> result = QueryResult.of(query.getSelection()
-                    .apply(Iterables.filter(iterable(contentLister.contentForTopic(decodedId, query)), Identified.class)), topic);
+            QueryResult<Identified, Topic> result = QueryResult.of(
+                query.getSelection().apply(
+                    Iterables.filter(
+                            Iterables.filter(iterable(contentLister.contentForTopic(decodedId, query)), Identified.class),
+                            FilterActivelyPublishedOnlyQueryExecutor.IS_ACTIVELY_PUBLISHED
+                    )
+                ), topic);
             queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
