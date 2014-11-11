@@ -10,24 +10,25 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.persistence.topic.TopicStore;
+import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.remotesite.knowledgemotion.topics.TopicGuesser;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.metabroadcast.common.base.Maybe;
 
 public class GettyContentExtractorTest {
 
-    private final TopicStore topicStore = mock(TopicStore.class);
-    private final GettyContentExtractor extractor = new GettyContentExtractor(topicStore);
-    
+    private final TopicGuesser topicGuesser = mock(TopicGuesser.class);
+    private final GettyContentExtractor extractor = new GettyContentExtractor(topicGuesser);
+
     @Test
     public void testExtractItem() {
-        Mockito.when(topicStore.topicFor(Matchers.anyString(), Matchers.anyString())).thenReturn(Maybe.just(new Topic(Long.valueOf(0))));
+        Mockito.when(topicGuesser.guessTopics(Matchers.<Iterable<String>>any())).thenReturn(
+                ImmutableSet.of(new TopicRef(Long.valueOf(0), 1.0f, false, TopicRef.Relationship.ABOUT)));
         
         VideoResponse video = new VideoResponse();
         video.setAssetId("id");
@@ -38,7 +39,6 @@ public class GettyContentExtractorTest {
         video.setThumb("thumb");
         video.setTitle("title");
         video.setAspectRatios(ImmutableList.of("16:9"));
-        video.setKeywordUsefForLookup("key");
         
         Content content = extractor.extract(video);
         Item item = (Item) content;

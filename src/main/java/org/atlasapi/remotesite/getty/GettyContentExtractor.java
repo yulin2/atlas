@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.getty;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.atlasapi.media.entity.Publisher.DBPEDIA;
 import static org.atlasapi.media.entity.Publisher.GETTY;
 import static org.joda.time.DateTimeConstants.SECONDS_PER_HOUR;
 import static org.joda.time.DateTimeConstants.SECONDS_PER_MINUTE;
@@ -15,13 +14,9 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.Topic.Type;
-import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.knowledgemotion.topics.TopicGuesser;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -30,22 +25,19 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
-import com.metabroadcast.common.base.Maybe;
 
 public class GettyContentExtractor implements ContentExtractor<VideoResponse, Content> {
 
-    private static final String DBPEDIA_NAMESPACE = "dbpedia";
-    private static final String DBPEDIA_URI_PATTERN = "http://dbpedia.org/resource/%s";
     private static final String GETTY_URI_PATTERN = "http://gettyimages.co.uk/%s";
     private static final String GETTY_CURIE_PATTERN = "getty:%s";
     
     private final Splitter durationSplitter = Splitter.on(":").omitEmptyStrings();
     private final Splitter dateSplitter = Splitter.onPattern("[-|+]").omitEmptyStrings();
     
-    private final TopicStore topicStore;
+    private final TopicGuesser topicGuesser;
     
-    public GettyContentExtractor(TopicStore topicStore) {
-        this.topicStore = checkNotNull(topicStore);
+    public GettyContentExtractor(TopicGuesser topicGuesser) {
+        this.topicGuesser = checkNotNull(topicGuesser);
     }
     
     @Override
@@ -68,32 +60,9 @@ public class GettyContentExtractor implements ContentExtractor<VideoResponse, Co
         item.setMediaType(MediaType.VIDEO);
         item.setImage(source.getThumb());
         item.setThumbnail(source.getThumb());
-        item.setTopicRefs(ImmutableList.of(createTopicFromKeyword(source.getKeywordUsefForLookup())));
-        
+        item.setTopicRefs(topicGuesser.guessTopics(source.getKeywords()));
+
         return item;
-    }
-    
-    private TopicRef createTopicFromKeyword(String keyword) {
-        String value = String.format(DBPEDIA_URI_PATTERN, keyword);
-        Maybe<Topic> resolved = topicStore.topicFor(DBPEDIA_NAMESPACE, value);
-        if (resolved.hasValue()) {
-            Topic topic = resolved.requireValue();
-            
-            topic.setValue(value);
-            topic.setNamespace(Publisher.DBPEDIA.name().toLowerCase());
-            topic.setPublisher(DBPEDIA);
-            topic.setTitle(titleFrom(keyword));
-            topic.setType(Type.SUBJECT);
-            topicStore.write(topic);
-            
-            return new TopicRef(topic, 1.0f, false, TopicRef.Relationship.ABOUT);
-        }
-        
-        throw new IllegalStateException(String.format("Topic Store failed to create Topic for %s", keyword));
-    }
-    
-    private String titleFrom(String keyword) {
-        return keyword.replaceAll("_", " ").replace("%28", "(").replace("%29", ")").replace("%27", "'");
     }
 
     private Iterable<KeyPhrase> keyphrases(List<String> keywords) {
@@ -154,11 +123,11 @@ public class GettyContentExtractor implements ContentExtractor<VideoResponse, Co
         return new DateTime(Long.valueOf(splitDate.get(0)), DateTimeZone.UTC);
     }
 
-    private String uri(String id) {
+    static String uri(String id) {
         return String.format(GETTY_URI_PATTERN, id);
     }
     
-    private String curie(String id) {
+    static String curie(String id) {
         String curie = String.format(GETTY_CURIE_PATTERN, id);
         return curie;
     }
