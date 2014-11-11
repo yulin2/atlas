@@ -2,8 +2,6 @@ package org.atlasapi.query.v2;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +17,6 @@ import org.atlasapi.media.entity.Topic;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.QueryResult;
-import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
@@ -45,18 +42,13 @@ public class TopicController extends BaseController<Iterable<Topic>> {
     private final TopicContentLister contentLister;
     private final QueryController queryController;
     private final TopicWriteController topicWriteController;
-    private final KnownTypeQueryExecutor executor;
 
-    public TopicController(TopicQueryResolver topicResolver, TopicContentLister contentLister, 
-            ApplicationConfigurationFetcher configFetcher, AdapterLog log, 
-            AtlasModelWriter<Iterable<Topic>> atlasModelOutputter, QueryController queryController, 
-            TopicWriteController topicWriteController, KnownTypeQueryExecutor executor) {
+    public TopicController(TopicQueryResolver topicResolver, TopicContentLister contentLister, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Topic>> atlasModelOutputter, QueryController queryController, TopicWriteController topicWriteController) {
         super(configFetcher, log, atlasModelOutputter, SubstitutionTableNumberCodec.lowerCaseOnly());
         this.topicResolver = topicResolver;
         this.contentLister = contentLister;
         this.queryController = queryController;
         this.topicWriteController = topicWriteController;
-        this.executor = executor;
     }
 
     @RequestMapping(value={"3.0/topics.*","/topics.*"})
@@ -125,16 +117,8 @@ public class TopicController extends BaseController<Iterable<Topic>> {
         
         try {
             Selection selection = query.getSelection();
-            Iterable<Identified> identified = Iterables.concat(
-                    executor.executeIdQuery(
-                            Iterables.transform(
-                                    Iterables.filter(
-                                            selection.apply(iterable(contentLister.contentForTopic(decodedId, query))), 
-                                            Identified.class), 
-                                    Identified.TO_ID), 
-                            query).values());
             QueryResult<Identified, Topic> result = QueryResult.of(query.getSelection()
-                    .apply(identified), topic);
+                    .apply(Iterables.filter(iterable(contentLister.contentForTopic(decodedId, query)), Identified.class)), topic);
             queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));

@@ -325,7 +325,7 @@ public class QueryWebModule {
 
     @Bean
     TopicController topicController() {
-        return new TopicController(new PublisherFilteringTopicResolver(topicResolver), new PublisherFilteringTopicContentLister(topicContentLister), configFetcher, log, topicModelOutputter(), queryController(), topicWriteController(), queryExecutor);
+        return new TopicController(new PublisherFilteringTopicResolver(topicResolver), new PublisherFilteringTopicContentLister(topicContentLister), configFetcher, log, topicModelOutputter(), queryController(), topicWriteController());
     }
 
     @Bean
