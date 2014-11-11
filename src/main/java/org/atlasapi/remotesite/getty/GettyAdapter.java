@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.getty;
 
 import java.util.List;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
@@ -86,7 +87,10 @@ public class GettyAdapter {
             if (maybeType != null && KEYWORDS_TYPES_TO_IGNORE.contains(maybeType.getAsString())) {
                 continue;  // skip this keyword
             }
-            keywordStrings.add(kwObject.get(KEYWORD_TITLE).getAsString());
+            String keywordTitle = Strings.emptyToNull(kwObject.get(KEYWORD_TITLE).getAsString());
+            if (keywordTitle != null) {
+                keywordStrings.add(keywordTitle);
+            }
         }
 
         return keywordStrings.build();
