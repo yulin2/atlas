@@ -87,7 +87,8 @@ public class GettyAdapter {
             if (maybeType != null && KEYWORDS_TYPES_TO_IGNORE.contains(maybeType.getAsString())) {
                 continue;  // skip this keyword
             }
-            String keywordTitle = Strings.emptyToNull(kwObject.get(KEYWORD_TITLE).getAsString());
+            JsonElement maybeTitle = kwObject.get(KEYWORD_TITLE);
+            String keywordTitle = (maybeTitle == null) ? null : Strings.emptyToNull(maybeTitle.getAsString());
             if (keywordTitle != null) {
                 keywordStrings.add(keywordTitle);
             }
