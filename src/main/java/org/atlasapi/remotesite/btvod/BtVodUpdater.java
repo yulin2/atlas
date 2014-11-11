@@ -59,19 +59,19 @@ public class BtVodUpdater extends ScheduledTask {
             reportStatus("Brand extract [IN PROGRESS]  Series extract [TODO]  Item extract [TODO]");
 
             vodData.processData(brandExtractor);
-            reportStatus(String.format("Brand extract [DONE: %d rows successful %d rows failed]  Series extract [IN PROGRESS]  Item extract [TODO]", 
+            reportStatus(String.format("Brand extract [DONE: %d rows successful %d rows failed]  Series extract [IN PROGRESS]  Item extract [TODO]  Content group update [TODO]", 
                     brandExtractor.getResult().getProcessed(), 
                     brandExtractor.getResult().getFailures()));
 
             vodData.processData(seriesExtractor);
-            reportStatus(String.format("Brand extract [DONE: %d rows successful %d rows failed]  Series extract [DONE: %d rows successful %d rows failed]  Item extract [IN PROGRESS]", 
+            reportStatus(String.format("Brand extract [DONE: %d rows successful %d rows failed]  Series extract [DONE: %d rows successful %d rows failed]  Item extract [IN PROGRESS]  Content group update [TODO]", 
                     brandExtractor.getResult().getProcessed(), 
                     brandExtractor.getResult().getFailures(), 
                     seriesExtractor.getResult().getProcessed(), 
                     seriesExtractor.getResult().getFailures()));
 
             vodData.processData(itemExtractor);
-            reportStatus(String.format("Brand extract [DONE: %d rows successful %d rows failed]  Series extract [DONE: %d rows successful %d rows failed]  Item extract [DONE: %d rows successful %d rows failed]",
+            reportStatus(String.format("Brand extract [DONE: %d rows successful %d rows failed]  Series extract [DONE: %d rows successful %d rows failed]  Item extract [DONE: %d rows successful %d rows failed] Content group update [IN PROGRESS]",
                     brandExtractor.getResult().getProcessed(), 
                     brandExtractor.getResult().getFailures(), 
                     seriesExtractor.getResult().getProcessed(), 
@@ -79,12 +79,13 @@ public class BtVodUpdater extends ScheduledTask {
                     itemExtractor.getResult().getProcessed(),
                     itemExtractor.getResult().getFailures()));
             
+            contentGroupUpdater.finish();
+            
             if (brandExtractor.getResult().getFailures() > 0
                     || seriesExtractor.getResult().getFailures() > 0
                     || itemExtractor.getResult().getFailures() > 0) {
                 throw new RuntimeException("Failed to extract some rows");
             }
-            contentGroupUpdater.finish();
         } catch (IOException e) {
             log.error("Extraction failed", e);
             Throwables.propagate(e);
