@@ -53,29 +53,36 @@ public class GettyUpdateTask extends ScheduledTask {
 
         //paginate videos
         while (true) {
-            reportStatus(progress.toString());
-
-            String response = null;
             try {
-                response = gettyClient.getVideoResponse(MAGIC_ALL_ITEMS_SEARCH_KEYWORD, offset);
-            } catch (IOException e) {
-                Throwables.propagate(e);
-            }
+                reportStatus(progress.toString());
 
-            List<VideoResponse> videos = adapter.parse(response);
-            if (videos.isEmpty()) {
-                break;
-            }
-
-            for (VideoResponse video : videos) {
+                String response = null;
                 try {
-                    Identified written = dataHandler.handle(video);
-                    receivedItemUris.add(written.getCanonicalUri());
-                    progress = progress.reduce(UpdateProgress.SUCCESS);
-                } catch (Exception e) {
-                    log.warn(String.format("Failed to interpret a video response"), e);
-                    progress = progress.reduce(UpdateProgress.FAILURE);
+                    log.debug("Requesting Getty items from {}", offset);
+                    response = gettyClient.getVideoResponse(MAGIC_ALL_ITEMS_SEARCH_KEYWORD, offset);
+                } catch (IOException e) {
+                    Throwables.propagate(e);
                 }
+
+                log.debug("Parsing response");
+                List<VideoResponse> videos = adapter.parse(response);
+                if (videos.isEmpty()) {
+                    break;
+                }
+
+                for (VideoResponse video : videos) {
+                    try {
+                        log.debug("Writing item {} ({})", video.getAssetId(), video.getTitle());
+                        Identified written = dataHandler.handle(video);
+                        receivedItemUris.add(written.getCanonicalUri());
+                        progress = progress.reduce(UpdateProgress.SUCCESS);
+                    } catch (Exception e) {
+                        log.warn(String.format("Failed to interpret a video response"), e);
+                        progress = progress.reduce(UpdateProgress.FAILURE);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Whole batch failed for some reason", e);
             }
             offset += itemsPerPage;
         }
