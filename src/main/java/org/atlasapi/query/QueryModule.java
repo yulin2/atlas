@@ -28,6 +28,7 @@ import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
+import org.atlasapi.query.content.FilterActivelyPublishedOnlyQueryExecutor;
 import org.atlasapi.query.content.FilterScheduleOnlyQueryExecutor;
 import org.atlasapi.query.content.LookupResolvingQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
@@ -70,6 +71,7 @@ public class QueryModule {
 		
 	    queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
 		
+	    queryExecutor = new FilterActivelyPublishedOnlyQueryExecutor(queryExecutor);
 	    queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
 	    queryExecutor = new FilterScheduleOnlyQueryExecutor(queryExecutor);
 	    
