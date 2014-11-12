@@ -93,7 +93,6 @@ import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.persistence.content.mongo.LastUpdatedContentFinder;
 import org.atlasapi.persistence.content.people.PersonStore;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.event.EventResolver;
@@ -177,7 +176,6 @@ public class QueryWebModule {
     private @Autowired TransactionStore transactionStore;
     private @Autowired FeedStatisticsResolver feedStatsResolver;
     private @Autowired TvAnytimeGenerator feedGenerator;
-    private @Autowired LastUpdatedContentFinder contentFinder;
 
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
@@ -350,7 +348,7 @@ public class QueryWebModule {
     
     @Bean
     ContentFeedController contentFeedController() {
-        return new ContentFeedController(configFetcher, log, tvaModelOutputter(), feedGenerator, contentFinder, contentResolver);
+        return new ContentFeedController(configFetcher, log, tvaModelOutputter(), feedGenerator, contentResolver);
     }
     
     @Bean
