@@ -45,7 +45,12 @@ public class SeriesPopulator implements ContentPopulator<Series> {
         }
 
         series.setCanonicalUri(canonicalUriForSeason(season.getSeasonProgramId().get()));
-        series.setParentRef(new ParentRef(parentCanonicalUri));
+
+        // Don't override parentRef if the same parentRef is already present
+        // This is in order to avoid to set a null containerId and change the hash
+        if (series.getParent() == null || !parentCanonicalUri.equals(series.getParent().getUri())) {
+            series.setParentRef(new ParentRef(parentCanonicalUri));
+        }
 
         if (season.getSeasonName().isPresent()) {
             series.setTitle(season.getSeasonName().get());

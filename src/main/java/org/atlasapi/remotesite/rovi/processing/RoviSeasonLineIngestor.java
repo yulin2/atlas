@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.rovi.processing;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeason;
 import static org.atlasapi.remotesite.rovi.RoviCanonicalUriGenerator.canonicalUriForSeasonHistory;
 
 import java.nio.charset.Charset;
@@ -59,12 +60,20 @@ public class RoviSeasonLineIngestor extends RoviActionLineIngestor<RoviSeasonHis
 
     @Override
     protected Optional<Series> resolveContent(RoviSeasonHistoryLine parsedLine) {
-        // Using alias for resolving here because for deletion records the seasonId is not present
-        String seasonHistoryUri = canonicalUriForSeasonHistory(parsedLine.getSeasonHistoryId());
-        
-        Maybe<Identified> maybeResolved = contentResolver
-                .findByUris(ImmutableList.of(seasonHistoryUri))
-                .getFirstValue();
+        Maybe<Identified> maybeResolved;
+
+        if (parsedLine.getSeasonProgramId().isPresent()) {
+            maybeResolved = contentResolver
+                    .findByCanonicalUris(ImmutableList.of(canonicalUriForSeason(
+                            parsedLine.getSeasonProgramId().get())))
+                    .getFirstValue();
+        } else {
+            // Using alias for resolving here because for deletion records the seasonProgramId is not present
+            String seasonHistoryUri = canonicalUriForSeasonHistory(parsedLine.getSeasonHistoryId());
+            maybeResolved = contentResolver
+                    .findByUris(ImmutableList.of(seasonHistoryUri))
+                    .getFirstValue();
+        }
         
         if (maybeResolved.isNothing()) {
             return Optional.absent();
