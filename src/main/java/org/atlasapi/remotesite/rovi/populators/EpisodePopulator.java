@@ -80,7 +80,12 @@ public class EpisodePopulator extends ItemPopulator<Episode> {
         }
 
         String seriesCanonicalUri = canonicalUriForProgram(program.getSeriesId().get());
-        episode.setParentRef(new ParentRef(seriesCanonicalUri));
+
+        // Don't override parentRef if the same parentRef is already present
+        // This is in order to avoid to set a null containerId and change the hash
+        if (episode.getContainer() == null || !seriesCanonicalUri.equals(episode.getContainer().getUri())) {
+            episode.setParentRef(new ParentRef(seriesCanonicalUri));
+        }
     }
     
     private void setSeriesRef(Episode episode, RoviProgramLine program) {
@@ -90,6 +95,11 @@ public class EpisodePopulator extends ItemPopulator<Episode> {
         }
         
         String seasonCanonicalUri = canonicalUriForSeason(program.getSeasonId().get());
-        episode.setSeriesRef(new ParentRef(seasonCanonicalUri));
+
+        // Don't override parentRef if the same parentRef is already present
+        // This is in order to avoid to set a null containerId and change the hash
+        if (episode.getSeriesRef() == null || !seasonCanonicalUri.equals(episode.getSeriesRef().getUri())) {
+            episode.setSeriesRef(new ParentRef(seasonCanonicalUri));
+        }
     }
 }
