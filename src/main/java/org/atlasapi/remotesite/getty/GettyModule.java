@@ -4,7 +4,6 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.remotesite.knowledgemotion.topics.TopicGuesser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +18,6 @@ public class GettyModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
-    private @Autowired ContentLister contentLister;
     private @Autowired TopicGuesser topicGuesser;
 
     @Value("${getty.client.id}") private String clientId;
@@ -36,7 +34,6 @@ public class GettyModule {
     private GettyUpdateTask gettyUpdater() {
         return new GettyUpdateTask(gettyClient(), new GettyAdapter(), 
                 new DefaultGettyDataHandler(contentResolver, contentWriter, new GettyContentExtractor(topicGuesser)),
-                contentLister,
                 Integer.valueOf(gettyPagination));
     }
 

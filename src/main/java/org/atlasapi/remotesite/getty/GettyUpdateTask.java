@@ -4,15 +4,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.listing.ContentLister;
-import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,17 +23,15 @@ public class GettyUpdateTask extends ScheduledTask {
     private final GettyClient gettyClient;
     private final GettyAdapter adapter;
     private final GettyDataHandler dataHandler;
-    private final ContentLister contentLister;
 
     private final int itemsPerPage;
 
     public GettyUpdateTask(GettyClient gettyClient, GettyAdapter adapter, 
-            GettyDataHandler dataHandler, ContentLister contentLister,
+            GettyDataHandler dataHandler,
             int itemsPerPage) {
         this.gettyClient = checkNotNull(gettyClient);
         this.adapter = checkNotNull(adapter);
         this.dataHandler = checkNotNull(dataHandler);
-        this.contentLister = checkNotNull(contentLister);
 
         this.itemsPerPage = itemsPerPage;
     }
@@ -85,17 +78,6 @@ public class GettyUpdateTask extends ScheduledTask {
                 log.error("Whole batch failed for some reason", e);
             }
             offset += itemsPerPage;
-        }
-
-        // Everything we haven't seen this time around must be not activelyPublished.
-        //
-        Iterator<Content> allContent = contentLister.listContent(ContentListingCriteria.defaultCriteria().forPublisher(Publisher.GETTY).build());
-        while (allContent.hasNext()) {
-            Content item = allContent.next();
-            if (! receivedItemUris.contains(item.getCanonicalUri())) {
-                item.setActivelyPublished(false);
-                dataHandler.write(item);
-            }
         }
     }
 
