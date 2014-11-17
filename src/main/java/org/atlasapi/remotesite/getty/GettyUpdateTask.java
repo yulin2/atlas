@@ -4,15 +4,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.listing.ContentLister;
-import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,24 +18,25 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 public class GettyUpdateTask extends ScheduledTask {
     private static final Logger log = LoggerFactory.getLogger(GettyUpdateTask.class);
 
+    static final String JOB_KEY = "getty-ingest";
     private static final String MAGIC_ALL_ITEMS_SEARCH_KEYWORD = "all vocabulary";
 
     private final GettyClient gettyClient;
     private final GettyAdapter adapter;
     private final GettyDataHandler dataHandler;
-    private final ContentLister contentLister;
 
     private final int itemsPerPage;
+    private final RestartStatusSupplier restartStatus;
 
     public GettyUpdateTask(GettyClient gettyClient, GettyAdapter adapter, 
-            GettyDataHandler dataHandler, ContentLister contentLister,
-            int itemsPerPage) {
+            GettyDataHandler dataHandler,
+            int itemsPerPage, RestartStatusSupplier restartStatus) {
         this.gettyClient = checkNotNull(gettyClient);
         this.adapter = checkNotNull(adapter);
         this.dataHandler = checkNotNull(dataHandler);
-        this.contentLister = checkNotNull(contentLister);
 
         this.itemsPerPage = itemsPerPage;
+        this.restartStatus = checkNotNull(restartStatus);
     }
 
     @Override
@@ -49,12 +45,13 @@ public class GettyUpdateTask extends ScheduledTask {
 
         Set<String> receivedItemUris = new HashSet<String>();
 
-        int offset = 1;  // Getty API starts its offsets at 1.
+        final int firstOffset = restartStatus.startFromOffset().or(1);  // Getty API starts its offsets at 1.
+        int offset = firstOffset;
 
         //paginate videos
         while (true) {
             try {
-                reportStatus(progress.toString());
+                reportStatus(progress.toString() + " (started at offset " + firstOffset + ")");
 
                 String response = null;
                 try {
@@ -67,7 +64,7 @@ public class GettyUpdateTask extends ScheduledTask {
                 log.debug("Parsing response");
                 List<VideoResponse> videos = adapter.parse(response);
                 if (videos.isEmpty()) {
-                    break;
+                    break;  // we've run out of data
                 }
 
                 for (VideoResponse video : videos) {
@@ -85,17 +82,6 @@ public class GettyUpdateTask extends ScheduledTask {
                 log.error("Whole batch failed for some reason", e);
             }
             offset += itemsPerPage;
-        }
-
-        // Everything we haven't seen this time around must be not activelyPublished.
-        //
-        Iterator<Content> allContent = contentLister.listContent(ContentListingCriteria.defaultCriteria().forPublisher(Publisher.GETTY).build());
-        while (allContent.hasNext()) {
-            Content item = allContent.next();
-            if (! receivedItemUris.contains(item.getCanonicalUri())) {
-                item.setActivelyPublished(false);
-                dataHandler.write(item);
-            }
         }
     }
 
