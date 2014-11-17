@@ -31,22 +31,24 @@ public class DefaultKnowledgeMotionDataRowHandler implements KnowledgeMotionData
     }
 
     @Override
-    public void handle(KnowledgeMotionDataRow row) {
+    public Optional<Content> handle(KnowledgeMotionDataRow row) {
         Content content = extractor.extract(row).orNull();
         if (content == null) {
-            return;
+            return Optional.absent();
         }
 
         Maybe<Identified> existing = resolve(content.getCanonicalUri());
         if (existing.isNothing()) {
             write(content);
+            return Optional.of(content);
         } else {
             Identified identified = existing.requireValue();
-            write(contentMerger.merge(ContentMerger.asItem(identified), (Item) content));
+            Item merged = contentMerger.merge(ContentMerger.asItem(identified), (Item) content);
+            return Optional.<Content>of(merged);
         }
     }
 
-    private void write(Content content) {
+    public void write(Content content) {
         Item item = (Item) content;
         writer.createOrUpdate(item);
     }
