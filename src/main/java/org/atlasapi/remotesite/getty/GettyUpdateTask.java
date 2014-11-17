@@ -49,7 +49,7 @@ public class GettyUpdateTask extends ScheduledTask {
         int offset = firstOffset;
 
         //paginate videos
-        while (true) {
+        while (shouldContinue()) {
             try {
                 reportStatus(progress.toString() + " (started at offset " + firstOffset + ")");
 
