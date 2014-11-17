@@ -20,10 +20,13 @@ import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Sets;
@@ -37,12 +40,14 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.media.entity.simple.Item, Item> {
 
     private final BroadcastModelTransformer broadcastTransformer;
-    
+    private final SegmentModelTransformer segmentModelTransformer;
+
     public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, 
             ChannelResolver channelResolver, NumberToShortStringCodec idCodec, 
             ClipModelTransformer clipsModelTransformer, Clock clock) {
         super(lookupStore, topicStore, idCodec, clipsModelTransformer, clock);
         this.broadcastTransformer = new BroadcastModelTransformer(channelResolver);
+        this.segmentModelTransformer = new SegmentModelTransformer();
     }
 
     @Override
@@ -58,13 +63,26 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
             item = createSong(inputItem);
         } else if ("broadcast".equals(type)) {
             item = createBroadcast(inputItem);
+        } else if ("segment".equals(type)) {
+            item = createSegment(inputItem);
         } else {
             item = new Item();
         }
         item.setLastUpdated(now);
         return setItemFields(item, inputItem, now);
     }
-    
+
+    private Item createSegment(org.atlasapi.media.entity.simple.Item inputItem) {
+        Item item = new Item();
+        ImmutableList.Builder<SegmentEvent> complexSegments = ImmutableList.builder();
+        for (org.atlasapi.media.entity.simple.SegmentEvent simpleSegment : inputItem.getSegments()) {
+            complexSegments.add(segmentModelTransformer.transform(simpleSegment));
+        }
+        Version version = new Version();
+        version.setSegmentEvents(complexSegments.build());
+        return item;
+    }
+
     private Item createBroadcast(org.atlasapi.media.entity.simple.Item inputItem) {
         Item item = new Item();
         HashSet<Broadcast> broadcasts = Sets.newHashSet();
