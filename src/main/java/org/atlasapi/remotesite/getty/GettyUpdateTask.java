@@ -18,6 +18,7 @@ import com.metabroadcast.common.scheduling.UpdateProgress;
 public class GettyUpdateTask extends ScheduledTask {
     private static final Logger log = LoggerFactory.getLogger(GettyUpdateTask.class);
 
+    static final String JOB_KEY = "getty-ingest";
     private static final String MAGIC_ALL_ITEMS_SEARCH_KEYWORD = "all vocabulary";
 
     private final GettyClient gettyClient;
@@ -25,15 +26,17 @@ public class GettyUpdateTask extends ScheduledTask {
     private final GettyDataHandler dataHandler;
 
     private final int itemsPerPage;
+    private final RestartStatusSupplier restartStatus;
 
     public GettyUpdateTask(GettyClient gettyClient, GettyAdapter adapter, 
             GettyDataHandler dataHandler,
-            int itemsPerPage) {
+            int itemsPerPage, RestartStatusSupplier restartStatus) {
         this.gettyClient = checkNotNull(gettyClient);
         this.adapter = checkNotNull(adapter);
         this.dataHandler = checkNotNull(dataHandler);
 
         this.itemsPerPage = itemsPerPage;
+        this.restartStatus = checkNotNull(restartStatus);
     }
 
     @Override
@@ -42,12 +45,13 @@ public class GettyUpdateTask extends ScheduledTask {
 
         Set<String> receivedItemUris = new HashSet<String>();
 
-        int offset = 1;  // Getty API starts its offsets at 1.
+        final int firstOffset = restartStatus.startFromOffset().or(1);  // Getty API starts its offsets at 1.
+        int offset = firstOffset;
 
         //paginate videos
         while (true) {
             try {
-                reportStatus(progress.toString());
+                reportStatus(progress.toString() + " (started at offset " + firstOffset + ")");
 
                 String response = null;
                 try {
@@ -60,7 +64,7 @@ public class GettyUpdateTask extends ScheduledTask {
                 log.debug("Parsing response");
                 List<VideoResponse> videos = adapter.parse(response);
                 if (videos.isEmpty()) {
-                    break;
+                    break;  // we've run out of data
                 }
 
                 for (VideoResponse video : videos) {

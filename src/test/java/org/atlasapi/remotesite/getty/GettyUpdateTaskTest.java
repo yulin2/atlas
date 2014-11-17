@@ -9,6 +9,7 @@ import org.atlasapi.media.entity.Content;
 import org.junit.Test;
 import org.mockito.Matchers;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
@@ -18,7 +19,12 @@ public class GettyUpdateTaskTest {
     private final GettyDataHandler handler = mock(GettyDataHandler.class);
     private final GettyTokenFetcher tokenFetcher = mock(GettyTokenFetcher.class);
     private final GettyClient gettyClient = mock(GettyClient.class);
-    private final ScheduledTask task = new GettyUpdateTask(gettyClient, adapter, handler, 90);
+    private final ScheduledTask task = new GettyUpdateTask(gettyClient, adapter, handler,
+            90, new RestartStatusSupplier() {
+                @Override public Optional<Integer> startFromOffset() {
+                    return Optional.of(1);
+                }
+            });
 
     private final VideoResponse res1 = new VideoResponse(), res2 = new VideoResponse();
     private final ImmutableList<VideoResponse> mockedClientResponses = ImmutableList.of(res1, res2);
