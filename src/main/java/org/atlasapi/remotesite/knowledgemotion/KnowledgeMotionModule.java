@@ -6,6 +6,7 @@ import org.atlasapi.googlespreadsheet.GoogleSpreadsheetModule;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.knowledgemotion.topics.TopicGuesser;
@@ -28,6 +29,7 @@ public class KnowledgeMotionModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
+    private @Autowired ContentLister contentLister;
     private @Autowired GoogleSpreadsheetModule spreadsheet;
 
     private @Autowired DatabasedMongo mongo;
@@ -60,9 +62,11 @@ public class KnowledgeMotionModule {
     }
 
     private KnowledgeMotionUpdateTask knowledgeMotionUpdater() {
-        return new KnowledgeMotionUpdateTask(spreadsheet.spreadsheetFetcher(), 
+        return new KnowledgeMotionUpdateTask(SOURCES,
+                spreadsheet.spreadsheetFetcher(), 
                 new DefaultKnowledgeMotionDataRowHandler(contentResolver, contentWriter, new KnowledgeMotionDataRowContentExtractor(SOURCES, topicGuesser())),
-                new KnowledgeMotionAdapter());
+                new KnowledgeMotionAdapter(),
+                contentLister);
     }
 
 }
