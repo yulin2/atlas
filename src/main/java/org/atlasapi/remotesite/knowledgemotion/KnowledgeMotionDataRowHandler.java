@@ -1,7 +1,12 @@
 package org.atlasapi.remotesite.knowledgemotion;
 
+import org.atlasapi.media.entity.Content;
+
+import com.google.common.base.Optional;
+
 public interface KnowledgeMotionDataRowHandler {
 
-    void handle(KnowledgeMotionDataRow row);
-    
+    Optional<Content> handle(KnowledgeMotionDataRow row);
+    void write(Content content);
+
 }
