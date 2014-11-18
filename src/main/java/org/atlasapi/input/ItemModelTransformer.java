@@ -80,6 +80,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         }
         Version version = new Version();
         version.setSegmentEvents(complexSegments.build());
+        item.addVersion(version);
         return item;
     }
 
