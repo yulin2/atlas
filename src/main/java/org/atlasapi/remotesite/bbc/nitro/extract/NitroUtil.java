@@ -16,6 +16,7 @@ import com.metabroadcast.atlas.glycerin.model.Availability;
 import com.metabroadcast.atlas.glycerin.model.AvailabilityOf;
 import com.metabroadcast.atlas.glycerin.model.Broadcast;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
+import com.metabroadcast.atlas.glycerin.model.Version;
 import com.metabroadcast.common.time.DateTimeZones;
 
 /**
@@ -89,6 +90,19 @@ public final class NitroUtil {
     public static PidReference versionPid(Broadcast broadcast) {
         checkNotNull(broadcast, "null broadcast");
         return refInTypes(broadcast, versionTypes);
+    }
+
+    /**
+     * Returns the {@link PidReference} of the programme associated with a version.
+     *
+     * @param version
+     *            - the version from which to extract the PID.
+     * @return - the {@link PidReference} of the version's programme or null if there is
+     *         none.
+     */
+    public static PidReference programmePid(Version version) {
+        checkNotNull(version, "null version");
+        return version.getVersionOf();
     }
     
     private static PidReference refInTypes(Broadcast broadcast, Set<String> types) {

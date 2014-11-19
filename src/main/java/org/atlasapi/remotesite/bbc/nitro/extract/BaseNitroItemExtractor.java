@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
@@ -13,20 +16,27 @@ import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSetMultimap.Builder;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.model.Availability;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.atlas.glycerin.model.Programme;
+import com.metabroadcast.atlas.glycerin.model.WarningText;
+import com.metabroadcast.atlas.glycerin.model.Warnings;
 import com.metabroadcast.common.collect.ImmutableOptionalMap;
 import com.metabroadcast.common.collect.OptionalMap;
 import com.metabroadcast.common.time.Clock;
@@ -40,6 +50,15 @@ import com.metabroadcast.common.time.Clock;
  */
 public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
     extends NitroContentExtractor<NitroItemSource<SOURCE>, ITEM> {
+
+    private final String WIDESCREEN_RATIO = "16:9";
+
+    private final Predicate<WarningText> IS_SHORT_WARNING = new Predicate<WarningText>() {
+        @Override
+        public boolean apply(WarningText input) {
+            return "short".equals(input.getLength());
+        }
+    };
 
     private final NitroBroadcastExtractor broadcastExtractor
         = new NitroBroadcastExtractor();
@@ -56,15 +75,27 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         OptionalMap<String, Encoding> encodings = extractEncodings(source.getAvailabilities(), now);
         
         ImmutableSet.Builder<Version> versions = ImmutableSet.builder();
-        for (String versionPid : Sets.union(broadcasts.keySet(), encodings.keySet())) {
+        for (com.metabroadcast.atlas.glycerin.model.Version nitroVersion : source.getVersions()) {
             Version version = new Version();
+            version.setDuration(convertDuration(nitroVersion.getDuration()));
             version.setLastUpdated(now);
-            version.setCanonicalUri(BbcFeeds.nitroUriForPid(versionPid));
-            version.setBroadcasts(broadcasts.get(versionPid));
-            Optional<Encoding> versionEncoding = encodings.get(versionPid);
-            if (versionEncoding.isPresent()) {
-                version.setManifestedAs(ImmutableSet.of(versionEncoding.get()));
+            version.setCanonicalUri(BbcFeeds.nitroUriForPid(nitroVersion.getPid()));
+            version.setBroadcasts(completeBroadcastsWithVersion(broadcasts, nitroVersion));
+            Optional<Encoding> optVersionEncoding = encodings.get(nitroVersion.getPid());
+
+            if (optVersionEncoding.isPresent()) {
+                Encoding versionEncoding = optVersionEncoding.get();
+                versionEncoding.setVideoAspectRatio(nitroVersion.getAspectRatio());
+                version.setManifestedAs(ImmutableSet.of(versionEncoding));
             }
+
+            Optional<WarningText> warningText = warningTextFrom(nitroVersion);
+            if (warningText.isPresent()) {
+                Restriction restriction = new Restriction();
+                restriction.setRestricted(true);
+                restriction.setMessage(warningText.get().getValue());
+            }
+
             versions.add(version);
         }
         item.setVersions(versions.build());
@@ -163,6 +194,38 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         }
         throw new IllegalArgumentException(String.format("No version ref for %s %s",
                 broadcast.getClass().getSimpleName(), broadcast.getPid()));
+    }
+
+    private Set<Broadcast> completeBroadcastsWithVersion(
+            ImmutableSetMultimap<String, Broadcast> broadcasts,
+            com.metabroadcast.atlas.glycerin.model.Version nitroVersion) {
+
+        return FluentIterable.from(broadcasts.get(nitroVersion.getPid()))
+                .transform(completeBroadcast(nitroVersion))
+                .toSet();
+    }
+
+    private Function<Broadcast, Broadcast> completeBroadcast(final com.metabroadcast.atlas.glycerin.model.Version version) {
+        return new Function<Broadcast, Broadcast>() {
+            @Override public Broadcast apply(Broadcast broadcast) {
+                broadcast.setWidescreen(WIDESCREEN_RATIO.equals(version.getAspectRatio()));
+                return broadcast;
+            }
+        };
+    }
+
+    private Duration convertDuration(javax.xml.datatype.Duration xmlDuration) {
+        return Duration.standardSeconds(xmlDuration.getSeconds());
+    }
+
+    private Optional<WarningText> warningTextFrom(com.metabroadcast.atlas.glycerin.model.Version version) {
+        Warnings warnings = version.getWarnings();
+
+        if (warnings == null) {
+            return Optional.absent();
+        }
+
+        return Iterables.tryFind(warnings.getWarningText(), IS_SHORT_WARNING);
     }
     
 }
