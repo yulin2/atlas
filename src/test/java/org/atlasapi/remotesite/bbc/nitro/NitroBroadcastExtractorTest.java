@@ -41,6 +41,7 @@ public class NitroBroadcastExtractorTest {
         publishedTime.setStart(start);
         publishedTime.setEnd(end);
         nitro.setPublishedTime(publishedTime);
+        nitro.setIsAudioDescribed(true);
         
         nitro.setIsRepeat(true);
         nitro.setIsAudioDescribed(true);
@@ -53,6 +54,7 @@ public class NitroBroadcastExtractorTest {
         assertThat(atlas.getTransmissionEndTime(), is(new DateTime("2013-09-11T08:15:00Z", DateTimeZones.UTC)));
         assertThat(atlas.getSourceId(), is("bbc:p01g1w71"));
         assertTrue(atlas.getRepeat());
+        assertTrue(atlas.getAudioDescribed());
         assertTrue(atlas.getAudioDescribed());
         
     }
