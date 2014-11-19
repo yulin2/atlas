@@ -36,7 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.atlasapi.feeds.youview.genres.GenreMapping;
+import org.atlasapi.feeds.youview.genres.OldGenreMapping;
 import org.atlasapi.feeds.youview.genres.GenreMappings;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Alias;
@@ -107,7 +107,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private static final Splitter TITLE_SPLIT = Splitter.on(" - ").trimResults();
     private final DateTimeFormatter dateMonthYearFormat = DateTimeFormat.forPattern("dd/MM/YYYY").withZoneUTC();
     private final DateTimeFormatter yearMonthDayFormat = ISODateTimeFormat.date().withZone(DateTimeZone.forID("Europe/London"));
-    private final GenreMapping genreMapping = GenreMappings.mappingFor(Publisher.LOVEFILM);
+    private final OldGenreMapping genreMapping = GenreMappings.mappingFor(Publisher.LOVEFILM);
     
     private static final EnglishLanguageCodeMap languageCodeMap = new EnglishLanguageCodeMap();
     private static final OptionalMap<String, Certificate> certificateMap = ImmutableOptionalMap.fromMap(

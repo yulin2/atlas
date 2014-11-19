@@ -19,11 +19,8 @@ import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.content.mongo.LastUpdatedContentFinder;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,17 +52,23 @@ public class ContentFeedController extends BaseController<JAXBElement<TVAMainTyp
             .withErrorCode("Api Key required")
             .withStatusCode(HttpStatusCode.FORBIDDEN);
     
-    private final DateTimeFormatter fmt = ISODateTimeFormat.dateHourMinuteSecond().withZone(DateTimeZones.UTC);
+    private static final AtlasErrorSummary NO_URI = new AtlasErrorSummary(new NullPointerException())
+            .withMessage("Required parameter 'uri' is missing")
+            .withErrorCode("Uri parameter required")
+            .withStatusCode(HttpStatusCode.BAD_REQUEST);
+    private static final AtlasErrorSummary CONTENT_NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
+            .withMessage("Unable to resolve content with the provided uri")
+            .withErrorCode("Content not found")
+            .withStatusCode(HttpStatusCode.BAD_REQUEST);
+    
     private final TvAnytimeGenerator feedGenerator;
-    private final LastUpdatedContentFinder contentFinder;
     private final ContentResolver contentResolver;
     
     public ContentFeedController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, 
             AtlasModelWriter<JAXBElement<TVAMainType>> outputter, TvAnytimeGenerator feedGenerator, 
-            LastUpdatedContentFinder contentFinder, ContentResolver contentResolver) {
+            ContentResolver contentResolver) {
         super(configFetcher, log, outputter);
         this.feedGenerator = checkNotNull(feedGenerator);
-        this.contentFinder = checkNotNull(contentFinder);
         this.contentResolver = checkNotNull(contentResolver);
     }
     
@@ -81,8 +84,7 @@ public class ContentFeedController extends BaseController<JAXBElement<TVAMainTyp
     @RequestMapping(value="/3.0/feeds/youview/{publisher}.xml", method = RequestMethod.GET)
     public void generateFeed(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("publisher") String publisherStr,
-            @RequestParam(value = "lastUpdated", required = false) String lastUpdated,
-            @RequestParam(value = "uri", required = false) String uri) throws IOException {
+            @RequestParam(value = "uri", required = true) String uri) throws IOException {
         try {
             Publisher publisher = Publisher.valueOf(publisherStr.trim().toUpperCase());
             ApplicationConfiguration appConfig = appConfig(request);
@@ -91,10 +93,17 @@ public class ContentFeedController extends BaseController<JAXBElement<TVAMainTyp
                 return;
             }
 
-            // TODO return sensible error if user asks for content that is not available
-            Optional<String> since = Optional.fromNullable(lastUpdated);
             Optional<String> possibleUri = Optional.fromNullable(uri);
-            JAXBElement<TVAMainType> tva = feedGenerator.generateTVAnytimeFrom(getContent(publisher, since, possibleUri));
+            if (!possibleUri.isPresent()) {
+                errorViewFor(request, response, NO_URI);
+                return;
+            }
+            Optional<Content> content = getContent(publisher, possibleUri.get());
+            if (!content.isPresent()) {
+                errorViewFor(request, response, CONTENT_NOT_FOUND);
+                return;
+            }
+            JAXBElement<TVAMainType> tva = feedGenerator.generateTVAnytimeFrom(content.get());
             
             modelAndViewFor(request, response, tva, appConfig);
         } catch (Exception e) {
@@ -103,14 +112,9 @@ public class ContentFeedController extends BaseController<JAXBElement<TVAMainTyp
     }
     
     // TODO extract this into custom content resolver class
-    private Iterable<Content> getContent(Publisher publisher, Optional<String> since, Optional<String> possibleUri) {
-        if (possibleUri.isPresent()) {
-            ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(possibleUri.get()));
-            Collection<Identified> resolved = resolvedContent.asResolvedMap().values();
-            return ImmutableList.of((Content) Iterables.getOnlyElement(resolved));
-        } else {
-            DateTime start = since.isPresent() ? fmt.parseDateTime(since.get()) : START_OF_TIME;
-            return ImmutableList.copyOf(contentFinder.updatedSince(publisher, start));
-        }
+    private Optional<Content> getContent(Publisher publisher, String uri) {
+        ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(uri));
+        Collection<Identified> resolved = resolvedContent.asResolvedMap().values();
+        return Optional.fromNullable((Content) Iterables.getOnlyElement(resolved, null));
     }
 }

@@ -56,8 +56,8 @@ import org.atlasapi.output.SimpleChannelModelWriter;
 import org.atlasapi.output.SimpleContentGroupModelWriter;
 import org.atlasapi.output.SimpleContentModelWriter;
 import org.atlasapi.output.SimpleEventModelWriter;
-import org.atlasapi.output.SimpleOrganisationModelWriter;
 import org.atlasapi.output.SimpleFeedStatisticsModelWriter;
+import org.atlasapi.output.SimpleOrganisationModelWriter;
 import org.atlasapi.output.SimplePersonModelWriter;
 import org.atlasapi.output.SimpleProductModelWriter;
 import org.atlasapi.output.SimpleScheduleModelWriter;
@@ -184,7 +184,6 @@ public class QueryWebModule {
     private @Autowired FeedStatisticsResolver feedStatsResolver;
     private @Autowired TvAnytimeGenerator feedGenerator;
     private @Autowired LastUpdatedContentFinder contentFinder;
-
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired AdapterLog log;
@@ -362,7 +361,7 @@ public class QueryWebModule {
     
     @Bean
     ContentFeedController contentFeedController() {
-        return new ContentFeedController(configFetcher, log, tvaModelOutputter(), feedGenerator, contentFinder, contentResolver);
+        return new ContentFeedController(configFetcher, log, tvaModelOutputter(), feedGenerator, contentResolver);
     }
     
     @Bean
