@@ -12,8 +12,8 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 public class SegmentModelTransformer {
 
     public SegmentEvent transform(org.atlasapi.media.entity.simple.SegmentEvent segmentEvent) {
-        checkArgument(segmentEvent.getSegment() != null
-                && !Strings.isNullOrEmpty(segmentEvent.getSegment().getId()),
+        checkArgument((segmentEvent.getSegment() != null
+                && segmentEvent.getSegment().getId() != null),
                     "You must specify a segment ID");
 
         SegmentEvent complex = new SegmentEvent();
