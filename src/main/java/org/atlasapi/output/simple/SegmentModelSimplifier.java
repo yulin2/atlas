@@ -71,12 +71,14 @@ public class SegmentModelSimplifier implements
     private org.atlasapi.media.entity.simple.Segment simplify(Segment segment) {
         final org.atlasapi.media.entity.simple.Segment seg = new org.atlasapi.media.entity.simple.Segment();
 
-        seg.setUri(segment.getCanonicalUri());
-        seg.setId(segment.getIdentifier());
+        seg.setCanonicalUri(segment.getCanonicalUri());
+        seg.setId(segment.getId());
 
-        final org.atlasapi.media.entity.Description description = segment.getDescription();
-        seg.setTitle(description.getTitle());
-        seg.setDescription(description.getSynopsis());
+        seg.setLongDescription(segment.getLongDescription());
+        seg.setMediumDescription(segment.getMediumDescription());
+        seg.setShortDescription(segment.getShortDescription());
+        seg.setTitle(segment.getTitle());
+        seg.setDescription(segment.getDescription());
 
         if (seg.getDuration() != null) {
             seg.setDuration(Ints.saturatedCast(segment.getDuration().getStandardSeconds()));

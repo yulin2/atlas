@@ -57,26 +57,14 @@ public class BbcIonSegmentExtractor implements ContentExtractor<IonSegmentEvent,
         final Segment segment = new Segment();
         segment.setCanonicalUri(BbcFeeds.slashProgrammesUriForPid(ionSegment.getPid()));
         segment.setPublisher(Publisher.BBC);
-        segment.setDescription(descriptionOf(ionSegment));
+        segment.setLongDescription(ionSegment.getLongSynopsis());
+        segment.setMediumDescription(ionSegment.getMediumSynopsis());
+        segment.setShortDescription(ionSegment.getShortSynopsis());
+        segment.setTitle(ionSegment.getTitle());
         segment.setType(SegmentType.fromString(ionSegment.getSegmentType()).valueOrNull());
         if (ionSegment.getDuration() != null) {
             segment.setDuration(Duration.standardSeconds(ionSegment.getDuration()));
         }
         return segment;
     }
-
-    private Description descriptionOf(IonSegment ionSegment) {
-        String synopsis;
-        if(!Strings.isNullOrEmpty(ionSegment.getLongSynopsis())) {
-            synopsis = ionSegment.getLongSynopsis();
-        } else if(!Strings.isNullOrEmpty(ionSegment.getMediumSynopsis())) {
-            synopsis = ionSegment.getMediumSynopsis();
-        } else {
-            synopsis = ionSegment.getShortSynopsis();
-        }
-        return description().withTitle(ionSegment.getTitle())
-                .withSynopsis(synopsis)
-                .build();
-    }
-
 }
