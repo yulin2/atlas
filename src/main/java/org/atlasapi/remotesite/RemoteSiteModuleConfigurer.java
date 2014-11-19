@@ -16,6 +16,7 @@ import org.atlasapi.remotesite.bt.events.BtEventsModule;
 import org.atlasapi.remotesite.btfeatured.BtFeaturedContentModule;
 import org.atlasapi.remotesite.btvod.BtVodModule;
 import org.atlasapi.remotesite.channel4.C4Module;
+import org.atlasapi.remotesite.channel4.pmlsd.C4PmlsdModule;
 import org.atlasapi.remotesite.five.FiveModule;
 import org.atlasapi.remotesite.getty.GettyModule;
 import org.atlasapi.remotesite.hulu.HuluModule;
@@ -57,6 +58,7 @@ public class RemoteSiteModuleConfigurer {
         .put("bbc",     BbcModule.class)
         .put("itv",     ItvModule.class)
         .put("c4",      C4Module.class)
+        .put("c4pmlsd", C4PmlsdModule.class)
         .put("five",    FiveModule.class)
  //       .put("ict",     ICTomorrowModule.class)
         .put("aorg",    ArchiveOrgModule.class)
