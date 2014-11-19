@@ -40,14 +40,12 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.media.entity.simple.Item, Item> {
 
     private final BroadcastModelTransformer broadcastTransformer;
-    private final SegmentModelTransformer segmentModelTransformer;
 
-    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, 
+    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore,
             ChannelResolver channelResolver, NumberToShortStringCodec idCodec, 
             ClipModelTransformer clipsModelTransformer, Clock clock) {
         super(lookupStore, topicStore, idCodec, clipsModelTransformer, clock);
         this.broadcastTransformer = new BroadcastModelTransformer(channelResolver);
-        this.segmentModelTransformer = new SegmentModelTransformer();
     }
 
     @Override
@@ -63,25 +61,11 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
             item = createSong(inputItem);
         } else if ("broadcast".equals(type)) {
             item = createBroadcast(inputItem);
-        } else if ("segment".equals(type)) {
-            item = createSegment(inputItem);
         } else {
             item = new Item();
         }
         item.setLastUpdated(now);
         return setItemFields(item, inputItem, now);
-    }
-
-    private Item createSegment(org.atlasapi.media.entity.simple.Item inputItem) {
-        Item item = new Item();
-        ImmutableList.Builder<SegmentEvent> complexSegments = ImmutableList.builder();
-        for (org.atlasapi.media.entity.simple.SegmentEvent simpleSegment : inputItem.getSegments()) {
-            complexSegments.add(segmentModelTransformer.transform(simpleSegment));
-        }
-        Version version = new Version();
-        version.setSegmentEvents(complexSegments.build());
-        item.addVersion(version);
-        return item;
     }
 
     private Item createBroadcast(org.atlasapi.media.entity.simple.Item inputItem) {
