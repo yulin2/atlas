@@ -8,6 +8,7 @@ import java.util.Set;
 import org.atlasapi.googlespreadsheet.SpreadsheetFetcher;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.ContentCategory;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public class KnowledgeMotionUpdateTask extends ScheduledTask {
             reportStatus(processor.getResult().toString() + " – finished; now un-ActivelyPublisheding disappeared content.");
 
             ImmutableSet<String> seenUris = processor.seenUris();
-            Iterator<Content> allStoredKmContent = contentLister.listContent(ContentListingCriteria.defaultCriteria().forPublishers(allKmPublishers).build());
+            Iterator<Content> allStoredKmContent = contentLister.listContent(ContentListingCriteria.defaultCriteria().forContent(ContentCategory.TOP_LEVEL_ITEM).forPublishers(allKmPublishers).build());
             while (allStoredKmContent.hasNext()) {
                 Content item = allStoredKmContent.next();
                 if (! seenUris.contains(item.getCanonicalUri())) {
