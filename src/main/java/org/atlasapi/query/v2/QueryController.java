@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.HttpStatusCode;
@@ -47,7 +46,8 @@ public class QueryController extends BaseController<QueryResult<Identified, ? ex
 	
 	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 	private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException())
-	                                                            .withStatusCode(HttpStatusCode.FORBIDDEN);
+	                                                            .withStatusCode(HttpStatusCode.FORBIDDEN)
+	                                                            .withMessage("Your API key is not permitted to view content from this publisher");
 
 	private final KnownTypeQueryExecutor executor;
 
