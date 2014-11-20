@@ -1,8 +1,17 @@
 package org.atlasapi.query;
 
+import javax.xml.bind.JAXBElement;
+
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.feeds.tvanytime.TvAnytimeGenerator;
 import org.atlasapi.feeds.utils.DescriptionWatermarker;
 import org.atlasapi.feeds.utils.WatermarkModule;
+import org.atlasapi.feeds.youview.statistics.FeedStatistics;
+import org.atlasapi.feeds.youview.statistics.FeedStatisticsQueryResult;
+import org.atlasapi.feeds.youview.statistics.FeedStatisticsResolver;
+import org.atlasapi.feeds.youview.transactions.Transaction;
+import org.atlasapi.feeds.youview.transactions.persistence.TransactionStore;
+import org.atlasapi.feeds.youview.transactions.simple.TransactionQueryResult;
 import org.atlasapi.input.BrandModelTransformer;
 import org.atlasapi.input.ClipModelTransformer;
 import org.atlasapi.input.DefaultGsonModelReader;
@@ -36,6 +45,7 @@ import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.DispatchingAtlasModelWriter;
+import org.atlasapi.output.JaxbTVAnytimeModelWriter;
 import org.atlasapi.output.JaxbXmlTranslator;
 import org.atlasapi.output.JsonTranslator;
 import org.atlasapi.output.QueryResult;
@@ -44,10 +54,12 @@ import org.atlasapi.output.SimpleChannelModelWriter;
 import org.atlasapi.output.SimpleContentGroupModelWriter;
 import org.atlasapi.output.SimpleContentModelWriter;
 import org.atlasapi.output.SimpleEventModelWriter;
+import org.atlasapi.output.SimpleFeedStatisticsModelWriter;
 import org.atlasapi.output.SimplePersonModelWriter;
 import org.atlasapi.output.SimpleProductModelWriter;
 import org.atlasapi.output.SimpleScheduleModelWriter;
 import org.atlasapi.output.SimpleTopicModelWriter;
+import org.atlasapi.output.SimpleTransactionModelWriter;
 import org.atlasapi.output.rdf.RdfXmlTranslator;
 import org.atlasapi.output.simple.ChannelGroupModelSimplifier;
 import org.atlasapi.output.simple.ChannelGroupSimplifier;
@@ -62,6 +74,7 @@ import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 import org.atlasapi.output.simple.EventModelSimplifier;
 import org.atlasapi.output.simple.EventRefModelSimplifier;
+import org.atlasapi.output.simple.FeedStatisticsModelSimplifier;
 import org.atlasapi.output.simple.ImageSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.OrganisationModelSimplifier;
@@ -71,6 +84,7 @@ import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.PublisherSimplifier;
 import org.atlasapi.output.simple.ServiceModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
+import org.atlasapi.output.simple.TransactionModelSimplifier;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -79,6 +93,7 @@ import org.atlasapi.persistence.content.PeopleQueryResolver;
 import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.persistence.content.mongo.LastUpdatedContentFinder;
 import org.atlasapi.persistence.content.people.PersonStore;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.event.EventResolver;
@@ -99,9 +114,11 @@ import org.atlasapi.query.topic.PublisherFilteringTopicContentLister;
 import org.atlasapi.query.topic.PublisherFilteringTopicResolver;
 import org.atlasapi.query.v2.ChannelController;
 import org.atlasapi.query.v2.ChannelGroupController;
+import org.atlasapi.query.v2.ContentFeedController;
 import org.atlasapi.query.v2.ContentGroupController;
 import org.atlasapi.query.v2.ContentWriteController;
 import org.atlasapi.query.v2.EventsController;
+import org.atlasapi.query.v2.FeedStatsController;
 import org.atlasapi.query.v2.PeopleController;
 import org.atlasapi.query.v2.PeopleWriteController;
 import org.atlasapi.query.v2.ProductController;
@@ -110,12 +127,15 @@ import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.query.v2.SearchController;
 import org.atlasapi.query.v2.TopicController;
 import org.atlasapi.query.v2.TopicWriteController;
+import org.atlasapi.query.v2.TransactionController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+
+import tva.metadata._2010.TVAMainType;
 
 import com.google.common.base.Splitter;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -154,6 +174,10 @@ public class QueryWebModule {
     private @Autowired LookupEntryStore lookupStore;
     private @Autowired DescriptionWatermarker descriptionWatermarker;
     private @Autowired EventResolver eventResolver;
+    private @Autowired TransactionStore transactionStore;
+    private @Autowired FeedStatisticsResolver feedStatsResolver;
+    private @Autowired TvAnytimeGenerator feedGenerator;
+    private @Autowired LastUpdatedContentFinder contentFinder;
 
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
@@ -315,6 +339,21 @@ public class QueryWebModule {
     }
 
     @Bean
+    TransactionController transactionController() {
+        return new TransactionController(configFetcher, log, transactionModelOutputter(), transactionStore);
+    }
+    
+    @Bean
+    FeedStatsController feedStatsController() {
+        return new FeedStatsController(configFetcher, log, feedStatsModelOutputter(), feedStatsResolver); 
+    }
+    
+    @Bean
+    ContentFeedController contentFeedController() {
+        return new ContentFeedController(configFetcher, log, tvaModelOutputter(), feedGenerator, contentFinder, contentResolver);
+    }
+    
+    @Bean
     AtlasModelWriter<QueryResult<Identified, ? extends Identified>> contentModelOutputter() {
         return this.<QueryResult<Identified, ? extends Identified>>standardWriter(
                 new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), contentItemModelSimplifier(), containerSimplifier(), topicSimplifier(), productSimplifier(), imageSimplifier(), personSimplifier()),
@@ -337,11 +376,20 @@ public class QueryWebModule {
     EventRefModelSimplifier eventRefSimplifier() {
         return new EventRefModelSimplifier(eventSimplifier(), eventResolver, idCodec());
     }
-
     
     @Bean
     EventModelSimplifier eventSimplifier() {
         return new EventModelSimplifier(topicSimplifier(), personSimplifier(), organisationSimplifier(), idCodec());
+    }
+    
+    @Bean
+    TransactionModelSimplifier transactionSimplifier() {
+        return new TransactionModelSimplifier();
+    }
+    
+    @Bean
+    FeedStatisticsModelSimplifier feedStatsSimplifier() {
+        return new FeedStatisticsModelSimplifier();
     }
     
     @Bean
@@ -418,6 +466,30 @@ public class QueryWebModule {
         return this.<Iterable<Event>>standardWriter(
                 new SimpleEventModelWriter(new JsonTranslator<EventQueryResult>(), contentResolver, eventModelSimplifier),
                 new SimpleEventModelWriter(new JaxbXmlTranslator<EventQueryResult>(), contentResolver, eventModelSimplifier));
+    }
+
+    @Bean
+    AtlasModelWriter<Iterable<Transaction>> transactionModelOutputter() {
+        TransactionModelSimplifier transactionModelSimplifier = transactionSimplifier();
+        return this.<Iterable<Transaction>>standardWriter(
+                new SimpleTransactionModelWriter(new JsonTranslator<TransactionQueryResult>(), transactionModelSimplifier),
+                new SimpleTransactionModelWriter(new JaxbXmlTranslator<TransactionQueryResult>(), transactionModelSimplifier));
+    }
+    
+    @Bean
+    AtlasModelWriter<Iterable<FeedStatistics>> feedStatsModelOutputter() {
+        FeedStatisticsModelSimplifier feedStatsSimplifier = feedStatsSimplifier();
+        return this.<Iterable<FeedStatistics>>standardWriter(
+                new SimpleFeedStatisticsModelWriter(new JsonTranslator<FeedStatisticsQueryResult>(), feedStatsSimplifier),
+                new SimpleFeedStatisticsModelWriter(new JaxbXmlTranslator<FeedStatisticsQueryResult>(), feedStatsSimplifier));
+    }
+    
+    @Bean
+    AtlasModelWriter<JAXBElement<TVAMainType>> tvaModelOutputter() {
+        AtlasModelWriter<JAXBElement<TVAMainType>> jaxbWriter = new JaxbTVAnytimeModelWriter();
+        return DispatchingAtlasModelWriter.<JAXBElement<TVAMainType>>dispatchingModelWriter()
+                .register(jaxbWriter, "xml", MimeType.APPLICATION_XML)
+                .build();
     }
 
     @Bean

@@ -8,7 +8,7 @@ import org.atlasapi.feeds.AtlasFeedsModule;
 import org.atlasapi.feeds.interlinking.delta.InterlinkingDeltaModule;
 import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
 import org.atlasapi.feeds.xmltv.XmlTvModule;
-import org.atlasapi.feeds.youview.YouViewFeedsWebModule;
+import org.atlasapi.feeds.youview.TVAnytimeFeedsModule;
 import org.atlasapi.feeds.youview.YouViewUploadModule;
 import org.atlasapi.googlespreadsheet.GoogleSpreadsheetModule;
 import org.atlasapi.logging.AtlasLoggingModule;
@@ -68,7 +68,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             RadioPlayerModule.class,
             XmlTvModule.class, 
             RemoteSiteHealthModule.class, 
-            EquivModule.class
+            EquivModule.class,
+            TVAnytimeFeedsModule.class
         );
         
         if(runProcessingOnly()) {
@@ -85,15 +86,10 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 ContentPurgeWebModule.class,
                 GoogleSpreadsheetModule.class
             );
-            if (youViewControllersEnabled()) {
+            if (youViewUploadEnabled()) {
                 builder.add(
-                    YouViewFeedsWebModule.class
-                );
-                if (youViewUploadEnabled()) {
-                    builder.add(
                         YouViewUploadModule.class
-                    );
-                }
+                );
             }
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
@@ -103,16 +99,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 ApplicationModule.class
             );
         }
-    }
-
-    // youview upload controllers can be enabled with one of these flags without enabling 
-    // the scheduled upload tasks. If the upload flags are enabled, those will override
-    // the flags controlling the controllers
-    private boolean youViewControllersEnabled() {
-        return Boolean.parseBoolean(Configurer.get("youview.upload.lovefilm.endpoints.enabled").get()) 
-                || Boolean.parseBoolean(Configurer.get("youview.upload.unbox.endpoints.enabled").get())
-                || Boolean.parseBoolean(Configurer.get("youview.upload.nitro.endpoints.enabled").get())
-                || youViewUploadEnabled();
     }
 
     private boolean youViewUploadEnabled() {
