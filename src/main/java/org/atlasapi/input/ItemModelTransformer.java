@@ -20,11 +20,14 @@ import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Sets;
@@ -38,8 +41,8 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.media.entity.simple.Item, Item> {
 
     private final BroadcastModelTransformer broadcastTransformer;
-    
-    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, 
+
+    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore,
             ChannelResolver channelResolver, NumberToShortStringCodec idCodec, 
             ClipModelTransformer clipsModelTransformer, Clock clock) {
         super(lookupStore, topicStore, idCodec, clipsModelTransformer, clock);
@@ -65,7 +68,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         item.setLastUpdated(now);
         return setItemFields(item, inputItem, now);
     }
-    
+
     private Item createBroadcast(org.atlasapi.media.entity.simple.Item inputItem) {
         Item item = new Item();
         HashSet<Broadcast> broadcasts = Sets.newHashSet();
