@@ -4,6 +4,8 @@ package org.atlasapi.input;
 import com.google.common.base.Strings;
 import org.atlasapi.media.SegmentType;
 import org.atlasapi.media.entity.Description;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.segment.Segment;
 import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.media.segment.SegmentRef;
@@ -24,7 +26,7 @@ public class SegmentModelTransformer {
         this.segmentWriter = checkNotNull(segmentWriter);
     }
 
-    public SegmentEvent transform(org.atlasapi.media.entity.simple.SegmentEvent simple) {
+    public SegmentEvent transform(org.atlasapi.media.entity.simple.SegmentEvent simple, PublisherDetails publisher) {
         checkArgument(Strings.isNullOrEmpty(simple.getUri()), "You must specify a URI on the item");
         checkArgument(simple.getSegment() != null, "You must specify a Segment on the SegmentEvent");
         SegmentEvent complex = new SegmentEvent();
@@ -39,26 +41,27 @@ public class SegmentModelTransformer {
         }
         complex.setIsChapter(simple.getIsChapter());
         if (Strings.isNullOrEmpty(simple.getSegment().getId())) {
-            complex.setSegment(writeSegment(simple.getSegment()));
+            complex.setSegment(writeSegment(simple.getSegment(), publisher));
         } else {
             complex.setSegment(new SegmentRef((simple.getSegment().getId())));
         }
         return complex;
     }
 
-    private SegmentRef writeSegment(org.atlasapi.media.entity.simple.Segment segment) {
-        Segment complex = transform(segment);
+    private SegmentRef writeSegment(org.atlasapi.media.entity.simple.Segment segment, PublisherDetails publisher) {
+        Segment complex = transform(segment, publisher);
         String id = segmentWriter.write(complex).getId().toString();
         return new SegmentRef(id);
     }
 
-    private Segment transform(org.atlasapi.media.entity.simple.Segment simple) {
+    private Segment transform(org.atlasapi.media.entity.simple.Segment simple, PublisherDetails publisher) {
         checkArgument((simple.getDuration() != null && simple.getDuration() > 0),
                 "You must specify a (positive) duration on the Segment");
         checkArgument(!Strings.isNullOrEmpty(simple.getSegmentType()),
                 "You must specify a type of Segment");
 
         Segment complex = new Segment();
+        complex.setPublisher(Publisher.fromKey(publisher.getKey()).requireValue());
         complex.setType(SegmentType.valueOf(simple.getSegmentType()));
         complex.setDuration(Duration.standardMinutes(simple.getDuration()));
         complex.setDescription(simple.getDescription());
