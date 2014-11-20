@@ -12,13 +12,7 @@ import org.atlasapi.feeds.youview.statistics.FeedStatisticsResolver;
 import org.atlasapi.feeds.youview.transactions.Transaction;
 import org.atlasapi.feeds.youview.transactions.persistence.TransactionStore;
 import org.atlasapi.feeds.youview.transactions.simple.TransactionQueryResult;
-import org.atlasapi.input.BrandModelTransformer;
-import org.atlasapi.input.ClipModelTransformer;
-import org.atlasapi.input.DefaultGsonModelReader;
-import org.atlasapi.input.DelegatingModelTransformer;
-import org.atlasapi.input.ItemModelTransformer;
-import org.atlasapi.input.PersonModelTransformer;
-import org.atlasapi.input.TopicModelTransformer;
+import org.atlasapi.input.*;
 import org.atlasapi.media.channel.CachingChannelGroupStore;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
@@ -45,6 +39,7 @@ import org.atlasapi.media.entity.simple.TopicQueryResult;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
+import org.atlasapi.media.segment.SegmentWriter;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.DispatchingAtlasModelWriter;
 import org.atlasapi.output.JaxbTVAnytimeModelWriter;
@@ -184,6 +179,7 @@ public class QueryWebModule {
     private @Autowired FeedStatisticsResolver feedStatsResolver;
     private @Autowired TvAnytimeGenerator feedGenerator;
     private @Autowired LastUpdatedContentFinder contentFinder;
+    private @Autowired SegmentWriter segmentWriter;
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired AdapterLog log;
@@ -284,7 +280,7 @@ public class QueryWebModule {
     }
     
     ClipModelTransformer clipTransformer() {
-        return new ClipModelTransformer(lookupStore, topicStore, channelResolver, idCodec(), new SystemClock());
+        return new ClipModelTransformer(lookupStore, topicStore, channelResolver, idCodec(), new SystemClock(), segmentModelTransformer());
     }
     
     BrandModelTransformer brandTransformer() {
@@ -292,8 +288,12 @@ public class QueryWebModule {
     }
     
     ItemModelTransformer itemTransformer() {
-        return new ItemModelTransformer(lookupStore, topicStore, channelResolver, idCodec(), clipTransformer(), new SystemClock());
-    }  
+        return new ItemModelTransformer(lookupStore, topicStore, channelResolver, idCodec(), clipTransformer(), new SystemClock(), segmentModelTransformer());
+    }
+
+    SegmentModelTransformer segmentModelTransformer() {
+        return new SegmentModelTransformer(segmentWriter);
+    }
     
     ContentWriteController contentWriteController() {
         return new ContentWriteController(configFetcher, contentResolver, contentWriter, new DefaultGsonModelReader(), new DelegatingModelTransformer(brandTransformer(), itemTransformer()));

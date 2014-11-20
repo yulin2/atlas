@@ -12,8 +12,8 @@ import com.metabroadcast.common.time.Clock;
 
 public class ClipModelTransformer extends ItemModelTransformer  {
     public ClipModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, 
-            ChannelResolver channelResolver, NumberToShortStringCodec idCodec, Clock clock) {
-        super(lookupStore, topicStore, channelResolver, idCodec, null, clock);
+            ChannelResolver channelResolver, NumberToShortStringCodec idCodec, Clock clock, SegmentModelTransformer segmentModelTransformer) {
+        super(lookupStore, topicStore, channelResolver, idCodec, null, clock, segmentModelTransformer);
     }
 
     @Override
