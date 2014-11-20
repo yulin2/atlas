@@ -25,8 +25,10 @@ public class SegmentModelTransformer {
     }
 
     public SegmentEvent transform(org.atlasapi.media.entity.simple.SegmentEvent simple) {
+        checkArgument(Strings.isNullOrEmpty(simple.getUri()), "You must specify a URI on the item");
         checkArgument(simple.getSegment() != null, "You must specify a Segment on the SegmentEvent");
         SegmentEvent complex = new SegmentEvent();
+        complex.setCanonicalUri(simple.getUri());
         complex.setDescription(Description.description()
                 .withSynopsis(simple.getDescription())
                 .withTitle(simple.getTitle())
