@@ -44,6 +44,7 @@ public class DefaultKnowledgeMotionDataRowHandler implements KnowledgeMotionData
         } else {
             Identified identified = existing.requireValue();
             Item merged = contentMerger.merge(ContentMerger.asItem(identified), (Item) content);
+            write(merged);
             return Optional.<Content>of(merged);
         }
     }
