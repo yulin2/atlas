@@ -14,7 +14,7 @@ import com.google.api.client.repackaged.com.google.common.base.Preconditions;
  * 
  */
 public class NitroImageExtractor 
-    implements ContentExtractor<com.metabroadcast.atlas.glycerin.model.Image, Image> {
+    implements ContentExtractor<com.metabroadcast.atlas.glycerin.model.Brand.Image, Image> {
 
     private final String recipe;
     private final int width;
@@ -37,7 +37,7 @@ public class NitroImageExtractor
     }
 
     @Override
-    public Image extract(com.metabroadcast.atlas.glycerin.model.Image source) {
+    public Image extract(com.metabroadcast.atlas.glycerin.model.Brand.Image source) {
         checkNotNull(source, "null image source");
         checkNotNull(source.getTemplateUrl(), "null image template");
 
