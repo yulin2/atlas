@@ -2,6 +2,9 @@ package org.atlasapi.input;
 
 
 import com.google.common.base.Strings;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+
 import org.atlasapi.media.SegmentType;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Publisher;
@@ -21,7 +24,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class SegmentModelTransformer {
 
     private final SegmentWriter segmentWriter;
-
+    private final NumberToShortStringCodec codec = new SubstitutionTableNumberCodec(); 
+    
     public SegmentModelTransformer(SegmentWriter segmentWriter) {
         this.segmentWriter = checkNotNull(segmentWriter);
     }
@@ -43,14 +47,14 @@ public class SegmentModelTransformer {
         if (Strings.isNullOrEmpty(simple.getSegment().getId())) {
             complex.setSegment(writeSegment(simple.getSegment(), publisher));
         } else {
-            complex.setSegment(new SegmentRef((simple.getSegment().getId())));
+            complex.setSegment(new SegmentRef(codec.decode(simple.getSegment().getId()).longValue()));
         }
         return complex;
     }
 
     private SegmentRef writeSegment(org.atlasapi.media.entity.simple.Segment segment, PublisherDetails publisher) {
         Segment complex = transform(segment, publisher);
-        String id = segmentWriter.write(complex).getId().toString();
+        long id = segmentWriter.write(complex).getId();
         return new SegmentRef(id);
     }
 
