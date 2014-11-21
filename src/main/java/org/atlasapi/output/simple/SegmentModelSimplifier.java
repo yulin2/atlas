@@ -1,5 +1,6 @@
 package org.atlasapi.output.simple;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,11 +20,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 public class SegmentModelSimplifier implements
         ModelSimplifier<List<SegmentEvent>, List<org.atlasapi.media.entity.simple.SegmentEvent>> {
 
     private final SegmentResolver segmentResolver;
+    private final NumberToShortStringCodec codec = new SubstitutionTableNumberCodec();
 
     public SegmentModelSimplifier(SegmentResolver segmentResolver) {
         this.segmentResolver = segmentResolver;
@@ -72,7 +76,7 @@ public class SegmentModelSimplifier implements
         final org.atlasapi.media.entity.simple.Segment seg = new org.atlasapi.media.entity.simple.Segment();
 
         seg.setUri(segment.getCanonicalUri());
-        seg.setId(segment.getId().toString());
+        seg.setId(codec.encode(BigInteger.valueOf(segment.getId())));
 
         seg.setLongDescription(segment.getLongDescription());
         seg.setMediumDescription(segment.getMediumDescription());
