@@ -10,6 +10,7 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.ion.BbcIonServices;
 import org.joda.time.DateTime;
 
+import com.google.api.client.repackaged.com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
@@ -26,6 +27,9 @@ public class NitroBroadcastExtractor
 
     private static final String TERRESTRIAL_EVENT_LOCATOR_TYPE = "terrestrial_event_locator";
     private static final String TERRESTRIAL_PROGRAM_CRID_TYPE = "terrestrial_programme_crid";
+    private static final String BID_TYPE = "bid";
+    private static final String PIPS_AUTHORITY = "pips";
+    private static final String TELEVIEW_AUTHORITY = "teleview";
 
     @Override
     public Optional<Broadcast> extract(com.metabroadcast.atlas.glycerin.model.Broadcast source) {
@@ -52,34 +56,62 @@ public class NitroBroadcastExtractor
             return ImmutableList.of();
         }
 
-        return aliasesForTypes(ids.getId(), TERRESTRIAL_EVENT_LOCATOR_TYPE, TERRESTRIAL_PROGRAM_CRID_TYPE);
+        return aliasesForTypesAndAuthorities(ids.getId(),
+                new TypeAndAuthority(TERRESTRIAL_EVENT_LOCATOR_TYPE, TELEVIEW_AUTHORITY),
+                new TypeAndAuthority(TERRESTRIAL_PROGRAM_CRID_TYPE, TELEVIEW_AUTHORITY),
+                new TypeAndAuthority(BID_TYPE, PIPS_AUTHORITY));
     }
 
-    private String namespaceForType(String type) {
-        return "bbc:" + type;
-    }
-
-    private Predicate<Id> idOfType(final String type) {
+    private Predicate<Id> idOfTypeAndAuthority(final TypeAndAuthority typeAndAuthority) {
         return new Predicate<Id>() {
             @Override
             public boolean apply(Id input) {
-                return type.equals(input.getType());
+                return typeAndAuthority.getType().equals(input.getType())
+                        && typeAndAuthority.getAuthority().equals(input.getAuthority());
             }
         };
     }
 
-    private Iterable<Alias> aliasesForTypes(List<Id> ids, String... types) {
+    private Iterable<Alias> aliasesForTypesAndAuthorities(List<Id> ids,
+            TypeAndAuthority... typeAndAuthorityPairs) {
         ImmutableList.Builder<Alias> aliases = ImmutableList.builder();
 
-        for (String type: types) {
-            Optional<Id> id = Iterables.tryFind(ids, idOfType(type));
+        for (TypeAndAuthority typeAndAuthority : typeAndAuthorityPairs) {
+            Optional<Id> id = Iterables.tryFind(ids, idOfTypeAndAuthority(typeAndAuthority));
 
             if (id.isPresent()) {
-                aliases.add(new Alias(namespaceForType(type), id.get().getValue()));
+                aliases.add(createAlias(id.get()));
             }
         }
 
         return aliases.build();
+    }
+
+    private Alias createAlias(Id id) {
+        return new Alias(namespaceFor(id), id.getValue());
+    }
+
+    private String namespaceFor(Id id) {
+        Joiner joiner = Joiner.on(':');
+        return joiner.join("bbc", id.getType(), id.getAuthority());
+    }
+
+    private static class TypeAndAuthority {
+        private final String type;
+        private final String authority;
+
+        private TypeAndAuthority(String type, String authority) {
+            this.type = type;
+            this.authority = authority;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getAuthority() {
+            return authority;
+        }
     }
 
 }
