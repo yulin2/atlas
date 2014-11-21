@@ -8,7 +8,9 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Map.Entry;
 
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import com.google.common.base.Strings;
@@ -17,6 +19,8 @@ import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
 import com.metabroadcast.atlas.glycerin.model.Availability;
 import com.metabroadcast.atlas.glycerin.model.Episode;
+import com.metabroadcast.atlas.glycerin.model.Format;
+import com.metabroadcast.atlas.glycerin.model.FormatsType;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.common.time.SystemClock;
 
@@ -140,6 +144,29 @@ public class NitroEpisodeExtractorTest {
         assertThat(episode.getContainer().getUri(), endsWith("b011cdng"));
         assertThat(episode.getSeriesRef().getUri(), endsWith("b011cdng"));
         assertThat(episode.getTitle(), is("Tinker, Tailor, Soldier, Spy Part 3"));
+    }
+
+    @Test
+    public void testFilmInstanceIsCreatedForFilmsFormat() {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+        tli.setFormats(filmFormatsType());
+
+        Item extracted = extractor.extract(NitroItemSource.valueOf(tli, noAvailability));
+
+        assertThat(extracted, is(Matchers.instanceOf(Film.class)));
+    }
+
+    private FormatsType filmFormatsType() {
+        FormatsType formatsType = new FormatsType();
+        Format filmsFormat = new Format();
+
+        filmsFormat.setFormatId("PT007");
+        filmsFormat.setValue("Films");
+        formatsType.getFormat().add(filmsFormat);
+
+        return formatsType;
     }
 
     private AncestorsTitles ancestorsTitles(String brandPid, String brandTitle) {
