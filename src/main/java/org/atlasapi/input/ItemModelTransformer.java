@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -20,10 +21,13 @@ import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Sets;
@@ -34,15 +38,19 @@ import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.media.entity.simple.Item, Item> {
 
     private final BroadcastModelTransformer broadcastTransformer;
-    
-    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore, 
-            ChannelResolver channelResolver, NumberToShortStringCodec idCodec, 
-            ClipModelTransformer clipsModelTransformer, Clock clock) {
+    private final SegmentModelTransformer segmentModelTransformer;
+
+    public ItemModelTransformer(LookupEntryStore lookupStore, TopicStore topicStore,
+            ChannelResolver channelResolver, NumberToShortStringCodec idCodec,
+            ClipModelTransformer clipsModelTransformer, Clock clock, SegmentModelTransformer segmentModelTransformer) {
         super(lookupStore, topicStore, idCodec, clipsModelTransformer, clock);
         this.broadcastTransformer = new BroadcastModelTransformer(channelResolver);
+        this.segmentModelTransformer = checkNotNull(segmentModelTransformer);
     }
 
     @Override
@@ -64,7 +72,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         item.setLastUpdated(now);
         return setItemFields(item, inputItem, now);
     }
-    
+
     private Item createBroadcast(org.atlasapi.media.entity.simple.Item inputItem) {
         Item item = new Item();
         HashSet<Broadcast> broadcasts = Sets.newHashSet();
@@ -111,8 +119,17 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
             for (org.atlasapi.media.entity.simple.Broadcast broadcast : inputItem.getBroadcasts()) {
                 broadcasts.add(broadcastTransformer.transform(broadcast));
             }
-            
+
             item.addVersion(new Version().copyWithBroadcasts(broadcasts));
+        }
+        if (!inputItem.getSegments().isEmpty()) {
+            Set<SegmentEvent> segments = Sets.newHashSet();
+            for (org.atlasapi.media.entity.simple.SegmentEvent segmentEvent : inputItem.getSegments()) {
+                segments.add(segmentModelTransformer.transform(segmentEvent, inputItem.getPublisher()));
+            }
+            Version version = new Version();
+            version.setSegmentEvents(segments);
+            item.addVersion(version);
         }
         return item;
     }
@@ -161,7 +178,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         location.setEmbedId(inputLocation.getEmbedId());
         location.setTransportIsLive(inputLocation.getTransportIsLive());
         location.setUri(inputLocation.getUri());
-        
+
         if (inputLocation.getTransportSubType() != null) {
             location.setTransportSubType(TransportSubType.fromString(inputLocation.getTransportSubType()));
         }
@@ -188,7 +205,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         policy.setRevenueContract(RevenueContract.fromKey(inputLocation.getRevenueContract()));
         return policy;
     }
-    
+
     private MimeType asMimeType(String mimeType) {
         if (mimeType != null) {
             return MimeType.fromString(mimeType);
