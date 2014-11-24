@@ -27,14 +27,18 @@ import org.joda.time.Duration;
 
 import com.metabroadcast.common.intl.Countries;
 import org.joda.time.ReadableDuration;
+import org.junit.Ignore;
 
 
 public class BbcProgrammesPolicyClientTest extends TestCase {
 
 	private String programmeThatWillBeAroundForALongWhileAsIsAvailableEverywhere = "http://feeds.bbc.co.uk/iplayer/episode/b00ss2rk";
-	
+
+
+    /* BBC Feeds is dead now so test will fail. */
 	@SuppressWarnings("unchecked")
-	public void testname() throws Exception {
+	@Ignore
+    public void testname() throws Exception {
 	    BbcLocationPolicyIds locationPolicyIds = BbcLocationPolicyIds.builder().build();
 	    
 		Policy policy = new BbcProgrammesPolicyClient(locationPolicyIds).policyForUri(programmeThatWillBeAroundForALongWhileAsIsAvailableEverywhere).requireValue();
