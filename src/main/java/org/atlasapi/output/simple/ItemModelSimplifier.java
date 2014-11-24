@@ -521,6 +521,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             simpleLocation.setAudioCoding(encoding.getAudioCoding().toString());
         }
 
+        simpleLocation.setAudioDescribed(encoding.getAudioDescribed());
         simpleLocation.setVideoFrameRate(encoding.getVideoFrameRate());
         simpleLocation.setVideoHorizontalSize(encoding.getVideoHorizontalSize());
         simpleLocation.setVideoProgressiveScan(encoding.getVideoProgressiveScan());

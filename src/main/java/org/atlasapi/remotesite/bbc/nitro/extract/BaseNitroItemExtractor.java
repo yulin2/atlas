@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Film;
@@ -33,6 +35,8 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.model.Availability;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.atlas.glycerin.model.Programme;
+import com.metabroadcast.atlas.glycerin.model.VersionType;
+import com.metabroadcast.atlas.glycerin.model.VersionTypes;
 import com.metabroadcast.atlas.glycerin.model.WarningText;
 import com.metabroadcast.atlas.glycerin.model.Warnings;
 import com.metabroadcast.common.collect.ImmutableOptionalMap;
@@ -49,6 +53,8 @@ import com.metabroadcast.common.time.Clock;
 public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
     extends NitroContentExtractor<NitroItemSource<SOURCE>, ITEM> {
 
+    private static final String AUDIO_DESCRIBED_VERSION_TYPE = "DubbedAudioDescribed";
+
     private final String WIDESCREEN_RATIO = "16:9";
 
     private final Predicate<WarningText> IS_SHORT_WARNING = new Predicate<WarningText>() {
@@ -58,11 +64,18 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         }
     };
 
+    private static final Predicate<VersionType> IS_AUDIO_DESCRIBED = new Predicate<VersionType>() {
+        @Override
+        public boolean apply(VersionType input) {
+            return AUDIO_DESCRIBED_VERSION_TYPE.equals(input.getId());
+        }
+    };
+
     private final NitroBroadcastExtractor broadcastExtractor
         = new NitroBroadcastExtractor();
     private final NitroAvailabilityExtractor availabilityExtractor
         = new NitroAvailabilityExtractor();
-    
+
     public BaseNitroItemExtractor(Clock clock) {
         super(clock);
     }
@@ -71,7 +84,7 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
     protected final void extractAdditionalFields(NitroItemSource<SOURCE> source, ITEM item, DateTime now) {
         ImmutableSetMultimap<String, Broadcast> broadcasts = extractBroadcasts(source.getBroadcasts(), now);
         OptionalMap<String, Encoding> encodings = extractEncodings(source.getAvailabilities(), now);
-        
+
         ImmutableSet.Builder<Version> versions = ImmutableSet.builder();
         for (com.metabroadcast.atlas.glycerin.model.Version nitroVersion : source.getVersions()) {
             Version version = new Version();
@@ -84,6 +97,7 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             if (optVersionEncoding.isPresent()) {
                 Encoding versionEncoding = optVersionEncoding.get();
                 versionEncoding.setVideoAspectRatio(nitroVersion.getAspectRatio());
+                versionEncoding.setAudioDescribed(isAudioDescribed(nitroVersion));
                 version.setManifestedAs(ImmutableSet.of(versionEncoding));
             }
 
@@ -104,6 +118,16 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             extractMediaTypeAndSpecialization(source, item);
         }
         extractAdditionalItemFields(source, item, now);
+    }
+
+    private boolean isAudioDescribed(com.metabroadcast.atlas.glycerin.model.Version nitroVersion) {
+        VersionTypes versionTypes = nitroVersion.getVersionTypes();
+
+        if (versionTypes == null) {
+            return false;
+        }
+
+        return Iterables.any(versionTypes.getVersionType(), IS_AUDIO_DESCRIBED);
     }
 
     private void extractMediaTypeAndSpecialization(NitroItemSource<SOURCE> source, ITEM item) {
