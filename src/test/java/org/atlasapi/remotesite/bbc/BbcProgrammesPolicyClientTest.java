@@ -11,7 +11,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License. */
-
+/*
 package org.atlasapi.remotesite.bbc;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,9 +34,9 @@ public class BbcProgrammesPolicyClientTest extends TestCase {
 	private String programmeThatWillBeAroundForALongWhileAsIsAvailableEverywhere = "http://feeds.bbc.co.uk/iplayer/episode/b00ss2rk";
 
 
-    /* BBC Feeds is dead now so test will fail. */
-	/* @SuppressWarnings("unchecked")
-    public void testname() throws Exception {
+     BBC Feeds is dead now so test will fail.
+	 @SuppressWarnings("unchecked")
+     public void testname() throws Exception {
 	    BbcLocationPolicyIds locationPolicyIds = BbcLocationPolicyIds.builder().build();
 	    
 		Policy policy = new BbcProgrammesPolicyClient(locationPolicyIds).policyForUri(programmeThatWillBeAroundForALongWhileAsIsAvailableEverywhere).requireValue();
@@ -44,6 +44,7 @@ public class BbcProgrammesPolicyClientTest extends TestCase {
 		assertThat(policy.getAvailableCountries(), is(Collections.singleton(Countries.ALL)));
 		assertThat(new Duration(policy.getAvailabilityStart(), policy.getAvailabilityEnd()), is(greaterThan((ReadableDuration) Duration.standardDays(100))));
 	}
-	*/
+
 
 }
+*/
