@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.feeds.youview.tasks.Status;
 import org.atlasapi.feeds.youview.tasks.Task;
 import org.atlasapi.feeds.youview.tasks.TaskQuery;
 import org.atlasapi.feeds.youview.tasks.persistence.TaskStore;
@@ -30,7 +31,6 @@ import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
-import com.youview.refdata.schemas.youviewstatusreport._2010_12_07.TransactionStateType;
 
 @Controller
 public class TaskController extends BaseController<Iterable<Task>> {
@@ -60,7 +60,7 @@ public class TaskController extends BaseController<Iterable<Task>> {
     public void transactions(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("publisher") String publisherStr,
             @RequestParam(value = "uri", required = false) String contentUri,
-            @RequestParam(value = "task_id", required = false) String taskId,
+            @RequestParam(value = "transaction_id", required = false) String transactionId,
             @RequestParam(value = "status", required = false) String status) throws IOException {
         
         try {
@@ -73,7 +73,7 @@ public class TaskController extends BaseController<Iterable<Task>> {
                 return;
             }
 
-            TaskQuery taskQuery = queryFrom(publisher, selection, contentUri, taskId, status);
+            TaskQuery taskQuery = queryFrom(publisher, selection, contentUri, transactionId, status);
             Iterable<Task> allTasks = taskStore.allTasks(taskQuery);
             
             modelAndViewFor(request, response, allTasks, appConfig);
@@ -82,14 +82,14 @@ public class TaskController extends BaseController<Iterable<Task>> {
         }
     }
     
-    private TaskQuery queryFrom(Publisher publisher, Selection selection, String contentUri, String taskId, String status) {
+    private TaskQuery queryFrom(Publisher publisher, Selection selection, String contentUri, String transactionId, String statusStr) {
         TaskQuery.Builder query = TaskQuery.builder(selection, publisher)
                 .withContentUri(contentUri)
-                .withTaskId(taskId);
+                .withTransactionId(transactionId);
         
-        if (status != null) {
-            TransactionStateType statusType = TransactionStateType.valueOf(status.trim().toUpperCase());
-            query.withTaskStatus(statusType);
+        if (statusStr != null) {
+            Status status = Status.valueOf(statusStr.trim().toUpperCase());
+            query.withTaskStatus(status);
         }
         return query.build();
     }
