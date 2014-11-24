@@ -9,9 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.v3.ApplicationConfiguration;
-import org.atlasapi.feeds.youview.transactions.Transaction;
-import org.atlasapi.feeds.youview.transactions.TransactionQuery;
-import org.atlasapi.feeds.youview.transactions.persistence.TransactionStore;
+import org.atlasapi.feeds.youview.tasks.Task;
+import org.atlasapi.feeds.youview.tasks.TaskQuery;
+import org.atlasapi.feeds.youview.tasks.persistence.TaskStore;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
@@ -27,17 +27,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.http.HttpStatusCode;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 import com.youview.refdata.schemas.youviewstatusreport._2010_12_07.TransactionStateType;
 
 @Controller
-public class TransactionController extends BaseController<Iterable<Transaction>> {
+public class TaskController extends BaseController<Iterable<Task>> {
     
     private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(100).withDefaultLimit(10);
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
-            .withMessage("No Transaction exists with the provided ID")
-            .withErrorCode("Transaction not found")
+            .withMessage("No Task exists with the provided ID")
+            .withErrorCode("Task not found")
             .withStatusCode(HttpStatusCode.NOT_FOUND);
     private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException())
             .withMessage("You require an API key to view this data")
@@ -45,19 +46,21 @@ public class TransactionController extends BaseController<Iterable<Transaction>>
             .withStatusCode(HttpStatusCode.FORBIDDEN);
     
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private final TransactionStore transactionStore;
+    private final TaskStore taskStore;
+    private final NumberToShortStringCodec idCodec;
     
-    public TransactionController(ApplicationConfigurationFetcher configFetcher, AdapterLog log,
-            AtlasModelWriter<Iterable<Transaction>> outputter, TransactionStore transactionStore) {
+    public TaskController(ApplicationConfigurationFetcher configFetcher, AdapterLog log,
+            AtlasModelWriter<Iterable<Task>> outputter, TaskStore taskStore, NumberToShortStringCodec idCodec) {
         super(configFetcher, log, outputter);
-        this.transactionStore = checkNotNull(transactionStore);
+        this.taskStore = checkNotNull(taskStore);
+        this.idCodec = checkNotNull(idCodec);
     }
 
-    @RequestMapping(value="/3.0/feeds/youview/{publisher}/transactions.json", method = RequestMethod.GET)
+    @RequestMapping(value="/3.0/feeds/youview/{publisher}/tasks.json", method = RequestMethod.GET)
     public void transactions(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("publisher") String publisherStr,
             @RequestParam(value = "uri", required = false) String contentUri,
-            @RequestParam(value = "transaction_id", required = false) String transactionId,
+            @RequestParam(value = "task_id", required = false) String taskId,
             @RequestParam(value = "status", required = false) String status) throws IOException {
         
         try {
@@ -70,35 +73,35 @@ public class TransactionController extends BaseController<Iterable<Transaction>>
                 return;
             }
 
-            TransactionQuery transactionQuery = queryFrom(publisher, selection, contentUri, transactionId, status);
-            Iterable<Transaction> allTransactions = transactionStore.allTransactions(transactionQuery);
+            TaskQuery taskQuery = queryFrom(publisher, selection, contentUri, taskId, status);
+            Iterable<Task> allTasks = taskStore.allTasks(taskQuery);
             
-            modelAndViewFor(request, response, allTransactions, appConfig);
+            modelAndViewFor(request, response, allTasks, appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
     }
     
-    private TransactionQuery queryFrom(Publisher publisher, Selection selection, String contentUri, String transactionId, String status) {
-        TransactionQuery.Builder query = TransactionQuery.builder(selection, publisher)
+    private TaskQuery queryFrom(Publisher publisher, Selection selection, String contentUri, String taskId, String status) {
+        TaskQuery.Builder query = TaskQuery.builder(selection, publisher)
                 .withContentUri(contentUri)
-                .withTransactionId(transactionId);
+                .withTaskId(taskId);
         
         if (status != null) {
             TransactionStateType statusType = TransactionStateType.valueOf(status.trim().toUpperCase());
-            query.withTransactionStatus(statusType);
+            query.withTaskStatus(statusType);
         }
         return query.build();
     }
 
-    @RequestMapping(value="/3.0/feeds/youview/{publisher}/transactions/{id}.json", method = RequestMethod.GET)
-    public void transaction(HttpServletRequest request, HttpServletResponse response,
+    @RequestMapping(value="/3.0/feeds/youview/{publisher}/tasks/{id}.json", method = RequestMethod.GET)
+    public void task(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("publisher") String publisherStr,
             @PathVariable("id") String id) throws IOException {
         try {
             
             String rawPublisherStr = publisherStr.trim().toUpperCase();
-            log.debug("transactions accessed with publisher {}", rawPublisherStr);
+            log.debug("tasks accessed with publisher {}", rawPublisherStr);
             Publisher publisher = Publisher.valueOf(rawPublisherStr);
             ApplicationConfiguration appConfig = appConfig(request);
             if (!appConfig.isEnabled(publisher)) {
@@ -106,7 +109,7 @@ public class TransactionController extends BaseController<Iterable<Transaction>>
                 return;
             }
 
-            Optional<Transaction> resolved = transactionStore.transactionFor(id, publisher);
+            Optional<Task> resolved = taskStore.taskFor(idCodec.decode(id).longValue());
             if (!resolved.isPresent()) {
                 errorViewFor(request, response, NOT_FOUND);
                 return;
