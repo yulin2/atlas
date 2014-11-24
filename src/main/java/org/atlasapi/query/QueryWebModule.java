@@ -9,10 +9,17 @@ import org.atlasapi.feeds.utils.WatermarkModule;
 import org.atlasapi.feeds.youview.statistics.FeedStatistics;
 import org.atlasapi.feeds.youview.statistics.FeedStatisticsQueryResult;
 import org.atlasapi.feeds.youview.statistics.FeedStatisticsResolver;
-import org.atlasapi.feeds.youview.transactions.Transaction;
-import org.atlasapi.feeds.youview.transactions.persistence.TransactionStore;
-import org.atlasapi.feeds.youview.transactions.simple.TransactionQueryResult;
-import org.atlasapi.input.*;
+import org.atlasapi.feeds.youview.tasks.Task;
+import org.atlasapi.feeds.youview.tasks.persistence.TaskStore;
+import org.atlasapi.feeds.youview.tasks.simple.TaskQueryResult;
+import org.atlasapi.input.BrandModelTransformer;
+import org.atlasapi.input.ClipModelTransformer;
+import org.atlasapi.input.DefaultGsonModelReader;
+import org.atlasapi.input.DelegatingModelTransformer;
+import org.atlasapi.input.ItemModelTransformer;
+import org.atlasapi.input.PersonModelTransformer;
+import org.atlasapi.input.SegmentModelTransformer;
+import org.atlasapi.input.TopicModelTransformer;
 import org.atlasapi.media.channel.CachingChannelGroupStore;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
@@ -56,8 +63,8 @@ import org.atlasapi.output.SimpleOrganisationModelWriter;
 import org.atlasapi.output.SimplePersonModelWriter;
 import org.atlasapi.output.SimpleProductModelWriter;
 import org.atlasapi.output.SimpleScheduleModelWriter;
+import org.atlasapi.output.SimpleTaskModelWriter;
 import org.atlasapi.output.SimpleTopicModelWriter;
-import org.atlasapi.output.SimpleTransactionModelWriter;
 import org.atlasapi.output.rdf.RdfXmlTranslator;
 import org.atlasapi.output.simple.ChannelGroupModelSimplifier;
 import org.atlasapi.output.simple.ChannelGroupSimplifier;
@@ -80,9 +87,10 @@ import org.atlasapi.output.simple.PersonModelSimplifier;
 import org.atlasapi.output.simple.PlayerModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.PublisherSimplifier;
+import org.atlasapi.output.simple.ResponseModelSimplifier;
 import org.atlasapi.output.simple.ServiceModelSimplifier;
+import org.atlasapi.output.simple.TaskModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
-import org.atlasapi.output.simple.TransactionModelSimplifier;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -125,9 +133,9 @@ import org.atlasapi.query.v2.ProductController;
 import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.query.v2.SearchController;
+import org.atlasapi.query.v2.TaskController;
 import org.atlasapi.query.v2.TopicController;
 import org.atlasapi.query.v2.TopicWriteController;
-import org.atlasapi.query.v2.TransactionController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -175,7 +183,7 @@ public class QueryWebModule {
     private @Autowired DescriptionWatermarker descriptionWatermarker;
     private @Autowired EventResolver eventResolver;
     private @Autowired OrganisationResolver organisationResolver;
-    private @Autowired TransactionStore transactionStore;
+    private @Autowired TaskStore taskStore;
     private @Autowired FeedStatisticsResolver feedStatsResolver;
     private @Autowired TvAnytimeGenerator feedGenerator;
     private @Autowired LastUpdatedContentFinder contentFinder;
@@ -350,8 +358,8 @@ public class QueryWebModule {
     }
 
     @Bean
-    TransactionController transactionController() {
-        return new TransactionController(configFetcher, log, transactionModelOutputter(), transactionStore);
+    TaskController taskController() {
+        return new TaskController(configFetcher, log, taskModelOutputter(), taskStore, idCodec());
     }
     
     @Bean
@@ -394,8 +402,8 @@ public class QueryWebModule {
     }
     
     @Bean
-    TransactionModelSimplifier transactionSimplifier() {
-        return new TransactionModelSimplifier();
+    TaskModelSimplifier taskSimplifier() {
+        return new TaskModelSimplifier(idCodec(), new ResponseModelSimplifier());
     }
     
     @Bean
@@ -488,11 +496,11 @@ public class QueryWebModule {
     }
     
     @Bean
-    AtlasModelWriter<Iterable<Transaction>> transactionModelOutputter() {
-        TransactionModelSimplifier transactionModelSimplifier = transactionSimplifier();
-        return this.<Iterable<Transaction>>standardWriter(
-                new SimpleTransactionModelWriter(new JsonTranslator<TransactionQueryResult>(), transactionModelSimplifier),
-                new SimpleTransactionModelWriter(new JaxbXmlTranslator<TransactionQueryResult>(), transactionModelSimplifier));
+    AtlasModelWriter<Iterable<Task>> taskModelOutputter() {
+        TaskModelSimplifier taskModelSimplifier = taskSimplifier();
+        return this.<Iterable<Task>>standardWriter(
+                new SimpleTaskModelWriter(new JsonTranslator<TaskQueryResult>(), taskModelSimplifier),
+                new SimpleTaskModelWriter(new JaxbXmlTranslator<TaskQueryResult>(), taskModelSimplifier));
     }
     
     @Bean
