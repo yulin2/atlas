@@ -27,7 +27,6 @@ import org.joda.time.Duration;
 
 import com.metabroadcast.common.intl.Countries;
 import org.joda.time.ReadableDuration;
-import org.junit.Ignore;
 
 
 public class BbcProgrammesPolicyClientTest extends TestCase {
@@ -36,8 +35,7 @@ public class BbcProgrammesPolicyClientTest extends TestCase {
 
 
     /* BBC Feeds is dead now so test will fail. */
-	@SuppressWarnings("unchecked")
-	@Ignore
+	/* @SuppressWarnings("unchecked")
     public void testname() throws Exception {
 	    BbcLocationPolicyIds locationPolicyIds = BbcLocationPolicyIds.builder().build();
 	    
@@ -46,6 +44,6 @@ public class BbcProgrammesPolicyClientTest extends TestCase {
 		assertThat(policy.getAvailableCountries(), is(Collections.singleton(Countries.ALL)));
 		assertThat(new Duration(policy.getAvailabilityStart(), policy.getAvailabilityEnd()), is(greaterThan((ReadableDuration) Duration.standardDays(100))));
 	}
-	
+	*/
 
 }
