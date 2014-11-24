@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.atlasapi.feeds.youview.genres.OldGenreMapping;
-import org.atlasapi.feeds.youview.genres.GenreMappings;
+import org.atlasapi.feeds.youview.lovefilm.LoveFilmGenreMapping;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
@@ -53,7 +53,6 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
@@ -107,7 +106,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private static final Splitter TITLE_SPLIT = Splitter.on(" - ").trimResults();
     private final DateTimeFormatter dateMonthYearFormat = DateTimeFormat.forPattern("dd/MM/YYYY").withZoneUTC();
     private final DateTimeFormatter yearMonthDayFormat = ISODateTimeFormat.date().withZone(DateTimeZone.forID("Europe/London"));
-    private final OldGenreMapping genreMapping = GenreMappings.mappingFor(Publisher.LOVEFILM);
+    private final OldGenreMapping genreMapping = new LoveFilmGenreMapping();
     
     private static final EnglishLanguageCodeMap languageCodeMap = new EnglishLanguageCodeMap();
     private static final OptionalMap<String, Certificate> certificateMap = ImmutableOptionalMap.fromMap(
