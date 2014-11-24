@@ -60,7 +60,7 @@ public class TaskController extends BaseController<Iterable<Task>> {
     public void transactions(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("publisher") String publisherStr,
             @RequestParam(value = "uri", required = false) String contentUri,
-            @RequestParam(value = "transaction_id", required = false) String transactionId,
+            @RequestParam(value = "remote_id", required = false) String remoteId,
             @RequestParam(value = "status", required = false) String status) throws IOException {
         
         try {
@@ -73,7 +73,7 @@ public class TaskController extends BaseController<Iterable<Task>> {
                 return;
             }
 
-            TaskQuery taskQuery = queryFrom(publisher, selection, contentUri, transactionId, status);
+            TaskQuery taskQuery = queryFrom(publisher, selection, contentUri, remoteId, status);
             Iterable<Task> allTasks = taskStore.allTasks(taskQuery);
             
             modelAndViewFor(request, response, allTasks, appConfig);
@@ -82,10 +82,10 @@ public class TaskController extends BaseController<Iterable<Task>> {
         }
     }
     
-    private TaskQuery queryFrom(Publisher publisher, Selection selection, String contentUri, String transactionId, String statusStr) {
+    private TaskQuery queryFrom(Publisher publisher, Selection selection, String contentUri, String remoteId, String statusStr) {
         TaskQuery.Builder query = TaskQuery.builder(selection, publisher)
                 .withContentUri(contentUri)
-                .withTransactionId(transactionId);
+                .withRemoteId(remoteId);
         
         if (statusStr != null) {
             Status status = Status.valueOf(statusStr.trim().toUpperCase());
