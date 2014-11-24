@@ -1,6 +1,9 @@
 package org.atlasapi.input;
 
-import java.util.*;
+import java.util.Currency;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.common.collect.Iterables;
 import org.atlasapi.media.TransportSubType;

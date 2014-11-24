@@ -18,9 +18,7 @@ import org.joda.time.Duration;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * Created by Jamie on 19/11/2014.
- */
+
 public class SegmentModelTransformer {
 
     private final SegmentWriter segmentWriter;
@@ -31,8 +29,7 @@ public class SegmentModelTransformer {
     }
 
     public SegmentEvent transform(org.atlasapi.media.entity.simple.SegmentEvent simple, PublisherDetails publisher) {
-        checkArgument(Strings.isNullOrEmpty(simple.getUri()), "You must specify a URI on the item");
-        checkArgument(simple.getSegment() != null, "You must specify a Segment on the SegmentEvent");
+        checkNotNull(simple.getSegment() != null, "You must specify a Segment on the SegmentEvent");
         SegmentEvent complex = new SegmentEvent();
         complex.setCanonicalUri(simple.getUri());
         complex.setDescription(Description.description()
