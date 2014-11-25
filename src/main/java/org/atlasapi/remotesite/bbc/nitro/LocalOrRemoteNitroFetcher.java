@@ -123,20 +123,7 @@ public class LocalOrRemoteNitroFetcher {
     }
 
     protected boolean fullFetchPermitted(Broadcast broadcast) {
-        LocalDate today = clock.now().toLocalDate();
-        LocalDate broadcastDay = NitroUtil.toDateTime(broadcast.getPublishedTime().getStart()).toLocalDate();
-        
-        Maybe<MediaType> mediaType = BbcIonMediaTypeMapping.mediaTypeForService(broadcast.getService().getSid());
-        
-        // today -4 for radio, today ± 2 for tv
-        // radio are more likely to publish clips after a show has been broadcast
-        // so with a limited ingest window it is more important to go back as far as possible for radio
-        // to ensure that clips are not missed
-        if (mediaType.hasValue() && mediaType.requireValue().equals("audio")) {
-            return today.plusDays(1).isAfter(broadcastDay) && today.minusDays(5).isBefore(broadcastDay);    
-        } else {
-            return today.plusDays(3).isAfter(broadcastDay) && today.minusDays(3).isBefore(broadcastDay);
-        }
+        return true;
     }
     
     
