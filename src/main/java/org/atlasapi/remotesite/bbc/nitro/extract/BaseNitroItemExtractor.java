@@ -6,9 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.annotation.Nullable;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
@@ -23,10 +20,8 @@ import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -54,8 +49,6 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
     extends NitroContentExtractor<NitroItemSource<SOURCE>, ITEM> {
 
     private static final String AUDIO_DESCRIBED_VERSION_TYPE = "DubbedAudioDescribed";
-
-    private final String WIDESCREEN_RATIO = "16:9";
 
     private final Predicate<WarningText> IS_SHORT_WARNING = new Predicate<WarningText>() {
         @Override
@@ -91,7 +84,7 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             version.setDuration(convertDuration(nitroVersion.getDuration()));
             version.setLastUpdated(now);
             version.setCanonicalUri(BbcFeeds.nitroUriForPid(nitroVersion.getPid()));
-            version.setBroadcasts(completeBroadcastsWithVersion(broadcasts, nitroVersion));
+            version.setBroadcasts(broadcasts.get(nitroVersion.getPid()));
             Optional<Encoding> optVersionEncoding = encodings.get(nitroVersion.getPid());
 
             if (optVersionEncoding.isPresent()) {
@@ -216,24 +209,6 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         }
         throw new IllegalArgumentException(String.format("No version ref for %s %s",
                 broadcast.getClass().getSimpleName(), broadcast.getPid()));
-    }
-
-    private Set<Broadcast> completeBroadcastsWithVersion(
-            ImmutableSetMultimap<String, Broadcast> broadcasts,
-            com.metabroadcast.atlas.glycerin.model.Version nitroVersion) {
-
-        return FluentIterable.from(broadcasts.get(nitroVersion.getPid()))
-                .transform(completeBroadcast(nitroVersion))
-                .toSet();
-    }
-
-    private Function<Broadcast, Broadcast> completeBroadcast(final com.metabroadcast.atlas.glycerin.model.Version version) {
-        return new Function<Broadcast, Broadcast>() {
-            @Override public Broadcast apply(Broadcast broadcast) {
-                broadcast.setWidescreen(WIDESCREEN_RATIO.equals(version.getAspectRatio()));
-                return broadcast;
-            }
-        };
     }
 
     private Duration convertDuration(javax.xml.datatype.Duration xmlDuration) {
