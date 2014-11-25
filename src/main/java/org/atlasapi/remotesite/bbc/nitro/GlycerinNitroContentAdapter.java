@@ -6,8 +6,6 @@ import static com.metabroadcast.atlas.glycerin.queries.ProgrammesMixin.TITLES;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Item;
@@ -18,7 +16,6 @@ import org.atlasapi.remotesite.bbc.nitro.extract.NitroItemSource;
 import org.atlasapi.remotesite.bbc.nitro.extract.NitroSeriesExtractor;
 import org.atlasapi.remotesite.bbc.nitro.extract.NitroUtil;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroClient;
-import org.atlasapi.remotesite.bbc.nitro.v1.NitroFormat;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +37,11 @@ import com.metabroadcast.atlas.glycerin.model.Broadcast;
 import com.metabroadcast.atlas.glycerin.model.Episode;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.atlas.glycerin.model.Programme;
+import com.metabroadcast.atlas.glycerin.model.Version;
 import com.metabroadcast.atlas.glycerin.queries.AvailabilityQuery;
 import com.metabroadcast.atlas.glycerin.queries.BroadcastsQuery;
 import com.metabroadcast.atlas.glycerin.queries.ProgrammesQuery;
+import com.metabroadcast.atlas.glycerin.queries.VersionsQuery;
 import com.metabroadcast.common.time.Clock;
 
 /** 
@@ -137,7 +136,7 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
                 log.warn("No programmes found for refs {}", Iterables.transform(refs, new Function<PidReference, String>() {
 
                     @Override
-                    public String apply(@Nullable PidReference pidRef) {
+                    public String apply(PidReference pidRef) {
                         return pidRef.getPid();
                     }
                     
@@ -164,6 +163,7 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
             throws GlycerinException, NitroException {
         ListMultimap<String, Availability> availabilities = availabilities(episodes);
         ListMultimap<String, Broadcast> broadcasts = broadcasts(episodes);
+        ListMultimap<String, Version> versions = versions(episodes);
         ImmutableList.Builder<NitroItemSource<Episode>> sources = ImmutableList.builder();
         for (Episode episode : episodes) {
             sources.add(NitroItemSource.valueOf(
@@ -171,7 +171,7 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
                     availabilities.get(episode.getPid()),
                     broadcasts.get(episode.getPid()),
                     genres(episode),
-                    formats(episode)));
+                    versions.get(episode.getPid())));
         }
         return sources.build();
     }
@@ -217,10 +217,6 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
         });
     }
 
-    private List<NitroFormat> formats(Episode episode) throws NitroException {
-        return nitroClient.formats(episode.getPid());
-    }
-
     private List<NitroGenreGroup> genres(Episode episode) throws NitroException {
         return nitroClient.genres(episode.getPid());
     }
@@ -233,6 +229,19 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
         return Multimaps.index(exhaust(glycerin.execute(query)), new Function<Broadcast, String>() {
             @Override
             public String apply(Broadcast input) {
+                return NitroUtil.programmePid(input).getPid();
+            }
+        });
+    }
+
+    private ListMultimap<String, Version> versions(ImmutableList<Episode> episodes) throws GlycerinException {
+        VersionsQuery query = VersionsQuery.builder()
+                .withProgramme(toPids(episodes))
+                .withPageSize(pageSize)
+                .build();
+        return Multimaps.index(exhaust(glycerin.execute(query)), new Function<Version, String>() {
+            @Override
+            public String apply(Version input) {
                 return NitroUtil.programmePid(input).getPid();
             }
         });

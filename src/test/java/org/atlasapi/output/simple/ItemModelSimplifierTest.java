@@ -117,6 +117,7 @@ public class ItemModelSimplifierTest {
         
         encoding.addAvailableAt(location);
         encoding.addAvailableAt(embed);
+        encoding.setAudioDescribed(true);
         fullItem.addVersion(version);
         fullItem.setTitle("Collings and Herrin");
         
@@ -141,7 +142,8 @@ public class ItemModelSimplifierTest {
         assertThat(simpleLocation.getPrice(), is(99));
         assertThat(simpleLocation.getAvailableCountries().size(), is(1));
         assertThat(simpleLocation.getAvailableCountries().iterator().next(), is("GB"));
-        
+        assertThat(simpleLocation.getAudioDescribed(), is(true));
+
         org.atlasapi.media.entity.simple.Location simpleEmbed = Iterables.getLast(simpleLocations, null);
         assertThat(simpleEmbed.getEmbedId(), is("embedId"));
         assertThat(simpleEmbed.getTransportType(), is("embed"));
