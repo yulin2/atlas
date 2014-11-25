@@ -1,41 +1,52 @@
 package org.atlasapi.remotesite.bbc.nitro.extract;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.api.client.repackaged.com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.remotesite.ContentExtractor;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 
 /**
  * Extracts an {@link Image} from a
- * {@link com.metabroadcast.atlas.glycerin.model.Image} according to a recipe.
+ * {@link com.metabroadcast.atlas.glycerin.model.Image} according to the provided dimensions.
  * 
  */
 public class NitroImageExtractor 
     implements ContentExtractor<com.metabroadcast.atlas.glycerin.model.Image, Image> {
 
     private final String recipe;
+    private final int width;
+    private final int height;
 
     /**
      * Create a new extractor which extracts {@link Image}s with the provided
-     * recipe.
+     * dimensions.
      * 
-     * @param recipe
-     *            - the recipe to use when extract an Image, e.g. "1024x576"
+     * @param width - the width of the image
+     * @param height - the height of the image
      */
-    public NitroImageExtractor(String recipe) {
-        checkArgument(!Strings.isNullOrEmpty(recipe), "recipe can't be null or empty");
-        this.recipe = recipe;
+    public NitroImageExtractor(int width, int height) {
+        checkArgument(width > 0, "width should be a positive number");
+        checkArgument(height > 0, "height should be a positive number");
+
+        this.width = width;
+        this.height = height;
+        this.recipe = String.format("%dx%d", width, height);
     }
-    
+
     @Override
     public Image extract(com.metabroadcast.atlas.glycerin.model.Image source) {
         checkNotNull(source, "null image source");
         checkNotNull(source.getTemplateUrl(), "null image template");
+
         String url = source.getTemplateUrl().replace("$recipe", recipe);
-        return new Image(url);
+        Image image = new Image(url);
+        image.setWidth(width);
+        image.setHeight(height);
+
+        return image;
     }
 
 }

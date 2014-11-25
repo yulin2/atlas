@@ -34,7 +34,7 @@ public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
     
     private final Clock clock;
     private final NitroImageExtractor imageExtractor
-        = new NitroImageExtractor("1024x576");
+        = new NitroImageExtractor(1024, 576);
     
     public NitroContentExtractor(Clock clock) {
         this.clock = clock;
