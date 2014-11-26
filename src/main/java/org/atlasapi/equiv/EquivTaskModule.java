@@ -19,6 +19,8 @@ import static org.atlasapi.media.entity.Publisher.TALK_TALK;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT_STAGE;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_SCOTLAND_RADIO;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_SCOTLAND_RADIO_STAGE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
 
 import java.util.Set;
@@ -174,6 +176,16 @@ public class EquivTaskModule {
                     .withPublishers(YOUVIEW_BT_STAGE)
                     .withChannels(youviewChannelResolver.getAllChannels())
                     .build().withName("YouView Stage BT Schedule Equivalence (8 day) Updater"), 
+                YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(YOUVIEW_SCOTLAND_RADIO)
+                    .withChannels(youviewChannelResolver.getAllChannels())
+                    .build().withName("YouView Scotland Radio Schedule Equivalence (8 day) Updater"), 
+                YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(YOUVIEW_SCOTLAND_RADIO_STAGE)
+                    .withChannels(youviewChannelResolver.getAllChannels())
+                    .build().withName("YouView Stage Scotland Radio Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(BBC)
