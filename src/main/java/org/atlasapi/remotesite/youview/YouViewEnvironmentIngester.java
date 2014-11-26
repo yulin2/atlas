@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.youview;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Set;
+
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -9,11 +11,14 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
+import org.atlasapi.remotesite.pa.channels.PaChannelsIngester;
 import org.joda.time.Duration;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.api.client.repackaged.com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Every;
@@ -24,6 +29,11 @@ public class YouViewEnvironmentIngester {
     
     private final static Every EVERY_15_MINUTES = RepetitionRules.every(Duration.standardMinutes(15));
     private final static Every EVERY_HOUR = RepetitionRules.every(Duration.standardHours(1));
+    
+    protected final static String SCOTLAND_SERVICE_ALIAS_PREFIX = "http://scotlandradio.youview.com/service/";
+    
+    private final static Set<String> ALIAS_PREFIXES = Sets.union( 
+            ImmutableSet.of(SCOTLAND_SERVICE_ALIAS_PREFIX), ImmutableSet.copyOf(PaChannelsIngester.YOUVIEW_SERVICE_ID_ALIAS_PREFIXES));
     
     private final SimpleScheduler scheduler;
     private final YouViewChannelProcessor youViewChannelProcessor;
@@ -54,7 +64,7 @@ public class YouViewEnvironmentIngester {
         
         this.ingestConfiguration = checkNotNull(ingestConfiguration);
         this.scheduler = checkNotNull(scheduler);
-        this.youViewChannelResolver = new DefaultYouViewChannelResolver(channelResolver);
+        this.youViewChannelResolver = new DefaultYouViewChannelResolver(channelResolver, ALIAS_PREFIXES);
         this.youViewScheduleFetcher = new YouViewScheduleFetcher(youViewUri, Ints.saturatedCast(timeout.getStandardSeconds()));
         this.youViewElementProcessor = new DefaultYouViewElementProcessor(
                                                 new YouViewContentExtractor(youViewChannelResolver, ingestConfiguration), 
