@@ -1,9 +1,9 @@
 package org.atlasapi.remotesite.youview;
 
-import static org.atlasapi.remotesite.pa.channels.PaChannelsIngester.YOUVIEW_SERVICE_ID_ALIAS_PREFIXES;
-
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,20 +14,26 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Multimap;
 
 public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
     
+    private static final String HTTP_PREFIX = "http://";
+
+    private static final String OVERRIDES_PREFIX = "http://overrides.";
+
     private static final Logger log = LoggerFactory.getLogger(DefaultYouViewChannelResolver.class);
     
     private final Map<Integer, Channel> channelMap;
     private final Map<Integer, String> aliasMap;
     
-    public DefaultYouViewChannelResolver(ChannelResolver channelResolver) {
+    public DefaultYouViewChannelResolver(ChannelResolver channelResolver, Set<String> aliasPrefixes) {
         Builder<Integer, Channel> channelMapBuilder = ImmutableMap.builder();
         Builder<Integer, String> aliasMapBuilder = ImmutableMap.builder();
         
-        for (String prefix : YOUVIEW_SERVICE_ID_ALIAS_PREFIXES) {
+        for (String prefix : aliasPrefixes) {
             buildEntriesForPrefix(channelResolver, prefix, channelMapBuilder, aliasMapBuilder);
         }
         
@@ -40,17 +46,44 @@ public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
             Builder<Integer, String> aliasMapBuilder) {
         
         Pattern pattern = Pattern.compile("^" + prefix + "(\\d+)$");
+        Multimap<Channel, String> overrides = overrideAliasesForPrefix(channelResolver, prefix);
         for (Entry<String, Channel> entry: channelResolver.forAliases(prefix).entrySet()) {
-            Matcher m = pattern.matcher(entry.getKey());
-            if (m.matches()) {
-                Integer serviceId = Integer.decode(m.group(1));
-                
-                channelMapBuilder.put(serviceId, entry.getValue());
-                aliasMapBuilder.put(serviceId, entry.getKey());
-            } else {
+            Channel channel = entry.getValue();
+            String alias = overrideFor(channel, overrides).or(entry.getKey());
+            Matcher m = pattern.matcher(alias);
+            if (!m.matches()) {
                 log.error("Could not parse YouView alias " + entry.getKey());
+                continue;
             }
+            Integer serviceId = Integer.decode(m.group(1));
+            
+            channelMapBuilder.put(serviceId, channel);
+            aliasMapBuilder.put(serviceId, alias);
         }
+    }
+
+    /**
+     * Provide the override mapping for a channel, if it exists, having rewritten it to
+     * use the standard, non-override, URI. For example http://override.youview.com/service/1
+     * will be rewritten as http://youview.com/service/1
+     */
+    private Optional<String> overrideFor(Channel channel, Multimap<Channel, String> overrides) {
+        Collection<String> overrideAliases = overrides.get(channel);
+        if (!overrideAliases.isEmpty()) {
+            if (overrideAliases.size() > 1) {
+                log.warn("Multiple override aliases found on single channel, taking first " + overrideAliases);
+            }
+            return Optional.of(overrideAliases.iterator().next().replace(OVERRIDES_PREFIX, HTTP_PREFIX));
+        }
+        return Optional.absent();
+    }
+    
+    private Multimap<Channel, String> overrideAliasesForPrefix(ChannelResolver channelResolver, String prefix) {
+        ImmutableMultimap.Builder<Channel, String> channelToAlias = ImmutableMultimap.builder();
+        for (Entry<String, Channel> entry: channelResolver.forAliases(prefix.replace(HTTP_PREFIX, OVERRIDES_PREFIX)).entrySet()) {
+            channelToAlias.put(entry.getValue(), entry.getKey());
+        }
+        return channelToAlias.build();
     }
 
     @Override
