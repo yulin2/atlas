@@ -236,7 +236,7 @@ public class GlycerinNitroContentAdapter implements NitroContentAdapter {
 
     private ListMultimap<String, Version> versions(ImmutableList<Episode> episodes) throws GlycerinException {
         VersionsQuery query = VersionsQuery.builder()
-                .withProgramme(toPids(episodes))
+                .withDescendantsOf(toPids(episodes))
                 .withPageSize(pageSize)
                 .build();
         return Multimaps.index(exhaust(glycerin.execute(query)), new Function<Version, String>() {
