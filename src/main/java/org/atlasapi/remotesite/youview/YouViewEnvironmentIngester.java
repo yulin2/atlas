@@ -30,11 +30,6 @@ public class YouViewEnvironmentIngester {
     private final static Every EVERY_15_MINUTES = RepetitionRules.every(Duration.standardMinutes(15));
     private final static Every EVERY_HOUR = RepetitionRules.every(Duration.standardHours(1));
     
-    protected final static String SCOTLAND_SERVICE_ALIAS_PREFIX = "http://scotlandradio.youview.com/service/";
-    
-    private final static Set<String> ALIAS_PREFIXES = Sets.union( 
-            ImmutableSet.of(SCOTLAND_SERVICE_ALIAS_PREFIX), ImmutableSet.copyOf(PaChannelsIngester.YOUVIEW_SERVICE_ID_ALIAS_PREFIXES));
-    
     private final SimpleScheduler scheduler;
     private final YouViewChannelProcessor youViewChannelProcessor;
     private final YouViewScheduleFetcher youViewScheduleFetcher;
@@ -60,11 +55,11 @@ public class YouViewEnvironmentIngester {
     public YouViewEnvironmentIngester(String youViewUri, Duration timeout, 
             SimpleScheduler scheduler, ChannelResolver channelResolver, ContentResolver contentResolver, 
             ContentWriter contentWriter, ScheduleWriter scheduleWriter, ScheduleResolver scheduleResolver, 
-            YouViewIngestConfiguration ingestConfiguration) {
+            YouViewChannelResolver youviewChannelResolver, YouViewIngestConfiguration ingestConfiguration) {
         
         this.ingestConfiguration = checkNotNull(ingestConfiguration);
         this.scheduler = checkNotNull(scheduler);
-        this.youViewChannelResolver = new DefaultYouViewChannelResolver(channelResolver, ALIAS_PREFIXES);
+        this.youViewChannelResolver = checkNotNull(youviewChannelResolver);
         this.youViewScheduleFetcher = new YouViewScheduleFetcher(youViewUri, Ints.saturatedCast(timeout.getStandardSeconds()));
         this.youViewElementProcessor = new DefaultYouViewElementProcessor(
                                                 new YouViewContentExtractor(youViewChannelResolver, ingestConfiguration), 

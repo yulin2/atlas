@@ -60,6 +60,7 @@ import org.atlasapi.remotesite.itv.whatson.ItvWhatsonChannelMap;
 import org.atlasapi.remotesite.redux.ReduxServices;
 import org.atlasapi.remotesite.youview.DefaultYouViewChannelResolver;
 import org.atlasapi.remotesite.youview.YouViewChannelResolver;
+import org.atlasapi.remotesite.youview.YouViewCoreModule;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.slf4j.Logger;
@@ -89,7 +90,7 @@ import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
-@Import({EquivModule.class, KafkaMessagingModule.class})
+@Import({EquivModule.class, KafkaMessagingModule.class, YouViewCoreModule.class })
 public class EquivTaskModule {
 
 
@@ -127,6 +128,7 @@ public class EquivTaskModule {
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired LookupWriter lookupWriter;
+    private @Autowired YouViewChannelResolver youviewChannelResolver;
     
     private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
     private @Autowired RecentEquivalenceResultStore equivalenceResultStore;
@@ -159,22 +161,22 @@ public class EquivTaskModule {
 
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(YOUVIEW)
-                    .withChannels(youViewChannelResolver().getAllChannels())
+                    .withChannels(youviewChannelResolver.getAllChannels())
                     .build().withName("YouView Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(YOUVIEW_STAGE)
-                    .withChannels(youViewChannelResolver().getAllChannels())
+                    .withChannels(youviewChannelResolver.getAllChannels())
                     .build().withName("YouView Stage Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(YOUVIEW_BT)
-                    .withChannels(youViewChannelResolver().getAllChannels())
+                    .withChannels(youviewChannelResolver.getAllChannels())
                     .build().withName("YouView BT Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(YOUVIEW_BT_STAGE)
-                    .withChannels(youViewChannelResolver().getAllChannels())
+                    .withChannels(youviewChannelResolver.getAllChannels())
                     .build().withName("YouView Stage BT Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
@@ -254,10 +256,6 @@ public class EquivTaskModule {
     
     public @Bean EquivalenceResultProbeController equivProbeController() {
         return new EquivalenceResultProbeController(equivalenceResultStore, equivProbeStore());
-    }
-    
-    private YouViewChannelResolver youViewChannelResolver() {
-        return new DefaultYouViewChannelResolver(channelResolver);
     }
     
     private Iterable<Channel> bbcChannels() {
