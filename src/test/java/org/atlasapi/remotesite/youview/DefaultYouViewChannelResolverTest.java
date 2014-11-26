@@ -47,8 +47,10 @@ public class DefaultYouViewChannelResolverTest {
         DefaultYouViewChannelResolver yvChannelResolver = new DefaultYouViewChannelResolver(channelResolver, ALIAS_PREFIXES);
         
         assertThat(yvChannelResolver.getChannel(456).get(), is(BBC_ONE));
-        assertFalse(yvChannelResolver.getChannel(123).isPresent());
+        assertFalse("Shouldn't be able to look up by overridden service ID", 
+                    yvChannelResolver.getChannel(123).isPresent());
         
-        assertThat(yvChannelResolver.getChannelServiceAlias(456), is("http://youview.com/service/456"));
+        assertThat(yvChannelResolver.getChannelServiceAlias(456), 
+                is("http://youview.com/service/456"));
     }
 }

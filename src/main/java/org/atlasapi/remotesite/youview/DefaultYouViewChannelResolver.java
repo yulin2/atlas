@@ -62,6 +62,11 @@ public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
         }
     }
 
+    /**
+     * Provide the override mapping for a channel, if it exists, having rewritten it to
+     * use the standard, non-override, URI. For example http://override.youview.com/service/1
+     * will be rewritten as http://youview.com/service/1
+     */
     private Optional<String> overrideFor(Channel channel, Multimap<Channel, String> overrides) {
         Collection<String> overrideAliases = overrides.get(channel);
         if (!overrideAliases.isEmpty()) {
