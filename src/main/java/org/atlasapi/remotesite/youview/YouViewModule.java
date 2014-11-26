@@ -14,21 +14,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
+@Import( YouViewCoreModule.class )
 public class YouViewModule {
 
     private static final String YOUVIEW_PRODUCTION_ALIAS_PREFIX = "youview";
     private static final String YOUVIEW_STAGE_ALIAS_PREFIX = "youview_stage";
+    
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ScheduleWriter scheduleWriter;
     private @Autowired ScheduleResolver scheduleResolver;
+    private @Autowired YouViewChannelResolver youviewChannelResolver;
     
     private @Value("${youview.prod.url}") String youViewProductionUri;
     private @Value("${youview.stage.url}") String youViewStageUri;
@@ -39,7 +43,8 @@ public class YouViewModule {
         return new YouViewEnvironmentIngester(youViewProductionUri, 
                 Duration.standardSeconds(timeout), scheduler, 
                 channelResolver, contentResolver, contentWriter, 
-                scheduleWriter, scheduleResolver, productionConfiguration());
+                scheduleWriter, scheduleResolver, youviewChannelResolver, 
+                productionConfiguration());
     }
     
     @Bean
@@ -47,7 +52,8 @@ public class YouViewModule {
         return new YouViewEnvironmentIngester(youViewStageUri, 
                 Duration.standardSeconds(timeout), scheduler, 
                 channelResolver, contentResolver, contentWriter, 
-                scheduleWriter, scheduleResolver, stageConfiguration());
+                scheduleWriter, scheduleResolver, youviewChannelResolver,
+                stageConfiguration());
     }
     
     @PostConstruct
@@ -59,6 +65,7 @@ public class YouViewModule {
     private YouViewIngestConfiguration productionConfiguration() {
         return new YouViewIngestConfiguration(
                 ImmutableMap.of(PaChannelsIngester.YOUVIEW_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW,
+                        YouViewCoreModule.SCOTLAND_SERVICE_ALIAS_PREFIX, Publisher.YOUVIEW_SCOTLAND_RADIO,
                         PaChannelsIngester.BT_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW_BT),
                 YOUVIEW_PRODUCTION_ALIAS_PREFIX);
     }
@@ -66,7 +73,9 @@ public class YouViewModule {
     private YouViewIngestConfiguration stageConfiguration() {
         return new YouViewIngestConfiguration(
                 ImmutableMap.of(PaChannelsIngester.YOUVIEW_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW_STAGE,
+                        YouViewCoreModule.SCOTLAND_SERVICE_ALIAS_PREFIX, Publisher.YOUVIEW_SCOTLAND_RADIO_STAGE,
                         PaChannelsIngester.BT_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW_BT_STAGE),
                 YOUVIEW_STAGE_ALIAS_PREFIX);
     }
+    
 }

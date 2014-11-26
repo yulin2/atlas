@@ -5,10 +5,19 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Map.Entry;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+
+import org.atlasapi.media.entity.Encoding;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Policy;
+import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import com.google.common.base.Strings;
@@ -16,13 +25,24 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
 import com.metabroadcast.atlas.glycerin.model.Availability;
+import com.metabroadcast.atlas.glycerin.model.AvailabilityOf;
+import com.metabroadcast.atlas.glycerin.model.Broadcast;
 import com.metabroadcast.atlas.glycerin.model.Episode;
+import com.metabroadcast.atlas.glycerin.model.Format;
+import com.metabroadcast.atlas.glycerin.model.FormatsType;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
+import com.metabroadcast.atlas.glycerin.model.Version;
+import com.metabroadcast.atlas.glycerin.model.VersionType;
+import com.metabroadcast.atlas.glycerin.model.VersionTypes;
 import com.metabroadcast.common.time.SystemClock;
 
 
 public class NitroEpisodeExtractorTest {
-    
+
+    private static final String AUDIO_DESCRIBED_VERSION_PID = "p02ccx3g";
+    private static final String NON_AUDIO_DESCRIBED_VERSION_PID = "p02ccx5g";
+    private static final String EPISODE_PID = "p01mv8m3";
+
     private static final ImmutableList<Availability> noAvailability = ImmutableList.<Availability>of();
     private final NitroEpisodeExtractor extractor = new NitroEpisodeExtractor(new SystemClock());
 
@@ -142,6 +162,65 @@ public class NitroEpisodeExtractorTest {
         assertThat(episode.getTitle(), is("Tinker, Tailor, Soldier, Spy Part 3"));
     }
 
+    @Test
+    public void testFilmInstanceIsCreatedForFilmsFormat() {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+        tli.setFormats(filmFormatsType());
+
+        Item extracted = extractor.extract(NitroItemSource.valueOf(tli, noAvailability));
+
+        assertThat(extracted, is(Matchers.instanceOf(Film.class)));
+    }
+
+    @Test
+    public void testAudioDescribedFlagIsProperlySet() throws DatatypeConfigurationException {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+
+        Item extractedAudioDescribed = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(availability(AUDIO_DESCRIBED_VERSION_PID)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(audioDescribedVersion())));
+
+        org.atlasapi.media.entity.Version audioDescribedVersion = extractedAudioDescribed.getVersions()
+                .iterator()
+                .next();
+
+        Encoding audioDescribedEncoding = audioDescribedVersion.getManifestedAs().iterator().next();
+
+        Item extractedNonAudioDescribed = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(availability(NON_AUDIO_DESCRIBED_VERSION_PID)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(nonAudioDescribedVersion())));
+
+        org.atlasapi.media.entity.Version nonAudioDescribedVersion = extractedNonAudioDescribed.getVersions()
+                .iterator()
+                .next();
+
+        Encoding nonAudioDescribedEncoding = nonAudioDescribedVersion.getManifestedAs()
+                .iterator()
+                .next();
+
+        assertTrue(audioDescribedEncoding.getAudioDescribed());
+        assertFalse(nonAudioDescribedEncoding.getAudioDescribed());
+    }
+
+    private FormatsType filmFormatsType() {
+        FormatsType formatsType = new FormatsType();
+        Format filmsFormat = new Format();
+
+        filmsFormat.setFormatId("PT007");
+        filmsFormat.setValue("Films");
+        formatsType.getFormat().add(filmsFormat);
+
+        return formatsType;
+    }
+
     private AncestorsTitles ancestorsTitles(String brandPid, String brandTitle) {
         return ancestorsTitles(brandPid, brandTitle, ImmutableMap.<String,String>of());
     }
@@ -169,6 +248,46 @@ public class NitroEpisodeExtractorTest {
         pidRef.setPid(pid);
         pidRef.setResultType(type);
         return pidRef;
+    }
+
+    private Availability availability(String versionPid) {
+        Availability availability = new Availability();
+        availability.getMediaSet().add("pc");
+
+        AvailabilityOf availabilityOfVersion = new AvailabilityOf();
+        availabilityOfVersion.setPid(versionPid);
+        availabilityOfVersion.setResultType("version");
+        availability.getAvailabilityOf().add(availabilityOfVersion);
+
+        AvailabilityOf availabilityOfEpisode = new AvailabilityOf();
+        availabilityOfEpisode.setPid(EPISODE_PID);
+        availabilityOfEpisode.setResultType("episode");
+        availability.getAvailabilityOf().add(availabilityOfEpisode);
+        return availability;
+    }
+
+    private Version audioDescribedVersion() throws DatatypeConfigurationException {
+        Version version = new Version();
+        version.setPid(AUDIO_DESCRIBED_VERSION_PID);
+
+        VersionType type = new VersionType();
+        type.setId("DubbedAudioDescribed");
+
+        VersionTypes types = new VersionTypes();
+        types.getVersionType().add(type);
+
+        version.setVersionTypes(types);
+        version.setDuration(DatatypeFactory.newInstance().newDuration(2000));
+
+        return version;
+    }
+
+    private Version nonAudioDescribedVersion() throws DatatypeConfigurationException {
+        Version version = new Version();
+        version.setPid(NON_AUDIO_DESCRIBED_VERSION_PID);
+        version.setDuration(DatatypeFactory.newInstance().newDuration(2000));
+
+        return version;
     }
 
 }

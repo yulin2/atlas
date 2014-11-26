@@ -91,7 +91,7 @@ public class YouViewUpdater extends ScheduledTask {
                 return entry.getValue();
             }
         }
-        throw new IllegalStateException("Could not find alias prefix to determine which publisher channel should be written as");
+        throw new IllegalStateException("Could not find alias prefix to determine which publisher channel should be written as: " + channelServiceAlias);
     }
     
 }

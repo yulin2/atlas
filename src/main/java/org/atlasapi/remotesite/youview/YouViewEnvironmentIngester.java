@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.youview;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Set;
+
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -9,11 +11,14 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
+import org.atlasapi.remotesite.pa.channels.PaChannelsIngester;
 import org.joda.time.Duration;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.api.client.repackaged.com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Every;
@@ -50,11 +55,11 @@ public class YouViewEnvironmentIngester {
     public YouViewEnvironmentIngester(String youViewUri, Duration timeout, 
             SimpleScheduler scheduler, ChannelResolver channelResolver, ContentResolver contentResolver, 
             ContentWriter contentWriter, ScheduleWriter scheduleWriter, ScheduleResolver scheduleResolver, 
-            YouViewIngestConfiguration ingestConfiguration) {
+            YouViewChannelResolver youviewChannelResolver, YouViewIngestConfiguration ingestConfiguration) {
         
         this.ingestConfiguration = checkNotNull(ingestConfiguration);
         this.scheduler = checkNotNull(scheduler);
-        this.youViewChannelResolver = new DefaultYouViewChannelResolver(channelResolver);
+        this.youViewChannelResolver = checkNotNull(youviewChannelResolver);
         this.youViewScheduleFetcher = new YouViewScheduleFetcher(youViewUri, Ints.saturatedCast(timeout.getStandardSeconds()));
         this.youViewElementProcessor = new DefaultYouViewElementProcessor(
                                                 new YouViewContentExtractor(youViewChannelResolver, ingestConfiguration), 
