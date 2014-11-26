@@ -3,7 +3,6 @@ package org.atlasapi.output.simple;
 import static com.google.api.client.util.Preconditions.checkNotNull;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.application.v3.ApplicationConfiguration;
@@ -34,6 +33,7 @@ public class TaskModelSimplifier implements ModelSimplifier<Task, org.atlasapi.f
         
         task.setId(idCodec.encode(BigInteger.valueOf(model.id())));
         task.setPublisher(model.publisher());
+        task.setAction(model.action());
         if (model.uploadTime().isPresent()) {
             task.setUploadTime(model.uploadTime().get().toDate());
         }
@@ -49,7 +49,7 @@ public class TaskModelSimplifier implements ModelSimplifier<Task, org.atlasapi.f
     }
 
     private Iterable<org.atlasapi.feeds.youview.tasks.simple.Response> simplifyResponses(
-            List<Response> remoteResponses, final Set<Annotation> annotations, final ApplicationConfiguration config) {
+            Set<Response> remoteResponses, final Set<Annotation> annotations, final ApplicationConfiguration config) {
         return FluentIterable.from(remoteResponses)
                 .transform(simplifyResponse(annotations, config))
                 .toSortedList(Ordering.natural());
