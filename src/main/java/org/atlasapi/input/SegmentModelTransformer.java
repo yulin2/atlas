@@ -66,6 +66,7 @@ public class SegmentModelTransformer {
         complex.setType(SegmentType.valueOf(simple.getSegmentType()));
         complex.setDuration(Duration.standardMinutes(simple.getDuration()));
         complex.setDescription(simple.getDescription());
+        complex.setRelatedLinks(simple.getRelatedLinks());
         complex.setTitle(simple.getTitle());
         return complex;
     }
