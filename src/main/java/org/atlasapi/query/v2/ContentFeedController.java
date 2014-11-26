@@ -12,6 +12,7 @@ import javax.xml.bind.JAXBElement;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.v3.ApplicationConfiguration;
 import org.atlasapi.feeds.tvanytime.TvAnytimeGenerator;
+import org.atlasapi.feeds.tvanytime.TvaGenerationException;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -20,7 +21,6 @@ import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.joda.time.DateTime;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +33,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.HttpStatusCode;
-import com.metabroadcast.common.time.DateTimeZones;
 
 /**
  * Produces an output feed a certain provider, given a certain publisher's content.
@@ -46,7 +45,6 @@ import com.metabroadcast.common.time.DateTimeZones;
 @Controller
 public class ContentFeedController extends BaseController<JAXBElement<TVAMainType>> {
 
-    private static final DateTime START_OF_TIME = new DateTime(2000, 1, 1, 0, 0, 0, 0, DateTimeZones.UTC);
     private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException())
             .withMessage("You require an API key to view this data")
             .withErrorCode("Api Key required")
@@ -105,9 +103,18 @@ public class ContentFeedController extends BaseController<JAXBElement<TVAMainTyp
             JAXBElement<TVAMainType> tva = feedGenerator.generateTVAnytimeFrom(content.get());
             
             modelAndViewFor(request, response, tva, appConfig);
+        } catch (TvaGenerationException e) {
+            errorViewFor(request, response, tvaGenerationError(e));
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
+    }
+    
+    private AtlasErrorSummary tvaGenerationError(TvaGenerationException e) { 
+        return new AtlasErrorSummary(e)
+                .withMessage("Unable to generate TVAnytime output for the provided uri")
+                .withErrorCode("TVAnytime generation error")
+                .withStatusCode(HttpStatusCode.SERVER_ERROR);
     }
     
     // TODO extract this into custom content resolver class
