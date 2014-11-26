@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.youview;
 
-import java.util.Set;
-
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.channel.ChannelResolver;
@@ -67,6 +65,7 @@ public class YouViewModule {
     private YouViewIngestConfiguration productionConfiguration() {
         return new YouViewIngestConfiguration(
                 ImmutableMap.of(PaChannelsIngester.YOUVIEW_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW,
+                        YouViewCoreModule.SCOTLAND_SERVICE_ALIAS_PREFIX, Publisher.YOUVIEW_SCOTLAND_RADIO,
                         PaChannelsIngester.BT_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW_BT),
                 YOUVIEW_PRODUCTION_ALIAS_PREFIX);
     }
@@ -74,6 +73,7 @@ public class YouViewModule {
     private YouViewIngestConfiguration stageConfiguration() {
         return new YouViewIngestConfiguration(
                 ImmutableMap.of(PaChannelsIngester.YOUVIEW_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW_STAGE,
+                        YouViewCoreModule.SCOTLAND_SERVICE_ALIAS_PREFIX, Publisher.YOUVIEW_SCOTLAND_RADIO_STAGE,
                         PaChannelsIngester.BT_SERVICE_ID_ALIAS_PREFIX, Publisher.YOUVIEW_BT_STAGE),
                 YOUVIEW_STAGE_ALIAS_PREFIX);
     }
