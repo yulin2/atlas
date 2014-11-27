@@ -329,7 +329,7 @@ public class NitroEpisodeExtractorTest {
         Warnings warnings = new Warnings();
 
         WarningText warningText = new WarningText();
-        warningText.setLength("short");
+        warningText.setLength("long");
         warningText.setValue(warningMessage);
 
         warnings.getWarningText().add(warningText);
