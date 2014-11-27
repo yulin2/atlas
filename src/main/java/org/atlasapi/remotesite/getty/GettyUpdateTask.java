@@ -4,12 +4,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.atlasapi.media.entity.Identified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
@@ -41,6 +43,8 @@ public class GettyUpdateTask extends ScheduledTask {
     protected void runTask() {
         UpdateProgress progress = UpdateProgress.START;
 
+        Map<String, Integer> contentFirstSeenAtOffset = Maps.newHashMap();
+
         final int firstOffset = restartStatus.startFromOffset().or(1);  // Getty API starts its offsets at 1.
         int offset = firstOffset;
 
@@ -67,6 +71,14 @@ public class GettyUpdateTask extends ScheduledTask {
                     try {
                         log.debug("Writing item {} ({})", video.getAssetId(), video.getTitle());
                         Identified written = dataHandler.handle(video);
+
+                        Integer maybeAlreadySeen = contentFirstSeenAtOffset.get(written.getCanonicalUri());
+                        if (maybeAlreadySeen != null) {
+                            log.warn("Getty item {} is a duplicate, seen at offset {} and first at {}!", new Object[]{written.getCanonicalUri(), offset, maybeAlreadySeen});
+                        } else {
+                            contentFirstSeenAtOffset.put(written.getCanonicalUri(), offset);
+                        }
+
                         progress = progress.reduce(UpdateProgress.SUCCESS);
                     } catch (Exception e) {
                         log.warn(String.format("Failed to interpret a video response"), e);
