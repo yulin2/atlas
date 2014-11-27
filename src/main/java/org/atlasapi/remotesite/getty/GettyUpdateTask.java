@@ -3,9 +3,7 @@ package org.atlasapi.remotesite.getty;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.atlasapi.media.entity.Identified;
 import org.slf4j.Logger;
@@ -43,8 +41,6 @@ public class GettyUpdateTask extends ScheduledTask {
     protected void runTask() {
         UpdateProgress progress = UpdateProgress.START;
 
-        Set<String> receivedItemUris = new HashSet<String>();
-
         final int firstOffset = restartStatus.startFromOffset().or(1);  // Getty API starts its offsets at 1.
         int offset = firstOffset;
 
@@ -71,7 +67,6 @@ public class GettyUpdateTask extends ScheduledTask {
                     try {
                         log.debug("Writing item {} ({})", video.getAssetId(), video.getTitle());
                         Identified written = dataHandler.handle(video);
-                        receivedItemUris.add(written.getCanonicalUri());
                         progress = progress.reduce(UpdateProgress.SUCCESS);
                     } catch (Exception e) {
                         log.warn(String.format("Failed to interpret a video response"), e);
