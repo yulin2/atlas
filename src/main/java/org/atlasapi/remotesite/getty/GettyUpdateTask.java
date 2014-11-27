@@ -48,10 +48,12 @@ public class GettyUpdateTask extends ScheduledTask {
         final int firstOffset = restartStatus.startFromOffset().or(1);  // Getty API starts its offsets at 1.
         int offset = firstOffset;
 
+        Integer expectedItemCount = null;
+
         //paginate videos
         while (shouldContinue()) {
             try {
-                reportStatus(progress.toString() + " (started at offset " + firstOffset + ")");
+                reportStatus(progress.toString() + " ( " + expectedItemCount + " total, started at offset " + firstOffset + ")");
 
                 String response = null;
                 try {
@@ -63,8 +65,18 @@ public class GettyUpdateTask extends ScheduledTask {
 
                 log.debug("Parsing response");
                 List<VideoResponse> videos = adapter.parse(response);
+
                 if (videos.isEmpty()) {
                     break;  // we've run out of data
+                }
+
+                Integer newExpectedItemCount = videos.get(0).getExpectedItemCount();
+                if (newExpectedItemCount != null) {
+                    expectedItemCount = newExpectedItemCount;
+                }
+                if (expectedItemCount != null && offset > expectedItemCount) {
+                    log.warn("Deliberately stopping because there are more pages of items than there should be.");
+                    break;
                 }
 
                 for (VideoResponse video : videos) {
@@ -90,6 +102,7 @@ public class GettyUpdateTask extends ScheduledTask {
             }
             offset += itemsPerPage;
         }
+        reportStatus("Finished, reaching offset " + offset + " / " + expectedItemCount +".");
     }
 
 }
