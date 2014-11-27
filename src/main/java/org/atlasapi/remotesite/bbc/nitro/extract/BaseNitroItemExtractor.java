@@ -49,11 +49,12 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
     extends NitroContentExtractor<NitroItemSource<SOURCE>, ITEM> {
 
     private static final String AUDIO_DESCRIBED_VERSION_TYPE = "DubbedAudioDescribed";
+    private static final String WARNING_TEXT_LONG_LENGTH = "long";
 
-    private final Predicate<WarningText> IS_SHORT_WARNING = new Predicate<WarningText>() {
+    private final Predicate<WarningText> IS_LONG_WARNING = new Predicate<WarningText>() {
         @Override
         public boolean apply(WarningText input) {
-            return "short".equals(input.getLength());
+            return WARNING_TEXT_LONG_LENGTH.equals(input.getLength());
         }
     };
 
@@ -227,7 +228,7 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             return Optional.absent();
         }
 
-        return Iterables.tryFind(warnings.getWarningText(), IS_SHORT_WARNING);
+        return Iterables.tryFind(warnings.getWarningText(), IS_LONG_WARNING);
     }
     
 }
