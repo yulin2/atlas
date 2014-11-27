@@ -81,7 +81,11 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         ImmutableSet.Builder<Version> versions = ImmutableSet.builder();
         for (com.metabroadcast.atlas.glycerin.model.Version nitroVersion : source.getVersions()) {
             Version version = new Version();
-            version.setDuration(convertDuration(nitroVersion.getDuration()));
+
+            if (nitroVersion.getDuration() != null) {
+                version.setDuration(convertDuration(nitroVersion.getDuration()));
+            }
+
             version.setLastUpdated(now);
             version.setCanonicalUri(BbcFeeds.nitroUriForPid(nitroVersion.getPid()));
             version.setBroadcasts(broadcasts.get(nitroVersion.getPid()));
@@ -99,6 +103,7 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
                 Restriction restriction = new Restriction();
                 restriction.setRestricted(true);
                 restriction.setMessage(warningText.get().getValue());
+                version.setRestriction(restriction);
             }
 
             versions.add(version);
