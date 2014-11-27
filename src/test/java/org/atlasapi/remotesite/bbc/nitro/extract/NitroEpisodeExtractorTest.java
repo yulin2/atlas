@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.bbc.nitro.extract;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -16,6 +18,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -23,6 +26,7 @@ import org.junit.Test;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
 import com.metabroadcast.atlas.glycerin.model.Availability;
 import com.metabroadcast.atlas.glycerin.model.AvailabilityOf;
@@ -34,6 +38,9 @@ import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.atlas.glycerin.model.Version;
 import com.metabroadcast.atlas.glycerin.model.VersionType;
 import com.metabroadcast.atlas.glycerin.model.VersionTypes;
+import com.metabroadcast.atlas.glycerin.model.Warning;
+import com.metabroadcast.atlas.glycerin.model.WarningText;
+import com.metabroadcast.atlas.glycerin.model.Warnings;
 import com.metabroadcast.common.time.SystemClock;
 
 
@@ -41,8 +48,9 @@ public class NitroEpisodeExtractorTest {
 
     private static final String AUDIO_DESCRIBED_VERSION_PID = "p02ccx3g";
     private static final String NON_AUDIO_DESCRIBED_VERSION_PID = "p02ccx5g";
-    private static final String EPISODE_PID = "p01mv8m3";
+    private static final String WITH_WARNING_VERSION_PID = "p02ccx8g";
 
+    private static final String EPISODE_PID = "p01mv8m3";
     private static final ImmutableList<Availability> noAvailability = ImmutableList.<Availability>of();
     private final NitroEpisodeExtractor extractor = new NitroEpisodeExtractor(new SystemClock());
 
@@ -210,6 +218,30 @@ public class NitroEpisodeExtractorTest {
         assertFalse(nonAudioDescribedEncoding.getAudioDescribed());
     }
 
+    @Test
+    public void testRestrictionIsProperlySet() {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+
+        String warningMessage = "This is a warning";
+
+        Item extractedAudioDescribed = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(availability(WITH_WARNING_VERSION_PID)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(versionWithWarning(warningMessage))));
+
+        org.atlasapi.media.entity.Version version = extractedAudioDescribed.getVersions()
+                .iterator()
+                .next();
+
+        Restriction restriction = version.getRestriction();
+
+        assertThat(restriction, is(notNullValue()));
+        assertEquals(restriction.getMessage(), warningMessage);
+    }
+
     private FormatsType filmFormatsType() {
         FormatsType formatsType = new FormatsType();
         Format filmsFormat = new Format();
@@ -286,6 +318,22 @@ public class NitroEpisodeExtractorTest {
         Version version = new Version();
         version.setPid(NON_AUDIO_DESCRIBED_VERSION_PID);
         version.setDuration(DatatypeFactory.newInstance().newDuration(2000));
+
+        return version;
+    }
+
+    private Version versionWithWarning(String warningMessage) {
+        Version version = new Version();
+        version.setPid(WITH_WARNING_VERSION_PID);
+
+        Warnings warnings = new Warnings();
+
+        WarningText warningText = new WarningText();
+        warningText.setLength("short");
+        warningText.setValue(warningMessage);
+
+        warnings.getWarningText().add(warningText);
+        version.setWarnings(warnings);
 
         return version;
     }
