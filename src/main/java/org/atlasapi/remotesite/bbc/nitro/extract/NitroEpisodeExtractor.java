@@ -19,6 +19,7 @@ import com.metabroadcast.atlas.glycerin.model.AncestorsTitles.Brand;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles.Series;
 import com.metabroadcast.atlas.glycerin.model.Episode;
 import com.metabroadcast.atlas.glycerin.model.Image;
+import com.metabroadcast.atlas.glycerin.model.MasterBrand;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.atlas.glycerin.model.Synopses;
 import com.metabroadcast.common.time.Clock;
@@ -180,6 +181,11 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
     @Override
     protected String extractMediaType(NitroItemSource<Episode> source) {
         return source.getProgramme().getMediaType();
+    }
+
+    @Override
+    protected MasterBrand extractMasterBrand(NitroItemSource<Episode> source) {
+        return source.getProgramme().getMasterBrand();
     }
     
 }

@@ -9,11 +9,13 @@ import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.ion.BbcIonServices;
 import org.joda.time.DateTime;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
+import com.metabroadcast.atlas.glycerin.model.MasterBrand;
 import com.metabroadcast.atlas.glycerin.model.Synopses;
 import com.metabroadcast.common.time.Clock;
 
@@ -66,11 +68,23 @@ public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
             content.setImage(image.getCanonicalUri());
             content.setImages(ImmutableSet.of(image));
         }
-        //TODO: brand.setPresentationChannel(BbcIonServices.get(source.getMasterBrand()));
+        MasterBrand masterBrand = extractMasterBrand(source);
+        if (masterBrand != null) {
+            content.setPresentationChannel(BbcIonServices.get(masterBrand.getMid()));
+        }
         //TODO: genres
         extractAdditionalFields(source, content, now);
         return content;
     }
+    
+    /**
+     * Projects the masterbrand of the source data.
+     * 
+     * @param source
+     *            - the source data
+     * @return - the masterbrand of the source data, or {@code null} if there is none.
+     */
+    protected abstract @Nullable MasterBrand extractMasterBrand(SOURCE source);
 
     /**
      * Creates a the raw {@code Content} object to be extracted.

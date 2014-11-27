@@ -118,6 +118,8 @@ public class ContentMerger {
         current.setClips(extracted.getClips());
         current.setEquivalentTo(extracted.getEquivalentTo());
         current.setRelatedLinks(extracted.getRelatedLinks());
+        current.setPresentationChannel(extracted.getPresentationChannel());
+        
         return current;
     }
 

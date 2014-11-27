@@ -63,7 +63,7 @@ public class BbcChannelSidAliasWriter {
         DatabasedMongo mongo = new DatabasedMongo(configureMongo(mongoHostStr), dbName);
         ChannelGroupStore channelGroupStore = new MongoChannelGroupStore(mongo);
         ChannelStore mongoChannelStore = new MongoChannelStore(mongo, channelGroupStore, channelGroupStore);
-        BbcChannelSidAliasWriter aliasWriter = new BbcChannelSidAliasWriter(mongoChannelStore );
+        BbcChannelSidAliasWriter aliasWriter = new BbcChannelSidAliasWriter(mongoChannelStore);
         aliasWriter.writeAliases();
     }
 
