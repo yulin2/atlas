@@ -53,9 +53,10 @@ public class ContentUpdatingNitroBroadcastHandler implements NitroBroadcastHandl
         = new NitroBroadcastExtractor();
 
 
-    public ContentUpdatingNitroBroadcastHandler(ContentResolver resolver, ContentWriter writer, NitroContentAdapter contentAdapter, Clock clock, GroupLock<String> lock) {
+    public ContentUpdatingNitroBroadcastHandler(ContentResolver resolver, ContentWriter writer,
+            LocalOrRemoteNitroFetcher localOrRemoteNitroFetcher, GroupLock<String> lock) {
         this.writer = writer;
-        this.localOrRemoteFetcher = new LocalOrRemoteNitroFetcher(resolver, contentAdapter, clock);
+        this.localOrRemoteFetcher = localOrRemoteNitroFetcher;
         this.lock = lock;
     }
     

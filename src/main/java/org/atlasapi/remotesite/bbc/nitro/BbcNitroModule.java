@@ -29,6 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import com.google.api.client.util.Strings;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -40,6 +42,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metabroadcast.atlas.glycerin.Glycerin;
 import com.metabroadcast.atlas.glycerin.XmlGlycerin;
 import com.metabroadcast.atlas.glycerin.XmlGlycerin.Builder;
+import com.metabroadcast.atlas.glycerin.model.Broadcast;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -83,20 +86,23 @@ public class BbcNitroModule {
     private ScheduledTask nitroScheduleUpdateTask(int back, int forward, Integer threadCount, Integer rateLimit) {
         DayRangeChannelDaySupplier drcds = new DayRangeChannelDaySupplier(bbcChannelSupplier(), dayRangeSupplier(back, forward));
         ExecutorService executor = Executors.newFixedThreadPool(threadCount, nitroThreadFactory);
-        return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor(rateLimit), null, jobFailureThresholdPercent);
+        return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor(rateLimit, Optional.<Predicate<Broadcast>>absent()), 
+                null, jobFailureThresholdPercent);
     }
     
     @Bean
     ScheduleDayUpdateController nitroScheduleUpdateController() {
-        return new ScheduleDayUpdateController(channelResolver, nitroChannelDayProcessor(nitroTodayRateLimit));
+        return new ScheduleDayUpdateController(channelResolver, 
+                            nitroChannelDayProcessor(nitroTodayRateLimit, 
+                            Optional.of(Predicates.<Broadcast>alwaysTrue())));
     }
 
-    ChannelDayProcessor nitroChannelDayProcessor(Integer rateLimit) {
+    ChannelDayProcessor nitroChannelDayProcessor(Integer rateLimit, Optional<Predicate<Broadcast>> fullFetchPermitted) {
         ScheduleResolverBroadcastTrimmer scheduleTrimmer
             = new ScheduleResolverBroadcastTrimmer(Publisher.BBC_NITRO, scheduleResolver, contentResolver, contentWriter);
         Glycerin glycerin = glycerin(rateLimit);
         return new NitroScheduleDayUpdater(scheduleWriter, scheduleTrimmer, 
-                nitroBroadcastHandler(glycerin), glycerin);
+                nitroBroadcastHandler(glycerin, fullFetchPermitted), glycerin);
     }
 
     Glycerin glycerin(Integer rateLimit) {
@@ -122,10 +128,22 @@ public class BbcNitroModule {
         return new HttpNitroClient(HostSpecifier.fromValid(nitroHost), nitroApiKey);
     }
 
-    NitroBroadcastHandler<ImmutableList<Optional<ItemRefAndBroadcast>>> nitroBroadcastHandler(Glycerin glycerin) {
+    NitroBroadcastHandler<ImmutableList<Optional<ItemRefAndBroadcast>>> nitroBroadcastHandler(Glycerin glycerin, 
+            Optional<Predicate<Broadcast>> fullFetchPermitted) {
         return new ContentUpdatingNitroBroadcastHandler(contentResolver, contentWriter, 
-                nitroContentAdapter(glycerin), new SystemClock(), pidLock);
+                        localOrRemoteNitroFetcher(glycerin, fullFetchPermitted), pidLock);
     }
+    
+    LocalOrRemoteNitroFetcher localOrRemoteNitroFetcher(Glycerin glycerin, 
+            Optional<Predicate<Broadcast>> fullFetchPermitted) {
+        if (fullFetchPermitted.isPresent()) {
+            return new LocalOrRemoteNitroFetcher(contentResolver, nitroContentAdapter(glycerin), fullFetchPermitted.get());
+        } else {
+            return new LocalOrRemoteNitroFetcher(contentResolver, nitroContentAdapter(glycerin), new SystemClock());
+        }
+    }
+    
+    
 
     GlycerinNitroContentAdapter nitroContentAdapter(Glycerin glycerin) {
         return new GlycerinNitroContentAdapter(glycerin, nitroClient(), new SystemClock(), nitroRequestPageSize);

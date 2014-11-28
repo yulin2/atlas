@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -43,14 +44,47 @@ public class LocalOrRemoteNitroFetcher {
     
     private final ContentResolver resolver;
     private final NitroContentAdapter contentAdapter;
-    private final Clock clock;
     private final ContentMerger contentMerger;
+    private final Predicate<Broadcast> fullFetchPermitted;
 
-    public LocalOrRemoteNitroFetcher(ContentResolver resolver, NitroContentAdapter contentAdapter, Clock clock) {
+    public LocalOrRemoteNitroFetcher(ContentResolver resolver, NitroContentAdapter contentAdapter, final Clock clock) {
+        this(resolver, contentAdapter, 
+                new ContentMerger(MergeStrategy.MERGE, MergeStrategy.KEEP),
+                new Predicate<Broadcast>() {
+
+                    @Override
+                    public boolean apply(Broadcast input) {
+                        LocalDate today = clock.now().toLocalDate();
+                        LocalDate broadcastDay = NitroUtil.toDateTime(input.getPublishedTime().getStart()).toLocalDate();
+                        
+                        Maybe<MediaType> mediaType = BbcIonMediaTypeMapping.mediaTypeForService(input.getService().getSid());
+                        
+                        // today -4 for radio, today ± 2 for tv
+                        // radio are more likely to publish clips after a show has been broadcast
+                        // so with a limited ingest window it is more important to go back as far as possible for radio
+                        // to ensure that clips are not missed
+                        if (mediaType.hasValue() && mediaType.requireValue().equals("audio")) {
+                            return today.plusDays(1).isAfter(broadcastDay) && today.minusDays(5).isBefore(broadcastDay);    
+                        } else {
+                            return today.plusDays(3).isAfter(broadcastDay) && today.minusDays(3).isBefore(broadcastDay);
+                        }
+                    }
+            
+                    }
+                );
+    }
+    
+    public LocalOrRemoteNitroFetcher(ContentResolver resolver, NitroContentAdapter contentAdapter, 
+            Predicate<Broadcast> fullFetchPermitted) {
+        this(resolver, contentAdapter, new ContentMerger(MergeStrategy.MERGE, MergeStrategy.KEEP), fullFetchPermitted);
+    }
+    
+    public LocalOrRemoteNitroFetcher(ContentResolver resolver, NitroContentAdapter contentAdapter, 
+            ContentMerger contentMerger, Predicate<Broadcast> fullFetchPermitted) {
         this.resolver = resolver;
         this.contentAdapter = contentAdapter;
-        this.clock = clock;
-        this.contentMerger = new ContentMerger(MergeStrategy.MERGE, MergeStrategy.KEEP);
+        this.fullFetchPermitted = fullFetchPermitted;
+        this.contentMerger = contentMerger;
     }
     
     public ResolveOrFetchResult<Item> resolveOrFetchItem(Iterable<Broadcast> broadcasts) throws NitroException {
@@ -60,7 +94,7 @@ public class LocalOrRemoteNitroFetcher {
         Iterable<PidReference> episodeRefs = toEpisodeRefs(broadcasts);
         ImmutableSet<String> itemUris = toItemUris(episodeRefs);
         ImmutableSet<Item> resolved = resolve(itemUris);
-        if (fullFetchPermitted(broadcasts.iterator().next())) {
+        if (fullFetchPermitted.apply(broadcasts.iterator().next())) {
             ImmutableSet<Item> fetched = contentAdapter.fetchEpisodes(episodeRefs);
             return mergeWithExisting(fetched, resolved);
         } else {
@@ -121,24 +155,6 @@ public class LocalOrRemoteNitroFetcher {
             }
         }), Predicates.notNull());
     }
-
-    protected boolean fullFetchPermitted(Broadcast broadcast) {
-        LocalDate today = clock.now().toLocalDate();
-        LocalDate broadcastDay = NitroUtil.toDateTime(broadcast.getPublishedTime().getStart()).toLocalDate();
-        
-        Maybe<MediaType> mediaType = BbcIonMediaTypeMapping.mediaTypeForService(broadcast.getService().getSid());
-        
-        // today -4 for radio, today ± 2 for tv
-        // radio are more likely to publish clips after a show has been broadcast
-        // so with a limited ingest window it is more important to go back as far as possible for radio
-        // to ensure that clips are not missed
-        if (mediaType.hasValue() && mediaType.requireValue().equals("audio")) {
-            return today.plusDays(1).isAfter(broadcastDay) && today.minusDays(5).isBefore(broadcastDay);    
-        } else {
-            return today.plusDays(3).isAfter(broadcastDay) && today.minusDays(3).isBefore(broadcastDay);
-        }
-    }
-    
     
     public ImmutableSet<Series> resolveOrFetchSeries(Iterable<Item> items) throws NitroException {
         if (Iterables.isEmpty(items)) {
