@@ -101,12 +101,7 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             }
 
             Optional<WarningText> warningText = warningTextFrom(nitroVersion);
-            if (warningText.isPresent()) {
-                Restriction restriction = new Restriction();
-                restriction.setRestricted(true);
-                restriction.setMessage(warningText.get().getValue());
-                version.setRestriction(restriction);
-            }
+            version.setRestriction(generateRestriction(warningText));
 
             versions.add(version);
         }
@@ -118,6 +113,18 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             extractMediaTypeAndSpecialization(source, item);
         }
         extractAdditionalItemFields(source, item, now);
+    }
+
+    private Restriction generateRestriction(Optional<WarningText> warningText) {
+        Restriction restriction = new Restriction();
+        restriction.setRestricted(false);
+
+        if (warningText.isPresent()) {
+            restriction.setRestricted(true);
+            restriction.setMessage(warningText.get().getValue());
+        }
+
+        return restriction;
     }
 
     private boolean isAudioDescribed(com.metabroadcast.atlas.glycerin.model.Version nitroVersion) {
