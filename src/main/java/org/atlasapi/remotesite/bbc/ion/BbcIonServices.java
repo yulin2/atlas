@@ -48,6 +48,7 @@ public class BbcIonServices {
         .put("cbbc",          "http://www.bbc.co.uk/services/cbbc")
         .put("cbeebies",          "http://www.bbc.co.uk/services/cbeebies").build();
         
+        
     public static BiMap<String, String> radioServices = ImmutableBiMap.<String, String>builder()
         .putAll(
             Maps.transformValues(
@@ -70,8 +71,42 @@ public class BbcIonServices {
     
     public static BiMap<String,String> services = ImmutableBiMap.<String, String>builder().putAll(tvServices).putAll(radioServices).build();
      
+    // Master brands that don't already form part of either tvServices or radioServices
+    private static BiMap<String, String> masterBrands = ImmutableBiMap.<String, String>builder()
+        .putAll(services)
+        .put("bbc_7", "http://www.bbc.co.uk/services/radio4extra")
+        .put("bbc_alba", "http://ref.atlasapi.org/channels/bbcalba")
+        .put("bbc_news", "http://www.bbc.co.uk/services/bbcnews")
+        .put("bbc_one", "http://ref.atlasapi.org/channels/pressassociation.com/stations/1")
+        .put("bbc_radio_four", "http://ref.atlasapi.org/channels/pressassociation.com/stations/5")
+        .put("bbc_radio_scotland", "http://ref.atlasapi.org/channels/pressassociation.com/stations/153")
+        .put("bbc_radio_wales", "http://ref.atlasapi.org/channels/pressassociation.com/stations/466")
+        .put("bbc_two", "http://ref.atlasapi.org/channels/pressassociation.com/stations/6")
+        .put("bbc_two_scotland", "http://www.bbc.co.uk/services/bbctwo/scotland")
+//       I don't think the following are required, but leaving here so the full list can be 
+//       checked
+//        .put("bbc_radio_swindon", "")
+//        .put("bbc_wales", "")
+//        .put("bbc_weather", "")
+//        .put("bbc_webonly", "")
+//        .put("bbc_world_news", "")
+//        .put("bbc_radio_webonly", "")
+//        .put("bbc_school_radio", "")
+//        .put("bbc_southern_counties_radio", "")
+//        .put("bbc_sport", "")
+//        .put("bbc_switch", "")
+//        .put("bbc_cymru", "")
+//        .put("bbc_democracy_live", "")
+//        .put("bbc_local_radio", "")
+//        .put("bbc_music", "")
+        .build();
+    
     public static String get(String ionService) {
         return services.get(ionService);
+    }
+    
+    public static String getMasterBrand(String ionService) {
+        return masterBrands.get(ionService);
     }
 
     public static String reverseGet(String bbcServiceUri) {
