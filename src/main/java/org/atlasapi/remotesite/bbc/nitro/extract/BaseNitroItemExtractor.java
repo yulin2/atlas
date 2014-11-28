@@ -18,6 +18,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 
 import com.google.common.base.Optional;
@@ -218,7 +219,8 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
     }
 
     private Duration convertDuration(javax.xml.datatype.Duration xmlDuration) {
-        return Duration.standardSeconds(xmlDuration.getSeconds());
+        DateTime now = DateTime.now(DateTimeZone.UTC);
+        return Duration.millis(xmlDuration.getTimeInMillis(now.toDate()));
     }
 
     private Optional<WarningText> warningTextFrom(com.metabroadcast.atlas.glycerin.model.Version version) {

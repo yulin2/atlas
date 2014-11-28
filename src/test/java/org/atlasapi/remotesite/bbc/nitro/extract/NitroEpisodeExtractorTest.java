@@ -17,16 +17,15 @@ import javax.xml.datatype.DatatypeFactory;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
 import org.hamcrest.Matchers;
+import org.joda.time.Duration;
 import org.junit.Test;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
 import com.metabroadcast.atlas.glycerin.model.Availability;
 import com.metabroadcast.atlas.glycerin.model.AvailabilityOf;
@@ -38,7 +37,6 @@ import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.atlas.glycerin.model.Version;
 import com.metabroadcast.atlas.glycerin.model.VersionType;
 import com.metabroadcast.atlas.glycerin.model.VersionTypes;
-import com.metabroadcast.atlas.glycerin.model.Warning;
 import com.metabroadcast.atlas.glycerin.model.WarningText;
 import com.metabroadcast.atlas.glycerin.model.Warnings;
 import com.metabroadcast.common.time.SystemClock;
@@ -49,6 +47,7 @@ public class NitroEpisodeExtractorTest {
     private static final String AUDIO_DESCRIBED_VERSION_PID = "p02ccx3g";
     private static final String NON_AUDIO_DESCRIBED_VERSION_PID = "p02ccx5g";
     private static final String WITH_WARNING_VERSION_PID = "p02ccx8g";
+    private static final Duration VERSION_DURATION = Duration.standardMinutes(90);
 
     private static final String EPISODE_PID = "p01mv8m3";
     private static final ImmutableList<Availability> noAvailability = ImmutableList.<Availability>of();
@@ -216,6 +215,7 @@ public class NitroEpisodeExtractorTest {
 
         assertTrue(audioDescribedEncoding.getAudioDescribed());
         assertFalse(nonAudioDescribedEncoding.getAudioDescribed());
+        assertEquals(VERSION_DURATION.getStandardSeconds(), (int)audioDescribedVersion.getDuration());
     }
 
     @Test
@@ -309,7 +309,7 @@ public class NitroEpisodeExtractorTest {
         types.getVersionType().add(type);
 
         version.setVersionTypes(types);
-        version.setDuration(DatatypeFactory.newInstance().newDuration(2000));
+        version.setDuration(DatatypeFactory.newInstance().newDuration(VERSION_DURATION.getMillis()));
 
         return version;
     }
@@ -317,7 +317,7 @@ public class NitroEpisodeExtractorTest {
     private Version nonAudioDescribedVersion() throws DatatypeConfigurationException {
         Version version = new Version();
         version.setPid(NON_AUDIO_DESCRIBED_VERSION_PID);
-        version.setDuration(DatatypeFactory.newInstance().newDuration(2000));
+        version.setDuration(DatatypeFactory.newInstance().newDuration(VERSION_DURATION.getMillis()));
 
         return version;
     }
