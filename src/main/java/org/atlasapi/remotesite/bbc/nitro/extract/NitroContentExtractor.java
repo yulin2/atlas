@@ -11,6 +11,8 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.BbcIonServices;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Objects;
@@ -31,6 +33,8 @@ import com.metabroadcast.common.time.Clock;
 public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
     implements ContentExtractor<SOURCE, CONTENT> {
 
+    private static final Logger log = LoggerFactory.getLogger(NitroContentExtractor.class);
+    
     private static final String PID_NAMESPACE = "gb:bbc:pid";
     private static final String URI_NAMESPACE = "uri";
     
@@ -70,9 +74,13 @@ public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
         }
         MasterBrand masterBrand = extractMasterBrand(source);
         if (masterBrand != null) {
-            content.setPresentationChannel(BbcIonServices.get(masterBrand.getMid()));
+            String masterBrandChannel = BbcIonServices.getMasterBrand(masterBrand.getMid());
+            content.setPresentationChannel(masterBrandChannel);
+            if (masterBrandChannel == null) {
+                log.warn("No master brand mapping found for " + pid);
+            }
         }
-        //TODO: genres
+        //TODO: genres from v2 API
         extractAdditionalFields(source, content, now);
         return content;
     }
