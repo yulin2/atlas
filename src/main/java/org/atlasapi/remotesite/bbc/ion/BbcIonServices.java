@@ -4,12 +4,14 @@ import org.atlasapi.feeds.radioplayer.RadioPlayerService;
 import org.atlasapi.feeds.radioplayer.RadioPlayerServices;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Maps;
 
 public class BbcIonServices {
-    
+
     public static BiMap<String, String> tvServices = ImmutableBiMap.<String, String>builder()
     
 //        .put("bbc_one",  "http://www.bbc.co.uk/services/bbcone")
@@ -73,7 +75,7 @@ public class BbcIonServices {
      
     // Master brands that don't already form part of either tvServices or radioServices
     private static BiMap<String, String> masterBrands = ImmutableBiMap.<String, String>builder()
-        .putAll(services)
+        .putAll(Maps.filterKeys(services, Predicates.equalTo("radio4extra")))
         .put("bbc_7", "http://www.bbc.co.uk/services/radio4extra")
         .put("bbc_alba", "http://ref.atlasapi.org/channels/bbcalba")
         .put("bbc_news", "http://www.bbc.co.uk/services/bbcnews")
