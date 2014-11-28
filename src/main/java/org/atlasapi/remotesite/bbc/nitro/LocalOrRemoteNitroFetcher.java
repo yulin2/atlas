@@ -166,7 +166,7 @@ public class LocalOrRemoteNitroFetcher {
         ResolvedContent resolved = resolver.findByCanonicalUris(seriesUris);
         ImmutableSet<Series> fetched = contentAdapter.fetchSeries(asSeriesPidRefs(seriesUris));
         return ImmutableSet.<Series>builder()
-                .addAll(Iterables.filter(resolved.getAllResolvedResults(), Series.class))
+                //.addAll(Iterables.filter(resolved.getAllResolvedResults(), Series.class))
                 .addAll(fetched)
                 .build();
     }
@@ -213,7 +213,7 @@ public class LocalOrRemoteNitroFetcher {
         ResolvedContent resolved = resolver.findByCanonicalUris(containerUris);
         ImmutableSet<Brand> fetched = contentAdapter.fetchBrands(asBrandPidRefs(containerUris));
         return ImmutableSet.<Brand>builder()
-                .addAll(Iterables.filter(resolved.getAllResolvedResults(), Brand.class))
+                //.addAll(Iterables.filter(resolved.getAllResolvedResults(), Brand.class))
                 .addAll(fetched)
                 .build();
     }
