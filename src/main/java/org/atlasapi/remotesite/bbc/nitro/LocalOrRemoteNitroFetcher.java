@@ -164,7 +164,7 @@ public class LocalOrRemoteNitroFetcher {
         Iterable<ParentRef> seriesRefs = getSeriesRefs(episodes);
         List<String> seriesUris = Lists.newArrayList(toUris(seriesRefs));
         ResolvedContent resolved = resolver.findByCanonicalUris(seriesUris);
-        ImmutableSet<Series> fetched = contentAdapter.fetchSeries(asSeriesPidRefs(resolved.getUnresolved()));
+        ImmutableSet<Series> fetched = contentAdapter.fetchSeries(asSeriesPidRefs(seriesUris));
         return ImmutableSet.<Series>builder()
                 .addAll(Iterables.filter(resolved.getAllResolvedResults(), Series.class))
                 .addAll(fetched)
@@ -175,7 +175,7 @@ public class LocalOrRemoteNitroFetcher {
         return asTypePidsRefs(pids, "series");
     }
 
-    private Iterable<PidReference> asTypePidsRefs(List<String> pids, final String type) {
+    private Iterable<PidReference> asTypePidsRefs(Iterable<String> pids, final String type) {
         return Iterables.transform(pids, new Function<String, PidReference>(){
             @Override
             public PidReference apply(String input) {
@@ -211,14 +211,14 @@ public class LocalOrRemoteNitroFetcher {
         Iterable<ParentRef> containerRefs = containerRefs(items);
         Iterable<String> containerUris = toUris(containerRefs);
         ResolvedContent resolved = resolver.findByCanonicalUris(containerUris);
-        ImmutableSet<Brand> fetched = contentAdapter.fetchBrands(asBrandPidRefs(resolved.getUnresolved()));
+        ImmutableSet<Brand> fetched = contentAdapter.fetchBrands(asBrandPidRefs(containerUris));
         return ImmutableSet.<Brand>builder()
                 .addAll(Iterables.filter(resolved.getAllResolvedResults(), Brand.class))
                 .addAll(fetched)
                 .build();
     }
     
-    private Iterable<PidReference> asBrandPidRefs(List<String> pids) {
+    private Iterable<PidReference> asBrandPidRefs(Iterable<String> pids) {
         return asTypePidsRefs(pids, "brand");
     }
 
