@@ -1,13 +1,17 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static com.google.common.base.Predicates.equalTo;
+import static com.google.common.base.Predicates.in;
+import static com.google.common.base.Predicates.not;
+
 import org.atlasapi.feeds.radioplayer.RadioPlayerService;
 import org.atlasapi.feeds.radioplayer.RadioPlayerServices;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 public class BbcIonServices {
@@ -74,8 +78,8 @@ public class BbcIonServices {
     public static BiMap<String,String> services = ImmutableBiMap.<String, String>builder().putAll(tvServices).putAll(radioServices).build();
      
     // Master brands that don't already form part of either tvServices or radioServices
-    private static BiMap<String, String> masterBrands = ImmutableBiMap.<String, String>builder()
-        .putAll(Maps.filterKeys(services, Predicates.equalTo("radio4extra")))
+    public static BiMap<String, String> masterBrands = ImmutableBiMap.<String, String>builder()
+        .putAll(Maps.filterKeys(services, not(in(ImmutableSet.of("bbc_radio_four_extra", "bbc_news24")))))
         .put("bbc_7", "http://www.bbc.co.uk/services/radio4extra")
         .put("bbc_alba", "http://ref.atlasapi.org/channels/bbcalba")
         .put("bbc_news", "http://www.bbc.co.uk/services/bbcnews")
