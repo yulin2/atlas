@@ -10,6 +10,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -26,6 +27,7 @@ import org.junit.Test;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
 import com.metabroadcast.atlas.glycerin.model.Availability;
 import com.metabroadcast.atlas.glycerin.model.AvailabilityOf;
@@ -47,6 +49,7 @@ public class NitroEpisodeExtractorTest {
     private static final String AUDIO_DESCRIBED_VERSION_PID = "p02ccx3g";
     private static final String NON_AUDIO_DESCRIBED_VERSION_PID = "p02ccx5g";
     private static final String WITH_WARNING_VERSION_PID = "p02ccx8g";
+    private static final String VERSION_PID = "p02ccx7g";
     private static final Duration VERSION_DURATION = Duration.standardMinutes(90);
 
     private static final String EPISODE_PID = "p01mv8m3";
@@ -242,6 +245,48 @@ public class NitroEpisodeExtractorTest {
         assertEquals(restriction.getMessage(), warningMessage);
     }
 
+    @Test
+    public void testVideoDimensionsAreNotHd() {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+
+        Item extracted = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(sdAvailability(VERSION_PID)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(version(VERSION_PID))));
+
+        org.atlasapi.media.entity.Version version = Iterables.getOnlyElement(extracted.getVersions());
+
+        Set<Encoding> encodings = version.getManifestedAs();
+        Encoding encoding = Iterables.getOnlyElement(encodings);
+
+        assertEquals(640, (int)encoding.getVideoHorizontalSize());
+        assertEquals(360, (int)encoding.getVideoVerticalSize());
+    }
+
+    @Test
+    public void testVideoDimensionsAreHd() {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+
+        Item extracted = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(hdAvailability(VERSION_PID)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(version(VERSION_PID))));
+
+        org.atlasapi.media.entity.Version version = Iterables.getOnlyElement(extracted.getVersions());
+
+        Set<Encoding> encodings = version.getManifestedAs();
+        Encoding encoding = Iterables.getOnlyElement(encodings);
+
+        assertEquals(1280, (int)encoding.getVideoHorizontalSize());
+        assertEquals(720, (int)encoding.getVideoVerticalSize());
+    }
+
     private FormatsType filmFormatsType() {
         FormatsType formatsType = new FormatsType();
         Format filmsFormat = new Format();
@@ -282,9 +327,8 @@ public class NitroEpisodeExtractorTest {
         return pidRef;
     }
 
-    private Availability availability(String versionPid) {
+    private Availability baseAvailability(String versionPid) {
         Availability availability = new Availability();
-        availability.getMediaSet().add("pc");
 
         AvailabilityOf availabilityOfVersion = new AvailabilityOf();
         availabilityOfVersion.setPid(versionPid);
@@ -296,6 +340,36 @@ public class NitroEpisodeExtractorTest {
         availabilityOfEpisode.setResultType("episode");
         availability.getAvailabilityOf().add(availabilityOfEpisode);
         return availability;
+    }
+
+    private Availability availability(String versionPid) {
+        Availability availability = baseAvailability(versionPid);
+        availability.getMediaSet().add("pc");
+
+        return availability;
+    }
+
+    private Availability sdAvailability(String versionPid) {
+        Availability availability = baseAvailability(versionPid);
+        availability.getMediaSet().add("iptv-sd");
+        availability.getMediaSet().add("iptv-all");
+
+        return availability;
+    }
+
+    private Availability hdAvailability(String versionPid) {
+        Availability availability = baseAvailability(versionPid);
+        availability.getMediaSet().add("iptv-hd");
+        availability.getMediaSet().add("iptv-all");
+
+        return availability;
+    }
+
+    private Version version(String versionPid) {
+        Version version = new Version();
+        version.setPid(versionPid);
+
+        return version;
     }
 
     private Version audioDescribedVersion() throws DatatypeConfigurationException {
