@@ -1,13 +1,16 @@
 package org.atlasapi.input;
 
 
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 import org.atlasapi.media.SegmentType;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.segment.Segment;
 import org.atlasapi.media.segment.SegmentEvent;
@@ -17,6 +20,8 @@ import org.joda.time.Duration;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.List;
 
 
 public class SegmentModelTransformer {
@@ -66,7 +71,28 @@ public class SegmentModelTransformer {
         complex.setType(SegmentType.valueOf(simple.getSegmentType()));
         complex.setDuration(Duration.standardMinutes(simple.getDuration()));
         complex.setDescription(simple.getDescription());
+        complex.setRelatedLinks(relatedLinks(simple.getRelatedLinks()));
         complex.setTitle(simple.getTitle());
         return complex;
+    }
+
+    private Iterable<RelatedLink> relatedLinks(
+            List<org.atlasapi.media.entity.simple.RelatedLink> relatedLinks) {
+        return Lists.transform(relatedLinks,
+                new Function<org.atlasapi.media.entity.simple.RelatedLink, RelatedLink>() {
+                    @Override
+                    public RelatedLink apply(org.atlasapi.media.entity.simple.RelatedLink input) {
+                        RelatedLink.LinkType type = RelatedLink.LinkType.valueOf(input.getType().toUpperCase());
+                        RelatedLink.Builder link = RelatedLink.relatedLink(type, input.getUrl())
+                                .withSourceId(input.getSourceId())
+                                .withShortName(input.getShortName())
+                                .withTitle(input.getTitle())
+                                .withDescription(input.getDescription())
+                                .withImage(input.getImage())
+                                .withThumbnail(input.getThumbnail());
+                        return link.build();
+                    }
+                }
+        );
     }
 }
