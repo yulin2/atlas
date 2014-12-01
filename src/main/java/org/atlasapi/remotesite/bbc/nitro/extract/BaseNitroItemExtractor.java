@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
@@ -78,7 +79,7 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
     @Override
     protected final void extractAdditionalFields(NitroItemSource<SOURCE> source, ITEM item, DateTime now) {
         ImmutableSetMultimap<String, Broadcast> broadcasts = extractBroadcasts(source.getBroadcasts(), now);
-        OptionalMap<String, Encoding> encodings = extractEncodings(source.getAvailabilities(), now);
+        OptionalMap<String, Set<Encoding>> encodings = extractEncodings(source.getAvailabilities(), now);
 
         ImmutableSet.Builder<Version> versions = ImmutableSet.builder();
         for (com.metabroadcast.atlas.glycerin.model.Version nitroVersion : source.getVersions()) {
@@ -91,13 +92,16 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
             version.setLastUpdated(now);
             version.setCanonicalUri(BbcFeeds.nitroUriForPid(nitroVersion.getPid()));
             version.setBroadcasts(broadcasts.get(nitroVersion.getPid()));
-            Optional<Encoding> optVersionEncoding = encodings.get(nitroVersion.getPid());
+            Optional<Set<Encoding>> optEncodings = encodings.get(nitroVersion.getPid());
 
-            if (optVersionEncoding.isPresent()) {
-                Encoding versionEncoding = optVersionEncoding.get();
-                versionEncoding.setVideoAspectRatio(nitroVersion.getAspectRatio());
-                versionEncoding.setAudioDescribed(isAudioDescribed(nitroVersion));
-                version.setManifestedAs(ImmutableSet.of(versionEncoding));
+            if (optEncodings.isPresent()) {
+                Set<Encoding> versionEncodings = optEncodings.get();
+
+                for (Encoding encoding: versionEncodings) {
+                    encoding.setVideoAspectRatio(nitroVersion.getAspectRatio());
+                    encoding.setAudioDescribed(isAudioDescribed(nitroVersion));
+                    version.setManifestedAs(versionEncodings);
+                }
             }
 
             Optional<WarningText> warningText = warningTextFrom(nitroVersion);
@@ -168,24 +172,27 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         
     }
 
-    private OptionalMap<String,Encoding> extractEncodings(List<Availability> availabilities, DateTime now) {
+    private OptionalMap<String, Set<Encoding>> extractEncodings(List<Availability> availabilities, DateTime now) {
         Map<String, Collection<Availability>> byVersion = indexByVersion(availabilities);
-        ImmutableMap.Builder<String, Encoding> results = ImmutableMap.builder();
+        ImmutableMap.Builder<String, Set<Encoding>> results = ImmutableMap.builder();
         for (Entry<String, Collection<Availability>> availability : byVersion.entrySet()) {
-            Optional<Encoding> extracted = availabilityExtractor.extract(availability.getValue());
-            if (extracted.isPresent()) {
-                results.put(availability.getKey(), setLastUpdated(extracted.get(), now));
+            Set<Encoding> extracted = availabilityExtractor.extract(availability.getValue());
+            if (!extracted.isEmpty()) {
+                results.put(availability.getKey(), setLastUpdated(extracted, now));
             }
         }
         return ImmutableOptionalMap.fromMap(results.build());
     }
 
-    private Encoding setLastUpdated(Encoding encoding, DateTime now) {
-        encoding.setLastUpdated(now);
-        for (Location location : encoding.getAvailableAt()) {
-            location.setLastUpdated(now);
+    private Set<Encoding> setLastUpdated(Set<Encoding> encodings, DateTime now) {
+        for (Encoding encoding: encodings) {
+            encoding.setLastUpdated(now);
+            for (Location location : encoding.getAvailableAt()) {
+                location.setLastUpdated(now);
+            }
         }
-        return encoding;
+
+        return encodings;
     }
 
     private Map<String, Collection<Availability>> indexByVersion(List<Availability> availabilities) {
