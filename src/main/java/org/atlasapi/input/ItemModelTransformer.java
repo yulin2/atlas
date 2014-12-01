@@ -122,7 +122,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
 
             item.addVersion(new Version().copyWithBroadcasts(broadcasts));
         }
-        if (inputItem != null && !inputItem.getSegments().isEmpty()) {
+        if (inputItem != null && inputItem.getSegments() != null && !inputItem.getSegments().isEmpty()) {
             Set<SegmentEvent> segments = Sets.newHashSet();
             for (org.atlasapi.media.entity.simple.SegmentEvent segmentEvent : inputItem.getSegments()) {
                 segments.add(segmentModelTransformer.transform(segmentEvent, inputItem.getPublisher()));
