@@ -98,7 +98,7 @@ public class MessageQueueingResultHandlerTest extends KafkaTestBase {
             };
             
         AdminUtils.createTopic(zkClient(), namespacedTopic, 1, 2, new Properties());
-        TestUtils.waitUntilMetadataIsPropagated(JavaConversions.asScalaBuffer(kafkaServers()), namespacedTopic, 0, 1000);
+        TestUtils.waitUntilMetadataIsPropagated(JavaConversions.asScalaBuffer(kafkaServers()), namespacedTopic, 0, 5000);
         TestUtils.waitUntilLeaderIsElectedOrChanged(zkClient(), namespacedTopic, 0, 500, Option.empty());
         
         KafkaConsumer consumer = (KafkaConsumer) mm.messageConsumerFactory().createConsumer(worker, serializer, topic, "Deserializer")
