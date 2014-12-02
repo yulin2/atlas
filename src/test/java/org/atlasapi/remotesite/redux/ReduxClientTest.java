@@ -12,6 +12,7 @@ import org.atlasapi.remotesite.redux.model.PaginatedBaseProgrammes;
 import org.atlasapi.remotesite.redux.model.ReduxMedia;
 import org.joda.time.LocalDate;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.is;
@@ -57,6 +58,7 @@ public class ReduxClientTest {
     }
 
 	@Test
+	@Ignore
 	public void testCanGetProgramme() throws HttpException, Exception {
 		FullReduxProgramme programme = reduxClient.programmeFor(exampleDiskref);
 		assertThat(programme.getTitle(), is("The Dare Devil"));
@@ -78,6 +80,7 @@ public class ReduxClientTest {
 	}
 	
 	@Test
+	@Ignore
 	public void testGetsProgrammesForDay() throws HttpException, Exception {
 	    List<BaseReduxProgramme> programmes = reduxClient.programmesForDay(new LocalDate());
 	    
