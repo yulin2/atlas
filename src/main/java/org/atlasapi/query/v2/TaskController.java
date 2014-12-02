@@ -9,7 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.v3.ApplicationConfiguration;
+import org.atlasapi.feeds.youview.tasks.Action;
 import org.atlasapi.feeds.youview.tasks.Status;
+import org.atlasapi.feeds.youview.tasks.TVAElementType;
 import org.atlasapi.feeds.youview.tasks.Task;
 import org.atlasapi.feeds.youview.tasks.TaskQuery;
 import org.atlasapi.feeds.youview.tasks.persistence.TaskStore;
@@ -61,7 +63,11 @@ public class TaskController extends BaseController<Iterable<Task>> {
             @PathVariable("publisher") String publisherStr,
             @RequestParam(value = "uri", required = false) String contentUri,
             @RequestParam(value = "remote_id", required = false) String remoteId,
-            @RequestParam(value = "status", required = false) String status) throws IOException {
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "action", required = false) String action,
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "element_id", required = false) String elementId
+            ) throws IOException {
         
         try {
             Selection selection = SELECTION_BUILDER.build(request);
@@ -73,7 +79,7 @@ public class TaskController extends BaseController<Iterable<Task>> {
                 return;
             }
 
-            TaskQuery taskQuery = queryFrom(publisher, selection, contentUri, remoteId, status);
+            TaskQuery taskQuery = queryFrom(publisher, selection, contentUri, remoteId, status, action, type, elementId);
             Iterable<Task> allTasks = taskStore.allTasks(taskQuery);
             
             modelAndViewFor(request, response, allTasks, appConfig);
@@ -82,15 +88,26 @@ public class TaskController extends BaseController<Iterable<Task>> {
         }
     }
     
-    private TaskQuery queryFrom(Publisher publisher, Selection selection, String contentUri, String remoteId, String statusStr) {
+    private TaskQuery queryFrom(Publisher publisher, Selection selection, String contentUri, String remoteId, String statusStr, 
+            String actionStr, String typeStr, String elementId) {
         TaskQuery.Builder query = TaskQuery.builder(selection, publisher)
                 .withContentUri(contentUri)
-                .withRemoteId(remoteId);
+                .withRemoteId(remoteId)
+                .withElementId(elementId);
         
         if (statusStr != null) {
             Status status = Status.valueOf(statusStr.trim().toUpperCase());
             query.withTaskStatus(status);
         }
+        if (actionStr != null) {
+            Action action = Action.valueOf(actionStr.trim().toUpperCase());
+            query.withTaskAction(action);
+        }
+        if (typeStr != null) {
+            TVAElementType type = TVAElementType.valueOf(typeStr.trim().toUpperCase());
+            query.withTaskType(type);
+        }
+        
         return query.build();
     }
 
