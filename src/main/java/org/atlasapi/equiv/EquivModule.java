@@ -40,6 +40,9 @@ import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT_STAGE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_SCOTLAND_RADIO;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_SCOTLAND_RADIO_STAGE;
+
 
 import java.io.File;
 import java.util.Set;
@@ -326,6 +329,16 @@ public class EquivModule {
         registerYouViewUpdaterForPublisher(
                 YOUVIEW_BT_STAGE, 
                 Sets.union(Sets.difference(acceptablePublishers, ImmutableSet.of(YOUVIEW_BT)), ImmutableSet.of(YOUVIEW_BT_STAGE)), 
+                updaters);
+        
+        registerYouViewUpdaterForPublisher(
+                YOUVIEW_SCOTLAND_RADIO, 
+                Sets.union(Sets.difference(acceptablePublishers, ImmutableSet.of(YOUVIEW_SCOTLAND_RADIO_STAGE)), ImmutableSet.of(YOUVIEW_SCOTLAND_RADIO)), 
+                updaters);
+        
+        registerYouViewUpdaterForPublisher(
+                YOUVIEW_SCOTLAND_RADIO_STAGE, 
+                Sets.union(Sets.difference(acceptablePublishers, ImmutableSet.of(YOUVIEW_SCOTLAND_RADIO)), ImmutableSet.of(YOUVIEW_SCOTLAND_RADIO_STAGE)), 
                 updaters);
 
         updaters.register(BETTY, SourceSpecificEquivalenceUpdater.builder(BETTY)

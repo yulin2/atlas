@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,10 +12,15 @@ import javax.xml.bind.JAXBElement;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.application.v3.ApplicationConfiguration;
-import org.atlasapi.feeds.tvanytime.TvAnytimeGenerator;
 import org.atlasapi.feeds.tvanytime.TvaGenerationException;
+import org.atlasapi.feeds.tvanytime.granular.GranularTvAnytimeGenerator;
+import org.atlasapi.feeds.youview.hierarchy.ContentHierarchyExpander;
+import org.atlasapi.feeds.youview.hierarchy.ItemAndVersion;
+import org.atlasapi.feeds.youview.hierarchy.ItemBroadcastHierarchy;
+import org.atlasapi.feeds.youview.hierarchy.ItemOnDemandHierarchy;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
@@ -58,16 +64,26 @@ public class ContentFeedController extends BaseController<JAXBElement<TVAMainTyp
             .withMessage("Unable to resolve content with the provided uri")
             .withErrorCode("Content not found")
             .withStatusCode(HttpStatusCode.BAD_REQUEST);
+    private static final AtlasErrorSummary CONTENT_NOT_AN_ITEM = new AtlasErrorSummary(new NullPointerException())
+            .withMessage("Resolved Content is not an Item, but needs to be")
+            .withErrorCode("Content not an Item")
+            .withStatusCode(HttpStatusCode.BAD_REQUEST);
+    private static final AtlasErrorSummary ELEMENT_NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
+            .withMessage("Unable to resolve element with the provided id")
+            .withErrorCode("Element not found")
+            .withStatusCode(HttpStatusCode.BAD_REQUEST);
     
-    private final TvAnytimeGenerator feedGenerator;
+    private final GranularTvAnytimeGenerator feedGenerator;
     private final ContentResolver contentResolver;
+    private final ContentHierarchyExpander hierarchyExpander;
     
     public ContentFeedController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, 
-            AtlasModelWriter<JAXBElement<TVAMainType>> outputter, TvAnytimeGenerator feedGenerator, 
-            ContentResolver contentResolver) {
+            AtlasModelWriter<JAXBElement<TVAMainType>> outputter, GranularTvAnytimeGenerator feedGenerator, 
+            ContentResolver contentResolver, ContentHierarchyExpander hierarchyExpander) {
         super(configFetcher, log, outputter);
         this.feedGenerator = checkNotNull(feedGenerator);
         this.contentResolver = checkNotNull(contentResolver);
+        this.hierarchyExpander = checkNotNull(hierarchyExpander);
     }
     
     /**
@@ -101,7 +117,50 @@ public class ContentFeedController extends BaseController<JAXBElement<TVAMainTyp
                 errorViewFor(request, response, CONTENT_NOT_FOUND);
                 return;
             }
-            JAXBElement<TVAMainType> tva = feedGenerator.generateTVAnytimeFrom(content.get());
+            if (content.get() instanceof Item) {
+                Item item = (Item) content.get();
+                
+                Map<String, ItemAndVersion> versions = hierarchyExpander.versionHierarchiesFor(item);
+                Map<String, ItemBroadcastHierarchy> broadcasts = hierarchyExpander.broadcastHierarchiesFor(item);
+                Map<String, ItemOnDemandHierarchy> onDemands = hierarchyExpander.onDemandHierarchiesFor(item);
+                
+                JAXBElement<TVAMainType> tva = feedGenerator.generateContentTVAFrom(content.get(), versions, broadcasts, onDemands);
+                modelAndViewFor(request, response, tva, appConfig);
+            } else {
+                JAXBElement<TVAMainType> tva = feedGenerator.generateContentTVAFrom(content.get());
+                modelAndViewFor(request, response, tva, appConfig);
+            }
+            
+        } catch (TvaGenerationException e) {
+            errorViewFor(request, response, tvaGenerationError(e));
+        } catch (Exception e) {
+            errorViewFor(request, response, AtlasErrorSummary.forException(e));
+        }
+    }
+
+    @RequestMapping(value="/3.0/feeds/youview/{publisher}/content.xml", method = RequestMethod.GET)
+    public void generateContentFeed(HttpServletRequest request, HttpServletResponse response,
+            @PathVariable("publisher") String publisherStr,
+            @RequestParam(value = "uri", required = true) String uri) throws IOException {
+        try {
+            Publisher publisher = Publisher.valueOf(publisherStr.trim().toUpperCase());
+            ApplicationConfiguration appConfig = appConfig(request);
+            if (!appConfig.isEnabled(publisher)) {
+                errorViewFor(request, response, FORBIDDEN);
+                return;
+            }
+
+            Optional<String> possibleUri = Optional.fromNullable(uri);
+            if (!possibleUri.isPresent()) {
+                errorViewFor(request, response, NO_URI);
+                return;
+            }
+            Optional<Content> content = getContent(publisher, possibleUri.get());
+            if (!content.isPresent()) {
+                errorViewFor(request, response, CONTENT_NOT_FOUND);
+                return;
+            }
+            JAXBElement<TVAMainType> tva = feedGenerator.generateContentTVAFrom(content.get());
             
             modelAndViewFor(request, response, tva, appConfig);
         } catch (TvaGenerationException e) {
@@ -111,6 +170,152 @@ public class ContentFeedController extends BaseController<JAXBElement<TVAMainTyp
         }
     }
     
+    @RequestMapping(value="/3.0/feeds/youview/{publisher}/versions.xml", method = RequestMethod.GET)
+    public void generateVersionsFeed(HttpServletRequest request, HttpServletResponse response,
+            @PathVariable("publisher") String publisherStr,
+            @RequestParam(value = "uri", required = true) String uri,
+            @RequestParam(value = "version_crid", required = false) String versionCrid) throws IOException {
+        try {
+            Publisher publisher = Publisher.valueOf(publisherStr.trim().toUpperCase());
+            ApplicationConfiguration appConfig = appConfig(request);
+            if (!appConfig.isEnabled(publisher)) {
+                errorViewFor(request, response, FORBIDDEN);
+                return;
+            }
+
+            Optional<String> possibleUri = Optional.fromNullable(uri);
+            if (!possibleUri.isPresent()) {
+                errorViewFor(request, response, NO_URI);
+                return;
+            }
+            Optional<Content> content = getContent(publisher, possibleUri.get());
+            if (!content.isPresent()) {
+                errorViewFor(request, response, CONTENT_NOT_FOUND);
+                return;
+            }
+            if (!(content.get() instanceof Item)) {
+                errorViewFor(request, response, CONTENT_NOT_AN_ITEM);
+                return;
+            }
+            Map<String, ItemAndVersion> hierarchies = hierarchyExpander.versionHierarchiesFor((Item) content.get());
+            
+            if (versionCrid != null) {
+                Optional<ItemAndVersion> versionHierarchy = Optional.fromNullable(hierarchies.get(versionCrid));
+                if (!versionHierarchy.isPresent()) {
+                    errorViewFor(request, response, ELEMENT_NOT_FOUND);
+                    return;
+                }
+                JAXBElement<TVAMainType> tva = feedGenerator.generateVersionTVAFrom(versionHierarchy.get(), versionCrid);
+                modelAndViewFor(request, response, tva, appConfig);
+            } else {
+                JAXBElement<TVAMainType> tva = feedGenerator.generateVersionTVAFrom(hierarchies);
+                modelAndViewFor(request, response, tva, appConfig);
+            }
+        } catch (TvaGenerationException e) {
+            errorViewFor(request, response, tvaGenerationError(e));
+        } catch (Exception e) {
+            errorViewFor(request, response, AtlasErrorSummary.forException(e));
+        }
+    }
+    
+    @RequestMapping(value="/3.0/feeds/youview/{publisher}/broadcasts.xml", method = RequestMethod.GET)
+    public void generateBroadcastFeed(HttpServletRequest request, HttpServletResponse response,
+            @PathVariable("publisher") String publisherStr,
+            @RequestParam(value = "uri", required = true) String uri,
+            @RequestParam(value = "broadcast_imi", required = false) String broadcastImi) throws IOException {
+        try {
+            Publisher publisher = Publisher.valueOf(publisherStr.trim().toUpperCase());
+            ApplicationConfiguration appConfig = appConfig(request);
+            if (!appConfig.isEnabled(publisher)) {
+                errorViewFor(request, response, FORBIDDEN);
+                return;
+            }
+
+            Optional<String> possibleUri = Optional.fromNullable(uri);
+            if (!possibleUri.isPresent()) {
+                errorViewFor(request, response, NO_URI);
+                return;
+            }
+            Optional<Content> content = getContent(publisher, possibleUri.get());
+            if (!content.isPresent()) {
+                errorViewFor(request, response, CONTENT_NOT_FOUND);
+                return;
+            }
+            if (!(content.get() instanceof Item)) {
+                errorViewFor(request, response, CONTENT_NOT_AN_ITEM);
+                return;
+            }
+            
+            Map<String, ItemBroadcastHierarchy> hierarchies = hierarchyExpander.broadcastHierarchiesFor((Item) content.get());
+            
+            if (broadcastImi != null) {
+                Optional<ItemBroadcastHierarchy> broadcastHierarchy = Optional.fromNullable(hierarchies.get(broadcastImi));
+                if (!broadcastHierarchy.isPresent()) {
+                    errorViewFor(request, response, ELEMENT_NOT_FOUND);
+                    return;
+                }
+                JAXBElement<TVAMainType> tva = feedGenerator.generateBroadcastTVAFrom(broadcastHierarchy.get(), broadcastImi);
+                modelAndViewFor(request, response, tva, appConfig);
+            } else {
+                JAXBElement<TVAMainType> tva = feedGenerator.generateBroadcastTVAFrom(hierarchies);
+                modelAndViewFor(request, response, tva, appConfig);
+            }
+        } catch (TvaGenerationException e) {
+            errorViewFor(request, response, tvaGenerationError(e));
+        } catch (Exception e) {
+            errorViewFor(request, response, AtlasErrorSummary.forException(e));
+        }
+    }
+
+    @RequestMapping(value="/3.0/feeds/youview/{publisher}/on_demands.xml", method = RequestMethod.GET)
+    public void generateOnDemandFeed(HttpServletRequest request, HttpServletResponse response,
+            @PathVariable("publisher") String publisherStr,
+            @RequestParam(value = "uri", required = true) String uri,
+            @RequestParam(value = "on_demand_imi", required = false) String onDemandImi) throws IOException {
+        try {
+            Publisher publisher = Publisher.valueOf(publisherStr.trim().toUpperCase());
+            ApplicationConfiguration appConfig = appConfig(request);
+            if (!appConfig.isEnabled(publisher)) {
+                errorViewFor(request, response, FORBIDDEN);
+                return;
+            }
+
+            Optional<String> possibleUri = Optional.fromNullable(uri);
+            if (!possibleUri.isPresent()) {
+                errorViewFor(request, response, NO_URI);
+                return;
+            }
+            Optional<Content> content = getContent(publisher, possibleUri.get());
+            if (!content.isPresent()) {
+                errorViewFor(request, response, CONTENT_NOT_FOUND);
+                return;
+            }
+            if (!(content.get() instanceof Item)) {
+                errorViewFor(request, response, CONTENT_NOT_AN_ITEM);
+                return;
+            }
+
+            Map<String, ItemOnDemandHierarchy> hierarchies = hierarchyExpander.onDemandHierarchiesFor((Item) content.get());
+            
+            if (onDemandImi != null) {
+                Optional<ItemOnDemandHierarchy> onDemandHierarchy = Optional.fromNullable(hierarchies.get(onDemandImi));
+                if (!onDemandHierarchy.isPresent()) {
+                    errorViewFor(request, response, ELEMENT_NOT_FOUND);
+                    return;
+                }
+                JAXBElement<TVAMainType> tva = feedGenerator.generateOnDemandTVAFrom(onDemandHierarchy.get(), onDemandImi);
+                modelAndViewFor(request, response, tva, appConfig);
+            } else {
+                JAXBElement<TVAMainType> tva = feedGenerator.generateOnDemandTVAFrom(hierarchies);
+                modelAndViewFor(request, response, tva, appConfig);
+            }
+        } catch (TvaGenerationException e) {
+            errorViewFor(request, response, tvaGenerationError(e));
+        } catch (Exception e) {
+            errorViewFor(request, response, AtlasErrorSummary.forException(e));
+        }
+    }
+
     private AtlasErrorSummary tvaGenerationError(TvaGenerationException e) { 
         return new AtlasErrorSummary(e)
                 .withMessage("Unable to generate TVAnytime output for the provided uri")
@@ -118,7 +323,6 @@ public class ContentFeedController extends BaseController<JAXBElement<TVAMainTyp
                 .withStatusCode(HttpStatusCode.SERVER_ERROR);
     }
     
-    // TODO extract this into custom content resolver class
     private Optional<Content> getContent(Publisher publisher, String uri) {
         ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(uri));
         Collection<Identified> resolved = resolvedContent.asResolvedMap().values();

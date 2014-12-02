@@ -3,9 +3,10 @@ package org.atlasapi.query;
 import javax.xml.bind.JAXBElement;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.feeds.tvanytime.TvAnytimeGenerator;
+import org.atlasapi.feeds.tvanytime.granular.GranularTvAnytimeGenerator;
 import org.atlasapi.feeds.utils.DescriptionWatermarker;
 import org.atlasapi.feeds.utils.WatermarkModule;
+import org.atlasapi.feeds.youview.hierarchy.ContentHierarchyExpander;
 import org.atlasapi.feeds.youview.statistics.FeedStatistics;
 import org.atlasapi.feeds.youview.statistics.FeedStatisticsQueryResult;
 import org.atlasapi.feeds.youview.statistics.FeedStatisticsResolver;
@@ -185,9 +186,11 @@ public class QueryWebModule {
     private @Autowired OrganisationResolver organisationResolver;
     private @Autowired TaskStore taskStore;
     private @Autowired FeedStatisticsResolver feedStatsResolver;
-    private @Autowired TvAnytimeGenerator feedGenerator;
+    private @Autowired GranularTvAnytimeGenerator feedGenerator;
     private @Autowired LastUpdatedContentFinder contentFinder;
     private @Autowired SegmentWriter segmentWriter;
+    private @Autowired ContentHierarchyExpander hierarchyExpander;
+
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired AdapterLog log;
@@ -369,7 +372,7 @@ public class QueryWebModule {
     
     @Bean
     ContentFeedController contentFeedController() {
-        return new ContentFeedController(configFetcher, log, tvaModelOutputter(), feedGenerator, contentResolver);
+        return new ContentFeedController(configFetcher, log, tvaModelOutputter(), feedGenerator, contentResolver, hierarchyExpander);
     }
     
     @Bean
