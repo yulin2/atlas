@@ -1,10 +1,11 @@
 package org.atlasapi.remotesite.bbc.nitro.extract;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.api.client.repackaged.com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.remotesite.ContentExtractor;
+
 
 /**
  * Extracts an {@link Image} from a

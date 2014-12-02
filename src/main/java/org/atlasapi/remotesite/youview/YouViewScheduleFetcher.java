@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import nu.xom.Builder;
 import nu.xom.Document;
 
+import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.atlasapi.remotesite.HttpClients;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class YouViewScheduleFetcher {
         client = new SimpleHttpClientBuilder()
             .withUserAgent(HttpClients.ATLAS_USER_AGENT)
             .withSocketTimeout(timeout, TimeUnit.SECONDS)
+            .withRetries(3)
             .build();
     }
 
@@ -44,7 +46,11 @@ public class YouViewScheduleFetcher {
         qsp.add("endtime", finish.toString(DATE_TIME_FORMAT));
         String url = youviewUrl + "?" + qsp.toQueryString();
         log.trace("Querying: " + url);
-        client.get(new SimpleHttpRequest<Void>(url, xmlTransformer));
+        try {
+            client.get(new SimpleHttpRequest<Void>(url, xmlTransformer));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get " + url, e);
+        }
         return xmlTransformer.getXml();
     }
     

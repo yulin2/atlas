@@ -19,6 +19,8 @@ import static org.atlasapi.media.entity.Publisher.TALK_TALK;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_BT_STAGE;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_SCOTLAND_RADIO;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW_SCOTLAND_RADIO_STAGE;
 import static org.atlasapi.media.entity.Publisher.YOUVIEW_STAGE;
 import static org.atlasapi.persistence.content.ContentCategory.TOP_LEVEL_ITEM;
 
@@ -47,7 +49,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.messaging.v3.EntityUpdatedMessage;
 import org.atlasapi.messaging.v3.JacksonMessageSerializer;
 import org.atlasapi.messaging.v3.KafkaMessagingModule;
-import org.atlasapi.persistence.content.ContentCategory;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
@@ -58,7 +59,6 @@ import org.atlasapi.remotesite.channel4.C4AtomApi;
 import org.atlasapi.remotesite.five.FiveChannelMap;
 import org.atlasapi.remotesite.itv.whatson.ItvWhatsonChannelMap;
 import org.atlasapi.remotesite.redux.ReduxServices;
-import org.atlasapi.remotesite.youview.DefaultYouViewChannelResolver;
 import org.atlasapi.remotesite.youview.YouViewChannelResolver;
 import org.atlasapi.remotesite.youview.YouViewCoreModule;
 import org.joda.time.Duration;
@@ -134,6 +134,24 @@ public class EquivTaskModule {
     private @Autowired RecentEquivalenceResultStore equivalenceResultStore;
     
     private @Autowired KafkaMessagingModule messaging;
+
+    private Set<String> RADIO_ALIASES = ImmutableSet.of("http://youview.com/service/37617", "http://youview.com/service/37897", "http://youview.com/service/38008", "http://youview.com/service/38270",
+            "http://youview.com/service/39058", "http://youview.com/service/39248", "http://youview.com/service/39510", "http://youview.com/service/15193102", "http://youview.com/service/15193080",
+            "http://youview.com/service/40643", "http://youview.com/service/40816", "http://youview.com/service/40985", "http://youview.com/service/41222", "http://youview.com/service/41463",
+            "http://youview.com/service/41596", "http://youview.com/service/1146", "http://youview.com/service/1147", "http://youview.com/service/1148", "http://youview.com/service/1149");
+    private Predicate<Channel> RADIO_CHANNELS = new Predicate<Channel>() {
+
+        @Override
+        public boolean apply(Channel input) {
+            for (String alias : input.getAliasUrls()) {
+                if (RADIO_ALIASES.contains(alias)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+    };
     
     @PostConstruct
     public void scheduleUpdater() {
@@ -161,12 +179,12 @@ public class EquivTaskModule {
 
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(YOUVIEW)
-                    .withChannels(youviewChannelResolver.getAllChannels())
+                    .withChannels(Iterables.filter(youviewChannelResolver.getAllChannels(), RADIO_CHANNELS))
                     .build().withName("YouView Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(YOUVIEW_STAGE)
-                    .withChannels(youviewChannelResolver.getAllChannels())
+                    .withChannels(Iterables.filter(youviewChannelResolver.getAllChannels(), RADIO_CHANNELS))
                     .build().withName("YouView Stage Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
@@ -178,6 +196,16 @@ public class EquivTaskModule {
                     .withPublishers(YOUVIEW_BT_STAGE)
                     .withChannels(youviewChannelResolver.getAllChannels())
                     .build().withName("YouView Stage BT Schedule Equivalence (8 day) Updater"), 
+                YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(YOUVIEW_SCOTLAND_RADIO)
+                    .withChannels(youviewChannelResolver.getAllChannels())
+                    .build().withName("YouView Scotland Radio Schedule Equivalence (8 day) Updater"), 
+                YOUVIEW_SCHEDULE_EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(taskBuilder(0, 7)
+                    .withPublishers(YOUVIEW_SCOTLAND_RADIO_STAGE)
+                    .withChannels(youviewChannelResolver.getAllChannels())
+                    .build().withName("YouView Stage Scotland Radio Schedule Equivalence (8 day) Updater"), 
                 YOUVIEW_STAGE_SCHEDULE_EQUIVALENCE_REPETITION);
             taskScheduler.schedule(taskBuilder(0, 7)
                     .withPublishers(BBC)
