@@ -37,6 +37,7 @@ public class BbcIonServices {
         .put("bbc_one_east_yorkshire",  "http://www.bbc.co.uk/services/bbcone/east_yorkshire")
         .put("bbc_one_northern_ireland",  "http://www.bbc.co.uk/services/bbcone/ni")
         .put("bbc_one_wales",  "http://www.bbc.co.uk/services/bbcone/wales")
+        .put("bbc_alba", "http://ref.atlasapi.org/channels/bbcalba")
         
 //        .put("bbc_two", "http://www.bbc.co.uk/services/bbctwo")
         .put("bbc_two_england", "http://www.bbc.co.uk/services/bbctwo/england")
@@ -81,7 +82,6 @@ public class BbcIonServices {
     public static BiMap<String, String> masterBrands = ImmutableBiMap.<String, String>builder()
         .putAll(Maps.filterKeys(services, not(in(ImmutableSet.of("bbc_radio_four_extra", "bbc_news24")))))
         .put("bbc_7", "http://www.bbc.co.uk/services/radio4extra")
-        .put("bbc_alba", "http://ref.atlasapi.org/channels/bbcalba")
         .put("bbc_news", "http://www.bbc.co.uk/services/bbcnews")
         .put("bbc_one", "http://ref.atlasapi.org/channels/pressassociation.com/stations/1")
         .put("bbc_radio_four", "http://ref.atlasapi.org/channels/pressassociation.com/stations/5")
