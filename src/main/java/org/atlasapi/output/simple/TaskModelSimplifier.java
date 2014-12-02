@@ -38,6 +38,8 @@ public class TaskModelSimplifier implements ModelSimplifier<Task, org.atlasapi.f
             task.setUploadTime(model.uploadTime().get().toDate());
         }
         task.setRemoteId(model.remoteId().orNull());
+        task.setElementType(model.elementType());
+        task.setElementId(model.elementId());
         task.setContent(model.content());
         task.setStatus(model.status());
         
