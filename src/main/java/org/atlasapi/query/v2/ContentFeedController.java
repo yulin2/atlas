@@ -174,7 +174,7 @@ public class ContentFeedController extends BaseController<JAXBElement<TVAMainTyp
     public void generateVersionsFeed(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("publisher") String publisherStr,
             @RequestParam(value = "uri", required = true) String uri,
-            @RequestParam(value = "versionCrid", required = false) String versionCrid) throws IOException {
+            @RequestParam(value = "version_crid", required = false) String versionCrid) throws IOException {
         try {
             Publisher publisher = Publisher.valueOf(publisherStr.trim().toUpperCase());
             ApplicationConfiguration appConfig = appConfig(request);
