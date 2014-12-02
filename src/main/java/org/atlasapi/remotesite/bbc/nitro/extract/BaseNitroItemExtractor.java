@@ -51,19 +51,13 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
     extends NitroContentExtractor<NitroItemSource<SOURCE>, ITEM> {
 
     private static final String AUDIO_DESCRIBED_VERSION_TYPE = "DubbedAudioDescribed";
+    private static final String SIGNED_VERSION_TYPE = "Signed";
     private static final String WARNING_TEXT_LONG_LENGTH = "long";
 
     private final Predicate<WarningText> IS_LONG_WARNING = new Predicate<WarningText>() {
         @Override
         public boolean apply(WarningText input) {
             return WARNING_TEXT_LONG_LENGTH.equals(input.getLength());
-        }
-    };
-
-    private static final Predicate<VersionType> IS_AUDIO_DESCRIBED = new Predicate<VersionType>() {
-        @Override
-        public boolean apply(VersionType input) {
-            return AUDIO_DESCRIBED_VERSION_TYPE.equals(input.getId());
         }
     };
 
@@ -99,7 +93,8 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
 
                 for (Encoding encoding: versionEncodings) {
                     encoding.setVideoAspectRatio(nitroVersion.getAspectRatio());
-                    encoding.setAudioDescribed(isAudioDescribed(nitroVersion));
+                    encoding.setAudioDescribed(isVersionOfType(nitroVersion, AUDIO_DESCRIBED_VERSION_TYPE));
+                    encoding.setSigned(isVersionOfType(nitroVersion, SIGNED_VERSION_TYPE));
                     version.setManifestedAs(versionEncodings);
                 }
             }
@@ -131,14 +126,23 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         return restriction;
     }
 
-    private boolean isAudioDescribed(com.metabroadcast.atlas.glycerin.model.Version nitroVersion) {
+    private boolean isVersionOfType(com.metabroadcast.atlas.glycerin.model.Version nitroVersion, String versionType) {
         VersionTypes versionTypes = nitroVersion.getVersionTypes();
 
         if (versionTypes == null) {
             return false;
         }
 
-        return Iterables.any(versionTypes.getVersionType(), IS_AUDIO_DESCRIBED);
+        return Iterables.any(versionTypes.getVersionType(), isOfType(versionType));
+    }
+
+    private Predicate<VersionType> isOfType(final String versionType) {
+        return new Predicate<VersionType>() {
+            @Override
+            public boolean apply(VersionType input) {
+                return versionType.equals(input.getId());
+            }
+        };
     }
 
     private void extractMediaTypeAndSpecialization(NitroItemSource<SOURCE> source, ITEM item) {
