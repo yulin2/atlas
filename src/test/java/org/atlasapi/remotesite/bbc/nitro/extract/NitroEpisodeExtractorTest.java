@@ -222,6 +222,37 @@ public class NitroEpisodeExtractorTest {
     }
 
     @Test
+    public void testSignedFlagIsProperlySet() throws DatatypeConfigurationException {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+
+        String signedVersionPid = "p02ccx5g";
+        String notSignedVersionPid = "p02ccx6g";
+
+        Item extractedSigned = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(availability(signedVersionPid)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(signedVersion(signedVersionPid))));
+
+        org.atlasapi.media.entity.Version signedVersion = Iterables.getOnlyElement(extractedSigned.getVersions());
+        Encoding signedEncoding = Iterables.getOnlyElement(signedVersion.getManifestedAs());
+
+        Item extractedNonAudioDescribed = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(availability(notSignedVersionPid)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(version(notSignedVersionPid))));
+
+        org.atlasapi.media.entity.Version nonSignedVersion = Iterables.getOnlyElement(extractedNonAudioDescribed.getVersions());
+        Encoding nonSignedEncoding = Iterables.getOnlyElement(nonSignedVersion.getManifestedAs());
+
+        assertTrue(signedEncoding.getSigned());
+        assertFalse(nonSignedEncoding.getSigned());
+    }
+
+    @Test
     public void testRestrictionIsProperlySet() {
         Episode tli = new Episode();
         tli.setPid("b012cl84");
@@ -283,8 +314,8 @@ public class NitroEpisodeExtractorTest {
         Set<Encoding> encodings = version.getManifestedAs();
         Encoding encoding = Iterables.getOnlyElement(encodings);
 
-        assertEquals(1280, (int)encoding.getVideoHorizontalSize());
-        assertEquals(720, (int)encoding.getVideoVerticalSize());
+        assertEquals(1280, (int) encoding.getVideoHorizontalSize());
+        assertEquals(720, (int) encoding.getVideoVerticalSize());
     }
 
     private FormatsType filmFormatsType() {
@@ -384,6 +415,19 @@ public class NitroEpisodeExtractorTest {
 
         version.setVersionTypes(types);
         version.setDuration(DatatypeFactory.newInstance().newDuration(VERSION_DURATION.getMillis()));
+
+        return version;
+    }
+
+    private Version signedVersion(String versionPid) throws DatatypeConfigurationException {
+        Version version = version(versionPid);
+
+        VersionType type = new VersionType();
+        type.setId("Signed");
+
+        VersionTypes types = new VersionTypes();
+        types.getVersionType().add(type);
+        version.setVersionTypes(types);
 
         return version;
     }
