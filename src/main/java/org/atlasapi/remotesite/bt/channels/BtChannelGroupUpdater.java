@@ -76,9 +76,9 @@ public class BtChannelGroupUpdater extends ScheduledTask {
     @Override
     protected void runTask() {
         try {
-            log.info("Acquiring channel writer lock");
+            log.debug("Acquiring channel writer lock");
             channelWriterLock.lock();
-            log.info("Acquired channel writer lock");
+            log.debug("Acquired channel writer lock");
             PaginatedEntries entries = btMpxClient.getChannels(Optional.<Selection>absent());
             ImmutableSet.Builder<String> allCurrentChannelGroups = ImmutableSet.builder();
             for (AbstractBtChannelGroupSaver saver : channelGroupSavers) {

@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import javax.annotation.PostConstruct;
@@ -211,7 +212,7 @@ public class PaModule {
         return new MongoPaScheduleVersionStore(mongo);
     }
     
-    public @Bean Lock channelWriterLock() {
+    public @Bean ReentrantLock channelWriterLock() {
         return new ReentrantLock();
     }
 }
