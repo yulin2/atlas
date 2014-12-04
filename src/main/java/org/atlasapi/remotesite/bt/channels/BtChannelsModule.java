@@ -124,15 +124,15 @@ public class BtChannelsModule {
                 .withName("BT Channel Group (PROD) Ingester"), 
                 PROD_INGEST_REPETITION);
         
-        scheduler.schedule(productionChannelGroupUpdater()
+        scheduler.schedule(dev1ChannelGroupUpdater()
                 .withName("BT Channel Group (TEST1) Ingester"), 
                 TEST1_INGEST_REPETITION);
         
-        scheduler.schedule(productionChannelGroupUpdater()
+        scheduler.schedule(dev2ChannelGroupUpdater()
                 .withName("BT Channel Group (TEST2) Ingester"), 
                 TEST2_INGEST_REPETITION);
         
-        scheduler.schedule(productionChannelGroupUpdater()
+        scheduler.schedule(dev3ChannelGroupUpdater()
                 .withName("BT Channel Group (REFERENCE) Ingester"), 
                 REFERENCE_INGEST_REPETITION);
     }
