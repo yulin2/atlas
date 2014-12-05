@@ -180,6 +180,7 @@ public class ContentMerger {
                     Version mergedVersion = mergedVersions.get(version.getCanonicalUri());
                     mergedVersion.setBroadcasts(Sets.union(version.getBroadcasts(), mergedVersion.getBroadcasts()));
                     mergedVersion.setManifestedAs(version.getManifestedAs());
+                    mergedVersion.setRestriction(version.getRestriction());
                     mergedVersions.put(version.getCanonicalUri(), mergedVersion);
                 } else {
                     mergedVersions.put(version.getCanonicalUri(), version);
