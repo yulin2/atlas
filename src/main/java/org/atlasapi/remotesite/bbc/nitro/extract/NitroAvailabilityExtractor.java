@@ -43,6 +43,9 @@ public class NitroAvailabilityExtractor implements ContentExtractor<Iterable<Ava
     private static final int SD_HORIZONTAL_SIZE = 640;
     private static final int SD_VERTICAL_SIZE = 360;
 
+    private static final int HD_BITRATE = 3_200_000;
+    private static final int SD_BITRATE = 1_500_000;
+
     private static final Predicate<Availability> IS_HD = new Predicate<Availability>() {
         @Override
         public boolean apply(Availability input) {
@@ -74,6 +77,7 @@ public class NitroAvailabilityExtractor implements ContentExtractor<Iterable<Ava
                 Encoding encoding = new Encoding();
                 encoding.setAvailableAt(locations);
                 setHorizontalAndVerticalSize(encoding, IS_HD.apply(availability));
+                encoding.setVideoBitRate(IS_HD.apply(availability) ? HD_BITRATE: SD_BITRATE);
                 encodings.add(encoding);
             }
         }
