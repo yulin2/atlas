@@ -5,6 +5,7 @@ import javax.annotation.PostConstruct;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.remotesite.metabroadcast.MongoSchedulingStore;
 import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
 import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
@@ -16,6 +17,8 @@ import org.atlasapi.remotesite.rovi.parsers.RoviProgramLineParser;
 import org.atlasapi.remotesite.rovi.parsers.RoviSeasonHistoryLineParser;
 import org.atlasapi.remotesite.rovi.populators.ScheduleLineBroadcastExtractor;
 import org.atlasapi.remotesite.rovi.processing.AuxiliaryCacheSupplier;
+import org.atlasapi.remotesite.rovi.processing.restartable.DefaultIngestStatusStore;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatusStore;
 import org.atlasapi.remotesite.rovi.processing.ItemBroadcastUpdater;
 import org.atlasapi.remotesite.rovi.processing.RoviDeltaIngestProcessor;
 import org.atlasapi.remotesite.rovi.processing.RoviFullIngestProcessor;
@@ -25,16 +28,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
 public class RoviModule {
 
+    private static final boolean FULL_INGEST = true;
+    private static final boolean DELTA_INGEST = false;
+
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
+    private @Autowired DatabasedMongo mongo;
     
     @Bean
     public MapBasedKeyedFileIndexer<String, RoviProgramDescriptionLine> descriptionsIndexer() {
@@ -65,6 +73,11 @@ public class RoviModule {
     }
 
     @Bean
+    public IngestStatusStore ingestStatusPersistor() {
+        return new DefaultIngestStatusStore(new MongoSchedulingStore(mongo));
+    }
+
+    @Bean
     public RoviContentWriter roviContentWriter() {
         return new RoviContentWriter(contentWriter);
     }
@@ -76,8 +89,9 @@ public class RoviModule {
                 episodeSequenceIndexer(),
                 roviContentWriter(),
                 contentResolver,
-                scheduleProcessor(),
-                auxCacheSupplier());
+                fullIngestScheduleProcessor(),
+                auxCacheSupplier(),
+                ingestStatusPersistor());
     }
 
     @Bean
@@ -88,7 +102,7 @@ public class RoviModule {
                 episodeSequenceIndexer(),
                 roviContentWriter(),
                 contentResolver,
-                scheduleProcessor(),
+                deltaIngestScheduleProcessor(),
                 auxCacheSupplier());
     }
     
@@ -122,10 +136,20 @@ public class RoviModule {
     }
     
     @Bean
-    public ScheduleFileProcessor scheduleProcessor() {
+    public ScheduleFileProcessor fullIngestScheduleProcessor() {
+        return scheduleProcessor(FULL_INGEST);
+    }
+
+    @Bean
+    public ScheduleFileProcessor deltaIngestScheduleProcessor() {
+        return scheduleProcessor(DELTA_INGEST);
+    }
+
+    private ScheduleFileProcessor scheduleProcessor(boolean fullIngest) {
         return new ScheduleFileProcessor(
                 new ItemBroadcastUpdater(contentResolver, contentWriter),
-                new ScheduleLineBroadcastExtractor(channelResolver));
+                new ScheduleLineBroadcastExtractor(channelResolver),
+                fullIngest);
     }
     
     @PostConstruct

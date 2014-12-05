@@ -10,11 +10,13 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Map;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
@@ -25,36 +27,25 @@ import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.remotesite.rovi.RoviConstants;
-import org.atlasapi.remotesite.rovi.RoviContentWriter;
 import org.atlasapi.remotesite.rovi.RoviTestUtils;
-import org.atlasapi.remotesite.rovi.indexing.MapBasedKeyedFileIndexer;
 import org.atlasapi.remotesite.rovi.model.RoviCulture;
-import org.atlasapi.remotesite.rovi.model.RoviEpisodeSequenceLine;
-import org.atlasapi.remotesite.rovi.model.RoviProgramDescriptionLine;
-import org.atlasapi.remotesite.rovi.parsers.RoviEpisodeSequenceLineParser;
-import org.atlasapi.remotesite.rovi.parsers.RoviProgramDescriptionLineParser;
+import org.atlasapi.remotesite.rovi.processing.restartable.IngestStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RoviFullIngestProcessorTest {
+public class RoviFullIngestProcessorTest extends AbstractRoviIngestProcessorTest {
 
     private static final String PARENT_BRAND_ID = "19914879";
     private static final String PARENT_SERIES_ID = "19914933";
     private static final String PARENT_FILM_ID = "2353207";
-    private static final int SEASON_NUMBER = 5;
     private static final Locale EN_US_LOCALE = RoviCulture.localeFromCulture("English - NA");
 
     private static final String PROGRAM_FILE = "org/atlasapi/remotesite/rovi/program.txt";
@@ -64,12 +55,6 @@ public class RoviFullIngestProcessorTest {
     private static final String SCHEDULE = "org/atlasapi/remotesite/rovi/schedule.txt";
 
     private RoviFullIngestProcessor processor;
-
-    @Mock private RoviContentWriter contentWriter;
-
-    @Mock private ContentResolver contentResolver;
-
-    @Mock private ScheduleFileProcessor scheduleProcessor;
 
     private ArgumentCaptor<? extends Content> argument = ArgumentCaptor.forClass(Content.class);
 
@@ -81,31 +66,25 @@ public class RoviFullIngestProcessorTest {
         processor = new RoviFullIngestProcessor(
                 descriptionsIndexer(),
                 episodeSequenceIndexer(),
-                contentWriter,
+                roviContentWriter,
                 contentResolver,
                 scheduleProcessor,
-                new AuxiliaryCacheSupplier(contentResolver));
+                new AuxiliaryCacheSupplier(contentResolver),
+                statusStore);
     }
 
     @Test
     public void testProcessing() throws IOException {
+        when(statusStore.getIngestStatus()).thenReturn(Optional.<IngestStatus>absent());
+
         processor.process(fileFromResource(PROGRAM_FILE),
                 fileFromResource(SEASON_HISTORY_SEQUENCE),
                 fileFromResource(SCHEDULE),
                 fileFromResource(PROGRAM_DESCRIPTION),
                 fileFromResource(EPISODE_SEQUENCE));
 
-        Mockito.verify(contentWriter, atLeastOnce()).writeContent(argument.capture());
+        Map<String, ? extends Content> items = contentWriter.getItems();
 
-        ImmutableMap<String, ? extends Content> items = Maps.uniqueIndex(argument.getAllValues(),
-                new Function<Content, String>() {
-
-                    @Override
-                    public String apply(Content input) {
-                        return input.getCanonicalUri();
-                    }
-                });
-        
         Content film = items.get(canonicalUriForProgram("15354310"));
         assertThat(film, notNullValue());
         assertThat(film, is(Film.class));
@@ -132,7 +111,7 @@ public class RoviFullIngestProcessorTest {
         assertThat(item.getEquivalentTo().isEmpty(), is(true));
         assertThat(item.getLocalizedDescriptions().isEmpty(), is(true));
 
-        Content brand = items.get(canonicalUriForProgram("19914879"));
+        Content brand = items.get(canonicalUriForProgram(PARENT_BRAND_ID));
         assertThat(brand, notNullValue());
         assertThat(brand, is(Brand.class));
         assertThat(brand.getTitle(), equalTo("Doctor Who"));
@@ -142,7 +121,7 @@ public class RoviFullIngestProcessorTest {
         assertThat(brand.getLocalizedDescription(EN_US_LOCALE).get().getShortDescription(),
                 equalTo("Following the adventures of a time-traveling alien called \"The Doctor\" and his human companions as they deal with crises set on Earth and other worlds."));
 
-        Content seriesContent = items.get(canonicalUriForSeason("19914933"));
+        Content seriesContent = items.get(canonicalUriForSeason(PARENT_SERIES_ID));
         assertThat(seriesContent, notNullValue());
         assertThat(seriesContent, is(Series.class));
         assertThat(seriesContent.getTitle(), equalTo("Series 5"));
@@ -176,34 +155,25 @@ public class RoviFullIngestProcessorTest {
         assertThat(episode2.getSeriesRef(), equalTo(ParentRef.parentRefFrom(parentSeries())));
         assertThat(episode2.getContainer(), equalTo(ParentRef.parentRefFrom(parentBrand())));
 
-    }
-
-    private MapBasedKeyedFileIndexer<String, RoviProgramDescriptionLine> descriptionsIndexer() {
-        return new MapBasedKeyedFileIndexer<>(
-                RoviConstants.FILE_CHARSET,
-                new RoviProgramDescriptionLineParser());
-    }
-
-    private MapBasedKeyedFileIndexer<String, RoviEpisodeSequenceLine> episodeSequenceIndexer() {
-        return new MapBasedKeyedFileIndexer<>(
-                RoviConstants.FILE_CHARSET,
-                new RoviEpisodeSequenceLineParser());
+        verify(scheduleProcessor, times(1)).process(fileFromResource(SCHEDULE));
     }
 
     private void instructContentResolver() {
+        when(contentResolver.findByUris(Mockito.anyCollectionOf(String.class)))
+                .thenReturn(RoviTestUtils.unresolvedContent());
+
         when(contentResolver.findByCanonicalUris(Mockito.anyCollectionOf(String.class)))
             .thenReturn(RoviTestUtils.unresolvedContent());
-        
-        when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PARENT_BRAND_ID))))
-                .thenReturn(resolvedContent(parentBrand()));
+
+        when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(
+                PARENT_BRAND_ID))))
+                .thenAnswer(writtenOrUnresolved(canonicalUriForProgram(PARENT_BRAND_ID)));
 
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForProgram(PARENT_FILM_ID))))
                 .thenReturn(resolvedContent(parentFilm()));
-        
-        Series series = parentSeries();
-        series.withSeriesNumber(SEASON_NUMBER);
+
         when(contentResolver.findByCanonicalUris(ImmutableList.of(canonicalUriForSeason(PARENT_SERIES_ID))))
-                .thenReturn(resolvedContent(series));     
+                .thenAnswer(writtenOrUnresolved(canonicalUriForSeason(PARENT_SERIES_ID)));
     }
 
     private Brand parentBrand() {
