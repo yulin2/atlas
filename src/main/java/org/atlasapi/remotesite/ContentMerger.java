@@ -184,6 +184,7 @@ public class ContentMerger {
                         mergedVersion.setDuration(Duration.standardSeconds(version.getDuration()));
                     }
                     mergedVersion.setManifestedAs(version.getManifestedAs());
+                    mergedVersion.setRestriction(version.getRestriction());
                     mergedVersions.put(version.getCanonicalUri(), mergedVersion);
                 } else {
                     mergedVersions.put(version.getCanonicalUri(), version);
