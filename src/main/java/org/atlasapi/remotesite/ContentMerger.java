@@ -119,6 +119,8 @@ public class ContentMerger {
         current.setEquivalentTo(extracted.getEquivalentTo());
         current.setRelatedLinks(extracted.getRelatedLinks());
         current.setPresentationChannel(extracted.getPresentationChannel());
+        current.setMediaType(extracted.getMediaType());
+        current.setSpecialization(extracted.getSpecialization());
         
         return current;
     }
