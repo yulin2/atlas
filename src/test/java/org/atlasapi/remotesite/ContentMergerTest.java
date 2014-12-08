@@ -71,9 +71,9 @@ public class ContentMergerTest {
         extracted.setVersions(ImmutableSet.of(version2));
         Item merged = contentMerger.merge(current, extracted);
 
-        Version mergetVersion = Iterables.getOnlyElement(merged.getVersions());
-        assertEquals("http://example.org/2", mergetVersion.getCanonicalUri());
-        assertTrue(mergetVersion.getRestriction().isRestricted());
+        Version mergedVersion = Iterables.getOnlyElement(merged.getVersions());
+        assertEquals("http://example.org/2", mergedVersion.getCanonicalUri());
+        assertTrue(mergedVersion.getRestriction().isRestricted());
     }
 
     @Test

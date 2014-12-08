@@ -53,6 +53,13 @@ public class NitroAvailabilityExtractor implements ContentExtractor<Iterable<Ava
         }
     };
 
+    private static final Predicate<Availability> IS_IPTV = new Predicate<Availability>() {
+        @Override
+        public boolean apply(Availability input) {
+            return input.getMediaSet().contains("iptv-all");
+        }
+    };
+
     
     private final Map<String, Platform> mediaSetPlatform = ImmutableMap.of(
         PC, Platform.PC,
@@ -76,8 +83,12 @@ public class NitroAvailabilityExtractor implements ContentExtractor<Iterable<Ava
             if (!locations.isEmpty()) {
                 Encoding encoding = new Encoding();
                 encoding.setAvailableAt(locations);
-                setHorizontalAndVerticalSize(encoding, IS_HD.apply(availability));
-                encoding.setVideoBitRate(IS_HD.apply(availability) ? HD_BITRATE: SD_BITRATE);
+
+                if (IS_IPTV.apply(availability)) {
+                    setHorizontalAndVerticalSize(encoding, IS_HD.apply(availability));
+                    encoding.setVideoBitRate(IS_HD.apply(availability) ? HD_BITRATE : SD_BITRATE);
+                }
+
                 encodings.add(encoding);
             }
         }

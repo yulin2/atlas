@@ -253,7 +253,7 @@ public class NitroEpisodeExtractorTest {
     }
 
     @Test
-    public void testRestrictionIsProperlySet() {
+    public void testRestrictionIsProperlySet() throws DatatypeConfigurationException {
         Episode tli = new Episode();
         tli.setPid("b012cl84");
         tli.setTitle("Destiny");
@@ -277,7 +277,7 @@ public class NitroEpisodeExtractorTest {
     }
 
     @Test
-    public void testVideoDimensionsAreNotHd() {
+    public void testVideoDimensionsAreNotHd() throws DatatypeConfigurationException {
         Episode tli = new Episode();
         tli.setPid("b012cl84");
         tli.setTitle("Destiny");
@@ -298,7 +298,7 @@ public class NitroEpisodeExtractorTest {
     }
 
     @Test
-    public void testVideoDimensionsAreHd() {
+    public void testVideoDimensionsAreHd() throws DatatypeConfigurationException {
         Episode tli = new Episode();
         tli.setPid("b012cl84");
         tli.setTitle("Destiny");
@@ -396,9 +396,10 @@ public class NitroEpisodeExtractorTest {
         return availability;
     }
 
-    private Version version(String versionPid) {
+    private Version version(String versionPid) throws DatatypeConfigurationException {
         Version version = new Version();
         version.setPid(versionPid);
+        version.setDuration(DatatypeFactory.newInstance().newDuration(VERSION_DURATION.getMillis()));
 
         return version;
     }
@@ -440,9 +441,9 @@ public class NitroEpisodeExtractorTest {
         return version;
     }
 
-    private Version versionWithWarning(String warningMessage) {
-        Version version = new Version();
-        version.setPid(WITH_WARNING_VERSION_PID);
+    private Version versionWithWarning(String warningMessage)
+            throws DatatypeConfigurationException {
+        Version version = version(WITH_WARNING_VERSION_PID);
 
         Warnings warnings = new Warnings();
 
