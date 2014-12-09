@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
-import com.metabroadcast.atlas.glycerin.model.MasterBrand;
+import com.metabroadcast.atlas.glycerin.model.Brand.MasterBrand;
 import com.metabroadcast.atlas.glycerin.model.Synopses;
 import com.metabroadcast.common.time.Clock;
 
@@ -66,7 +66,7 @@ public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
             content.setMediumDescription(synposes.getMedium());
             content.setLongDescription(synposes.getLong());
         }
-        com.metabroadcast.atlas.glycerin.model.Image srcImage = extractImage(source);
+        com.metabroadcast.atlas.glycerin.model.Brand.Image srcImage = extractImage(source);
         if (srcImage != null && !Strings.isNullOrEmpty(srcImage.getTemplateUrl())) {
             Image image = imageExtractor.extract(srcImage);
             content.setImage(image.getCanonicalUri());
@@ -140,7 +140,7 @@ public abstract class NitroContentExtractor<SOURCE, CONTENT extends Content>
      *            - the source data
      * @return - the image of the source data, or {@code null} if there is none.
      */
-    protected abstract @Nullable com.metabroadcast.atlas.glycerin.model.Image extractImage(SOURCE source);
+    protected abstract @Nullable com.metabroadcast.atlas.glycerin.model.Brand.Image extractImage(SOURCE source);
     
     /**
      * Concrete implementations can override this method to perform additional

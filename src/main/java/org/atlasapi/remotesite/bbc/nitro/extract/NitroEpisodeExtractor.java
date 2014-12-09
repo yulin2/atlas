@@ -4,22 +4,25 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
-import org.atlasapi.remotesite.bbc.nitro.v1.NitroFormat;
 import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles.Brand;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles.Series;
 import com.metabroadcast.atlas.glycerin.model.Episode;
-import com.metabroadcast.atlas.glycerin.model.Image;
-import com.metabroadcast.atlas.glycerin.model.MasterBrand;
+import com.metabroadcast.atlas.glycerin.model.Format;
+import com.metabroadcast.atlas.glycerin.model.Brand.Image;
+import com.metabroadcast.atlas.glycerin.model.Brand.MasterBrand;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
 import com.metabroadcast.atlas.glycerin.model.Synopses;
 import com.metabroadcast.common.time.Clock;
@@ -41,6 +44,13 @@ import com.metabroadcast.common.time.Clock;
 public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode, Item> {
 
     private static final String FILM_FORMAT_ID = "PT007";
+    private static final Predicate<Format> IS_FILM_FORMAT = new Predicate<Format>() {
+        @Override
+        public boolean apply(Format input) {
+            return FILM_FORMAT_ID.equals(input.getFormatId());
+        }
+    };
+
     private final ContentExtractor<List<NitroGenreGroup>, Set<String>> genresExtractor
         = new NitroGenresExtractor();
 
@@ -50,7 +60,7 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
 
     @Override
     protected Item createContent(NitroItemSource<Episode> source) {
-        if (isFilmFormat(source)) {
+        if (isFilmFormat(source.getProgramme())) {
             return new Film();
         }
         if (source.getProgramme().getEpisodeOf() == null) {
@@ -59,13 +69,12 @@ public final class NitroEpisodeExtractor extends BaseNitroItemExtractor<Episode,
         return new org.atlasapi.media.entity.Episode();
     }
 
-    private boolean isFilmFormat(NitroItemSource<Episode> source) {
-        for (NitroFormat format : source.getFormats()) {
-            if (FILM_FORMAT_ID.equals(format.getId())) {
-                return true;
-            }
+    private boolean isFilmFormat(Episode episode) {
+        if (episode.getFormats() == null) {
+            return false;
         }
-        return false;
+
+        return Iterables.any(episode.getFormats().getFormat(), IS_FILM_FORMAT);
     }
 
     @Override

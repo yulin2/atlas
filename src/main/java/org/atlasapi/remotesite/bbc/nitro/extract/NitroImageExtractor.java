@@ -1,12 +1,10 @@
 package org.atlasapi.remotesite.bbc.nitro.extract;
 
-import static com.google.api.client.repackaged.com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.remotesite.ContentExtractor;
-
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 
 /**
  * Extracts an {@link Image} from a
@@ -14,7 +12,7 @@ import com.google.api.client.repackaged.com.google.common.base.Preconditions;
  * 
  */
 public class NitroImageExtractor 
-    implements ContentExtractor<com.metabroadcast.atlas.glycerin.model.Image, Image> {
+    implements ContentExtractor<com.metabroadcast.atlas.glycerin.model.Brand.Image, Image> {
 
     private final String recipe;
     private final int width;
@@ -37,7 +35,7 @@ public class NitroImageExtractor
     }
 
     @Override
-    public Image extract(com.metabroadcast.atlas.glycerin.model.Image source) {
+    public Image extract(com.metabroadcast.atlas.glycerin.model.Brand.Image source) {
         checkNotNull(source, "null image source");
         checkNotNull(source.getTemplateUrl(), "null image template");
 

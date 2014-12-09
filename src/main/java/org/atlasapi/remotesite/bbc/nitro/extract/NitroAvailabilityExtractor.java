@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.bbc.nitro.extract;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -16,7 +17,7 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 
-import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.atlas.glycerin.model.Availability;
@@ -28,43 +29,88 @@ import com.metabroadcast.common.time.DateTimeZones;
  * Possibly extracts an {@link Encoding} and {@link Location}s for it from some
  * {@link Availability}s.
  */
-public class NitroAvailabilityExtractor implements ContentExtractor<Iterable<Availability>, Optional<Encoding>> {
+public class NitroAvailabilityExtractor implements ContentExtractor<Iterable<Availability>, Set<Encoding>> {
 
     private static final String IPLAYER_URL_BASE = "http://www.bbc.co.uk/iplayer/episode/";
     private static final String APPLE_IPHONE4_IPAD_HLS_3G = "apple-iphone4-ipad-hls-3g";
     private static final String APPLE_IPHONE4_HLS = "apple-iphone4-hls";
     private static final String PC = "pc";
+    private static final String YOUVIEW = "iptv-all";
     private static final String AVAILABLE = "available";
+    private static final int HD_HORIZONTAL_SIZE = 1280;
+    private static final int HD_VERTICAL_SIZE = 720;
+
+    private static final int SD_HORIZONTAL_SIZE = 640;
+    private static final int SD_VERTICAL_SIZE = 360;
+
+    private static final int HD_BITRATE = 3_200_000;
+    private static final int SD_BITRATE = 1_500_000;
+
+    private static final Predicate<Availability> IS_HD = new Predicate<Availability>() {
+        @Override
+        public boolean apply(Availability input) {
+            return !input.getMediaSet().contains("iptv-sd");
+        }
+    };
+
+    private static final Predicate<Availability> IS_IPTV = new Predicate<Availability>() {
+        @Override
+        public boolean apply(Availability input) {
+            return input.getMediaSet().contains("iptv-all");
+        }
+    };
+
     
     private final Map<String, Platform> mediaSetPlatform = ImmutableMap.of(
         PC, Platform.PC,
         APPLE_IPHONE4_HLS, Platform.IOS,
-        APPLE_IPHONE4_IPAD_HLS_3G, Platform.IOS
+        APPLE_IPHONE4_IPAD_HLS_3G, Platform.IOS,
+        YOUVIEW, Platform.YOUVIEW_IPLAYER
     );
+
     private final Map<String, Network> mediaSetNetwork = ImmutableMap.of(
         APPLE_IPHONE4_HLS, Network.WIFI,
         APPLE_IPHONE4_IPAD_HLS_3G, Network.THREE_G
     );
     
     @Override
-    public Optional<Encoding> extract(Iterable<Availability> availabilities) {
-        ImmutableSet.Builder<Location> locations = ImmutableSet.builder();
+    public Set<Encoding> extract(Iterable<Availability> availabilities) {
+        ImmutableSet.Builder<Encoding> encodings = ImmutableSet.builder();
+
         for (Availability availability : availabilities) {
-            for (String mediaSet : availability.getMediaSet()) {
-                Platform platform = mediaSetPlatform.get(mediaSet);
-                if (platform != null) {
-                    locations.add(newLocation(availability, platform, mediaSetNetwork.get(mediaSet)));
+            Set<Location> locations = getLocationsFor(availability);
+
+            if (!locations.isEmpty()) {
+                Encoding encoding = new Encoding();
+                encoding.setAvailableAt(locations);
+
+                if (IS_IPTV.apply(availability)) {
+                    setHorizontalAndVerticalSize(encoding, IS_HD.apply(availability));
+                    encoding.setVideoBitRate(IS_HD.apply(availability) ? HD_BITRATE : SD_BITRATE);
                 }
+
+                encodings.add(encoding);
             }
         }
-        ImmutableSet<Location> encodingLocations = locations.build();
-        if (encodingLocations.isEmpty()) {
-            return Optional.absent();
+
+        return encodings.build();
+    }
+
+    private void setHorizontalAndVerticalSize(Encoding encoding, boolean isHD) {
+        encoding.setVideoHorizontalSize(isHD ? HD_HORIZONTAL_SIZE : SD_HORIZONTAL_SIZE);
+        encoding.setVideoVerticalSize(isHD ? HD_VERTICAL_SIZE : SD_VERTICAL_SIZE);
+    }
+
+    private Set<Location> getLocationsFor(Availability availability) {
+        ImmutableSet.Builder<Location> locations = ImmutableSet.builder();
+
+        for (String mediaSet : availability.getMediaSet()) {
+            Platform platform = mediaSetPlatform.get(mediaSet);
+            if (platform != null) {
+                locations.add(newLocation(availability, platform, mediaSetNetwork.get(mediaSet)));
+            }
         }
-        
-        Encoding encoding = new Encoding();
-        encoding.setAvailableAt(encodingLocations);
-        return Optional.of(encoding);
+        return locations.build();
     }
 
     private Location newLocation(Availability source, Platform platform, Network network) {

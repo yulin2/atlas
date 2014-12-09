@@ -2,27 +2,57 @@ package org.atlasapi.remotesite.bbc.nitro.extract;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Map.Entry;
+import java.util.Set;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+
+import org.atlasapi.media.entity.Encoding;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Restriction;
+import org.atlasapi.remotesite.bbc.nitro.v1.NitroGenreGroup;
+import org.hamcrest.Matchers;
+import org.joda.time.Duration;
 import org.junit.Test;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.atlas.glycerin.model.AncestorsTitles;
 import com.metabroadcast.atlas.glycerin.model.Availability;
+import com.metabroadcast.atlas.glycerin.model.AvailabilityOf;
+import com.metabroadcast.atlas.glycerin.model.Broadcast;
 import com.metabroadcast.atlas.glycerin.model.Episode;
+import com.metabroadcast.atlas.glycerin.model.Format;
+import com.metabroadcast.atlas.glycerin.model.FormatsType;
 import com.metabroadcast.atlas.glycerin.model.PidReference;
+import com.metabroadcast.atlas.glycerin.model.Version;
+import com.metabroadcast.atlas.glycerin.model.VersionType;
+import com.metabroadcast.atlas.glycerin.model.VersionTypes;
+import com.metabroadcast.atlas.glycerin.model.WarningText;
+import com.metabroadcast.atlas.glycerin.model.Warnings;
 import com.metabroadcast.common.time.SystemClock;
 
 
 public class NitroEpisodeExtractorTest {
-    
+
+    private static final String AUDIO_DESCRIBED_VERSION_PID = "p02ccx3g";
+    private static final String NON_AUDIO_DESCRIBED_VERSION_PID = "p02ccx5g";
+    private static final String WITH_WARNING_VERSION_PID = "p02ccx8g";
+    private static final String VERSION_PID = "p02ccx7g";
+    private static final Duration VERSION_DURATION = Duration.standardMinutes(90);
+
+    private static final String EPISODE_PID = "p01mv8m3";
     private static final ImmutableList<Availability> noAvailability = ImmutableList.<Availability>of();
     private final NitroEpisodeExtractor extractor = new NitroEpisodeExtractor(new SystemClock());
 
@@ -142,6 +172,163 @@ public class NitroEpisodeExtractorTest {
         assertThat(episode.getTitle(), is("Tinker, Tailor, Soldier, Spy Part 3"));
     }
 
+    @Test
+    public void testFilmInstanceIsCreatedForFilmsFormat() {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+        tli.setFormats(filmFormatsType());
+
+        Item extracted = extractor.extract(NitroItemSource.valueOf(tli, noAvailability));
+
+        assertThat(extracted, is(Matchers.instanceOf(Film.class)));
+    }
+
+    @Test
+    public void testAudioDescribedFlagIsProperlySet() throws DatatypeConfigurationException {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+
+        Item extractedAudioDescribed = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(availability(AUDIO_DESCRIBED_VERSION_PID)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(audioDescribedVersion())));
+
+        org.atlasapi.media.entity.Version audioDescribedVersion = extractedAudioDescribed.getVersions()
+                .iterator()
+                .next();
+
+        Encoding audioDescribedEncoding = audioDescribedVersion.getManifestedAs().iterator().next();
+
+        Item extractedNonAudioDescribed = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(availability(NON_AUDIO_DESCRIBED_VERSION_PID)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(nonAudioDescribedVersion())));
+
+        org.atlasapi.media.entity.Version nonAudioDescribedVersion = extractedNonAudioDescribed.getVersions()
+                .iterator()
+                .next();
+
+        Encoding nonAudioDescribedEncoding = nonAudioDescribedVersion.getManifestedAs()
+                .iterator()
+                .next();
+
+        assertTrue(audioDescribedEncoding.getAudioDescribed());
+        assertFalse(nonAudioDescribedEncoding.getAudioDescribed());
+        assertEquals(VERSION_DURATION.getStandardSeconds(), (int)audioDescribedVersion.getDuration());
+    }
+
+    @Test
+    public void testSignedFlagIsProperlySet() throws DatatypeConfigurationException {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+
+        String signedVersionPid = "p02ccx5g";
+        String notSignedVersionPid = "p02ccx6g";
+
+        Item extractedSigned = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(availability(signedVersionPid)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(signedVersion(signedVersionPid))));
+
+        org.atlasapi.media.entity.Version signedVersion = Iterables.getOnlyElement(extractedSigned.getVersions());
+        Encoding signedEncoding = Iterables.getOnlyElement(signedVersion.getManifestedAs());
+
+        Item extractedNonAudioDescribed = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(availability(notSignedVersionPid)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(version(notSignedVersionPid))));
+
+        org.atlasapi.media.entity.Version nonSignedVersion = Iterables.getOnlyElement(extractedNonAudioDescribed.getVersions());
+        Encoding nonSignedEncoding = Iterables.getOnlyElement(nonSignedVersion.getManifestedAs());
+
+        assertTrue(signedEncoding.getSigned());
+        assertFalse(nonSignedEncoding.getSigned());
+    }
+
+    @Test
+    public void testRestrictionIsProperlySet() throws DatatypeConfigurationException {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+
+        String warningMessage = "This is a warning";
+
+        Item extractedAudioDescribed = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(availability(WITH_WARNING_VERSION_PID)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(versionWithWarning(warningMessage))));
+
+        org.atlasapi.media.entity.Version version = extractedAudioDescribed.getVersions()
+                .iterator()
+                .next();
+
+        Restriction restriction = version.getRestriction();
+
+        assertThat(restriction, is(notNullValue()));
+        assertEquals(restriction.getMessage(), warningMessage);
+    }
+
+    @Test
+    public void testVideoDimensionsAreNotHd() throws DatatypeConfigurationException {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+
+        Item extracted = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(sdAvailability(VERSION_PID)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(version(VERSION_PID))));
+
+        org.atlasapi.media.entity.Version version = Iterables.getOnlyElement(extracted.getVersions());
+
+        Set<Encoding> encodings = version.getManifestedAs();
+        Encoding encoding = Iterables.getOnlyElement(encodings);
+
+        assertEquals(640, (int)encoding.getVideoHorizontalSize());
+        assertEquals(360, (int)encoding.getVideoVerticalSize());
+    }
+
+    @Test
+    public void testVideoDimensionsAreHd() throws DatatypeConfigurationException {
+        Episode tli = new Episode();
+        tli.setPid("b012cl84");
+        tli.setTitle("Destiny");
+
+        Item extracted = extractor.extract(NitroItemSource.valueOf(tli,
+                ImmutableList.of(hdAvailability(VERSION_PID)),
+                ImmutableList.<Broadcast>of(),
+                ImmutableList.<NitroGenreGroup>of(),
+                ImmutableList.of(version(VERSION_PID))));
+
+        org.atlasapi.media.entity.Version version = Iterables.getOnlyElement(extracted.getVersions());
+
+        Set<Encoding> encodings = version.getManifestedAs();
+        Encoding encoding = Iterables.getOnlyElement(encodings);
+
+        assertEquals(1280, (int) encoding.getVideoHorizontalSize());
+        assertEquals(720, (int) encoding.getVideoVerticalSize());
+    }
+
+    private FormatsType filmFormatsType() {
+        FormatsType formatsType = new FormatsType();
+        Format filmsFormat = new Format();
+
+        filmsFormat.setFormatId("PT007");
+        filmsFormat.setValue("Films");
+        formatsType.getFormat().add(filmsFormat);
+
+        return formatsType;
+    }
+
     private AncestorsTitles ancestorsTitles(String brandPid, String brandTitle) {
         return ancestorsTitles(brandPid, brandTitle, ImmutableMap.<String,String>of());
     }
@@ -169,6 +356,105 @@ public class NitroEpisodeExtractorTest {
         pidRef.setPid(pid);
         pidRef.setResultType(type);
         return pidRef;
+    }
+
+    private Availability baseAvailability(String versionPid) {
+        Availability availability = new Availability();
+
+        AvailabilityOf availabilityOfVersion = new AvailabilityOf();
+        availabilityOfVersion.setPid(versionPid);
+        availabilityOfVersion.setResultType("version");
+        availability.getAvailabilityOf().add(availabilityOfVersion);
+
+        AvailabilityOf availabilityOfEpisode = new AvailabilityOf();
+        availabilityOfEpisode.setPid(EPISODE_PID);
+        availabilityOfEpisode.setResultType("episode");
+        availability.getAvailabilityOf().add(availabilityOfEpisode);
+        return availability;
+    }
+
+    private Availability availability(String versionPid) {
+        Availability availability = baseAvailability(versionPid);
+        availability.getMediaSet().add("pc");
+
+        return availability;
+    }
+
+    private Availability sdAvailability(String versionPid) {
+        Availability availability = baseAvailability(versionPid);
+        availability.getMediaSet().add("iptv-sd");
+        availability.getMediaSet().add("iptv-all");
+
+        return availability;
+    }
+
+    private Availability hdAvailability(String versionPid) {
+        Availability availability = baseAvailability(versionPid);
+        availability.getMediaSet().add("iptv-hd");
+        availability.getMediaSet().add("iptv-all");
+
+        return availability;
+    }
+
+    private Version version(String versionPid) throws DatatypeConfigurationException {
+        Version version = new Version();
+        version.setPid(versionPid);
+        version.setDuration(DatatypeFactory.newInstance().newDuration(VERSION_DURATION.getMillis()));
+
+        return version;
+    }
+
+    private Version audioDescribedVersion() throws DatatypeConfigurationException {
+        Version version = new Version();
+        version.setPid(AUDIO_DESCRIBED_VERSION_PID);
+
+        VersionType type = new VersionType();
+        type.setId("DubbedAudioDescribed");
+
+        VersionTypes types = new VersionTypes();
+        types.getVersionType().add(type);
+
+        version.setVersionTypes(types);
+        version.setDuration(DatatypeFactory.newInstance().newDuration(VERSION_DURATION.getMillis()));
+
+        return version;
+    }
+
+    private Version signedVersion(String versionPid) throws DatatypeConfigurationException {
+        Version version = version(versionPid);
+
+        VersionType type = new VersionType();
+        type.setId("Signed");
+
+        VersionTypes types = new VersionTypes();
+        types.getVersionType().add(type);
+        version.setVersionTypes(types);
+
+        return version;
+    }
+
+    private Version nonAudioDescribedVersion() throws DatatypeConfigurationException {
+        Version version = new Version();
+        version.setPid(NON_AUDIO_DESCRIBED_VERSION_PID);
+        version.setDuration(DatatypeFactory.newInstance().newDuration(VERSION_DURATION.getMillis()));
+
+        return version;
+    }
+
+    private Version versionWithWarning(String warningMessage)
+            throws DatatypeConfigurationException {
+        Version version = version(WITH_WARNING_VERSION_PID);
+
+        Warnings warnings = new Warnings();
+
+        WarningText warningText = new WarningText();
+        warningText.setLength("long");
+        warningText.setValue(warningMessage);
+
+        warnings.getWarningText().add(warningText);
+        version.setWarnings(warnings);
+
+        return version;
     }
 
 }
