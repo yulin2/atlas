@@ -88,8 +88,17 @@ public class ContentMerger {
     public Container merge(Container current, Container extracted) {
         current = mergeContents(current, extracted);
         if (current instanceof Series && extracted instanceof Series) {
-            ((Series) current).withSeriesNumber(((Series) extracted).getSeriesNumber());
-            ((Series) current).setParentRef(((Series) extracted).getParent());
+            Series currentSeries = (Series) current;
+            Series extractedSeries = (Series) extracted;
+            
+            currentSeries.withSeriesNumber(extractedSeries.getSeriesNumber());
+            
+            if (currentSeries.getParent() == null
+                    || extractedSeries.getParent() == null
+                    || !currentSeries.getParent().equals(extractedSeries.getParent())) {
+                currentSeries.setParentRef(extractedSeries.getParent());
+            }
+            
         }
         return current;
     }
