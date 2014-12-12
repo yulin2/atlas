@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -103,18 +104,27 @@ public class LocalOrRemoteNitroFetcher {
         }
     }
     
-    private ResolveOrFetchResult<Item> mergeWithExisting(ImmutableSet<Item> fetchedItems,
-            Set<Item> existingItems) {
-        Map<String, Item> fetchedIndex = Maps.newHashMap(Maps.uniqueIndex(fetchedItems, Identified.TO_URI));
-        ImmutableSet.Builder<Item> resolved = ImmutableSet.builder();
-        for (Item existing : existingItems) {
-            Item fetched = fetchedIndex.remove(existing.getCanonicalUri());
+    private <T extends Content> ResolveOrFetchResult<T> mergeWithExisting(ImmutableSet<T> fetchedItems,
+            Set<T> existingItems) {
+        Map<String, T> fetchedIndex = Maps.newHashMap(Maps.uniqueIndex(fetchedItems, Identified.TO_URI));
+        ImmutableSet.Builder<T> resolved = ImmutableSet.builder();
+        for (T existing : existingItems) {
+            T fetched = fetchedIndex.remove(existing.getCanonicalUri());
             if (fetched != null) {
-                existing = contentMerger.merge(existing, fetched);
+                if (fetched instanceof Brand) {
+                    contentMerger.merge((Brand) existing, (Brand) fetched);
+                } else if (fetched instanceof Series) {
+                    contentMerger.merge((Series) existing, (Series) fetched);
+                } else if (fetched instanceof Item) {
+                    contentMerger.merge((Item) existing, (Item) fetched);
+                } else {
+                    throw new IllegalArgumentException("Can't handle Content of type " + fetched.getClass().getCanonicalName());
+                }
+                
             }
             resolved.add(existing);
         }
-        return new ResolveOrFetchResult<Item>(resolved.build(), fetchedIndex.values());
+        return new ResolveOrFetchResult<T>(resolved.build(), fetchedIndex.values());
     }
 
     private Iterable<PidReference> unresolved(Iterable<Broadcast> broadcasts, ImmutableSet<Item> resolved) {
@@ -165,10 +175,10 @@ public class LocalOrRemoteNitroFetcher {
         List<String> seriesUris = Lists.newArrayList(toUris(seriesRefs));
         ResolvedContent resolved = resolver.findByCanonicalUris(seriesUris);
         ImmutableSet<Series> fetched = contentAdapter.fetchSeries(asSeriesPidRefs(seriesUris));
-        return ImmutableSet.<Series>builder()
-                //.addAll(Iterables.filter(resolved.getAllResolvedResults(), Series.class))
-                .addAll(fetched)
-                .build();
+        
+        return mergeWithExisting(
+                    fetched, 
+                    ImmutableSet.copyOf(Iterables.filter(resolved.getAllResolvedResults(), Series.class))).getAll();
     }
 
     private Iterable<PidReference> asSeriesPidRefs(List<String> pids) {
@@ -212,10 +222,10 @@ public class LocalOrRemoteNitroFetcher {
         Iterable<String> containerUris = toUris(containerRefs);
         ResolvedContent resolved = resolver.findByCanonicalUris(containerUris);
         ImmutableSet<Brand> fetched = contentAdapter.fetchBrands(asBrandPidRefs(containerUris));
-        return ImmutableSet.<Brand>builder()
-                //.addAll(Iterables.filter(resolved.getAllResolvedResults(), Brand.class))
-                .addAll(fetched)
-                .build();
+        
+        return mergeWithExisting(
+                    fetched, 
+                    ImmutableSet.copyOf(Iterables.filter(resolved.getAllResolvedResults(), Brand.class))).getAll();
     }
     
     private Iterable<PidReference> asBrandPidRefs(Iterable<String> pids) {
