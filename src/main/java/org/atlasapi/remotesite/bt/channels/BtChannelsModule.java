@@ -13,6 +13,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.bt.channels.mpxclient.BtMpxClient;
 import org.atlasapi.remotesite.bt.channels.mpxclient.GsonBtMpxClient;
 import org.atlasapi.remotesite.pa.PaModule;
+import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,9 +29,10 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Import( PaModule.class )
 public class BtChannelsModule {
 
+    private static final String ALIAS_NAMESPACE_PREFIX = "bt";
     private static final String URI_PREFIX_STRING_FORMAT = "http://%s/";
 
-    private static final RepetitionRule PROD_INGEST_REPETITION = RepetitionRules.daily(new LocalTime(15,0));
+    private static final RepetitionRule PROD_INGEST_REPETITION = RepetitionRules.every(Duration.standardHours(2));
     private static final LocalTime NON_PROD_BASE_START_TIME = new LocalTime(16,0);
     
     private static final RepetitionRule TEST1_INGEST_REPETITION = RepetitionRules.daily(NON_PROD_BASE_START_TIME);
@@ -81,22 +83,22 @@ public class BtChannelsModule {
     
     @Bean 
     public BtChannelGroupUpdater productionChannelGroupUpdater() {
-        return perEnvironmentChannelGroupUpdater(Publisher.BT_TV_CHANNELS, "bt", baseUri);
+        return perEnvironmentChannelGroupUpdater(Publisher.BT_TV_CHANNELS, ALIAS_NAMESPACE_PREFIX, baseUri);
     }
     
     @Bean 
     public BtChannelGroupUpdater dev1ChannelGroupUpdater() {
-        return perEnvironmentChannelGroupUpdater(Publisher.BT_TV_CHANNELS_TEST1, "bt-test1", test1BaseUri);
+        return perEnvironmentChannelGroupUpdater(Publisher.BT_TV_CHANNELS_TEST1, ALIAS_NAMESPACE_PREFIX, test1BaseUri);
     }
     
     @Bean 
     public BtChannelGroupUpdater dev2ChannelGroupUpdater() {
-        return perEnvironmentChannelGroupUpdater(Publisher.BT_TV_CHANNELS_TEST2, "bt-test2", test2BaseUri);
+        return perEnvironmentChannelGroupUpdater(Publisher.BT_TV_CHANNELS_TEST2, ALIAS_NAMESPACE_PREFIX, test2BaseUri);
     }
     
     @Bean 
     public BtChannelGroupUpdater dev3ChannelGroupUpdater() {
-        return perEnvironmentChannelGroupUpdater(Publisher.BT_TV_CHANNELS_REFERENCE, "bt-reference", test3BaseUri);
+        return perEnvironmentChannelGroupUpdater(Publisher.BT_TV_CHANNELS_REFERENCE, ALIAS_NAMESPACE_PREFIX, test3BaseUri);
     }
     
     private BtChannelGroupUpdater perEnvironmentChannelGroupUpdater(Publisher publisher, 

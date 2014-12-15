@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bbc.nitro;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -82,10 +84,10 @@ public class LocalOrRemoteNitroFetcher {
     
     public LocalOrRemoteNitroFetcher(ContentResolver resolver, NitroContentAdapter contentAdapter, 
             ContentMerger contentMerger, Predicate<Broadcast> fullFetchPermitted) {
-        this.resolver = resolver;
-        this.contentAdapter = contentAdapter;
-        this.fullFetchPermitted = fullFetchPermitted;
-        this.contentMerger = contentMerger;
+        this.resolver = checkNotNull(resolver);
+        this.contentAdapter = checkNotNull(contentAdapter);
+        this.fullFetchPermitted = checkNotNull(fullFetchPermitted);
+        this.contentMerger = checkNotNull(contentMerger);
     }
     
     public ResolveOrFetchResult<Item> resolveOrFetchItem(Iterable<Broadcast> broadcasts) throws NitroException {

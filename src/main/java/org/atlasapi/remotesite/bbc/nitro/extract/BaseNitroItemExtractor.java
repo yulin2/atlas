@@ -76,42 +76,61 @@ public abstract class BaseNitroItemExtractor<SOURCE, ITEM extends Item>
         OptionalMap<String, Set<Encoding>> encodings = extractEncodings(source.getAvailabilities(), now);
 
         ImmutableSet.Builder<Version> versions = ImmutableSet.builder();
+
         for (com.metabroadcast.atlas.glycerin.model.Version nitroVersion : source.getVersions()) {
-            Version version = new Version();
-
-            if (nitroVersion.getDuration() != null) {
-                version.setDuration(convertDuration(nitroVersion.getDuration()));
-            }
-
-            version.setLastUpdated(now);
-            version.setCanonicalUri(BbcFeeds.nitroUriForPid(nitroVersion.getPid()));
-            version.setBroadcasts(broadcasts.get(nitroVersion.getPid()));
-            Optional<Set<Encoding>> optEncodings = encodings.get(nitroVersion.getPid());
-
-            if (optEncodings.isPresent()) {
-                Set<Encoding> versionEncodings = optEncodings.get();
-
-                for (Encoding encoding: versionEncodings) {
-                    encoding.setVideoAspectRatio(nitroVersion.getAspectRatio());
-                    encoding.setAudioDescribed(isVersionOfType(nitroVersion, AUDIO_DESCRIBED_VERSION_TYPE));
-                    encoding.setSigned(isVersionOfType(nitroVersion, SIGNED_VERSION_TYPE));
-                    version.setManifestedAs(versionEncodings);
-                }
-            }
-
-            Optional<WarningText> warningText = warningTextFrom(nitroVersion);
-            version.setRestriction(generateRestriction(warningText));
-
+            Version version = generateVersion(now, broadcasts, encodings, nitroVersion);
             versions.add(version);
         }
+
         item.setVersions(versions.build());
+
         if (item instanceof Film) {
             item.setMediaType(MediaType.VIDEO);
             item.setSpecialization(Specialization.FILM);
         } else {
             extractMediaTypeAndSpecialization(source, item);
         }
+
         extractAdditionalItemFields(source, item, now);
+    }
+
+    private Version generateVersion(DateTime now,
+            ImmutableSetMultimap<String, Broadcast> broadcasts,
+            OptionalMap<String, Set<Encoding>> encodings,
+            com.metabroadcast.atlas.glycerin.model.Version nitroVersion) {
+        Version version = new Version();
+
+        version.setDuration(convertDuration(nitroVersion.getDuration()));
+        version.setLastUpdated(now);
+        version.setCanonicalUri(BbcFeeds.nitroUriForPid(nitroVersion.getPid()));
+        version.setBroadcasts(broadcasts.get(nitroVersion.getPid()));
+
+        Optional<Set<Encoding>> optEncodings = encodings.get(nitroVersion.getPid());
+
+        if (optEncodings.isPresent()) {
+            Set<Encoding> versionEncodings = optEncodings.get();
+            setEncodingDetails(nitroVersion, versionEncodings);
+            version.setManifestedAs(versionEncodings);
+        }
+
+        Optional<WarningText> warningText = warningTextFrom(nitroVersion);
+        version.setRestriction(generateRestriction(warningText));
+        return version;
+    }
+
+    private void setEncodingDetails(
+            com.metabroadcast.atlas.glycerin.model.Version nitroVersion,
+            Set<Encoding> encodings) {
+
+        /**
+         * Even if aspect ratio and the audio described and signed flags are on Version in the Nitro model,
+         * in Atlas they naturally belong to Encoding
+         */
+        for (Encoding encoding: encodings) {
+            encoding.setVideoAspectRatio(nitroVersion.getAspectRatio());
+            encoding.setAudioDescribed(isVersionOfType(nitroVersion, AUDIO_DESCRIBED_VERSION_TYPE));
+            encoding.setSigned(isVersionOfType(nitroVersion, SIGNED_VERSION_TYPE));
+        }
     }
 
     private Restriction generateRestriction(Optional<WarningText> warningText) {

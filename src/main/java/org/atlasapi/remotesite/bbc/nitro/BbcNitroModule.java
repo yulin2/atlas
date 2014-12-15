@@ -86,7 +86,7 @@ public class BbcNitroModule {
     private ScheduledTask nitroScheduleUpdateTask(int back, int forward, Integer threadCount, Integer rateLimit) {
         DayRangeChannelDaySupplier drcds = new DayRangeChannelDaySupplier(bbcChannelSupplier(), dayRangeSupplier(back, forward));
         ExecutorService executor = Executors.newFixedThreadPool(threadCount, nitroThreadFactory);
-        return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor(rateLimit, Optional.of(Predicates.<Broadcast>alwaysTrue())), 
+        return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor(rateLimit, Optional.of(Predicates.<Broadcast>alwaysTrue())),
                 null, jobFailureThresholdPercent);
     }
     

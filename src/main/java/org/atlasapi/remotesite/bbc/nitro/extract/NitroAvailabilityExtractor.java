@@ -83,7 +83,7 @@ public class NitroAvailabilityExtractor implements ContentExtractor<Iterable<Ava
             return input.getMediaSet().contains("iptv-all");
         }
     };
-    
+
     private final Map<String, Platform> mediaSetPlatform = ImmutableMap.of(
         PC, Platform.PC,
         APPLE_IPHONE4_HLS, Platform.IOS,
