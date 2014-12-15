@@ -39,20 +39,24 @@ public class GettyAdapter {
     private static final String ASPECT_RATIOS = "AspectRatios";
 
     public List<VideoResponse> parse(String text) {
-        JsonObject parse = (JsonObject) new JsonParser().parse(text);
-        JsonObject result = parse.get(SEARCH_RESULT).getAsJsonObject();
+        try {
+            JsonObject parse = (JsonObject) new JsonParser().parse(text);
+            JsonObject result = parse.get(SEARCH_RESULT).getAsJsonObject();
 
-        JsonArray videoArray = result.get(VIDEOS).getAsJsonArray();
-        Integer expectedCount = maybeInteger(result.get(EXPECTED_COUNT));
+            JsonArray videoArray = result.get(VIDEOS).getAsJsonArray();
+            Integer expectedCount = maybeInteger(result.get(EXPECTED_COUNT));
 
-        Builder<VideoResponse> videos = new ImmutableList.Builder<VideoResponse>();
-        //check here so that json parser doesn't fail
-        if (videoArray.size() != 0) {
-            for (JsonElement elem : videoArray) {
-                videos.add(createVideoResponse(elem.getAsJsonObject(), expectedCount));
+            Builder<VideoResponse> videos = new ImmutableList.Builder<VideoResponse>();
+            //check here so that json parser doesn't fail
+            if (videoArray.size() != 0) {
+                for (JsonElement elem : videoArray) {
+                    videos.add(createVideoResponse(elem.getAsJsonObject(), expectedCount));
+                }
             }
+            return videos.build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse response:\n" + text, e);
         }
-        return videos.build();
     }
 
     /** Gson is an enormous pile of crap and JsonElement.getAsString() just fails on 'JsonNull'. Helpful. */
