@@ -186,7 +186,7 @@ public class LocalOrRemoteNitroFetcher {
             
             if (!maybeId.hasValue()
                     || Iterables.any(seriesUriMap.get(seriesUri), fullFetchPermitted)) {
-                log.trace("Will fetch {} from Nitro", seriesUri);
+                log.trace("Will fetch series {} from Nitro", seriesUri);
                 toFetch.add(seriesUri);
             }
         }
@@ -248,7 +248,7 @@ public class LocalOrRemoteNitroFetcher {
             
             if (!maybeId.hasValue()
                     || Iterables.any(brandUriMap.get(brandUri), fullFetchPermitted)) {
-                log.trace("Will fetch {} from Nitro", brandUri);
+                log.trace("Will fetch brand {} from Nitro", brandUri);
                 toFetch.add(brandUri);
             }
         }
