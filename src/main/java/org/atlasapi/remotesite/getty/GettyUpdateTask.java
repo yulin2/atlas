@@ -2,16 +2,27 @@ package org.atlasapi.remotesite.getty;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.ContentCategory;
+import org.atlasapi.persistence.content.listing.ContentLister;
+import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.UpdateProgress;
 
@@ -19,46 +30,76 @@ public class GettyUpdateTask extends ScheduledTask {
     private static final Logger log = LoggerFactory.getLogger(GettyUpdateTask.class);
 
     static final String JOB_KEY = "getty-ingest";
-    private static final String MAGIC_ALL_ITEMS_SEARCH_KEYWORD = "all vocabulary";
 
     private final GettyClient gettyClient;
     private final GettyAdapter adapter;
     private final GettyDataHandler dataHandler;
+    private final ContentLister contentLister;
 
     private final int itemsPerPage;
+    private final String idsFileName;
     private final RestartStatusSupplier restartStatus;
 
-    public GettyUpdateTask(GettyClient gettyClient, GettyAdapter adapter, 
-            GettyDataHandler dataHandler,
+    public GettyUpdateTask(GettyClient gettyClient, GettyAdapter adapter,
+            ContentLister contentLister,
+            GettyDataHandler dataHandler, String idsFileName,
             int itemsPerPage, RestartStatusSupplier restartStatus) {
         this.gettyClient = checkNotNull(gettyClient);
         this.adapter = checkNotNull(adapter);
         this.dataHandler = checkNotNull(dataHandler);
+        this.contentLister = checkNotNull(contentLister);
 
         this.itemsPerPage = itemsPerPage;
+        this.idsFileName = idsFileName;
         this.restartStatus = checkNotNull(restartStatus);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void runTask() {
         UpdateProgress progress = UpdateProgress.START;
 
-        Map<String, Integer> contentFirstSeenAtOffset = Maps.newHashMap();
-
-        final int firstOffset = restartStatus.startFromOffset().or(1);  // Getty API starts its offsets at 1.
+        final int firstOffset = restartStatus.startFromOffset().or(0);
         int offset = firstOffset;
 
-        Integer expectedItemCount = null;
+        reportStatus("Reading ID-list file.");
+        ImmutableList<String> gettyIds = ImmutableList.of();
+        try {
+            gettyIds = ImmutableList.<String>copyOf(IOUtils.readLines(new FileReader(idsFileName)));
+        } catch (Exception e) {
+            Throwables.propagate(e);
+        }
 
-        //paginate videos
-        while (shouldContinue()) {
+        Set<String> expectedGettyUris = ImmutableSet.copyOf(Iterables.transform(gettyIds, new Function<String, String>() {
+            @Override public String apply(String id) {
+                return GettyContentExtractor.uri(id);
+            }
+        }));
+
+        int removals = 0;
+
+        reportStatus("File contains " + gettyIds.size() + " IDs. Now unpublishing disappeared content.");
+        Iterator<Content> allStoredGettyContent = contentLister.listContent(ContentListingCriteria.defaultCriteria().forContent(ContentCategory.TOP_LEVEL_ITEM).forPublishers(Publisher.GETTY).build());
+        while (allStoredGettyContent.hasNext()) {
+            Content item = allStoredGettyContent.next();
+            if (! expectedGettyUris.contains(item.getCanonicalUri())) {
+                ++removals;
+                log.info("Unpublishing item {}", item.getCanonicalUri());
+                item.setActivelyPublished(false);
+                dataHandler.write(item);
+            }
+        }
+
+        // Page through videos and merge in resulting content
+        while (shouldContinue() && offset < gettyIds.size()) {
             try {
-                reportStatus(progress.toString() + " ( " + expectedItemCount + " total, started at offset " + firstOffset + ")");
+                ImmutableList<String> thisPageIds = gettyIds.subList(offset, Math.min(offset + itemsPerPage, gettyIds.size()));
+                reportStatus(removals + " removals. Processing content. " + progress.toString() + ". " + gettyIds.size() + " total, started at offset " + firstOffset + ".");
 
                 String response = null;
                 try {
                     log.debug("Requesting Getty items from {}", offset);
-                    response = gettyClient.getVideoResponse(MAGIC_ALL_ITEMS_SEARCH_KEYWORD, offset);
+                    response = gettyClient.getVideoResponse(thisPageIds);
                 } catch (IOException e) {
                     Throwables.propagate(e);
                 }
@@ -66,30 +107,10 @@ public class GettyUpdateTask extends ScheduledTask {
                 log.debug("Parsing response");
                 List<VideoResponse> videos = adapter.parse(response);
 
-                if (videos.isEmpty()) {
-                    break;  // we've run out of data
-                }
-
-                Integer newExpectedItemCount = videos.get(0).getExpectedItemCount();
-                if (newExpectedItemCount != null) {
-                    expectedItemCount = newExpectedItemCount;
-                }
-                if (expectedItemCount != null && offset > expectedItemCount) {
-                    log.warn("Deliberately stopping because there are more pages of items than there should be.");
-                    break;
-                }
-
                 for (VideoResponse video : videos) {
                     try {
                         log.debug("Writing item {} ({})", video.getAssetId(), video.getTitle());
                         Identified written = dataHandler.handle(video);
-
-                        Integer maybeAlreadySeen = contentFirstSeenAtOffset.get(written.getCanonicalUri());
-                        if (maybeAlreadySeen != null) {
-                            log.warn("Getty item {} is a duplicate, seen at offset {} and first at {}!", new Object[]{written.getCanonicalUri(), offset, maybeAlreadySeen});
-                        } else {
-                            contentFirstSeenAtOffset.put(written.getCanonicalUri(), offset);
-                        }
 
                         progress = progress.reduce(UpdateProgress.SUCCESS);
                     } catch (Exception e) {
@@ -102,7 +123,7 @@ public class GettyUpdateTask extends ScheduledTask {
             }
             offset += itemsPerPage;
         }
-        reportStatus("Finished, reaching offset " + offset + " / " + expectedItemCount +".");
+        reportStatus("Finished. " + removals + " removals." + progress.toString() + ". Expected " + gettyIds.size() +" items.");
     }
 
 }
