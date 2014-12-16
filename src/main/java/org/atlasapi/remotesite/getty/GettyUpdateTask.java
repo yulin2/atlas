@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -58,9 +59,7 @@ public class GettyUpdateTask extends ScheduledTask {
     @Override
     protected void runTask() {
         UpdateProgress progress = UpdateProgress.START;
-
-        final int firstOffset = restartStatus.startFromOffset().or(0);
-        int offset = firstOffset;
+        final Optional<Integer> firstOffset = restartStatus.startFromOffset();
 
         reportStatus("Reading ID-list file.");
         ImmutableList<String> gettyIds = ImmutableList.of();
@@ -70,31 +69,35 @@ public class GettyUpdateTask extends ScheduledTask {
             Throwables.propagate(e);
         }
 
-        Set<String> expectedGettyUris = ImmutableSet.copyOf(Iterables.transform(gettyIds, new Function<String, String>() {
-            @Override public String apply(String id) {
-                return GettyContentExtractor.uri(id);
-            }
-        }));
-
         int removals = 0;
+        if (! firstOffset.isPresent()) {
+            Set<String> expectedGettyUris = ImmutableSet.copyOf(Iterables.transform(gettyIds, new Function<String, String>() {
+                @Override public String apply(String id) {
+                    return GettyContentExtractor.uri(id);
+                }
+            }));
 
-        reportStatus("File contains " + gettyIds.size() + " IDs. Now unpublishing disappeared content.");
-        Iterator<Content> allStoredGettyContent = contentLister.listContent(ContentListingCriteria.defaultCriteria().forContent(ContentCategory.TOP_LEVEL_ITEM).forPublishers(Publisher.GETTY).build());
-        while (allStoredGettyContent.hasNext()) {
-            Content item = allStoredGettyContent.next();
-            if (! expectedGettyUris.contains(item.getCanonicalUri())) {
-                ++removals;
-                log.info("Unpublishing item {}", item.getCanonicalUri());
-                item.setActivelyPublished(false);
-                dataHandler.write(item);
+            reportStatus("File contains " + gettyIds.size() + " IDs. Now unpublishing disappeared content.");
+            Iterator<Content> allStoredGettyContent = contentLister.listContent(ContentListingCriteria.defaultCriteria().forContent(ContentCategory.TOP_LEVEL_ITEM).forPublishers(Publisher.GETTY).build());
+            while (allStoredGettyContent.hasNext()) {
+                Content item = allStoredGettyContent.next();
+                if (! expectedGettyUris.contains(item.getCanonicalUri())) {
+                    ++removals;
+                    log.info("Unpublishing item {}", item.getCanonicalUri());
+                    item.setActivelyPublished(false);
+                    dataHandler.write(item);
+                }
             }
         }
+
+        int offset = firstOffset.or(0);
 
         // Page through videos and merge in resulting content
         while (shouldContinue() && offset < gettyIds.size()) {
             try {
+                restartStatus.saveCurrentOffset(offset);
                 ImmutableList<String> thisPageIds = gettyIds.subList(offset, Math.min(offset + itemsPerPage, gettyIds.size()));
-                reportStatus(removals + " removals. Processing content. " + progress.toString() + ". " + gettyIds.size() + " total, started at offset " + firstOffset + ".");
+                reportStatus(removals + " removals. Processing content. " + progress.toString() + ". " + gettyIds.size() + " total, started at offset " + firstOffset.or(0) + ".");
 
                 String response = null;
                 try {
@@ -123,6 +126,8 @@ public class GettyUpdateTask extends ScheduledTask {
             }
             offset += itemsPerPage;
         }
+
+        restartStatus.clearCurrentOffset();
         reportStatus("Finished. " + removals + " removals." + progress.toString() + ". Expected " + gettyIds.size() +" items.");
     }
 
