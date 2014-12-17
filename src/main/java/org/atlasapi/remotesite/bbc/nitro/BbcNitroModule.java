@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -76,17 +77,19 @@ public class BbcNitroModule {
     @PostConstruct
     public void configure() {
         if (tasksEnabled) {
-            scheduler.schedule(nitroScheduleUpdateTask(7, 7, nitroFortnightThreadCount, nitroFortnightRateLimit)
+            scheduler.schedule(nitroScheduleUpdateTask(7, 7, nitroFortnightThreadCount, nitroFortnightRateLimit, Optional.<Predicate<Item>>absent())
                 .withName("Nitro 15 day updater"), RepetitionRules.every(Duration.standardHours(2)));
-            scheduler.schedule(nitroScheduleUpdateTask(0, 0, nitroTodayThreadCount, nitroTodayRateLimit)
+            scheduler.schedule(nitroScheduleUpdateTask(0, 0, nitroTodayThreadCount, nitroTodayRateLimit, Optional.<Predicate<Item>>absent())
                 .withName("Nitro today updater"), RepetitionRules.every(Duration.standardMinutes(30)));
+            scheduler.schedule(nitroScheduleUpdateTask(0, 0, nitroTodayThreadCount, nitroTodayRateLimit, Optional.of(Predicates.<Item>alwaysTrue()))
+                    .withName("Nitro full fetch 15 day updater"), RepetitionRules.NEVER);
         }
     }
 
-    private ScheduledTask nitroScheduleUpdateTask(int back, int forward, Integer threadCount, Integer rateLimit) {
+    private ScheduledTask nitroScheduleUpdateTask(int back, int forward, Integer threadCount, Integer rateLimit, Optional<Predicate<Item>> fullFetchPermittedPredicate) {
         DayRangeChannelDaySupplier drcds = new DayRangeChannelDaySupplier(bbcChannelSupplier(), dayRangeSupplier(back, forward));
         ExecutorService executor = Executors.newFixedThreadPool(threadCount, nitroThreadFactory);
-        return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor(rateLimit, Optional.<Predicate<Broadcast>>absent()), 
+        return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor(rateLimit, fullFetchPermittedPredicate),
                 null, jobFailureThresholdPercent);
     }
     
@@ -94,10 +97,10 @@ public class BbcNitroModule {
     ScheduleDayUpdateController nitroScheduleUpdateController() {
         return new ScheduleDayUpdateController(channelResolver, 
                             nitroChannelDayProcessor(nitroTodayRateLimit, 
-                            Optional.of(Predicates.<Broadcast>alwaysTrue())));
+                            Optional.of(Predicates.<Item>alwaysTrue())));
     }
 
-    ChannelDayProcessor nitroChannelDayProcessor(Integer rateLimit, Optional<Predicate<Broadcast>> fullFetchPermitted) {
+    ChannelDayProcessor nitroChannelDayProcessor(Integer rateLimit, Optional<Predicate<Item>> fullFetchPermitted) {
         ScheduleResolverBroadcastTrimmer scheduleTrimmer
             = new ScheduleResolverBroadcastTrimmer(Publisher.BBC_NITRO, scheduleResolver, contentResolver, contentWriter);
         Glycerin glycerin = glycerin(rateLimit);
@@ -129,13 +132,13 @@ public class BbcNitroModule {
     }
 
     NitroBroadcastHandler<ImmutableList<Optional<ItemRefAndBroadcast>>> nitroBroadcastHandler(Glycerin glycerin, 
-            Optional<Predicate<Broadcast>> fullFetchPermitted) {
+            Optional<Predicate<Item>> fullFetchPermitted) {
         return new ContentUpdatingNitroBroadcastHandler(contentResolver, contentWriter, 
                         localOrRemoteNitroFetcher(glycerin, fullFetchPermitted), pidLock);
     }
     
     LocalOrRemoteNitroFetcher localOrRemoteNitroFetcher(Glycerin glycerin, 
-            Optional<Predicate<Broadcast>> fullFetchPermitted) {
+            Optional<Predicate<Item>> fullFetchPermitted) {
         if (fullFetchPermitted.isPresent()) {
             return new LocalOrRemoteNitroFetcher(contentResolver, nitroContentAdapter(glycerin), fullFetchPermitted.get());
         } else {
