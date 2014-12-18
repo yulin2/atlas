@@ -13,6 +13,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.LastUpdatedSettingContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonServices;
@@ -102,7 +103,7 @@ public class BbcNitroModule {
 
     ChannelDayProcessor nitroChannelDayProcessor(Integer rateLimit, Optional<Predicate<Item>> fullFetchPermitted) {
         ScheduleResolverBroadcastTrimmer scheduleTrimmer
-            = new ScheduleResolverBroadcastTrimmer(Publisher.BBC_NITRO, scheduleResolver, contentResolver, contentWriter);
+            = new ScheduleResolverBroadcastTrimmer(Publisher.BBC_NITRO, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
         Glycerin glycerin = glycerin(rateLimit);
         return new NitroScheduleDayUpdater(scheduleWriter, scheduleTrimmer, 
                 nitroBroadcastHandler(glycerin, fullFetchPermitted), glycerin);
@@ -131,9 +132,14 @@ public class BbcNitroModule {
         return new HttpNitroClient(HostSpecifier.fromValid(nitroHost), nitroApiKey);
     }
 
+    @Bean
+    LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter() {
+        return new LastUpdatedSettingContentWriter(contentResolver, contentWriter);
+    }
+
     NitroBroadcastHandler<ImmutableList<Optional<ItemRefAndBroadcast>>> nitroBroadcastHandler(Glycerin glycerin, 
             Optional<Predicate<Item>> fullFetchPermitted) {
-        return new ContentUpdatingNitroBroadcastHandler(contentResolver, contentWriter, 
+        return new ContentUpdatingNitroBroadcastHandler(contentResolver, lastUpdatedSettingContentWriter(),
                         localOrRemoteNitroFetcher(glycerin, fullFetchPermitted), pidLock);
     }
     
