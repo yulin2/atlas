@@ -259,6 +259,7 @@ public class LocalOrRemoteNitroFetcher {
                     ImmutableSet.copyOf(Iterables.filter(resolved.getAllResolvedResults(), Brand.class))).getAll();
     }
     
+    
     private Multimap<String, Item> toBrandUriMap(Iterable<Item> items) {
         return Multimaps.index(Iterables.filter(items, HAS_BRAND), TO_BRAND_REF_URI);
     }

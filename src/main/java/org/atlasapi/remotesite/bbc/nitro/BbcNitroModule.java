@@ -77,17 +77,19 @@ public class BbcNitroModule {
     @PostConstruct
     public void configure() {
         if (tasksEnabled) {
-            scheduler.schedule(nitroScheduleUpdateTask(7, 7, nitroFortnightThreadCount, nitroFortnightRateLimit)
+            scheduler.schedule(nitroScheduleUpdateTask(7, 7, nitroFortnightThreadCount, nitroFortnightRateLimit, Optional.<Predicate<Item>>absent())
                 .withName("Nitro 15 day updater"), RepetitionRules.every(Duration.standardHours(2)));
-            scheduler.schedule(nitroScheduleUpdateTask(0, 0, nitroTodayThreadCount, nitroTodayRateLimit)
+            scheduler.schedule(nitroScheduleUpdateTask(0, 0, nitroTodayThreadCount, nitroTodayRateLimit, Optional.<Predicate<Item>>absent())
                 .withName("Nitro today updater"), RepetitionRules.every(Duration.standardMinutes(30)));
+            scheduler.schedule(nitroScheduleUpdateTask(0, 0, nitroTodayThreadCount, nitroTodayRateLimit, Optional.of(Predicates.<Item>alwaysTrue()))
+                    .withName("Nitro full fetch 15 day updater"), RepetitionRules.NEVER);
         }
     }
 
-    private ScheduledTask nitroScheduleUpdateTask(int back, int forward, Integer threadCount, Integer rateLimit) {
+    private ScheduledTask nitroScheduleUpdateTask(int back, int forward, Integer threadCount, Integer rateLimit, Optional<Predicate<Item>> fullFetchPermittedPredicate) {
         DayRangeChannelDaySupplier drcds = new DayRangeChannelDaySupplier(bbcChannelSupplier(), dayRangeSupplier(back, forward));
         ExecutorService executor = Executors.newFixedThreadPool(threadCount, nitroThreadFactory);
-        return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor(rateLimit, Optional.of(Predicates.<Item>alwaysTrue())),
+        return new ChannelDayProcessingTask(executor, drcds, nitroChannelDayProcessor(rateLimit, fullFetchPermittedPredicate),
                 null, jobFailureThresholdPercent);
     }
     
