@@ -44,7 +44,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metabroadcast.atlas.glycerin.Glycerin;
 import com.metabroadcast.atlas.glycerin.XmlGlycerin;
 import com.metabroadcast.atlas.glycerin.XmlGlycerin.Builder;
-import com.metabroadcast.atlas.glycerin.model.Broadcast;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -102,11 +101,13 @@ public class BbcNitroModule {
     }
 
     ChannelDayProcessor nitroChannelDayProcessor(Integer rateLimit, Optional<Predicate<Item>> fullFetchPermitted) {
+        LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter = new LastUpdatedSettingContentWriter(contentResolver, contentWriter);
+        
         ScheduleResolverBroadcastTrimmer scheduleTrimmer
-            = new ScheduleResolverBroadcastTrimmer(Publisher.BBC_NITRO, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
+            = new ScheduleResolverBroadcastTrimmer(Publisher.BBC_NITRO, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter);
         Glycerin glycerin = glycerin(rateLimit);
         return new NitroScheduleDayUpdater(scheduleWriter, scheduleTrimmer, 
-                nitroBroadcastHandler(glycerin, fullFetchPermitted), glycerin);
+                nitroBroadcastHandler(glycerin, fullFetchPermitted, lastUpdatedSettingContentWriter), glycerin);
     }
 
     Glycerin glycerin(Integer rateLimit) {
@@ -132,14 +133,9 @@ public class BbcNitroModule {
         return new HttpNitroClient(HostSpecifier.fromValid(nitroHost), nitroApiKey);
     }
 
-    @Bean
-    LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter() {
-        return new LastUpdatedSettingContentWriter(contentResolver, contentWriter);
-    }
-
     NitroBroadcastHandler<ImmutableList<Optional<ItemRefAndBroadcast>>> nitroBroadcastHandler(Glycerin glycerin, 
-            Optional<Predicate<Item>> fullFetchPermitted) {
-        return new ContentUpdatingNitroBroadcastHandler(contentResolver, lastUpdatedSettingContentWriter(),
+            Optional<Predicate<Item>> fullFetchPermitted, ContentWriter contentWriter) {
+        return new ContentUpdatingNitroBroadcastHandler(contentResolver, contentWriter,
                         localOrRemoteNitroFetcher(glycerin, fullFetchPermitted), pidLock);
     }
     
