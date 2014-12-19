@@ -88,6 +88,7 @@ public class BbcIonServices {
         .put("bbc_two", "http://ref.atlasapi.org/channels/pressassociation.com/stations/6")
         .put("bbc_two_scotland", "http://www.bbc.co.uk/services/bbctwo/scotland")
         .put("bbc_sport", "http://www.bbc.co.uk/services/bbc_sport")
+        .put("bbc_webonly", "http://www.bbc.co.uk/services/bbc_webonly")
 //       I don't think the following are required, but leaving here so the full list can be 
 //       checked
 //        .put("bbc_radio_swindon", "")
