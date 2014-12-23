@@ -13,6 +13,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Version;
+import org.joda.time.Duration;
 
 import com.google.common.base.Equivalence;
 import com.google.common.base.Function;
@@ -192,6 +193,7 @@ public class ContentMerger {
                     mergedVersion.setBroadcasts(Sets.union(version.getBroadcasts(), mergedVersion.getBroadcasts()));
                     mergedVersion.setManifestedAs(version.getManifestedAs());
                     mergedVersion.setRestriction(version.getRestriction());
+                    mergedVersion.setDuration(Duration.standardSeconds(version.getDuration()));
                     mergedVersions.put(version.getCanonicalUri(), mergedVersion);
                 } else {
                     mergedVersions.put(version.getCanonicalUri(), version);
