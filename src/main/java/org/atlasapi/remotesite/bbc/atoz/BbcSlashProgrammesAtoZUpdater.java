@@ -5,6 +5,7 @@ import static com.metabroadcast.common.scheduling.UpdateProgress.SUCCESS;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,9 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.metabroadcast.common.scheduling.ScheduledTask;
@@ -71,8 +69,17 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
         	    ChannelAndPid cap = caps.next();
                 submitted.acquire();
                 log.debug("submitted " + cap);
-                ListenableFuture<?> result = executor.submit(taskFor(cap));
-                Futures.addCallback(result,updateProgressCallback(cap, progress, submitted));
+                CompletableFuture<?> result = CompletableFuture.runAsync(taskFor(cap), executor);
+                result.whenComplete((r, exception) -> {
+                    if (exception == null) {
+                        if (shouldContinue()) {
+                            saveProgress(cap);
+                        }
+                        updateProgress(SUCCESS, progress, submitted);
+                    } else {
+                        updateProgress(FAILURE, progress, submitted);
+                    }
+                });
             }
         	submitted.acquire(5);
     	} catch (InterruptedException e) {
@@ -84,28 +91,10 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
         }
     }
 
-    private FutureCallback<Object> updateProgressCallback(final ChannelAndPid cap, final AtomicReference<UpdateProgress> progress, final Semaphore submitted) {
-        return new FutureCallback<Object>() {
-
-            @Override
-            public void onSuccess(Object result) {
-                if (shouldContinue()) {
-                    saveProgress(cap);
-                }
-                updateProgress(SUCCESS);
-            }
-
-            private void updateProgress(UpdateProgress update) {
-                submitted.release();
-                progress.set(progress.get().reduce(update));
-                reportStatus(progress.get().toString());
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                updateProgress(FAILURE);
-            }
-        };
+    private void updateProgress(UpdateProgress update, final AtomicReference<UpdateProgress> progress, final Semaphore submitted) {
+        submitted.release();
+        progress.set(progress.get().reduce(update));
+        reportStatus(progress.get().toString());
     }
 
     private Runnable taskFor(final ChannelAndPid cap) {
